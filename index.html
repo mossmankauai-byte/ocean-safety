@@ -5926,7 +5926,12 @@ async function rescore(){
   // Update header weather strip from live or snapshot data
   const D = (typeof LIVE !== 'undefined' && LIVE) ? LIVE : SNAP;
   if(D){
-    const airTemp = (typeof window._airTemp === 'number') ? window._airTemp : 78;
+    // Per-side override: when a shore is picked in the header, the four chips read that
+    // shore's own weather (fetched by fetchSideWeather). Null side = island-wide default.
+    const _side = window._activeSide;
+    const _sw = (_side && window._sideWx && window._sideWx[_side]) ? window._sideWx[_side] : null;
+    const airTemp = _sw && typeof _sw.temp === 'number' ? _sw.temp
+                  : (typeof window._airTemp === 'number') ? window._airTemp : 78;
     const _now = new Date();
     const hourNow = _now.getHours();
     // Prefer the actual sunrise/sunset times the API returned (window._sunriseToday /
@@ -5963,22 +5968,12 @@ async function rescore(){
     paintChip('hdrTemp', `${t}°`, tempHint, tempLevel);
 
     // WIND — calm vs windy for water and beach activities
-    const w = D.wind;
+    const w = Math.round(_sw && typeof _sw.wind === 'number' ? _sw.wind : D.wind);
     const windLevel = w < 8 ? 'good' : w < 18 ? 'ok' : 'poor';
     const windHint = w < 5 ? 'Calm' : w < 10 ? 'Light' : w < 16 ? 'Breezy' : w < 22 ? 'Brisk' : w < 28 ? 'Windy' : 'Strong';
     paintChip('hdrWind', `${w}mph`, windHint, windLevel);
 
-    // SURF — readability for swim/snorkel default user
-    const s = D.surf;
-    if(surfDataStale() || typeof s !== 'number' || !isFinite(s)){
-      // Marine fetch failed / returned null, OR the reading is older than the freshness
-      // budget — show unavailable, never a stale or calm "Flat" reading presented as current.
-      paintChip('hdrSurf', '—', 'No data', 'poor');
-    } else {
-      const surfLevel = s < 2.5 ? 'good' : s < 5 ? 'ok' : 'poor';
-      const surfHint = s < 1.5 ? 'Flat' : s < 2.5 ? 'Mellow' : s < 4 ? 'Fun' : s < 6 ? 'Big' : 'Heavy';
-      paintChip('hdrSurf', `${s.toFixed(1)}ft`, surfHint, surfLevel);
-    }
+    // SURF lives on the per-shore map chips now, not in the header strip.
 
     // PRECIP — chance of rain. Uses three icon tiers that match the chips & 7-day strip:
     //   <30%  → cond-rain-chance  (cloud + drop + "?")  → "Chance"  · level=good
@@ -5986,7 +5981,8 @@ async function rescore(){
     //   ≥70%  → cond-rain-likely  (cloud + sun + heavy drops) → "Likely" · level=poor
     // ?? (not ||) so a legitimate 0% probability still reads as "Dry" rather than falling
     // back to SNAP. Falls back to SNAP only when the API field is genuinely missing/null.
-    const pc = (typeof D.precip_chance === 'number') ? D.precip_chance
+    const pc = (_sw && typeof _sw.precip_chance === 'number') ? _sw.precip_chance
+             : (typeof D.precip_chance === 'number') ? D.precip_chance
              : (typeof SNAP.precip_chance === 'number' ? SNAP.precip_chance : 0);
     const pcPct = Math.round(pc);
     const precipLevel = pcPct < 30 ? 'good' : pcPct < 70 ? 'ok' : 'poor';
@@ -6009,7 +6005,7 @@ async function rescore(){
     // Twilight clamp: Open-Meteo's hourly uv_index lags the actual sun position by up to
     // an hour, so within 45 min of sunrise/sunset we cap UV at 2 (Low). Prevents the chip
     // from saying "Moderate" when the sun is visibly close to the horizon.
-    let uv = isNight ? 0 : D.uv;
+    let uv = isNight ? 0 : (_sw && typeof _sw.uv === 'number' ? _sw.uv : D.uv);
     if(_nearTwilight && typeof uv === 'number') uv = Math.min(uv, 2);
     const uvEl = document.getElementById('hdrUv');
     // Boundary fix: during DAYTIME with uv exactly 0 (legit on overcast dawn/dusk),
@@ -6190,10 +6186,9 @@ function updateLiveNow(){
     label = 'Live Now'; val = 'Loading…';
   } else if(tab === 'beaches'){
     label = 'Beaches Now';
-    const surf = (typeof c.es === 'number') ? c.es.toFixed(1) + 'ft' : '—';
-    const wind = (typeof c.wind === 'number') ? Math.round(c.wind) + 'mph' : '—';
+    // Surf + wind now live on the per-shore map chips; keep this chip weather-only.
     const pc = (typeof c.precip_chance === 'number') ? Math.round(c.precip_chance) : 0;
-    val = c.brown ? '⚠ Brown water' : (pc >= 40 ? `${surf} · ${pc}% rain` : `${surf} · ${wind}`);
+    val = c.brown ? 'Brown water advisory' : (pc >= 40 ? `${pc}% rain` : 'Clear');
   } else if(tab === 'hikes'){
     label = 'Trails Now';
     const pc = (typeof c.precip_chance === 'number') ? Math.round(c.precip_chance) : 0;
@@ -6654,6 +6649,83 @@ if('serviceWorker' in navigator){
     });
   });
 }
+</script>
+<script>
+(function(){
+  /* Header weather-by-shore. Kauaʻi's coasts have very different microclimates, so the
+     header reads the picked shore's own weather. One Open-Meteo call covers all four
+     representative points. Falls back to the island reading until it loads or if it fails. */
+  var SIDE_PTS = {
+    north:{lat:22.205,lon:-159.503,label:'North'},
+    east: {lat:22.005,lon:-159.337,label:'East'},
+    south:{lat:21.880,lon:-159.460,label:'South'},
+    west: {lat:21.970,lon:-159.700,label:'West'}
+  };
+  var ORDER=['north','east','south','west'];
+  function repaint(){ try{ if(typeof rescore==='function') rescore(); }catch(e){} }
+
+  window.fetchSideWeather=async function(){
+    try{
+      var lats=ORDER.map(function(k){return SIDE_PTS[k].lat;}).join(',');
+      var lons=ORDER.map(function(k){return SIDE_PTS[k].lon;}).join(',');
+      var url='https://api.open-meteo.com/v1/forecast?latitude='+lats+'&longitude='+lons+
+        '&current=temperature_2m,wind_speed_10m,uv_index&daily=precipitation_probability_max'+
+        '&wind_speed_unit=mph&temperature_unit=fahrenheit&timezone=Pacific%2FHonolulu';
+      var r=await fetch(url); if(!r.ok) return;
+      var data=await r.json(); var arr=Array.isArray(data)?data:[data]; var sides={};
+      ORDER.forEach(function(k,i){
+        var d=arr[i]; if(!d||!d.current) return;
+        var pp=d.daily&&d.daily.precipitation_probability_max;
+        sides[k]={temp:d.current.temperature_2m,wind:d.current.wind_speed_10m,uv:Math.round(d.current.uv_index),
+                  precip_chance:(pp&&pp[0]!=null)?pp[0]:null};
+      });
+      window._sideWx=sides; repaint();
+    }catch(e){}
+  };
+
+  window.selectSide=function(side){
+    window._activeSide=side;
+    try{ localStorage.setItem('os_side',side); }catch(e){}
+    var els=document.querySelectorAll('.hdr-side');
+    for(var i=0;i<els.length;i++) els[i].classList.toggle('on',els[i].getAttribute('data-side')===side);
+    repaint();
+  };
+
+  function build(){
+    var host=document.getElementById('hdrWx');
+    if(!host||document.getElementById('hdrSideRow')) return;
+    var saved=null; try{ saved=localStorage.getItem('os_side'); }catch(e){}
+    window._activeSide=(saved&&SIDE_PTS[saved])?saved:'east';
+    if(!document.getElementById('hdrSideStyle')){
+      var st=document.createElement('style'); st.id='hdrSideStyle';
+      st.textContent='#hdrSurf{display:none!important}'+
+        '.hdr-side-row{display:flex;gap:5px;margin:7px 14px 2px;overflow-x:auto;scrollbar-width:none}'+
+        '.hdr-side-row::-webkit-scrollbar{display:none}'+
+        '.hdr-side{flex:1 0 auto;padding:5px 10px;border-radius:999px;border:1px solid var(--border,#e5e7eb);'+
+          "background:var(--warm,#f5ecd7);color:var(--mute,#6b7280);font:600 11.5px/1 'DM Sans',sans-serif;"+
+          'letter-spacing:.02em;cursor:pointer;white-space:nowrap;transition:background .18s,color .18s,border-color .18s;-webkit-tap-highlight-color:transparent}'+
+        '.hdr-side:active{transform:scale(.97)}'+
+        '.hdr-side.on{background:var(--ocean,#0f4c5c);border-color:var(--ocean,#0f4c5c);color:#fff}';
+      document.head.appendChild(st);
+    }
+    var row=document.createElement('div'); row.id='hdrSideRow'; row.className='hdr-side-row';
+    row.setAttribute('role','tablist'); row.setAttribute('aria-label','Weather by shore');
+    ORDER.forEach(function(k){
+      var b=document.createElement('button');
+      b.className='hdr-side'+(k===window._activeSide?' on':''); b.type='button';
+      b.setAttribute('data-side',k); b.setAttribute('role','tab'); b.textContent=SIDE_PTS[k].label;
+      b.addEventListener('click',function(){ window.selectSide(k); });
+      row.appendChild(b);
+    });
+    var tb1=host.closest?host.closest('.tb1'):host.parentNode;
+    if(tb1&&tb1.parentNode) tb1.parentNode.insertBefore(row,tb1.nextSibling);
+    else host.parentNode.insertBefore(row,host.nextSibling);
+  }
+
+  function init(){ build(); window.fetchSideWeather(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  setInterval(function(){ window.fetchSideWeather(); },600000);
+})();
 </script>
 </body>
 </html>
