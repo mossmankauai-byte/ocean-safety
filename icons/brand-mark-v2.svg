@@ -1,0 +1,13 @@
+<svg viewBox="0 0 64 64" width="40" height="40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="oceanGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b485b"/>
+      <stop offset="100%" stop-color="#1b6d83"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#oceanGrad)"/>
+  <circle cx="46" cy="20" r="5" fill="#e07856"/>
+  <path d="M5 38 Q15 32 25 38 T45 38 T62 38" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M5 46 Q15 40 25 46 T45 46 T62 46" stroke="#94becc" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.85"/>
+  <path d="M5 53 Q15 48 25 53 T45 53 T62 53" stroke="#c9a84c" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.75"/>
+</svg>

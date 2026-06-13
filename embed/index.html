@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c5c">
+<title>Add live Kauaʻi ocean conditions to your site — free | Ocean Safe</title>
+<meta name="description" content="A free, copy-paste widget that shows today's live Kauaʻi ocean conditions and safety on your own site. For vacation-rental hosts, blogs, and tour operators.">
+<link rel="canonical" href="https://oceansafety.app/embed/">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ocean:#0f4c5c;--gold:#c9a84c;--warm:#f5ecd7;--ink:#1c1c1c;--mute:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--warm);line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px 64px}
+header.top{display:flex;align-items:center;gap:9px;padding:16px 0 10px}
+header.top a{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ocean);font-weight:700}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--ocean);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px}
+.brand{font-size:15px}.brand small{display:block;font-size:10.5px;font-weight:600;color:var(--mute);letter-spacing:.04em;text-transform:uppercase}
+h1{font-size:27px;line-height:1.16;margin:14px 0 8px;letter-spacing:-.01em}
+.lede{font-size:16px;color:#33403f;margin-bottom:18px}
+.panel{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 6px 20px rgba(15,76,92,.06)}
+.preview{flex:0 0 auto}
+.controls{flex:1;min-width:240px}
+label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);display:block;margin-bottom:6px}
+select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font:inherit;background:var(--warm);color:var(--ink);margin-bottom:16px}
+.snip{margin-bottom:14px}
+.snip h3{font-size:13px;color:var(--ocean);margin-bottom:6px}
+.code{position:relative}
+textarea{width:100%;height:74px;padding:11px 12px;border:1px solid var(--border);border-radius:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:#0f4c5c;color:#e7f3f5;resize:none}
+.copy{position:absolute;top:8px;right:8px;background:var(--gold);color:#3a2e08;border:none;border-radius:7px;padding:5px 10px;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.copy:active{transform:scale(.95)}
+.note{font-size:13px;color:var(--mute);margin-top:8px}
+iframe.prev{border:0;width:340px;height:240px}
+@media(max-width:560px){iframe.prev{width:100%}}
+footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--mute)}
+footer a{color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><a href="/"><span class="logo">≈</span><span class="brand">Ocean Safe<small>Kauaʻi Beach Safety</small></span></a></header>
+<h1>Put live Kauaʻi conditions on your site</h1>
+<p class="lede">A free widget that shows today's real ocean conditions and our beach score for any Kauaʻi beach. Great for vacation-rental listings, travel blogs, and tour pages. Pick a beach, copy, paste.</p>
+<div class="panel">
+  <div class="preview"><iframe class="prev" id="prev" src="/embed/badge.html" title="Live Kauaʻi ocean conditions by Ocean Safe" loading="lazy"></iframe></div>
+  <div class="controls">
+    <label for="bsel">Beach</label>
+    <select id="bsel"><option value="">Kauaʻi (island overview)</option><optgroup label="North Shore"><option value="anini">Anini</option><option value="hanalei">Hanalei</option><option value="kee">Ke'e</option><option value="tunnels">Tunnels</option><option value="queens_bath">Queen's Bath</option><option value="lumahai">Lumahai</option><option value="secret">Secret</option><option value="kalihiwai">Kalihiwai</option></optgroup><optgroup label="East Side"><option value="lydgate">Lydgate</option><option value="kalapaki">Kalapaki</option><option value="kealia">Kealia</option><option value="wailua">Wailua</option><option value="donkey">Donkey</option></optgroup><optgroup label="South Shore"><option value="poipu">Poipu</option><option value="mahaulepu">Mahaulepu</option><option value="shipwreck">Shipwreck</option><option value="brennecke">Brennecke</option><option value="koloa_landing">Koloa Landing</option></optgroup><optgroup label="West Side"><option value="salt_pond">Salt Pond</option><option value="kekaha">Kekaha</option><option value="polihale">Polihale</option><option value="pakala">Pakala</option></optgroup></select>
+    <div class="snip">
+      <h3>Embed code (recommended)</h3>
+      <div class="code"><textarea id="snipScript" readonly></textarea><button class="copy" data-t="snipScript">Copy</button></div>
+      <p class="note">Works on most blogs and websites. The link back to Ocean Safe is included.</p>
+    </div>
+    <div class="snip">
+      <h3>Or use an iframe</h3>
+      <div class="code"><textarea id="snipFrame" readonly></textarea><button class="copy" data-t="snipFrame">Copy</button></div>
+    </div>
+  </div>
+</div>
+<footer><p><strong>Ocean Safe</strong> is a free, no-login ocean-safety guide for Kauaʻi. The widget is free to use; please keep the attribution link. <a href="/today/">See all beach conditions</a>.</p></footer>
+</div>
+<script>
+var SITE="https://oceansafety.app";
+var sel=document.getElementById('bsel'),prev=document.getElementById('prev');
+var sS=document.getElementById('snipScript'),sF=document.getElementById('snipFrame');
+function upd(){
+  var v=sel.value;
+  var attr=v?' data-beach="'+v+'"':'';
+  sS.value='<script src="'+SITE+'/embed/badge.js"'+attr+' async><\/script>';
+  sF.value='<iframe src="'+SITE+'/embed/badge.html'+(v?'?beach='+v:'')+'" width="340" height="240" style="border:0" loading="lazy" title="Live Kauaʻi ocean conditions by Ocean Safe"><\/iframe>';
+  prev.src='/embed/badge.html'+(v?'?beach='+v:'');
+}
+sel.addEventListener('change',upd);
+document.querySelectorAll('.copy').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var t=document.getElementById(btn.getAttribute('data-t'));t.select();
+    try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}
+    var o=btn.textContent;btn.textContent='Copied';setTimeout(function(){btn.textContent=o;},1200);
+  });
+});
+upd();
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+{
+  "name": "Ocean Safe — Kauaʻi Beach Guide",
+  "short_name": "Ocean Safe",
+  "description": "Live ocean conditions, beaches, trails, and family picks across Kauaʻi. Built locally, ad-free, no signup.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#faf6ea",
+  "theme_color": "#0b485b",
+  "categories": [
+    "travel",
+    "navigation",
+    "weather",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "icons/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pwa-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Hanalei Bay",
+      "short_name": "Hanalei",
+      "description": "Hanalei Bay beach conditions",
+      "url": "/?beach=hanalei",
+      "icons": [
+        {
+          "src": "icons/pwa-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Poʻipū Beach",
+      "short_name": "Poʻipū",
+      "description": "Poʻipū Beach conditions",
+      "url": "/?beach=poipu",
+      "icons": [
+        {
+          "src": "icons/pwa-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Tunnels Beach",
+      "short_name": "Tunnels",
+      "description": "Tunnels Beach conditions",
+      "url": "/?beach=tunnels",
+      "icons": [
+        {
+          "src": "icons/pwa-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Keʻe Beach",
+      "short_name": "Keʻe",
+      "description": "Keʻe Beach conditions",
+      "url": "/?beach=kee",
+      "icons": [
+        {
+          "src": "icons/pwa-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
