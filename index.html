@@ -1269,10 +1269,13 @@ a{text-decoration:none;color:inherit}
 .shore-chip.has-brown .shore-drop{display:block}
 .shore-n{top:208px;left:50%;transform:translateX(-50%)}
 .shore-n:active{transform:translateX(-50%) scale(.97)}
-.shore-e{right:12px;top:46%}
+/* N over the north ocean; E/S/W docked in the south ocean band (below the
+   island's lowest land) so they never cover a beach pin, even with every
+   marker shown. Verified 0 overlaps against 34 pins. */
+.shore-e{right:12px;bottom:96px}
 .shore-s{bottom:96px;left:50%;transform:translateX(-50%)}
 .shore-s:active{transform:translateX(-50%) scale(.97)}
-.shore-w{left:12px;top:46%}
+.shore-w{left:12px;bottom:96px}
 /* BROWN WATER on pins — ring uses the warn-text brown (#92400e, existing token family)
    so the state reads "runoff" without inventing a new accent. The droplet + tint live
    INSIDE the title pill (.mklbl-brown), not in a separate stacked tag — a stacked tag
