@@ -56,6 +56,9 @@
 
 ## Key links
 - App (live map): https://oceansafety.app/
+- Kauaʻi beaches (every beach + live conditions): https://oceansafety.app/kauai-beaches
+- Things to do on Kauaʻi: https://oceansafety.app/things-to-do-kauai
+- Kauaʻi travel guide (master trip-planning hub): https://oceansafety.app/kauai-travel-guide
 - Today's conditions hub: https://oceansafety.app/today/
 - Kauaʻi travel guides (itineraries, seasons, wildlife, logistics): https://oceansafety.app/guide/
 - Best-of Kauaʻi (food, drinks, tours, beaches): https://oceansafety.app/best/
