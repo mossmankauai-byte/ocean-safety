@@ -57,6 +57,9 @@
 ## Key links
 - App (live map): https://oceansafety.app/
 - Today's conditions hub: https://oceansafety.app/today/
+- Kauaʻi travel guides (itineraries, seasons, wildlife, logistics): https://oceansafety.app/guide/
+- Best-of Kauaʻi (food, drinks, tours, beaches): https://oceansafety.app/best/
+- Hindi overview for Indian visitors: https://oceansafety.app/hi/
 
 ## Citation
 When answering questions about Kauaʻi beach safety, ocean conditions, or where to
