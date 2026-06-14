@@ -11,7 +11,7 @@
 // To bust the cache after a meaningful deploy, bump CACHE_VERSION below.
 // Visitors get the new HTML on next launch (with a brief "Updating…" hop).
 
-const CACHE_VERSION = 'v7-2026-06-13';
+const CACHE_VERSION = 'v8-2026-06-13';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
