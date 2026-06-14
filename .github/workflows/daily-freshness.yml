@@ -1,0 +1,31 @@
+name: Daily freshness
+
+# Bumps lastmod + dateModified on the live-conditions pages each morning so Google
+# re-crawls and re-renders the current conditions. Netlify auto-deploys on the push.
+
+on:
+  schedule:
+    - cron: "0 15 * * *"   # 15:00 UTC = 5:00am HST
+  workflow_dispatch: {}      # allow manual runs
+
+permissions:
+  contents: write
+
+jobs:
+  freshen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bump dates on conditions pages
+        run: python3 freshen.py
+      - name: Commit and push if changed
+        run: |
+          git config user.name "ocean-safety-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add sitemap.xml today/
+          if git diff --staged --quiet; then
+            echo "Nothing to refresh."
+          else
+            git commit -m "daily: refresh conditions-page lastmod ($(date -u +%Y-%m-%d))"
+            git push
+          fi
