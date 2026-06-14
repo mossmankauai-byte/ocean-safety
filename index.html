@@ -13,6 +13,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="shortcut icon" href="icons/favicon.ico">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1407,6 +1408,9 @@ a{text-decoration:none;color:inherit}
 .mkcraft{width:36px;height:36px;border-radius:50%;background:#f5e6f5;border:2px solid #7e22ce;color:#581c87;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.18);box-sizing:border-box}
 .mkcraft svg{width:18px;height:18px;display:block}
 .leaflet-marker-icon .mkcraft{margin:0 !important}
+.mkdrink{width:36px;height:36px;border-radius:50%;background:#eef0fe;border:2px solid #4f46e5;color:#3730a3;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.18);box-sizing:border-box}
+.mkdrink svg{width:18px;height:18px;display:block}
+.leaflet-marker-icon .mkdrink{margin:0 !important}
 
 #locHelpOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:none}
 #locHelpOverlay.on{display:block}
@@ -2817,6 +2821,64 @@ const GROCERIES=[
    tags:['grocery','convenience','liquor']}
 ];
 
+// DRINKS — Shopping > Drinks subtab. Independently-researched juice/açaí bars, local
+// coffee roasters, and a few bars/breweries. Coordinates are geocoded to each spot;
+// directions resolve by name (see dirUrl), so a town-level pin still routes correctly.
+const DRINKS=[
+  {id:'kauai_juice_co',website:'https://www.kauaijuiceco.com/',name:'Kauai Juice Co.',n:'Kauai Juice',r:'East Side',lat:22.0876,lon:-159.3375,
+   type:'cold-pressed juice & kombucha',price:'$$',hours:'Open daily',
+   tip:'Organic cold-pressed juice and kombucha on tap with exotic local-fruit flavors. Locations in Kapaʻa, Kīlauea, and Kōloa.',
+   tags:['juice','kombucha','organic','vegan','kapaa']},
+  {id:'little_fish_coffee',website:'https://littlefishcoffee.com/',name:'Little Fish Coffee',n:'Little Fish',r:'South Shore',lat:21.8770,lon:-159.4560,
+   type:'coffee & açaí bowls',price:'$$',hours:'From 7am',
+   tip:'Locally roasted coffee plus fruit-loaded açaí bowls, popular enough to draw a morning line at the 7am open. Also in Hanapēpē.',
+   tags:['coffee','acai','smoothies','poipu']},
+  {id:'java_kai',name:'Java Kai',n:'Java Kai',r:'East Side',lat:22.0792,lon:-159.3192,
+   type:'coffeehouse',price:'$$',hours:'Mornings daily',
+   tip:'Local-roasted beans and tropical lattes like the Mac Nut Latte. A repeat "Best Coffeehouse in Kapaʻa" winner. Also in Poʻipū, Princeville, and Līhuʻe.',
+   tags:['coffee','latte','breakfast','kapaa']},
+  {id:'dark_horse_coffee',website:'https://darkhorsecoffeeroasters.com/',name:'Dark Horse Coffee Roasters',n:'Dark Horse',r:'South Shore',lat:21.9069,lon:-159.4700,
+   type:'coffee roaster',price:'$$',hours:'Mornings daily',
+   tip:'Small-batch on-site roasting with pour-overs, espresso, and a signature haupia-foam cold brew, in historic Old Kōloa Town.',
+   tags:['coffee','roaster','cold_brew','koloa']},
+  {id:'aloha_juice_bar',name:'Aloha Juice Bar',n:'Aloha Juice',r:'North Shore',lat:22.2046,lon:-159.4992,
+   type:'juice & açaí bowls',price:'$$',hours:'Daytime daily',
+   tip:'Fresh-squeezed juices, smoothies, açaí bowls, and Dole Whip in walkable Hanalei town (Ching Young Village).',
+   tags:['juice','acai','dole_whip','hanalei']},
+  {id:'kalalea_juice_hale',name:'Kalalea Juice Hale',n:'Kalalea Juice',r:'East Side',lat:22.1452,lon:-159.3126,
+   type:'açaí & juice',price:'$$',hours:'Daytime daily',
+   tip:'Creamy açaí, including the loaded "King Kong" bowl, served under the Anahola mountains. A beloved local spot.',
+   tags:['acai','juice','local','anahola']},
+  {id:'anakes_juice_bar',name:'Anake’s Juice Bar',n:'Anake’s',r:'South Shore',lat:21.8832,lon:-159.4718,
+   type:'açaí & juice',price:'$$',hours:'8am–4pm daily',
+   tip:'Creative açaí and dragonfruit bowls plus fresh juices, tucked inside Kukuiʻula Market in Poʻipū.',
+   tags:['acai','juice','dragonfruit','poipu']},
+  {id:'gs_juicebar',name:'G’s Juicebar',n:'G’s Juicebar',r:'West Side',lat:21.9573,lon:-159.6685,
+   type:'açaí & smoothies',price:'$$',hours:'Daytime daily',
+   tip:'Brazilian-style açaí bowls and smoothies with generous portions, next to the Waimea Theater on the West Side.',
+   tags:['acai','smoothies','brazilian','waimea']},
+  {id:'tahiti_nui',name:'Tahiti Nui',n:'Tahiti Nui',r:'North Shore',lat:22.2046,lon:-159.4999,
+   type:'tiki bar & mai tais',price:'$$',hours:'Lunch to late',
+   tip:'The secret-recipe "World Famous" mai tai, a top-three island pick, in a classic 1963 Hanalei tiki setting with live music.',
+   tags:['bar','mai_tai','tiki','live_music','hanalei']},
+  {id:'kauai_island_brewing',website:'https://kauaiislandbrewing.com/',name:'Kauai Island Brewing Co.',n:'Island Brewing',r:'West Side',lat:21.9036,lon:-159.5866,
+   type:'brewery & taproom',price:'$$',hours:'Happy hour 3–5pm daily',
+   tip:'The self-styled "world’s westernmost brewery," with 10+ house beers, an ocean-view taproom, and a daily 3–5pm happy hour at Port Allen.',
+   tags:['brewery','beer','happy_hour','port_allen']},
+  {id:'brenneckes_broiler',website:'https://www.brenneckes.com/',name:'Brennecke’s Beach Broiler',n:'Brennecke’s',r:'South Shore',lat:21.8746,lon:-159.4542,
+   type:'beach bar & happy hour',price:'$$',hours:'Happy hour 3–5pm daily',
+   tip:'Oceanfront Poʻipū Beach happy hour daily 3–5pm, with mai tais and lilikoʻi mimosas across from the sand.',
+   tags:['bar','happy_hour','oceanview','poipu']},
+  {id:'rumfire_poipu',website:'https://www.rumfirekauai.com/',name:'RumFire Poipu Beach',n:'RumFire',r:'South Shore',lat:21.8730,lon:-159.4586,
+   type:'sunset cocktail bar',price:'$$$',hours:'Happy hour daily',
+   tip:'A 180-degree Poʻipū Beach sunset view with a craft-cocktail happy hour (about $11 cocktails, $6 draft) at the Sheraton.',
+   tags:['bar','cocktails','sunset','happy_hour','poipu']},
+  {id:'kauai_coffee_co',website:'https://kauaicoffee.com/',name:'Kauai Coffee Company',n:'Kauai Coffee',r:'South Shore',lat:21.8980,lon:-159.5680,
+   type:'coffee farm & tasting',price:'$',hours:'9am–5pm daily',
+   tip:'A free self-guided plantation walk and tasting room at the largest coffee farm in the U.S., in Kalāheo. Open daily.',
+   tags:['coffee','farm','tasting','tour','kalaheo']}
+];
+
 // Add channel_ids to beaches
 B.find(b=>b.id==='kee').channels=['kee_exit','tunnels_channel'];
 B.find(b=>b.id==='anini').channels=['anini_gap'];
@@ -3011,7 +3073,8 @@ const KBG_SAVED_KIND_META = {
   grocery: {arr: GROCERIES,    open: 'openGrocerySheet',  label: 'Grocery', color: '#1a7a8a'},
   gas:     {arr: GAS_STATIONS, open: 'openGasSheet',      label: 'Gas',     color: '#d97706'},
   craft:   {arr: LOCAL_CRAFTS, open: 'openCraftSheet',    label: 'Craft',   color: '#a855f7'},
-  market:  {arr: FMARKETS,     open: 'openMarketSheet',   label: 'Market',  color: '#16a34a'}
+  market:  {arr: FMARKETS,     open: 'openMarketSheet',   label: 'Market',  color: '#16a34a'},
+  drink:   {arr: DRINKS,       open: 'openDrinkSheet',    label: 'Drinks',  color: '#4f46e5'}
 };
 
 // Walk saved keys and drop any whose kind:id no longer resolves to a real item.
@@ -4310,6 +4373,22 @@ function renderCoffee(){
     });
   }
 }
+function mkDrinkIcon(d){
+  return L.divIcon({
+    html:`<div class="mkw"><div class="mkdrink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10l-1.15 13.07a1 1 0 0 1-1 .93H9.15a1 1 0 0 1-1-.93L7 7z"/><line x1="5.5" y1="7" x2="18.5" y2="7"/><line x1="14.5" y1="3" x2="13.4" y2="7"/></svg></div><div class="mklbl">${d.n}</div></div>`,
+    className:'',iconSize:[140,60],iconAnchor:[70,20]
+  });
+}
+let drinkMkrs={};
+function renderDrinks(){
+  Object.values(drinkMkrs).forEach(m=>m.remove()); drinkMkrs={};
+  if(window._activeTab !== 'shopping' || window._activeSub !== 'drinks') return;
+  DRINKS.forEach(d=>{
+    const mk = L.marker([d.lat,d.lon],{icon:mkDrinkIcon(d)}).addTo(map);
+    mk.on('click',()=>openDrinkSheet(d.id));
+    drinkMkrs[d.id] = mk;
+  });
+}
 function openCraftSheet(id){
   const c = LOCAL_CRAFTS.find(x=>x.id===id); if(!c) return;
   const tagPills = (c.tags||[]).map(t=>`<span style="background:#f5e6f5;color:#581c87;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
@@ -4327,6 +4406,27 @@ function openCraftSheet(id){
     <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:12px">${tagPills}</div>
     <div class="poi-cta-row">
       <a href="${dirUrl(c.name, c.lat, c.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
+    </div>`;
+  document.getElementById('sheet').classList.add('on');
+  document.getElementById('overlay').classList.add('on');
+}
+function openDrinkSheet(id){
+  const d = DRINKS.find(x=>x.id===id); if(!d) return;
+  const tagPills = (d.tags||[]).map(t=>`<span style="background:#eef0fe;color:#3730a3;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
+  const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
+    <div class="poi-hero" style="background:${heroBg(d.photo, 'linear-gradient(135deg,#4f46e5,#6366f1)')};color:#fff">
+      <div class="poi-hero-icon" style="color:#fff"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10l-1.15 13.07a1 1 0 0 1-1 .93H9.15a1 1 0 0 1-1-.93L7 7z"/><line x1="5.5" y1="7" x2="18.5" y2="7"/><line x1="14.5" y1="3" x2="13.4" y2="7"/></svg></div>${heartButton('drink', d.id)}
+      <div><div class="poi-hero-name" style="color:#fff">${d.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${d.r} • ${d.type}</div></div>
+    </div>
+    <div class="poi-grid">
+      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${d.hours}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${d.price||'—'}</div></div>
+    </div>
+    <div class="poi-local-tip" style="margin-top:14px"><span style="font-size:14px;flex-shrink:0">◈</span><span>${d.tip}</span></div>
+    ${contactRow(d)}
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:12px">${tagPills}</div>
+    <div class="poi-cta-row">
+      <a href="${dirUrl(d.name, d.lat, d.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
     </div>`;
   document.getElementById('sheet').classList.add('on');
   document.getElementById('overlay').classList.add('on');
@@ -5287,13 +5387,15 @@ function acceptDisclaimer(){
   try { localStorage.setItem('disclaimerAccepted', new Date().toISOString()); } catch(e){}
   closeDisclaimer();
 }
-function checkFirstVisit(){
+// Show the safety disclaimer on the user's first navigation action (a main-tab tap),
+// not on page load, so the map is visible first. Once accepted it never reappears.
+function disclaimerOnFirstNav(){
+  if(window._disclaimerNavChecked) return;
+  window._disclaimerNavChecked = true;
   try {
-    if(!localStorage.getItem('disclaimerAccepted')){
-      openDisclaimer();
-    }
+    if(!localStorage.getItem('disclaimerAccepted')) openDisclaimer();
   } catch(e){
-    // localStorage blocked (private browsing) — show every visit
+    // localStorage blocked (private browsing) — show on first nav each session
     openDisclaimer();
   }
 }
@@ -5345,6 +5447,7 @@ const SUBTABS = {
   shopping: {default:'grocery', items:[
     {sub:'grocery',label:'Grocery'},
     {sub:'food',label:'Food'},
+    {sub:'drinks',label:'Drinks'},
     {sub:'coffee',label:'Coffee'},
     {sub:'farmers',label:'Farmers'},
     {sub:'crafts',label:'Crafts'},
@@ -5445,6 +5548,7 @@ function shoppingFilterCounts(){
   return {
     grocery: (typeof GROCERIES     !== 'undefined') ? GROCERIES.length     : 0,
     food:    (typeof FOODS         !== 'undefined') ? FOODS.length         : 0,
+    drinks:  (typeof DRINKS        !== 'undefined') ? DRINKS.length        : 0,
     farmers: (typeof FMARKETS      !== 'undefined') ? FMARKETS.length      : 0,
     crafts:  (typeof LOCAL_CRAFTS  !== 'undefined') ? LOCAL_CRAFTS.length  : 0,
     gas:     (typeof GAS_STATIONS  !== 'undefined') ? GAS_STATIONS.length  : 0
@@ -5576,6 +5680,7 @@ function buildSubtabs(tabName){
         renderGas();
         renderCrafts();
         renderCoffee();
+        renderDrinks();
         renderMarkets();
       }
     });
@@ -5585,6 +5690,7 @@ function buildSubtabs(tabName){
 function wireTabs(){
   document.querySelectorAll('#tabs .tab').forEach(el=>{
     el.addEventListener('click',()=>{
+      disclaimerOnFirstNav();
       const tabName = el.dataset.tab;
       // ACTIVITIES tab: opens the condition-aware GetYourGuide sheet, doesn't change map state.
       // Clear any stale subtab pills + dropdown left over from the previous tab.
@@ -5616,6 +5722,7 @@ function wireTabs(){
       renderGas();
       renderCrafts();
       renderCoffee();
+      renderDrinks();
       if(window._activeTab !== 'beaches'){
         Object.values(chMkrs||{}).forEach(m=>m.remove());chMkrs={};
       } else {
@@ -5926,6 +6033,7 @@ async function rescore(){
   renderGas();
   renderCrafts();
   renderCoffee();
+  renderDrinks();
   // Update header weather strip from live or snapshot data
   const D = (typeof LIVE !== 'undefined' && LIVE) ? LIVE : SNAP;
   if(D){
@@ -6570,8 +6678,8 @@ async function boot(){
   const ld=document.getElementById('loader');
   ld.classList.add('hide');
   setTimeout(()=>ld.style.display='none',500);
-  // Show disclaimer modal on first visit (after a short delay so loader fades first)
-  setTimeout(checkFirstVisit, 700);
+  // The safety disclaimer no longer auto-opens on load; it appears on the user's
+  // first navigation tap (see disclaimerOnFirstNav, wired into the main tab clicks).
   setTimeout(checkInstallEligibility, 800);
 }
 
