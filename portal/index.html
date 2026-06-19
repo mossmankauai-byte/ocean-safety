@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="oceansafe-favicon.png">
+<link rel="stylesheet" href="portal.css">
+<title>OceanSafe Partners — Sign in</title>
+</head>
+<body>
+<div class="center">
+  <div class="card" style="max-width:380px;width:100%">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">
+      <img src="oceansafe-favicon.png" alt="" style="width:30px;height:30px;border-radius:8px">
+      <b style="font-size:16px">OceanSafe&nbsp;Partners</b>
+    </div>
+    <h2 style="margin-bottom:4px">Sign in</h2>
+    <p class="muted small" style="margin:0 0 14px">Enter your email and we'll send you a one-time sign-in link — no password to remember.</p>
+
+    <div id="form">
+      <label class="f" for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" placeholder="you@yourshop.com">
+      <div id="msg" class="msg hide"></div>
+      <button id="send" class="btn primary block" style="margin-top:12px">Email me a sign-in link</button>
+    </div>
+
+    <div id="booting" class="muted small" style="text-align:center;padding:8px">Loading…</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  // If the magic link just brought them back, supabase-js parses the session from
+  // the URL automatically — route them onward by whether they've set up a shop.
+  async function route() {
+    const session = await currentSession();
+    if (!session) { el("booting").classList.add("hide"); el("form").style.display = "block"; return; }
+    try {
+      const partner = await getMyPartner(session.user.id);
+      location.replace(partner ? "dashboard.html" : "get-started.html");
+    } catch (e) {
+      el("booting").classList.add("hide"); el("form").style.display = "block";
+      toast(el("msg"), "err", errText(e.message || e));
+    }
+  }
+
+  el("form").style.display = "none";
+  route();
+
+  el("send").addEventListener("click", async () => {
+    const email = el("email").value.trim();
+    if (!email) return toast(el("msg"), "err", "Enter your email first.");
+    el("send").disabled = true; el("send").innerHTML = '<span class="spin"></span>';
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: location.href.split("#")[0] },
+    });
+    el("send").disabled = false; el("send").textContent = "Email me a sign-in link";
+    if (error) return toast(el("msg"), "err", error.message);
+    toast(el("msg"), "ok", `Check ${email} — tap the link to sign in. You can close this tab.`);
+  });
+</script>
+</body>
+</html>
