@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="oceansafe-favicon.png">
+<link rel="stylesheet" href="portal.css">
+<title>OceanSafe Partners — Sales</title>
+<style>
+  .chart{width:100%;height:172px;display:block}
+  .topbar{display:flex;align-items:center;gap:9px;margin-bottom:11px;font-size:13px}
+  .topbar .nm{flex:0 0 120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+  .topbar .track{flex:1;height:9px;background:#eef2f3;border-radius:6px;overflow:hidden}
+  .topbar .fill{height:100%;background:var(--ocean);border-radius:6px}
+  .topbar .amt{flex:0 0 58px;text-align:right;font-weight:750}
+</style>
+</head>
+<body>
+<div class="bar"><img src="oceansafe-favicon.png" alt=""><b>OceanSafe</b><span class="crumb" id="shopName">·</span>
+  <span class="sp"></span>
+  <nav class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a class="on" href="sales.html">Sales</a>
+    <a href="products.html">Products</a>
+    <a href="promotions.html">Promotions</a>
+    <a href="#" id="out">Sign out</a>
+  </nav></div>
+
+<div class="wrap">
+  <h1>Sales</h1>
+
+  <!-- stat cards -->
+  <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:12px">
+    <div class="card"><div class="lbl">Sales this month</div><div class="big" id="mSales">—</div><div class="muted small" id="mCount">0 orders</div></div>
+    <div class="card"><div class="lbl">Your payout (90%)</div><div class="big" id="mPayout" style="color:var(--green)">—</div><div class="muted small">after OceanSafe's 10%</div></div>
+    <div class="card"><div class="lbl">Avg order</div><div class="big" id="mAvg">—</div><div class="muted small">per paid order</div></div>
+    <div class="card"><div class="lbl">All-time orders</div><div class="big" id="mAll">—</div><div class="muted small">paid, lifetime</div></div>
+  </div>
+
+  <!-- chart + top sellers -->
+  <div class="grid two" style="margin-top:14px;grid-template-columns:1.7fr 1fr">
+    <div class="card"><h2>Sales — last 30 days</h2><div id="chart"><span class="muted small">…</span></div></div>
+    <div class="card"><h2>Top sellers</h2><div id="top"><span class="muted small">…</span></div></div>
+  </div>
+
+  <!-- order history -->
+  <div class="card" style="margin-top:14px">
+    <h2>All orders</h2>
+    <div id="orders"><span class="muted small">…</span></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  let session, partner;
+  function esc(s){ return String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c])); }
+
+  (async () => {
+    session = await requireAuth();
+    partner = await getMyPartner(session.user.id);
+    if (!partner) return location.replace("get-started.html");
+    el("shopName").textContent = "· " + partner.name;
+    el("out").addEventListener("click", (e) => { e.preventDefault(); signOut(); });
+    load();
+  })();
+
+  async function load() {
+    const affiliate = (partner.store_mode || "storefront") === "affiliate";
+    let all;
+    if (window.OCEANSAFE_DEMO) {
+      all = window.demoData().orders;
+    } else {
+      const { data: orders, error } = await sb.from("orders")
+        .select("id,total_cents,status,created_at").eq("partner_id", partner.id).order("created_at", { ascending: false });
+      if (error) { el("chart").innerHTML = `<span class="msg err">${esc(error.message)}</span>`; return; }
+      all = orders || [];
+    }
+    const paid = all.filter(o => o.status === "paid");
+
+    // stat cards
+    const now = new Date(), m0 = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const paidMonth = paid.filter(o => o.created_at >= m0);
+    const cents = paidMonth.reduce((s, o) => s + (o.total_cents || 0), 0);
+    el("mSales").textContent = money(cents);
+    el("mCount").textContent = `${paidMonth.length} order${paidMonth.length === 1 ? "" : "s"}`;
+    el("mPayout").textContent = money(Math.round(cents * 0.9));
+    el("mAvg").textContent = paidMonth.length ? money(Math.round(cents / paidMonth.length)) : "—";
+    el("mAll").textContent = paid.length;
+
+    // chart
+    el("chart").innerHTML = affiliate
+      ? `<div class="muted small" style="padding:54px 0;text-align:center">Affiliate mode — purchases happen on Amazon, so they're not tracked here. Switch to Online store to sell and track sales in-app.</div>`
+      : salesChart(paid);
+
+    // top sellers (from captured line items)
+    await loadTop(paid.map(o => o.id), affiliate);
+
+    // order history
+    if (!all.length) { el("orders").innerHTML = `<span class="muted small">No orders yet.</span>`; }
+    else {
+      const badge = s => ({ paid:"b-green", pending:"b-amber", refunded:"b-grey", disputed:"b-red", failed:"b-red", expired:"b-grey", ready:"b-blue", collected:"b-green" }[s] || "b-grey");
+      el("orders").innerHTML = `<table><tr><th>When</th><th>Status</th><th style="text-align:right">Total</th></tr>${
+        all.slice(0, 40).map(o => `<tr><td>${new Date(o.created_at).toLocaleDateString()}</td><td><span class="badge ${badge(o.status)}">${esc(o.status)}</span></td><td style="text-align:right;font-weight:700">${money(o.total_cents)}</td></tr>`).join("")
+      }</table>`;
+    }
+  }
+
+  async function loadTop(paidIds, affiliate) {
+    if (affiliate) { el("top").innerHTML = `<span class="muted small">Not tracked in affiliate mode.</span>`; return; }
+    if (!paidIds.length) { el("top").innerHTML = `<span class="muted small">No sales yet — top sellers show up here once orders come in.</span>`; return; }
+    let items;
+    if (window.OCEANSAFE_DEMO) { items = window.demoData().items; }
+    else { ({ data: items } = await sb.from("order_items").select("title,qty,price_cents,order_id").in("order_id", paidIds)); }
+    const totals = {};
+    for (const it of (items || [])) {
+      const k = it.title || "Item";
+      totals[k] = (totals[k] || 0) + (it.price_cents || 0) * (it.qty || 1);
+    }
+    const rows = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    if (!rows.length) { el("top").innerHTML = `<span class="muted small">No sales yet.</span>`; return; }
+    const max = rows[0][1] || 1;
+    el("top").innerHTML = rows.map(([nm, v]) =>
+      `<div class="topbar"><span class="nm">${esc(nm)}</span><span class="track"><span class="fill" style="width:${Math.round(v / max * 100)}%"></span></span><span class="amt">${money(v)}</span></div>`).join("");
+  }
+
+  // SVG line+area chart of daily paid sales over the last 30 days
+  function salesChart(paid) {
+    const days = 30, W = 600, H = 160, base = H - 6, top = 14;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const b = new Array(days).fill(0);
+    for (const o of paid) {
+      const d = new Date(o.created_at); d.setHours(0, 0, 0, 0);
+      const idx = days - 1 - Math.round((today - d) / 86400000);
+      if (idx >= 0 && idx < days) b[idx] += (o.total_cents || 0);
+    }
+    if (!b.some(v => v > 0))
+      return `<div class="muted small" style="padding:54px 0;text-align:center">No sales in the last 30 days yet — your chart fills in as orders come through.</div>`;
+    const max = Math.max(1, ...b);
+    const pts = b.map((v, i) => [(i / (days - 1)) * W, base - (v / max) * (base - top)]);
+    const line = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    const area = `${line} L${W} ${base} L0 ${base} Z`;
+    const mid = ((base + top) / 2).toFixed(1);
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="var(--line)"/>
+      <line x1="0" y1="${mid}" x2="${W}" y2="${mid}" stroke="var(--line)" stroke-dasharray="3 4"/>
+      <path d="${area}" fill="var(--ocean)" opacity="0.08"/>
+      <path d="${line}" fill="none" stroke="var(--ocean)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+    </svg>
+    <div class="muted small" style="display:flex;justify-content:space-between;margin-top:4px"><span>30 days ago</span><span>peak ${money(max)}/day</span><span>today</span></div>`;
+  }
+</script>
+</body>
+</html>
