@@ -1,4 +1,2 @@
 # OceanSafe shop co-brand pages — clean URLs (rewrite, address bar stays /p/<shop>)
-/p/nukumoi       /p/nukumoi.html        200
-/p/snorkel-bobs  /p/snorkel-bobs.html   200
-/p/seasport      /p/seasport.html       200
+/p/demo         /p/demo.html           200
