@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="oceansafe-favicon.png">
+<link rel="stylesheet" href="portal.css">
+<title>OceanSafe Partners — Promotions</title>
+</head>
+<body>
+<div class="bar"><img src="oceansafe-favicon.png" alt=""><b>OceanSafe</b><span class="crumb" id="shopName">·</span>
+  <span class="sp"></span>
+  <nav class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="sales.html">Sales</a>
+    <a href="products.html">Products</a>
+    <a class="on" href="promotions.html">Promotions</a>
+    <a href="#" id="out">Sign out</a>
+  </nav></div>
+
+<div class="wrap" style="max-width:680px">
+  <div style="display:flex;align-items:center;gap:12px">
+    <h1 style="flex:1">Promotions</h1>
+    <button class="btn primary" id="addBtn">+ Add promotion</button>
+  </div>
+  <p class="muted small" style="margin:0 2px">Upload a PDF flyer (a sale, a coupon, an event). It shows in your in-app page while it's live and inside its dates.</p>
+
+  <div class="card hide" id="editor" style="margin-top:14px">
+    <h2 id="edTitle">Add promotion</h2>
+    <label class="f" for="title">Title</label>
+    <input id="title" placeholder="20% off snorkel rentals this week">
+    <div class="row2">
+      <div><label class="f" for="starts">Starts</label><input id="starts" type="date"></div>
+      <div><label class="f" for="ends">Ends</label><input id="ends" type="date"></div>
+    </div>
+    <label class="f" for="pdf">PDF flyer</label>
+    <input id="pdf" type="file" accept="application/pdf">
+    <div class="hint" id="pdfHint">PDF only. Leave empty when editing to keep the current file.</div>
+    <label class="chk on" id="liveChk" style="margin-top:14px;display:inline-flex"><input type="checkbox" id="live" checked> Live (show it now)</label>
+    <div id="msg" class="msg hide"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn primary" id="save">Save</button>
+      <button class="btn ghost" id="cancel">Cancel</button>
+      <span style="flex:1"></span>
+      <button class="btn danger hide" id="del">Delete</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div id="list"><span class="muted small">Loading…</span></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  let session, partner, promos = [], editingId = null;
+
+  (async () => {
+    session = await requireAuth();
+    partner = await getMyPartner(session.user.id);
+    if (!partner) return location.replace("get-started.html");
+    el("shopName").textContent = "· " + partner.name;
+    el("out").addEventListener("click", (e) => { e.preventDefault(); signOut(); });
+    el("addBtn").addEventListener("click", () => openEditor(null));
+    el("cancel").addEventListener("click", closeEditor);
+    el("save").addEventListener("click", save);
+    el("del").addEventListener("click", remove);
+    el("live").addEventListener("change", () => el("liveChk").classList.toggle("on", el("live").checked));
+    load();
+  })();
+
+  async function load() {
+    if (window.OCEANSAFE_DEMO) { el("list").innerHTML = `<div class="msg info">Demo mode — add your Supabase keys in <code>config.js</code> to manage real promotions.</div>`; return; }
+    const { data, error } = await sb.from("promotions").select("*").eq("partner_id", partner.id).order("created_at", { ascending: false });
+    if (error) { el("list").innerHTML = `<span class="msg err">${error.message}</span>`; return; }
+    promos = data || [];
+    if (!promos.length) { el("list").innerHTML = `<span class="muted small">No promotions yet.</span>`; return; }
+    el("list").innerHTML = `<table><tr><th>Title</th><th>Runs</th><th>Status</th><th></th></tr>${
+      promos.map((p) => `<tr>
+        <td><b>${esc(p.title || "Untitled")}</b>${safeUrl(p.pdf_url) ? ` · <a href="${esc(safeUrl(p.pdf_url))}" target="_blank" rel="noopener noreferrer">PDF</a>` : ""}</td>
+        <td class="small muted">${p.starts_at || "—"} → ${p.ends_at || "—"}</td>
+        <td><span class="badge ${p.status === "live" ? "b-green" : "b-grey"}">${p.status}</span></td>
+        <td style="text-align:right"><button class="btn ghost small" data-edit="${p.id}">Edit</button></td>
+      </tr>`).join("")
+    }</table>`;
+    $$("[data-edit]").forEach((b) => b.addEventListener("click", () => openEditor(b.dataset.edit)));
+  }
+
+  function openEditor(id) {
+    editingId = id;
+    const p = id ? promos.find((x) => x.id === id) : null;
+    el("edTitle").textContent = p ? "Edit promotion" : "Add promotion";
+    el("del").classList.toggle("hide", !p);
+    el("msg").classList.add("hide");
+    el("title").value = p?.title || "";
+    el("starts").value = p?.starts_at || "";
+    el("ends").value = p?.ends_at || "";
+    el("pdf").value = "";
+    el("live").checked = p ? p.status === "live" : true;
+    el("liveChk").classList.toggle("on", el("live").checked);
+    el("editor").classList.remove("hide");
+    el("editor").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function closeEditor() { el("editor").classList.add("hide"); editingId = null; }
+
+  async function save() {
+    const title = el("title").value.trim();
+    if (!title) return toast(el("msg"), "err", "Give the promotion a title.");
+    el("save").disabled = true; el("save").innerHTML = '<span class="spin"></span>';
+    try {
+      let pdf_url = editingId ? (promos.find((x) => x.id === editingId)?.pdf_url || null) : null;
+      const file = el("pdf").files[0];
+      if (file) {
+        if (file.type !== "application/pdf") throw new Error("That's not a PDF.");
+        pdf_url = await uploadToBucket("promos", partner.id, file);
+      }
+      if (!pdf_url) throw new Error("Upload a PDF flyer.");
+      const row = {
+        partner_id: partner.id, title, pdf_url,
+        starts_at: el("starts").value || null, ends_at: el("ends").value || null,
+        status: el("live").checked ? "live" : "draft",
+      };
+      const q = editingId ? sb.from("promotions").update(row).eq("id", editingId) : sb.from("promotions").insert(row);
+      const { error } = await q;
+      if (error) throw error;
+      closeEditor(); load();
+    } catch (e) { toast(el("msg"), "err", errText(e.message || e)); }
+    finally { el("save").disabled = false; el("save").textContent = "Save"; }
+  }
+
+  async function remove() {
+    if (!editingId || !confirm("Delete this promotion?")) return;
+    const { error } = await sb.from("promotions").delete().eq("id", editingId);
+    if (error) return toast(el("msg"), "err", error.message);
+    closeEditor(); load();
+  }
+  function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+  function safeUrl(u) { const s = String(u ?? "").trim(); return /^https:\/\//i.test(s) ? s : ""; }
+</script>
+</body>
+</html>
