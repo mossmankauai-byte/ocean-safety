@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="oceansafe-favicon.png">
+<link rel="stylesheet" href="portal.css">
+<title>OceanSafe Partners — Products</title>
+</head>
+<body>
+<div class="bar"><img src="oceansafe-favicon.png" alt=""><b>OceanSafe</b><span class="crumb" id="shopName">·</span>
+  <span class="sp"></span>
+  <nav class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="sales.html">Sales</a>
+    <a class="on" href="products.html">Products</a>
+    <a href="promotions.html">Promotions</a>
+    <a href="#" id="out">Sign out</a>
+  </nav></div>
+
+<div class="wrap">
+  <div style="display:flex;align-items:center;gap:12px">
+    <h1 style="flex:1">Products</h1>
+    <button class="btn primary" id="addBtn">+ Add product</button>
+  </div>
+
+  <!-- editor -->
+  <div class="card hide" id="editor" style="margin-top:14px">
+    <h2 id="edTitle">Add product</h2>
+
+    <!-- product type — HIDDEN for the gift-shops-only launch: every product is a
+         Storefront item sold in-app. The radios stay in the DOM (storefront checked)
+         so the form logic keeps working. To re-enable Amazon-affiliate items in
+         phase 2, delete the style="display:none" below. -->
+    <div class="checks" id="modeRow" style="display:none;margin-bottom:4px">
+      <label class="chk on" id="modeStore"><input type="radio" name="mode" value="storefront" checked> Storefront (you sell it)</label>
+      <label class="chk" id="modeAff"><input type="radio" name="mode" value="affiliate"> Affiliate (Amazon link)</label>
+    </div>
+
+    <div id="affBox" class="hide">
+      <label class="f" for="asinInput">Amazon link or ASIN</label>
+      <input id="asinInput" placeholder="Paste an amazon.com/dp/… URL or a 10-char ASIN">
+      <div class="hint" id="asinHint">We'll pull the product code. Amazon's API is retired, so add your own title + photo below.</div>
+    </div>
+
+    <label class="f" for="title">Title</label>
+    <input id="title" placeholder="Reef-safe sunscreen SPF 50">
+
+    <div class="row2">
+      <div><label class="f" for="category">Category</label>
+        <input id="category" placeholder="sunscreen, snorkel gear, apparel…"></div>
+      <div id="priceWrap"><label class="f" for="price">Your price (USD)</label>
+        <input id="price" type="number" min="0" step="0.01" placeholder="24.99"></div>
+    </div>
+
+    <label class="f">Photo</label>
+    <input id="photo" type="file" accept="image/*">
+    <div class="hint" id="photoHint">A clear square photo works best.</div>
+
+    <label class="f" for="stock" style="margin-top:14px">How many do you have?</label>
+    <input id="stock" type="number" min="0" step="1" placeholder="">
+    <div class="hint">Leave blank = always available (made to order). At 0 it auto-marks sold out.</div>
+
+    <label class="f" style="margin-top:14px">Show this product when conditions are…</label>
+    <div class="checks" id="tags"></div>
+    <div class="hint">Drives the in-app recommendation. Pick “Any day” if it always applies.</div>
+
+    <label class="chk on" id="activeChk" style="margin-top:14px;display:inline-flex"><input type="checkbox" id="active" checked> Active (visible in store)</label>
+
+    <div id="msg" class="msg hide"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn primary" id="save">Save product</button>
+      <button class="btn ghost" id="cancel">Cancel</button>
+      <span style="flex:1"></span>
+      <button class="btn danger hide" id="del">Delete</button>
+    </div>
+  </div>
+
+  <!-- list -->
+  <div class="card" style="margin-top:14px">
+    <div id="list"><span class="muted small">Loading…</span></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  const TAGS = [
+    { k: "any", label: "Any day" },
+    { k: "high_uv", label: "Strong sun / high UV" },
+    { k: "good_snorkel", label: "Good snorkeling" },
+    { k: "big_surf", label: "Big surf" },
+    { k: "calm_water", label: "Calm water" },
+    { k: "windy", label: "Windy" },
+    { k: "rainy", label: "Rainy" },
+  ];
+  let session, partner, products = [], editingId = null;
+
+  (async () => {
+    session = await requireAuth();
+    partner = await getMyPartner(session.user.id);
+    if (!partner) return location.replace("get-started.html");
+    el("shopName").textContent = "· " + partner.name;
+    el("out").addEventListener("click", (e) => { e.preventDefault(); signOut(); });
+    el("tags").innerHTML = TAGS.map((t) => `<label class="chk" data-tag="${t.k}"><input type="checkbox" value="${t.k}"> ${t.label}</label>`).join("");
+    $$("#tags .chk").forEach((c) => c.addEventListener("click", () => setTimeout(() => c.classList.toggle("on", c.querySelector("input").checked))));
+    wireMode();
+    el("addBtn").addEventListener("click", () => openEditor(null));
+    el("cancel").addEventListener("click", closeEditor);
+    el("save").addEventListener("click", save);
+    el("del").addEventListener("click", remove);
+    load();
+  })();
+
+  function wireMode() {
+    $$('input[name="mode"]').forEach((r) => r.addEventListener("change", () => {
+      const aff = r.value === "affiliate" && r.checked;
+      if (!r.checked) return;
+      el("modeStore").classList.toggle("on", r.value === "storefront");
+      el("modeAff").classList.toggle("on", r.value === "affiliate");
+      el("affBox").classList.toggle("hide", r.value !== "affiliate");
+      el("priceWrap").style.display = r.value === "affiliate" ? "none" : "";
+    }));
+  }
+  const currentMode = () => ($$('input[name="mode"]').find((r) => r.checked)?.value) ?? "storefront";
+
+  async function load() {
+    if (window.OCEANSAFE_DEMO) { el("list").innerHTML = `<div class="msg info">Demo mode — add your Supabase keys in <code>config.js</code> to manage real products.</div>`; return; }
+    const { data, error } = await sb.from("products").select("*").eq("partner_id", partner.id).order("sort", { ascending: true }).order("created_at", { ascending: false });
+    if (error) { el("list").innerHTML = `<span class="msg err">${error.message}</span>`; return; }
+    products = data || [];
+    if (!products.length) { el("list").innerHTML = `<span class="muted small">No products yet. Add your first one.</span>`; return; }
+    el("list").innerHTML = `<table><tr><th></th><th>Product</th><th>Type</th><th style="text-align:right">Price</th><th></th></tr>${
+      products.map((p) => `<tr>
+        <td><img class="thumb" src="${esc(safeUrl(p.image_url))}" alt="" onerror="this.style.visibility='hidden'"></td>
+        <td><b>${esc(p.title)}</b><div class="muted small">${esc(p.category || "")}${p.active ? "" : " · hidden"}${stockLabel(p)}</div></td>
+        <td><span class="badge ${p.mode === "storefront" ? "b-blue" : "b-grey"}">${p.mode}</span></td>
+        <td style="text-align:right">${p.mode === "storefront" ? money(p.price_cents) : "—"}</td>
+        <td style="text-align:right"><button class="btn ghost small" data-edit="${p.id}">Edit</button></td>
+      </tr>`).join("")
+    }</table>`;
+    $$("[data-edit]").forEach((b) => b.addEventListener("click", () => openEditor(b.dataset.edit)));
+  }
+
+  function openEditor(id) {
+    editingId = id;
+    const p = id ? products.find((x) => x.id === id) : null;
+    el("edTitle").textContent = p ? "Edit product" : "Add product";
+    el("del").classList.toggle("hide", !p);
+    el("msg").classList.add("hide");
+    // mode
+    const mode = p?.mode || partner.store_mode || "storefront";
+    $$('input[name="mode"]').forEach((r) => { r.checked = r.value === mode; r.dispatchEvent(new Event("change")); });
+    el("asinInput").value = p?.asin || "";
+    el("title").value = p?.title || "";
+    el("category").value = p?.category || "";
+    el("price").value = p?.price_cents != null ? (p.price_cents / 100).toFixed(2) : "";
+    el("stock").value = p?.stock != null ? p.stock : "";
+    el("photo").value = "";
+    el("active").checked = p ? !!p.active : true;
+    el("activeChk").classList.toggle("on", el("active").checked);
+    const tags = p?.show_when || [];
+    $$("#tags .chk").forEach((c) => { const on = tags.includes(c.dataset.tag); c.querySelector("input").checked = on; c.classList.toggle("on", on); });
+    el("editor").classList.remove("hide");
+    el("editor").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function closeEditor() { el("editor").classList.add("hide"); editingId = null; }
+
+  async function save() {
+    const mode = currentMode();
+    const title = el("title").value.trim();
+    if (!title) return toast(el("msg"), "err", "Give the product a title.");
+    const asin = mode === "affiliate" ? parseAsin(el("asinInput").value) : null;
+    if (mode === "affiliate" && el("asinInput").value.trim() && !asin) return toast(el("msg"), "err", "Couldn't read an ASIN from that — paste a full amazon.com/dp/… link.");
+    let price_cents = null;
+    if (mode === "storefront") {
+      const raw = el("price").value.trim();
+      if (raw === "") return toast(el("msg"), "err", "Storefront items need a price.");
+      const parsed = parseFloat(raw);
+      if (!Number.isFinite(parsed) || parsed < 0) return toast(el("msg"), "err", "Enter a valid price (0 or more).");
+      price_cents = Math.round(parsed * 100);
+    }
+    const show_when = $$("#tags input:checked").map((i) => i.value);
+
+    let stock = null;
+    const stockRaw = el("stock").value.trim();
+    if (stockRaw !== "") {
+      const s = parseInt(stockRaw, 10);
+      if (!Number.isFinite(s) || s < 0) return toast(el("msg"), "err", "Enter a whole number of items (0 or more), or leave blank.");
+      stock = s;
+    }
+
+    el("save").disabled = true; el("save").innerHTML = '<span class="spin"></span>';
+    try {
+      let image_url = editingId ? (products.find((x) => x.id === editingId)?.image_url || null) : null;
+      const file = el("photo").files[0];
+      if (file) image_url = await uploadToBucket("product-images", partner.id, file);
+      if (mode === "affiliate" && !image_url) throw new Error("Affiliate items need a photo (Amazon's API can't supply one).");
+
+      const row = {
+        partner_id: partner.id, title, mode,
+        category: el("category").value.trim() || null,
+        price_cents, image_url, stock,
+        asin, source: asin ? "amazon" : "manual",
+        affiliate_url: mode === "affiliate" ? (affiliateLink(asin, partner.amazon_tag) || null) : null,
+        show_when, active: el("active").checked,
+      };
+      const q = editingId
+        ? sb.from("products").update(row).eq("id", editingId)
+        : sb.from("products").insert(row);
+      const { error } = await q;
+      if (error) throw error;
+      closeEditor(); load();
+    } catch (e) {
+      toast(el("msg"), "err", errText(e.message || e));
+    } finally { el("save").disabled = false; el("save").textContent = "Save product"; }
+  }
+
+  async function remove() {
+    if (!editingId || !confirm("Delete this product?")) return;
+    const { error } = await sb.from("products").delete().eq("id", editingId);
+    if (error) return toast(el("msg"), "err", error.message);
+    closeEditor(); load();
+  }
+
+  el("active").addEventListener("change", () => el("activeChk").classList.toggle("on", el("active").checked));
+  function stockLabel(p) {
+    if (p.stock == null) return "";
+    if (p.stock === 0 || (!p.active && p.stock <= 0)) return ' · <b>Sold out</b>';
+    return ` · ${p.stock} left`;
+  }
+  function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+  function safeUrl(u) { const s = String(u ?? "").trim(); return /^https?:\/\//i.test(s) ? s : ""; }
+</script>
+</body>
+</html>
