@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Your Shop (demo) · OceanSafe partner dashboard</title>
+<style>
+  :root{--accent:#0A8BA8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#F5F7F9;color:#16202A;
+    -webkit-font-smoothing:antialiased;line-height:1.5;padding:28px 18px 64px}
+  .wrap{max-width:760px;margin:0 auto}
+  .topbar{height:6px;background:var(--accent);border-radius:6px;margin-bottom:18px}
+  .demo-ribbon{background:#16202A;color:#fff;font-size:13px;font-weight:600;text-align:center;padding:10px 14px;border-radius:8px;margin-bottom:16px}
+  .mast{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .wm{font-weight:800;font-size:20px;letter-spacing:-.3px}.wm .c{color:var(--accent)}
+  .shop{font-weight:700;font-size:20px;color:#16202A}
+  .crumb{color:#64727F;font-size:14px}
+  .priv{font-size:12.5px;color:#64727F;background:#EEF2F5;border:1px solid #E0E6EB;border-radius:8px;padding:9px 12px;margin:14px 0 22px}
+  .priv b{color:#16202A}
+  .card{background:#fff;border:1px solid #E2E8ED;border-radius:12px;padding:18px;margin-bottom:16px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#64727F;margin-bottom:12px;font-weight:700}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;text-decoration:none;border-radius:9px;
+    padding:10px 16px;cursor:pointer;border:1px solid transparent}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.ghost{background:#fff;color:#16202A;border-color:#D5DCE2}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .qr{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:14px}
+  .qr img{width:120px;height:120px;border:1px solid #E2E8ED;border-radius:10px;background:#fff}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:8px 14px;font-size:14.5px}
+  .kv .k{color:#64727F}
+  .hint{font-size:13px;color:#64727F;margin-top:8px}
+  .status{font-size:14px;background:#F0F7F2;border:1px solid #D6EADD;color:#1B7A43;border-radius:8px;padding:8px 11px;margin-top:12px;display:inline-block}
+  .soonrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid #EDF1F4}
+  .soonrow:first-of-type{border-top:none}
+  .soonrow .lab{color:#8A97A3}
+  .pill{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;background:#EEF2F5;color:#7A8794;border:1px solid #E0E6EB;border-radius:999px;padding:3px 9px}
+  .empty{font-style:italic;color:#64727F;font-size:14px;border-left:3px solid #E0E6EB;padding:4px 0 4px 12px;margin-top:12px}
+  .start{background:#FFFBEF;border:1px solid #F0E2BF}
+  .steps{margin:6px 0 0;padding-left:22px;font-size:14.5px;line-height:1.5;color:#3C4753}
+  .steps li{margin:8px 0}
+  .steps b{color:#16202A}
+  details summary{cursor:pointer;font-weight:600;font-size:14px;color:#16202A}
+  details p{font-size:14px;color:#3C4753;margin-top:10px}
+  .cap{background:#F7F9FB;border:1px solid #E2E8ED;border-radius:8px;padding:11px 12px;font-size:13.5px;color:#3C4753}
+  .foot{font-size:12.5px;color:#8A97A3;text-align:center;margin-top:26px}
+  a{color:var(--accent)}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16202A;color:#fff;font-size:13px;
+    padding:9px 15px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s}
+  .toast.show{opacity:1}
+</style></head>
+<body><div class="wrap">
+  <div class="demo-ribbon">DEMO · a sample of your partner dashboard — your real one looks just like this</div>
+  <div class="topbar"></div>
+  <div class="mast"><span class="wm">Ocean<span class="c">Safe</span></span><span class="crumb">partner dashboard</span></div>
+  <div class="shop">Your Shop (demo) <span class="crumb">· Hanalei</span></div>
+
+  <div class="priv">🔒 <b>This link is private to you.</b> It's an unguessable link — not a password — so anyone who has it can view this page. Don't post it publicly; bookmark it for yourself.</div>
+
+  <!-- 0 · get started / how to use -->
+  <div class="card start">
+    <h2>Get started — your first 10 minutes</h2>
+    <ol class="steps">
+      <li><b>Bookmark this page.</b> It's your home base — your page, QR card, and plan all live here.</li>
+      <li><b>Put your cards out.</b> Stack them by the register and tuck one in every bag or receipt — that's how visitors find your page.</li>
+      <li><b>Add the QR to your own stuff.</b> Download it below and drop it on your signage, window, and socials (there's a copy-paste caption further down).</li>
+      <li><b>See your live page.</b> Tap <b>"View your live page"</b> to see exactly what your customers see.</li>
+      <li><b>Need any change?</b> Hours, a photo, your logo, a typo — hit <b>"Request a change."</b> A real person, same day.</li>
+    </ol>
+    <div class="hint">Your in-app store — add your own products and take orders — turns on soon; we'll email you the day it's ready. Your page and cards are already working now.</div>
+  </div>
+
+  <!-- 1 · live page + QR -->
+  <div class="card">
+    <h2>Your page &amp; QR card</h2>
+    <div class="row">
+      <a class="btn primary" href="https://oceansafety.app" target="_blank" rel="noopener">View your live page ↗</a>
+      <button class="btn ghost" onclick="copy('https://oceansafety.app')">Copy page link</button>
+    </div>
+    <div class="qr">
+      <img src="data:image/png;base64,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" alt="Your QR code" onerror="this.style.display='none'">
+      <div>
+        <div style="font-weight:600;margin-bottom:8px">Your card QR — points to your page</div>
+        <div class="row">
+          <a class="btn ghost sm" href="data:image/png;base64,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" download="demo-qr.png">Download PNG</a>
+          <a class="btn ghost sm" href="card.pdf" download="demo-card.pdf">Print-ready PDF</a>
+        </div>
+        <div class="hint">Drop the QR onto your own signage, receipts, or posts too.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 · reorder cards -->
+  <div class="card">
+    <h2>Need more cards?</h2>
+    <p style="font-size:14.5px">Cards walk out the door — that's the point. Reorder 200 more anytime for $100.</p>
+    <div class="status">Card kit — designed &amp; shipping to you</div>
+    <div class="row" style="margin-top:14px">
+      <a class="btn primary" href="mailto:mossmankauai@gmail.com?subject=More%20cards%20for%20Hanalei%20Surf%20Co.%20(sample)&amp;body=Hi%20OceanSafe%20team%2C%0A%0AHanalei%20Surf%20Co.%20(sample)%20(demo)%20would%20like%20200%20more%20cards%20(%24100).%0A%0AShip%20to%3A%0A%0AThanks!">Reorder 200 cards — $100 ↗</a>
+    </div>
+  </div>
+
+  <!-- 3 · your details + request a change -->
+  <div class="card">
+    <h2>What's live (read-only)</h2>
+    <div class="kv">
+      <span class="k">Shop</span><span>Your Shop (demo)</span>
+      <span class="k">Tagline</span><span>Surf &amp; snorkel rentals — sample shop</span>
+      <span class="k">Area</span><span>Hanalei</span>
+      <span class="k">Page</span><span><a href="https://oceansafety.app" target="_blank" rel="noopener">https://oceansafety.app</a></span>
+    </div>
+    <div class="hint">This is what's showing on your page now. To change anything — hours, a photo, your logo, a typo — just ask:</div>
+    <div class="row" style="margin-top:12px">
+      <a class="btn ghost" href="mailto:mossmankauai@gmail.com?subject=Update%20Hanalei%20Surf%20Co.%20(sample)&#39;s%20OceanSafe%20page&amp;body=Hi%20OceanSafe%20team%2C%0A%0APlease%20update%20the%20following%20on%20Hanalei%20Surf%20Co.%20(sample)&#39;s%20page%20(demo)%3A%0A%0A-%20%0A%0AThanks!">Request a change ↗</a>
+    </div>
+  </div>
+
+  <!-- 4 · plan & renewal -->
+  <div class="card">
+    <h2>Your plan</h2>
+    <div class="kv">
+      <span class="k">Plan</span><span>Storefront partner</span>
+      <span class="k">Terms</span><span>$149 one-time card kit + $1,500 / year + 10% of in-app sales (your first year, we cover the card-processing fees, so the 10% is all-in)</span>
+      <span class="k">Renews</span><span>Jun 18, 2027</span>
+    </div>
+    <div class="hint">We'll email you before renewal — no surprise charges. To make changes, just reply to any of our emails.</div>
+  </div>
+
+  <!-- 8 · analytics (honest, coming soon) -->
+  <div class="card">
+    <h2>Visits &amp; scans</h2>
+    <div class="soonrow"><span class="lab">Page visits</span><span class="pill">Coming soon</span></div>
+    <div class="soonrow"><span class="lab">Card scans</span><span class="pill">Coming soon</span></div>
+    <div class="soonrow"><span class="lab">Taps to your page</span><span class="pill">Coming soon</span></div>
+    <div class="empty">Visit and scan counts turn on once analytics goes live — we'll email you the week it does. Nothing for you to set up.</div>
+  </div>
+
+  <!-- 9 · live store dashboard (coming soon) -->
+  <div class="card">
+    <h2>Your live store tools</h2>
+    <p style="font-size:14.5px">Real-time sales, editable products, and payouts — activating soon, behind a secure sign-in.</p>
+    <div class="row" style="margin-top:12px"><span class="pill">Activating soon</span></div>
+  </div>
+
+  <!-- 9b · how orders will work -->
+  <div class="card">
+    <h2>How orders will work</h2>
+    <ol class="steps">
+      <li><b>A visitor buys</b> from your Shop tab in the app and pays right there.</li>
+      <li><b>You get an order email</b> the second it's paid — item, size, and a pickup code.</li>
+      <li><b>You fulfill it</b> — hand it over or ship it.</li>
+      <li><b>You're paid</b> — the money lands in your account; the 10% (card fee included) comes out automatically. No invoices, no separate processing bill.</li>
+    </ol>
+    <div class="hint">This turns on when your store tools go live. Until then, your page and cards are already sending you foot traffic.</div>
+  </div>
+
+  <!-- 6 · share kit -->
+  <div class="card">
+    <h2>Spread the word</h2>
+    <p style="font-size:14.5px;margin-bottom:10px">Copy-paste caption for your socials:</p>
+    <div class="cap" id="cap">We&#39;ve partnered with OceanSafe 🌊 — scan our card for today&#39;s Kauaʻi beach-safety report before you get in the water. Stay safe out there! https://oceansafety.app</div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn ghost sm" onclick="copy(document.getElementById('cap').textContent)">Copy caption</button>
+      <a class="btn ghost sm" href="data:image/png;base64,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" download="demo-qr.png">Get the QR image</a>
+    </div>
+  </div>
+
+  <!-- 6b · get more scans -->
+  <div class="card">
+    <h2>Get more scans</h2>
+    <ol class="steps">
+      <li><b>Ask at checkout</b> — "Scan this for today's beach conditions before you head out." People say yes.</li>
+      <li><b>One card in every bag</b> and on every receipt — it rides home with them.</li>
+      <li><b>Post the QR</b> to your story and stick it in your window.</li>
+      <li><b>Tell your staff one line</b> so everyone offers it the same way.</li>
+    </ol>
+    <div class="hint">More scans = more people on your page = more eyes on your shop. That's the whole engine.</div>
+  </div>
+
+  <!-- 7 · what's included -->
+  <div class="card">
+    <details>
+      <summary>What's included in your partnership</summary>
+      <p>Two things: (1) your own online store — sell your products right inside the app — and (2) a utility platform that brings you customers: the beach-safety app every visitor checks before the water, with your own page (a live daily Kauaʻi ocean-safety report), your shop featured as the local safety partner for your beach, a printed QR card kit for your counter, and this private dashboard. We build and keep it all current — you just hand out cards.</p>
+    </details>
+  </div>
+
+  <!-- 4b · quick answers (FAQ) -->
+  <div class="card">
+    <h2>Quick answers</h2>
+    <details><summary>Is it really free for my customers?</summary><p>Yes — always. The app and your page cost visitors nothing. That's exactly why they use it before every beach day.</p></details>
+    <details style="margin-top:8px"><summary>How do orders reach me?</summary><p>Once your store is live, every paid order emails you the second it's placed — item, size, and a pickup code — and the money lands in your account. See "How orders will work" above.</p></details>
+    <details style="margin-top:8px"><summary>What's the 10%?</summary><p>10% of your in-app sales. For your first year we also cover the card-processing fees, so that 10% is truly all-in — nothing else comes out of a sale. Your page, conditions, and cards aren't taxed at all.</p></details>
+    <details style="margin-top:8px"><summary>Can I cancel?</summary><p>Anytime — just reply to any email. No phone tree, no lock-in.</p></details>
+  </div>
+
+  <!-- 5 · contact -->
+  <div class="card">
+    <h2>Questions?</h2>
+    <p style="font-size:14.5px">Email or text us — a real person, same day. <a href="mailto:mossmankauai@gmail.com">mossmankauai@gmail.com</a></p>
+    <div class="hint">Reply to any email to change anything, or to cancel — no phone tree.</div>
+  </div>
+
+  <div class="foot">OceanSafe · https://oceansafety.app/demo/dashboard</div>
+</div>
+<div class="toast" id="toast">Copied</div>
+<script>
+  function copy(t){navigator.clipboard?.writeText(t).then(()=>{var e=document.getElementById('toast');e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1400)})}
+</script>
+</body></html>
