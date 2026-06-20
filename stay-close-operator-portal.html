@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OceanSafe · Operator Portal (configure stay-close)</title>
+<style>
+  :root{
+    --sand:#f3ede0; --sand-2:#faf6ee; --card:#ffffff; --ink:#2c2a24; --ink-soft:#6b6457; --line:#e7dfce;
+    --green:#628a56; --green-d:#3d5346; --amber:#d97706; --coral:#e07856; --plum:#7a5a82; --teal:#0e7d8f;
+    --font:"Helvetica Neue",Arial,Helvetica,sans-serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font-family:var(--font); color:var(--ink); background:var(--sand); -webkit-font-smoothing:antialiased; padding-bottom:92px}
+  .top{position:sticky; top:0; z-index:10; background:rgba(250,246,238,.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
+  .topin{max-width:880px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:12px}
+  .flag{width:0;height:0;border-left:13px solid #16a34a;border-top:9px solid transparent;border-bottom:9px solid transparent}
+  .wm{font-weight:700; font-size:15px; color:var(--green-d)} .wm span{color:var(--amber)}
+  .console{font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.07em; padding-left:10px; margin-left:4px; border-left:1px solid var(--line)}
+  .frame{max-width:880px; margin:0 auto; padding:0 20px}
+  .lead-in{font-size:13px; color:var(--ink-soft); margin:16px 0 4px; line-height:1.5}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; margin-top:14px}
+  h4{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--green-d); margin:0 0 4px; font-weight:700}
+  .hint{font-size:12px; color:var(--ink-soft); margin:0 0 14px; line-height:1.45}
+  label{font-size:12px; font-weight:700; color:var(--ink-soft); display:block; margin-bottom:5px}
+  input[type=text],input[type=number],input[type=email]{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:10px 11px; font-family:inherit; font-size:13.5px; background:#fff}
+  input:focus{outline:none; border-color:var(--green)}
+  .field{margin-bottom:0}
+
+  .segblock{border:1px solid var(--line); border-radius:13px; padding:14px; margin-bottom:12px; background:var(--sand-2)}
+  .segblock:last-child{margin-bottom:0}
+  .segtitle{display:flex; align-items:center; gap:9px; margin-bottom:4px}
+  .segtitle .dot{width:10px;height:10px;border-radius:50%}
+  .segtitle b{font-size:13.5px} .segtitle .funnel{font-size:11px; color:var(--ink-soft); margin-left:auto}
+  .d-renter{background:var(--green)} .d-exchange{background:var(--teal)} .d-owner{background:var(--plum)}
+  .dealrow{display:grid; grid-template-columns:48px 1fr 1fr 84px; gap:9px; align-items:end; padding:9px 0; border-bottom:1px solid #efe7d6}
+  .dealrow:last-child{border-bottom:0}
+  @media(max-width:620px){.dealrow{grid-template-columns:48px 1fr}}
+
+  .gates{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  @media(max-width:620px){.gates{grid-template-columns:1fr}}
+  .gate{display:flex; align-items:center; gap:10px; border:1.5px solid var(--line); border-radius:11px; padding:11px; background:#fff; cursor:pointer}
+  .gate input{width:18px;height:18px; accent-color:var(--green)} .gate span{font-size:13px; font-weight:600}
+
+  .slots{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  @media(max-width:620px){.slots{grid-template-columns:1fr}}
+
+  .qrgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+  @media(max-width:620px){.qrgrid{grid-template-columns:1fr}}
+  .qrcard{border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center; background:#fff}
+  .qrcard .qrsvg{width:88px;height:88px; margin:0 auto 9px}
+  .qrcard b{font-size:13px} .qrcard .code{font-family:ui-monospace,Menlo,monospace; font-size:11px; color:var(--ink-soft); margin:2px 0 10px}
+  .qrcard .dl{font-size:12px; font-weight:700; color:var(--green-d); border:1px solid var(--line); border-radius:8px; padding:6px 10px; cursor:pointer; background:var(--sand-2); display:inline-block}
+  .qrcard .dl:hover{border-color:var(--green)}
+
+  .grid{display:grid; gap:12px}
+  .chk{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--ink)}
+  .chk input{width:16px;height:16px; accent-color:var(--green)}
+
+  .savebar{position:fixed; left:0; right:0; bottom:0; background:rgba(250,246,238,.95); backdrop-filter:blur(8px); border-top:1px solid var(--line); z-index:20}
+  .savein{max-width:880px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:12px}
+  .btn{border:0; border-radius:11px; padding:12px 18px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer}
+  .btn.green{background:var(--green); color:#fff} .btn.green:hover{background:var(--green-d)}
+  .status{font-size:12.5px; color:var(--green-d); font-weight:700; opacity:0; transition:opacity .2s}
+  .status.on{opacity:1}
+  a.link{color:var(--green-d); font-weight:700; font-size:13px; text-decoration:none}
+</style>
+</head>
+<body>
+<div class="top"><div class="topin"><span class="flag"></span><span class="wm">Ocean<span>Safe</span></span><span class="console">Operator Portal · Configure stay-close</span></div></div>
+
+<div class="frame">
+  <p class="lead-in">Three QR codes, one per guest type, each with its own deals. Configure here for <b id="resortName">Marriott&rsquo;s Waiohai Beach Club</b>, then open the guest app to see it live.</p>
+
+  <div class="card">
+    <h4>Property</h4>
+    <label for="resort">Resort name</label>
+    <input type="text" id="resort" value="Marriott&rsquo;s Waiohai Beach Club">
+  </div>
+
+  <div class="card">
+    <h4>Deals by guest type</h4>
+    <p class="hint">Each QR code carries its own menu. Renters and exchangers run a tour funnel; owners run upgrade and referral. All gifts are resort-funded; OceanSafe routes the guest and does not fulfill.</p>
+    <div id="segDeals"></div>
+  </div>
+
+  <div class="card">
+    <h4>Download your QR codes</h4>
+    <p class="hint">Print each on its matching card stock. Front desk or housekeeping places the right one by reservation type.</p>
+    <div class="qrgrid" id="qrgrid"></div>
+  </div>
+
+  <div class="card">
+    <h4>Qualification gates (non-owner tours)</h4>
+    <p class="hint">Only guests who pass enabled gates are offered a tour. Owners skip this.</p>
+    <div class="gates" id="gates"></div>
+  </div>
+
+  <div class="card">
+    <h4>Session availability</h4>
+    <p class="hint">Slot times offered for sessions and owner updates. Set seat capacity (&ldquo;spots left&rdquo;) per session in the Console.</p>
+    <div class="slots" id="slots"></div>
+  </div>
+
+  <div class="card">
+    <h4>Lead routing</h4>
+    <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px">
+      <div class="field"><label for="crm">CRM webhook URL</label><input type="text" id="crm" placeholder="https://your-crm/webhook"></div>
+      <div class="field"><label for="email">Notify email (sales desk)</label><input type="email" id="email" placeholder="sales@waiohai.com"></div>
+    </div>
+    <div class="chk" style="margin-top:12px"><input type="checkbox" id="digest" checked> <span>Send daily lead digest</span></div>
+  </div>
+</div>
+
+<div class="savebar"><div class="savein">
+  <button class="btn green" id="save">Save settings</button>
+  <span class="status" id="status">&#10003; Saved, guest app updated</span>
+  <span style="margin-left:auto"></span>
+  <a class="link" href="stay-close-timeshare.html">Open guest app &rarr;</a>
+  <a class="link" href="stay-close-operator-dashboard.html">Analytics &rarr;</a>
+</div></div>
+
+<script>
+(function(){
+  "use strict";
+  var CKEY="oceansafe_ts_config";
+  var SEGMETA=[
+    {k:"renter",name:"Renter",dot:"d-renter",code:"WAI-RENT",funnel:"Tour funnel"},
+    {k:"exchange",name:"Exchange (RCI / II)",dot:"d-exchange",code:"WAI-EXCH",funnel:"Tour funnel"},
+    {k:"owner",name:"Owner",dot:"d-owner",code:"WAI-OWNR",funnel:"Upgrade + referral"}
+  ];
+  var DEF={
+    resort:"Marriott’s Waiohai Beach Club",
+    deals:{
+      renter:[{ic:"⛵",t:"Sunset dinner cruise",d:"Nāpali coast, for two",v:180},{ic:"🌺",t:"Lūʻau for two",d:"Poʻipū, incl. transport",v:300},{ic:"🏨",t:"$200 resort credit",d:"dining / spa",v:200}],
+      exchange:[{ic:"🤿",t:"Snorkel sail for two",d:"south shore reef",v:160},{ic:"🍽️",t:"$150 dining credit",d:"any on-site restaurant",v:150},{ic:"💆",t:"$175 spa credit",d:"Waiohai spa",v:175}],
+      owner:[{ic:"⭐",t:"15,000 bonus points",d:"added to your account",v:300},{ic:"🍽️",t:"$250 owner dining credit",d:"any on-site restaurant",v:250},{ic:"🌺",t:"Lūʻau for two",d:"Poʻipū, incl. transport",v:300}]
+    },
+    qualify:{couple:true,age:true,home:true,income:true,ownerCheck:true},
+    slots:["Today · 2:00 PM","Tomorrow · 9:00 AM","Tomorrow · 2:00 PM","Day after · 9:00 AM"],
+    routing:{crm:"",email:"",digest:true}
+  };
+  var GATES=[["couple","Couple, both attend"],["age","Both 30 or older"],["home","Owns their home"],["income","Income $50k+"],["ownerCheck","Not a current owner"]];
+
+  function load(){ try{ var c=JSON.parse(localStorage.getItem(CKEY))||{}; return Object.assign({}, DEF, c, {deals:Object.assign({}, DEF.deals, c.deals||{})}); }catch(e){ return DEF; } }
+  var cfg=load();
+  var $=function(id){return document.getElementById(id);};
+  var esc=function(s){return String(s).replace(/"/g,"&quot;");};
+
+  // deals per segment
+  $("segDeals").innerHTML = SEGMETA.map(function(seg){
+    var rows=cfg.deals[seg.k].map(function(d,i){
+      var id="deal_"+seg.k+"_"+i;
+      return '<div class="dealrow">'+
+        '<div class="field"><label>Icon</label><input type="text" id="'+id+'_ic" value="'+esc(d.ic)+'" maxlength="2"></div>'+
+        '<div class="field"><label>Deal name</label><input type="text" id="'+id+'_t" value="'+esc(d.t)+'"></div>'+
+        '<div class="field"><label>Detail</label><input type="text" id="'+id+'_d" value="'+esc(d.d)+'"></div>'+
+        '<div class="field"><label>Value $</label><input type="number" id="'+id+'_v" value="'+d.v+'"></div>'+
+      '</div>';
+    }).join("");
+    return '<div class="segblock"><div class="segtitle"><span class="dot '+seg.dot+'"></span><b>'+seg.name+'</b><span class="funnel">'+seg.funnel+' &middot; QR '+seg.code+'</span></div>'+rows+'</div>';
+  }).join("");
+
+  // qr codes
+  function qrSvg(){
+    var g='', cells=[[4,4],[54,4],[4,54],[30,6],[44,10],[30,14],[42,18],[6,30],[22,30],[38,34],[54,34],[70,34],[30,42],[50,42],[66,42],[30,54],[46,54],[62,62],[34,66],[52,68]];
+    cells.forEach(function(c){ g+='<rect x="'+c[0]+'" y="'+c[1]+'" width="'+(c[0]%20===4?20:4)+'" height="'+(c[0]%20===4?20:4)+'" fill="#2c2a24"/>'; });
+    return '<svg class="qrsvg" viewBox="0 0 78 78"><rect width="78" height="78" fill="#fff"/>'+g+
+      '<rect x="8" y="8" width="12" height="12" fill="#fff"/><rect x="11" y="11" width="6" height="6"/>'+
+      '<rect x="58" y="8" width="12" height="12" fill="#fff"/><rect x="61" y="11" width="6" height="6"/>'+
+      '<rect x="8" y="58" width="12" height="12" fill="#fff"/><rect x="11" y="61" width="6" height="6"/></svg>';
+  }
+  $("qrgrid").innerHTML = SEGMETA.map(function(seg){
+    return '<div class="qrcard">'+qrSvg()+'<b>'+seg.name+'</b><div class="code">'+seg.code+'</div><span class="dl" data-c="'+seg.code+'">Download PNG</span></div>';
+  }).join("");
+  $("qrgrid").querySelectorAll(".dl").forEach(function(b){ b.onclick=function(){ b.textContent="Downloaded ✓"; setTimeout(function(){b.textContent="Download PNG";},1500); }; });
+
+  // gates
+  $("gates").innerHTML = GATES.map(function(g){ return '<label class="gate"><input type="checkbox" id="q_'+g[0]+'" '+(cfg.qualify[g[0]]?'checked':'')+'><span>'+g[1]+'</span></label>'; }).join("");
+
+  // slots
+  $("slots").innerHTML = cfg.slots.map(function(s,i){ return '<div class="field"><label>Slot '+(i+1)+'</label><input type="text" id="slot'+i+'" value="'+esc(s)+'"></div>'; }).join("");
+
+  // routing + resort
+  $("resort").value=cfg.resort; $("crm").value=cfg.routing.crm||""; $("email").value=cfg.routing.email||""; $("digest").checked=!!cfg.routing.digest;
+  $("resort").oninput=function(){ $("resortName").innerHTML=this.value||"your resort"; };
+
+  function gather(){
+    var deals={};
+    SEGMETA.forEach(function(seg){ deals[seg.k]=cfg.deals[seg.k].map(function(_,i){ var id="deal_"+seg.k+"_"+i; return {ic:$(id+"_ic").value||"🎁", t:$(id+"_t").value, d:$(id+"_d").value, v:+$(id+"_v").value||0}; }); });
+    var qualify={}; GATES.forEach(function(g){ qualify[g[0]]=$("q_"+g[0]).checked; });
+    var slots=cfg.slots.map(function(_,i){ return $("slot"+i).value; }).filter(function(s){return s&&s.trim();});
+    return { resort:$("resort").value, deals:deals, qualify:qualify, slots:slots, routing:{crm:$("crm").value, email:$("email").value, digest:$("digest").checked} };
+  }
+  $("save").onclick=function(){ localStorage.setItem(CKEY, JSON.stringify(gather())); var s=$("status"); s.classList.add("on"); setTimeout(function(){ s.classList.remove("on"); }, 2200); };
+})();
+</script>
+</body>
+</html>
