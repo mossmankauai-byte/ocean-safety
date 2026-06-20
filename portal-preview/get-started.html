@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="oceansafe-favicon.png">
+<link rel="stylesheet" href="portal.css">
+<title>OceanSafe Partners — Get started</title>
+</head>
+<body>
+<header class="bar" role="banner"><img src="oceansafe-favicon.png" alt="OceanSafe" width="26" height="26"><b>OceanSafe</b><span class="crumb">· Get started</span>
+  <span class="sp"></span><a class="small muted" href="#" id="out" style="text-decoration:none;min-height:44px;display:inline-flex;align-items:center">Sign out</a></header>
+
+<main class="wrap" id="main" style="max-width:560px">
+  <h1>Set up your shop</h1>
+  <p class="muted small" style="margin:0 0 6px">Just the basics to create your page. You'll add products next, and connect payouts when you're ready to sell — your store stays private until then.</p>
+
+  <div class="card" style="margin-top:14px">
+    <label class="f" for="name">Shop name</label>
+    <input id="name" placeholder="Hanalei Gift Co.">
+    <div class="hint">Your page will live at <span id="slugPreview">oceansafety.app/p/your-shop</span></div>
+
+    <div class="row2">
+      <div><label class="f" for="region">Beach area</label>
+        <select id="region">
+          <option value="">Choose…</option>
+          <option value="hanalei">Hanalei / North Shore</option>
+          <option value="poipu">Poʻipū / South Shore</option>
+          <option value="kapaa">Kapaʻa / East Side</option>
+          <option value="princeville">Princeville</option>
+          <option value="koloa">Kōloa</option>
+          <option value="lihue">Līhuʻe</option>
+        </select></div>
+      <div><label class="f" for="phone">Phone</label><input id="phone" placeholder="(808) 555-0100"></div>
+    </div>
+
+    <label class="f" for="website">Website</label>
+    <input id="website" placeholder="https://yourshop.com">
+
+    <label class="f" for="address">Address</label>
+    <input id="address" placeholder="5-5161 Kuhio Hwy, Hanalei">
+
+    <label class="f" for="short">One-line description</label>
+    <input id="short" placeholder="Island-made gifts &amp; beach gear in Hanalei">
+
+    <div id="msg" class="msg hide" role="status" aria-live="assertive"></div>
+    <button id="create" class="btn primary block" style="margin-top:16px">Create my shop →</button>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  let session;
+  (async () => {
+    session = await requireAuth();
+    // already set up? go straight to the dashboard
+    const existing = await getMyPartner(session.user.id);
+    if (existing) location.replace("dashboard.html");
+  })();
+
+  el("out").addEventListener("click", (e) => { e.preventDefault(); signOut(); });
+
+  el("name").addEventListener("input", () => {
+    const s = slugify(el("name").value) || "your-shop";
+    el("slugPreview").textContent = `oceansafety.app/p/${s}`;
+  });
+
+  el("create").addEventListener("click", async () => {
+    const name = el("name").value.trim();
+    if (!name) return toast(el("msg"), "err", "Your shop needs a name.");
+    el("create").disabled = true; el("create").innerHTML = '<span class="spin"></span>';
+    const row = {
+      owner: session.user.id,
+      name,
+      slug: slugify(name),
+      region: el("region").value || null,
+      phone: el("phone").value.trim() || null,
+      website: el("website").value.trim() || null,
+      address: el("address").value.trim() || null,
+      short: el("short").value.trim() || null,
+      status: "draft",
+      store_mode: "storefront",
+    };
+    const { error } = await sb.from("partners").insert(row);
+    if (error) {
+      el("create").disabled = false; el("create").textContent = "Create my shop →";
+      return toast(el("msg"), "err", error.message.includes("duplicate") ? "That shop name/slug is taken — try a slight variation." : error.message);
+    }
+    location.replace("dashboard.html");
+  });
+</script>
+</body>
+</html>
