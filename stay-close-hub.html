@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" type="image/png" href="/assets/oceansafe-favicon.png">
+<link rel="apple-touch-icon" href="/assets/oceansafe-favicon.png">
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OceanSafe · Stay-Close for Timeshare</title>
 <style>
   :root{
-    --sand:#f3ede0; --sand-2:#faf6ee; --card:#ffffff; --ink:#2c2a24; --ink-soft:#6b6457; --line:#e7dfce;
-    --green:#628a56; --green-d:#3d5346; --amber:#d97706; --coral:#e07856; --plum:#7a5a82; --teal:#0e7d8f;
+    --sand:#f4f1ea; --sand-2:#faf6ee; --card:#ffffff; --ink:#2c2a24; --ink-soft:#6b6457; --line:#e7dfce;
+    --green:#628a56; --green-d:#0f4c5c; --amber:#c9a84c; --coral:#e07856; --plum:#7a5a82; --teal:#0a8ba8;
     --font:"Helvetica Neue",Arial,Helvetica,sans-serif;
   }
   *{box-sizing:border-box} html,body{margin:0}
@@ -20,11 +23,24 @@
   .wm{font-weight:700; font-size:17px; color:var(--green-d)} .wm span{color:var(--amber)}
   .tag{margin-left:auto; font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.07em; background:#fff; border:1px solid var(--line); border-radius:999px; padding:5px 12px}
 
+  .herofig{position:relative;border-radius:22px;overflow:hidden;margin-bottom:22px;aspect-ratio:21/9;background:#0e7d8f}
+  .herofig>img{width:100%;height:100%;object-fit:cover;object-position:center 40%}
+  .herofig::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,38,40,.78) 0%,rgba(20,38,40,.42) 42%,transparent 72%)}
+  .herofig-top{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;align-items:center;gap:12px;padding:18px 22px}
+  .herofig-top .cobrand{font-size:12px;font-weight:700;color:rgba(255,255,255,.92);border:1px dashed rgba(255,255,255,.55);border-radius:999px;padding:5px 12px;letter-spacing:.02em}
+  .herofig-top .powered{margin-left:auto;font-size:12px;font-weight:700;color:#c9a84c}
+  .herofig-top .powered b{font-weight:800;color:#c9a84c}
+  .herofig-top .powered b span{color:#fff}
+  .herofig-copy{position:absolute;left:0;bottom:0;z-index:2;padding:22px 26px;max-width:640px}
+  .herofig-copy h1{color:#fff;margin:0 0 8px}
+  .herofig-copy .sub{color:rgba(255,255,255,.9);max-width:520px}
+  @media(max-width:560px){.herofig{aspect-ratio:16/10}.herofig-copy{padding:18px}}
+
   .hero{margin-bottom:8px}
   h1{font-size:30px; letter-spacing:-.02em; margin:0 0 8px}
   .sub{font-size:15px; color:var(--ink-soft); line-height:1.5; max-width:640px; margin:0}
 
-  .loop{display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; margin:24px 0 6px}
+  .loop{display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; margin:22px 0 8px; background:var(--sand-2); border:1px solid var(--line); border-radius:16px; padding:14px}
   .loopstep{flex:1; min-width:150px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px}
   .loopstep .k{font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--green)}
   .loopstep .t{font-weight:700; font-size:14px; margin:5px 0 3px}
@@ -43,6 +59,11 @@
   .tile .who{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:8px}
   .tile p{margin:0 0 12px; font-size:13px; color:var(--ink-soft); line-height:1.45}
   .go{font-size:13px; font-weight:700; color:var(--green-d)}
+  .tile-shot{display:block;margin:-18px -18px 14px;border-bottom:1px solid var(--line);border-radius:18px 18px 0 0;overflow:hidden;aspect-ratio:16/10;background:#f1ece1}
+  .tile-shot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .cards a.tile:first-child .tile-shot img{object-position:center top}
+
+  .eyebrow{font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--green-d); margin:22px 0 0}
 
   .entry{margin-top:24px; background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px; display:flex; gap:18px; align-items:center}
   @media(max-width:560px){.entry{flex-direction:column; text-align:center}}
@@ -56,11 +77,22 @@
 </head>
 <body>
 <div class="frame">
+  <figure class="herofig">
+    <img src="/assets/sc-hero.jpg" alt="Teal tropical bay at a resort coastline">
+    <div class="herofig-top">
+      <span class="cobrand">Your Logo here</span>
+      <span class="powered">powered by <b>Ocean<span>Safe</span></b></span>
+    </div>
+    <figcaption class="herofig-copy">
+      <h1>Stay-Close for Timeshare</h1>
+      <p class="sub">An in-unit guide the operator licenses per room. It reads the moment a guest loves the trip and routes them — owners to upgrades &amp; referrals, guests to a tour — straight into the resort’s own sales pipeline.</p>
+    </figcaption>
+  </figure>
+
   <div class="brandrow"><span class="flag"></span><span class="wm">Ocean<span>Safe</span></span><span class="tag">Timeshare product</span></div>
 
   <div class="hero">
-    <h1>Stay-Close for Timeshare</h1>
-    <p class="sub">An in-unit guide the operator licenses per room. It reads the moment a guest loves the trip and routes them — owners to upgrades &amp; referrals, guests to a tour — straight into the resort’s own sales pipeline.</p>
+    <p class="sub" style="margin:0 0 4px">Three connected tools, one stay-close loop — configure it, the guest experiences it, the operator measures it.</p>
   </div>
 
   <div class="loop">
@@ -71,23 +103,24 @@
     <div class="loopstep b3"><div class="k">3 · Measure</div><div class="t">Operator console</div><div class="d">Leads land live; sales works the queue.</div></div>
   </div>
 
+  <p class="eyebrow">Open a surface</p>
   <div class="cards">
     <a class="tile" href="stay-close-timeshare.html">
-      <div class="ic app">📱</div>
+      <span class="tile-shot"><img src="/assets/sc-shot-app.jpg" alt="OceanSafe guest app" loading="lazy"></span>
       <div class="who">Guest · in unit</div>
       <h3>Guest app</h3>
       <p>The stay-close card. Flip segments (owner / renter / exchange) and run the flow.</p>
       <span class="go">Open guest app →</span>
     </a>
     <a class="tile" href="stay-close-operator-portal.html">
-      <div class="ic cfg">⚙️</div>
+      <span class="tile-shot"><img src="/assets/sc-shot-portal.jpg" alt="OceanSafe operator portal" loading="lazy"></span>
       <div class="who">Operator · setup</div>
       <h3>Operator portal</h3>
       <p>Configure the resort’s gifts, qualification gates, session slots, and lead routing.</p>
       <span class="go">Configure stay-close →</span>
     </a>
     <a class="tile" href="stay-close-operator-dashboard.html">
-      <div class="ic con">📊</div>
+      <span class="tile-shot"><img src="/assets/sc-shot-console.jpg" alt="OceanSafe operator console" loading="lazy"></span>
       <div class="who">Operator · results</div>
       <h3>Operator console</h3>
       <p>Live lead queue, tour funnel, owner health, safety, and the ROI on the license.</p>
