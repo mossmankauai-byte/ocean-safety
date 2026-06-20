@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="oceansafe-favicon.png">
+<link rel="stylesheet" href="portal.css">
+<title>OceanSafe Partners — Dashboard</title>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar" role="banner"><img src="oceansafe-favicon.png" alt="OceanSafe" width="26" height="26"><b>OceanSafe</b><span class="crumb" id="shopName">·</span>
+  <span class="sp"></span>
+  <nav class="nav" aria-label="Portal sections">
+    <a class="on" href="dashboard.html" aria-current="page">Today</a>
+    <a href="sales.html">Sales</a>
+    <a href="products.html">Products</a>
+    <a href="promotions.html">Promotions</a>
+    <a href="#" id="out">Sign out</a>
+  </nav></header>
+
+<main class="wrap" id="main">
+  <h1 id="hi">Dashboard</h1>
+  <p class="subhead">Your store, today — payouts, sales, and the orders coming in.</p>
+
+  <!-- store type — HIDDEN for the gift-shops-only launch: every partner is an
+       Online store, so there's no toggle to surface. To re-enable affiliate mode
+       in phase 2, delete the style="display:none" on the line below. -->
+  <div class="card" id="modeCard" style="display:none">
+    <div class="lbl">Store type</div>
+    <div class="seg" id="seg">
+      <button data-mode="storefront" type="button"><b>🛍️ Online store</b><span>You sell &amp; ship · checkout in-app</span></button>
+      <button data-mode="affiliate" type="button"><b>🔗 Affiliate links</b><span>Link out to Amazon · no checkout</span></button>
+    </div>
+    <p class="muted small" id="modeDesc" style="margin:10px 2px 0"></p>
+  </div>
+
+  <!-- payouts + go-live: the two questions an owner answers each morning -->
+  <section class="grid two" aria-label="Store status">
+    <div class="card" id="payCard">
+      <h2 class="lbl"><span class="dot d-grey" id="payDot" aria-hidden="true"></span> Get paid</h2>
+      <div id="payBody" aria-live="polite"><span class="skel" aria-label="Checking how you get paid">Checking payout status…</span></div>
+    </div>
+
+    <div class="card" id="liveCard">
+      <h2 class="lbl">Store status</h2>
+      <div id="liveBody" aria-live="polite"><span class="skel" aria-label="Checking store status">Loading…</span></div>
+    </div>
+  </section>
+
+  <!-- Earnings band — the money + the trend, read as one "balance + activity" module -->
+  <section class="band" style="margin-top:14px" aria-label="This month at a glance">
+    <div class="grid three">
+      <div class="card tile-ocean"><h2 class="lbl">Sales this month</h2><div class="big" id="mSales"><span class="skel big" aria-label="Loading sales">—</span></div><div class="muted small" id="mCount">No paid orders yet</div></div>
+      <div class="card tile-green"><h2 class="lbl">Your payout</h2><div class="big" id="mPayout" style="color:var(--green)"><span class="skel big" aria-label="Loading payout">—</span></div><div class="muted small">Your 90% — after OceanSafe's 10%</div></div>
+      <div class="card tile-gold"><h2 class="lbl">Products</h2><div class="big" id="mProd"><span class="skel big" aria-label="Loading product count">—</span></div><div class="muted small"><a href="products.html">Manage catalog →</a></div></div>
+    </div>
+    <div class="band-divider"></div>
+    <!-- sales trend (same orders the tiles use, draws itself in on load) -->
+    <div class="card" aria-label="Sales over the last 30 days">
+      <div class="chart-head">
+        <h2 style="margin:0">Sales — last 30 days</h2>
+        <span class="chart-peak" id="chartPeak"></span>
+      </div>
+      <div id="chart"><span class="skel wide" aria-label="Loading your sales chart"></span></div>
+    </div>
+  </section>
+
+  <!-- recent orders — read-only triage; full fulfillment lives on the Sales page -->
+  <section class="card" style="margin-top:14px" aria-label="Recent orders">
+    <div class="chart-head" style="margin-bottom:12px">
+      <h2 style="margin:0">Recent orders</h2>
+      <a class="small" href="sales.html" style="font-weight:600">View all orders →</a>
+    </div>
+    <div id="orders" aria-live="polite"><span class="skel wide" aria-label="Loading recent orders"></span></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  let session, partner;
+  function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  (async () => {
+    session = await requireAuth();
+    partner = await getMyPartner(session.user.id);
+    if (!partner) return location.replace("get-started.html");
+
+    el("shopName").textContent = "· " + partner.name;
+    el("hi").textContent = partner.name;
+    el("out").addEventListener("click", (e) => { e.preventDefault(); signOut(); });
+
+    renderStoreType();
+    $$("#seg button").forEach((b) => b.addEventListener("click", () => setStoreMode(b.dataset.mode)));
+    payoutStatusToast();
+    loadPayouts();
+    loadSales();
+  })();
+
+  // ── store type: online store ⇄ affiliate links ─────────────────────────────
+  function renderStoreType() {
+    const mode = partner.store_mode || "storefront";
+    $$("#seg button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
+    el("modeDesc").textContent = mode === "affiliate"
+      ? "Your products link out to Amazon with your tag. No checkout or payouts to set up — you earn Amazon commission. Fastest to launch."
+      : "You list products, take payment in the app, and fulfill. You keep 90%; OceanSafe's fee is 10%. Needs payouts connected to go live.";
+  }
+  async function setStoreMode(mode) {
+    if (mode === (partner.store_mode || "storefront")) return;
+    const prev = partner.store_mode;
+    partner.store_mode = mode; renderStoreType();
+    const { error } = await sb.from("partners").update({ store_mode: mode }).eq("id", partner.id);
+    if (error) { partner.store_mode = prev; renderStoreType(); alert(error.message); return; }
+    loadPayouts(); // connection + go-live state
+  }
+
+  // ── Get paid — DUAL RAIL: Square (primary/recommended) OR Stripe (alternative).
+  //    A shop is "set up to take money" if EITHER rail is live. Square store payments
+  //    run through the shop's OWN Square; Stripe runs through the shop's OWN bank.
+  function payoutStatusToast() {
+    const params = new URLSearchParams(location.search);
+    const sq = params.get("square");
+    const s = params.get("stripe");
+    const sqMsg = {
+      connected: "✓ Square is connected — customers can buy your products and you get paid through your own Square.",
+      error: "Something went wrong connecting Square. Please try again, or email us.",
+    }[sq];
+    const msg = {
+      connected: "✓ Payouts are set up — customers can buy your products and you get paid.",
+      refresh: "Looks like setup didn't finish. Pick up where you left off below.",
+      error: "Something went wrong setting up payouts. Please try again, or email us.",
+    }[s];
+    if (sqMsg) alert(sqMsg);
+    else if (msg) alert(msg);
+    if (sq || s) history.replaceState(null, "", location.pathname);
+  }
+
+  // track each rail so renderLive can gate go-live on EITHER being connected
+  let chargesEnabled = false;   // Stripe charges live
+  let squareConnected = false;  // Square connected (merchant present, not revoked)
+  const canSell = () => chargesEnabled || squareConnected;
+
+  async function loadPayouts() {
+    if (window.OCEANSAFE_DEMO) {
+      squareConnected = true;
+      chargesEnabled = false;
+      el("payDot").className = "dot d-green";
+      el("payBody").innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Square connected</b><span class="badge b-green">connected</span></div>
+        <p class="muted small" style="margin:0 0 12px">Customers buy your products in the app and pay through <b>your own Square</b>; the money lands in your Square balance and OceanSafe takes 10%. <i>(demo)</i></p>
+        <button class="btn ghost block" type="button">View payments in Square →</button>`;
+      renderLive(true);
+      return;
+    }
+
+    // Square connection state lives on the partner record (square_merchant_id /
+    // square_revoked_at), already loaded via getMyPartner's select("*").
+    squareConnected = !!partner.square_merchant_id && !partner.square_revoked_at;
+
+    el("payDot").className = "dot d-grey";
+    el("payBody").innerHTML = `<span class="skel" aria-label="Checking how you get paid">Checking payout status…</span>`;
+    let st = {};
+    try {
+      st = await fn("connect-status", { partner_id: partner.id });
+    } catch (e) {
+      // Stripe status unknown — but if Square is connected we're still good.
+      st = { _failed: true };
+    }
+    chargesEnabled = !!st.stripe_charges_enabled;
+    const stripeStarted = !!st.connected;
+
+    // ── State 1: Square connected (primary rail live) ─────────────────────────
+    if (squareConnected) {
+      el("payDot").className = "dot d-green";
+      el("payBody").innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Square connected</b><span class="badge b-green">connected</span></div>
+        <p class="muted small" style="margin:0 0 12px">Customers buy your products right in the app and pay through <b>your own Square</b>. Every sale lands in your Square balance; OceanSafe automatically takes its 10% — nothing for you to reconcile.</p>
+        <button class="btn ghost block" id="sqOpen">View payments in Square →</button>`;
+      el("sqOpen").addEventListener("click", () => window.open("https://squareup.com/dashboard", "_blank", "noopener"));
+      renderLive(true);
+      return;
+    }
+
+    // ── State 2: Stripe charges live (alternative rail) ───────────────────────
+    if (chargesEnabled) {
+      el("payDot").className = "dot d-green";
+      el("payBody").innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Stripe connected</b><span class="badge b-green">connected</span></div>
+        <p class="muted small" style="margin:0 0 12px">Customers buy your products right in the app. Every sale lands in <b>your</b> bank account; OceanSafe automatically takes its 10% — nothing for you to reconcile.</p>
+        <button class="btn ghost block" id="payLogin">View payouts on Stripe →</button>`;
+      el("payLogin").addEventListener("click", openStripeDashboard);
+      renderLive(true);
+      return;
+    }
+
+    // ── State 3: Stripe started but not finished ──────────────────────────────
+    if (stripeStarted) {
+      el("payDot").className = "dot d-amber";
+      el("payBody").innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Finish Stripe setup</b><span class="badge b-amber">incomplete</span></div>
+        <p class="muted small" style="margin:0 0 12px">You started connecting your bank with Stripe but a few details are still needed before you can get paid. It only takes a minute to finish — or connect Square instead.</p>
+        <button class="btn primary block" id="payResume">Finish Stripe setup →</button>
+        <button class="btn ghost block" id="sqConn" style="margin-top:8px">Connect your Square instead →</button>`;
+      el("payResume").addEventListener("click", () => startOnboard(st.resume_url));
+      el("sqConn").addEventListener("click", startSquare);
+      renderLive(false);
+      return;
+    }
+
+    // ── State 4: nothing connected → offer BOTH, Square primary ───────────────
+    el("payDot").className = "dot d-grey";
+    el("payBody").innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Connect a way to get paid</b><span class="badge b-grey">not connected</span></div>
+      <p class="muted small" style="margin:0 0 12px">Connect once — then customers can buy your products inside the app and the money goes straight to you. <b>Square is recommended</b> and the fastest way to start.</p>
+      <button class="btn primary block" id="sqConn">Connect your Square →</button>
+      <p class="muted small" style="margin:8px 2px 14px"><a href="https://squareup.com/signup" target="_blank" rel="noopener">Don't have Square? Create one free →</a></p>
+      <button class="btn ghost block" id="payConn">Or connect a bank with Stripe</button>`;
+    el("sqConn").addEventListener("click", startSquare);
+    el("payConn").addEventListener("click", () => startOnboard());
+    renderLive(false);
+  }
+
+  // Kick off the Square OAuth connect (mirrors startOnboard, but for Square).
+  async function startSquare() {
+    const btn = el("sqConn");
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
+    try {
+      const r = await fn("square-connect-start", { partner_id: partner.id });
+      if (!r || !r.url) throw new Error("Couldn't start the Square connection.");
+      location.href = r.url; // → Square OAuth authorize
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.textContent = "Connect your Square →"; }
+      const m = document.createElement("div"); m.className = "msg err"; m.textContent = errText(e.message || e);
+      el("payBody").appendChild(m);
+    }
+  }
+
+  async function startOnboard(resumeUrl) {
+    const btn = el("payConn") || el("payResume");
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
+    try {
+      if (resumeUrl) { location.href = resumeUrl; return; }
+      const r = await fn("connect-onboard", { partner_id: partner.id });
+      if (!r || !r.url) throw new Error("Couldn't start payout setup.");
+      location.href = r.url; // → Stripe onboarding
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.textContent = resumeUrl ? "Finish payout setup →" : "Connect your bank to get paid →"; }
+      const m = document.createElement("div"); m.className = "msg err"; m.textContent = errText(e.message || e);
+      el("payBody").appendChild(m);
+    }
+  }
+
+  async function openStripeDashboard() {
+    const btn = el("payLogin"); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+    try {
+      const r = await fn("connect-login-link", {});
+      if (!r || !r.url) throw new Error("Couldn't open your Stripe dashboard.");
+      window.open(r.url, "_blank", "noopener");
+    } catch (e) {
+      const m = document.createElement("div"); m.className = "msg err"; m.textContent = errText(e.message || e);
+      el("payBody").appendChild(m);
+    } finally {
+      btn.disabled = false; btn.textContent = "View payouts on Stripe →";
+    }
+  }
+
+  // ── store status / go-live (gated on EITHER rail — Square or Stripe — being live) ─
+  function renderLive(sellable) {
+    const published = partner.status === "live";
+    let html;
+    if (published && !sellable) {
+      // published but payouts not active → customers can't check out; warn + recover
+      html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Action needed</b><span class="badge b-red">payouts off</span></div>
+        <p class="muted small" style="margin:0">Your store is published, but you have no active way to get paid — so customers can't check out. Connect Square or Stripe above to keep selling.</p>`;
+    } else if (published) {
+      html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Live</b><span class="badge b-green">published</span></div>
+        <p class="muted small" style="margin:0 0 12px">Your store is visible in the OceanSafe app.</p>
+        <button class="btn ghost block" id="liveBtn">Unpublish</button>`;
+    } else if (sellable) {
+      html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Ready to go live</b><span class="badge b-amber">draft</span></div>
+        <p class="muted small" style="margin:0 0 12px">You're set up to get paid. Publish to show your store in the app.</p>
+        <button class="btn primary block" id="liveBtn">Go live</button>`;
+    } else {
+      html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Draft</b><span class="badge b-grey">hidden</span></div>
+        <p class="muted small" style="margin:0 0 12px">Connect Square or Stripe first — your store stays private until then.</p>
+        <button class="btn ghost block" disabled>Set up payouts to go live</button>`;
+    }
+    el("liveBody").innerHTML = html;
+    if (el("liveBtn")) el("liveBtn").addEventListener("click", () => toggleLive(!published));
+  }
+
+  async function toggleLive(makeLive) {
+    el("liveBtn").disabled = true; el("liveBtn").innerHTML = '<span class="spin"></span>';
+    const { error } = await sb.from("partners").update({ status: makeLive ? "live" : "draft" }).eq("id", partner.id);
+    if (error) {
+      el("liveBtn").disabled = false; el("liveBtn").textContent = makeLive ? "Go live" : "Unpublish";
+      const m = document.createElement("div"); m.className = "msg err"; m.textContent = error.message;
+      el("liveBody").appendChild(m); return;
+    }
+    partner.status = makeLive ? "live" : "draft";
+    renderLive(canSell()); // re-render the live card (either rail)
+  }
+
+  // ── sales summary ───────────────────────────────────────────────────────────
+  async function loadSales() {
+    let orders, prodCount;
+    if (window.OCEANSAFE_DEMO) {
+      orders = window.demoData().orders; prodCount = 8;
+    } else {
+      const [o, p] = await Promise.all([
+        sb.from("orders").select("total_cents,status,created_at").eq("partner_id", partner.id).order("created_at", { ascending: false }),
+        sb.from("products").select("id", { count: "exact", head: true }).eq("partner_id", partner.id).eq("active", true),
+      ]);
+      orders = o.data; prodCount = p.count;
+    }
+    el("mProd").textContent = prodCount ?? 0;
+
+    const now = new Date(), m0 = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const paidThisMonth = (orders || []).filter((o) => o.status === "paid" && o.created_at >= m0);
+    const cents = paidThisMonth.reduce((s, o) => s + (o.total_cents || 0), 0);
+    el("mSales").textContent = money(cents);
+    el("mCount").textContent = paidThisMonth.length
+      ? `${paidThisMonth.length} paid order${paidThisMonth.length === 1 ? "" : "s"} this month`
+      : "No paid orders yet";
+    el("mPayout").textContent = money(Math.round(cents * 0.9));
+
+    // sales trend — same orders the cards use, drawn as a line+area chart
+    const paidAll = (orders || []).filter((o) => o.status === "paid");
+    el("chart").innerHTML = salesChart(paidAll);
+
+    const recent = (orders || []).slice(0, 8);
+    if (!recent.length) { el("orders").innerHTML = emptyState("🧾", "No orders yet", "Your first sale will show up here the moment a customer checks out."); return; }
+    const badge = (s) => ({ paid: "b-green", pending: "b-amber", refunded: "b-grey", disputed: "b-red", failed: "b-red", expired: "b-grey", ready: "b-blue", collected: "b-green" }[s] || "b-grey");
+    el("orders").innerHTML = `<table><tr><th>When</th><th>Status</th><th style="text-align:right">Total</th></tr>${
+      recent.map((o) => `<tr><td>${new Date(o.created_at).toLocaleDateString()}</td><td><span class="badge ${badge(o.status)}">${o.status}</span></td><td style="text-align:right;font-weight:700">${money(o.total_cents)}</td></tr>`).join("")
+    }</table>`;
+  }
+
+  // ── designed empty state (warm, plain-English) ──────────────────────────────
+  function emptyState(glyph, title, line) {
+    return `<div class="empty"><div aria-hidden="true" style="font-size:26px">${glyph}</div><b>${esc(title)}</b><span>${esc(line)}</span></div>`;
+  }
+
+  // ── SVG line+area chart of daily paid sales over the last 30 days ────────────
+  //    (self-contained copy; matches the one on the Sales page)
+  function salesChart(paid) {
+    const days = 30, W = 600, H = 160, base = H - 6, top = 14;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const b = new Array(days).fill(0);
+    for (const o of paid) {
+      const d = new Date(o.created_at); d.setHours(0, 0, 0, 0);
+      const idx = days - 1 - Math.round((today - d) / 86400000);
+      if (idx >= 0 && idx < days) b[idx] += (o.total_cents || 0);
+    }
+    if (!b.some((v) => v > 0)) {
+      const pe = el("chartPeak"); if (pe) pe.textContent = "";
+      return emptyState("📈", "No sales in the last 30 days", "Your chart fills in on its own as orders come through.");
+    }
+    const max = Math.max(1, ...b);
+    const pts = b.map((v, i) => [(i / (days - 1)) * W, base - (v / max) * (base - top)]);
+    const line = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    const area = `${line} L${W} ${base} L0 ${base} Z`;
+    const mid = ((base + top) / 2).toFixed(1);
+    // peak point — the one focusable, tooltip-bearing dot (aqua, the trust accent)
+    const peakIdx = b.indexOf(Math.max(...b));
+    const peak = pts[peakIdx];
+    // emphasize the peak figure in the card head (non-locked span, additive)
+    const peakEl = el("chartPeak");
+    if (peakEl) peakEl.innerHTML = `peak <b>${money(max)}</b><span class="chart-peak-unit">/day</span>`;
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Daily sales for the last 30 days, peak ${money(max)} in a day">
+      <defs><linearGradient id="oscFade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="var(--ocean)" stop-opacity="0.16"/>
+        <stop offset="1" stop-color="var(--ocean)" stop-opacity="0"/>
+      </linearGradient></defs>
+      <line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="var(--line)"/>
+      <line x1="0" y1="${mid}" x2="${W}" y2="${mid}" stroke="var(--line)" stroke-dasharray="3 4"/>
+      <path class="chart-area" d="${area}" fill="url(#oscFade)" opacity="0.08"/>
+      <path class="chart-line" d="${line}" fill="none" stroke="var(--ocean)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle class="chart-peak-dot" cx="${peak[0].toFixed(1)}" cy="${peak[1].toFixed(1)}" r="3.5" tabindex="0" role="img" aria-label="Peak day: ${money(max)}"><title>Peak: ${money(max)} in a single day</title></circle>
+    </svg>
+    <div class="chart-axis"><span>30 days ago</span><span class="chart-peak-val">peak ${money(max)}/day</span><span>today</span></div>`;
+  }
+</script>
+</body>
+</html>
