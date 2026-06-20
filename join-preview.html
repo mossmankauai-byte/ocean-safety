@@ -1,157 +1,228 @@
 <!doctype html>
-<html lang="en"><head>
+<html lang="en" class="no-js"><head>
+<script>document.documentElement.className=document.documentElement.className.replace("no-js","js");</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Become a Kauaʻi Safety Partner — OceanSafe</title>
 <link rel="icon" href="https://oceansafety.app/favicon.ico">
-<meta name="description" content="Put your shop, hotel, or rental on the beach-safety app every Kauaʻi visitor checks before the water. Live conditions, co-branded QR cards, and an in-app store.">
+<meta name="theme-color" content="#0f4c5c">
+<meta name="description" content="Put your shop, hotel, or rental on the beach-safety app every Kauaʻi visitor checks before the water. Live conditions, co-branded QR cards, and an in-app store you earn from.">
 <meta property="og:title" content="Become a Kauaʻi Safety Partner — OceanSafe">
 <meta property="og:description" content="The app every Kauaʻi beachgoer opens before the water. Featured as the local safety partner, with live conditions and QR cards for your guests.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://oceansafety.app/join">
 <meta property="og:image" content="https://oceansafety.app/assets/join-hero.jpg">
+<link rel="preload" as="image" href="/assets/join-hero.jpg" fetchpriority="high">
 <style>
   :root{
-    --ocean:#0f4c5c; --aqua:#0a8ba8; --gold:#c9a84c; --ink:#0d1b22;
-    --paper:#f6f8f9; --line:rgba(13,27,34,.10); --line-2:rgba(13,27,34,.16);
-    --muted:#52626c; --muted-2:#7b8993;
-    --glass:rgba(255,255,255,.62); --glass-line:rgba(255,255,255,.55);
-    --shadow:0 18px 50px -18px rgba(15,76,92,.30);
-    --shadow-lg:0 40px 90px -30px rgba(13,27,34,.45);
-    --r:18px; --r-sm:12px;
-    --ease:cubic-bezier(.22,.61,.36,1);
-    --max:1080px; --gut:clamp(18px,4vw,40px);
+    /* ---- color ---- */
+    --ocean:#0f4c5c; --ocean-700:#0c3e4b; --aqua:#0a8ba8; --gold:#c9a84c; --gold-soft:#ffe6a6;
+    --ink:#0d1b22; --paper:#f5f7f8; --paper-2:#eef3f4;
+    --line:rgba(13,27,34,.09); --line-2:rgba(13,27,34,.15);
+    --muted:#4f5f69; --muted-2:#5a6973; --aqua-700:#06748e;
+    --glass:rgba(255,255,255,.64); --glass-line:rgba(255,255,255,.55);
+    /* ---- elevation (tokenized) ---- */
+    --sh-1:0 1px 2px rgba(13,27,34,.06), 0 2px 8px -2px rgba(13,27,34,.08);
+    --sh-2:0 18px 50px -18px rgba(15,76,92,.30);
+    --sh-3:0 40px 90px -30px rgba(13,27,34,.45);
+    --ring:0 0 0 3px rgba(10,139,168,.45), 0 0 0 6px rgba(255,255,255,.85);
+    /* ---- radius (tokenized) ---- */
+    --r:18px; --r-sm:12px; --r-lg:24px; --r-xl:28px;
+    /* ---- motion ---- */
+    --ease:cubic-bezier(.2,.8,.2,1);
+    --ease-soft:cubic-bezier(.22,.61,.36,1);
+    /* ---- layout / 8px rhythm ---- */
+    --max:1080px; --gut:clamp(20px,4vw,40px);
+    --sec-y:clamp(72px,9vw,120px);
+    /* ---- type (fluid scale) ---- */
     --fs-eyebrow:clamp(11px,.78vw,12.5px);
+    --fs-body:clamp(15.5px,1.15vw,17px);
+    --fs-h2:clamp(28px,3.7vw,46px);
+    --fs-display:clamp(40px,6.6vw,80px);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Inter,sans-serif;
     background:var(--paper); color:var(--ink);
     -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-    line-height:1.55; overflow-x:hidden;
+    line-height:1.6; overflow-x:hidden;
+    font-feature-settings:"kern" 1,"liga" 1;
   }
   a{color:var(--aqua);text-decoration:none}
-  img{max-width:100%;display:block}
+  img,video{max-width:100%;display:block}
+  ::selection{background:rgba(201,168,76,.32)}
   .wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gut)}
-  .eyebrow{font-size:var(--fs-eyebrow);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--aqua)}
+  .eyebrow{font-size:var(--fs-eyebrow);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--ocean)}
+
+  /* ---- universal focus-visible ---- */
+  a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--ring)}
+  .btn:focus-visible{box-shadow:var(--ring), var(--sh-2)}
+  .skip{position:fixed;left:12px;top:-60px;z-index:100;background:#fff;color:var(--ocean);font-weight:700;
+    padding:10px 16px;border-radius:10px;box-shadow:var(--sh-2);transition:top .2s var(--ease)}
+  .skip:focus{top:12px}
 
   /* ---------- top nav ---------- */
   .nav{position:absolute;top:0;left:0;right:0;z-index:30;padding:18px 0}
   .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
-  .wm{font-weight:800;font-size:21px;letter-spacing:-.4px;color:#fff;display:inline-flex;align-items:center;gap:7px}
+  .wm{font-weight:800;font-size:21px;letter-spacing:-.03em;color:#fff;display:inline-flex;align-items:center;gap:8px}
   .wm .c{color:#fff;opacity:.78}
   .wm .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(201,168,76,.28)}
-  .nav .links{display:flex;align-items:center;gap:8px}
-  .nav .navlink{color:rgba(255,255,255,.86);font-size:14px;font-weight:600;padding:9px 14px;border-radius:999px;transition:background .2s var(--ease)}
-  .nav .navlink:hover{background:rgba(255,255,255,.12)}
-  .nav .navcta{background:#fff;color:var(--ocean);font-weight:700;padding:9px 16px;border-radius:999px;font-size:14px}
-  @media(max-width:680px){.nav .navlink{display:none}.nav .navcta{padding:9px 15px}}
+  .nav .links{display:flex;align-items:center;gap:6px}
+  .nav .navlink{color:rgba(255,255,255,.86);font-size:14px;font-weight:600;padding:9px 14px;border-radius:999px;transition:background .2s var(--ease),color .2s var(--ease)}
+  .nav .navlink:hover{background:rgba(255,255,255,.13);color:#fff}
+  .nav .navcta{background:#fff;color:var(--ocean);font-weight:700;padding:9px 17px;border-radius:999px;font-size:14px;transition:transform .18s var(--ease),box-shadow .2s var(--ease)}
+  .nav .navcta:hover{transform:translateY(-1px);box-shadow:0 10px 26px -10px rgba(0,0,0,.4)}
+  @media(max-width:700px){.nav .navlink{display:none}
+    .nav .navcta{min-height:44px;display:inline-flex;align-items:center;padding:11px 18px}}
 
   /* ---------- hero ---------- */
   .hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;isolation:isolate;overflow:hidden}
-  .hero__media{position:absolute;inset:0;z-index:-2}
-  .hero__media video,.hero__media img{width:100%;height:100%;object-fit:cover;object-position:center 42%}
+  .hero__media{position:absolute;inset:0;z-index:-2;will-change:transform;transform:scale(1.14)}
+  .hero__media video,.hero__media img{width:100%;height:100%;object-fit:cover;object-position:center 44%}
   .hero__scrim{position:absolute;inset:0;z-index:-1;
     background:
-      radial-gradient(120% 90% at 18% 100%, rgba(13,27,34,.78), rgba(13,27,34,0) 60%),
-      linear-gradient(180deg, rgba(13,27,34,.34) 0%, rgba(13,27,34,.06) 26%, rgba(13,27,34,.30) 58%, rgba(7,18,24,.86) 100%);
+      radial-gradient(118% 84% at 16% 102%, rgba(7,18,24,.80), rgba(7,18,24,0) 56%),
+      linear-gradient(180deg, rgba(13,27,34,.46) 0%, rgba(13,27,34,.10) 24%, rgba(13,27,34,.22) 54%, rgba(7,18,24,.88) 100%);
   }
-  .hero__inner{padding-block:clamp(120px,16vh,200px) clamp(40px,7vh,84px);width:100%}
-  .hero .eyebrow{color:#cfe9f1}
+  /* subtle top vignette so nav reads on bright frames */
+  .hero__scrim::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,18,24,.30),transparent 18%)}
+  .hero__inner{padding-block:clamp(116px,16vh,196px) clamp(40px,7vh,80px);width:100%}
+  .hero .eyebrow{color:#d5edf3}
   .hero h1{
-    color:#fff;font-weight:800;letter-spacing:-.022em;line-height:1.02;
-    font-size:clamp(40px,6.6vw,80px);margin:16px 0 0;max-width:15ch;
-    text-shadow:0 2px 40px rgba(7,18,24,.5);
+    color:#fff;font-weight:800;letter-spacing:-.028em;line-height:1.02;
+    font-size:var(--fs-display);margin:14px 0 0;max-width:15ch;
+    text-shadow:0 2px 36px rgba(7,18,24,.55);
   }
-  .hero h1 .swap{color:#ffe6a6}
-  .hero .lede{color:rgba(255,255,255,.92);font-size:clamp(16.5px,1.5vw,20px);max-width:50ch;margin-top:20px;line-height:1.5;text-shadow:0 1px 20px rgba(7,18,24,.55)}
+  .hero h1 .swap{color:var(--gold-soft);transition:opacity .3s var(--ease)}
+  .hero .lede{color:rgba(255,255,255,.93);font-size:clamp(16.5px,1.5vw,20px);max-width:50ch;margin-top:20px;line-height:1.55;text-shadow:0 1px 18px rgba(7,18,24,.6)}
   .hero .lede .seg-offer{color:#fff;font-weight:600}
-  .hero__cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;align-items:center}
-  .hero .trustline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:26px;color:rgba(255,255,255,.82);font-size:13.5px}
-  .hero .trustline .dotsep{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.45)}
+  .hero__row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .hero__cta{margin-top:30px}
+  .hero .trustline{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:26px;color:rgba(255,255,255,.84);font-size:13.5px}
+  .hero .trustline .dotsep{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.42)}
+  .hero .trustline svg{width:15px;height:15px;color:var(--gold-soft);flex:none}
+  .hero .trustline span{display:inline-flex;align-items:center;gap:7px}
+
+  /* scroll cue */
+  .scrollcue{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;color:rgba(255,255,255,.7);
+    display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  .scrollcue .mouse{width:22px;height:34px;border:1.5px solid rgba(255,255,255,.5);border-radius:12px;position:relative}
+  .scrollcue .mouse::after{content:"";position:absolute;left:50%;top:7px;width:3px;height:6px;border-radius:2px;background:rgba(255,255,255,.85);transform:translateX(-50%);animation:cue 1.8s var(--ease) infinite}
+  @keyframes cue{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}60%{opacity:1;transform:translate(-50%,9px)}100%{opacity:0;transform:translate(-50%,9px)}}
+  @media(max-width:680px),(prefers-reduced-motion:reduce){.scrollcue{display:none}}
 
   /* buttons */
-  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:16px;border-radius:999px;
-    padding:15px 26px;border:none;cursor:pointer;transition:transform .18s var(--ease),box-shadow .25s var(--ease),background .2s var(--ease);
-    will-change:transform;text-decoration:none;line-height:1}
-  .btn--gold{background:var(--gold);color:#2a2206;box-shadow:0 14px 34px -10px rgba(201,168,76,.6)}
-  .btn--gold:hover{transform:translateY(-2px);box-shadow:0 20px 44px -12px rgba(201,168,76,.7)}
-  .btn--solid{background:var(--ocean);color:#fff;box-shadow:var(--shadow)}
-  .btn--solid:hover{transform:translateY(-2px);background:#0c3e4b}
-  .btn--glass{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:700;font-size:16px;border-radius:999px;
+    padding:15px 26px;border:1px solid transparent;cursor:pointer;
+    transition:transform .18s var(--ease),box-shadow .25s var(--ease),background .2s var(--ease),border-color .2s var(--ease);
+    text-decoration:none;line-height:1;min-height:48px}
+  .btn:hover,.btn:focus-visible{will-change:transform}
+  .btn:active{transform:translateY(0) scale(.985)}
+  .btn--gold{background:var(--gold);color:#2a2206;box-shadow:0 14px 34px -12px rgba(201,168,76,.65)}
+  .btn--gold:hover{transform:translateY(-2px);box-shadow:0 20px 44px -12px rgba(201,168,76,.78)}
+  .btn--solid{background:var(--ocean);color:#fff;box-shadow:var(--sh-2)}
+  .btn--solid:hover{transform:translateY(-2px);background:var(--ocean-700)}
+  .btn--glass{background:rgba(255,255,255,.13);color:#fff;border-color:rgba(255,255,255,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
   .btn--glass:hover{background:rgba(255,255,255,.24);transform:translateY(-2px)}
-  .btn--ghost{background:#fff;color:var(--ink);border:1px solid var(--line-2)}
-  .btn--ghost:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  .btn--ghost{background:#fff;color:var(--ink);border-color:var(--line-2)}
+  .btn--ghost:hover{transform:translateY(-2px);box-shadow:var(--sh-2);border-color:transparent}
   .btn .arr{transition:transform .2s var(--ease)}
   .btn:hover .arr{transform:translateX(3px)}
 
   /* ---------- segment switch ---------- */
-  .segbar{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:rgba(255,255,255,.12);
-    border:1px solid rgba(255,255,255,.34);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:relative}
+  .segwrap{margin-top:28px}
+  .seglabel{display:block;color:rgba(255,255,255,.82);font-size:12px;font-weight:600;letter-spacing:.04em;margin-bottom:9px;text-shadow:0 1px 10px rgba(7,18,24,.6)}
+  .segbar{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:rgba(255,255,255,.11);
+    border:1px solid rgba(255,255,255,.32);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:relative;max-width:100%}
   .segbtn{position:relative;z-index:2;border:none;background:none;cursor:pointer;font-family:inherit;
-    font-weight:700;font-size:14.5px;color:rgba(255,255,255,.78);padding:11px 18px;border-radius:999px;transition:color .25s var(--ease);white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+    font-weight:700;font-size:14.5px;color:rgba(255,255,255,.9);padding:11px 18px;border-radius:999px;
+    transition:color .25s var(--ease);white-space:nowrap;display:inline-flex;align-items:center;gap:8px;min-height:44px}
   .segbtn[aria-selected="true"]{color:var(--ocean)}
-  .segglide{position:absolute;z-index:1;top:5px;bottom:5px;border-radius:999px;background:#fff;
-    box-shadow:0 6px 18px -6px rgba(13,27,34,.4);transition:transform .42s var(--ease),width .42s var(--ease);will-change:transform,width}
+  /* No-JS / pre-paint fallback: selected tab carries its own white pill so the label is always legible */
+  .segbtn[aria-selected="true"]::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:999px;background:#fff;
+    box-shadow:0 6px 18px -6px rgba(13,27,34,.4)}
+  .js .segbtn[aria-selected="true"]::before{display:none}
+  .segbtn:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(255,255,255,.9)}
+  .segglide{position:absolute;z-index:1;top:5px;bottom:5px;border-radius:999px;background:#fff;width:0;
+    box-shadow:0 6px 18px -6px rgba(13,27,34,.4)}
+  .segglide.ready{transition:transform .42s var(--ease),width .42s var(--ease);will-change:transform,width}
   .segbtn svg{width:17px;height:17px}
   @media(max-width:520px){.segbtn{padding:10px 13px;font-size:13.5px}.segbtn .seglabel-long{display:none}}
+  @media (prefers-reduced-motion:reduce){.segglide.ready{transition:none}.hero h1 .swap{transition:none}}
 
   /* ---------- sections ---------- */
   section{position:relative}
-  .sec{padding-block:clamp(64px,9vw,120px)}
+  .sec{padding-block:var(--sec-y)}
+  .sec--tight{padding-block:clamp(56px,7vw,88px)}
+  .sec--flush{padding-top:0}
+  .eyebrow--gold{color:var(--gold-soft)}
   .sec-head{max-width:62ch}
-  .sec-head h2{font-size:clamp(28px,3.7vw,46px);font-weight:800;letter-spacing:-.02em;line-height:1.06;margin-top:14px}
-  .sec-head p{color:var(--muted);font-size:clamp(16px,1.3vw,18.5px);margin-top:16px;max-width:54ch}
+  .sec-head--snug{margin-bottom:8px}
+  .sec-head h2{font-size:var(--fs-h2);font-weight:800;letter-spacing:-.022em;line-height:1.06;margin-top:14px;text-wrap:balance}
+  .sec-head p{color:var(--muted);font-size:clamp(16px,1.3vw,18.5px);margin-top:16px;max-width:54ch;line-height:1.6}
 
   /* reveal */
-  .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+  .reveal.willing{will-change:transform,opacity}
   .reveal.in{opacity:1;transform:none}
-  .reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}.reveal.d4{transition-delay:.32s}
+  .reveal.d1{transition-delay:.07s}.reveal.d2{transition-delay:.14s}.reveal.d3{transition-delay:.21s}.reveal.d4{transition-delay:.28s}
   @media (prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important;transition:none}}
 
   /* ---------- proof band ---------- */
   .proof{background:var(--ocean);color:#fff;position:relative;overflow:hidden}
-  .proof::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 120% at 100% 0%,rgba(10,139,168,.5),transparent 55%);pointer-events:none}
+  .proof::before{content:"";position:absolute;inset:0;background:radial-gradient(78% 120% at 100% 0%,rgba(10,139,168,.5),transparent 54%);pointer-events:none}
+  .proof::after{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent)}
   .proof .wrap{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(20px,3vw,40px);padding-block:clamp(44px,5vw,64px)}
+  .stat{position:relative}
+  .stat+.stat::before{content:"";position:absolute;left:calc(-1*clamp(10px,1.5vw,20px));top:4px;bottom:4px;width:1px;background:rgba(255,255,255,.12)}
   .stat .n{font-size:clamp(30px,3.6vw,44px);font-weight:800;letter-spacing:-.02em;line-height:1;color:#fff}
   .stat .n .u{color:var(--gold)}
-  .stat .l{font-size:13.5px;color:rgba(255,255,255,.74);margin-top:9px;line-height:1.45}
-  @media(max-width:760px){.proof .wrap{grid-template-columns:repeat(2,1fr);gap:30px 20px}}
+  .stat .l{font-size:13.5px;color:rgba(255,255,255,.76);margin-top:10px;line-height:1.5}
+  @media(max-width:760px){.proof .wrap{grid-template-columns:repeat(2,1fr);gap:30px 24px}
+    .stat:nth-child(odd)::before{display:none}}
+  .proofnote{position:relative;padding-bottom:clamp(36px,4vw,52px);margin-top:-8px}
+  .proofnote p{font-size:14px;color:rgba(255,255,255,.82);line-height:1.55;max-width:64ch}
+  .proofnote a{color:var(--gold-soft);font-weight:600;white-space:nowrap}
+  .proofnote a:hover{text-decoration:underline}
 
   /* ---------- bento ---------- */
   .bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:46px}
-  .tile{position:relative;border-radius:var(--r);border:1px solid var(--line);background:#fff;padding:26px;overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s var(--ease)}
-  .tile:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--line-2)}
-  .tile .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(10,139,168,.1);color:var(--aqua);margin-bottom:16px}
+  .tile{position:relative;border-radius:var(--r);border:1px solid var(--line);background:#fff;padding:26px;overflow:hidden;box-shadow:var(--sh-1);
+    transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s var(--ease)}
+  .tile:hover{transform:translateY(-4px);box-shadow:var(--sh-2);border-color:var(--line-2)}
+  .tile .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(10,139,168,.10);color:var(--aqua);margin-bottom:16px}
   .tile .ic svg{width:21px;height:21px}
-  .tile h3{font-size:18.5px;font-weight:700;letter-spacing:-.01em}
-  .tile p{color:var(--muted);font-size:15px;margin-top:8px;line-height:1.55}
+  .tile h3{font-size:18.5px;font-weight:700;letter-spacing:-.012em}
+  .tile p{color:var(--muted);font-size:15px;margin-top:8px;line-height:1.58}
   .tile--span2{grid-column:span 2}
-  .tile--feature{grid-column:span 4;color:#fff;border:none;padding:0;min-height:300px}
-  .tile--feature .ft-media{position:absolute;inset:0;z-index:0}
-  .tile--feature .ft-media video,.tile--feature .ft-media img{width:100%;height:100%;object-fit:cover}
-  .tile--feature .ft-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(120deg,rgba(13,27,34,.82) 8%,rgba(13,27,34,.18) 70%)}
+  .tile--feature{grid-column:span 4;color:#fff;border:none;padding:0;min-height:300px;grid-row:span 2}
+  .tile--feature .ft-media{position:absolute;inset:0;z-index:0;will-change:transform;transition:transform .6s var(--ease)}
+  .tile--feature:hover .ft-media{transform:scale(1.04)}
+  .tile--feature .ft-media video,.tile--feature .ft-media img{width:100%;height:100%;object-fit:cover;object-position:center 35%}
+  .tile--feature .ft-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(118deg,rgba(7,18,24,.86) 6%,rgba(13,27,34,.28) 64%,rgba(13,27,34,.08) 100%)}
   .tile--feature .ft-body{position:relative;z-index:2;padding:30px;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
   .tile--feature .ic{background:rgba(255,255,255,.16);color:#fff}
   .tile--feature h3{font-size:23px}
-  .tile--feature p{color:rgba(255,255,255,.86)}
+  .tile--feature p{color:rgba(255,255,255,.88)}
   @media(max-width:860px){.bento{grid-template-columns:repeat(2,1fr)}
-    .tile--span2,.tile--feature{grid-column:span 2;grid-row:auto}}
+    .tile--span2,.tile--feature{grid-column:span 2;grid-row:auto!important}
+    .tile--feature{min-height:260px}}
   @media(max-width:520px){.bento{grid-template-columns:1fr}
     .tile--span2,.tile--feature{grid-column:span 1}}
 
   /* ---------- glass offer card ---------- */
-  .offerwrap{position:relative;margin-top:46px;border-radius:24px;overflow:hidden;border:1px solid var(--line)}
+  .offerwrap{position:relative;margin-top:46px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line);box-shadow:var(--sh-2)}
   .offerwrap .offer-media{position:absolute;inset:0;z-index:0}
-  .offerwrap .offer-media img{width:100%;height:100%;object-fit:cover}
-  .offerwrap .offer-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(15,76,92,.5),rgba(13,27,34,.78))}
-  .offergrid{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr .95fr;gap:0}
+  .offerwrap .offer-media img{width:100%;height:100%;object-fit:cover;object-position:center 40%}
+  .offerwrap .offer-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(165deg,rgba(15,76,92,.55),rgba(7,18,24,.82))}
+  .offergrid{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr .95fr;gap:0;align-items:center}
   .offer-left{padding:clamp(30px,4vw,52px);color:#fff}
-  .offer-left .eyebrow{color:#ffe6a6}
-  .offer-left h3{font-size:clamp(26px,3vw,36px);font-weight:800;letter-spacing:-.02em;line-height:1.08;margin-top:12px}
-  .offer-left .ol-sub{color:rgba(255,255,255,.86);margin-top:14px;font-size:16px;max-width:42ch}
+  .offer-left .eyebrow{color:var(--gold-soft)}
+  .offer-left h3{font-size:clamp(26px,3vw,36px);font-weight:800;letter-spacing:-.022em;line-height:1.08;margin-top:12px;text-wrap:balance}
+  .offer-left .ol-sub{color:rgba(255,255,255,.88);margin-top:14px;font-size:16px;max-width:42ch;line-height:1.55}
+  .offer-left .ol-bullets{margin-top:24px;color:rgba(255,255,255,.92)}
   .glass-card{margin:clamp(16px,2vw,24px);border-radius:var(--r);background:var(--glass);
     backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);
     border:1px solid var(--glass-line);box-shadow:0 30px 70px -28px rgba(7,18,24,.6);padding:clamp(24px,2.6vw,34px);color:var(--ink);position:relative}
@@ -160,55 +231,115 @@
     -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
   .gc-tag{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ocean)}
   .gc-price{display:flex;align-items:baseline;gap:8px;margin-top:8px;flex-wrap:wrap}
-  .gc-price .amt{font-size:clamp(34px,4vw,46px);font-weight:800;letter-spacing:-.02em;color:var(--ocean)}
-  .gc-price .per{color:var(--muted);font-size:15px;font-weight:600}
-  .gc-line{font-size:15px;color:var(--ink);margin-top:6px}
+  .gc-price .amt{font-size:clamp(34px,4vw,46px);font-weight:800;letter-spacing:-.025em;color:var(--ocean)}
+  .gc-price .per{color:#2c3a42;font-size:15px;font-weight:600}
+  .gc-line{font-size:15px;color:#27353d;margin-top:6px}
   .gc-line b{color:var(--ocean)}
   .gc-list{list-style:none;margin-top:18px;display:flex;flex-direction:column;gap:11px}
-  .gc-list li{display:flex;gap:10px;font-size:14.5px;color:#2c3a42;line-height:1.4}
-  .gc-list li svg{width:18px;height:18px;flex:none;color:var(--gold);margin-top:1px}
+  .gc-list li{display:flex;gap:10px;font-size:14.5px;color:#2c3a42;line-height:1.45}
+  .gc-list li svg{width:18px;height:18px;flex:none;color:var(--gold);margin-top:2px}
   .gc-cta{margin-top:22px;display:flex;flex-direction:column;gap:10px}
-  .gc-note{font-size:12.5px;color:var(--muted-2);margin-top:12px;line-height:1.45}
+  .gc-note{font-size:12.5px;color:#3a4750;margin-top:12px;line-height:1.5}
   @media(max-width:860px){.offergrid{grid-template-columns:1fr}.glass-card{margin-top:0}}
+
+  /* ---------- lead form ---------- */
+  .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .leadform{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+  .leadform .fld{display:flex;flex-direction:column;gap:6px}
+  .leadform .fld--full{grid-column:1/-1}
+  .leadform label{font-size:12.5px;font-weight:700;letter-spacing:.02em;color:#27353d}
+  .leadform label .req{color:var(--aqua-700)}
+  .leadform input,.leadform textarea,.leadform select{
+    font-family:inherit;font-size:15px;color:var(--ink);background:#fff;
+    border:1px solid var(--line-2);border-radius:var(--r-sm);padding:12px 14px;width:100%;min-height:46px;
+    transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+  .leadform textarea{min-height:84px;resize:vertical;line-height:1.5}
+  .leadform input:focus,.leadform textarea:focus,.leadform select:focus{outline:none;border-color:var(--aqua);box-shadow:0 0 0 3px rgba(10,139,168,.18)}
+  .leadform input::placeholder,.leadform textarea::placeholder{color:#8893a0}
+  .leadform .form-cta{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;margin-top:2px}
+  .leadform .form-note{grid-column:1/-1;font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:2px}
+  .leadform .form-note a{font-weight:600}
+  .form-success{display:none;background:rgba(10,139,168,.08);border:1px solid rgba(10,139,168,.3);border-radius:var(--r);
+    padding:22px 24px;margin-top:22px;color:var(--ocean)}
+  .form-success.show{display:block;animation:faqIn .35s var(--ease)}
+  .form-success b{display:block;font-size:17px;font-weight:800;letter-spacing:-.01em}
+  .form-success p{font-size:14.5px;color:#27353d;margin-top:6px;line-height:1.55}
+  @media(max-width:560px){.leadform{grid-template-columns:1fr}}
+
+  /* compact segment selector at the offer (point of decision) */
+  .segbar--light{background:var(--paper-2);border:1px solid var(--line-2)}
+  .segbar--light .segbtn{color:var(--muted)}
+  .segbar--light .segbtn[aria-selected="true"]{color:var(--ocean)}
+  .segbar--light .segbtn[aria-selected="true"]::before{background:#fff;box-shadow:var(--sh-1)}
+  .js .segbar--light .segbtn[aria-selected="true"]::before{display:none}
+  .segbar--light .segglide{background:#fff;box-shadow:var(--sh-1)}
+  .segbar--light .segbtn:focus-visible{box-shadow:var(--ring)}
+  .offer-seg{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:18px}
+  .offer-seg .seglabel-d{color:var(--muted);font-size:13px;font-weight:600}
 
   /* ---------- how it works ---------- */
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px}
-  .stepcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:28px 26px 26px;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
-  .stepcard:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-  .stepcard .num{font-size:13px;font-weight:800;color:var(--aqua);letter-spacing:.1em}
-  .stepcard h3{font-size:19px;font-weight:700;margin-top:14px;letter-spacing:-.01em}
-  .stepcard p{color:var(--muted);font-size:15px;margin-top:8px}
-  .stepcard::after{content:"";position:absolute;right:-9px;top:50%;width:18px;height:18px;border-top:2px solid var(--line-2);border-right:2px solid var(--line-2);transform:translateY(-50%) rotate(45deg);opacity:.6}
+  .stepcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:28px 26px 26px;box-shadow:var(--sh-1);
+    transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+  .stepcard:hover{transform:translateY(-4px);box-shadow:var(--sh-2)}
+  .stepcard .num{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--aqua);letter-spacing:.12em}
+  .stepcard .num::before{content:"";width:22px;height:2px;background:var(--gold);border-radius:2px}
+  .stepcard h3{font-size:19px;font-weight:700;margin-top:14px;letter-spacing:-.012em}
+  .stepcard p{color:var(--muted);font-size:15px;margin-top:8px;line-height:1.58}
+  .stepcard::after{content:"";position:absolute;right:-9px;top:50%;width:16px;height:16px;border-top:2px solid var(--line-2);border-right:2px solid var(--line-2);transform:translateY(-50%) rotate(45deg);opacity:.55}
   .stepcard:last-child::after{display:none}
   @media(max-width:760px){.steps{grid-template-columns:1fr}.stepcard::after{display:none}}
 
   /* ---------- gallery ---------- */
   .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px}
-  .shot{display:block;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#fff;
+  .shot{display:block;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#fff;box-shadow:var(--sh-1);
     transition:transform .3s var(--ease),box-shadow .3s var(--ease);color:inherit}
-  .shot:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .shot:hover{transform:translateY(-4px);box-shadow:var(--sh-2)}
   .shot .ph{aspect-ratio:4/3;overflow:hidden;background:linear-gradient(135deg,#dceaef,#eef4f5)}
   .shot .ph img{width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .6s var(--ease)}
   .shot:hover .ph img{transform:scale(1.05)}
   .shot .cap{padding:16px 18px}
-  .shot .cap b{display:block;font-size:15.5px;font-weight:700}
-  .shot .cap span{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--aqua);font-weight:600;margin-top:4px}
+  .shot .cap b{display:block;font-size:15.5px;font-weight:700;letter-spacing:-.01em}
+  .shot .cap span{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--aqua);font-weight:600;margin-top:5px}
+  .shot:hover .cap span svg{transform:translate(2px,-2px)}
+  .shot .cap span svg{transition:transform .25s var(--ease)}
   @media(max-width:760px){.gallery{grid-template-columns:1fr}}
+
+  /* ---------- FAQ ---------- */
+  .faqgrid{margin-top:40px;max-width:760px}
+  .faq{border-bottom:1px solid var(--line)}
+  .faq:first-child{border-top:1px solid var(--line)}
+  .faq summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:22px 4px;font-size:clamp(16px,1.3vw,18px);font-weight:700;letter-spacing:-.01em;color:var(--ink);
+    transition:color .2s var(--ease)}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:hover{color:var(--ocean)}
+  .faq summary .pm{flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;position:relative;transition:background .2s var(--ease),border-color .2s var(--ease)}
+  .faq[open] summary .pm{background:var(--ocean);border-color:var(--ocean)}
+  .faq summary .pm::before,.faq summary .pm::after{content:"";position:absolute;background:var(--muted);width:11px;height:2px;border-radius:2px;transition:transform .25s var(--ease),background .2s var(--ease)}
+  .faq summary .pm::after{transform:rotate(90deg)}
+  .faq[open] summary .pm::before,.faq[open] summary .pm::after{background:#fff}
+  .faq[open] summary .pm::after{transform:rotate(0)}
+  .faq .ans{overflow:hidden}
+  .faq .ans p{color:var(--muted);font-size:15.5px;line-height:1.65;padding:0 4px 24px;max-width:62ch}
+  .faq[open] .ans{animation:faqIn .32s var(--ease)}
+  @keyframes faqIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.faq[open] .ans{animation:none}}
 
   /* ---------- testimonial / editorial ---------- */
   .quote{max-width:60ch;margin:0 auto;text-align:center}
   .quote .qmark{font-size:64px;line-height:0;color:var(--gold);font-family:Georgia,serif;display:block;height:30px}
-  .quote blockquote{font-size:clamp(22px,2.6vw,32px);font-weight:600;letter-spacing:-.01em;line-height:1.32;color:var(--ink)}
+  .quote blockquote{font-size:clamp(22px,2.6vw,32px);font-weight:600;letter-spacing:-.012em;line-height:1.34;color:var(--ink);text-wrap:balance}
   .quote cite{display:block;margin-top:20px;font-style:normal;font-size:14.5px;color:var(--muted);font-weight:600}
 
   /* ---------- final CTA ---------- */
-  .finale{position:relative;overflow:hidden;color:#fff;border-radius:28px;margin:0 auto;max-width:var(--max)}
+  .finale{position:relative;overflow:hidden;color:#fff;border-radius:var(--r-xl);margin:0 auto;max-width:var(--max);box-shadow:var(--sh-2)}
   .finale .fin-media{position:absolute;inset:0;z-index:0}
-  .finale .fin-media video,.finale .fin-media img{width:100%;height:100%;object-fit:cover}
-  .finale .fin-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(160deg,rgba(15,76,92,.82),rgba(13,27,34,.9))}
+  .finale .fin-media video,.finale .fin-media img{width:100%;height:100%;object-fit:cover;object-position:center 55%}
+  .finale .fin-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(158deg,rgba(15,76,92,.82),rgba(7,18,24,.92))}
   .finale .fin-body{position:relative;z-index:2;padding:clamp(48px,7vw,92px) var(--gut);text-align:center}
-  .finale h2{font-size:clamp(30px,4.4vw,56px);font-weight:800;letter-spacing:-.02em;line-height:1.05;max-width:18ch;margin-inline:auto}
-  .finale p{color:rgba(255,255,255,.9);font-size:clamp(16px,1.4vw,19px);margin-top:18px;max-width:50ch;margin-inline:auto}
+  .finale h2{font-size:clamp(30px,4.4vw,56px);font-weight:800;letter-spacing:-.022em;line-height:1.05;max-width:18ch;margin:14px auto 0;text-wrap:balance}
+  .finale p{color:rgba(255,255,255,.9);font-size:clamp(16px,1.4vw,19px);margin-top:18px;max-width:50ch;margin-inline:auto;line-height:1.55}
   .finale .fin-cta{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:32px}
 
   /* ---------- footer ---------- */
@@ -216,27 +347,31 @@
   .foot .wm{color:var(--ocean);justify-content:center;margin-bottom:12px}
   .foot .wm .c{color:var(--aqua);opacity:1}
   .foot a{font-weight:600}
-  .foot .fineprint{margin-top:14px;max-width:64ch;margin-inline:auto;color:var(--muted-2);font-size:12.5px;line-height:1.5}
+  .foot .fineprint{margin-top:14px;max-width:64ch;margin-inline:auto;color:var(--muted-2);font-size:12.5px;line-height:1.6}
 
   /* ---------- sticky cta bar ---------- */
-  .stickybar{position:fixed;left:0;right:0;bottom:0;z-index:40;transform:translateY(120%);
-    transition:transform .45s var(--ease);background:rgba(255,255,255,.82);
+  .stickybar{position:fixed;left:0;right:0;bottom:0;z-index:40;transform:translateY(120%);visibility:hidden;
+    transition:transform .45s var(--ease),visibility 0s linear .45s;background:rgba(255,255,255,.84);
     backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
     border-top:1px solid var(--line);box-shadow:0 -10px 40px -20px rgba(13,27,34,.4)}
-  .stickybar.show{transform:none}
+  .stickybar.show{transform:none;visibility:visible;transition:transform .45s var(--ease),visibility 0s}
   .stickybar .inner{max-width:var(--max);margin:0 auto;padding:12px var(--gut);display:flex;align-items:center;gap:16px;justify-content:space-between}
   .stickybar .sb-copy b{font-size:15px;display:block;letter-spacing:-.01em}
   .stickybar .sb-copy span{font-size:13px;color:var(--muted)}
   .stickybar .sb-actions{display:flex;gap:10px;align-items:center;flex:none}
-  .stickybar .btn{padding:12px 20px;font-size:14.5px}
+  .stickybar .btn{padding:12px 20px;font-size:14.5px;min-height:44px}
   @media(max-width:680px){.stickybar .sb-copy span{display:none}.stickybar .inner{padding:10px 16px;gap:10px}
-    .stickybar .btn--ghost{display:none}.stickybar .btn{flex:1;justify-content:center}}
-  @media (prefers-reduced-motion:reduce){.btn,.tile,.shot,.stepcard{transition:none}}
-</style></head>
+    .stickybar .btn--ghost{display:none}.stickybar .btn{flex:1}}
+  @media (prefers-reduced-motion:reduce){.stickybar{transition:none}.btn,.tile,.shot,.stepcard,.tile--feature .ft-media{transition:none}}
+</style>
+<noscript><style>.reveal{opacity:1!important;transform:none!important}.segglide{display:none}</style></noscript>
+</head>
 <body>
 
+<a class="skip" href="#what">Skip to content</a>
+
 <!-- ============ NAV ============ -->
-<nav class="nav">
+<nav class="nav" aria-label="Primary">
   <div class="wrap">
     <a class="wm" href="https://oceansafety.app" aria-label="OceanSafe home"><span class="dot"></span>Ocean<span class="c">Safe</span></a>
     <div class="links">
@@ -251,58 +386,65 @@
 <!-- ============ HERO ============ -->
 <header class="hero" id="top">
   <div class="hero__media">
-    <video autoplay muted loop playsinline preload="metadata" poster="/assets/join-hero.jpg" id="heroVideo">
+    <video autoplay muted loop playsinline preload="metadata" poster="/assets/join-hero.jpg" id="heroVideo" aria-hidden="true">
       <source src="/assets/join-hero.mp4" type="video/mp4">
     </video>
   </div>
   <div class="hero__scrim"></div>
   <div class="hero__inner">
     <div class="wrap">
-      <p class="eyebrow reveal in">Kauaʻi safety partner program</p>
-      <h1 class="reveal in d1">Be the local name on the app <span class="swap" data-swap="headline">every beachgoer checks.</span></h1>
-      <p class="lede reveal in d2">OceanSafe is the beach-safety app Kauaʻi visitors open before they get in the water. <span class="seg-offer" data-swap="lede">Become the safety partner they see first — featured by name, with live daily conditions and QR cards for your counter.</span></p>
+      <p class="eyebrow reveal">Kauaʻi safety partner program</p>
+      <h1 class="reveal d1">Be the local name on the app <span class="swap" data-swap="headline">every beachgoer checks.</span></h1>
+      <p class="lede reveal d2">OceanSafe is the beach-safety app Kauaʻi visitors open before they get in the water. <span class="seg-offer" data-swap="lede">Become the safety partner they see first — featured by name, with live daily conditions and QR cards for your counter.</span></p>
 
-      <div class="hero__cta reveal in d3" style="margin-top:26px">
-        <div class="segbar" role="tablist" aria-label="Choose your business type" id="segbar">
+      <div class="segwrap reveal d3">
+        <span class="seglabel" id="seglabel">I run a…</span>
+        <div class="segbar" role="radiogroup" aria-labelledby="seglabel" id="segbar">
           <span class="segglide" id="segglide" aria-hidden="true"></span>
-          <button class="segbtn" role="tab" id="seg-shop" aria-selected="true" data-seg="shop">
+          <button class="segbtn" type="button" role="radio" id="seg-shop" aria-checked="true" aria-selected="true" data-seg="shop">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9"/><path d="M3 9h18"/></svg>
-            <span>I run a <span class="seglabel-long">Shop</span></span>
+            <span>Shop</span>
           </button>
-          <button class="segbtn" role="tab" id="seg-hotel" aria-selected="false" data-seg="hotel">
+          <button class="segbtn" type="button" role="radio" id="seg-hotel" aria-checked="false" aria-selected="false" data-seg="hotel" tabindex="-1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V5a1 1 0 011-1h12a1 1 0 011 1v16"/><path d="M9 8h.01M13 8h.01M9 12h.01M13 12h.01"/></svg>
-            <span>I run a <span class="seglabel-long">Hotel</span></span>
+            <span>Hotel <span class="seglabel-long">or inn</span></span>
           </button>
-          <button class="segbtn" role="tab" id="seg-rental" aria-selected="false" data-seg="rental">
+          <button class="segbtn" type="button" role="radio" id="seg-rental" aria-checked="false" aria-selected="false" data-seg="rental" tabindex="-1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
-            <span>I manage <span class="seglabel-long">Rentals</span></span>
+            <span>Rental<span class="seglabel-long">s</span></span>
           </button>
         </div>
+        <span class="sr-only" role="status" aria-live="polite" id="segStatus"></span>
       </div>
 
-      <div class="hero__cta reveal in d3">
-        <a class="btn btn--gold" href="#offer">Claim your spot <span class="arr">→</span></a>
+      <div class="hero__cta hero__row reveal d3">
+        <a class="btn btn--gold" href="#offer">Claim your spot <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn--glass" href="https://oceansafety.app" target="_blank" rel="noopener">Try the live app ↗</a>
       </div>
 
-      <div class="trustline reveal in d4">
-        <span>Live daily conditions from NOAA &amp; NWS</span>
+      <div class="trustline reveal d4">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Live daily conditions from NOAA &amp; NWS</span>
         <span class="dotsep"></span>
-        <span>Printed QR cards shipped to you</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Printed QR cards shipped to you</span>
         <span class="dotsep"></span>
-        <span>Cancel anytime</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Cancel anytime</span>
       </div>
     </div>
   </div>
+  <div class="scrollcue" aria-hidden="true"><span class="mouse"></span>Scroll</div>
 </header>
 
 <!-- ============ PROOF BAND ============ -->
-<section class="proof">
+<section class="proof" aria-label="Why partners join">
   <div class="wrap">
     <div class="stat reveal"><div class="n">First<span class="u">.</span></div><div class="l">The app visitors check before they get in the water</div></div>
     <div class="stat reveal d1"><div class="n">90<span class="u">%</span></div><div class="l">Shops &amp; rentals keep 90% of every in-app sale — OceanSafe takes 10%</div></div>
-    <div class="stat reveal d2"><div class="n">Daily</div><div class="l">Fresh Kauaʻi ocean-safety report, branded to you</div></div>
+    <div class="stat reveal d2"><div class="n">Daily</div><div class="l">A fresh Kauaʻi ocean-safety report, branded to you</div></div>
     <div class="stat reveal d3"><div class="n">$149</div><div class="l">One-time co-branded QR card kit, printed &amp; shipped</div></div>
+  </div>
+  <div class="wrap proofnote reveal">
+    <p>Built on Kauaʻi, for Kauaʻi — live daily conditions drawn from public NOAA &amp; NWS data.
+      <a href="https://oceansafety.app" target="_blank" rel="noopener">See the live app for yourself ↗</a></p>
   </div>
 </section>
 
@@ -316,9 +458,9 @@
     </div>
 
     <div class="bento">
-      <div class="tile tile--feature reveal" style="grid-row:span 2">
+      <div class="tile tile--feature reveal">
         <div class="ft-media">
-          <video autoplay muted loop playsinline preload="none" poster="/assets/join-2.jpg" data-lazyvideo="/assets/join-2.mp4"></video>
+          <video autoplay muted loop playsinline preload="none" poster="/assets/join-hero.jpg" data-lazyvideo="/assets/join-hero.mp4" aria-hidden="true"></video>
         </div>
         <div class="ft-scrim"></div>
         <div class="ft-body">
@@ -331,12 +473,12 @@
       <div class="tile tile--span2 reveal d1">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
         <h3>Printed QR cards</h3>
-        <p>A co-branded card kit for your counter, welcome book, or rooms — guests scan and you're their safety source.</p>
+        <p>A co-branded card kit for your counter, welcome book, or rooms — guests scan, and you're their safety source.</p>
       </div>
 
       <div class="tile tile--span2 reveal d2">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6L8 13.9 2 9.4h7.6z"/></svg></div>
-        <h3>Featured as the local safety partner</h3>
+        <h3>The local safety partner</h3>
         <p>Your business is the trusted name visitors see first — not a banner ad, a genuine local recommendation.</p>
       </div>
 
@@ -348,7 +490,7 @@
       </div>
 
       <!-- segment-specific tile: HOTEL guest amenity -->
-      <div class="tile tile--span2 seg-hotel reveal d1" style="display:none">
+      <div class="tile tile--span2 seg-hotel reveal d1" hidden>
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 9V6a2 2 0 00-2-2H6a2 2 0 00-2 2v3"/><path d="M2 13a2 2 0 012-2h16a2 2 0 012 2v4H2z"/><path d="M2 17v3M22 17v3"/></svg></div>
         <h3>A safety amenity guests remember</h3>
         <p>In-room cards and a branded page show guests you care about their safety — a concierge touch that earns reviews.</p>
@@ -363,13 +505,73 @@
   </div>
 </section>
 
+<!-- ============ HOW IT WORKS ============ -->
+<section class="sec sec--tight" aria-label="How it works">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">How it works</p>
+      <h2>Live in days, not weeks.</h2>
+    </div>
+    <div class="steps">
+      <div class="stepcard reveal">
+        <div class="num">STEP 01</div>
+        <h3>Claim your spot</h3>
+        <p>Tell us about your business — or, if you're a shop and ready now, e-sign and pay. Two minutes, no call required.</p>
+      </div>
+      <div class="stepcard reveal d1">
+        <div class="num">STEP 02</div>
+        <h3>We build your page</h3>
+        <p>Your co-branded page goes live with daily conditions, and your printed QR card kit ships to your door.</p>
+      </div>
+      <div class="stepcard reveal d2">
+        <div class="num">STEP 03</div>
+        <h3>Reach every beachgoer</h3>
+        <p>Cards go on counters and in rooms. Visitors scan, check conditions, and find you as the local they trust.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY (preserve conversion links) ============ -->
+<section class="sec sec--tight" aria-label="See it for yourself">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">See it for yourself</p>
+      <h2>Exactly what your guests &amp; visitors see.</h2>
+    </div>
+    <div class="gallery">
+      <a class="shot reveal" href="https://oceansafety.app" target="_blank" rel="noopener">
+        <div class="ph"><img src="join-app.jpg" width="800" height="600" alt="Live daily ocean-safety report shown in the OceanSafe app" loading="lazy"></div>
+        <div class="cap"><b>Your live safety report</b><span>Conditions every visitor checks <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div>
+      </a>
+      <a class="shot reveal d1" href="join-card.jpg" target="_blank" rel="noopener">
+        <div class="ph"><img src="join-card.jpg" width="800" height="600" alt="Co-branded QR counter card a partner places by the register" loading="lazy"></div>
+        <div class="cap"><b>Your QR counter cards</b><span>Co-branded, printed &amp; shipped <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div>
+      </a>
+      <a class="shot reveal d2" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">
+        <div class="ph"><img src="join-dash.jpg" width="800" height="600" alt="Partner dashboard demo showing scans, orders, and payouts" loading="lazy"></div>
+        <div class="cap"><b>Your private dashboard</b><span>Open the interactive demo <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- ============ THE OFFER (GLASS) ============ -->
 <section class="sec" id="offer">
   <div class="wrap">
-    <div class="sec-head reveal" style="margin-bottom:8px">
+    <div class="sec-head sec-head--snug reveal">
       <p class="eyebrow">The deal</p>
       <h2 data-swap="offer-head">Simple terms. Claim your spot today.</h2>
       <p>Pricing is set per business type. Tell us about your place and we'll get you live — or, if you're a shop and ready now, start checkout in two minutes.</p>
+      <div class="offer-seg reveal d1">
+        <span class="seglabel-d" id="seglabelD">I run a…</span>
+        <div class="segbar segbar--light" role="radiogroup" aria-labelledby="seglabelD" id="segbarOffer">
+          <span class="segglide" aria-hidden="true"></span>
+          <button class="segbtn" type="button" role="radio" aria-checked="true" aria-selected="true" data-seg="shop"><span>Shop</span></button>
+          <button class="segbtn" type="button" role="radio" aria-checked="false" aria-selected="false" data-seg="hotel" tabindex="-1"><span>Hotel<span class="seglabel-long"> or inn</span></span></button>
+          <button class="segbtn" type="button" role="radio" aria-checked="false" aria-selected="false" data-seg="rental" tabindex="-1"><span>Rental<span class="seglabel-long">s</span></span></button>
+        </div>
+      </div>
     </div>
 
     <div class="offerwrap reveal d1">
@@ -383,7 +585,7 @@
           <h3 data-swap="offer-title">Sell to every beachgoer, keep 90%.</h3>
           <p class="ol-sub" data-swap="offer-sub">Your storefront lives inside the app visitors already trust. The card kit gets you on counters; the page keeps you in front of them all season.</p>
 
-          <ul class="gc-list" style="margin-top:24px;color:rgba(255,255,255,.92)" data-swap="offer-bullets">
+          <ul class="gc-list ol-bullets" data-swap="offer-bullets">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your own page + live daily conditions</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-app store — you keep 90% of every sale</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Year one, we cover card-processing fees</li>
@@ -405,92 +607,102 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>
           </ul>
 
-          <div class="gc-cta">
-            <a class="btn btn--solid" id="primaryCta" href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner%20%E2%80%94%20claim%20our%20spot" style="justify-content:center" data-swap-href="primary">Claim your spot <span class="arr">→</span></a>
-            <a class="btn btn--ghost" id="secondaryCta" href="https://square.link/u/7ObYUsQv" target="_blank" rel="noopener" style="justify-content:center" data-swap-href="secondary" data-swap="secondary-label">Ready now? Start checkout ↗</a>
+          <form class="leadform" id="leadForm" action="https://formspree.io/f/mossmankauai" method="POST" novalidate>
+            <input type="hidden" name="segment" id="leadSegment" value="Shop">
+            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+            <div class="fld">
+              <label for="leadName">Your name <span class="req" aria-hidden="true">*</span></label>
+              <input id="leadName" name="name" type="text" autocomplete="name" placeholder="Jane Kahale" required>
+            </div>
+            <div class="fld">
+              <label for="leadBiz">Business name <span class="req" aria-hidden="true">*</span></label>
+              <input id="leadBiz" name="business" type="text" autocomplete="organization" placeholder="Hanalei Surf Co." required>
+            </div>
+            <div class="fld">
+              <label for="leadEmail">Email <span class="req" aria-hidden="true">*</span></label>
+              <input id="leadEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@business.com" required>
+            </div>
+            <div class="fld">
+              <label for="leadPhone">Phone</label>
+              <input id="leadPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(808) 555-0123">
+            </div>
+            <div class="fld fld--full">
+              <label for="leadMsg">Anything we should know? <span style="font-weight:600;color:var(--muted)">(optional)</span></label>
+              <textarea id="leadMsg" name="message" placeholder="Beach area, number of units, questions…"></textarea>
+            </div>
+            <div class="form-cta">
+              <button class="btn btn--solid" type="submit" id="primaryCta">Claim your spot <span class="arr" aria-hidden="true">→</span></button>
+              <a class="btn btn--ghost" id="secondaryCta" href="https://square.link/u/7ObYUsQv" target="_blank" rel="noopener" data-swap-href="secondary" data-swap="secondary-label">Ready now? Start checkout ↗</a>
+            </div>
+            <p class="gc-note" data-swap="card-note">First payment $1,649 (kit + year one). No hidden fees — we email before any renewal. Cancel anytime.</p>
+            <p class="form-note">We'll reply within one business day. Prefer email? Write us at <a href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner%20%E2%80%94%20claim%20our%20spot" id="mailtoFallback">mossmankauai@gmail.com</a>.</p>
+          </form>
+          <div class="form-success" id="formSuccess" role="status" aria-live="polite" tabindex="-1">
+            <b>You're on the list.</b>
+            <p>Thanks — we've got your details and we'll be in touch within one business day to get you live. Want to keep going now? <a href="https://square.link/u/7ObYUsQv" target="_blank" rel="noopener">Start shop checkout ↗</a></p>
           </div>
-          <p class="gc-note" data-swap="card-note">First payment $1,649 (kit + year one). No hidden fees — we email before any renewal. Cancel anytime.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ HOW IT WORKS ============ -->
-<section class="sec">
+<!-- ============ FAQ ============ -->
+<section class="sec sec--tight" aria-label="Common questions">
   <div class="wrap">
     <div class="sec-head reveal">
-      <p class="eyebrow">How it works</p>
-      <h2>Live in days, not weeks.</h2>
+      <p class="eyebrow">Common questions</p>
+      <h2>The details, up front.</h2>
     </div>
-    <div class="steps">
-      <div class="stepcard reveal">
-        <div class="num">STEP 01</div>
-        <h3>Claim your spot</h3>
-        <p>Tell us about your business, or e-sign and pay if you're a shop ready to go. Two minutes, no call required.</p>
-      </div>
-      <div class="stepcard reveal d1">
-        <div class="num">STEP 02</div>
-        <h3>We build your page</h3>
-        <p>Your co-branded page goes live with daily conditions, and your printed QR card kit ships to your door.</p>
-      </div>
-      <div class="stepcard reveal d2">
-        <div class="num">STEP 03</div>
-        <h3>Reach every beachgoer</h3>
-        <p>Cards go on counters and in rooms. Visitors scan, check conditions, and find you as the local they trust.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ GALLERY (preserve conversion links) ============ -->
-<section class="sec">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <p class="eyebrow">See it for yourself</p>
-      <h2>Exactly what your guests &amp; visitors see.</h2>
-    </div>
-    <div class="gallery">
-      <a class="shot reveal" href="https://oceansafety.app" target="_blank" rel="noopener">
-        <div class="ph"><img src="join-app.jpg" alt="Live daily ocean-safety report in the OceanSafe app" loading="lazy"></div>
-        <div class="cap"><b>Your live safety report</b><span>Conditions every visitor checks <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div>
-      </a>
-      <a class="shot reveal d1" href="join-card.jpg" target="_blank" rel="noopener">
-        <div class="ph"><img src="join-card.jpg" alt="Co-branded QR counter card" loading="lazy"></div>
-        <div class="cap"><b>Your QR counter cards</b><span>Co-branded, printed &amp; shipped <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div>
-      </a>
-      <a class="shot reveal d2" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">
-        <div class="ph"><img src="join-dash.jpg" alt="Partner dashboard demo" loading="lazy"></div>
-        <div class="cap"><b>Your private dashboard</b><span>Open the interactive demo <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div>
-      </a>
+    <div class="faqgrid reveal d1">
+      <details class="faq">
+        <summary>How fast can I be live?<span class="pm" aria-hidden="true"></span></summary>
+        <div class="ans"><p>Most partners go live within the same week. You claim your spot, send us your logo, and we build your co-branded page while your printed QR cards ship to your door.</p></div>
+      </details>
+      <details class="faq">
+        <summary>What does the 90 / 10 split actually mean?<span class="pm" aria-hidden="true"></span></summary>
+        <div class="ans"><p>If you sell through the in-app store, you keep 90% of every sale and OceanSafe keeps 10%. That 10% is the only deduction — in year one we also cover card-processing fees, so nothing else comes out.</p></div>
+      </details>
+      <details class="faq">
+        <summary>I don't sell products. Is this still worth it?<span class="pm" aria-hidden="true"></span></summary>
+        <div class="ans"><p>Yes. For hotels, inns, and rentals the value is the safety touch itself — your name on the app every guest checks, branded cards in rooms and at the desk, and fewer worried calls. The store is optional.</p></div>
+      </details>
+      <details class="faq">
+        <summary>Is the safety information reliable?<span class="pm" aria-hidden="true"></span></summary>
+        <div class="ans"><p>Conditions come from public NOAA and NWS sources and refresh daily. OceanSafe is guidance, not a guarantee — it doesn't replace lifeguards or posted advisories, and your page says so clearly.</p></div>
+      </details>
+      <details class="faq">
+        <summary>Am I locked into a contract?<span class="pm" aria-hidden="true"></span></summary>
+        <div class="ans"><p>No. Cancel anytime. We email you before any renewal, so there are no surprise charges.</p></div>
+      </details>
     </div>
   </div>
 </section>
 
 <!-- ============ QUOTE / EDITORIAL ============ -->
-<section class="sec">
+<section class="sec sec--tight" aria-label="Why it matters">
   <div class="wrap">
     <div class="quote reveal">
       <span class="qmark" aria-hidden="true">&ldquo;</span>
-      <blockquote>Every visitor checks the ocean before they go. Being the name on that screen means they find <em>us</em> first.</blockquote>
-      <cite>— The kind of partner OceanSafe is built for</cite>
+      <blockquote>Every visitor checks the ocean before they go. We built OceanSafe so the local business they already trust is the name on that screen.</blockquote>
+      <cite>— Why we're signing founding partners on Kauaʻi</cite>
     </div>
   </div>
 </section>
 
 <!-- ============ FINAL CTA ============ -->
-<section class="sec" style="padding-top:0">
-  <div class="finale">
+<section class="sec sec--flush">
+  <div class="finale reveal">
     <div class="fin-media">
-      <video autoplay muted loop playsinline preload="none" poster="/assets/join-hero.jpg" data-lazyvideo="/assets/join-3.mp4"></video>
+      <video autoplay muted loop playsinline preload="none" poster="/assets/join-hero.jpg" data-lazyvideo="/assets/join-hero.mp4" aria-hidden="true"></video>
     </div>
     <div class="fin-scrim"></div>
     <div class="fin-body">
-      <p class="eyebrow" style="color:#ffe6a6">Limited founding partners</p>
-      <h2 style="margin-top:14px" data-swap="final-head">Become Kauaʻi's go-to safety partner.</h2>
-      <p>Spots are limited by area so each partner stands out. Claim yours and we'll have you live this week.</p>
+      <p class="eyebrow eyebrow--gold">Founding partners · one per category, per beach area</p>
+      <h2 data-swap="final-head">Become Kauaʻi's go-to safety partner.</h2>
+      <p>We feature one shop, one hotel, and one rental partner per beach area, so each name stands out. Claim yours and we'll have you live this week.</p>
       <div class="fin-cta">
-        <a class="btn btn--gold" id="finalCta" href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner%20%E2%80%94%20claim%20our%20spot" data-swap-href="primary">Claim your spot <span class="arr">→</span></a>
+        <a class="btn btn--gold" id="finalCta" href="#offer">Claim your spot <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn--glass" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">See the demo dashboard ↗</a>
       </div>
     </div>
@@ -507,7 +719,7 @@
 </footer>
 
 <!-- ============ STICKY CTA ============ -->
-<div class="stickybar" id="stickybar" aria-hidden="true">
+<div class="stickybar" id="stickybar">
   <div class="inner">
     <div class="sb-copy">
       <b data-swap="sticky-title">Claim your Kauaʻi spot</b>
@@ -515,7 +727,7 @@
     </div>
     <div class="sb-actions">
       <a class="btn btn--ghost" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">See demo</a>
-      <a class="btn btn--gold" href="#offer">Claim your spot <span class="arr">→</span></a>
+      <a class="btn btn--gold" href="#offer">Claim your spot <span class="arr" aria-hidden="true">→</span></a>
     </div>
   </div>
 </div>
@@ -530,7 +742,7 @@
     if(hv){ try{ hv.removeAttribute("autoplay"); hv.pause(); }catch(e){} }
   }
 
-  /* ---- lazy-load ambient section videos ---- */
+  /* ---- lazy-load ambient section videos (transform/opacity only, GPU) ---- */
   if(!prefersReduced && "IntersectionObserver" in window){
     var vObs = new IntersectionObserver(function(entries){
       entries.forEach(function(en){
@@ -544,7 +756,7 @@
         }
         vObs.unobserve(v);
       });
-    }, {rootMargin:"300px"});
+    }, {rootMargin:"400px"});
     document.querySelectorAll("[data-lazyvideo]").forEach(function(v){ vObs.observe(v); });
   }
 
@@ -552,7 +764,15 @@
   if("IntersectionObserver" in window && !prefersReduced){
     var rObs = new IntersectionObserver(function(entries){
       entries.forEach(function(en){
-        if(en.isIntersecting){ en.target.classList.add("in"); rObs.unobserve(en.target); }
+        if(en.isIntersecting){
+          var el = en.target;
+          el.classList.add("willing");
+          /* next frame so will-change is applied before the transform/opacity transition runs */
+          requestAnimationFrame(function(){ el.classList.add("in"); });
+          /* drop the compositor hint once the reveal has settled */
+          setTimeout(function(){ el.classList.remove("willing"); }, 1000);
+          rObs.unobserve(el);
+        }
       });
     }, {threshold:.12, rootMargin:"0px 0px -8% 0px"});
     document.querySelectorAll(".reveal:not(.in)").forEach(function(el){ rObs.observe(el); });
@@ -560,22 +780,26 @@
     document.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("in"); });
   }
 
-  /* ---- subtle hero parallax ---- */
+  /* ---- buttery hero parallax (transform only, rAF-throttled) ---- */
   if(!prefersReduced){
     var media = document.querySelector(".hero__media");
     var ticking = false;
+    function park(){
+      var y = window.scrollY;
+      if(media && y < window.innerHeight){
+        /* cap travel below the overscan: scale 1.14 => ~7% per edge; keep offset under 5% of height */
+        var max = window.innerHeight * 0.05;
+        var off = Math.min(y * 0.12, max);
+        media.style.transform = "translate3d(0," + off + "px,0) scale(1.14)";
+      }
+    }
     window.addEventListener("scroll", function(){
       if(ticking) return; ticking = true;
-      requestAnimationFrame(function(){
-        var y = window.scrollY;
-        if(media && y < window.innerHeight){ media.style.transform = "translateY(" + (y*0.18) + "px) scale(1.06)"; }
-        ticking = false;
-      });
+      requestAnimationFrame(function(){ park(); ticking = false; });
     }, {passive:true});
-    if(media) media.style.transform = "scale(1.06)";
   }
 
-  /* ---- sticky CTA: show after hero, hide while offer visible or near footer ---- */
+  /* ---- sticky CTA: show after hero, hide near offer or footer ---- */
   var bar = document.getElementById("stickybar");
   var offer = document.getElementById("offer");
   function updateBar(){
@@ -583,8 +807,9 @@
     var oRect = offer.getBoundingClientRect();
     var offerVisible = (oRect.top < window.innerHeight && oRect.bottom > 0);
     var nearFoot = (window.innerHeight + window.scrollY) > (document.body.offsetHeight - 240);
-    if(past && !offerVisible && !nearFoot){ bar.classList.add("show"); bar.setAttribute("aria-hidden","false"); }
-    else { bar.classList.remove("show"); bar.setAttribute("aria-hidden","true"); }
+    /* visibility:hidden (set in CSS via .show) removes the bar from the tab order & a11y tree when hidden */
+    if(past && !offerVisible && !nearFoot){ bar.classList.add("show"); }
+    else { bar.classList.remove("show"); }
   }
   window.addEventListener("scroll", updateBar, {passive:true});
   window.addEventListener("resize", updateBar);
@@ -614,7 +839,8 @@
       "sticky-sub": "Sell to every beachgoer · keep 90% · live this week",
       primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20shop%20partner%20%E2%80%94%20claim%20our%20spot",
       secondary: "https://square.link/u/7ObYUsQv",
-      showStore: true, showHotel: false
+      label: "Shop", announce: "Showing shop partner details and pricing.",
+      showStore: true, showHotel: false, showSecondary: true
     },
     hotel: {
       headline: "every guest checks.",
@@ -638,7 +864,8 @@
       "sticky-sub": "A safety amenity guests remember · tailored package",
       primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20hotel%20partner%20%E2%80%94%20let's%20talk",
       secondary: "https://oceansafety.app",
-      showStore: false, showHotel: true
+      label: "Hotel or inn", announce: "Showing hotel partner details and pricing.",
+      showStore: false, showHotel: true, showSecondary: true
     },
     rental: {
       headline: "every guest checks.",
@@ -662,9 +889,14 @@
       "sticky-sub": "Better reviews + guest store · priced per portfolio",
       primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20rental%20partner%20%E2%80%94%20let's%20talk",
       secondary: "https://oceansafety.app",
-      showStore: true, showHotel: false
+      label: "Rentals", announce: "Showing vacation-rental partner details and pricing.",
+      showStore: true, showHotel: false, showSecondary: true
     }
   };
+
+  var current = "shop";
+  var status = document.getElementById("segStatus");
+  var segField = document.getElementById("leadSegment");
 
   function setSwaps(seg){
     var data = SEG[seg];
@@ -682,44 +914,105 @@
       if(/^https?:/.test(data.secondary)){ sec.setAttribute("target","_blank"); sec.setAttribute("rel","noopener"); }
       else { sec.removeAttribute("target"); sec.removeAttribute("rel"); }
     }
-    /* segment-only tiles */
-    document.querySelectorAll(".seg-store").forEach(function(t){ t.style.display = data.showStore ? "block":"none"; });
-    document.querySelectorAll(".seg-hotel").forEach(function(t){ t.style.display = data.showHotel ? "block":"none"; });
+    /* segment-only tiles (use hidden attribute — no layout shift jank) */
+    document.querySelectorAll(".seg-store").forEach(function(t){ t.hidden = !data.showStore; });
+    document.querySelectorAll(".seg-hotel").forEach(function(t){ t.hidden = !data.showHotel; });
+    /* carry the chosen segment into the lead + mailto subject */
+    if(segField) segField.value = data.label;
+    var mf = document.getElementById("mailtoFallback");
+    if(mf) mf.setAttribute("href", data.primary);
   }
 
-  var segbar = document.getElementById("segbar");
-  var glide = document.getElementById("segglide");
-  var btns = Array.prototype.slice.call(segbar.querySelectorAll(".segbtn"));
+  /* ---- segment switches (hero + offer kept in sync) ---- */
+  var groups = Array.prototype.slice.call(document.querySelectorAll('[role="radiogroup"]'));
+  var bars = groups.map(function(group){
+    var glide = group.querySelector(".segglide");
+    var btns = Array.prototype.slice.call(group.querySelectorAll(".segbtn"));
+    return {group:group, glide:glide, btns:btns};
+  });
 
-  function moveGlide(btn){
-    glide.style.width = btn.offsetWidth + "px";
-    glide.style.transform = "translateX(" + (btn.offsetLeft - 5) + "px)";
+  function moveGlide(bar, btn){
+    if(!bar.glide) return;
+    bar.glide.style.width = btn.offsetWidth + "px";
+    bar.glide.style.transform = "translateX(" + (btn.offsetLeft - 5) + "px)";
   }
-  function select(btn, focus){
-    btns.forEach(function(b){ b.setAttribute("aria-selected", b===btn ? "true":"false"); });
-    moveGlide(btn);
-    setSwaps(btn.getAttribute("data-seg"));
-    if(focus) btn.focus();
+  function syncBar(bar, seg){
+    var target = null;
+    bar.btns.forEach(function(b){
+      var on = b.getAttribute("data-seg") === seg;
+      b.setAttribute("aria-checked", on ? "true":"false");
+      b.setAttribute("aria-selected", on ? "true":"false");
+      b.tabIndex = on ? 0 : -1;
+      if(on) target = b;
+    });
+    if(target) moveGlide(bar, target);
+  }
+  function select(seg, focusEl, announce){
+    if(SEG[seg] == null) return;
+    current = seg;
+    bars.forEach(function(bar){ syncBar(bar, seg); });
+    setSwaps(seg);
+    if(announce && status) status.textContent = SEG[seg].announce;
+    if(focusEl) focusEl.focus();
   }
 
-  btns.forEach(function(btn, i){
-    btn.addEventListener("click", function(){ select(btn); });
-    btn.addEventListener("keydown", function(e){
-      if(e.key === "ArrowRight" || e.key === "ArrowLeft"){
-        e.preventDefault();
-        var dir = e.key === "ArrowRight" ? 1 : -1;
-        var ni = (i + dir + btns.length) % btns.length;
-        select(btns[ni], true);
-      }
+  bars.forEach(function(bar){
+    bar.btns.forEach(function(btn, i){
+      btn.addEventListener("click", function(){ select(btn.getAttribute("data-seg")); });
+      btn.addEventListener("keydown", function(e){
+        if(e.key === "ArrowRight" || e.key === "ArrowLeft"){
+          e.preventDefault();
+          var dir = e.key === "ArrowRight" ? 1 : -1;
+          var ni = (i + dir + bar.btns.length) % bar.btns.length;
+          var nb = bar.btns[ni];
+          select(nb.getAttribute("data-seg"), nb, true);
+        } else if(e.key === "Home"){ e.preventDefault(); select(bar.btns[0].getAttribute("data-seg"), bar.btns[0], true); }
+        else if(e.key === "End"){ e.preventDefault(); var lb = bar.btns[bar.btns.length-1]; select(lb.getAttribute("data-seg"), lb, true); }
+      });
     });
   });
 
-  /* init */
-  function initGlide(){ var cur = segbar.querySelector('[aria-selected="true"]'); if(cur) moveGlide(cur); }
+  /* ---- init: size glides, then enable their transitions (no first-paint width pop) ---- */
+  function reposition(){ bars.forEach(function(bar){ var cur = bar.group.querySelector('[aria-checked="true"]'); if(cur) moveGlide(bar, cur); }); }
   setSwaps("shop");
-  initGlide();
-  window.addEventListener("resize", initGlide);
-  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(initGlide); }
+  reposition();
+  requestAnimationFrame(function(){ bars.forEach(function(bar){ if(bar.glide) bar.glide.classList.add("ready"); }); });
+  window.addEventListener("resize", reposition);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(reposition); }
+
+  /* ============ LEAD FORM ============ */
+  /* NOTE: set the form action to your real Formspree (or Netlify) endpoint before launch.
+     The default below is a placeholder. If the POST fails, we fall back to a prefilled mailto. */
+  var form = document.getElementById("leadForm");
+  if(form){
+    var success = document.getElementById("formSuccess");
+    var submitBtn = document.getElementById("primaryCta");
+    function showSuccess(){
+      form.style.display = "none";
+      if(success){ success.classList.add("show"); success.focus(); }
+    }
+    function fv(n){ var el = form.elements[n]; return (el && el.value) || ""; }
+    function mailtoFallback(){
+      var seg = SEG[current].label;
+      var lines = "Name: "+fv("name")+"\nBusiness: "+fv("business")+"\nSegment: "+seg
+        +"\nEmail: "+fv("email")+"\nPhone: "+fv("phone")+"\n\n"+fv("message");
+      window.location.href = "mailto:mossmankauai@gmail.com?subject="
+        + encodeURIComponent("OceanSafe partner — "+seg+" — claim our spot")
+        + "&body=" + encodeURIComponent(lines);
+    }
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+      if(!form.checkValidity()){ form.reportValidity(); return; }
+      var action = form.getAttribute("action") || "";
+      var canPost = /^https?:\/\//.test(action) && action.indexOf("formspree.io/f/mossmankauai") === -1;
+      if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = "Sending…"; }
+      if(!canPost || !window.fetch){ mailtoFallback(); if(submitBtn){submitBtn.disabled=false;} return; }
+      fetch(action, { method:"POST", body:new FormData(form), headers:{ "Accept":"application/json" } })
+        .then(function(r){ if(r.ok){ showSuccess(); } else { mailtoFallback(); } })
+        .catch(function(){ mailtoFallback(); })
+        .then(function(){ if(submitBtn){ submitBtn.disabled=false; submitBtn.innerHTML='Claim your spot <span class="arr" aria-hidden="true">→</span>'; } });
+    });
+  }
 })();
 </script>
 </body></html>
