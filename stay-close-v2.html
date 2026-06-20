@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f4c5c">
+<title>OceanSafe · Kauaʻi</title>
+<style>
+  /* ── critical inline tokens (system fonts, no web-font fetch → fast LCP) ── */
+  :root{
+    --ocean:#0f4c5c; --ocean-d:#0a3a47; --aqua:#0a8ba8; --aqua-l:#e3f4f8;
+    --gold:#c9a84c; --gold-d:#a8862f; --gold-l:#f8efd6;
+    --ink:#0d1b22; --ink-2:#3e525c; --ink-3:#6c7d85;
+    --bg:#f4f1ea; --surf:#ffffff; --line:#e6e0d4; --line-2:#d7cfbf;
+    --green:#15803d; --green-l:#e7f3ec; --yellow:#d6a514; --red:#c0392b;
+    --coral:#e0653c; --coral-d:#c44e29;
+    --ok:#15803d;
+    --r:16px; --r-sm:11px; --r-lg:22px;
+    --safe-b:env(safe-area-inset-bottom,0px);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --ease:cubic-bezier(.22,.9,.27,1);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:var(--font); color:var(--ink); background:var(--bg);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    overscroll-behavior-y:none;
+  }
+  /* device stage — phone-first; on desktop it centers a phone-sized canvas */
+  #stage{min-height:100dvh;display:flex;align-items:stretch;justify-content:center;background:var(--bg)}
+  @media(min-width:520px){
+    #stage{align-items:center;background:radial-gradient(1100px 700px at 50% -10%,#dcebef 0%,transparent 60%),var(--bg);padding:24px}
+  }
+  #app{
+    position:relative;width:100%;max-width:430px;background:var(--surf);
+    display:flex;flex-direction:column;min-height:100dvh;overflow:hidden;
+  }
+  @media(min-width:520px){
+    #app{min-height:0;height:880px;max-height:92dvh;border-radius:40px;
+      box-shadow:0 40px 90px -36px rgba(13,27,34,.5),0 0 0 11px #1a1410,0 0 0 12px #2c2c2a;}
+  }
+
+  /* ── top app bar ── */
+  .bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:9px;
+    padding:max(14px,env(safe-area-inset-top)) 18px 12px;background:rgba(255,255,255,.86);
+    backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);
+    border-bottom:1px solid var(--line)}
+  .mark{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;letter-spacing:-.01em;color:var(--ocean)}
+  .mark b{color:var(--aqua)}
+  .mark svg{display:block}
+  .seg-tag{margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    padding:5px 10px;border-radius:999px;background:var(--aqua-l);color:var(--ocean)}
+  .seg-tag.owner{background:var(--gold-l);color:var(--gold-d)}
+
+  /* ── progress (endowed, starts >0) ── */
+  .prog{height:3px;background:var(--line);position:relative;overflow:hidden}
+  .prog>i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--aqua),var(--ocean));
+    width:14%;transition:width .5s var(--ease)}
+  @media(prefers-reduced-motion:reduce){.prog>i{transition:none}}
+
+  /* ── scroll body ── */
+  .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .view{padding:18px 18px calc(118px + var(--safe-b))}
+
+  /* enter animation */
+  .anim-in{animation:slideIn .42s var(--ease) both}
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.anim-in{animation:none}}
+
+  /* ── utility hub ── */
+  .hero{margin:4px 0 16px}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--aqua);margin:0 0 6px}
+  h1{font-size:25px;line-height:1.12;letter-spacing:-.02em;font-weight:800;margin:0}
+  .lede{font-size:15px;line-height:1.5;color:var(--ink-2);margin:8px 0 0}
+  .status{display:flex;align-items:center;gap:12px;background:var(--ocean);color:#fff;border-radius:var(--r);
+    padding:14px 16px;margin:2px 0 14px}
+  .status .glyph{width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,.14);display:grid;place-items:center;flex:0 0 auto}
+  .status .glyph svg{display:block}
+  .status b{font-size:15px}.status .s{font-size:12.5px;opacity:.82;margin-top:1px}
+  .status .now{margin-left:auto;text-align:right;font-size:11px;opacity:.7;line-height:1.35}
+
+  .sect-h{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:18px 2px 9px}
+  .beach{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--line);
+    border-radius:var(--r);padding:12px 13px;margin-bottom:9px;width:100%;text-align:left;font-family:inherit;cursor:pointer;
+    transition:transform .12s var(--ease),border-color .12s}
+  .beach:active{transform:scale(.985)}
+  .beach .flag{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px;flex:0 0 auto}
+  .beach .nm{font-size:15px;font-weight:700}.beach .mt{font-size:12.5px;color:var(--ink-2);margin-top:1px}
+  .beach .chev{margin-left:auto;color:var(--ink-3);font-size:20px;line-height:1}
+  .f-lo{background:var(--green)}.f-md{background:var(--yellow)}.f-hi{background:var(--red)}
+  .beach .chev{transition:transform .22s var(--ease)}
+  .beach[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .bdetail{overflow:hidden;max-height:0;opacity:0;transition:max-height .28s var(--ease),opacity .2s,margin .28s var(--ease);
+    margin:-9px 0 0;border-radius:0 0 var(--r) var(--r)}
+  .bdetail.open{max-height:240px;opacity:1;margin:-9px 0 9px}
+  .bdetail .inner{background:#fbf8f1;border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r) var(--r);
+    padding:12px 14px 13px;font-size:13px;line-height:1.5;color:var(--ink-2)}
+  .bdetail .inner b{color:var(--ink)}
+  .bdetail .met{display:flex;gap:14px;margin-top:9px;flex-wrap:wrap}
+  .bdetail .met i{font-style:normal;font-size:11.5px;color:var(--ink-3);font-weight:700}
+  .bdetail .met i b{color:var(--ocean);font-weight:800}
+  @media(prefers-reduced-motion:reduce){.bdetail{transition:none}.beach .chev{transition:none}}
+
+  .trip{display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,#fbf7ee,#f6efe0);
+    border:1px solid var(--gold-l);border-radius:var(--r);padding:13px;margin-top:9px}
+  .trip .ring{width:46px;height:46px;flex:0 0 auto}
+  .trip b{font-size:15px}.trip .s{font-size:12.5px;color:var(--ink-2);margin-top:1px}
+
+  /* ── persuasion / sheet shared ── */
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;padding:7px 12px;border-radius:999px;margin-bottom:13px}
+  .pill.aqua{background:var(--aqua-l);color:var(--ocean)}
+  .pill.gold{background:var(--gold-l);color:var(--gold-d)}
+  .pill .dotpulse{width:7px;height:7px;border-radius:50%;background:var(--coral);animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+  @media(prefers-reduced-motion:reduce){.dotpulse{animation:none}}
+
+  .h2{font-size:23px;line-height:1.15;letter-spacing:-.02em;font-weight:800;margin:0 0 8px}
+  .p{font-size:15px;line-height:1.5;color:var(--ink-2);margin:0 0 14px}
+  .p b{color:var(--ink)}
+
+  .gift-row{display:flex;gap:9px;margin:0 0 14px}
+  .gmini{flex:1;background:var(--surf);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 8px;text-align:center}
+  .gmini .gi{font-size:20px;line-height:1}.gmini .gt{font-size:12px;font-weight:700;margin-top:6px;line-height:1.25}
+  .gmini .gv{font-size:11px;color:var(--gold-d);font-weight:700;margin-top:3px}
+
+  .disc{display:flex;gap:9px;font-size:12.5px;color:var(--ink-2);line-height:1.45;background:#faf7f0;
+    border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:11px 13px;margin:0 0 4px}
+  .disc b{color:var(--ink)}
+  .disc .ico{color:var(--gold-d);font-weight:900;flex:0 0 auto}
+
+  .proof{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);margin:12px 2px 2px}
+  .proof .av{display:flex}.proof .av i{width:22px;height:22px;border-radius:50%;border:2px solid var(--surf);margin-left:-7px;background:var(--aqua)}
+  .proof .av i:first-child{margin-left:0}
+  .proof b{color:var(--ink)}
+
+  /* ── qualify ── */
+  .q{padding:15px 0;border-bottom:1px solid var(--line)}
+  .q:first-of-type{padding-top:6px}
+  .q .qq{font-size:15.5px;font-weight:600;line-height:1.35;margin-bottom:11px}
+  .yn{display:flex;gap:9px}
+  .yn button{flex:1;border:1.5px solid var(--line-2);background:var(--surf);border-radius:12px;padding:13px;
+    font-family:inherit;font-size:15px;font-weight:800;color:var(--ink-2);cursor:pointer;min-height:48px;
+    transition:transform .12s var(--ease),border-color .12s,background .12s}
+  .yn button:active{transform:scale(.96)}
+  .yn button.on{border-color:var(--aqua);background:var(--aqua-l);color:var(--ocean)}
+  .yn button.on.neg{border-color:var(--red);background:#fbeae8;color:var(--red)}
+  .trust{display:flex;gap:7px;font-size:12px;color:var(--ink-3);margin:14px 2px 0;line-height:1.4}
+  .trust .lk{font-size:14px}
+
+  /* ── gift select (claim) ── */
+  .opt{display:flex;align-items:center;gap:13px;border:1.5px solid var(--line);background:var(--surf);
+    border-radius:var(--r);padding:13px;margin-bottom:10px;cursor:pointer;width:100%;text-align:left;font-family:inherit;
+    position:relative;transition:transform .14s var(--ease),border-color .14s,background .14s}
+  .opt:active{transform:scale(.985)}
+  .opt.on{border-color:var(--gold-d);background:var(--gold-l)}
+  .opt .oi{width:46px;height:46px;border-radius:13px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:23px;flex:0 0 auto}
+  .opt.on .oi{border-color:var(--gold)}
+  .opt .ot{font-size:15px;font-weight:700}.opt .od{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+  .opt .ov{font-size:12px;font-weight:800;color:var(--gold-d);margin-top:3px}
+  .opt .chk{margin-left:auto;width:24px;height:24px;border-radius:50%;border:2px solid var(--line-2);flex:0 0 auto;
+    display:grid;place-items:center;transition:.16s var(--ease)}
+  .opt.on .chk{border-color:var(--gold-d);background:var(--gold-d)}
+  .opt .chk svg{opacity:0;transform:scale(.4);transition:.18s var(--ease)}
+  .opt.on .chk svg{opacity:1;transform:scale(1)}
+  .tagm{position:absolute;top:-9px;right:14px;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    background:var(--ocean);color:#fff;padding:3px 9px;border-radius:999px}
+
+  /* ── chips (owner topics) ── */
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin:2px 0 16px}
+  .chip{border:1.5px solid var(--line-2);background:var(--surf);border-radius:999px;padding:11px 16px;
+    font-family:inherit;font-size:14px;font-weight:700;color:var(--ink-2);cursor:pointer;min-height:44px;
+    transition:transform .12s var(--ease),border-color .12s,background .12s}
+  .chip:active{transform:scale(.95)}
+  .chip.on{border-color:var(--gold-d);background:var(--gold-l);color:var(--gold-d)}
+
+  /* ── slots ── */
+  .slots{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 8px}
+  .slot{border:1.5px solid var(--line);background:var(--surf);border-radius:13px;padding:13px 10px;text-align:left;
+    font-family:inherit;cursor:pointer;min-height:62px;transition:transform .12s var(--ease),border-color .12s,background .12s}
+  .slot:active{transform:scale(.97)}
+  .slot .sd{font-size:14px;font-weight:800}
+  .slot .st{font-size:13px;color:var(--ink-2);margin-top:1px}
+  .slot .sl{font-size:11px;font-weight:800;margin-top:6px;color:var(--ink-3)}
+  .slot .sl.low{color:var(--coral-d)}
+  .slot.on{border-color:var(--ocean);background:var(--aqua-l)}
+  .slot.full{opacity:.5;cursor:not-allowed}
+  .slot.full .sl{color:var(--ink-3)}
+  .why{font-size:12px;color:var(--ink-3);line-height:1.45;margin:0 2px 4px;display:flex;gap:6px}
+
+  /* ── fields ── */
+  .field{margin:0 0 13px}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px}
+  .field .optl{font-weight:600;color:var(--ink-3)}
+  .field input{width:100%;border:1.5px solid var(--line-2);border-radius:12px;padding:14px;font-family:inherit;font-size:16px;
+    background:var(--surf);transition:border-color .14s,box-shadow .14s}
+  .field input:focus{outline:none;border-color:var(--aqua);box-shadow:0 0 0 4px rgba(10,139,168,.12)}
+  .field .hint{font-size:11.5px;color:var(--ink-3);margin-top:6px;display:flex;gap:6px;line-height:1.4}
+
+  /* ── checkbox opt-in ── */
+  .optin{display:flex;gap:11px;align-items:flex-start;border:1.5px solid var(--line);border-radius:var(--r);padding:13px;cursor:pointer;margin:2px 0 14px;background:var(--surf)}
+  .optin .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line-2);flex:0 0 auto;display:grid;place-items:center;transition:.16s var(--ease);margin-top:1px}
+  .optin.on .box{background:var(--aqua);border-color:var(--aqua)}
+  .optin .box svg{opacity:0;transform:scale(.4);transition:.16s var(--ease)}
+  .optin.on .box svg{opacity:1;transform:scale(1)}
+  .optin .ot{font-size:13.5px;line-height:1.45;color:var(--ink-2)}.optin .ot b{color:var(--ink)}
+
+  /* ── disqualified / activity card ── */
+  .act{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surf);margin:4px 0 10px}
+  .act .ph{height:118px;background:linear-gradient(135deg,#0a8ba8,#0f4c5c);display:grid;place-items:center;color:#fff;font-size:36px}
+  .act .ab{padding:14px}
+  .act .at{font-size:16px;font-weight:800}.act .ad{font-size:13px;color:var(--ink-2);margin-top:3px;line-height:1.45}
+
+  /* ── confirm ── */
+  .ok{width:78px;height:78px;margin:8px auto 6px;display:block;animation:okpop .45s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes okpop{0%{transform:scale(.55);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  @media(prefers-reduced-motion:reduce){.ok{animation:none}}
+  .ok circle{stroke:var(--ok);stroke-width:5;fill:none;stroke-dasharray:201;stroke-dashoffset:201;animation:draw .5s var(--ease) .05s forwards}
+  .ok path{stroke:var(--ok);stroke-width:6;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:48;stroke-dashoffset:48;animation:draw .35s var(--ease) .42s forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @media(prefers-reduced-motion:reduce){.ok circle,.ok path{animation:none;stroke-dashoffset:0}}
+  .recap{background:#faf7f0;border:1px solid var(--line);border-radius:var(--r);padding:6px 15px;margin:14px 0}
+  .recap .row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .recap .row:last-child{border-bottom:0}
+  .recap .row span{color:var(--ink-2)}.recap .row b{text-align:right}
+  .next{font-size:13.5px;color:var(--ink-2);line-height:1.55}
+  .next .nh{font-weight:800;color:var(--ink);margin:2px 0 8px}
+  .next ul{margin:0;padding-left:18px}.next li{margin:6px 0}
+  .sms{display:flex;align-items:center;gap:10px;background:var(--green-l);border:1px solid #cbe6d4;border-radius:var(--r);padding:12px 14px;margin:14px 0;font-size:13px;color:#14532d;line-height:1.4}
+  .sms .ic{font-size:18px;flex:0 0 auto}
+
+  /* ── sticky CTA dock ── */
+  .dock{position:absolute;left:0;right:0;bottom:0;z-index:25;padding:13px 18px calc(13px + var(--safe-b));
+    background:linear-gradient(180deg,rgba(255,255,255,0),var(--surf) 28%);pointer-events:none}
+  .dock>*{pointer-events:auto}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:15px;
+    padding:16px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;min-height:54px;
+    transition:transform .12s var(--ease),filter .12s,opacity .12s}
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--coral);color:#fff}
+  .btn.primary:active{background:var(--coral-d)}
+  .btn.ocean{background:var(--ocean);color:#fff}
+  .btn.gold{background:var(--gold-d);color:#fff}
+  .btn:disabled{background:var(--line);color:var(--ink-3);opacity:1;cursor:not-allowed;filter:none}
+  .btn .ar{font-size:18px}
+  .dockhint{font-size:12px;color:var(--ink-3);text-align:center;margin:0 0 9px;line-height:1.4;
+    transition:opacity .18s var(--ease)}
+  .ghost{display:block;width:100%;background:transparent;border:0;color:var(--ink-3);font-family:inherit;
+    font-size:14px;font-weight:600;padding:11px;margin-top:6px;cursor:pointer;text-align:center}
+  .ghost:active{opacity:.6}
+
+  /* back affordance */
+  .back{position:absolute;left:14px;top:max(14px,env(safe-area-inset-top));z-index:31;width:38px;height:38px;
+    border:0;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border-radius:50%;display:none;place-items:center;
+    cursor:pointer;color:var(--ink);font-size:20px}
+  .back.show{display:grid}
+
+  /* ── start screen (demo segment chooser) ── */
+  #start{position:absolute;inset:0;z-index:60;background:linear-gradient(170deg,#0f4c5c,#0a3a47);color:#fff;
+    display:flex;flex-direction:column;padding:max(40px,env(safe-area-inset-top)) 26px calc(34px + var(--safe-b));overflow:auto}
+  #start .sm{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px}
+  #start .sm b{color:var(--gold)}
+  #start h2{font-size:27px;line-height:1.18;letter-spacing:-.02em;font-weight:800;margin:34px 0 10px}
+  #start .ss{font-size:15px;line-height:1.55;color:rgba(255,255,255,.78);margin:0 0 26px}
+  #start .qr{display:flex;align-items:center;gap:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+    border-radius:var(--r);padding:15px;margin-bottom:12px;width:100%;text-align:left;cursor:pointer;color:#fff;font-family:inherit;
+    transition:transform .14s var(--ease),background .14s}
+  #start .qr:active{transform:scale(.98)}
+  #start .qr:hover{background:rgba(255,255,255,.12)}
+  #start .qr .qc{width:52px;height:52px;border-radius:12px;background:#fff;display:grid;place-items:center;flex:0 0 auto}
+  #start .qr .ql{font-size:16px;font-weight:800}
+  #start .qr .qd{font-size:12.5px;color:rgba(255,255,255,.66);margin-top:2px}
+  #start .qr .qa{margin-left:auto;color:rgba(255,255,255,.6);font-size:22px}
+  #start .note{font-size:12px;color:rgba(255,255,255,.52);line-height:1.5;margin-top:18px}
+  #start .note code{background:rgba(255,255,255,.12);padding:1px 6px;border-radius:5px;font-size:11.5px}
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <main id="app" role="application" aria-label="OceanSafe Kauaʻi in-room guide">
+
+    <!-- demo segment chooser (one of the 3 printed QR codes) -->
+    <section id="start" aria-label="Choose demo segment">
+      <div class="sm">Ocean<b>Safe</b><span style="font-weight:600;font-size:13px;opacity:.7;margin-left:6px">· Kauaʻi</span></div>
+      <h2>Three printed QR codes.<br>One scans you in.</h2>
+      <p class="ss">In production the guest scans a single code in their unit — it already knows who they are. Pick a code to preview that experience.</p>
+
+      <button class="qr" data-seg="renter">
+        <span class="qc">
+          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="5" fill="#0f4c5c"/><g fill="#fff"><rect x="5" y="5" width="8" height="8" rx="1.5"/><rect x="21" y="5" width="8" height="8" rx="1.5"/><rect x="5" y="21" width="8" height="8" rx="1.5"/><rect x="16" y="16" width="3" height="3"/><rect x="22" y="16" width="3" height="3"/><rect x="26" y="20" width="3" height="3"/><rect x="16" y="22" width="3" height="3"/><rect x="20" y="26" width="3" height="3"/><rect x="26" y="26" width="3" height="3"/></g></svg>
+        </span>
+        <span><span class="ql">Renting the unit</span><span class="qd">Booked hotel-side · not an owner</span></span>
+        <span class="qa">›</span>
+      </button>
+
+      <button class="qr" data-seg="exchange">
+        <span class="qc">
+          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="5" fill="#0a8ba8"/><g fill="#fff"><rect x="5" y="5" width="8" height="8" rx="1.5"/><rect x="21" y="5" width="8" height="8" rx="1.5"/><rect x="5" y="21" width="8" height="8" rx="1.5"/><rect x="17" y="5" width="3" height="3"/><rect x="16" y="16" width="3" height="3"/><rect x="22" y="20" width="3" height="3"/><rect x="16" y="26" width="3" height="3"/><rect x="26" y="16" width="3" height="3"/><rect x="20" y="22" width="3" height="3"/></g></svg>
+        </span>
+        <span><span class="ql">Exchanging in</span><span class="qd">RCI / Interval · staying on points</span></span>
+        <span class="qa">›</span>
+      </button>
+
+      <button class="qr" data-seg="owner">
+        <span class="qc">
+          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="5" fill="#c9a84c"/><g fill="#fff"><rect x="5" y="5" width="8" height="8" rx="1.5"/><rect x="21" y="5" width="8" height="8" rx="1.5"/><rect x="5" y="21" width="8" height="8" rx="1.5"/><rect x="16" y="16" width="3" height="3"/><rect x="20" y="16" width="3" height="3"/><rect x="26" y="16" width="3" height="3"/><rect x="16" y="20" width="3" height="3"/><rect x="22" y="22" width="3" height="3"/><rect x="16" y="26" width="3" height="3"/><rect x="26" y="26" width="3" height="3"/></g></svg>
+        </span>
+        <span><span class="ql">Owner here</span><span class="qd">Vacation-ownership member</span></span>
+        <span class="qa">›</span>
+      </button>
+
+      <p class="note">Demo only — the chooser stands in for the printed code. You can also deep-link: <code>?seg=renter</code>, <code>?seg=exchange</code>, <code>?seg=owner</code>. Owners are routed by <code>isOwner()</code> and never see an ownership pitch.</p>
+    </section>
+
+    <!-- app chrome -->
+    <header class="bar">
+      <span class="mark" aria-label="OceanSafe">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M2 13c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2" stroke="#0a8ba8" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M2 9c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2" stroke="#0f4c5c" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        Ocean<b>Safe</b>
+      </span>
+      <span class="seg-tag" id="segTag" aria-live="polite">Guest</span>
+    </header>
+    <div class="prog" aria-hidden="true"><i id="progBar"></i></div>
+
+    <button class="back" id="backBtn" aria-label="Go back">‹</button>
+
+    <div class="scroll" id="scroll">
+      <div class="view" id="view"></div>
+    </div>
+
+    <div class="dock" id="dock"></div>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ════════════════════════ CONFIG (operator-set) ════════════════════════ */
+  var RESORT = "Marriott's Waiohai Beach Club";
+  var UNIT   = "214";
+
+  // exactly 3 curated, resort-funded gifts per segment (Iyengar: 3 > 24)
+  // "most" flags the honest, reversible default. v = anchored value.
+  var GIFTS = {
+    renter:[
+      {ic:"🌺",t:"Lūʻau for two",d:"Poʻipū · transport included",v:300,most:true},
+      {ic:"⛵",t:"Sunset dinner cruise",d:"Nāpali coast · for two",v:280},
+      {ic:"🏨",t:"$200 resort credit",d:"dining or spa on-property",v:200}
+    ],
+    exchange:[
+      {ic:"🤿",t:"Snorkel sail for two",d:"south-shore reef morning",v:200,most:true},
+      {ic:"🍽️",t:"$175 dining credit",d:"any on-site restaurant",v:175},
+      {ic:"💆",t:"$175 spa credit",d:"Waiohai spa",v:175}
+    ],
+    owner:[
+      {ic:"⭐",t:"15,000 bonus points",d:"added to your account",v:300,most:true},
+      {ic:"🍽️",t:"$250 owner dining credit",d:"any on-site restaurant",v:250},
+      {ic:"🌺",t:"Lūʻau for two",d:"Poʻipū · transport included",v:300}
+    ]
+  };
+
+  // 5-tap qualifier — operator-configurable. gate = passing answer.
+  var QUALIFY = [
+    {k:"couple",q:"Traveling as a couple, both able to attend together?",gate:"yes"},
+    {k:"age",   q:"Are you both 30 or older?",gate:"yes"},
+    {k:"home",  q:"Do you own your primary home?",gate:"yes"},
+    {k:"income",q:"Combined household income $50k or more?",gate:"yes"},
+    {k:"already",q:"Do you already own at this resort?",gate:"no"}
+  ];
+
+  var OWNER_TOPICS = ["More points","Add a week","Upgrade my unit","Better season"];
+
+  // real capacity feed → real "spots left". 0 = greyed, never hidden.
+  // unlimited:true would suppress scarcity entirely (honest lever rule).
+  function capacityFor(days){
+    // short lead beats incentives → bias to same/next day.
+    // Inventory is genuinely tight near checkout — keep the scarcity honest but
+    // visible on the common path (mostly 1-2 left, never a fake "lots open").
+    if(days>=2) return [
+      {day:"Today",  time:"2:00 PM", left:1},
+      {day:"Tomorrow",time:"9:00 AM", left:2},
+      {day:"Tomorrow",time:"2:00 PM", left:1},
+      {day:"Wed",    time:"9:00 AM", left:0}
+    ];
+    return [
+      {day:"Today", time:"2:00 PM", left:1},
+      {day:"Today", time:"4:30 PM", left:1},
+      {day:"Tomorrow",time:"8:30 AM", left:2},
+      {day:"Tomorrow",time:"10:00 AM",left:0}
+    ];
+  }
+  // honest social proof — only shown where real data exists
+  var PROOF = {
+    renter:"31 guests booked a session here this month",
+    exchange:"22 exchange guests toured here this month",
+    owner:"18 owners reviewed their plan here this month"
+  };
+
+  /* ════════════════════════ STATE ════════════════════════ */
+  var seg = "renter";              // set by QR / ?seg=
+  var DAYS_LEFT = 2;               // demo: nights remaining (operator: real)
+  var flow = {};
+  function resetFlow(){ flow = {gift:null, answers:{}, slot:null, topic:null, friend:"", email:"", optin:false, nurtureEmail:""}; }
+  resetFlow();
+
+  var history = [];                // step stack for back-nav
+
+  var $ = function(s,r){ return (r||document).querySelector(s); };
+  var view = $("#view"), dock = $("#dock"), scroll = $("#scroll");
+  var progBar = $("#progBar"), segTag = $("#segTag"), backBtn = $("#backBtn");
+
+  /* ── HARD GUARDRAIL: owners route to a no-buy tree. Enforced in code. ── */
+  function isOwner(){ return seg === "owner"; }
+  // Build-blocking invariant: the owner step registry must never reference a
+  // buy/qualify/tour step. assertOwnerSafe() throws if that ever changes.
+  var OWNER_STEPS = ["ownerWelcome","ownerUpdate","referral","sameTrip","nurture","confirm"];
+  var BUY_STEPS   = ["offer","qualify","disqualified","incentive"];
+  function assertOwnerSafe(){
+    for(var i=0;i<OWNER_STEPS.length;i++){
+      if(BUY_STEPS.indexOf(OWNER_STEPS[i])!==-1){
+        throw new Error("GUARDRAIL VIOLATION: owner tree references buy step '"+OWNER_STEPS[i]+"'");
+      }
+    }
+    return true;
+  }
+  function guardOwner(step){
+    // any attempt to send an owner into a buy step is blocked at runtime
+    if(isOwner() && BUY_STEPS.indexOf(step)!==-1){
+      throw new Error("GUARDRAIL: owner cannot enter buy step '"+step+"'");
+    }
+  }
+  assertOwnerSafe(); // runs at load — a violation breaks the demo loudly
+
+  /* ════════════════════════ HELPERS ════════════════════════ */
+  function CHK(){ return '<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+  function gifts(){ return GIFTS[seg] || GIFTS.renter; }
+  function giftByKey(k){ return gifts()[k]; }
+
+  function setProgress(pct){ progBar.style.width = Math.max(14, pct) + "%"; }
+
+  function haptic(){ if(navigator.vibrate){ try{ navigator.vibrate(8); }catch(e){} } }
+
+  // central renderer: keeps one-thing-per-screen, animates in, resets scroll
+  function render(opts){
+    // opts: {body, cta, ghost, onCta, progress, canBack, ctaClass}
+    view.innerHTML = '<div class="anim-in">'+opts.body+'</div>';
+    var dockHtml = "";
+    // hint above the CTA explaining WHY it's locked — shown only while disabled
+    if(opts.hint){
+      dockHtml += '<div class="dockhint" id="dockHint" aria-live="polite" style="'+(opts.ctaDisabled?"":"display:none")+'">'+opts.hint+'</div>';
+    }
+    if(opts.cta){
+      dockHtml += '<button class="btn '+(opts.ctaClass||"primary")+'" id="ctaBtn"'+(opts.ctaDisabled?" disabled":"")+'>'+
+        opts.cta+(opts.ctaArrow?' <span class="ar">→</span>':'')+'</button>';
+    }
+    if(opts.ghost){ dockHtml += '<button class="ghost" id="ghostBtn">'+opts.ghost+'</button>'; }
+    dock.innerHTML = dockHtml;
+    if(opts.cta){ $("#ctaBtn").addEventListener("click", function(){ haptic(); opts.onCta&&opts.onCta(); }); }
+    if(opts.ghost){ $("#ghostBtn").addEventListener("click", function(){ opts.onGhost&&opts.onGhost(); }); }
+    setProgress(opts.progress||14);
+    backBtn.classList.toggle("show", !!opts.canBack);
+    scroll.scrollTop = 0;
+    if(opts.after) opts.after();
+  }
+  function setCtaEnabled(on){
+    var b=$("#ctaBtn"); if(b){ b.disabled=!on; }
+    var h=$("#dockHint"); if(h){ h.style.display = on ? "none" : ""; }
+  }
+
+  // push a step so Back works
+  function go(stepFn, name){
+    guardOwner(name);
+    history.push(stepFn);
+    stepFn();
+  }
+  backBtn.addEventListener("click", function(){
+    if(history.length>1){ history.pop(); var prev=history[history.length-1]; prev(); }
+    else { backToHub(); }
+  });
+  function backToHub(){ history=[hub]; resetFlow(); hub(); }
+
+  /* ════════════════════════ UTILITY HUB (all segments) ════════════════════════ */
+  function hub(){
+    history=[hub];
+    var greet = isOwner()
+      ? '<span class="eyebrow">Aloha again, owner</span><h1>Welcome home to Poʻipū.</h1>'
+      : '<span class="eyebrow">Aloha · live beach safety</span><h1>Know before you go in.</h1>';
+    var body =
+      '<div class="hero">'+greet+
+        '<p class="lede">Today\'s lifeguard flags for the South Shore, updated this morning.</p>'+
+      '</div>'+
+      '<div class="status">'+
+        '<span class="glyph">'+flagGlyph()+'</span>'+
+        '<span><b>Poʻipū Beach Park</b><span class="s">Low hazard · lifeguarded · gentle</span></span>'+
+        '<span class="now">Updated<br>7:42 AM</span>'+
+      '</div>'+
+      '<div class="sect-h">Flags right now <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink-3)">· tap a beach for detail</span></div>'+
+      beachRow("f-lo","LO","Poʻipū Beach Park","Low · lifeguarded · gentle shorebreak",
+        "Calmest of the south-shore beaches this morning. Lifeguard on duty 9am–5pm. <b>Watch the right side</b> near the rocks where a mild current pulls out.",
+        {Surf:"1–2 ft",Wind:"8 mph E",Water:"77°F"})+
+      beachRow("f-md","MD","Shipwreck Beach","Moderate · shorebreak building midday",
+        "A strong shorebreak builds as the swell fills in after noon. <b>Fine for strong swimmers in the morning</b>; not for keiki or boogie-boarding past midday.",
+        {Surf:"3–4 ft",Wind:"12 mph E",Water:"76°F"})+
+      beachRow("f-hi","HI","Queen's Bath","High · do not enter · strong current",
+        "<b>Do not enter the water.</b> The lava ledge is being washed by sets and the rip is pulling hard offshore. People are swept off these rocks every year — admire it from the trail only.",
+        {Surf:"5–7 ft",Wind:"15 mph NE",Water:"75°F"})+
+      beachRow("f-lo","LO","Baby Beach (Poʻipū)","Low · protected · great for keiki",
+        "A reef-sheltered pool that stays calm at most tides — the best keiki spot on the south shore today. <b>Shallow and warm</b>, no lifeguard, so keep little ones within reach.",
+        {Surf:"0–1 ft",Wind:"7 mph E",Water:"78°F"})+
+      '<div class="sect-h">Your stay · unit '+UNIT+'</div>'+
+      '<div class="trip">'+
+        ringSvg(6,8)+
+        '<span><b>6 beaches explored</b><span class="s">Day '+(8-DAYS_LEFT)+' of 7 · '+RESORT+'</span></span>'+
+      '</div>';
+
+    render({
+      body: body,
+      progress: 14,
+      cta: isOwner() ? "See what's new for owners" : "Stay close — see your aloha gift",
+      ctaArrow:true,
+      ctaClass: isOwner()?"gold":"primary",
+      onCta: function(){
+        if(isOwner()){ go(ownerWelcome,"ownerWelcome"); }
+        else { go(offer,"offer"); }
+      },
+      after: function(){
+        // beaches are real expandable detail (utility hook must actually pay off).
+        Array.prototype.forEach.call(view.querySelectorAll(".beach"), function(b){
+          b.addEventListener("click", function(){
+            haptic();
+            var d = b.nextElementSibling;
+            var open = b.getAttribute("aria-expanded")==="true";
+            // accordion: close any other open row
+            Array.prototype.forEach.call(view.querySelectorAll(".beach"), function(x){
+              x.setAttribute("aria-expanded","false");
+              if(x.nextElementSibling && x.nextElementSibling.classList) x.nextElementSibling.classList.remove("open");
+            });
+            if(!open && d){ b.setAttribute("aria-expanded","true"); d.classList.add("open"); }
+          });
+        });
+      }
+    });
+  }
+  function beachRow(cls,abbr,name,meta,detail,met){
+    var metHtml = met ? '<div class="met">'+Object.keys(met).map(function(k){
+        return '<i>'+k+' <b>'+met[k]+'</b></i>'; }).join("")+'</div>' : '';
+    return '<button class="beach" aria-expanded="false"><span class="flag '+cls+'">'+abbr+'</span>'+
+      '<span><span class="nm">'+name+'</span><span class="mt">'+meta+'</span></span>'+
+      '<span class="chev" aria-hidden="true">›</span></button>'+
+      '<div class="bdetail"><div class="inner">'+(detail||meta)+metHtml+'</div></div>';
+  }
+  // lifeguard flag on a pole — reads as beach-safety, not a media "play" glyph
+  function flagGlyph(){
+    return '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">'+
+      '<rect x="6" y="2" width="1.6" height="18" rx="0.8" fill="#fff"/>'+
+      '<path d="M7.6 3.2h9.2l-2.4 3 2.4 3H7.6z" fill="#fff"/></svg>';
+  }
+  function ringSvg(done,total){
+    var pct=done/total, c=2*Math.PI*18, off=c*(1-pct);
+    return '<svg class="ring" viewBox="0 0 46 46" aria-hidden="true">'+
+      '<circle cx="23" cy="23" r="18" fill="none" stroke="#ece2cc" stroke-width="5"/>'+
+      '<circle cx="23" cy="23" r="18" fill="none" stroke="#c9a84c" stroke-width="5" stroke-linecap="round" '+
+        'stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 23 23)"/>'+
+      '<text x="23" y="27" text-anchor="middle" font-size="13" font-weight="800" fill="#a8862f">'+done+'</text></svg>';
+  }
+
+  /* ════════════════════════ NON-OWNER: tour funnel ════════════════════════ */
+  function offer(){
+    var g = gifts();
+    var ex = seg==="exchange";
+    var hook = ex ? "Loved the islands on points?" : "Not ready to leave Kauaʻi?";
+    var line = ex
+      ? "Plenty of our exchange guests end up staying close. Sit in on a relaxed, no-pressure ownership session and pick a thank-you, on us:"
+      : "A lot of our guests come back to this beach every year. Sit in on a no-pressure ownership session and pick a thank-you, on us:";
+    render({
+      progress: 30,
+      canBack:true,
+      body:
+        '<div class="pill aqua"><span class="dotpulse"></span>You explored 6 Kauaʻi beaches this trip</div>'+
+        '<h2 class="h2">'+hook+'</h2>'+
+        '<p class="p">'+line+'</p>'+
+        '<div class="gift-row">'+ g.map(function(x){
+          return '<div class="gmini"><div class="gi">'+x.ic+'</div><div class="gt">'+x.t+'</div><div class="gv">$'+x.v+'</div></div>';
+        }).join("") +'</div>'+
+        '<div class="disc"><span class="ico">!</span><span><b>Straight up:</b> it\'s a ~90-minute timeshare presentation. No obligation — you keep the gift just for attending. Resort-funded.</span></div>',
+      cta:"See if I qualify", ctaArrow:true,
+      onCta:function(){ go(qualify,"qualify"); },
+      ghost:"Maybe later",
+      onGhost:function(){ log("dismissed"); go(nurture,"nurture"); }   // ethical exit → one-tap nurture, not a needy modal
+    });
+  }
+
+  function qualify(){
+    var rows = QUALIFY.map(function(it){
+      return '<div class="q"><div class="qq">'+it.q+'</div>'+
+        '<div class="yn" data-k="'+it.k+'"><button data-v="yes">Yes</button><button data-v="no">No</button></div></div>';
+    }).join("");
+    render({
+      progress: 46,
+      canBack:true,
+      body:
+        '<div class="pill aqua">⏱ 15 seconds · 5 quick taps</div>'+
+        '<h2 class="h2">Quick check</h2>'+
+        '<p class="p">Resorts reserve the gift for guests who genuinely fit. No typing.</p>'+
+        rows+
+        '<div class="trust"><span class="lk">🔒</span><span>We never sell your answers. This only decides which offer fits — and you can stop anytime.</span></div>',
+      cta:"Continue", ctaArrow:true, ctaDisabled:true,
+      hint:"Answer all 5 to continue",
+      onCta:function(){
+        var pass = QUALIFY.every(function(it){ return flow.answers[it.k]===it.gate; });
+        pass ? go(incentive,"incentive") : go(disqualified,"disqualified");
+      },
+      after:function(){
+        Array.prototype.forEach.call(view.querySelectorAll(".yn"), function(yn){
+          Array.prototype.forEach.call(yn.querySelectorAll("button"), function(b){
+            b.addEventListener("click", function(){
+              haptic();
+              Array.prototype.forEach.call(yn.querySelectorAll("button"), function(x){ x.classList.remove("on","neg"); });
+              b.classList.add("on"); if(b.dataset.v==="no") b.classList.add("neg");
+              flow.answers[yn.dataset.k]=b.dataset.v;
+              setCtaEnabled(Object.keys(flow.answers).length===QUALIFY.length);
+            });
+          });
+        });
+      }
+    });
+  }
+
+  // segment-aware off-ramp activity (stays consistent with operator's menu;
+  // falls back to the curated cruise). Honest: OceanSafe doesn't fulfill —
+  // we hand off to the front desk / booking partner, never a no-op.
+  function offRampActivity(){
+    return {
+      ic:"⛵",
+      t:"Sunset Nāpali coast cruise — tonight",
+      d:"Departs Port Allen 5:30 PM. We'll let the front desk hold a couple of OceanSafe seats. No catch, no pitch."
+    };
+  }
+  function disqualified(){
+    log("disqualified");  // a gracious off-ramp is a feature. all levers OFF.
+    var a = offRampActivity();
+    render({
+      progress: 55,   // soft off-ramp: NOT a high-value completion — never crown it 100%
+      canBack:true,
+      body:
+        '<h2 class="h2">No session this time —</h2>'+
+        '<p class="p">that one isn\'t a fit, and we\'d never spend your last day on a presentation you can\'t use. Here\'s something you actually can, before you fly out:</p>'+
+        '<div class="act"><div class="ph">'+a.ic+'</div><div class="ab">'+
+          '<div class="at">'+a.t+'</div>'+
+          '<div class="ad">'+a.d+'</div>'+
+        '</div></div>'+
+        '<div class="act"><div class="ph" style="background:linear-gradient(135deg,#c9a84c,#a8862f)">🥾</div><div class="ab">'+
+          '<div class="at">Māhāʻulepū Heritage Trail</div>'+
+          '<div class="ad">Quiet coastal hike, 15 min from your unit. Best light right after sunrise.</div>'+
+        '</div></div>',
+      cta:"Hold my cruise seats", ctaClass:"ocean", ctaArrow:true,
+      onCta:function(){ log("activity_holds"); go(function(){ confirm("activity"); },"confirm"); },
+      ghost:"Back to beach safety",
+      onGhost:function(){ backToHub(); }
+    });
+  }
+
+  function incentive(){
+    var g = gifts();
+    var cards = g.map(function(x,i){
+      return '<button class="opt" data-k="'+i+'">'+
+        (x.most?'<span class="tagm">Most picked</span>':'')+
+        '<span class="oi">'+x.ic+'</span>'+
+        '<span><span class="ot">'+x.t+'</span><span class="od">'+x.d+'</span><span class="ov">$'+x.v+' value · on the resort</span></span>'+
+        '<span class="chk">'+CHK()+'</span></button>';
+    }).join("");
+    render({
+      progress: 62,
+      canBack:true,
+      body:
+        '<div class="pill gold">🎉 You\'re in — all three are funded by the resort</div>'+
+        '<h2 class="h2">Pick your thank-you</h2>'+
+        '<p class="p">Yours to keep just for attending the session. Choose the one you\'d love most.</p>'+
+        cards+
+        '<div class="disc"><span class="ico">♥</span><span>90-minute session, <b>no obligation to buy</b>. The gift is yours whether you join or not.</span></div>',
+      cta:"Continue", ctaArrow:true, ctaDisabled:true,
+      hint:"Pick your gift to continue",
+      onCta:function(){ DAYS_LEFT>=1 ? go(sameTrip,"sameTrip") : go(nurture,"nurture"); },
+      after:function(){ wireGiftPick(); }
+    });
+  }
+  function wireGiftPick(onPick){
+    Array.prototype.forEach.call(view.querySelectorAll(".opt"), function(o){
+      o.addEventListener("click", function(){
+        haptic();
+        Array.prototype.forEach.call(view.querySelectorAll(".opt"), function(x){ x.classList.remove("on"); });
+        o.classList.add("on");
+        flow.gift = +o.dataset.k;
+        setCtaEnabled(true);
+        onPick && onPick();
+      });
+    });
+  }
+
+  /* ════════════════════════ OWNER: update + referral (NO BUY) ════════════════════════ */
+  function ownerWelcome(){
+    render({
+      progress: 30,
+      canBack:true,
+      body:
+        '<div class="pill gold">🌺 Owner since 2019 · year 7 with us</div>'+
+        '<h2 class="h2">Two things owners love this week.</h2>'+
+        '<p class="p">Hope unit '+UNIT+' feels like home. Your call — both come with a resort-funded thank-you, zero pressure.</p>'+
+        ownerCard("ownerUpd","📈","Review my ownership","More points, add a week, a better season — a quick benefits review.")+
+        ownerCard("ownerRef","🌺","Refer a friend","Send an aloha gift. If they visit and tour, you both get rewarded."),
+      // two co-equal CTAs live in the body as cards; dock holds the gentle dismiss
+      ghost:"Just enjoying my stay",
+      onGhost:function(){ log("dismissed"); backToHub(); },
+      after:function(){
+        $("#ownerUpd").addEventListener("click", function(){ haptic(); go(ownerUpdate,"ownerUpdate"); });
+        $("#ownerRef").addEventListener("click", function(){ haptic(); go(referral,"referral"); });
+      }
+    });
+  }
+  function ownerCard(id,ic,title,desc){
+    return '<button class="opt" id="'+id+'" style="margin-bottom:11px">'+
+      '<span class="oi" style="background:var(--gold-l);border-color:var(--gold)">'+ic+'</span>'+
+      '<span><span class="ot">'+title+'</span><span class="od">'+desc+'</span></span>'+
+      '<span class="chev" style="margin-left:auto;color:var(--ink-3);font-size:22px">›</span></button>';
+  }
+
+  function ownerUpdate(){
+    var g = gifts();
+    var chips = OWNER_TOPICS.map(function(t){ return '<button class="chip" data-t="'+t+'">'+t+'</button>'; }).join("");
+    var cards = g.map(function(x,i){
+      return '<button class="opt" data-k="'+i+'">'+
+        (x.most?'<span class="tagm">Most picked</span>':'')+
+        '<span class="oi">'+x.ic+'</span>'+
+        '<span><span class="ot">'+x.t+'</span><span class="od">'+x.d+'</span><span class="ov">$'+x.v+' value · on the resort</span></span>'+
+        '<span class="chk">'+CHK()+'</span></button>';
+    }).join("");
+    render({
+      progress: 52,
+      canBack:true,
+      body:
+        '<div class="pill gold">~60 min · benefits review, never a sales pitch</div>'+
+        '<h2 class="h2">What would make your weeks better?</h2>'+
+        '<p class="p">Pick what you\'d like to talk through.</p>'+
+        '<div class="chips">'+chips+'</div>'+
+        '<div class="sect-h" style="margin-top:4px">Your thank-you for sitting down</div>'+
+        cards,
+      cta:"Book my owner update", ctaArrow:true, ctaClass:"gold", ctaDisabled:true,
+      hint:"Pick a topic and your thank-you",
+      onCta:function(){ DAYS_LEFT>=1 ? go(sameTrip,"sameTrip") : go(nurture,"nurture"); },
+      after:function(){
+        Array.prototype.forEach.call(view.querySelectorAll(".chip"), function(c){
+          c.addEventListener("click", function(){
+            haptic();
+            Array.prototype.forEach.call(view.querySelectorAll(".chip"), function(x){ x.classList.remove("on"); });
+            c.classList.add("on"); flow.topic=c.dataset.t; check();
+          });
+        });
+        wireGiftPick(check);
+        function check(){ setCtaEnabled(!!(flow.topic && flow.gift!==null)); }
+      }
+    });
+  }
+
+  function referral(){
+    render({
+      progress: 52,
+      canBack:true,
+      body:
+        '<div class="pill gold">🌺 You both get rewarded</div>'+
+        '<h2 class="h2">Know someone who\'d love it here?</h2>'+
+        '<p class="p">Send them an aloha gift. If they visit and take a tour, you both get rewarded — no strings on your end.</p>'+
+        '<div class="field"><label for="fn">Friend\'s first name</label><input id="fn" type="text" autocomplete="off" placeholder="e.g. Dana"></div>'+
+        '<div class="field"><label for="fe">Their email</label><input id="fe" type="email" autocomplete="off" inputmode="email" placeholder="dana@email.com">'+
+          '<div class="hint">🔒 We send one aloha gift email — no spam, no resale.</div></div>',
+      cta:"Send their aloha gift", ctaClass:"gold", ctaDisabled:true,
+      hint:"Add your friend's name and email",
+      onCta:function(){ flow.friend=$("#fn").value.trim(); flow.email=$("#fe").value.trim(); log("referral"); go(function(){ confirm("referral"); },"confirm"); },
+      after:function(){
+        function ck(){
+          var ok = $("#fn").value.trim() && /.+@.+\..+/.test($("#fe").value.trim());
+          setCtaEnabled(!!ok);
+        }
+        $("#fn").addEventListener("input", ck); $("#fe").addEventListener("input", ck);
+      }
+    });
+  }
+
+  /* ════════════════════════ SHARED: same-trip booking ════════════════════════ */
+  function sameTrip(){
+    var owner = isOwner();
+    var caps = capacityFor(DAYS_LEFT);
+    var anySlot = caps.some(function(s){ return s.left>0; });
+
+    // ── ALL-FULL state: real production state as inventory depletes. ──
+    // Don't strand the guest behind a dead disabled button — show an explicit
+    // empty-state and PROMOTE the next-trip nurture path to the primary CTA.
+    if(!anySlot){
+      log("slots_full");
+      render({
+        progress: 80,
+        canBack:true,
+        body:
+          '<div class="pill aqua">🚐 Shuttle included · ~'+(owner?"60":"90")+' min</div>'+
+          '<h2 class="h2">'+(owner?"Sessions are full right now":"All booked for your remaining nights")+'</h2>'+
+          '<p class="p">Every '+(owner?"owner update":"session")+' is full for the rest of your stay — these fill from check-in. We\'d rather not rush you onto a bad time.</p>'+
+          '<div class="act"><div class="ph" style="background:linear-gradient(135deg,#0a8ba8,#0f4c5c)">✈️</div><div class="ab">'+
+            '<div class="at">Save it for your next trip</div>'+
+            '<div class="ad">We\'ll hold your '+(flow.gift!==null?giftByKey(flow.gift).t.toLowerCase():"aloha gift")+' and line up a session for your return — one reminder, nothing before that.</div>'+
+          '</div></div>',
+        cta:"Save my gift for next trip", ctaArrow:true, ctaClass: owner?"gold":"primary",
+        onCta:function(){ go(nurture,"nurture"); }
+      });
+      return;
+    }
+
+    var slotsHtml = caps.map(function(s,i){
+      var full = s.left<=0;
+      var low = s.left===1;
+      var lab = full ? "Full" : (s.left+" spot"+(s.left>1?"s":"")+" left");
+      return '<button class="slot'+(full?" full":"")+'" data-i="'+i+'"'+(full?" disabled aria-disabled=\"true\"":"")+'>'+
+        '<div class="sd">'+s.day+'</div><div class="st">'+s.time+'</div>'+
+        '<div class="sl'+(low?" low":"")+'">'+lab+'</div></button>';
+    }).join("");
+    // honest scarcity reason line — driven by the real feed, always shown so the
+    // lever is visible on the common path (count of genuine same-trip openings).
+    var tight = caps.filter(function(s){return s.left>0;}).length;
+    var reason = '<div class="why"><span>ℹ️</span><span>'+tight+' session time'+(tight>1?"s":"")+' left before checkout — sessions run twice a day and fill from check-in.</span></div>';
+    var proof = PROOF[seg] ? '<div class="proof"><span class="av"><i></i><i style="background:#c9a84c"></i><i style="background:#0f4c5c"></i></span><span><b>'+PROOF[seg]+'</b></span></div>' : '';
+
+    render({
+      progress: 80,
+      canBack:true,
+      body:
+        '<div class="pill aqua">🚐 Shuttle included · ~'+(owner?"60":"90")+' min</div>'+
+        '<h2 class="h2">'+(owner?"Book your owner update":"Grab a session before checkout")+'</h2>'+
+        '<p class="p">'+(owner?"A relaxed benefits review — pick the time that suits you.":"You\'ve got time before you fly out. Pick a slot — we\'ll text your shuttle pickup.")+'</p>'+
+        reason+
+        '<div class="slots">'+slotsHtml+'</div>'+
+        proof,
+      cta:"Reserve under my name", ctaArrow:true, ctaClass: owner?"gold":"primary", ctaDisabled:true,
+      hint:"Pick a session time above",
+      onCta:function(){ log(owner?"owner_update":"tour_booked"); go(function(){ confirm("trip"); },"confirm"); },
+      ghost:"I\'m flying out — save it for next trip",
+      onGhost:function(){ go(nurture,"nurture"); },
+      after:function(){
+        Array.prototype.forEach.call(view.querySelectorAll(".slot"), function(sl){
+          if(sl.classList.contains("full")) return;
+          sl.addEventListener("click", function(){
+            haptic();
+            Array.prototype.forEach.call(view.querySelectorAll(".slot"), function(x){ x.classList.remove("on"); });
+            sl.classList.add("on");
+            var c=caps[+sl.dataset.i]; flow.slot=c.day+" · "+c.time;
+            setCtaEnabled(true);
+          });
+        });
+      }
+    });
+  }
+
+  /* ════════════════════════ SHARED: nurture opt-in ════════════════════════ */
+  function nurture(){
+    var owner = isOwner();
+    var giftName = flow.gift!==null ? giftByKey(flow.gift).t.toLowerCase() : "aloha gift";
+    render({
+      progress: 88,
+      canBack:true,
+      body:
+        '<div class="pill aqua">✈️ For your next Kauaʻi trip</div>'+
+        '<h2 class="h2">Flying out soon?</h2>'+
+        '<p class="p">No problem. We\'ll hold your '+giftName+' and line up the '+(owner?"owner update":"session")+' for your next visit.</p>'+
+        '<div class="field"><label for="em">Email</label><input id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com"></div>'+
+        '<div class="optin" id="optin" role="checkbox" aria-checked="false" tabindex="0">'+
+          '<span class="box">'+CHK()+'</span>'+
+          '<span class="ot"><b>Yes, remind me once</b> when I start planning my return. One message — unsubscribe anytime.</span>'+
+        '</div>',
+      cta:"Save my gift for next trip", ctaClass: owner?"gold":"primary", ctaDisabled:true,
+      hint:"Add your email and check the box",
+      onCta:function(){ flow.nurtureEmail=$("#em").value.trim(); log(owner?"owner_nurture":"nurture"); go(function(){ confirm("next"); },"confirm"); },
+      after:function(){
+        var optin=$("#optin"), em=$("#em");
+        function ck(){
+          var ok = flow.optin && /.+@.+\..+/.test(em.value.trim());
+          setCtaEnabled(ok);
+        }
+        function toggle(){ flow.optin=!flow.optin; optin.classList.toggle("on",flow.optin); optin.setAttribute("aria-checked",flow.optin); haptic(); ck(); }
+        optin.addEventListener("click", toggle);
+        optin.addEventListener("keydown", function(e){ if(e.key===" "||e.key==="Enter"){ e.preventDefault(); toggle(); } });
+        em.addEventListener("input", ck);
+      }
+    });
+  }
+
+  /* ════════════════════════ PEAK-END: confirm ════════════════════════ */
+  function confirm(route){
+    backBtn.classList.remove("show");
+    var owner = isOwner();
+    var g = flow.gift!==null ? giftByKey(flow.gift) : null;
+    var body;
+
+    if(route==="referral"){
+      body =
+        okMark()+
+        '<h2 class="h2" style="text-align:center">Gift on its way 🌺</h2>'+
+        '<p class="p" style="text-align:center">We\'ll email '+(flow.friend||"your friend")+' their aloha gift and a Kauaʻi planning guide.</p>'+
+        '<div class="recap">'+
+          row("Sent to", flow.friend||"Your friend")+
+          row("Reward", "You both — when they tour")+
+        '</div>'+
+        '<div class="next"><div class="nh">What happens next</div><ul>'+
+          '<li>'+(flow.friend||"They")+' get a warm intro and your aloha gift.</li>'+
+          '<li>When they visit and attend a tour, your owner account is credited automatically.</li>'+
+        '</ul></div>';
+    } else if(route==="activity"){
+      var act = offRampActivity();
+      body =
+        okMark()+
+        '<h2 class="h2" style="text-align:center">Seats requested 🌺</h2>'+
+        '<p class="p" style="text-align:center">We\'ve asked the front desk to hold your spots — they\'ll confirm availability shortly.</p>'+
+        '<div class="recap">'+
+          row("Activity", act.t.split(" — ")[0])+
+          row("Tonight", "5:30 PM · Port Allen")+
+        '</div>'+
+        '<div class="sms"><span class="ic">💬</span><span>The front desk will text you to confirm pickup and any balance. OceanSafe doesn\'t charge you — this is a friendly hand-off, no pitch.</span></div>'+
+        '<div class="next"><div class="nh">What happens next</div><ul>'+
+          '<li>Front desk confirms your held seats by text.</li>'+
+          '<li>Enjoy your last evening on the water — mahalo for staying with us.</li>'+
+        '</ul></div>';
+    } else {
+      var when = route==="trip" ? flow.slot : "your next Kauaʻi trip";
+      var title = route==="trip"
+        ? (owner?"Your owner update is booked":"You're booked")
+        : "Saved — see you next time";
+      var smsLine = route==="trip"
+        ? '<div class="sms"><span class="ic">💬</span><span>We\'ll text a confirmation now, then a reminder 48 hours before and on the day. Tap to confirm and your spot is locked.</span></div>'
+        : '<div class="sms"><span class="ic">💌</span><span>One friendly email when you start planning your return — nothing before that.</span></div>';
+      body =
+        okMark()+
+        '<h2 class="h2" style="text-align:center">'+title+'</h2>'+
+        '<div class="recap">'+
+          row("Resort", RESORT)+
+          (owner&&flow.topic ? row("Topic", flow.topic) : "")+
+          (g ? row("Your gift", g.ic+" "+g.t) : "")+
+          row(route==="trip"?(owner?"Owner update":"Session"):"When", when)+
+          (route==="trip" ? row("Reserved under","Unit "+UNIT+" · no deposit") : "")+
+        '</div>'+
+        smsLine+
+        '<div class="next"><div class="nh">What happens next</div><ul>'+
+          (route==="trip"
+            ? '<li>Concierge texts your shuttle pickup time.</li><li>'+(owner?"It\'s a benefits review — explore freely, zero pressure.":"Attend the full session with both guests, then claim your gift on the spot.")+'</li><li>'+(owner?"Keep everything you have, no matter what.":"No obligation to buy. Ever.")+'</li>'
+            : '<li>We hold your gift and your preferred session.</li><li>One reminder when you\'re planning your return — then we line it up.</li>')+
+        '</ul></div>';
+    }
+
+    render({
+      progress: 100,
+      body: body,
+      cta:"Back to beach safety", ctaClass: owner?"gold":"ocean",
+      onCta:function(){ backToHub(); }
+    });
+    // peak-end micro-flourish (reduced-motion safe — CSS gates the animation)
+  }
+  function okMark(){
+    return '<svg class="ok" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="32"/><path d="M25 41l11 11 20-23"/></svg>';
+  }
+  function row(k,v){ return '<div class="row"><span>'+k+'</span><b>'+v+'</b></div>'; }
+
+  /* ════════════════════════ INSTRUMENTATION (category-first baseline) ════════════════════════ */
+  // logs open→qualify→book→show funnel per segment. In production → analytics.
+  function log(event){
+    var rec = {t:Date.now(), seg:seg, event:event, gift:flow.gift!==null?giftByKey(flow.gift).t:null,
+               topic:flow.topic||null, slot:flow.slot||null, daysLeft:DAYS_LEFT};
+    try{
+      var arr = JSON.parse(localStorage.getItem("oceansafe_v2_events")||"[]");
+      arr.push(rec); localStorage.setItem("oceansafe_v2_events", JSON.stringify(arr.slice(-200)));
+    }catch(e){}
+    if(window.console) console.log("[OceanSafe]", event, "·", seg, rec.gift?("· "+rec.gift):"");
+  }
+
+  /* ════════════════════════ BOOT ════════════════════════ */
+  function applySegment(s){
+    seg = (s==="owner"||s==="exchange"||s==="renter") ? s : "renter";
+    segTag.textContent = seg==="owner"?"Owner":(seg==="exchange"?"Exchange guest":"Guest");
+    segTag.classList.toggle("owner", seg==="owner");
+    assertOwnerSafe();          // re-verify guardrail on every segment switch
+    log("app_open");
+    $("#start").style.display="none";
+    hub();
+  }
+
+  // ?seg= deep-link skips the chooser; otherwise show the QR start screen
+  var params = new URLSearchParams(location.search);
+  var qp = params.get("seg");
+  if(params.get("days")) DAYS_LEFT = Math.max(0, Math.min(7, parseInt(params.get("days"),10)||2));
+  if(qp){ applySegment(qp); }
+  else {
+    Array.prototype.forEach.call(document.querySelectorAll("#start .qr"), function(b){
+      b.addEventListener("click", function(){ haptic(); applySegment(b.dataset.seg); });
+    });
+  }
+})();
+</script>
+</body>
+</html>
