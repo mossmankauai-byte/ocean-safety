@@ -11,7 +11,7 @@
 // To bust the cache after a meaningful deploy, bump CACHE_VERSION below.
 // Visitors get the new HTML on next launch (with a brief "Updating…" hop).
 
-const CACHE_VERSION = 'v14-2026-06-19';
+const CACHE_VERSION = 'v15-2026-06-20';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -162,3 +162,4 @@ if (workbox) {
 // Take control immediately on update — so a deploy doesn't require closing all tabs.
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+
