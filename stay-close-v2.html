@@ -5,8 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f4c5c">
 <title>OceanSafe · Kauaʻi</title>
+<link rel="icon" type="image/png" href="/assets/oceansafe-favicon.png">
+<link rel="apple-touch-icon" href="/assets/oceansafe-favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap">
 <style>
-  /* ── critical inline tokens (system fonts, no web-font fetch → fast LCP) ── */
+  /* ── critical inline tokens (system fonts, no web-font fetch -> fast LCP) ── */
   :root{
     --ocean:#0f4c5c; --ocean-d:#0a3a47; --aqua:#0a8ba8; --aqua-l:#e3f4f8;
     --gold:#c9a84c; --gold-d:#a8862f; --gold-l:#f8efd6;
@@ -18,8 +23,37 @@
     --r:16px; --r-sm:11px; --r-lg:22px;
     --safe-b:env(safe-area-inset-bottom,0px);
     --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    /* DISPLAY serif — five-star hallmark; matched fallback so the swap is shift-free */
+    --serif:"Fraunces",ui-serif,Georgia,"Times New Roman",serif;
     --ease:cubic-bezier(.22,.9,.27,1);
+    /* operator logo swap: set --logo:url("...") to drop a real mark, zero layout shift */
+    --logo:none;
   }
+  /* editorial display type — serif on cover/headlines/gift names/confirm only */
+  .serif{font-family:var(--serif);font-weight:600;letter-spacing:-.02em;font-optical-sizing:auto}
+  .tnum{font-variant-numeric:tabular-nums}
+  /* gold hairline rule — recurring luxury signature above eyebrows */
+  .grule{display:block;width:40px;height:1px;background:var(--gold);margin:0 0 11px;border:0}
+  .grule.center{margin-left:auto;margin-right:auto}
+
+  /* ── PHOTO-CARD PRIMITIVE (single reused element; solid fallback first -> zero CLS) ── */
+  .photo{position:relative;width:100%;overflow:hidden;border-radius:var(--r);background:var(--ocean)}
+  .photo::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);pointer-events:none;z-index:3}
+  .photo>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+    opacity:0;transition:opacity .6s var(--ease);filter:saturate(.92)}
+  .photo>img.loaded{opacity:1}
+  .photo.fb-aqua{background:var(--aqua)}
+  .photo.fb-green{background:var(--green)}
+  .photo.fb-gold{background:var(--gold-d)}
+  .photo .scrim{position:absolute;inset:0;border-radius:inherit;z-index:1}
+  .photo .scrim.dark{background:linear-gradient(180deg,rgba(8,28,35,.04) 0%,rgba(8,28,35,.16) 42%,rgba(8,28,35,.76) 100%)}
+  .photo .scrim.light{background:linear-gradient(180deg,rgba(8,28,35,0) 28%,rgba(8,28,35,.46) 100%)}
+  .photo .pcap{position:absolute;left:18px;right:18px;bottom:16px;z-index:2;color:#fff}
+  @media(prefers-reduced-motion:reduce){.photo>img{transition:none}}
+  .photo.photo-failed>img{display:none}
+  /* peak-end reward photo — one Kauaʻi frame on the confirm screen */
+  .rewardpix{margin:0 0 16px;height:134px}
+  .rewardpix .photo{height:100%}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;height:100%}
   body{
@@ -41,22 +75,34 @@
       box-shadow:0 40px 90px -36px rgba(13,27,34,.5),0 0 0 11px #1a1410,0 0 0 12px #2c2c2a;}
   }
 
-  /* ── top app bar ── */
-  .bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:9px;
-    padding:max(14px,env(safe-area-inset-top)) 18px 12px;background:rgba(255,255,255,.86);
-    backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);
+  /* ── co-brand publisher's masthead — resort owns the cover ── */
+  .bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;
+    padding:max(11px,env(safe-area-inset-top)) 16px 10px;background:rgba(255,253,249,.9);
+    backdrop-filter:saturate(1.5) blur(16px);-webkit-backdrop-filter:saturate(1.5) blur(16px);
     border-bottom:1px solid var(--line)}
-  .mark{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;letter-spacing:-.01em;color:var(--ocean)}
-  .mark b{color:var(--aqua)}
-  .mark svg{display:block}
-  .seg-tag{margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
-    padding:5px 10px;border-radius:999px;background:var(--aqua-l);color:var(--ocean)}
-  .seg-tag.owner{background:var(--gold-l);color:var(--gold-d)}
+  /* LEFT: operator logo slot — dashed-gold placeholder, swap via --logo or an <img> */
+  .logo-slot{flex:0 0 auto;width:120px;height:28px;border-radius:7px;display:grid;place-items:center;
+    border:1px dashed var(--gold);background:var(--gold-l);overflow:hidden}
+  .logo-slot.has-logo{border:0;background:transparent}
+  .logo-slot .lh{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-d);opacity:.85}
+  .logo-slot img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+  .bar .vrule{width:1px;height:22px;background:var(--line-2);flex:0 0 auto}
+  /* RIGHT: OceanSafe imprint — deliberately quieter than the resort mark */
+  .imprint{display:flex;align-items:center;gap:7px;min-width:0}
+  .imprint svg{display:block;flex:0 0 auto}
+  .imprint .imk{display:block;flex:0 0 auto;width:22px;height:22px;border-radius:6px;box-shadow:0 1px 3px rgba(13,27,34,.18)}
+  .imprint .it{line-height:1.05}
+  .imprint .it b{display:block;font-weight:800;font-size:13px;letter-spacing:-.01em;color:var(--ocean)}
+  .imprint .it b i{font-style:normal;color:var(--aqua)}
+  .imprint .it s{display:block;text-decoration:none;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-d);margin-top:1px}
+  .seg-tag{margin-left:auto;flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    padding:5px 11px;border-radius:999px;background:transparent;color:var(--ocean);border:1px solid var(--gold)}
+  .seg-tag.owner{color:var(--gold-d);border-color:var(--gold-d)}
 
   /* ── progress (endowed, starts >0) ── */
   .prog{height:3px;background:var(--line);position:relative;overflow:hidden}
-  .prog>i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--aqua),var(--ocean));
-    width:14%;transition:width .5s var(--ease)}
+  .prog>i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--aqua),var(--ocean) 70%,var(--gold));
+    width:14%;transition:width .55s var(--ease)}
   @media(prefers-reduced-motion:reduce){.prog>i{transition:none}}
 
   /* ── scroll body ── */
@@ -68,13 +114,25 @@
   @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   @media(prefers-reduced-motion:reduce){.anim-in{animation:none}}
 
-  /* ── utility hub ── */
+  /* ── utility hub: full-bleed editorial cover ── */
+  .cover{position:relative;margin:2px -18px 0;aspect-ratio:5/4}
+  .cover .photo{height:100%;border-radius:0}
+  .cover .photo>img{animation:none}
+  .cover .pcap{left:18px;right:18px;bottom:34px}
+  .cover .eyebrow{color:#f4dd9b}
+  .cover h1{color:#fff;text-shadow:0 1px 18px rgba(8,28,35,.4)}
+  .cover .dateline{font-size:12px;color:rgba(255,255,255,.82);margin-top:7px;font-weight:600}
+  @media(prefers-reduced-motion:no-preference){
+    .cover .photo>img.kb{animation:kenburns 7s ease-out both}
+  }
+  @keyframes kenburns{from{transform:scale(1.045)}to{transform:scale(1)}}
   .hero{margin:4px 0 16px}
-  .eyebrow{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--aqua);margin:0 0 6px}
-  h1{font-size:25px;line-height:1.12;letter-spacing:-.02em;font-weight:800;margin:0}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-d);margin:0 0 6px}
+  h1{font-size:clamp(27px,8.4vw,33px);line-height:1.08;letter-spacing:-.02em;font-weight:600;margin:0;font-family:var(--serif);font-optical-sizing:auto}
   .lede{font-size:15px;line-height:1.5;color:var(--ink-2);margin:8px 0 0}
   .status{display:flex;align-items:center;gap:12px;background:var(--ocean);color:#fff;border-radius:var(--r);
-    padding:14px 16px;margin:2px 0 14px}
+    padding:14px 16px;margin:-24px 0 14px;position:relative;z-index:4;
+    box-shadow:0 18px 38px -20px rgba(13,27,34,.55)}
   .status .glyph{width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,.14);display:grid;place-items:center;flex:0 0 auto}
   .status .glyph svg{display:block}
   .status b{font-size:15px}.status .s{font-size:12.5px;opacity:.82;margin-top:1px}
@@ -108,26 +166,38 @@
   .trip b{font-size:15px}.trip .s{font-size:12.5px;color:var(--ink-2);margin-top:1px}
 
   /* ── persuasion / sheet shared ── */
-  .pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;padding:7px 12px;border-radius:999px;margin-bottom:13px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.01em;padding:7px 13px;border-radius:999px;margin-bottom:13px}
+  .pill svg{display:block;flex:0 0 auto}
   .pill.aqua{background:var(--aqua-l);color:var(--ocean)}
   .pill.gold{background:var(--gold-l);color:var(--gold-d)}
   .pill .dotpulse{width:7px;height:7px;border-radius:50%;background:var(--coral);animation:pulse 1.8s ease-in-out infinite}
   @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
   @media(prefers-reduced-motion:reduce){.dotpulse{animation:none}}
 
-  .h2{font-size:23px;line-height:1.15;letter-spacing:-.02em;font-weight:800;margin:0 0 8px}
+  .h2{font-size:clamp(24px,7vw,28px);line-height:1.12;letter-spacing:-.02em;font-weight:600;margin:0 0 8px;font-family:var(--serif);font-optical-sizing:auto}
   .p{font-size:15px;line-height:1.5;color:var(--ink-2);margin:0 0 14px}
   .p b{color:var(--ink)}
 
+  /* gift preview: featured photo-header + two compact line-icon tiles */
+  .gift-feat{position:relative;margin:0 0 9px}
+  .gift-feat .photo{aspect-ratio:16/9}
+  .gift-feat .vchip{position:absolute;top:11px;right:11px;z-index:4;background:var(--gold);color:var(--ink);
+    font-size:11px;font-weight:800;letter-spacing:.02em;padding:5px 11px;border-radius:999px;
+    box-shadow:0 4px 12px -4px rgba(13,27,34,.5)}
+  .gift-feat .gfcap{position:absolute;left:14px;right:14px;bottom:13px;z-index:4;color:#fff}
+  .gift-feat .gfcap b{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:-.01em;display:block;text-shadow:0 1px 10px rgba(8,28,35,.5)}
+  .gift-feat .gfcap span{font-size:12px;opacity:.9}
   .gift-row{display:flex;gap:9px;margin:0 0 14px}
-  .gmini{flex:1;background:var(--surf);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 8px;text-align:center}
-  .gmini .gi{font-size:20px;line-height:1}.gmini .gt{font-size:12px;font-weight:700;margin-top:6px;line-height:1.25}
-  .gmini .gv{font-size:11px;color:var(--gold-d);font-weight:700;margin-top:3px}
+  .gmini{flex:1;background:var(--surf);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 8px 11px;text-align:center}
+  .gmini .gi{height:22px;display:grid;place-items:center}.gmini .gi svg{display:block;color:var(--aqua)}
+  .gmini .gt{font-size:12px;font-weight:700;margin-top:7px;line-height:1.25}
+  .gmini .gv{font-size:11px;color:var(--gold-d);font-weight:800;margin-top:3px;font-variant-numeric:tabular-nums}
 
   .disc{display:flex;gap:9px;font-size:12.5px;color:var(--ink-2);line-height:1.45;background:#faf7f0;
     border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:11px 13px;margin:0 0 4px}
   .disc b{color:var(--ink)}
-  .disc .ico{color:var(--gold-d);font-weight:900;flex:0 0 auto}
+  .disc .ico{color:var(--gold-d);flex:0 0 auto;margin-top:1px}
+  .disc .ico svg{display:block}
 
   .proof{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);margin:12px 2px 2px}
   .proof .av{display:flex}.proof .av i{width:22px;height:22px;border-radius:50%;border:2px solid var(--surf);margin-left:-7px;background:var(--aqua)}
@@ -154,8 +224,14 @@
     position:relative;transition:transform .14s var(--ease),border-color .14s,background .14s}
   .opt:active{transform:scale(.985)}
   .opt.on{border-color:var(--gold-d);background:var(--gold-l)}
-  .opt .oi{width:46px;height:46px;border-radius:13px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:23px;flex:0 0 auto}
-  .opt.on .oi{border-color:var(--gold)}
+  .opt .oi{width:46px;height:46px;border-radius:13px;background:var(--aqua-l);border:1px solid var(--line);display:grid;place-items:center;flex:0 0 auto;color:var(--ocean)}
+  .opt .oi svg{display:block}
+  .opt.on .oi{border-color:var(--gold);background:var(--gold-l);color:var(--gold-d)}
+  /* photo-header gift card for the featured pick on the incentive screen */
+  .opt .ophoto{width:64px;height:64px;border-radius:13px;flex:0 0 auto;overflow:hidden;position:relative;background:var(--ocean)}
+  .opt .ophoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s var(--ease)}
+  .opt .ophoto img.loaded{opacity:1}
+  @media(prefers-reduced-motion:reduce){.opt .ophoto img{transition:none}}
   .opt .ot{font-size:15px;font-weight:700}.opt .od{font-size:12.5px;color:var(--ink-2);margin-top:2px}
   .opt .ov{font-size:12px;font-weight:800;color:var(--gold-d);margin-top:3px}
   .opt .chk{margin-left:auto;width:24px;height:24px;border-radius:50%;border:2px solid var(--line-2);flex:0 0 auto;
@@ -207,7 +283,13 @@
 
   /* ── disqualified / activity card ── */
   .act{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surf);margin:4px 0 10px}
-  .act .ph{height:118px;background:linear-gradient(135deg,#0a8ba8,#0f4c5c);display:grid;place-items:center;color:#fff;font-size:36px}
+  .act .ph{position:relative;aspect-ratio:16/7;background:var(--ocean)}
+  .act .ph.fb-gold{background:var(--gold-d)}
+  .act .ph>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .55s var(--ease)}
+  .act .ph>img.loaded{opacity:1}
+  .act .ph .pico{position:absolute;left:12px;bottom:10px;z-index:2;color:#fff;opacity:.92}
+  .act .ph::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,28,35,0) 45%,rgba(8,28,35,.35) 100%);z-index:1}
+  @media(prefers-reduced-motion:reduce){.act .ph>img{transition:none}}
   .act .ab{padding:14px}
   .act .at{font-size:16px;font-weight:800}.act .ad{font-size:13px;color:var(--ink-2);margin-top:3px;line-height:1.45}
 
@@ -226,8 +308,14 @@
   .next{font-size:13.5px;color:var(--ink-2);line-height:1.55}
   .next .nh{font-weight:800;color:var(--ink);margin:2px 0 8px}
   .next ul{margin:0;padding-left:18px}.next li{margin:6px 0}
+  /* calm peak-end exhale band under the checkmark */
+  .exhale{margin:16px -18px -118px;aspect-ratio:16/8;position:relative;opacity:0}
+  .exhale .photo{height:100%;border-radius:0}
+  @media(prefers-reduced-motion:no-preference){.exhale{animation:exhaleUp .5s var(--ease) .35s forwards}}
+  @media(prefers-reduced-motion:reduce){.exhale{opacity:1}}
+  @keyframes exhaleUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   .sms{display:flex;align-items:center;gap:10px;background:var(--green-l);border:1px solid #cbe6d4;border-radius:var(--r);padding:12px 14px;margin:14px 0;font-size:13px;color:#14532d;line-height:1.4}
-  .sms .ic{font-size:18px;flex:0 0 auto}
+  .sms .ic{flex:0 0 auto;margin-top:1px}.sms .ic svg{display:block}
 
   /* ── sticky CTA dock ── */
   .dock{position:absolute;left:0;right:0;bottom:0;z-index:25;padding:13px 18px calc(13px + var(--safe-b));
@@ -274,6 +362,13 @@
   #start .note{font-size:12px;color:rgba(255,255,255,.52);line-height:1.5;margin-top:18px}
   #start .note code{background:rgba(255,255,255,.12);padding:1px 6px;border-radius:5px;font-size:11.5px}
 
+  /* AA keyboard nav — gold focus ring on every interactive element */
+  a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible,
+  .beach:focus-visible,.opt:focus-visible,.chip:focus-visible,.slot:focus-visible,
+  .optin:focus-visible,.qr:focus-visible{outline:none;box-shadow:0 0 0 2px var(--surf),0 0 0 4px var(--gold)}
+  .yn button:focus-visible{box-shadow:0 0 0 2px var(--surf),0 0 0 4px var(--gold)}
+  .field input:focus-visible{outline:none;border-color:var(--aqua);box-shadow:0 0 0 2px var(--surf),0 0 0 4px var(--gold)}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto !important}}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 </style>
 </head>
@@ -284,14 +379,14 @@
     <!-- demo segment chooser (one of the 3 printed QR codes) -->
     <section id="start" aria-label="Choose demo segment">
       <div class="sm">Ocean<b>Safe</b><span style="font-weight:600;font-size:13px;opacity:.7;margin-left:6px">· Kauaʻi</span></div>
-      <h2>Three printed QR codes.<br>One scans you in.</h2>
-      <p class="ss">In production the guest scans a single code in their unit — it already knows who they are. Pick a code to preview that experience.</p>
+      <h2>One code in your unit.<br>It already knows you.</h2>
+      <p class="ss">In your room, a single scan opens your guide — no sign-in, no forms. Pick a code below to preview the guest it was printed for.</p>
 
       <button class="qr" data-seg="renter">
         <span class="qc">
           <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="5" fill="#0f4c5c"/><g fill="#fff"><rect x="5" y="5" width="8" height="8" rx="1.5"/><rect x="21" y="5" width="8" height="8" rx="1.5"/><rect x="5" y="21" width="8" height="8" rx="1.5"/><rect x="16" y="16" width="3" height="3"/><rect x="22" y="16" width="3" height="3"/><rect x="26" y="20" width="3" height="3"/><rect x="16" y="22" width="3" height="3"/><rect x="20" y="26" width="3" height="3"/><rect x="26" y="26" width="3" height="3"/></g></svg>
         </span>
-        <span><span class="ql">Renting the unit</span><span class="qd">Booked hotel-side · not an owner</span></span>
+        <span><span class="ql">I'm renting this unit</span><span class="qd">Booked through the resort · not an owner</span></span>
         <span class="qa">›</span>
       </button>
 
@@ -299,7 +394,7 @@
         <span class="qc">
           <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="5" fill="#0a8ba8"/><g fill="#fff"><rect x="5" y="5" width="8" height="8" rx="1.5"/><rect x="21" y="5" width="8" height="8" rx="1.5"/><rect x="5" y="21" width="8" height="8" rx="1.5"/><rect x="17" y="5" width="3" height="3"/><rect x="16" y="16" width="3" height="3"/><rect x="22" y="20" width="3" height="3"/><rect x="16" y="26" width="3" height="3"/><rect x="26" y="16" width="3" height="3"/><rect x="20" y="22" width="3" height="3"/></g></svg>
         </span>
-        <span><span class="ql">Exchanging in</span><span class="qd">RCI / Interval · staying on points</span></span>
+        <span><span class="ql">I'm exchanging in</span><span class="qd">RCI or Interval · staying on points</span></span>
         <span class="qa">›</span>
       </button>
 
@@ -307,18 +402,22 @@
         <span class="qc">
           <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="5" fill="#c9a84c"/><g fill="#fff"><rect x="5" y="5" width="8" height="8" rx="1.5"/><rect x="21" y="5" width="8" height="8" rx="1.5"/><rect x="5" y="21" width="8" height="8" rx="1.5"/><rect x="16" y="16" width="3" height="3"/><rect x="20" y="16" width="3" height="3"/><rect x="26" y="16" width="3" height="3"/><rect x="16" y="20" width="3" height="3"/><rect x="22" y="22" width="3" height="3"/><rect x="16" y="26" width="3" height="3"/><rect x="26" y="26" width="3" height="3"/></g></svg>
         </span>
-        <span><span class="ql">Owner here</span><span class="qd">Vacation-ownership member</span></span>
+        <span><span class="ql">I'm an owner</span><span class="qd">Vacation-ownership member here</span></span>
         <span class="qa">›</span>
       </button>
 
       <p class="note">Demo only — the chooser stands in for the printed code. You can also deep-link: <code>?seg=renter</code>, <code>?seg=exchange</code>, <code>?seg=owner</code>. Owners are routed by <code>isOwner()</code> and never see an ownership pitch.</p>
     </section>
 
-    <!-- app chrome -->
+    <!-- co-brand publisher's masthead — resort owns the cover, OceanSafe is the imprint -->
     <header class="bar">
-      <span class="mark" aria-label="OceanSafe">
-        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M2 13c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2" stroke="#0a8ba8" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M2 9c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2" stroke="#0f4c5c" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-        Ocean<b>Safe</b>
+      <span class="logo-slot" id="logoSlot" aria-label="Resort logo">
+        <span class="lh">Your Logo here</span>
+      </span>
+      <span class="vrule" aria-hidden="true"></span>
+      <span class="imprint" aria-label="powered by OceanSafe">
+        <img class="imk" src="/assets/oceansafe-favicon.png" width="22" height="22" alt="" aria-hidden="true">
+        <span class="it"><b>Ocean<i>Safe</i></b><s>powered by</s></span>
       </span>
       <span class="seg-tag" id="segTag" aria-live="polite">Guest</span>
     </header>
@@ -342,41 +441,76 @@
   var RESORT = "Marriott's Waiohai Beach Club";
   var UNIT   = "214";
 
+  /* ════ ICONS (no-emoji rule: inline line icons only) ════ */
+  // Founder hard requirement: zero emoji in the rendered UI. Every glyph below is a
+  // 1.5px-stroke, currentColor, 24-viewBox line icon. Color/size are set by the caller
+  // so each context paints it from the ocean/aqua/gold palette.
+  var ICONS = {
+    flower:'<circle cx="12" cy="7" r="3"/><circle cx="7.2" cy="10.5" r="3"/><circle cx="9.1" cy="16" r="3"/><circle cx="14.9" cy="16" r="3"/><circle cx="16.8" cy="10.5" r="3"/><circle cx="12" cy="12" r="2"/>',
+    boat:'<path d="M12 3v11"/><path d="M12 5l6 9h-6z"/><path d="M4 15h16l-2.3 5H6.3z"/>',
+    hotel:'<rect x="5" y="3.5" width="14" height="17" rx="1.2"/><path d="M10 20.5v-4h4v4"/><path d="M8.5 8h0M12 8h0M15.5 8h0M8.5 11.5h0M12 11.5h0M15.5 11.5h0"/>',
+    snorkel:'<rect x="3.5" y="8.5" width="11" height="7" rx="2.2"/><path d="M14.5 11h2"/><path d="M16.5 7v8a2.5 2.5 0 0 0 2.5 2.5"/>',
+    dining:'<path d="M5.5 3v3.5M8 3v3.5M10.5 3v3.5"/><path d="M5.5 6.5h5"/><path d="M8 6.5V21"/><path d="M15.5 3v18"/><path d="M15.5 4c2.6 .6 2.6 7.4 0 8"/>',
+    spa:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.52-4.48 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>',
+    points:'<polygon points="12,3 14.23,8.93 20.56,9.22 15.61,13.17 17.29,19.28 12,15.8 6.71,19.28 8.39,13.17 3.44,9.22 9.77,8.93"/>',
+    chart:'<path d="M4 4v16h16"/><path d="M7.5 14.5l3.5-4 3 2.5 5-6"/><path d="M15.5 7h3.5v3.5"/>',
+    timer:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.5"/><path d="M9.5 2.5h5"/><path d="M12 2.5v3"/>',
+    lock:'<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/>',
+    sparkle:'<polygon points="12,2.5 13.4,9 18.5,10 13.4,11 12,17.5 10.6,11 5.5,10 10.6,9"/><polygon points="18.5,15 19.2,17.3 21.5,18 19.2,18.7 18.5,21 17.8,18.7 15.5,18 17.8,17.3"/>',
+    shuttle:'<rect x="3" y="6.5" width="18" height="9" rx="2"/><path d="M3 11h18"/><circle cx="7.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/>',
+    plane:'<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 4.6c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.8h0"/>',
+    chat:'<rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 17v3l4-3"/>',
+    mail:'<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M4 7l8 5.5L20 7"/>',
+    heart:'<path d="M12 20s-7-4.35-9.2-8.5C1.3 8.6 2.8 5.5 6 5.5c1.9 0 3.2 1.1 4 2.3.8-1.2 2.1-2.3 4-2.3 3.2 0 4.7 3.1 3.2 6C19 15.65 12 20 12 20z"/>',
+    mountain:'<path d="M3 19l5.5-9 3 4 2.5-4 5.5 9z"/><circle cx="16.5" cy="6.5" r="1.5"/>',
+    arrow:'<path d="M4 12h15"/><path d="M13 6l6 6-6 6"/>'
+  };
+  // ico(name, size, color) -> inline <svg> string. color defaults to inherit
+  // (currentColor) so pill / disclosure / sms contexts paint it from their own text color.
+  function ico(name, size, color){
+    size = size || 22;
+    return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" '+
+      'stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" '+
+      'style="vertical-align:middle;flex:0 0 auto'+(color?(';color:'+color):'')+'" aria-hidden="true">'+
+      (ICONS[name]||'')+'</svg>';
+  }
+
   // exactly 3 curated, resort-funded gifts per segment (Iyengar: 3 > 24)
   // "most" flags the honest, reversible default. v = anchored value.
   var GIFTS = {
     renter:[
-      {ic:"🌺",t:"Lūʻau for two",d:"Poʻipū · transport included",v:300,most:true},
-      {ic:"⛵",t:"Sunset dinner cruise",d:"Nāpali coast · for two",v:280},
-      {ic:"🏨",t:"$200 resort credit",d:"dining or spa on-property",v:200}
+      {ic:"flower",t:"Lūʻau for two",d:"Poʻipū · transport included",v:300,most:true},
+      {ic:"boat",t:"Sunset dinner cruise",d:"Nāpali coast · for two",v:280},
+      {ic:"hotel",t:"$200 resort credit",d:"dining or spa on-property",v:200}
     ],
     exchange:[
-      {ic:"🤿",t:"Snorkel sail for two",d:"south-shore reef morning",v:200,most:true},
-      {ic:"🍽️",t:"$175 dining credit",d:"any on-site restaurant",v:175},
-      {ic:"💆",t:"$175 spa credit",d:"Waiohai spa",v:175}
+      {ic:"snorkel",t:"Snorkel sail for two",d:"south-shore reef morning",v:200,most:true},
+      {ic:"dining",t:"$175 dining credit",d:"any on-site restaurant",v:175},
+      {ic:"spa",t:"$175 spa credit",d:"Waiohai spa",v:175}
     ],
     owner:[
-      {ic:"⭐",t:"15,000 bonus points",d:"added to your account",v:300,most:true},
-      {ic:"🍽️",t:"$250 owner dining credit",d:"any on-site restaurant",v:250},
-      {ic:"🌺",t:"Lūʻau for two",d:"Poʻipū · transport included",v:300}
+      {ic:"points",t:"15,000 bonus points",d:"added to your account",v:300,most:true},
+      {ic:"dining",t:"$250 owner dining credit",d:"any on-site restaurant",v:250},
+      {ic:"flower",t:"Lūʻau for two",d:"Poʻipū · transport included",v:300}
     ]
   };
 
   // 5-tap qualifier — operator-configurable. gate = passing answer.
   var QUALIFY = [
-    {k:"couple",q:"Traveling as a couple, both able to attend together?",gate:"yes"},
+    {k:"couple",q:"Traveling as a couple, and could you both attend together?",gate:"yes"},
     {k:"age",   q:"Are you both 30 or older?",gate:"yes"},
-    {k:"home",  q:"Do you own your primary home?",gate:"yes"},
-    {k:"income",q:"Combined household income $50k or more?",gate:"yes"},
-    {k:"already",q:"Do you already own at this resort?",gate:"no"}
+    {k:"home",  q:"Do you own the home you live in?",gate:"yes"},
+    {k:"income",q:"Is your combined household income $50,000 or more?",gate:"yes"},
+    {k:"already",q:"Do you already own here at this resort?",gate:"no"}
   ];
 
   var OWNER_TOPICS = ["More points","Add a week","Upgrade my unit","Better season"];
 
-  // real capacity feed → real "spots left". 0 = greyed, never hidden.
+  // real capacity feed -> real "spots left". 0 = greyed, never hidden.
   // unlimited:true would suppress scarcity entirely (honest lever rule).
   function capacityFor(days){
-    // short lead beats incentives → bias to same/next day.
+    // short lead beats incentives -> bias to same/next day.
     // Inventory is genuinely tight near checkout — keep the scarcity honest but
     // visible on the common path (mostly 1-2 left, never a fake "lots open").
     if(days>=2) return [
@@ -447,6 +581,14 @@
   function render(opts){
     // opts: {body, cta, ghost, onCta, progress, canBack, ctaClass}
     view.innerHTML = '<div class="anim-in">'+opts.body+'</div>';
+    // fade in any photo primitives on this screen (data-src -> src, .loaded once decoded)
+    Array.prototype.forEach.call(view.querySelectorAll('.photo>img[data-src]'), function(im){
+      function show(){ im.classList.add('loaded'); }
+      im.addEventListener('load', show);
+      im.addEventListener('error', function(){ im.parentNode.classList.add('photo-failed'); });
+      im.src = im.getAttribute('data-src');
+      if(im.complete && im.naturalWidth) show();
+    });
     var dockHtml = "";
     // hint above the CTA explaining WHY it's locked — shown only while disabled
     if(opts.hint){
@@ -454,7 +596,7 @@
     }
     if(opts.cta){
       dockHtml += '<button class="btn '+(opts.ctaClass||"primary")+'" id="ctaBtn"'+(opts.ctaDisabled?" disabled":"")+'>'+
-        opts.cta+(opts.ctaArrow?' <span class="ar">→</span>':'')+'</button>';
+        opts.cta+(opts.ctaArrow?' <span class="ar">'+ico("arrow",18)+'</span>':'')+'</button>';
     }
     if(opts.ghost){ dockHtml += '<button class="ghost" id="ghostBtn">'+opts.ghost+'</button>'; }
     dock.innerHTML = dockHtml;
@@ -485,19 +627,22 @@
   /* ════════════════════════ UTILITY HUB (all segments) ════════════════════════ */
   function hub(){
     history=[hub];
-    var greet = isOwner()
-      ? '<span class="eyebrow">Aloha again, owner</span><h1>Welcome home to Poʻipū.</h1>'
-      : '<span class="eyebrow">Aloha · live beach safety</span><h1>Know before you go in.</h1>';
+    var coverEy = isOwner() ? 'Welcome home, owner' : 'Live beach safety';
+    var coverH  = isOwner() ? 'Welcome home to Poʻipū.' : 'Know before you go in.';
     var body =
-      '<div class="hero">'+greet+
-        '<p class="lede">Today\'s lifeguard flags for the South Shore, updated this morning.</p>'+
-      '</div>'+
+      '<div class="cover"><div class="photo fb-aqua">'+
+        '<img class="kb" alt="Kauaʻi south shore from the air" data-src="/assets/sc-surf.jpg">'+
+        '<div class="scrim dark"></div>'+
+        '<div class="pcap"><span class="eyebrow">'+coverEy+'</span><h1>'+coverH+'</h1>'+
+          '<div class="dateline">South Shore · checked this morning</div></div>'+
+      '</div></div>'+
+      '<p class="lede" style="margin:15px 2px 2px">Today\'s lifeguard flags, so you can pick the right beach.</p>'+
       '<div class="status">'+
         '<span class="glyph">'+flagGlyph()+'</span>'+
         '<span><b>Poʻipū Beach Park</b><span class="s">Low hazard · lifeguarded · gentle</span></span>'+
         '<span class="now">Updated<br>7:42 AM</span>'+
       '</div>'+
-      '<div class="sect-h">Flags right now <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink-3)">· tap a beach for detail</span></div>'+
+      '<div class="sect-h">Flags right now <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink-3)">· tap any beach for the full read</span></div>'+
       beachRow("f-lo","LO","Poʻipū Beach Park","Low · lifeguarded · gentle shorebreak",
         "Calmest of the south-shore beaches this morning. Lifeguard on duty 9am–5pm. <b>Watch the right side</b> near the rocks where a mild current pulls out.",
         {Surf:"1–2 ft",Wind:"8 mph E",Water:"77°F"})+
@@ -519,7 +664,7 @@
     render({
       body: body,
       progress: 14,
-      cta: isOwner() ? "See what's new for owners" : "Stay close — see your aloha gift",
+      cta: isOwner() ? "See what's new for owners" : "See your aloha gift",
       ctaArrow:true,
       ctaClass: isOwner()?"gold":"primary",
       onCta: function(){
@@ -571,25 +716,25 @@
   function offer(){
     var g = gifts();
     var ex = seg==="exchange";
-    var hook = ex ? "Loved the islands on points?" : "Not ready to leave Kauaʻi?";
+    var hook = ex ? "Wish you could come back on points like this?" : "Not ready to leave this beach?";
     var line = ex
-      ? "Plenty of our exchange guests end up staying close. Sit in on a relaxed, no-pressure ownership session and pick a thank-you, on us:"
-      : "A lot of our guests come back to this beach every year. Sit in on a no-pressure ownership session and pick a thank-you, on us:";
+      ? "Many of our exchange guests decide to stay close for good. Spend about 90 relaxed minutes learning how, and pick a thank-you to keep, on the resort:"
+      : "A lot of guests return to this exact shore every year. Spend about 90 relaxed minutes hearing how ownership works, and pick a thank-you to keep, on the resort:";
     render({
       progress: 30,
       canBack:true,
       body:
-        '<div class="pill aqua"><span class="dotpulse"></span>You explored 6 Kauaʻi beaches this trip</div>'+
+        '<div class="pill aqua"><span class="dotpulse"></span>6 Kauaʻi beaches explored this trip</div>'+
         '<h2 class="h2">'+hook+'</h2>'+
         '<p class="p">'+line+'</p>'+
         '<div class="gift-row">'+ g.map(function(x){
-          return '<div class="gmini"><div class="gi">'+x.ic+'</div><div class="gt">'+x.t+'</div><div class="gv">$'+x.v+'</div></div>';
+          return '<div class="gmini"><div class="gi">'+ico(x.ic,22,'var(--gold-d)')+'</div><div class="gt">'+x.t+'</div><div class="gv">$'+x.v+'</div></div>';
         }).join("") +'</div>'+
-        '<div class="disc"><span class="ico">!</span><span><b>Straight up:</b> it\'s a ~90-minute timeshare presentation. No obligation — you keep the gift just for attending. Resort-funded.</span></div>',
+        '<div class="disc"><span class="ico">'+ico("info",16)+'</span><span><b>No fine print:</b> it\'s a 90-minute ownership presentation. Come, ask anything, buy nothing — the gift is yours just for showing up. Paid for by the resort.</span></div>',
       cta:"See if I qualify", ctaArrow:true,
       onCta:function(){ go(qualify,"qualify"); },
       ghost:"Maybe later",
-      onGhost:function(){ log("dismissed"); go(nurture,"nurture"); }   // ethical exit → one-tap nurture, not a needy modal
+      onGhost:function(){ log("dismissed"); go(nurture,"nurture"); }   // ethical exit -> one-tap nurture, not a needy modal
     });
   }
 
@@ -602,11 +747,11 @@
       progress: 46,
       canBack:true,
       body:
-        '<div class="pill aqua">⏱ 15 seconds · 5 quick taps</div>'+
-        '<h2 class="h2">Quick check</h2>'+
-        '<p class="p">Resorts reserve the gift for guests who genuinely fit. No typing.</p>'+
+        '<div class="pill aqua">'+ico("timer",16)+' About 15 seconds · 5 taps, no typing</div>'+
+        '<h2 class="h2">A quick check</h2>'+
+        '<p class="p">The resort sets the gift aside for guests it genuinely fits. Five taps tells us if that\'s you.</p>'+
         rows+
-        '<div class="trust"><span class="lk">🔒</span><span>We never sell your answers. This only decides which offer fits — and you can stop anytime.</span></div>',
+        '<div class="trust"><span class="lk">'+ico("lock",15)+'</span><span>Your answers stay private — never sold. They only decide which offer fits, and you can stop anytime.</span></div>',
       cta:"Continue", ctaArrow:true, ctaDisabled:true,
       hint:"Answer all 5 to continue",
       onCta:function(){
@@ -634,7 +779,7 @@
   // we hand off to the front desk / booking partner, never a no-op.
   function offRampActivity(){
     return {
-      ic:"⛵",
+      ic:"boat",
       t:"Sunset Nāpali coast cruise — tonight",
       d:"Departs Port Allen 5:30 PM. We'll let the front desk hold a couple of OceanSafe seats. No catch, no pitch."
     };
@@ -648,11 +793,11 @@
       body:
         '<h2 class="h2">No session this time —</h2>'+
         '<p class="p">that one isn\'t a fit, and we\'d never spend your last day on a presentation you can\'t use. Here\'s something you actually can, before you fly out:</p>'+
-        '<div class="act"><div class="ph">'+a.ic+'</div><div class="ab">'+
+        '<div class="act"><div class="ph">'+ico(a.ic,40,'#fff')+'</div><div class="ab">'+
           '<div class="at">'+a.t+'</div>'+
           '<div class="ad">'+a.d+'</div>'+
         '</div></div>'+
-        '<div class="act"><div class="ph" style="background:linear-gradient(135deg,#c9a84c,#a8862f)">🥾</div><div class="ab">'+
+        '<div class="act"><div class="ph" style="background:linear-gradient(135deg,#c9a84c,#a8862f)">'+ico("mountain",40,'#fff')+'</div><div class="ab">'+
           '<div class="at">Māhāʻulepū Heritage Trail</div>'+
           '<div class="ad">Quiet coastal hike, 15 min from your unit. Best light right after sunrise.</div>'+
         '</div></div>',
@@ -668,7 +813,7 @@
     var cards = g.map(function(x,i){
       return '<button class="opt" data-k="'+i+'">'+
         (x.most?'<span class="tagm">Most picked</span>':'')+
-        '<span class="oi">'+x.ic+'</span>'+
+        '<span class="oi">'+ico(x.ic,24,'var(--gold-d)')+'</span>'+
         '<span><span class="ot">'+x.t+'</span><span class="od">'+x.d+'</span><span class="ov">$'+x.v+' value · on the resort</span></span>'+
         '<span class="chk">'+CHK()+'</span></button>';
     }).join("");
@@ -676,11 +821,11 @@
       progress: 62,
       canBack:true,
       body:
-        '<div class="pill gold">🎉 You\'re in — all three are funded by the resort</div>'+
+        '<div class="pill gold">'+ico("sparkle",16)+' You\'re in — all three are funded by the resort</div>'+
         '<h2 class="h2">Pick your thank-you</h2>'+
         '<p class="p">Yours to keep just for attending the session. Choose the one you\'d love most.</p>'+
         cards+
-        '<div class="disc"><span class="ico">♥</span><span>90-minute session, <b>no obligation to buy</b>. The gift is yours whether you join or not.</span></div>',
+        '<div class="disc"><span class="ico">'+ico("heart",16)+'</span><span>90-minute session, <b>no obligation to buy</b>. The gift is yours whether you join or not.</span></div>',
       cta:"Continue", ctaArrow:true, ctaDisabled:true,
       hint:"Pick your gift to continue",
       onCta:function(){ DAYS_LEFT>=1 ? go(sameTrip,"sameTrip") : go(nurture,"nurture"); },
@@ -706,11 +851,11 @@
       progress: 30,
       canBack:true,
       body:
-        '<div class="pill gold">🌺 Owner since 2019 · year 7 with us</div>'+
-        '<h2 class="h2">Two things owners love this week.</h2>'+
-        '<p class="p">Hope unit '+UNIT+' feels like home. Your call — both come with a resort-funded thank-you, zero pressure.</p>'+
-        ownerCard("ownerUpd","📈","Review my ownership","More points, add a week, a better season — a quick benefits review.")+
-        ownerCard("ownerRef","🌺","Refer a friend","Send an aloha gift. If they visit and tour, you both get rewarded."),
+        '<div class="pill gold">'+ico("flower",16)+' Owner since 2019 · year 7 with us</div>'+
+        '<h2 class="h2">Two things owners are loving this week.</h2>'+
+        '<p class="p">We hope unit '+UNIT+' feels like home. Both come with a thank-you on the resort, and there\'s no pressure either way.</p>'+
+        ownerCard("ownerUpd","chart","Make the most of my ownership","More points, an extra week, a better season — a quick benefits review.")+
+        ownerCard("ownerRef","flower","Share it with a friend","Send them an aloha gift. If they visit and take a tour, you\'re both rewarded."),
       // two co-equal CTAs live in the body as cards; dock holds the gentle dismiss
       ghost:"Just enjoying my stay",
       onGhost:function(){ log("dismissed"); backToHub(); },
@@ -722,7 +867,7 @@
   }
   function ownerCard(id,ic,title,desc){
     return '<button class="opt" id="'+id+'" style="margin-bottom:11px">'+
-      '<span class="oi" style="background:var(--gold-l);border-color:var(--gold)">'+ic+'</span>'+
+      '<span class="oi" style="background:var(--gold-l);border-color:var(--gold)">'+ico(ic,24,'var(--gold-d)')+'</span>'+
       '<span><span class="ot">'+title+'</span><span class="od">'+desc+'</span></span>'+
       '<span class="chev" style="margin-left:auto;color:var(--ink-3);font-size:22px">›</span></button>';
   }
@@ -733,7 +878,7 @@
     var cards = g.map(function(x,i){
       return '<button class="opt" data-k="'+i+'">'+
         (x.most?'<span class="tagm">Most picked</span>':'')+
-        '<span class="oi">'+x.ic+'</span>'+
+        '<span class="oi">'+ico(x.ic,24,'var(--gold-d)')+'</span>'+
         '<span><span class="ot">'+x.t+'</span><span class="od">'+x.d+'</span><span class="ov">$'+x.v+' value · on the resort</span></span>'+
         '<span class="chk">'+CHK()+'</span></button>';
     }).join("");
@@ -769,12 +914,12 @@
       progress: 52,
       canBack:true,
       body:
-        '<div class="pill gold">🌺 You both get rewarded</div>'+
+        '<div class="pill gold">'+ico("flower",16)+' You\'re both rewarded</div>'+
         '<h2 class="h2">Know someone who\'d love it here?</h2>'+
-        '<p class="p">Send them an aloha gift. If they visit and take a tour, you both get rewarded — no strings on your end.</p>'+
+        '<p class="p">Send them an aloha gift. If they visit and take a tour, you\'re both rewarded — and there\'s nothing more for you to do.</p>'+
         '<div class="field"><label for="fn">Friend\'s first name</label><input id="fn" type="text" autocomplete="off" placeholder="e.g. Dana"></div>'+
         '<div class="field"><label for="fe">Their email</label><input id="fe" type="email" autocomplete="off" inputmode="email" placeholder="dana@email.com">'+
-          '<div class="hint">🔒 We send one aloha gift email — no spam, no resale.</div></div>',
+          '<div class="hint">'+ico("lock",14)+' Just one aloha gift email — no spam, and we never share their address.</div></div>',
       cta:"Send their aloha gift", ctaClass:"gold", ctaDisabled:true,
       hint:"Add your friend's name and email",
       onCta:function(){ flow.friend=$("#fn").value.trim(); flow.email=$("#fe").value.trim(); log("referral"); go(function(){ confirm("referral"); },"confirm"); },
@@ -803,10 +948,10 @@
         progress: 80,
         canBack:true,
         body:
-          '<div class="pill aqua">🚐 Shuttle included · ~'+(owner?"60":"90")+' min</div>'+
+          '<div class="pill aqua">'+ico("shuttle",16)+' Shuttle included · ~'+(owner?"60":"90")+' min</div>'+
           '<h2 class="h2">'+(owner?"Sessions are full right now":"All booked for your remaining nights")+'</h2>'+
           '<p class="p">Every '+(owner?"owner update":"session")+' is full for the rest of your stay — these fill from check-in. We\'d rather not rush you onto a bad time.</p>'+
-          '<div class="act"><div class="ph" style="background:linear-gradient(135deg,#0a8ba8,#0f4c5c)">✈️</div><div class="ab">'+
+          '<div class="act"><div class="ph" style="background:linear-gradient(135deg,#0a8ba8,#0f4c5c)">'+ico("plane",40,'#fff')+'</div><div class="ab">'+
             '<div class="at">Save it for your next trip</div>'+
             '<div class="ad">We\'ll hold your '+(flow.gift!==null?giftByKey(flow.gift).t.toLowerCase():"aloha gift")+' and line up a session for your return — one reminder, nothing before that.</div>'+
           '</div></div>',
@@ -827,14 +972,14 @@
     // honest scarcity reason line — driven by the real feed, always shown so the
     // lever is visible on the common path (count of genuine same-trip openings).
     var tight = caps.filter(function(s){return s.left>0;}).length;
-    var reason = '<div class="why"><span>ℹ️</span><span>'+tight+' session time'+(tight>1?"s":"")+' left before checkout — sessions run twice a day and fill from check-in.</span></div>';
+    var reason = '<div class="why"><span>'+ico("info",14)+'</span><span>'+tight+' session time'+(tight>1?"s":"")+' left before checkout — sessions run twice a day and fill from check-in.</span></div>';
     var proof = PROOF[seg] ? '<div class="proof"><span class="av"><i></i><i style="background:#c9a84c"></i><i style="background:#0f4c5c"></i></span><span><b>'+PROOF[seg]+'</b></span></div>' : '';
 
     render({
       progress: 80,
       canBack:true,
       body:
-        '<div class="pill aqua">🚐 Shuttle included · ~'+(owner?"60":"90")+' min</div>'+
+        '<div class="pill aqua">'+ico("shuttle",16)+' Shuttle included · ~'+(owner?"60":"90")+' min</div>'+
         '<h2 class="h2">'+(owner?"Book your owner update":"Grab a session before checkout")+'</h2>'+
         '<p class="p">'+(owner?"A relaxed benefits review — pick the time that suits you.":"You\'ve got time before you fly out. Pick a slot — we\'ll text your shuttle pickup.")+'</p>'+
         reason+
@@ -868,7 +1013,7 @@
       progress: 88,
       canBack:true,
       body:
-        '<div class="pill aqua">✈️ For your next Kauaʻi trip</div>'+
+        '<div class="pill aqua">'+ico("plane",16)+' For your next Kauaʻi trip</div>'+
         '<h2 class="h2">Flying out soon?</h2>'+
         '<p class="p">No problem. We\'ll hold your '+giftName+' and line up the '+(owner?"owner update":"session")+' for your next visit.</p>'+
         '<div class="field"><label for="em">Email</label><input id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com"></div>'+
@@ -903,7 +1048,7 @@
     if(route==="referral"){
       body =
         okMark()+
-        '<h2 class="h2" style="text-align:center">Gift on its way 🌺</h2>'+
+        '<h2 class="h2" style="text-align:center">Gift on its way '+ico("flower",22,'var(--gold-d)')+'</h2>'+
         '<p class="p" style="text-align:center">We\'ll email '+(flow.friend||"your friend")+' their aloha gift and a Kauaʻi planning guide.</p>'+
         '<div class="recap">'+
           row("Sent to", flow.friend||"Your friend")+
@@ -917,13 +1062,13 @@
       var act = offRampActivity();
       body =
         okMark()+
-        '<h2 class="h2" style="text-align:center">Seats requested 🌺</h2>'+
+        '<h2 class="h2" style="text-align:center">Seats requested '+ico("flower",22,'var(--gold-d)')+'</h2>'+
         '<p class="p" style="text-align:center">We\'ve asked the front desk to hold your spots — they\'ll confirm availability shortly.</p>'+
         '<div class="recap">'+
           row("Activity", act.t.split(" — ")[0])+
           row("Tonight", "5:30 PM · Port Allen")+
         '</div>'+
-        '<div class="sms"><span class="ic">💬</span><span>The front desk will text you to confirm pickup and any balance. OceanSafe doesn\'t charge you — this is a friendly hand-off, no pitch.</span></div>'+
+        '<div class="sms"><span class="ic">'+ico("chat",18)+'</span><span>The front desk will text you to confirm pickup and any balance. OceanSafe doesn\'t charge you — this is a friendly hand-off, no pitch.</span></div>'+
         '<div class="next"><div class="nh">What happens next</div><ul>'+
           '<li>Front desk confirms your held seats by text.</li>'+
           '<li>Enjoy your last evening on the water — mahalo for staying with us.</li>'+
@@ -934,15 +1079,15 @@
         ? (owner?"Your owner update is booked":"You're booked")
         : "Saved — see you next time";
       var smsLine = route==="trip"
-        ? '<div class="sms"><span class="ic">💬</span><span>We\'ll text a confirmation now, then a reminder 48 hours before and on the day. Tap to confirm and your spot is locked.</span></div>'
-        : '<div class="sms"><span class="ic">💌</span><span>One friendly email when you start planning your return — nothing before that.</span></div>';
+        ? '<div class="sms"><span class="ic">'+ico("chat",18)+'</span><span>We\'ll text a confirmation now, then a reminder 48 hours before and on the day. Tap to confirm and your spot is locked.</span></div>'
+        : '<div class="sms"><span class="ic">'+ico("mail",18)+'</span><span>One friendly email when you start planning your return — nothing before that.</span></div>';
       body =
         okMark()+
         '<h2 class="h2" style="text-align:center">'+title+'</h2>'+
         '<div class="recap">'+
           row("Resort", RESORT)+
           (owner&&flow.topic ? row("Topic", flow.topic) : "")+
-          (g ? row("Your gift", g.ic+" "+g.t) : "")+
+          (g ? row("Your gift", ico(g.ic,18,'var(--gold-d)')+" "+g.t) : "")+
           row(route==="trip"?(owner?"Owner update":"Session"):"When", when)+
           (route==="trip" ? row("Reserved under","Unit "+UNIT+" · no deposit") : "")+
         '</div>'+
@@ -953,6 +1098,10 @@
             : '<li>We hold your gift and your preferred session.</li><li>One reminder when you\'re planning your return — then we line it up.</li>')+
         '</ul></div>';
     }
+    // peak-end reward — one Kauaʻi frame of the place they're staying close to
+    body = '<div class="rewardpix"><div class="photo fb-aqua">'+
+      '<img alt="Kauaʻi from the air" data-src="/assets/sc-hero.jpg">'+
+      '<div class="scrim light"></div></div></div>' + body;
 
     render({
       progress: 100,
@@ -968,7 +1117,7 @@
   function row(k,v){ return '<div class="row"><span>'+k+'</span><b>'+v+'</b></div>'; }
 
   /* ════════════════════════ INSTRUMENTATION (category-first baseline) ════════════════════════ */
-  // logs open→qualify→book→show funnel per segment. In production → analytics.
+  // logs open->qualify->book->show funnel per segment. In production -> analytics.
   function log(event){
     var rec = {t:Date.now(), seg:seg, event:event, gift:flow.gift!==null?giftByKey(flow.gift).t:null,
                topic:flow.topic||null, slot:flow.slot||null, daysLeft:DAYS_LEFT};
