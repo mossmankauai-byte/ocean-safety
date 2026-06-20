@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Become a Kauaʻi Safety Partner — OceanSafe</title>
+<link rel="icon" href="https://oceansafety.app/favicon.ico">
+<meta name="description" content="Put your shop, hotel, or rental on the beach-safety app every Kauaʻi visitor checks before the water. Live conditions, co-branded QR cards, and an in-app store.">
+<meta property="og:title" content="Become a Kauaʻi Safety Partner — OceanSafe">
+<meta property="og:description" content="The app every Kauaʻi beachgoer opens before the water. Featured as the local safety partner, with live conditions and QR cards for your guests.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oceansafety.app/join">
+<meta property="og:image" content="https://oceansafety.app/assets/join-hero.jpg">
+<style>
+  :root{
+    --ocean:#0f4c5c; --aqua:#0a8ba8; --gold:#c9a84c; --ink:#0d1b22;
+    --paper:#f6f8f9; --line:rgba(13,27,34,.10); --line-2:rgba(13,27,34,.16);
+    --muted:#52626c; --muted-2:#7b8993;
+    --glass:rgba(255,255,255,.62); --glass-line:rgba(255,255,255,.55);
+    --shadow:0 18px 50px -18px rgba(15,76,92,.30);
+    --shadow-lg:0 40px 90px -30px rgba(13,27,34,.45);
+    --r:18px; --r-sm:12px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+    --max:1080px; --gut:clamp(18px,4vw,40px);
+    --fs-eyebrow:clamp(11px,.78vw,12.5px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Inter,sans-serif;
+    background:var(--paper); color:var(--ink);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    line-height:1.55; overflow-x:hidden;
+  }
+  a{color:var(--aqua);text-decoration:none}
+  img{max-width:100%;display:block}
+  .wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gut)}
+  .eyebrow{font-size:var(--fs-eyebrow);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--aqua)}
+
+  /* ---------- top nav ---------- */
+  .nav{position:absolute;top:0;left:0;right:0;z-index:30;padding:18px 0}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .wm{font-weight:800;font-size:21px;letter-spacing:-.4px;color:#fff;display:inline-flex;align-items:center;gap:7px}
+  .wm .c{color:#fff;opacity:.78}
+  .wm .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(201,168,76,.28)}
+  .nav .links{display:flex;align-items:center;gap:8px}
+  .nav .navlink{color:rgba(255,255,255,.86);font-size:14px;font-weight:600;padding:9px 14px;border-radius:999px;transition:background .2s var(--ease)}
+  .nav .navlink:hover{background:rgba(255,255,255,.12)}
+  .nav .navcta{background:#fff;color:var(--ocean);font-weight:700;padding:9px 16px;border-radius:999px;font-size:14px}
+  @media(max-width:680px){.nav .navlink{display:none}.nav .navcta{padding:9px 15px}}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;isolation:isolate;overflow:hidden}
+  .hero__media{position:absolute;inset:0;z-index:-2}
+  .hero__media video,.hero__media img{width:100%;height:100%;object-fit:cover;object-position:center 42%}
+  .hero__scrim{position:absolute;inset:0;z-index:-1;
+    background:
+      radial-gradient(120% 90% at 18% 100%, rgba(13,27,34,.78), rgba(13,27,34,0) 60%),
+      linear-gradient(180deg, rgba(13,27,34,.34) 0%, rgba(13,27,34,.06) 26%, rgba(13,27,34,.30) 58%, rgba(7,18,24,.86) 100%);
+  }
+  .hero__inner{padding-block:clamp(120px,16vh,200px) clamp(40px,7vh,84px);width:100%}
+  .hero .eyebrow{color:#cfe9f1}
+  .hero h1{
+    color:#fff;font-weight:800;letter-spacing:-.022em;line-height:1.02;
+    font-size:clamp(40px,6.6vw,80px);margin:16px 0 0;max-width:15ch;
+    text-shadow:0 2px 40px rgba(7,18,24,.5);
+  }
+  .hero h1 .swap{color:#ffe6a6}
+  .hero .lede{color:rgba(255,255,255,.92);font-size:clamp(16.5px,1.5vw,20px);max-width:50ch;margin-top:20px;line-height:1.5;text-shadow:0 1px 20px rgba(7,18,24,.55)}
+  .hero .lede .seg-offer{color:#fff;font-weight:600}
+  .hero__cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;align-items:center}
+  .hero .trustline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:26px;color:rgba(255,255,255,.82);font-size:13.5px}
+  .hero .trustline .dotsep{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.45)}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:16px;border-radius:999px;
+    padding:15px 26px;border:none;cursor:pointer;transition:transform .18s var(--ease),box-shadow .25s var(--ease),background .2s var(--ease);
+    will-change:transform;text-decoration:none;line-height:1}
+  .btn--gold{background:var(--gold);color:#2a2206;box-shadow:0 14px 34px -10px rgba(201,168,76,.6)}
+  .btn--gold:hover{transform:translateY(-2px);box-shadow:0 20px 44px -12px rgba(201,168,76,.7)}
+  .btn--solid{background:var(--ocean);color:#fff;box-shadow:var(--shadow)}
+  .btn--solid:hover{transform:translateY(-2px);background:#0c3e4b}
+  .btn--glass{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .btn--glass:hover{background:rgba(255,255,255,.24);transform:translateY(-2px)}
+  .btn--ghost{background:#fff;color:var(--ink);border:1px solid var(--line-2)}
+  .btn--ghost:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  .btn .arr{transition:transform .2s var(--ease)}
+  .btn:hover .arr{transform:translateX(3px)}
+
+  /* ---------- segment switch ---------- */
+  .segbar{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.34);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:relative}
+  .segbtn{position:relative;z-index:2;border:none;background:none;cursor:pointer;font-family:inherit;
+    font-weight:700;font-size:14.5px;color:rgba(255,255,255,.78);padding:11px 18px;border-radius:999px;transition:color .25s var(--ease);white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+  .segbtn[aria-selected="true"]{color:var(--ocean)}
+  .segglide{position:absolute;z-index:1;top:5px;bottom:5px;border-radius:999px;background:#fff;
+    box-shadow:0 6px 18px -6px rgba(13,27,34,.4);transition:transform .42s var(--ease),width .42s var(--ease);will-change:transform,width}
+  .segbtn svg{width:17px;height:17px}
+  @media(max-width:520px){.segbtn{padding:10px 13px;font-size:13.5px}.segbtn .seglabel-long{display:none}}
+
+  /* ---------- sections ---------- */
+  section{position:relative}
+  .sec{padding-block:clamp(64px,9vw,120px)}
+  .sec-head{max-width:62ch}
+  .sec-head h2{font-size:clamp(28px,3.7vw,46px);font-weight:800;letter-spacing:-.02em;line-height:1.06;margin-top:14px}
+  .sec-head p{color:var(--muted);font-size:clamp(16px,1.3vw,18.5px);margin-top:16px;max-width:54ch}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+  .reveal.in{opacity:1;transform:none}
+  .reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}.reveal.d4{transition-delay:.32s}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important;transition:none}}
+
+  /* ---------- proof band ---------- */
+  .proof{background:var(--ocean);color:#fff;position:relative;overflow:hidden}
+  .proof::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 120% at 100% 0%,rgba(10,139,168,.5),transparent 55%);pointer-events:none}
+  .proof .wrap{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(20px,3vw,40px);padding-block:clamp(44px,5vw,64px)}
+  .stat .n{font-size:clamp(30px,3.6vw,44px);font-weight:800;letter-spacing:-.02em;line-height:1;color:#fff}
+  .stat .n .u{color:var(--gold)}
+  .stat .l{font-size:13.5px;color:rgba(255,255,255,.74);margin-top:9px;line-height:1.45}
+  @media(max-width:760px){.proof .wrap{grid-template-columns:repeat(2,1fr);gap:30px 20px}}
+
+  /* ---------- bento ---------- */
+  .bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:46px}
+  .tile{position:relative;border-radius:var(--r);border:1px solid var(--line);background:#fff;padding:26px;overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s var(--ease)}
+  .tile:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--line-2)}
+  .tile .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(10,139,168,.1);color:var(--aqua);margin-bottom:16px}
+  .tile .ic svg{width:21px;height:21px}
+  .tile h3{font-size:18.5px;font-weight:700;letter-spacing:-.01em}
+  .tile p{color:var(--muted);font-size:15px;margin-top:8px;line-height:1.55}
+  .tile--span2{grid-column:span 2}
+  .tile--feature{grid-column:span 4;color:#fff;border:none;padding:0;min-height:300px}
+  .tile--feature .ft-media{position:absolute;inset:0;z-index:0}
+  .tile--feature .ft-media video,.tile--feature .ft-media img{width:100%;height:100%;object-fit:cover}
+  .tile--feature .ft-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(120deg,rgba(13,27,34,.82) 8%,rgba(13,27,34,.18) 70%)}
+  .tile--feature .ft-body{position:relative;z-index:2;padding:30px;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+  .tile--feature .ic{background:rgba(255,255,255,.16);color:#fff}
+  .tile--feature h3{font-size:23px}
+  .tile--feature p{color:rgba(255,255,255,.86)}
+  @media(max-width:860px){.bento{grid-template-columns:repeat(2,1fr)}
+    .tile--span2,.tile--feature{grid-column:span 2;grid-row:auto}}
+  @media(max-width:520px){.bento{grid-template-columns:1fr}
+    .tile--span2,.tile--feature{grid-column:span 1}}
+
+  /* ---------- glass offer card ---------- */
+  .offerwrap{position:relative;margin-top:46px;border-radius:24px;overflow:hidden;border:1px solid var(--line)}
+  .offerwrap .offer-media{position:absolute;inset:0;z-index:0}
+  .offerwrap .offer-media img{width:100%;height:100%;object-fit:cover}
+  .offerwrap .offer-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(15,76,92,.5),rgba(13,27,34,.78))}
+  .offergrid{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr .95fr;gap:0}
+  .offer-left{padding:clamp(30px,4vw,52px);color:#fff}
+  .offer-left .eyebrow{color:#ffe6a6}
+  .offer-left h3{font-size:clamp(26px,3vw,36px);font-weight:800;letter-spacing:-.02em;line-height:1.08;margin-top:12px}
+  .offer-left .ol-sub{color:rgba(255,255,255,.86);margin-top:14px;font-size:16px;max-width:42ch}
+  .glass-card{margin:clamp(16px,2vw,24px);border-radius:var(--r);background:var(--glass);
+    backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);
+    border:1px solid var(--glass-line);box-shadow:0 30px 70px -28px rgba(7,18,24,.6);padding:clamp(24px,2.6vw,34px);color:var(--ink);position:relative}
+  .glass-card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+    background:linear-gradient(140deg,rgba(255,255,255,.9),rgba(255,255,255,0) 45%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+  .gc-tag{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ocean)}
+  .gc-price{display:flex;align-items:baseline;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .gc-price .amt{font-size:clamp(34px,4vw,46px);font-weight:800;letter-spacing:-.02em;color:var(--ocean)}
+  .gc-price .per{color:var(--muted);font-size:15px;font-weight:600}
+  .gc-line{font-size:15px;color:var(--ink);margin-top:6px}
+  .gc-line b{color:var(--ocean)}
+  .gc-list{list-style:none;margin-top:18px;display:flex;flex-direction:column;gap:11px}
+  .gc-list li{display:flex;gap:10px;font-size:14.5px;color:#2c3a42;line-height:1.4}
+  .gc-list li svg{width:18px;height:18px;flex:none;color:var(--gold);margin-top:1px}
+  .gc-cta{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+  .gc-note{font-size:12.5px;color:var(--muted-2);margin-top:12px;line-height:1.45}
+  @media(max-width:860px){.offergrid{grid-template-columns:1fr}.glass-card{margin-top:0}}
+
+  /* ---------- how it works ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px}
+  .stepcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:28px 26px 26px;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+  .stepcard:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .stepcard .num{font-size:13px;font-weight:800;color:var(--aqua);letter-spacing:.1em}
+  .stepcard h3{font-size:19px;font-weight:700;margin-top:14px;letter-spacing:-.01em}
+  .stepcard p{color:var(--muted);font-size:15px;margin-top:8px}
+  .stepcard::after{content:"";position:absolute;right:-9px;top:50%;width:18px;height:18px;border-top:2px solid var(--line-2);border-right:2px solid var(--line-2);transform:translateY(-50%) rotate(45deg);opacity:.6}
+  .stepcard:last-child::after{display:none}
+  @media(max-width:760px){.steps{grid-template-columns:1fr}.stepcard::after{display:none}}
+
+  /* ---------- gallery ---------- */
+  .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px}
+  .shot{display:block;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#fff;
+    transition:transform .3s var(--ease),box-shadow .3s var(--ease);color:inherit}
+  .shot:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .shot .ph{aspect-ratio:4/3;overflow:hidden;background:linear-gradient(135deg,#dceaef,#eef4f5)}
+  .shot .ph img{width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .6s var(--ease)}
+  .shot:hover .ph img{transform:scale(1.05)}
+  .shot .cap{padding:16px 18px}
+  .shot .cap b{display:block;font-size:15.5px;font-weight:700}
+  .shot .cap span{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--aqua);font-weight:600;margin-top:4px}
+  @media(max-width:760px){.gallery{grid-template-columns:1fr}}
+
+  /* ---------- testimonial / editorial ---------- */
+  .quote{max-width:60ch;margin:0 auto;text-align:center}
+  .quote .qmark{font-size:64px;line-height:0;color:var(--gold);font-family:Georgia,serif;display:block;height:30px}
+  .quote blockquote{font-size:clamp(22px,2.6vw,32px);font-weight:600;letter-spacing:-.01em;line-height:1.32;color:var(--ink)}
+  .quote cite{display:block;margin-top:20px;font-style:normal;font-size:14.5px;color:var(--muted);font-weight:600}
+
+  /* ---------- final CTA ---------- */
+  .finale{position:relative;overflow:hidden;color:#fff;border-radius:28px;margin:0 auto;max-width:var(--max)}
+  .finale .fin-media{position:absolute;inset:0;z-index:0}
+  .finale .fin-media video,.finale .fin-media img{width:100%;height:100%;object-fit:cover}
+  .finale .fin-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(160deg,rgba(15,76,92,.82),rgba(13,27,34,.9))}
+  .finale .fin-body{position:relative;z-index:2;padding:clamp(48px,7vw,92px) var(--gut);text-align:center}
+  .finale h2{font-size:clamp(30px,4.4vw,56px);font-weight:800;letter-spacing:-.02em;line-height:1.05;max-width:18ch;margin-inline:auto}
+  .finale p{color:rgba(255,255,255,.9);font-size:clamp(16px,1.4vw,19px);margin-top:18px;max-width:50ch;margin-inline:auto}
+  .finale .fin-cta{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:32px}
+
+  /* ---------- footer ---------- */
+  .foot{padding-block:48px;text-align:center;color:var(--muted-2);font-size:13.5px}
+  .foot .wm{color:var(--ocean);justify-content:center;margin-bottom:12px}
+  .foot .wm .c{color:var(--aqua);opacity:1}
+  .foot a{font-weight:600}
+  .foot .fineprint{margin-top:14px;max-width:64ch;margin-inline:auto;color:var(--muted-2);font-size:12.5px;line-height:1.5}
+
+  /* ---------- sticky cta bar ---------- */
+  .stickybar{position:fixed;left:0;right:0;bottom:0;z-index:40;transform:translateY(120%);
+    transition:transform .45s var(--ease);background:rgba(255,255,255,.82);
+    backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
+    border-top:1px solid var(--line);box-shadow:0 -10px 40px -20px rgba(13,27,34,.4)}
+  .stickybar.show{transform:none}
+  .stickybar .inner{max-width:var(--max);margin:0 auto;padding:12px var(--gut);display:flex;align-items:center;gap:16px;justify-content:space-between}
+  .stickybar .sb-copy b{font-size:15px;display:block;letter-spacing:-.01em}
+  .stickybar .sb-copy span{font-size:13px;color:var(--muted)}
+  .stickybar .sb-actions{display:flex;gap:10px;align-items:center;flex:none}
+  .stickybar .btn{padding:12px 20px;font-size:14.5px}
+  @media(max-width:680px){.stickybar .sb-copy span{display:none}.stickybar .inner{padding:10px 16px;gap:10px}
+    .stickybar .btn--ghost{display:none}.stickybar .btn{flex:1;justify-content:center}}
+  @media (prefers-reduced-motion:reduce){.btn,.tile,.shot,.stepcard{transition:none}}
+</style></head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="wrap">
+    <a class="wm" href="https://oceansafety.app" aria-label="OceanSafe home"><span class="dot"></span>Ocean<span class="c">Safe</span></a>
+    <div class="links">
+      <a class="navlink" href="#what">What you get</a>
+      <a class="navlink" href="#offer">The deal</a>
+      <a class="navlink" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">See a demo</a>
+      <a class="navcta" href="#offer">Claim your spot</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero__media">
+    <video autoplay muted loop playsinline preload="metadata" poster="/assets/join-hero.jpg" id="heroVideo">
+      <source src="/assets/join-hero.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero__scrim"></div>
+  <div class="hero__inner">
+    <div class="wrap">
+      <p class="eyebrow reveal in">Kauaʻi safety partner program</p>
+      <h1 class="reveal in d1">Be the local name on the app <span class="swap" data-swap="headline">every beachgoer checks.</span></h1>
+      <p class="lede reveal in d2">OceanSafe is the beach-safety app Kauaʻi visitors open before they get in the water. <span class="seg-offer" data-swap="lede">Become the safety partner they see first — featured by name, with live daily conditions and QR cards for your counter.</span></p>
+
+      <div class="hero__cta reveal in d3" style="margin-top:26px">
+        <div class="segbar" role="tablist" aria-label="Choose your business type" id="segbar">
+          <span class="segglide" id="segglide" aria-hidden="true"></span>
+          <button class="segbtn" role="tab" id="seg-shop" aria-selected="true" data-seg="shop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9"/><path d="M3 9h18"/></svg>
+            <span>I run a <span class="seglabel-long">Shop</span></span>
+          </button>
+          <button class="segbtn" role="tab" id="seg-hotel" aria-selected="false" data-seg="hotel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V5a1 1 0 011-1h12a1 1 0 011 1v16"/><path d="M9 8h.01M13 8h.01M9 12h.01M13 12h.01"/></svg>
+            <span>I run a <span class="seglabel-long">Hotel</span></span>
+          </button>
+          <button class="segbtn" role="tab" id="seg-rental" aria-selected="false" data-seg="rental">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+            <span>I manage <span class="seglabel-long">Rentals</span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="hero__cta reveal in d3">
+        <a class="btn btn--gold" href="#offer">Claim your spot <span class="arr">→</span></a>
+        <a class="btn btn--glass" href="https://oceansafety.app" target="_blank" rel="noopener">Try the live app ↗</a>
+      </div>
+
+      <div class="trustline reveal in d4">
+        <span>Live daily conditions from NOAA &amp; NWS</span>
+        <span class="dotsep"></span>
+        <span>Printed QR cards shipped to you</span>
+        <span class="dotsep"></span>
+        <span>Cancel anytime</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ PROOF BAND ============ -->
+<section class="proof">
+  <div class="wrap">
+    <div class="stat reveal"><div class="n">First<span class="u">.</span></div><div class="l">The app visitors check before they get in the water</div></div>
+    <div class="stat reveal d1"><div class="n">90<span class="u">%</span></div><div class="l">Shops &amp; rentals keep 90% of every in-app sale — OceanSafe takes 10%</div></div>
+    <div class="stat reveal d2"><div class="n">Daily</div><div class="l">Fresh Kauaʻi ocean-safety report, branded to you</div></div>
+    <div class="stat reveal d3"><div class="n">$149</div><div class="l">One-time co-branded QR card kit, printed &amp; shipped</div></div>
+  </div>
+</section>
+
+<!-- ============ WHAT YOU GET (BENTO) ============ -->
+<section class="sec" id="what">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">What every partner gets</p>
+      <h2 data-swap="what-head">Your name, in front of every visitor planning their beach day.</h2>
+      <p data-swap="what-sub">Visitors find you at the exact moment they're deciding where to go — not buried in a search, but featured as the local safety partner they trust.</p>
+    </div>
+
+    <div class="bento">
+      <div class="tile tile--feature reveal" style="grid-row:span 2">
+        <div class="ft-media">
+          <video autoplay muted loop playsinline preload="none" poster="/assets/join-2.jpg" data-lazyvideo="/assets/join-2.mp4"></video>
+        </div>
+        <div class="ft-scrim"></div>
+        <div class="ft-body">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3 data-swap="feature-h">A co-branded page with live conditions</h3>
+          <p data-swap="feature-p">oceansafety.app/p/your-business — your logo, your name, and today's real Kauaʻi ocean-safety report, refreshed daily.</p>
+        </div>
+      </div>
+
+      <div class="tile tile--span2 reveal d1">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+        <h3>Printed QR cards</h3>
+        <p>A co-branded card kit for your counter, welcome book, or rooms — guests scan and you're their safety source.</p>
+      </div>
+
+      <div class="tile tile--span2 reveal d2">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6L8 13.9 2 9.4h7.6z"/></svg></div>
+        <h3>Featured as the local safety partner</h3>
+        <p>Your business is the trusted name visitors see first — not a banner ad, a genuine local recommendation.</p>
+      </div>
+
+      <!-- segment-specific tile: STORE (shop + rental) -->
+      <div class="tile tile--span2 seg-store reveal d1">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
+        <h3>An in-app store</h3>
+        <p>Sell your products inside the app. Visitors buy, you keep 90%, OceanSafe takes 10% — that's the only deduction.</p>
+      </div>
+
+      <!-- segment-specific tile: HOTEL guest amenity -->
+      <div class="tile tile--span2 seg-hotel reveal d1" style="display:none">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 9V6a2 2 0 00-2-2H6a2 2 0 00-2 2v3"/><path d="M2 13a2 2 0 012-2h16a2 2 0 012 2v4H2z"/><path d="M2 17v3M22 17v3"/></svg></div>
+        <h3>A safety amenity guests remember</h3>
+        <p>In-room cards and a branded page show guests you care about their safety — a concierge touch that earns reviews.</p>
+      </div>
+
+      <div class="tile tile--span2 reveal d3">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+        <h3>A private dashboard</h3>
+        <p>Manage your page, products, and orders — and see scans, clicks, and payouts at a glance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE OFFER (GLASS) ============ -->
+<section class="sec" id="offer">
+  <div class="wrap">
+    <div class="sec-head reveal" style="margin-bottom:8px">
+      <p class="eyebrow">The deal</p>
+      <h2 data-swap="offer-head">Simple terms. Claim your spot today.</h2>
+      <p>Pricing is set per business type. Tell us about your place and we'll get you live — or, if you're a shop and ready now, start checkout in two minutes.</p>
+    </div>
+
+    <div class="offerwrap reveal d1">
+      <div class="offer-media">
+        <img src="/assets/join-hero.jpg" alt="" aria-hidden="true">
+      </div>
+      <div class="offer-scrim"></div>
+      <div class="offergrid">
+        <div class="offer-left">
+          <p class="eyebrow" data-swap="offer-kicker">For Kauaʻi shops</p>
+          <h3 data-swap="offer-title">Sell to every beachgoer, keep 90%.</h3>
+          <p class="ol-sub" data-swap="offer-sub">Your storefront lives inside the app visitors already trust. The card kit gets you on counters; the page keeps you in front of them all season.</p>
+
+          <ul class="gc-list" style="margin-top:24px;color:rgba(255,255,255,.92)" data-swap="offer-bullets">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your own page + live daily conditions</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-app store — you keep 90% of every sale</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Year one, we cover card-processing fees</li>
+          </ul>
+        </div>
+
+        <div class="glass-card">
+          <span class="gc-tag" data-swap="card-tag">Storefront · per store</span>
+          <div class="gc-price">
+            <span class="amt" data-swap="card-amt">$1,500</span>
+            <span class="per" data-swap="card-per">/ year</span>
+          </div>
+          <p class="gc-line" data-swap="card-line">Plus a one-time <b>$149</b> card kit and <b>10%</b> of in-app sales.</p>
+
+          <ul class="gc-list" data-swap="card-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live ocean report</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-app store, you keep 90%</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Printed QR card kit, shipped</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>
+          </ul>
+
+          <div class="gc-cta">
+            <a class="btn btn--solid" id="primaryCta" href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner%20%E2%80%94%20claim%20our%20spot" style="justify-content:center" data-swap-href="primary">Claim your spot <span class="arr">→</span></a>
+            <a class="btn btn--ghost" id="secondaryCta" href="https://square.link/u/7ObYUsQv" target="_blank" rel="noopener" style="justify-content:center" data-swap-href="secondary" data-swap="secondary-label">Ready now? Start checkout ↗</a>
+          </div>
+          <p class="gc-note" data-swap="card-note">First payment $1,649 (kit + year one). No hidden fees — we email before any renewal. Cancel anytime.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">How it works</p>
+      <h2>Live in days, not weeks.</h2>
+    </div>
+    <div class="steps">
+      <div class="stepcard reveal">
+        <div class="num">STEP 01</div>
+        <h3>Claim your spot</h3>
+        <p>Tell us about your business, or e-sign and pay if you're a shop ready to go. Two minutes, no call required.</p>
+      </div>
+      <div class="stepcard reveal d1">
+        <div class="num">STEP 02</div>
+        <h3>We build your page</h3>
+        <p>Your co-branded page goes live with daily conditions, and your printed QR card kit ships to your door.</p>
+      </div>
+      <div class="stepcard reveal d2">
+        <div class="num">STEP 03</div>
+        <h3>Reach every beachgoer</h3>
+        <p>Cards go on counters and in rooms. Visitors scan, check conditions, and find you as the local they trust.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY (preserve conversion links) ============ -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">See it for yourself</p>
+      <h2>Exactly what your guests &amp; visitors see.</h2>
+    </div>
+    <div class="gallery">
+      <a class="shot reveal" href="https://oceansafety.app" target="_blank" rel="noopener">
+        <div class="ph"><img src="join-app.jpg" alt="Live daily ocean-safety report in the OceanSafe app" loading="lazy"></div>
+        <div class="cap"><b>Your live safety report</b><span>Conditions every visitor checks <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div>
+      </a>
+      <a class="shot reveal d1" href="join-card.jpg" target="_blank" rel="noopener">
+        <div class="ph"><img src="join-card.jpg" alt="Co-branded QR counter card" loading="lazy"></div>
+        <div class="cap"><b>Your QR counter cards</b><span>Co-branded, printed &amp; shipped <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div>
+      </a>
+      <a class="shot reveal d2" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">
+        <div class="ph"><img src="join-dash.jpg" alt="Partner dashboard demo" loading="lazy"></div>
+        <div class="cap"><b>Your private dashboard</b><span>Open the interactive demo <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUOTE / EDITORIAL ============ -->
+<section class="sec">
+  <div class="wrap">
+    <div class="quote reveal">
+      <span class="qmark" aria-hidden="true">&ldquo;</span>
+      <blockquote>Every visitor checks the ocean before they go. Being the name on that screen means they find <em>us</em> first.</blockquote>
+      <cite>— The kind of partner OceanSafe is built for</cite>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="sec" style="padding-top:0">
+  <div class="finale">
+    <div class="fin-media">
+      <video autoplay muted loop playsinline preload="none" poster="/assets/join-hero.jpg" data-lazyvideo="/assets/join-3.mp4"></video>
+    </div>
+    <div class="fin-scrim"></div>
+    <div class="fin-body">
+      <p class="eyebrow" style="color:#ffe6a6">Limited founding partners</p>
+      <h2 style="margin-top:14px" data-swap="final-head">Become Kauaʻi's go-to safety partner.</h2>
+      <p>Spots are limited by area so each partner stands out. Claim yours and we'll have you live this week.</p>
+      <div class="fin-cta">
+        <a class="btn btn--gold" id="finalCta" href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner%20%E2%80%94%20claim%20our%20spot" data-swap-href="primary">Claim your spot <span class="arr">→</span></a>
+        <a class="btn btn--glass" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">See the demo dashboard ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="wrap">
+    <a class="wm" href="https://oceansafety.app"><span class="dot" style="background:var(--gold)"></span>Ocean<span class="c">Safe</span></a>
+    <div>Questions first? Email or text us — <a href="mailto:mossmankauai@gmail.com">mossmankauai@gmail.com</a> · <a href="https://oceansafety.app">oceansafety.app</a></div>
+    <p class="fineprint">OceanSafe shows general ocean and weather conditions from public sources (NOAA, NWS). It is guidance, not a guarantee of safety, and does not replace lifeguards or posted advisories.</p>
+  </div>
+</footer>
+
+<!-- ============ STICKY CTA ============ -->
+<div class="stickybar" id="stickybar" aria-hidden="true">
+  <div class="inner">
+    <div class="sb-copy">
+      <b data-swap="sticky-title">Claim your Kauaʻi spot</b>
+      <span data-swap="sticky-sub">Featured as the local safety partner · live this week</span>
+    </div>
+    <div class="sb-actions">
+      <a class="btn btn--ghost" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">See demo</a>
+      <a class="btn btn--gold" href="#offer">Claim your spot <span class="arr">→</span></a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- reduced motion: pause hero video, keep poster ---- */
+  if(prefersReduced){
+    var hv = document.getElementById("heroVideo");
+    if(hv){ try{ hv.removeAttribute("autoplay"); hv.pause(); }catch(e){} }
+  }
+
+  /* ---- lazy-load ambient section videos ---- */
+  if(!prefersReduced && "IntersectionObserver" in window){
+    var vObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(!en.isIntersecting) return;
+        var v = en.target, src = v.getAttribute("data-lazyvideo");
+        if(src && !v.querySelector("source")){
+          var s = document.createElement("source");
+          s.src = src; s.type = "video/mp4";
+          v.appendChild(s); v.load();
+          var p = v.play(); if(p && p.catch) p.catch(function(){});
+        }
+        vObs.unobserve(v);
+      });
+    }, {rootMargin:"300px"});
+    document.querySelectorAll("[data-lazyvideo]").forEach(function(v){ vObs.observe(v); });
+  }
+
+  /* ---- scroll reveal ---- */
+  if("IntersectionObserver" in window && !prefersReduced){
+    var rObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add("in"); rObs.unobserve(en.target); }
+      });
+    }, {threshold:.12, rootMargin:"0px 0px -8% 0px"});
+    document.querySelectorAll(".reveal:not(.in)").forEach(function(el){ rObs.observe(el); });
+  } else {
+    document.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("in"); });
+  }
+
+  /* ---- subtle hero parallax ---- */
+  if(!prefersReduced){
+    var media = document.querySelector(".hero__media");
+    var ticking = false;
+    window.addEventListener("scroll", function(){
+      if(ticking) return; ticking = true;
+      requestAnimationFrame(function(){
+        var y = window.scrollY;
+        if(media && y < window.innerHeight){ media.style.transform = "translateY(" + (y*0.18) + "px) scale(1.06)"; }
+        ticking = false;
+      });
+    }, {passive:true});
+    if(media) media.style.transform = "scale(1.06)";
+  }
+
+  /* ---- sticky CTA: show after hero, hide while offer visible or near footer ---- */
+  var bar = document.getElementById("stickybar");
+  var offer = document.getElementById("offer");
+  function updateBar(){
+    var past = window.scrollY > window.innerHeight * 0.85;
+    var oRect = offer.getBoundingClientRect();
+    var offerVisible = (oRect.top < window.innerHeight && oRect.bottom > 0);
+    var nearFoot = (window.innerHeight + window.scrollY) > (document.body.offsetHeight - 240);
+    if(past && !offerVisible && !nearFoot){ bar.classList.add("show"); bar.setAttribute("aria-hidden","false"); }
+    else { bar.classList.remove("show"); bar.setAttribute("aria-hidden","true"); }
+  }
+  window.addEventListener("scroll", updateBar, {passive:true});
+  window.addEventListener("resize", updateBar);
+  updateBar();
+
+  /* ============ SEGMENT SWITCH ============ */
+  var SEG = {
+    shop: {
+      headline: "every beachgoer checks.",
+      lede: "Become the safety partner they see first — featured by name, with live daily conditions, QR cards for your counter, and a store so every visitor can shop you.",
+      "what-head": "Your store, in front of every visitor planning their beach day.",
+      "what-sub": "Visitors find your shop the moment they're deciding what to do — featured as the local safety partner, with your products one tap away.",
+      "feature-h": "A co-branded page with your store",
+      "feature-p": "oceansafety.app/p/your-shop — your logo, live Kauaʻi conditions, and your products for sale, all in one trusted place.",
+      "offer-kicker": "For Kauaʻi shops",
+      "offer-title": "Sell to every beachgoer, keep 90%.",
+      "offer-sub": "Your storefront lives inside the app visitors already trust. The card kit gets you on counters; the page keeps you in front of them all season.",
+      "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your own page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-app store — you keep 90% of every sale</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Year one, we cover card-processing fees</li>',
+      "card-tag": "Storefront · per store",
+      "card-amt": "$1,500",
+      "card-per": "/ year",
+      "card-line": "Plus a one-time <b>$149</b> card kit and <b>10%</b> of in-app sales.",
+      "card-note": "First payment $1,649 (kit + year one). Year one we cover card-processing fees, so 10% is the only deduction. Cancel anytime.",
+      "secondary-label": "Ready now? Start checkout ↗",
+      "final-head": "Become Kauaʻi's go-to beach shop.",
+      "sticky-title": "Put your shop on the app",
+      "sticky-sub": "Sell to every beachgoer · keep 90% · live this week",
+      primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20shop%20partner%20%E2%80%94%20claim%20our%20spot",
+      secondary: "https://square.link/u/7ObYUsQv",
+      showStore: true, showHotel: false
+    },
+    hotel: {
+      headline: "every guest checks.",
+      lede: "Give guests a safety amenity they remember — your hotel featured by name on the app, with live daily conditions and co-branded cards for rooms and the front desk.",
+      "what-head": "A concierge-grade safety touch, branded to your hotel.",
+      "what-sub": "Guests open the app before the beach and see your name as the safety partner — a thoughtful amenity that earns trust and reviews.",
+      "feature-h": "A co-branded page with live conditions",
+      "feature-p": "oceansafety.app/p/your-hotel — your logo and today's real Kauaʻi ocean-safety report, ready for your welcome book and in-room cards.",
+      "offer-kicker": "For Kauaʻi hotels & inns",
+      "offer-title": "A safety amenity guests remember.",
+      "offer-sub": "Be the name guests see when they check conditions. We tailor the package to your property — rooms, front desk, and welcome book.",
+      "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-room &amp; front-desk QR cards</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>A concierge touch that earns reviews</li>',
+      "card-tag": "Hotel partner",
+      "card-amt": "Let's talk",
+      "card-per": "tailored to your property",
+      "card-line": "Includes the <b>$149</b> co-branded card kit. We size the package to your rooms and front desk.",
+      "card-note": "Pricing is set per property — tell us about your hotel and we'll put together the right package. No obligation.",
+      "secondary-label": "Try the live app ↗",
+      "final-head": "Make safety part of your guest experience.",
+      "sticky-title": "Add OceanSafe to your hotel",
+      "sticky-sub": "A safety amenity guests remember · tailored package",
+      primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20hotel%20partner%20%E2%80%94%20let's%20talk",
+      secondary: "https://oceansafety.app",
+      showStore: false, showHotel: true
+    },
+    rental: {
+      headline: "every guest checks.",
+      lede: "Stock every booking with a local safety touch — your brand on the app, live daily conditions, in-room QR cards, and a store so guests can shop your picks.",
+      "what-head": "A five-star safety touch in every booking.",
+      "what-sub": "Guests check the ocean before they go and find you as the local safety partner — fewer worried calls, better reviews, an easy upsell.",
+      "feature-h": "A co-branded page + guest store",
+      "feature-p": "oceansafety.app/p/your-rentals — your brand, live Kauaʻi conditions, and a store where guests buy gear and your local picks.",
+      "offer-kicker": "For vacation rentals & Airbnb managers",
+      "offer-title": "Better reviews, plus a new revenue line.",
+      "offer-sub": "QR cards in every unit, your brand on the safety app, and an in-app store where guests buy — you keep 90%. Priced per portfolio.",
+      "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>QR cards in every unit + your branded page</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-app store — you keep 90% of every sale</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Fewer worried calls, better reviews</li>',
+      "card-tag": "Rental partner",
+      "card-amt": "Let's talk",
+      "card-per": "priced to your portfolio",
+      "card-line": "Includes the <b>$149</b> card kit. In-app store earns you <b>90%</b> of every sale.",
+      "card-note": "Pricing is set by portfolio size — tell us how many units you manage and we'll tailor it. No obligation.",
+      "secondary-label": "Try the live app ↗",
+      "final-head": "Put a local safety partner in every unit.",
+      "sticky-title": "Add OceanSafe to your rentals",
+      "sticky-sub": "Better reviews + guest store · priced per portfolio",
+      primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20rental%20partner%20%E2%80%94%20let's%20talk",
+      secondary: "https://oceansafety.app",
+      showStore: true, showHotel: false
+    }
+  };
+
+  function setSwaps(seg){
+    var data = SEG[seg];
+    document.querySelectorAll("[data-swap]").forEach(function(el){
+      var key = el.getAttribute("data-swap");
+      if(data[key] != null) el.innerHTML = data[key];
+    });
+    document.querySelectorAll("[data-swap-href]").forEach(function(el){
+      var key = el.getAttribute("data-swap-href"); /* primary | secondary */
+      if(data[key] != null) el.setAttribute("href", key === "secondary" ? data.secondary : data.primary);
+    });
+    /* secondary CTA opens external in a new tab; mailto in same */
+    var sec = document.getElementById("secondaryCta");
+    if(sec){
+      if(/^https?:/.test(data.secondary)){ sec.setAttribute("target","_blank"); sec.setAttribute("rel","noopener"); }
+      else { sec.removeAttribute("target"); sec.removeAttribute("rel"); }
+    }
+    /* segment-only tiles */
+    document.querySelectorAll(".seg-store").forEach(function(t){ t.style.display = data.showStore ? "block":"none"; });
+    document.querySelectorAll(".seg-hotel").forEach(function(t){ t.style.display = data.showHotel ? "block":"none"; });
+  }
+
+  var segbar = document.getElementById("segbar");
+  var glide = document.getElementById("segglide");
+  var btns = Array.prototype.slice.call(segbar.querySelectorAll(".segbtn"));
+
+  function moveGlide(btn){
+    glide.style.width = btn.offsetWidth + "px";
+    glide.style.transform = "translateX(" + (btn.offsetLeft - 5) + "px)";
+  }
+  function select(btn, focus){
+    btns.forEach(function(b){ b.setAttribute("aria-selected", b===btn ? "true":"false"); });
+    moveGlide(btn);
+    setSwaps(btn.getAttribute("data-seg"));
+    if(focus) btn.focus();
+  }
+
+  btns.forEach(function(btn, i){
+    btn.addEventListener("click", function(){ select(btn); });
+    btn.addEventListener("keydown", function(e){
+      if(e.key === "ArrowRight" || e.key === "ArrowLeft"){
+        e.preventDefault();
+        var dir = e.key === "ArrowRight" ? 1 : -1;
+        var ni = (i + dir + btns.length) % btns.length;
+        select(btns[ni], true);
+      }
+    });
+  });
+
+  /* init */
+  function initGlide(){ var cur = segbar.querySelector('[aria-selected="true"]'); if(cur) moveGlide(cur); }
+  setSwaps("shop");
+  initGlide();
+  window.addEventListener("resize", initGlide);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(initGlide); }
+})();
+</script>
+</body></html>
