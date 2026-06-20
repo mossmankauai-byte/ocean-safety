@@ -45,6 +45,35 @@
   .slots{display:grid; grid-template-columns:1fr 1fr; gap:10px}
   @media(max-width:620px){.slots{grid-template-columns:1fr}}
 
+  /* ── session quick-add ── */
+  .addbar{display:grid; grid-template-columns:1.3fr 1fr .7fr auto; gap:9px; align-items:end}
+  @media(max-width:620px){.addbar{grid-template-columns:1fr 1fr}}
+  input[type=date],input[type=time]{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:9px 11px; font-family:inherit; font-size:13.5px; background:#fff; color:var(--ink)}
+  input[type=date]:focus,input[type=time]:focus{outline:none; border-color:var(--green)}
+  .addbtn{white-space:nowrap; padding:10px 14px; height:40px}
+  @media(max-width:620px){.addbtn{grid-column:1/-1; width:100%}}
+  .addmsg{font-size:12px; font-weight:700; margin:9px 0 0; min-height:15px; line-height:1.3}
+  .addmsg.err{color:var(--coral)} .addmsg.ok{color:var(--green-d)}
+
+  .presets{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:13px 0 4px; padding-top:13px; border-top:1px solid var(--line)}
+  .presets-lbl{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft)}
+  .chip{border:1.5px solid var(--line); background:var(--sand-2); color:var(--green-d); border-radius:999px; padding:7px 13px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer}
+  .chip:hover{border-color:var(--green); background:#fff}
+
+  .seslist{margin-top:14px; display:flex; flex-direction:column; gap:8px}
+  .sesrow{display:grid; grid-template-columns:auto 1fr auto auto; gap:10px; align-items:center; border:1.5px solid var(--line); border-radius:11px; padding:9px 11px; background:#fff}
+  .sesrow .day{font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; min-width:42px}
+  .sesrow .lbl{font-size:13.5px; font-weight:700; color:var(--ink)}
+  .sesrow .lbl small{display:block; font-size:11px; font-weight:600; color:var(--ink-soft)}
+  .capedit{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--ink-soft)}
+  .capedit input{width:52px; text-align:center; padding:6px 4px}
+  .rm{border:0; background:none; color:var(--coral); font-size:18px; font-weight:700; cursor:pointer; line-height:1; padding:2px 6px; border-radius:8px}
+  .rm:hover{background:#fbeae4}
+  .sesempty{font-size:13px; color:var(--ink-soft); text-align:center; padding:18px 10px; border:1.5px dashed var(--line); border-radius:11px; background:var(--sand-2)}
+  .sesfoot{display:flex; align-items:center; gap:12px; margin-top:11px; font-size:12px; color:var(--ink-soft); font-weight:600}
+  .sesfoot .clear{margin-left:auto; color:var(--coral); background:none; border:0; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer}
+  @media(max-width:620px){.sesrow{grid-template-columns:auto 1fr auto; row-gap:6px}.sesrow .capedit{grid-column:2/3; justify-self:start}}
+
   .qrgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
   @media(max-width:620px){.qrgrid{grid-template-columns:1fr}}
   .qrcard{border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center; background:#fff}
@@ -98,8 +127,27 @@
 
   <div class="card">
     <h4>Session availability</h4>
-    <p class="hint">Slot times offered for sessions and owner updates. Set seat capacity (&ldquo;spots left&rdquo;) per session in the Console.</p>
-    <div class="slots" id="slots"></div>
+    <p class="hint">Add the times you offer tours and owner updates. Pick a date and time, set how many spots, and add it. Use a preset to fill a whole week in one tap. Guests see these in the app; capacity also shows in the Console.</p>
+
+    <div class="addbar">
+      <div class="field"><label for="sa_date">Date</label><input type="date" id="sa_date"></div>
+      <div class="field"><label for="sa_time">Time</label><input type="time" id="sa_time" value="09:00" step="900"></div>
+      <div class="field"><label for="sa_cap">Spots</label><input type="number" id="sa_cap" value="8" min="1" max="99"></div>
+      <button class="btn green addbtn" id="sa_add" type="button">+ Add session</button>
+    </div>
+    <p class="addmsg" id="sa_msg"></p>
+
+    <div class="presets">
+      <span class="presets-lbl">Quick fill:</span>
+      <button class="chip" id="pre_9_1" type="button">9:00 AM &amp; 1:00 PM &middot; next 7 days</button>
+      <button class="chip" id="pre_weekday" type="button">Weekdays only &middot; next 2 weeks</button>
+      <button class="chip" id="pre_dup" type="button">Duplicate added &rarr; next week</button>
+    </div>
+
+    <div class="seslist" id="seslist"></div>
+    <div class="sesfoot" id="sesfoot"></div>
+    <!-- legacy hidden container kept for any external lookups; populated mirror of seslist -->
+    <div class="slots" id="slots" style="display:none"></div>
   </div>
 
   <div class="card">
@@ -178,8 +226,131 @@
   // gates
   $("gates").innerHTML = GATES.map(function(g){ return '<label class="gate"><input type="checkbox" id="q_'+g[0]+'" '+(cfg.qualify[g[0]]?'checked':'')+'><span>'+g[1]+'</span></label>'; }).join("");
 
-  // slots
-  $("slots").innerHTML = cfg.slots.map(function(s,i){ return '<div class="field"><label>Slot '+(i+1)+'</label><input type="text" id="slot'+i+'" value="'+esc(s)+'"></div>'; }).join("");
+  // ── session availability (friendly quick-add) ──
+  // INTERNAL model only. cfg.slots stays an array of label STRINGS (guest app contract);
+  // capacity is mirrored into cfg.slotCaps (parallel array, backward-compatible).
+  var DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  function startOfDay(d){ var x=new Date(d); x.setHours(0,0,0,0); return x; }
+  function todayMid(){ return startOfDay(new Date()); }
+  // turn a Date into the friendly "when" label the guest app already shows
+  function whenLabel(d){
+    var diff=Math.round((startOfDay(d)-todayMid())/86400000);
+    if(diff===0) return "Today";
+    if(diff===1) return "Tomorrow";
+    if(diff===2) return "Day after";
+    if(diff>2 && diff<7) return DOW[d.getDay()];
+    return DOW[d.getDay()]+" "+(d.getMonth()+1)+"/"+d.getDate();
+  }
+  // "09:00" -> "9:00 AM"
+  function timeLabel(t){
+    var p=String(t).split(":"); var h=+p[0]||0, m=p[1]||"00";
+    var ap=h>=12?"PM":"AM"; var hh=h%12; if(hh===0)hh=12;
+    return hh+":"+m+" "+ap;
+  }
+  function slotLabel(d,t){ return whenLabel(d)+" · "+timeLabel(t); }
+
+  // parse an existing saved label string back into a sortable session (best-effort)
+  var WHENMAP={"Today":0,"Tomorrow":1,"Day after":2};
+  function parseSaved(str,cap){
+    var parts=String(str).split("·"); var whenStr=(parts[0]||"").trim(); var timeStr=(parts[1]||"").trim();
+    // recover a date for sorting; relative labels resolve off today
+    var base=todayMid(), dt=new Date(base);
+    if(WHENMAP[whenStr]!=null){ dt.setDate(base.getDate()+WHENMAP[whenStr]); }
+    else { var di=DOW.indexOf(whenStr.split(" ")[0]); if(di>=0){ var add=(di-base.getDay()+7)%7||7; dt.setDate(base.getDate()+add); } }
+    return {label:String(str), cap:cap, sort:dt.getTime(), raw:true};
+  }
+
+  // build initial session list from saved cfg.slots (+ optional cfg.slotCaps)
+  var sessions=(cfg.slots||[]).map(function(s,i){
+    var cap=(cfg.slotCaps&&cfg.slotCaps[i]!=null)?+cfg.slotCaps[i]:8;
+    return parseSaved(s, cap>0?cap:8);
+  });
+
+  function sortSessions(){ sessions.sort(function(a,b){ return (a.sort||0)-(b.sort||0); }); }
+  function dupKey(s){ return s.label.toLowerCase(); }
+  function hasSession(label){ var k=label.toLowerCase(); return sessions.some(function(s){return s.label.toLowerCase()===k;}); }
+
+  // add one session from a Date + "HH:MM" time; returns true if added (false if dup)
+  function addSession(d,t,cap){
+    var label=slotLabel(d,t);
+    if(hasSession(label)) return false;
+    sessions.push({label:label, cap:cap>0?cap:8, sort:startOfDay(d).getTime()+(parseInt(String(t).split(":")[0],10)*60+parseInt(String(t).split(":")[1],10))*60000});
+    return true;
+  }
+
+  function flash(msg,ok){ var m=$("sa_msg"); m.textContent=msg; m.className="addmsg "+(ok?"ok":"err"); if(msg){ setTimeout(function(){ if(m.textContent===msg){ m.textContent=""; m.className="addmsg"; } },2600); } }
+
+  function renderSessions(){
+    sortSessions();
+    var box=$("seslist");
+    if(!sessions.length){
+      box.innerHTML='<div class="sesempty">No session times yet. Add one above, or tap a quick-fill preset to set up a whole week.</div>';
+    } else {
+      box.innerHTML=sessions.map(function(s,i){
+        var parts=s.label.split("·"); var w=(parts[0]||"").trim(); var t=(parts[1]||s.label).trim();
+        return '<div class="sesrow">'+
+          '<div class="day">'+esc(w)+'</div>'+
+          '<div class="lbl">'+esc(t)+'<small>'+esc(w)+'</small></div>'+
+          '<label class="capedit">spots <input type="number" min="1" max="99" value="'+(s.cap||8)+'" data-i="'+i+'" class="capinput"></label>'+
+          '<button class="rm" type="button" data-i="'+i+'" aria-label="remove session">&times;</button>'+
+        '</div>';
+      }).join("");
+    }
+    // mirror to hidden legacy container (label strings only) for safety
+    $("slots").innerHTML=sessions.map(function(s){ return '<input type="hidden" value="'+esc(s.label)+'">'; }).join("");
+    // footer
+    $("sesfoot").innerHTML = sessions.length
+      ? '<span>'+sessions.length+' session'+(sessions.length>1?'s':'')+' set</span><button class="clear" type="button" id="sesclear">Remove all</button>'
+      : '';
+    // wire row controls
+    box.querySelectorAll(".capinput").forEach(function(inp){ inp.onchange=function(){ var v=Math.max(1,Math.min(99,+inp.value||8)); sessions[+inp.dataset.i].cap=v; inp.value=v; }; });
+    box.querySelectorAll(".rm").forEach(function(b){ b.onclick=function(){ sessions.splice(+b.dataset.i,1); renderSessions(); }; });
+    var clr=$("sesclear"); if(clr) clr.onclick=function(){ if(sessions.length){ sessions=[]; renderSessions(); flash("All session times removed.",false); } };
+  }
+
+  // default the date picker to today
+  (function(){ var d=new Date(); var iso=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); $("sa_date").value=iso; $("sa_date").min=iso; })();
+
+  // quick-add button
+  $("sa_add").onclick=function(){
+    var dv=$("sa_date").value, tv=$("sa_time").value, cv=Math.max(1,Math.min(99,+$("sa_cap").value||8));
+    if(!dv){ flash("Pick a date first.",false); return; }
+    if(!tv){ flash("Pick a time first.",false); return; }
+    var d=new Date(dv+"T00:00:00");
+    if(startOfDay(d)<todayMid()){ flash("That date is in the past — pick today or later.",false); return; }
+    if(addSession(d,tv,cv)){ renderSessions(); flash("Added "+slotLabel(d,tv)+".",true); }
+    else { flash("That time is already on the list.",false); }
+  };
+
+  // presets
+  function addRange(times,days,opts){
+    opts=opts||{}; var added=0, base=todayMid();
+    for(var i=0;i<days;i++){
+      var d=new Date(base); d.setDate(base.getDate()+i);
+      if(opts.weekdaysOnly && (d.getDay()===0||d.getDay()===6)) continue;
+      times.forEach(function(t){ if(addSession(new Date(d),t,8)) added++; });
+    }
+    renderSessions();
+    flash(added?("Added "+added+" session"+(added>1?"s":"")+"."):"Those sessions were already on the list.", added>0);
+  }
+  $("pre_9_1").onclick=function(){ addRange(["09:00","13:00"],7,{}); };
+  $("pre_weekday").onclick=function(){ addRange(["09:00","13:00"],14,{weekdaysOnly:true}); };
+  $("pre_dup").onclick=function(){
+    // duplicate every currently-listed session to 7 days later
+    if(!sessions.length){ flash("Nothing to duplicate yet — add some sessions first.",false); return; }
+    sortSessions();
+    var snapshot=sessions.slice(), added=0;
+    snapshot.forEach(function(s){
+      var base=(s.sort!=null)?new Date(s.sort):null; if(!base)return;
+      var nd=new Date(base); nd.setDate(base.getDate()+7);
+      var hh=String(nd.getHours()).padStart(2,"0"), mm=String(nd.getMinutes()).padStart(2,"0");
+      if(addSession(nd,hh+":"+mm,s.cap)) added++;
+    });
+    renderSessions();
+    flash(added?("Duplicated "+added+" session"+(added>1?"s":"")+" to next week."):"Next week already has these sessions.", added>0);
+  };
+
+  renderSessions();
 
   // routing + resort
   $("resort").value=cfg.resort; $("crm").value=cfg.routing.crm||""; $("email").value=cfg.routing.email||""; $("digest").checked=!!cfg.routing.digest;
@@ -189,8 +360,12 @@
     var deals={};
     SEGMETA.forEach(function(seg){ deals[seg.k]=cfg.deals[seg.k].map(function(_,i){ var id="deal_"+seg.k+"_"+i; return {ic:$(id+"_ic").value||"🎁", t:$(id+"_t").value, d:$(id+"_d").value, v:+$(id+"_v").value||0}; }); });
     var qualify={}; GATES.forEach(function(g){ qualify[g[0]]=$("q_"+g[0]).checked; });
-    var slots=cfg.slots.map(function(_,i){ return $("slot"+i).value; }).filter(function(s){return s&&s.trim();});
-    return { resort:$("resort").value, deals:deals, qualify:qualify, slots:slots, routing:{crm:$("crm").value, email:$("email").value, digest:$("digest").checked} };
+    sortSessions();
+    // cfg.slots = array of label STRINGS (guest-app contract, unchanged shape)
+    var slots=sessions.map(function(s){ return s.label; }).filter(function(s){return s&&s.trim();});
+    // cfg.slotCaps = parallel array of seat capacities (backward-compatible add-on)
+    var slotCaps=sessions.map(function(s){ return s.cap>0?s.cap:8; });
+    return { resort:$("resort").value, deals:deals, qualify:qualify, slots:slots, slotCaps:slotCaps, routing:{crm:$("crm").value, email:$("email").value, digest:$("digest").checked} };
   }
   $("save").onclick=function(){ localStorage.setItem(CKEY, JSON.stringify(gather())); var s=$("status"); s.classList.add("on"); setTimeout(function(){ s.classList.remove("on"); }, 2200); };
 })();
