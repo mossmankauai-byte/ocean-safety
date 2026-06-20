@@ -344,8 +344,12 @@
   .back.show{display:grid}
 
   /* ── start screen (demo segment chooser) ── */
-  #start{position:absolute;inset:0;z-index:60;background:linear-gradient(170deg,#0f4c5c,#0a3a47);color:#fff;
-    display:flex;flex-direction:column;padding:max(40px,env(safe-area-inset-top)) 26px calc(34px + var(--safe-b));overflow:auto}
+  #start{position:absolute;inset:0;z-index:60;color:#fff;
+    display:flex;flex-direction:column;padding:max(40px,env(safe-area-inset-top)) 26px calc(34px + var(--safe-b));overflow:auto;
+    background:
+      linear-gradient(180deg,rgba(15,76,92,.72) 0%,rgba(10,58,71,.80) 55%,rgba(10,42,52,.96) 100%),
+      url('/assets/sc-hero.jpg') center/cover no-repeat,
+      linear-gradient(170deg,#0f4c5c,#0a3a47)}
   #start .sm{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px}
   #start .sm b{color:var(--gold)}
   #start h2{font-size:27px;line-height:1.18;letter-spacing:-.02em;font-weight:800;margin:34px 0 10px}
@@ -572,6 +576,17 @@
   function CHK(){ return '<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
   function gifts(){ return GIFTS[seg] || GIFTS.renter; }
   function giftByKey(k){ return gifts()[k]; }
+  // map a gift to a scenic Kauaʻi frame: resort credit -> resort coast, luau/cruise/sail -> serene bay
+  function giftImg(g){
+    return /credit/i.test(g.t) ? "/assets/sc-resort.jpg" : "/assets/sc-bay.jpg";
+  }
+  // featured-gift photo header (the conversion moment) — reuses the .gift-feat primitive
+  function giftFeatHtml(g){
+    return '<div class="gift-feat"><div class="photo fb-aqua">'+
+      '<img alt="'+g.t+' on Kauaʻi" data-src="'+giftImg(g)+'">'+
+      '<div class="scrim dark"></div><span class="vchip">$'+g.v+' value</span>'+
+      '<div class="gfcap"><b>'+g.t+'</b><span>'+g.d+'</span></div></div></div>';
+  }
 
   function setProgress(pct){ progBar.style.width = Math.max(14, pct) + "%"; }
 
@@ -582,7 +597,7 @@
     // opts: {body, cta, ghost, onCta, progress, canBack, ctaClass}
     view.innerHTML = '<div class="anim-in">'+opts.body+'</div>';
     // fade in any photo primitives on this screen (data-src -> src, .loaded once decoded)
-    Array.prototype.forEach.call(view.querySelectorAll('.photo>img[data-src]'), function(im){
+    Array.prototype.forEach.call(view.querySelectorAll('.photo>img[data-src],.act .ph>img[data-src],.opt .ophoto img[data-src]'), function(im){
       function show(){ im.classList.add('loaded'); }
       im.addEventListener('load', show);
       im.addEventListener('error', function(){ im.parentNode.classList.add('photo-failed'); });
@@ -642,7 +657,8 @@
         '<span><b>Poʻipū Beach Park</b><span class="s">Low hazard · lifeguarded · gentle</span></span>'+
         '<span class="now">Updated<br>7:42 AM</span>'+
       '</div>'+
-      '<div class="sect-h">Flags right now <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink-3)">· tap any beach for the full read</span></div>'+
+      '<div class="sect-h">Flags right now</div>'+
+      '<p class="why" style="margin:-4px 2px 8px"><span>'+ico("info",14)+'</span><span>Tap any beach for the full read.</span></p>'+
       beachRow("f-lo","LO","Poʻipū Beach Park","Low · lifeguarded · gentle shorebreak",
         "Calmest of the south-shore beaches this morning. Lifeguard on duty 9am–5pm. <b>Watch the right side</b> near the rocks where a mild current pulls out.",
         {Surf:"1–2 ft",Wind:"8 mph E",Water:"77°F"})+
@@ -715,6 +731,7 @@
   /* ════════════════════════ NON-OWNER: tour funnel ════════════════════════ */
   function offer(){
     var g = gifts();
+    var feat = g.filter(function(x){return x.most;})[0] || g[0];
     var ex = seg==="exchange";
     var hook = ex ? "Wish you could come back on points like this?" : "Not ready to leave this beach?";
     var line = ex
@@ -727,6 +744,7 @@
         '<div class="pill aqua"><span class="dotpulse"></span>6 Kauaʻi beaches explored this trip</div>'+
         '<h2 class="h2">'+hook+'</h2>'+
         '<p class="p">'+line+'</p>'+
+        giftFeatHtml(feat)+
         '<div class="gift-row">'+ g.map(function(x){
           return '<div class="gmini"><div class="gi">'+ico(x.ic,22,'var(--gold-d)')+'</div><div class="gt">'+x.t+'</div><div class="gv">$'+x.v+'</div></div>';
         }).join("") +'</div>'+
@@ -793,11 +811,11 @@
       body:
         '<h2 class="h2">No session this time —</h2>'+
         '<p class="p">that one isn\'t a fit, and we\'d never spend your last day on a presentation you can\'t use. Here\'s something you actually can, before you fly out:</p>'+
-        '<div class="act"><div class="ph">'+ico(a.ic,40,'#fff')+'</div><div class="ab">'+
+        '<div class="act"><div class="ph"><img alt="Sunset cruise off the Nāpali coast" data-src="/assets/sc-bay.jpg"><span class="pico">'+ico(a.ic,22,'#fff')+'</span></div><div class="ab">'+
           '<div class="at">'+a.t+'</div>'+
           '<div class="ad">'+a.d+'</div>'+
         '</div></div>'+
-        '<div class="act"><div class="ph" style="background:linear-gradient(135deg,#c9a84c,#a8862f)">'+ico("mountain",40,'#fff')+'</div><div class="ab">'+
+        '<div class="act"><div class="ph fb-gold"><img alt="Coastal headland on Kauaʻi\'s south shore" data-src="/assets/sc-surf.jpg"><span class="pico">'+ico("mountain",22,'#fff')+'</span></div><div class="ab">'+
           '<div class="at">Māhāʻulepū Heritage Trail</div>'+
           '<div class="ad">Quiet coastal hike, 15 min from your unit. Best light right after sunrise.</div>'+
         '</div></div>',
@@ -810,6 +828,7 @@
 
   function incentive(){
     var g = gifts();
+    var feat = g.filter(function(x){return x.most;})[0] || g[0];
     var cards = g.map(function(x,i){
       return '<button class="opt" data-k="'+i+'">'+
         (x.most?'<span class="tagm">Most picked</span>':'')+
@@ -824,6 +843,7 @@
         '<div class="pill gold">'+ico("sparkle",16)+' You\'re in — all three are funded by the resort</div>'+
         '<h2 class="h2">Pick your thank-you</h2>'+
         '<p class="p">Yours to keep just for attending the session. Choose the one you\'d love most.</p>'+
+        giftFeatHtml(feat)+
         cards+
         '<div class="disc"><span class="ico">'+ico("heart",16)+'</span><span>90-minute session, <b>no obligation to buy</b>. The gift is yours whether you join or not.</span></div>',
       cta:"Continue", ctaArrow:true, ctaDisabled:true,
@@ -951,7 +971,7 @@
           '<div class="pill aqua">'+ico("shuttle",16)+' Shuttle included · ~'+(owner?"60":"90")+' min</div>'+
           '<h2 class="h2">'+(owner?"Sessions are full right now":"All booked for your remaining nights")+'</h2>'+
           '<p class="p">Every '+(owner?"owner update":"session")+' is full for the rest of your stay — these fill from check-in. We\'d rather not rush you onto a bad time.</p>'+
-          '<div class="act"><div class="ph" style="background:linear-gradient(135deg,#0a8ba8,#0f4c5c)">'+ico("plane",40,'#fff')+'</div><div class="ab">'+
+          '<div class="act"><div class="ph"><img alt="Serene Kauaʻi bay to return to" data-src="/assets/sc-bay.jpg"><span class="pico">'+ico("plane",22,'#fff')+'</span></div><div class="ab">'+
             '<div class="at">Save it for your next trip</div>'+
             '<div class="ad">We\'ll hold your '+(flow.gift!==null?giftByKey(flow.gift).t.toLowerCase():"aloha gift")+' and line up a session for your return — one reminder, nothing before that.</div>'+
           '</div></div>',
