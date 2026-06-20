@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="oceansafe-favicon.png">
+<link rel="stylesheet" href="portal.css">
+<title>OceanSafe Partners — Orders & fulfillment</title>
+<style>
+  /* ── page-local: orders/fulfillment surface (locked IDs untouched) ─────── */
+  .chart{width:100%;height:172px;display:block}
+  .topbar{display:flex;align-items:center;gap:9px;margin-bottom:11px;font-size:13px}
+  .topbar .nm{flex:0 0 120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+  .topbar .track{flex:1;height:9px;background:var(--line-soft);border-radius:6px;overflow:hidden}
+  .topbar .fill{height:100%;background:var(--ocean);border-radius:6px}
+  .topbar .amt{flex:0 0 58px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+
+  /* header row: title + live fulfillment-queue summary chip */
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .queue-pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;
+    color:var(--ocean);background:var(--tint-aqua);border:1px solid #cde7ef;
+    padding:7px 13px;border-radius:var(--r-pill);margin:0 2px 2px}
+  .queue-pill .dot{width:7px;height:7px}
+  .queue-pill.calm{color:var(--mute);background:var(--line-soft);border-color:var(--line)}
+
+  /* orders table polish: fulfillment column, action buttons, code/track mono */
+  #orders table{table-layout:auto}
+  #orders th.r,#orders td.r{text-align:right}
+  #orders td .ful{display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-weight:600;white-space:nowrap}
+  #orders td .ful svg{width:14px;height:14px;flex:none;color:var(--mute)}
+  #orders td .sub{display:block;font-size:11.5px;color:var(--mute);margin-top:2px}
+  .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:700;
+    letter-spacing:.04em;background:var(--line-soft);color:var(--ink);
+    padding:2px 7px;border-radius:6px;white-space:nowrap}
+  /* per-row action affordances — reuse .btn system, sized for table cells */
+  #orders .acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+  #orders .acts .btn{min-height:32px;padding:0 11px;font-size:12.5px;border-radius:var(--r-sm)}
+  #orders .done{font-size:12px;font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  #orders .done svg{width:14px;height:14px}
+  /* segmented filter over the order list */
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+  .filters button{font:inherit;font-size:12.5px;font-weight:700;color:var(--mute);
+    background:#fff;border:1px solid var(--line);border-radius:var(--r-pill);
+    padding:6px 13px;min-height:34px;cursor:pointer;
+    transition:border-color .12s ease,background .12s ease,color .12s ease}
+  .filters button:hover{border-color:var(--aqua);color:var(--ocean)}
+  .filters button.on{background:var(--ocean);border-color:var(--ocean);color:#fff}
+  .filters button .ct{font-variant-numeric:tabular-nums;opacity:.7;margin-left:5px}
+  .filters button.on .ct{opacity:.85}
+
+  @media (max-width:600px){
+    /* stacked-row reflow: give each value a label so cells stay scannable */
+    #orders td{position:relative}
+    #orders td::before{content:attr(data-l);font-size:var(--t-cap);font-weight:800;
+      text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}
+    #orders td.r{justify-content:space-between}
+    #orders .acts{justify-content:flex-start}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar" role="banner"><img src="oceansafe-favicon.png" alt="OceanSafe" width="26" height="26"><b>OceanSafe</b><span class="crumb" id="shopName">·</span>
+  <span class="sp"></span>
+  <nav class="nav" aria-label="Portal sections">
+    <a href="dashboard.html">Today</a>
+    <a class="on" href="sales.html" aria-current="page">Sales</a>
+    <a href="products.html">Products</a>
+    <a href="promotions.html">Promotions</a>
+    <a href="#" id="out">Sign out</a>
+  </nav></header>
+
+<main class="wrap" id="main">
+  <div class="page-head">
+    <div>
+      <h1>Orders &amp; fulfillment</h1>
+      <p class="subhead">Every order, and what to do next — hand off pickups, ship the rest.</p>
+    </div>
+    <span class="queue-pill calm" id="queuePill" aria-live="polite">
+      <span class="dot d-grey" aria-hidden="true"></span><span id="queueText">Loading orders…</span>
+    </span>
+  </div>
+
+  <!-- stat cards -->
+  <section class="grid kpis" style="margin-top:16px" aria-label="Sales summary">
+    <div class="card tile-ocean"><h2 class="lbl">Sales this month</h2><div class="big" id="mSales"><span class="skel big" aria-label="Loading sales">—</span></div><div class="muted small" id="mCount">No orders yet</div></div>
+    <div class="card tile-green"><h2 class="lbl">Your payout</h2><div class="big" id="mPayout" style="color:var(--green)"><span class="skel big" aria-label="Loading payout">—</span></div><div class="muted small">Your 90% — after OceanSafe's 10%</div></div>
+    <div class="card tile-ocean"><h2 class="lbl">Avg order</h2><div class="big" id="mAvg"><span class="skel big" aria-label="Loading average">—</span></div><div class="muted small">per paid order</div></div>
+    <div class="card tile-ocean"><h2 class="lbl">All-time orders</h2><div class="big" id="mAll"><span class="skel big" aria-label="Loading lifetime orders">—</span></div><div class="muted small">paid, lifetime</div></div>
+  </section>
+
+  <!-- chart + top sellers -->
+  <div class="grid two" style="margin-top:16px;grid-template-columns:1.7fr 1fr">
+    <section class="card" aria-label="Sales over the last 30 days"><h2>Sales — last 30 days</h2><div id="chart"><span class="skel wide" aria-label="Loading your sales chart"></span></div></section>
+    <section class="card" aria-label="Top selling products"><h2>Top sellers</h2><div id="top"><span class="skel wide" aria-label="Loading top sellers"></span></div></section>
+  </div>
+
+  <!-- order history + fulfillment -->
+  <section class="card" style="margin-top:16px" aria-label="All orders and fulfillment">
+    <h2>All orders</h2>
+    <div class="filters" id="orderFilters" role="group" aria-label="Filter orders" hidden></div>
+    <div id="orders" aria-live="polite"><span class="skel wide" aria-label="Loading orders"></span></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  let session, partner;
+  let allOrders = [];          // last-loaded order set (drives filters + row actions)
+  let orderFilter = "all";     // current fulfillment-queue filter
+  function esc(s){ return String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c])); }
+
+  (async () => {
+    session = await requireAuth();
+    partner = await getMyPartner(session.user.id);
+    if (!partner) return location.replace("get-started.html");
+    el("shopName").textContent = "· " + partner.name;
+    el("out").addEventListener("click", (e) => { e.preventDefault(); signOut(); });
+    load();
+  })();
+
+  async function load() {
+    const affiliate = (partner.store_mode || "storefront") === "affiliate";
+    let all;
+    if (window.OCEANSAFE_DEMO) {
+      all = window.demoData().orders;
+    } else {
+      const { data: orders, error } = await sb.from("orders")
+        .select("id,total_cents,status,created_at,fulfillment,pickup_code,tracking").eq("partner_id", partner.id).order("created_at", { ascending: false });
+      if (error) { el("chart").innerHTML = `<span class="msg err">${esc(error.message)}</span>`; return; }
+      all = orders || [];
+    }
+    const paid = all.filter(o => o.status === "paid");
+
+    // stat cards
+    const now = new Date(), m0 = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const paidMonth = paid.filter(o => o.created_at >= m0);
+    const cents = paidMonth.reduce((s, o) => s + (o.total_cents || 0), 0);
+    el("mSales").textContent = money(cents);
+    el("mCount").textContent = paidMonth.length ? `${paidMonth.length} order${paidMonth.length === 1 ? "" : "s"} this month` : "No orders yet";
+    el("mPayout").textContent = money(Math.round(cents * 0.9));
+    el("mAvg").textContent = paidMonth.length ? money(Math.round(cents / paidMonth.length)) : "—";
+    el("mAll").textContent = paid.length;
+
+    // chart
+    el("chart").innerHTML = affiliate
+      ? `<div class="muted small" style="padding:54px 0;text-align:center">Affiliate mode — purchases happen on Amazon, so they're not tracked here. Switch to Online store to sell and track sales in-app.</div>`
+      : salesChart(paid);
+
+    // top sellers (from captured line items)
+    await loadTop(paid.map(o => o.id), affiliate);
+
+    // orders + fulfillment
+    allOrders = all;
+    renderQueue(all);
+    renderFilters(all);
+    renderOrders();
+  }
+
+  // ── fulfillment helpers ──────────────────────────────────────────────────
+  const STATUS_BADGE = { paid:"b-green", pending:"b-amber", refunded:"b-grey", disputed:"b-red", failed:"b-red", expired:"b-grey", ready:"b-blue", shipped:"b-blue", collected:"b-green" };
+  const STATUS_LABEL = { paid:"Paid", pending:"Pending", refunded:"Refunded", disputed:"Disputed", failed:"Failed", expired:"Expired", ready:"Ready for pickup", shipped:"Shipped", collected:"Collected" };
+  const ICON = {
+    pickup:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 3v4h-5"/><circle cx="7" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>',
+    ship:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+  };
+  // An order "needs action" when it's paid/ready (pickup) or paid/ready (ship, untracked).
+  const isPickup = o => (o.fulfillment || "pickup") === "pickup";
+  function needsAction(o){
+    if (isPickup(o)) return o.status === "paid" || o.status === "ready";
+    return (o.status === "paid" || o.status === "ready") && !o.tracking; // ship not yet shipped
+  }
+  const queueOrders = list => list.filter(needsAction);
+
+  function renderQueue(list){
+    const n = queueOrders(list).length;
+    const pill = el("queuePill"), txt = el("queueText"), dot = pill.querySelector(".dot");
+    if (!list.length){ pill.className = "queue-pill calm"; dot.className = "dot d-grey"; txt.textContent = "No orders yet"; return; }
+    if (n){ pill.className = "queue-pill"; dot.className = "dot d-amber"; txt.textContent = `${n} order${n===1?"":"s"} to fulfill`; }
+    else { pill.className = "queue-pill calm"; dot.className = "dot d-green"; txt.textContent = "All caught up"; }
+  }
+
+  function renderFilters(list){
+    const wrap = el("orderFilters");
+    if (!list.length){ wrap.hidden = true; return; }
+    const defs = [
+      ["all", "All", list.length],
+      ["todo", "To fulfill", queueOrders(list).length],
+      ["pickup", "Pickups", list.filter(isPickup).length],
+      ["ship", "Shipments", list.filter(o => !isPickup(o)).length],
+    ];
+    wrap.hidden = false;
+    wrap.innerHTML = defs.map(([k,label,ct]) =>
+      `<button type="button" data-filter="${k}" class="${orderFilter===k?"on":""}" aria-pressed="${orderFilter===k}">${label}<span class="ct">${ct}</span></button>`).join("");
+    wrap.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      orderFilter = b.dataset.filter; renderFilters(allOrders); renderOrders();
+    }));
+  }
+
+  function filtered(){
+    if (orderFilter === "todo") return queueOrders(allOrders);
+    if (orderFilter === "pickup") return allOrders.filter(isPickup);
+    if (orderFilter === "ship") return allOrders.filter(o => !isPickup(o));
+    return allOrders;
+  }
+
+  function fulfillCell(o){
+    if (isPickup(o)){
+      const code = o.pickup_code ? `<span class="sub">Code <span class="code">${esc(o.pickup_code)}</span></span>` : "";
+      return `<span class="ful">${ICON.pickup}Pickup</span>${code}`;
+    }
+    const track = o.tracking ? `<span class="sub">Tracking <span class="code">${esc(o.tracking)}</span></span>` : "";
+    return `<span class="ful">${ICON.ship}Ship</span>${track}`;
+  }
+
+  function actionCell(o){
+    if (needsAction(o)){
+      if (isPickup(o))
+        return `<div class="acts"><button type="button" class="btn primary" data-act="collected" data-id="${esc(o.id)}">Mark collected</button></div>`;
+      return `<div class="acts"><button type="button" class="btn primary" data-act="shipped" data-id="${esc(o.id)}">Mark shipped</button></div>`;
+    }
+    if (o.status === "collected") return `<span class="done">${ICON.check}Collected</span>`;
+    if (o.status === "shipped")   return `<span class="done">${ICON.check}Shipped</span>`;
+    return `<span class="muted small">—</span>`;
+  }
+
+  function renderOrders(){
+    if (!allOrders.length){ el("orders").innerHTML = emptyState("🧾", "No orders yet", "Your first sale will show up here the moment a customer checks out."); return; }
+    const rows = filtered();
+    if (!rows.length){ el("orders").innerHTML = emptyState("🎉", "Nothing in this view", "No orders match this filter right now — try “All”."); return; }
+    el("orders").innerHTML = `<table><thead><tr><th>When</th><th>Fulfillment</th><th>Status</th><th class="r">Total</th><th class="r">Action</th></tr></thead><tbody>${
+      rows.slice(0, 40).map(o => `<tr>
+        <td data-l="When">${new Date(o.created_at).toLocaleDateString()}</td>
+        <td data-l="Fulfillment">${fulfillCell(o)}</td>
+        <td data-l="Status"><span class="badge ${STATUS_BADGE[o.status]||"b-grey"}">${esc(STATUS_LABEL[o.status]||o.status)}</span></td>
+        <td data-l="Total" class="r" style="font-weight:700">${money(o.total_cents)}</td>
+        <td data-l="Action" class="r">${actionCell(o)}</td>
+      </tr>`).join("")
+    }</tbody></table>`;
+    el("orders").querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", onFulfill));
+  }
+
+  // Mark collected/shipped. Optimistic in demo; persists in live (best-effort).
+  async function onFulfill(e){
+    const btn = e.currentTarget, id = btn.dataset.id, act = btn.dataset.act;
+    const o = allOrders.find(x => x.id === id);
+    if (!o) return;
+    btn.disabled = true; btn.innerHTML = `<span class="spin"></span>`;
+    const next = act === "collected" ? "collected" : "shipped";
+    try {
+      if (!window.OCEANSAFE_DEMO) {
+        const patch = { status: next };
+        if (next === "shipped" && !o.tracking) patch.tracking = "PENDING";
+        const { error } = await sb.from("orders").update(patch).eq("id", id);
+        if (error) throw error;
+      }
+    } catch (err) {
+      btn.disabled = false; btn.textContent = act === "collected" ? "Mark collected" : "Mark shipped";
+      const t = document.createElement("div"); t.className = "msg err"; t.textContent = err.message || "Could not update — try again.";
+      el("orders").prepend(t); setTimeout(() => t.remove(), 4000); return;
+    }
+    o.status = next;
+    if (next === "shipped" && !o.tracking) o.tracking = "PENDING";
+    renderQueue(allOrders); renderFilters(allOrders); renderOrders();
+  }
+
+  function emptyState(glyph, title, line) {
+    return `<div class="empty"><div aria-hidden="true" style="font-size:26px">${glyph}</div><b>${esc(title)}</b><span>${esc(line)}</span></div>`;
+  }
+
+  async function loadTop(paidIds, affiliate) {
+    if (affiliate) { el("top").innerHTML = `<span class="muted small">Not tracked in affiliate mode.</span>`; return; }
+    if (!paidIds.length) { el("top").innerHTML = emptyState("🏆", "No sales yet", "Your best-selling products will line up here once orders come in."); return; }
+    let items;
+    if (window.OCEANSAFE_DEMO) { items = window.demoData().items; }
+    else { ({ data: items } = await sb.from("order_items").select("title,qty,price_cents,order_id").in("order_id", paidIds)); }
+    const totals = {};
+    for (const it of (items || [])) {
+      const k = it.title || "Item";
+      totals[k] = (totals[k] || 0) + (it.price_cents || 0) * (it.qty || 1);
+    }
+    const rows = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    if (!rows.length) { el("top").innerHTML = `<span class="muted small">No sales yet.</span>`; return; }
+    const max = rows[0][1] || 1;
+    el("top").innerHTML = rows.map(([nm, v]) =>
+      `<div class="topbar"><span class="nm">${esc(nm)}</span><span class="track"><span class="fill" style="width:${Math.round(v / max * 100)}%"></span></span><span class="amt">${money(v)}</span></div>`).join("");
+  }
+
+  // SVG line+area chart of daily paid sales over the last 30 days
+  function salesChart(paid) {
+    const days = 30, W = 600, H = 160, base = H - 6, top = 14;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const b = new Array(days).fill(0);
+    for (const o of paid) {
+      const d = new Date(o.created_at); d.setHours(0, 0, 0, 0);
+      const idx = days - 1 - Math.round((today - d) / 86400000);
+      if (idx >= 0 && idx < days) b[idx] += (o.total_cents || 0);
+    }
+    if (!b.some(v => v > 0))
+      return emptyState("📈", "No sales in the last 30 days", "Your chart fills in on its own as orders come through.");
+    const max = Math.max(1, ...b);
+    const pts = b.map((v, i) => [(i / (days - 1)) * W, base - (v / max) * (base - top)]);
+    const line = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    const area = `${line} L${W} ${base} L0 ${base} Z`;
+    const mid = ((base + top) / 2).toFixed(1);
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Daily sales for the last 30 days, peak ${money(max)} in a day">
+      <line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="var(--line)"/>
+      <line x1="0" y1="${mid}" x2="${W}" y2="${mid}" stroke="var(--line)" stroke-dasharray="3 4"/>
+      <path d="${area}" fill="var(--ocean)" opacity="0.08"/>
+      <path d="${line}" fill="none" stroke="var(--ocean)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+    </svg>
+    <div class="muted small" style="display:flex;justify-content:space-between;margin-top:4px"><span>30 days ago</span><span>peak ${money(max)}/day</span><span>today</span></div>`;
+  }
+</script>
+</body>
+</html>
