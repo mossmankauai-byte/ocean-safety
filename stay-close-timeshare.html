@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OceanSafe · Stay-Close for Timeshare (prototype)</title>
+<style>
+  :root{
+    --sand:#f3ede0; --sand-2:#faf6ee; --card:#ffffff;
+    --ink:#2c2a24; --ink-soft:#6b6457; --line:#e4dccb;
+    --green:#628a56; --green-d:#3d5346; --green-l:#a8bea2;
+    --amber:#d97706; --amber-l:#fef3c7; --coral:#e07856; --coral-d:#c85f3e;
+    --plum:#7a5a82; --plum-l:#f1e9f3;
+    --flag-red:#b91c1c; --flag-green:#16a34a; --flag-yellow:#eab308;
+    --font-body:"Helvetica Neue",Arial,Helvetica,sans-serif;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:var(--font-body); color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #eaf3ec 0%, transparent 55%),
+      radial-gradient(1000px 500px at 110% 10%, #fbf1dd 0%, transparent 50%),
+      var(--sand);
+    min-height:100vh; padding:22px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{display:grid; grid-template-columns:minmax(0,400px) minmax(0,1fr); gap:26px; max-width:1060px; margin:0 auto; align-items:start}
+  @media(max-width:860px){ .wrap{grid-template-columns:1fr} }
+
+  h1.title{font-size:15px; letter-spacing:.02em; margin:0 0 2px}
+  .sub{color:var(--ink-soft); font-size:13px; margin:0 0 14px}
+  .crumbs{font-size:11.5px; color:var(--ink-soft); margin:0 0 16px; line-height:1.5}
+  .crumbs b{color:var(--green-d)}
+
+  /* phone */
+  .phone{width:100%; max-width:400px; height:772px; margin:0 auto; position:relative; background:#cfe3d6; border:10px solid #20211d; border-radius:42px; box-shadow:0 30px 60px -28px rgba(40,40,30,.55); overflow:hidden}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:140px; height:24px; background:#20211d; border-radius:0 0 16px 16px; z-index:40}
+  .screen{position:absolute; inset:0; overflow:hidden; border-radius:32px}
+  .app{position:absolute; inset:0; background:var(--sand-2); display:flex; flex-direction:column}
+  .appbar{display:flex; align-items:center; gap:9px; padding:34px 16px 12px; background:linear-gradient(180deg,#eaf3ec,#f6f1e6)}
+  .flag{width:0;height:0;border-left:13px solid var(--flag-green);border-top:9px solid transparent;border-bottom:9px solid transparent}
+  .wordmark{font-weight:700; font-size:16px; color:var(--green-d)} .wordmark span{color:var(--amber)}
+  .appbody{padding:6px 16px 16px; overflow:auto}
+  .h2{font-size:13px; color:var(--ink-soft); margin:14px 2px 8px; font-weight:700; text-transform:uppercase; letter-spacing:.06em}
+  .beach{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:12px; margin-bottom:10px; display:flex; gap:11px; align-items:center}
+  .beach .dot{width:38px;height:38px;border-radius:11px; flex:0 0 auto; display:grid;place-items:center; color:#fff; font-weight:800; font-size:12px}
+  .beach b{font-size:14px} .beach .m{font-size:12px;color:var(--ink-soft)}
+
+  .scrim{position:absolute; inset:0; background:rgba(28,28,22,.34); opacity:0; pointer-events:none; transition:opacity .28s ease; z-index:20}
+  .scrim.on{opacity:1; pointer-events:auto}
+  .sheet{position:absolute; left:0; right:0; bottom:0; z-index:30; background:var(--card); border-radius:22px 22px 32px 32px; box-shadow:0 -18px 40px -20px rgba(40,40,30,.45); transform:translateY(110%); transition:transform .34s cubic-bezier(.2,.8,.2,1); max-height:90%; display:flex; flex-direction:column}
+  .sheet.on{transform:translateY(0)}
+  @media(prefers-reduced-motion:reduce){ .sheet,.scrim{transition:none} }
+  .grab{width:40px;height:4px;border-radius:4px;background:var(--line); margin:9px auto 2px}
+  .sheet .body{padding:6px 18px 20px; overflow:auto}
+
+  .brandrow{display:flex; align-items:center; gap:8px; padding:2px 0 6px}
+  .brandrow .flag{transform:scale(.85)}
+  .brandrow .nm{font-weight:700; color:var(--green-d); font-size:12.5px}
+  .brandrow .by{margin-left:auto; font-size:10.5px; color:var(--ink-soft)}
+
+  .hook{font-size:21px; line-height:1.2; font-weight:700; margin:6px 0 6px; letter-spacing:-.01em}
+  .lede{font-size:14px; color:var(--ink-soft); line-height:1.45; margin:0 0 14px}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px; font-weight:700; padding:5px 10px; border-radius:999px; margin-bottom:12px}
+  .pill.amber{background:var(--amber-l); color:#8a5208} .pill.plum{background:var(--plum-l); color:#5d3f66}
+
+  .gifts{display:flex; gap:8px; margin:2px 0 14px}
+  .gift{flex:1; background:var(--sand-2); border:1px solid var(--line); border-radius:12px; padding:10px 8px; text-align:center}
+  .gift .ic{font-size:18px} .gift .t{font-size:11.5px; font-weight:700; margin-top:4px} .gift .v{font-size:10.5px;color:var(--ink-soft)}
+
+  .disc{font-size:11px; color:var(--ink-soft); background:#f7f4ec; border:1px dashed var(--line); border-radius:10px; padding:9px 11px; line-height:1.4; margin:4px 0 14px}
+  .disc b{color:var(--ink)}
+
+  .btn{display:block; width:100%; border:0; border-radius:13px; padding:14px; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; text-align:center; margin-top:9px}
+  .btn:first-child{margin-top:0}
+  .btn.primary{background:var(--coral); color:#fff} .btn.primary:hover{background:var(--coral-d)}
+  .btn.green{background:var(--green); color:#fff} .btn.green:hover{background:var(--green-d)}
+  .btn.plum{background:var(--plum); color:#fff} .btn.plum:hover{filter:brightness(.92)}
+  .btn.ghost{background:transparent; color:var(--ink-soft); font-weight:600; padding:11px}
+  .btn:disabled{opacity:.45; cursor:not-allowed}
+
+  .q{padding:11px 0; border-bottom:1px solid var(--line)} .q:last-of-type{border-bottom:0}
+  .q .lab{font-size:13.5px; font-weight:600; margin-bottom:8px; line-height:1.35}
+  .seg{display:flex; gap:8px}
+  .seg button{flex:1; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:9px; font-family:inherit; font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer}
+  .seg button.sel{border-color:var(--green); background:#eef4ea; color:var(--green-d)}
+  .seg button.sel.no{border-color:var(--flag-red); background:#fbecec; color:#992020}
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:2px 0 12px}
+  .chip{border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:9px 13px; font-family:inherit; font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer}
+  .chip.sel{border-color:var(--plum); background:var(--plum-l); color:#5d3f66}
+
+  .opt{display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:13px; padding:12px; margin-bottom:9px; cursor:pointer; background:#fff}
+  .opt.sel{border-color:var(--coral); background:#fdf1ec}
+  .opt .ic{width:40px;height:40px;border-radius:11px;background:var(--amber-l); display:grid;place-items:center; font-size:20px; flex:0 0 auto}
+  .opt .t{font-weight:700; font-size:14px} .opt .d{font-size:12px;color:var(--ink-soft)}
+  .opt .chk{margin-left:auto; width:20px;height:20px;border-radius:50%; border:2px solid var(--line); flex:0 0 auto}
+  .opt.sel .chk{border-color:var(--coral); background:var(--coral); box-shadow:inset 0 0 0 3px #fff}
+
+  .slots{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:4px 0 8px}
+  .slot{border:1.5px solid var(--line); background:#fff; border-radius:11px; padding:11px 8px; text-align:center; cursor:pointer; font-size:13px; font-weight:600}
+  .slot small{display:block; color:var(--ink-soft); font-weight:500; font-size:11px}
+  .slot.sel{border-color:var(--green); background:#eef4ea; color:var(--green-d)}
+  .slot.full{opacity:.5; cursor:not-allowed}
+
+  .field{margin:6px 0 12px}
+  .field label{font-size:12.5px;font-weight:700;color:var(--ink-soft); display:block; margin-bottom:5px}
+  .field input{width:100%; border:1.5px solid var(--line); border-radius:11px; padding:12px; font-family:inherit; font-size:14px}
+  .field input:focus{outline:none; border-color:var(--green)}
+
+  .ok{width:54px;height:54px;border-radius:50%; background:var(--flag-green); display:grid;place-items:center; color:#fff; font-size:28px; margin:6px auto 10px}
+  .recap{background:var(--sand-2); border:1px solid var(--line); border-radius:12px; padding:12px; margin:10px 0; font-size:13px}
+  .recap .row{display:flex; justify-content:space-between; padding:4px 0}
+  .next{font-size:12.5px;color:var(--ink-soft); line-height:1.5}
+  .next li{margin:3px 0}
+
+  .panel{display:flex; flex-direction:column; gap:14px}
+  .pcard{background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden}
+  .pcard h3{margin:0; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--green-d); padding:13px 15px; border-bottom:1px solid var(--line)}
+  .pcard .pc{padding:14px 15px}
+  .lab2{font-size:12px;font-weight:700;color:var(--ink-soft); margin:0 0 6px}
+  .segsel{display:flex; gap:7px; margin-bottom:14px}
+  .segsel button{flex:1; border:1.5px solid var(--line); background:#fff; border-radius:9px; padding:9px 4px; font-family:inherit; font-weight:700; font-size:11.5px; color:var(--ink-soft); cursor:pointer; line-height:1.2}
+  .segsel button.sel{border-color:var(--green); background:#eef4ea; color:var(--green-d)}
+  .segsel button.sel.owner{border-color:var(--plum); background:var(--plum-l); color:#5d3f66}
+  .ctl{margin-bottom:13px}
+  .ctl .top{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px}
+  .ctl input[type=range]{width:100%; accent-color:var(--green)}
+  .daysrow{display:flex; gap:7px}
+  .daysrow button{flex:1; border:1.5px solid var(--line); background:#fff; border-radius:9px; padding:8px 4px; font-family:inherit; font-weight:700; font-size:12px; color:var(--ink-soft); cursor:pointer}
+  .daysrow button.sel{border-color:var(--green); background:#eef4ea; color:var(--green-d)}
+  .verdict{border-radius:11px; padding:11px 12px; font-size:13px; line-height:1.4; margin-top:4px}
+  .verdict.fire{background:#eef6ea; border:1px solid #cfe3c2; color:#2f5a22}
+  .verdict.owner{background:var(--plum-l); border:1px solid #ddc9e2; color:#5d3f66}
+  .verdict.hold{background:#f7f4ec; border:1px solid var(--line); color:var(--ink-soft)}
+  .verdict b{font-weight:800}
+
+  .ledger .empty{color:var(--ink-soft); font-style:italic; font-size:12.5px}
+  .lead{border:1px solid var(--line); border-radius:11px; padding:10px 11px; margin-bottom:8px; background:var(--sand-2)}
+  .lead .hl{display:flex; justify-content:space-between; font-weight:700; margin-bottom:3px; font-size:12.5px}
+  .lead .meta{color:var(--ink-soft); font-size:11.5px; line-height:1.5}
+  .tag{display:inline-block; font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; margin-right:3px}
+  .tag.tour{background:#dcfce7; color:#166534} .tag.owner{background:var(--plum-l);color:#5d3f66}
+  .tag.ref{background:#e0f2f7;color:#0e6f86} .tag.soft{background:var(--amber-l);color:#8a5208} .tag.dq{background:#fee2e2;color:#991b1b}
+  .totals{display:flex; gap:10px} .tot{flex:1; background:#eef4ea; border:1px solid #cfe3c2; border-radius:11px; padding:10px; text-align:center}
+  .tot .n{font-size:19px; font-weight:800; color:var(--green-d)} .tot .l{font-size:10.5px; color:var(--ink-soft); margin-top:2px}
+  .mini{font-size:11px; color:var(--ink-soft); line-height:1.5; margin-top:8px}
+  .reset{background:none;border:1px solid var(--line); border-radius:9px; padding:7px 11px; font-family:inherit; font-size:11.5px; color:var(--ink-soft); cursor:pointer; margin-top:10px}
+  code.k{background:#f1ede3; padding:1px 5px; border-radius:5px; font-size:11px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div>
+    <h1 class="title">OceanSafe · Stay-Close for Timeshare</h1>
+    <p class="sub">Segment-driven: the same in-unit guide behaves differently for owners vs. guests — and never pitches ownership to an owner.</p>
+    <p class="crumbs">Master switch = <b>who’s in the unit</b>. Non-owner → <b>tour funnel</b>. Owner → <b>upgrade + referral</b>, never a “buy” pitch. Flip the segment on the right and open the card.</p>
+
+    <div class="phone" aria-label="OceanSafe app preview">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="app">
+          <div class="appbar"><span class="flag"></span><span class="wordmark">Ocean<span>Safe</span></span></div>
+          <div class="appbody">
+            <div class="h2">Today · Poʻipū, South Shore</div>
+            <div class="beach"><div class="dot" style="background:var(--flag-green)">LO</div><div><b>Poʻipū Beach Park</b><div class="m">Low hazard · lifeguarded · gentle</div></div></div>
+            <div class="beach"><div class="dot" style="background:var(--flag-yellow)">MD</div><div><b>Shipwreck Beach</b><div class="m">Moderate · shorebreak today</div></div></div>
+            <div class="beach"><div class="dot" style="background:var(--flag-red)">HI</div><div><b>Queen’s Bath</b><div class="m">High hazard · do not enter</div></div></div>
+            <div class="h2">Your week · unit 214</div>
+            <div class="beach"><div class="dot" style="background:var(--green)">★</div><div><b>6 beaches explored</b><div class="m">Day 5 of 7 · Marriott’s Waiohai Beach Club</div></div></div>
+          </div>
+        </div>
+        <div class="scrim" id="scrim"></div>
+        <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="OceanSafe stay-close">
+          <div class="grab"></div>
+          <div class="body" id="sheetBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="pcard">
+      <h3>① Who’s in the unit + intent signal</h3>
+      <div class="pc">
+        <div class="lab2">Which QR was scanned (segment)</div>
+        <div class="segsel" id="segSel">
+          <button data-seg="renter" class="sel">Renting<br>(hotel-side)</button>
+          <button data-seg="exchange">Exchanging<br>in (RCI/II)</button>
+          <button data-seg="owner">Owner<br>here</button>
+        </div>
+        <div class="ctl"><div class="top"><span>Stay elapsed</span><b id="elapsedV">71%</b></div><input type="range" id="elapsed" min="0" max="100" value="71" aria-label="Stay elapsed percent"></div>
+        <div class="ctl"><div class="top"><span>Engagement score</span><b id="engageV">78</b></div><input type="range" id="engage" min="0" max="100" value="78" aria-label="Engagement score"></div>
+        <div class="ctl"><div class="top"><span>Days left on trip</span><b id="daysV">2</b></div>
+          <div class="daysrow" id="daysRow"><button data-d="0">Today</button><button data-d="1">1</button><button data-d="2" class="sel">2</button><button data-d="3">3+</button></div>
+        </div>
+        <div class="verdict" id="verdict"></div>
+        <button class="btn primary" id="fireBtn" style="margin-top:11px">Open the card</button>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <h3>② Operator intelligence — leads &amp; economics</h3>
+      <div class="pc">
+        <div class="totals">
+          <div class="tot"><div class="n" id="totActions">0</div><div class="l">funnel actions</div></div>
+          <div class="tot"><div class="n" id="totRev">$0</div><div class="l">est. revenue (on show)</div></div>
+        </div>
+        <div class="ledger" id="ledger" style="margin-top:12px"><div class="empty">No activity yet — pick a segment, open the card, run the flow.</div></div>
+        <div class="mini" id="econNote"></div>
+        <button class="reset" id="resetBtn">Reset ledger</button>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <h3>Guardrails baked in</h3>
+      <div class="pc mini" style="font-size:11.5px">
+        <b>Owners never see a “buy ownership” pitch.</b> Segment gating is enforced in the engine, not just the UI. Owners get upgrade + referral instead. Everything is opt-in, one ask + easy dismiss, and transparent that sessions are presentations. Disqualified non-owners get a friendly activity off-ramp, never a tour they can’t use. OceanSafe routes the qualified guest into the resort’s pipeline; it does not fulfill activities. Segment comes from the QR scanned; capacity (spots left) is set by the operator.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var RESORT = "Marriott’s Waiohai Beach Club";
+  var FEES = {tour:150, owner:100, referral:50}, FULFILL=0.15;
+  var STORE = "oceansafe_ts_leads_v2";
+  // each segment (QR) has its own deal menu — set in the Operator Portal
+  var DEALS = {
+    renter:   {d0:{ic:"⛵",t:"Sunset dinner cruise",d:"Nāpali coast · for two",v:180}, d1:{ic:"🌺",t:"Lūʻau for two",d:"Poʻipū · incl. transport",v:300}, d2:{ic:"🏨",t:"$200 resort credit",d:"dining / spa on-property",v:200}},
+    exchange: {d0:{ic:"🤿",t:"Snorkel sail for two",d:"south shore reef",v:160}, d1:{ic:"🍽️",t:"$150 dining credit",d:"any on-site restaurant",v:150}, d2:{ic:"💆",t:"$175 spa credit",d:"Waiohai spa",v:175}},
+    owner:    {d0:{ic:"⭐",t:"15,000 bonus points",d:"added to your account",v:300}, d1:{ic:"🍽️",t:"$250 owner dining credit",d:"any on-site restaurant",v:250}, d2:{ic:"🌺",t:"Lūʻau for two",d:"Poʻipū · incl. transport",v:300}}
+  };
+  var GIFTS = DEALS.renter; // reassigned to the scanned segment's deals on open()
+  var UPGRADES = ["More points","Add a week","Upgrade my unit","Better season"];
+
+  // ── operator config (set in the Operator Portal) drives the guest experience ──
+  var CFG=null, CFG_SLOTS=null;
+  try{ CFG=JSON.parse(localStorage.getItem("oceansafe_ts_config")); }catch(e){}
+  if(CFG){
+    if(CFG.resort) RESORT=CFG.resort;
+    if(CFG.deals){ ["renter","exchange","owner"].forEach(function(sg){ var arr=CFG.deals[sg]; if(arr&&arr.length){ var o={}; arr.forEach(function(x,i){ o["d"+i]={ic:x.ic,t:x.t,d:x.d,v:+x.v}; }); DEALS[sg]=o; } }); }
+    if(CFG.slots && CFG.slots.length) CFG_SLOTS=CFG.slots;
+  }
+
+  var sim={segment:"renter", elapsed:71, engage:78, days:2};
+  var flow={};
+  function resetFlow(){ flow={kind:null, answers:{}, gift:null, slot:null, upgrade:null, email:"", friend:""}; }
+  resetFlow();
+  var $=function(id){return document.getElementById(id);};
+  var sheet=$("sheet"), scrim=$("scrim"), body=$("sheetBody");
+
+  function isOwner(){ return sim.segment==="owner"; }
+  function triggers(){ return sim.elapsed>=60 && sim.engage>=55; }
+
+  function renderVerdict(){
+    var v=$("verdict"), fire=triggers();
+    if(!fire){
+      v.className="verdict hold";
+      v.innerHTML="<b>· Holding.</b> "+(sim.elapsed<60?"Too early in the stay":"Engagement too low")+" — the agent only spends this moment on guests likely to act.";
+    } else if(isOwner()){
+      v.className="verdict owner";
+      v.innerHTML="<b>✓ Owner path.</b> No ownership pitch. Routes to <b>upgrade + referral</b> with an owner-update session.";
+    } else {
+      v.className="verdict fire";
+      v.innerHTML="<b>✓ Tour path.</b> Non-owner at peak return-intent → <b>"+(sim.days>=1?"same-trip session":"next-trip nurture")+"</b>.";
+    }
+    $("fireBtn").disabled=!fire; $("fireBtn").style.opacity=fire?1:.5;
+  }
+
+  function open(){ resetFlow(); GIFTS = DEALS[sim.segment] || DEALS.renter; if(isOwner()){ flow.kind="owner"; stepOwnerWelcome(); } else { flow.kind="tour"; stepOffer(); } scrim.classList.add("on"); sheet.classList.add("on"); }
+  function close(){ scrim.classList.remove("on"); sheet.classList.remove("on"); }
+  scrim.addEventListener("click", close);
+
+  function giftMini(k){ var g=GIFTS[k]; return '<div class="gift"><div class="ic">'+g.ic+'</div><div class="t">'+g.t+'</div><div class="v">$'+g.v+' value</div></div>'; }
+  function giftCards(){ return Object.keys(GIFTS).map(function(k){ var g=GIFTS[k];
+    return '<div class="opt" data-k="'+k+'"><div class="ic">'+g.ic+'</div><div><div class="t">'+g.t+'</div><div class="d">'+g.d+' · $'+g.v+' value</div></div><div class="chk"></div></div>'; }).join(""); }
+  function wireGifts(onPick){ body.querySelectorAll(".opt").forEach(function(o){ o.onclick=function(){ body.querySelectorAll(".opt").forEach(function(x){x.classList.remove("sel");}); o.classList.add("sel"); flow.gift=o.dataset.k; onPick&&onPick(); }; }); }
+
+  /* ===== NON-OWNER: tour funnel ===== */
+  function stepOffer(){
+    body.innerHTML=
+      '<div class="brandrow"><span class="flag"></span><span class="nm">OceanSafe</span><span class="by">a note before you go</span></div>'+
+      '<div class="pill amber">🌊 You explored 6 Kauaʻi beaches this trip</div>'+
+      '<div class="hook">Not ready to leave Kauaʻi?</div>'+
+      '<div class="lede">A lot of our guests come back every year. Sit in on a no-pressure ownership session at '+RESORT+' and pick a thank-you on us:</div>'+
+      '<div class="gifts">'+Object.keys(GIFTS).slice(0,3).map(giftMini).join("")+'</div>'+
+      '<div class="disc"><b>Straight up:</b> it’s a ~90-minute timeshare presentation. No obligation — you keep the gift just for attending.</div>'+
+      '<button class="btn primary" id="go">See if I qualify</button><button class="btn ghost" id="later">Maybe later</button>';
+    $("go").onclick=stepQualify; $("later").onclick=function(){ logLead("dismissed"); close(); };
+  }
+  var QS=[
+    {k:"couple",q:"Traveling as a couple, with both able to attend together?",gate:"yes"},
+    {k:"age",q:"Are you both 30 or older?",gate:"yes"},
+    {k:"home",q:"Do you own your home?",gate:"yes"},
+    {k:"income",q:"Combined household income $50k+?",gate:"yes"},
+    {k:"owner",q:"Already own a timeshare at this resort?",gate:"no"}
+  ];
+  if(CFG && CFG.qualify){ QS=QS.filter(function(q){ var key=q.k==="owner"?"ownerCheck":q.k; return CFG.qualify[key]!==false; }); }
+  function stepQualify(){
+    var h='<div class="brandrow"><span class="flag"></span><span class="nm">Quick check</span><span class="by">15 seconds</span></div><div class="lede" style="margin-bottom:10px">Resorts reserve the gift for guests who fit:</div>';
+    QS.forEach(function(it){ h+='<div class="q"><div class="lab">'+it.q+'</div><div class="seg" data-k="'+it.k+'"><button data-v="yes">Yes</button><button data-v="no">No</button></div></div>'; });
+    h+='<button class="btn primary" id="qNext" disabled style="margin-top:14px">Continue</button>';
+    body.innerHTML=h;
+    body.querySelectorAll(".seg").forEach(function(seg){ seg.querySelectorAll("button").forEach(function(b){ b.onclick=function(){
+      seg.querySelectorAll("button").forEach(function(x){x.classList.remove("sel","no");}); b.classList.add("sel"); if(b.dataset.v==="no")b.classList.add("no");
+      flow.answers[seg.dataset.k]=b.dataset.v; $("qNext").disabled=Object.keys(flow.answers).length<QS.length;
+    }; }); });
+    $("qNext").onclick=function(){ QS.every(function(it){return flow.answers[it.k]===it.gate;}) ? stepIncentive() : stepDisqualified(); };
+  }
+  function stepDisqualified(){ logLead("disqualified");
+    body.innerHTML='<div class="brandrow"><span class="flag"></span><span class="nm">All good</span></div><div class="hook" style="font-size:19px">No session this time —</div><div class="lede">that one’s not a fit, and we’d never waste your last day on it. Here’s something you <i>can</i> use before you fly out:</div><div class="opt sel"><div class="ic">⛵</div><div><div class="t">Sunset Nāpali cruise — tonight</div><div class="d">15% off for OceanSafe guests</div></div></div><button class="btn green" id="x1">See tonight’s cruise</button><button class="btn ghost" id="x2">No thanks</button>';
+    $("x1").onclick=close; $("x2").onclick=close;
+  }
+  function stepIncentive(){
+    body.innerHTML='<div class="brandrow"><span class="flag"></span><span class="nm">You’re in 🎉</span><span class="by">pick your thank-you</span></div><div class="lede" style="margin-bottom:12px">All three are funded by the resort. Choose one:</div>'+giftCards()+'<button class="btn primary" id="iNext" disabled style="margin-top:8px">Continue</button>';
+    wireGifts(function(){ $("iNext").disabled=false; });
+    $("iNext").onclick=function(){ sim.days>=1?stepSameTrip():stepNurture(); };
+  }
+
+  /* ===== OWNER: upgrade + referral funnel ===== */
+  function stepOwnerWelcome(){
+    body.innerHTML=
+      '<div class="brandrow"><span class="flag"></span><span class="nm">OceanSafe</span><span class="by">welcome back</span></div>'+
+      '<div class="pill plum">🌺 Owner since 2019 · year 7 with us</div>'+
+      '<div class="hook">Aloha again, owner.</div>'+
+      '<div class="lede">Hope unit 214 feels like home. Two things owners love this week — your call:</div>'+
+      '<button class="btn plum" id="up">Add to my ownership</button>'+
+      '<button class="btn green" id="ref">Refer a friend — you both get a gift</button>'+
+      '<button class="btn ghost" id="later">Just enjoying my stay</button>';
+    $("up").onclick=stepOwnerUpgrade; $("ref").onclick=stepReferral; $("later").onclick=function(){ logLead("dismissed"); close(); };
+  }
+  function stepOwnerUpgrade(){
+    var h='<div class="brandrow"><span class="flag"></span><span class="nm">Owner update</span><span class="by">~60 min</span></div>'+
+      '<div class="lede" style="margin-bottom:8px">What would make your weeks better? Pick one to talk through:</div><div class="chips" id="ups">';
+    UPGRADES.forEach(function(u){ h+='<button class="chip" data-u="'+u+'">'+u+'</button>'; });
+    h+='</div><div class="lab2" style="margin:6px 0 6px">Your thank-you for sitting down (resort-funded):</div>'+giftCards()+'<button class="btn plum" id="uNext" disabled style="margin-top:8px">Book my owner update</button>';
+    body.innerHTML=h;
+    body.querySelectorAll(".chip").forEach(function(c){ c.onclick=function(){ body.querySelectorAll(".chip").forEach(function(x){x.classList.remove("sel");}); c.classList.add("sel"); flow.upgrade=c.dataset.u; check(); }; });
+    wireGifts(check);
+    function check(){ $("uNext").disabled = !(flow.upgrade && flow.gift); }
+    $("uNext").onclick=function(){ sim.days>=1?stepSameTrip():stepNurture(); };
+  }
+  function stepReferral(){
+    body.innerHTML='<div class="brandrow"><span class="flag"></span><span class="nm">Refer a friend</span></div><div class="hook" style="font-size:19px">Know someone who’d love it here?</div><div class="lede">Send them an aloha gift. If they visit and tour, you both get rewarded.</div><div class="field"><label for="fn">Friend’s first name</label><input id="fn" type="text" placeholder="e.g. Dana"></div><div class="field"><label for="fe">Their email</label><input id="fe" type="email" placeholder="friend@email.com"></div><button class="btn green" id="rSend" disabled>Send their aloha gift</button>';
+    function ck(){ flow.friend=$("fn").value; flow.email=$("fe").value; $("rSend").disabled=!(flow.friend.trim() && /.+@.+\..+/.test(flow.email)); }
+    $("fn").oninput=ck; $("fe").oninput=ck;
+    $("rSend").onclick=function(){ logLead("referral"); stepConfirm("referral"); };
+  }
+
+  /* ===== shared routing (kind-aware) ===== */
+  function stepSameTrip(){
+    var owner=flow.kind==="owner";
+    var defSlots = sim.days>=2 ? [["Today","2:00 PM"],["Tomorrow","9:00 AM"],["Tomorrow","2:00 PM"],["Day after","9:00 AM"]] : [["Today","2:00 PM"],["Today","4:30 PM"],["Tomorrow","8:30 AM"],["Tomorrow","10:00 AM"]];
+    var useCfg=!!CFG_SLOTS, slots = useCfg ? CFG_SLOTS : defSlots;
+    var h='<div class="brandrow"><span class="flag"></span><span class="nm">'+(owner?"Book your owner update":"Book your session")+'</span><span class="by">~'+(owner?"60":"90")+' min</span></div><div class="lede" style="margin-bottom:10px">You’ve got time before checkout. Grab a slot — shuttle included.</div><div class="slots">';
+    var SPOTS=[3,1,5,2];
+    slots.forEach(function(s,i){ var lbl=useCfg ? s : (s[0]+' · '+s[1]); var left=SPOTS[i%SPOTS.length]; var lc=left<=1?"#b91c1c":"var(--ink-soft)"; h+='<div class="slot'+(left===0?' full':'')+'" data-i="'+i+'"><span>'+lbl+'</span><small style="color:'+lc+';font-weight:700">'+(left===0?"Full":left+" spots left")+'</small></div>'; });
+    h+='</div><button class="btn '+(owner?"plum":"primary")+'" id="sBook" disabled style="margin-top:10px">Confirm</button>';
+    body.innerHTML=h;
+    body.querySelectorAll(".slot").forEach(function(sl){ sl.onclick=function(){ if(sl.classList.contains("full"))return; body.querySelectorAll(".slot").forEach(function(x){x.classList.remove("sel");}); sl.classList.add("sel"); flow.slot=(sl.querySelector("span")||sl).textContent; $("sBook").disabled=false; }; });
+    $("sBook").onclick=function(){ logLead(owner?"owner_update":"qualified"); stepConfirm("trip"); };
+  }
+  function stepNurture(){
+    var owner=flow.kind==="owner";
+    body.innerHTML='<div class="brandrow"><span class="flag"></span><span class="nm">For next time</span></div><div class="hook" style="font-size:19px">Flying out today?</div><div class="lede">No problem — we’ll hold your '+GIFTS[flow.gift].t.toLowerCase()+' and line up the '+(owner?"owner update":"session")+' for your next Kauaʻi trip.</div><div class="field"><label for="em">Email</label><input id="em" type="email" placeholder="you@email.com"></div><div class="disc">One message when you start planning your return. Unsubscribe anytime.</div><button class="btn '+(owner?"plum":"primary")+'" id="nSave" disabled>Save for next trip</button>';
+    var em=$("em"); em.oninput=function(){ flow.email=em.value; $("nSave").disabled=!/.+@.+\..+/.test(em.value); };
+    $("nSave").onclick=function(){ logLead(owner?"owner_nurture":"nurture"); stepConfirm("next"); };
+  }
+  function stepConfirm(route){
+    var owner=flow.kind==="owner", g=flow.gift?GIFTS[flow.gift]:null;
+    if(route==="referral"){
+      body.innerHTML='<div class="ok">✓</div><div class="hook" style="text-align:center; font-size:20px">Gift on its way 🌺</div><div class="recap"><div class="row"><span>Sent to</span><b>'+flow.friend+'</b></div><div class="row"><span>Reward</span><b>You both, if they tour</b></div></div><div class="next">We’ll email '+flow.friend+' their aloha gift and a Kauaʻi planning guide. If they visit and attend a tour, your owner account gets credited.</div><button class="btn green" id="done" style="margin-top:8px">Done</button>';
+    } else {
+      var when=route==="trip"?flow.slot.replace(/(AM|PM)/,' $1'):"your next Kauaʻi trip";
+      body.innerHTML='<div class="ok">✓</div><div class="hook" style="text-align:center; font-size:20px">'+(route==="trip"?"You’re booked":"Saved — see you next time")+'</div><div class="recap"><div class="row"><span>Resort</span><b>'+RESORT+'</b></div>'+(owner?'<div class="row"><span>Topic</span><b>'+flow.upgrade+'</b></div>':'')+'<div class="row"><span>Your gift</span><b>'+g.ic+' '+g.t+'</b></div><div class="row"><span>'+(route==="trip"?(owner?"Owner update":"Session"):"When")+'</span><b>'+when+'</b></div></div><div class="next"><b style="color:var(--ink)">What happens next</b><ul><li>'+(route==="trip"?"Concierge texts your shuttle pickup.":"We email one reminder when you plan your return.")+'</li><li>'+(owner?"It’s an owner update — explore options, zero pressure.":"Attend the full session with both guests → claim your gift on the spot.")+'</li><li>'+(owner?"Keep what you have either way.":"No obligation to buy. Ever.")+'</li></ul></div><button class="btn '+(owner?"plum":"green")+'" id="done" style="margin-top:6px">Done</button>';
+    }
+    $("done").onclick=close; renderLedger();
+  }
+
+  /* ===== ledger ===== */
+  function loadLeads(){ try{return JSON.parse(localStorage.getItem(STORE))||[];}catch(e){return [];} }
+  function saveLeads(a){ try{localStorage.setItem(STORE,JSON.stringify(a));}catch(e){} }
+  function logLead(status){
+    var g=flow.gift?GIFTS[flow.gift]:null;
+    var fee = status==="qualified"?FEES.tour : status==="owner_update"?FEES.owner : status==="referral"?FEES.referral : 0;
+    var fulfill = 0; // OceanSafe routes the lead; it does not fulfill activities
+    var lead={ id:"L"+(loadLeads().length+1), segment:sim.segment, kind:flow.kind, status:status, route:sim.days>=1?"same-trip":"next-trip", upgrade:flow.upgrade||null, gift:g?g.t:"—", fee:fee, fulfillment:fulfill, oceansafe_rev:fee+fulfill, signal:{elapsed:sim.elapsed,engage:sim.engage,days:sim.days} };
+    var a=loadLeads(); a.unshift(lead); saveLeads(a); renderLedger();
+  }
+  function tagFor(s){
+    if(s==="qualified") return '<span class="tag tour">tour booked</span>';
+    if(s==="owner_update") return '<span class="tag owner">owner update</span>';
+    if(s==="referral") return '<span class="tag ref">referral</span>';
+    if(s==="nurture"||s==="owner_nurture") return '<span class="tag soft">nurture</span>';
+    if(s==="disqualified") return '<span class="tag dq">off-ramp</span>';
+    return '<span class="tag dq">dismissed</span>';
+  }
+  function renderLedger(){
+    var a=loadLeads(), L=$("ledger");
+    var actions=a.filter(function(x){return x.oceansafe_rev>0;}).length;
+    var rev=a.reduce(function(s,x){return s+(x.oceansafe_rev||0);},0);
+    $("totActions").textContent=actions; $("totRev").textContent="$"+rev.toLocaleString();
+    if(!a.length){ L.innerHTML='<div class="empty">No activity yet — pick a segment, open the card, run the flow.</div>'; $("econNote").textContent=""; return; }
+    L.innerHTML=a.slice(0,7).map(function(x){
+      return '<div class="lead"><div class="hl"><span>'+x.id+' · '+x.segment+'</span><span>'+(x.oceansafe_rev?'$'+x.oceansafe_rev:'—')+'</span></div><div class="meta">'+tagFor(x.status)+(x.upgrade?' '+x.upgrade:'')+'<br>signal: '+x.signal.elapsed+'% · eng '+x.signal.engage+(x.fee?' &nbsp;|&nbsp; fee $'+x.fee+(x.fulfillment?' + fulfill $'+x.fulfillment:''):'')+'</div></div>';
+    }).join("");
+    $("econNote").innerHTML="Counts on a <i>shown</i> session. Owners are never ownership sales, only upgrades and referrals.";
+  }
+
+  /* ===== controls ===== */
+  $("segSel").querySelectorAll("button").forEach(function(b){ b.onclick=function(){
+    $("segSel").querySelectorAll("button").forEach(function(x){x.classList.remove("sel","owner");});
+    b.classList.add("sel"); if(b.dataset.seg==="owner")b.classList.add("owner"); sim.segment=b.dataset.seg; renderVerdict();
+  }; });
+  $("elapsed").oninput=function(){ sim.elapsed=+this.value; $("elapsedV").textContent=this.value+"%"; renderVerdict(); };
+  $("engage").oninput=function(){ sim.engage=+this.value; $("engageV").textContent=this.value; renderVerdict(); };
+  $("daysRow").querySelectorAll("button").forEach(function(b){ b.onclick=function(){
+    $("daysRow").querySelectorAll("button").forEach(function(x){x.classList.remove("sel");}); b.classList.add("sel"); sim.days=+b.dataset.d;
+    $("daysV").textContent=b.dataset.d==="3"?"3+":b.dataset.d; renderVerdict();
+  }; });
+  $("fireBtn").onclick=function(){ if(triggers()) open(); };
+  $("resetBtn").onclick=function(){ saveLeads([]); renderLedger(); };
+
+  renderVerdict(); renderLedger();
+})();
+</script>
+</body>
+</html>
