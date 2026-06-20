@@ -1,0 +1,568 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   portal.css — OceanSafe Partner Portal design system  ·  "Tidewater"
+   ────────────────────────────────────────────────────────────────────────────
+   A calm, Linear/Stripe-grade operating console. ~90% neutral greyscale, one
+   accent that only ever means "good / money / live", tabular numerals so figures
+   never jitter, real designed empty/loading states.
+
+   CONTRACT — every class/id the inline <script> + app.js reference is preserved.
+   Re-skinned (must keep name): bar nav crumb sp wrap center card grid two three
+   lbl muted small big h1 h2 f row2 hint checks chk seg btn primary ghost danger
+   stripe block small badge b-grey/green/amber/red/blue dot d-grey/green/amber/
+   red/blue thumb msg ok err info hide spin skip skel empty chart topbar nm track
+   fill amt. All elevation rides existing markup + the #payDot state classes.
+   Nothing here requires a JS change.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ── brand ─────────────────────────────────────────────────────────────── */
+  --ocean:#0f4c5c;        /* structure + primary action + chart data-ink         */
+  --ocean-deep:#0a3640;   /* primary :hover                                       */
+  --aqua:#0a8ba8;         /* THE interaction accent: focus, active nav, "good"    */
+  --gold:#c9a84c;         /* rare: Products KPI keyline + plan accents ONLY       */
+  --stripe:#635bff;       /* bound to the Stripe connect button only             */
+
+  /* ── ink ───────────────────────────────────────────────────────────────── */
+  --ink:#1c2227;          /* primary text — AA on white & --bg                   */
+  --mute:#6b7682;         /* labels / secondary — AA on white & --bg             */
+  --ink-soft:#33424d;     /* form labels                                         */
+
+  /* ── surfaces (layered near-white) ─────────────────────────────────────── */
+  --bg:#f6f8f9;           /* app canvas                                          */
+  --surface:#ffffff;      /* cards                                               */
+  --surface-sub:#f3f7f8;  /* faint sub-surface for the "Earnings band"           */
+  --line:#e6eaec;         /* hairline                                            */
+  --line-soft:#eef2f3;    /* zebra/track fills, hover tints                      */
+
+  /* ── tint backs (AA same-hue text lives in the .b-* classes) ───────────── */
+  --tint-aqua:#eef6f9;    /* active nav chip / selected pill                     */
+  --tint-green:#e6f6ec;
+  --tint-amber:#fdf0dd;
+  --tint-red:#fde7e7;
+  --tint-blue:#ecebff;
+
+  /* ── semantic ──────────────────────────────────────────────────────────── */
+  --green:#16a34a; --amber:#b4690e; --red:#dc2626;
+
+  /* ── radius ────────────────────────────────────────────────────────────── */
+  --r-sm:8px; --r:11px; --r-card:14px; --r-pill:999px;
+  --radius:14px;          /* kept: equals --r-card, referenced by old rules      */
+
+  /* ── spacing — 8px rhythm ──────────────────────────────────────────────── */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px;
+
+  /* ── shadow — barely-there, fintech-flat ───────────────────────────────── */
+  --shadow:0 1px 2px rgba(16,40,50,.04);
+  --shadow-lift:0 6px 20px rgba(16,40,50,.08);
+  --ring:0 0 0 2px var(--surface), 0 0 0 4px var(--aqua);
+
+  /* ── type scale (responsive via clamp, no font load) ───────────────────── */
+  --t-display:clamp(22px, 1.2rem + 0.7vw, 26px);  /* h1 / #hi                   */
+  --t-h2:16px;                                     /* section headers           */
+  --t-num:clamp(26px, 1.4rem + 0.9vw, 30px);       /* .big KPI figure           */
+  --t-body:14px;
+  --t-small:12px;
+  --t-micro:11px;
+  --t-cap:10px;
+
+  /* ── motion ────────────────────────────────────────────────────────────── */
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --dur:220ms;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BASE
+   ════════════════════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size:var(--t-body);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  /* load-bearing: every figure inherits tabular nums → demo↔live never jitters */
+  font-variant-numeric:tabular-nums;
+}
+a{color:var(--ocean);text-underline-offset:2px}
+a:hover{color:var(--ocean-deep)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em;
+  background:var(--line-soft);padding:1px 5px;border-radius:5px}
+::selection{background:var(--tint-aqua);color:var(--ocean)}
+
+/* shells ---------------------------------------------------------------------- */
+.wrap{max-width:1080px;margin:0 auto;padding:24px 24px 64px}
+.center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+
+/* page-header band (no box) --------------------------------------------------- */
+h1,#hi{font-size:var(--t-display);font-weight:700;letter-spacing:-.015em;
+  line-height:1.15;margin:20px 2px 2px}
+h2{font-size:var(--t-h2);font-weight:700;letter-spacing:-.01em;margin:0 0 12px;color:var(--ink)}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TOPBAR + NAV  (.bar / .nav — 56px sticky, markup unchanged)
+   ════════════════════════════════════════════════════════════════════════════ */
+.bar{
+  display:flex;align-items:center;gap:12px;height:56px;padding:0 24px;
+  background:var(--surface);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:5;
+  backdrop-filter:saturate(1.1);
+}
+.bar img{width:26px;height:26px;border-radius:7px;box-shadow:0 0 0 1px rgba(16,40,50,.04)}
+.bar b{font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+.bar .crumb{
+  font-size:13px;color:var(--mute);
+  padding-left:12px;margin-left:2px;border-left:1px solid var(--line);
+}
+.bar .sp{margin-left:auto}
+
+.nav{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.nav a{
+  font-size:13px;font-weight:600;color:#56616b;text-decoration:none;
+  padding:8px 12px;border-radius:var(--r);
+  min-height:44px;display:inline-flex;align-items:center;
+}
+.nav a:hover{background:var(--line-soft);color:var(--ocean)}
+.nav a.on,.nav a[aria-current="page"]{background:var(--tint-aqua);color:var(--ocean)}
+/* sign-out: split off as a quiet muted link after a hairline */
+#out{color:var(--mute);margin-left:6px}
+#out:hover{color:var(--ink);background:var(--line-soft)}
+#out::before{content:"";display:inline-block;width:1px;height:18px;
+  background:var(--line);margin-right:8px;vertical-align:middle}
+
+/* muted sub-line under the page header (markup uses .muted.small there) -------- */
+.subhead{color:var(--mute);font-size:13px;margin:0 2px 4px}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   GRID
+   ════════════════════════════════════════════════════════════════════════════ */
+.grid{display:grid;gap:16px}
+.grid.two{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.grid.three{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+/* opt-in helpers for the Sales page rows (page may swap in to drop inline styles) */
+.grid.kpis{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.stack{display:flex;flex-direction:column;gap:24px}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CARDS
+   ════════════════════════════════════════════════════════════════════════════ */
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r-card);
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+.card+.card{margin-top:16px}
+
+/* interactive cards lift 1px on hover only */
+.card.interactive{transition:box-shadow .14s var(--ease),transform .14s var(--ease);cursor:pointer}
+.card.interactive:hover{box-shadow:var(--shadow-lift);transform:translateY(-1px)}
+
+/* hero status pair gets reserved height so demo→live can't reflow */
+.card.hero,#payCard,#liveCard{min-height:148px}
+
+/* "Earnings band" — faint sub-surface fusing payout + chart into one module */
+.band{background:var(--surface-sub);border:1px solid var(--line);
+  border-radius:var(--r-card);padding:6px;display:grid;gap:6px}
+.band>.card{border:0;box-shadow:none;background:transparent}
+.band .band-divider{border-top:1px solid var(--line)}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   KPI / STAT TILE  (.lbl + .big inside .card)
+   ════════════════════════════════════════════════════════════════════════════ */
+.lbl{
+  font-size:var(--t-cap);font-weight:800;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--mute);
+  margin:0 0 10px;display:flex;align-items:center;gap:6px;
+}
+.muted{color:var(--mute)}
+.small{font-size:var(--t-small)}
+.big{
+  font-size:var(--t-num);font-weight:700;letter-spacing:-.02em;line-height:1.2;
+  min-height:1.2em;font-variant-numeric:tabular-nums;
+}
+
+/* instrument-cluster keylines — opt-in 3px top-left accent per tile.
+   ocean = sales · green = payout · gold = products (gold's only non-money home) */
+.tile-ocean,.tile-green,.tile-gold{position:relative;overflow:hidden}
+.tile-ocean::before,.tile-green::before,.tile-gold::before{
+  content:"";position:absolute;left:0;top:0;width:36px;height:3px;border-radius:0 0 3px 0}
+.tile-ocean::before{background:var(--ocean)}
+.tile-green::before{background:var(--green)}
+.tile-gold::before{background:var(--gold)}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TABLES  (#orders / #list / #top — JS-built <table>)
+   ════════════════════════════════════════════════════════════════════════════ */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  text-align:left;font-size:var(--t-cap);text-transform:uppercase;letter-spacing:.05em;
+  color:var(--mute);font-weight:800;padding:10px;border-bottom:1px solid var(--line);
+}
+td{padding:12px 10px;border-top:1px solid var(--line);vertical-align:middle}
+tbody tr:hover,table tr:hover{background:var(--line-soft)}
+td[style*="right"],th[style*="right"]{font-variant-numeric:tabular-nums}
+.thumb{width:40px;height:40px;border-radius:var(--r-sm);object-fit:cover;background:var(--line-soft)}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BADGES + DOTS
+   ════════════════════════════════════════════════════════════════════════════ */
+.badge{
+  font-size:var(--t-micro);font-weight:800;padding:3px 9px;border-radius:var(--r-pill);
+  letter-spacing:.01em;display:inline-flex;align-items:center;white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.b-grey{background:var(--line-soft);color:#566}
+.b-green{background:var(--tint-green);color:#137a3a}
+.b-amber{background:var(--tint-amber);color:#92600a}
+.b-red{background:var(--tint-red);color:#b42121}
+.b-blue{background:var(--tint-blue);color:#4b45c6}
+
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.d-grey{background:#c2cace}
+.d-green{background:var(--green)}
+.d-amber{background:var(--amber)}
+.d-red{background:var(--red)}
+.d-blue{background:var(--stripe)}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BUTTONS  (.btn .primary .stripe .ghost .danger .block .small)
+   ════════════════════════════════════════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:0;border-radius:var(--r);padding:0 16px;min-height:44px;
+  font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;
+  color:var(--ink);
+}
+.btn.primary{background:var(--ocean);color:#fff}
+.btn.primary:hover:not(:disabled){background:var(--ocean-deep)}
+.btn.stripe{background:var(--stripe);color:#fff}
+.btn.stripe:hover:not(:disabled){background:#534cdb}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn.ghost:hover:not(:disabled){background:var(--line-soft);border-color:#d6dde0}
+.btn.danger{background:#fff;border:1px solid #f3c2c2;color:var(--red)}
+.btn.danger:hover:not(:disabled){background:var(--tint-red)}
+.btn.block{width:100%}
+.btn.small{min-height:34px;padding:0 12px;font-size:13px;border-radius:var(--r-sm)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* spinner — JS injects <span class="spin"> into buttons; white border reads on dark */
+.spin{display:inline-block;width:15px;height:15px;border:2px solid #fff;
+  border-top-color:transparent;border-radius:50%;animation:s .7s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   FORMS
+   ════════════════════════════════════════════════════════════════════════════ */
+label.f{display:block;font-size:12.5px;font-weight:700;margin:14px 0 5px;color:var(--ink-soft)}
+input,select,textarea{
+  width:100%;font:inherit;font-size:14px;min-height:44px;padding:11px 12px;
+  border:1.5px solid var(--line);border-radius:var(--r-sm);
+  background:#fff;color:var(--ink);
+  transition:border-color .12s ease,box-shadow .12s ease;
+}
+input::placeholder,textarea::placeholder{color:#9aa4ab}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--ocean);box-shadow:0 0 0 3px rgba(10,139,168,.12)}
+textarea{min-height:74px;resize:vertical;line-height:1.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:11.5px;color:var(--mute);margin-top:4px;line-height:1.45}
+
+/* file inputs → dashed dropzone */
+input[type=file]{padding:13px 12px;border-style:dashed;background:var(--surface-sub);cursor:pointer}
+input[type=file]:hover{border-color:var(--aqua)}
+
+/* checkbox / radio pills (.checks / .chk — `on` toggled by JS) ----------------- */
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chk{
+  display:inline-flex;align-items:center;gap:6px;font-size:13px;
+  border:1.5px solid var(--line);border-radius:var(--r-pill);
+  padding:8px 13px;min-height:40px;cursor:pointer;user-select:none;color:var(--ink);
+  transition:border-color .12s ease,background .12s ease,color .12s ease;
+}
+.chk input{width:auto;min-height:0;accent-color:var(--ocean)}
+.chk:hover{border-color:var(--aqua)}
+.chk.on{border-color:var(--aqua);background:var(--tint-aqua);color:var(--ocean)}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SEGMENTED TOGGLE  (.seg — store type, dormant for launch)
+   ════════════════════════════════════════════════════════════════════════════ */
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{
+  font:inherit;text-align:left;border:1.5px solid var(--line);background:#fff;
+  border-radius:12px;padding:13px 14px;cursor:pointer;color:var(--ink);
+  display:flex;flex-direction:column;gap:3px;
+  transition:border-color .12s ease,background .12s ease;
+}
+.seg button b{font-size:14px;font-weight:700}
+.seg button span{font-size:11.5px;color:var(--mute)}
+.seg button:hover{border-color:var(--aqua)}
+.seg button.on{border-color:var(--aqua);background:var(--tint-aqua)}
+.seg button.on b{color:var(--ocean)}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MESSAGES / TOASTS  (.msg ok|err|info — toggled .hide by JS)
+   ════════════════════════════════════════════════════════════════════════════ */
+.msg{font-size:13px;padding:10px 12px;border-radius:var(--r-sm);margin:10px 0;
+  border:1px solid transparent}
+.msg.ok{background:var(--tint-green);color:#137a3a;border-color:#bfe6cd}
+.msg.err{background:var(--tint-red);color:#b42121;border-color:#f3c2c2}
+.msg.info{background:var(--tint-aqua);color:#0a5a72;border-color:#cde7ef}
+.hide{display:none!important}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DATA VIZ  (#chart line+area · #top bars)
+   ════════════════════════════════════════════════════════════════════════════ */
+.chart{width:100%;height:172px;display:block;overflow:visible}
+/* line+area both get var(--ocean); the area carries opacity .08 inline from JS */
+
+/* chart card head — title left, emphasized peak figure right */
+.chart-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.chart-peak{font-size:var(--t-small);color:var(--mute);white-space:nowrap;font-variant-numeric:tabular-nums}
+.chart-peak b{color:var(--ink);font-weight:700}
+.chart-peak-unit{color:var(--mute)}
+
+/* x-axis anchors recede; the one peak figure reads as data */
+.chart-axis{display:flex;justify-content:space-between;margin-top:6px;
+  font-size:var(--t-small);color:var(--mute)}
+.chart-peak-val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+
+/* peak dot — the single focusable interaction accent (aqua, the "trusted" color) */
+.chart-peak-dot{fill:var(--aqua);stroke:#fff;stroke-width:1.5;cursor:pointer;
+  transition:r .12s var(--ease)}
+.chart-peak-dot:hover,.chart-peak-dot:focus-visible{r:5;outline:none}
+.chart-peak-dot:focus-visible{stroke:var(--aqua);stroke-width:3;stroke-opacity:.35}
+
+/* top-sellers bars (.topbar/.nm/.track/.fill/.amt — page-local in sales.html) */
+.topbar{display:flex;align-items:center;gap:9px;margin-bottom:11px;font-size:13px}
+.topbar .nm{flex:0 0 120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.topbar .track{flex:1;height:9px;background:var(--line-soft);border-radius:6px;overflow:hidden}
+.topbar .fill{height:100%;background:var(--ocean);border-radius:6px}
+.topbar .amt{flex:0 0 58px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   EMPTY + LOADING/SKELETON STATES
+   ════════════════════════════════════════════════════════════════════════════ */
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;
+  gap:6px;padding:36px 16px;color:var(--mute)}
+.empty>div[aria-hidden],.empty .glyph{font-size:26px;opacity:.5;line-height:1}
+.empty svg{width:30px;height:30px;opacity:.5;color:var(--ocean)}
+.empty b{color:var(--ink);font-size:14px;font-weight:700}
+.empty span{font-size:12.5px;max-width:36ch;line-height:1.5}
+
+/* skeleton shimmer — JS overwrites the placeholder span the moment data lands */
+.skel{
+  display:inline-block;min-width:120px;height:1em;border-radius:6px;color:transparent!important;
+  background:linear-gradient(90deg,var(--line-soft) 25%,#f6f9fa 50%,var(--line-soft) 75%);
+  background-size:200% 100%;animation:shimmer 1.2s linear infinite;vertical-align:middle;
+}
+.skel.big{height:30px;width:120px}
+.skel.wide{display:block;width:100%;height:54px;min-width:0}
+@keyframes shimmer{to{background-position:-200% 0}}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY  (skip link + focus-visible ring)
+   ════════════════════════════════════════════════════════════════════════════ */
+.skip{position:absolute;left:-999px;top:0;z-index:50;background:var(--ocean);color:#fff;
+  padding:10px 14px;border-radius:0 0 10px 0;font-size:13px;font-weight:700;text-decoration:none}
+.skip:focus{left:0}
+
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible,
+.chk:focus-within,.seg button:focus-visible{
+  outline:none;box-shadow:var(--ring);border-radius:var(--r-sm)}
+input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:none;box-shadow:var(--ring)}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MOTION LAYER  (GPU-only: transform + opacity. No layout thrash.)
+   ════════════════════════════════════════════════════════════════════════════ */
+/* mount: cards fade-up 8px in a top-to-bottom stagger */
+@keyframes riseIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.wrap .card{animation:riseIn var(--dur) var(--ease) both}
+.wrap .grid .card:nth-child(2){animation-delay:.04s}
+.wrap .grid .card:nth-child(3){animation-delay:.08s}
+.wrap .grid+.grid .card{animation-delay:.06s}
+.wrap .grid+.grid+*{animation-delay:.12s}
+/* guard: editors that start .hide must appear instantly when JS un-hides them */
+.card.hide{animation:none}
+
+/* hover/active feedback */
+.card{transition:box-shadow .14s var(--ease),transform .14s var(--ease),border-color .14s var(--ease)}
+.card:hover{box-shadow:var(--shadow-lift);transform:translateY(-1px)}
+.btn,.nav a,.chk,.seg button{
+  transition:transform .1s var(--ease),background .14s var(--ease),
+  border-color .14s var(--ease),box-shadow .14s var(--ease),color .14s var(--ease)}
+.btn:hover:not(:disabled){box-shadow:0 2px 8px rgba(16,40,50,.1)}
+.btn:active:not(:disabled){transform:scale(.98)}
+.nav a:active{transform:scale(.97)}
+
+/* chart draw-in — line path = the one with vector-effect; area = the one with opacity */
+.chart path[vector-effect]{stroke-dasharray:1400;stroke-dashoffset:0;
+  animation:draw .9s var(--ease) .12s 1}
+.chart path[opacity]{animation:fadeArea .6s ease both}
+@keyframes draw{from{stroke-dashoffset:1400}to{stroke-dashoffset:0}}
+@keyframes fadeArea{from{opacity:0}to{opacity:.08}}
+
+/* status "color spine" — a 3px rail on #payCard driven entirely by #payDot's
+   state class via :has(). Lives on the PARENT so it survives payBody rewrites. */
+#payCard{position:relative;overflow:hidden}
+#payCard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:#c2cace;transition:background .3s ease}
+#payCard:has(#payDot.d-green)::before{background:var(--aqua)}
+#payCard:has(#payDot.d-amber)::before{background:var(--amber);animation:pulse 1.6s ease 1}
+#payCard:has(#payDot.d-red)::before{background:var(--red);animation:pulse 1.6s ease 1}
+#payCard:has(#payDot.d-grey)::before{background:#c2cace}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+/* #liveCard gets a static structural ocean keyline (no dot to key off) */
+#liveCard{position:relative;overflow:hidden}
+#liveCard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ocean)}
+
+/* inline messages slide+fade in like toasts */
+.msg:not(.hide){animation:toastIn .18s var(--ease) both}
+@keyframes toastIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE  (collapse to a single readable column on phones)
+   ════════════════════════════════════════════════════════════════════════════ */
+@media (max-width:640px){
+  .wrap{padding:16px 16px 48px}
+  /* topbar: wordmark row, nav as a horizontal pill strip below */
+  .bar{flex-wrap:wrap;gap:6px 10px;height:auto;padding:10px 16px}
+  .bar .crumb{padding-left:10px;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;max-width:40vw}
+  .nav{width:100%;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
+  .nav a{white-space:nowrap;padding:8px 11px}
+  /* every multi-column grid → one column; payCard stays first (source order) */
+  .grid.two,.grid.three,.grid.kpis,
+  .grid[style*="repeat(4"],.grid[style*="1.7fr"]{grid-template-columns:1fr!important}
+  .row2{grid-template-columns:1fr}
+  .seg{grid-template-columns:1fr}
+  /* status-card heading + badge wrap instead of clipping */
+  #payBody>div:first-child,#liveBody>div:first-child{flex-wrap:wrap}
+}
+@media (max-width:600px){
+  /* JS-built tables reflow to stacked rows, no markup change */
+  table,tbody,tr,td{display:block;width:100%}
+  thead,table tr:first-child th,th{display:none}
+  tr{border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px;padding:4px 12px;background:#fff}
+  tr:hover{background:#fff}
+  td{border:0;padding:7px 0;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  td .thumb{margin:0}
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   AUTH / SIGN-IN  (index.html — the partner's first touch)
+   Self-contained: every JS id (#form #email #msg #send #booting) is preserved;
+   these classes only wrap + elevate the existing markup. The page renders
+   identically in demo mode because nothing functional changed.
+   ════════════════════════════════════════════════════════════════════════════ */
+/* full-bleed branded canvas behind the auth card */
+.auth{
+  position:relative;min-height:100vh;width:100%;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;overflow:hidden;
+  background:
+    radial-gradient(1100px 620px at 12% -8%, #103f4d 0%, rgba(16,63,77,0) 58%),
+    radial-gradient(900px 560px at 108% 116%, #0a8ba8 0%, rgba(10,139,168,0) 52%),
+    linear-gradient(168deg,#0c3a47 0%,#0f4c5c 46%,#0a313c 100%);
+  color:#eaf3f5;
+}
+/* faint horizon line + grain so the deep field never feels flat */
+.auth::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 120%, rgba(201,168,76,.10), rgba(201,168,76,0) 60%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px);
+  mix-blend-mode:screen;opacity:.9;
+}
+/* slow drifting light, GPU-only — the "ocean" breathing under the card */
+.auth::after{
+  content:"";position:absolute;left:50%;top:50%;width:140vmax;height:140vmax;
+  transform:translate(-50%,-50%);pointer-events:none;
+  background:radial-gradient(closest-side, rgba(10,139,168,.22), rgba(10,139,168,0) 70%);
+  animation:authDrift 18s var(--ease) infinite alternate;
+}
+@keyframes authDrift{
+  from{transform:translate(-54%,-46%) scale(1)}
+  to{transform:translate(-46%,-54%) scale(1.12)}
+}
+
+/* the auth column: brand mark, then the card */
+.auth-shell{
+  position:relative;z-index:1;width:100%;max-width:404px;
+  display:flex;flex-direction:column;align-items:stretch;gap:18px;
+  animation:authRise .5s var(--ease) both;
+}
+@keyframes authRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* brand lockup above the card — sits on the dark field */
+.auth-brand{display:flex;align-items:center;gap:11px;padding-left:2px}
+.auth-brand img{
+  width:42px;height:42px;border-radius:11px;
+  box-shadow:0 6px 18px rgba(0,0,0,.28),0 0 0 1px rgba(255,255,255,.10);
+}
+.auth-brand b{font-size:17px;font-weight:700;letter-spacing:-.01em;color:#fff}
+.auth-brand .auth-brand-sub{display:block;font-size:11.5px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;color:rgba(234,243,245,.62);margin-top:1px}
+
+/* the card itself — bright, crisp, sitting proud of the dark field */
+.auth-card{
+  background:var(--surface);color:var(--ink);
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:18px;padding:28px 26px 24px;
+  box-shadow:0 24px 60px -18px rgba(8,30,38,.55),0 2px 0 rgba(255,255,255,.6) inset;
+}
+.auth-card h1{font-size:23px;font-weight:700;letter-spacing:-.018em;margin:0 0 5px;line-height:1.15}
+.auth-card .auth-lede{color:var(--mute);font-size:13.5px;line-height:1.5;margin:0 0 18px}
+
+/* the email field, given a touch more presence than the form default */
+.auth-card label.f{margin-top:0;margin-bottom:6px;font-size:12px;letter-spacing:.01em}
+.auth-card input{min-height:48px;font-size:15px;border-radius:10px}
+.auth-card .btn.block{min-height:48px;font-size:14.5px;border-radius:10px;margin-top:14px;
+  box-shadow:0 6px 16px -6px rgba(15,76,92,.55)}
+.auth-card .btn.block:hover:not(:disabled){box-shadow:0 8px 20px -6px rgba(15,76,92,.6)}
+
+/* trust row beneath the button — quiet reassurance, AA contrast */
+.auth-assure{display:flex;align-items:center;gap:7px;justify-content:center;
+  margin-top:14px;color:var(--mute);font-size:11.5px;font-weight:600;letter-spacing:.01em}
+.auth-assure svg{width:13px;height:13px;flex:none;color:var(--green)}
+
+/* "booting" gate — a calm centered loader while the session is checked */
+.auth-boot{display:flex;flex-direction:column;align-items:center;gap:12px;
+  padding:14px 8px;color:var(--mute);font-size:13px;text-align:center}
+.auth-boot .spin{width:22px;height:22px;border-width:2.5px;
+  border-color:rgba(15,76,92,.18);border-top-color:var(--aqua)}
+
+/* footer line under the shell — sits on the dark field, low-key */
+.auth-foot{text-align:center;font-size:11.5px;color:rgba(234,243,245,.5);
+  margin-top:2px;line-height:1.5}
+.auth-foot a{color:rgba(234,243,245,.78);text-decoration:none;font-weight:600}
+.auth-foot a:hover{color:#fff}
+
+@media (max-width:440px){
+  .auth{padding:16px;align-items:flex-start;padding-top:9vh}
+  .auth-card{padding:24px 20px 22px;border-radius:16px}
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION  (strip to instant; freeze the spine; keep the .spin status loader)
+   ════════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important}
+  .wrap .card{animation:none;opacity:1;transform:none}
+  .chart path[vector-effect]{stroke-dashoffset:0}
+  .chart path[opacity]{opacity:.08}
+  .skel{animation:none;background:var(--line-soft)}
+  .auth::after{animation:none}
+  .auth-shell{animation:none;opacity:1;transform:none}
+  .card:hover{transform:none}
+  .btn:active:not(:disabled){transform:none}
+  /* the spinner is a status signal — keep it spinning */
+  .spin{animation:s .7s linear infinite!important}
+}
