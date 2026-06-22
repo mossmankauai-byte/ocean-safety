@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Hanalei Surf Co. (sample) · OceanSafe partner dashboard</title>
+<style>
+  :root{--accent:#0A8BA8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#F5F7F9;color:#16202A;
+    -webkit-font-smoothing:antialiased;line-height:1.5;padding:28px 18px 64px}
+  .wrap{max-width:760px;margin:0 auto}
+  .topbar{height:6px;background:var(--accent);border-radius:6px;margin-bottom:18px}
+  .demo-ribbon{background:#16202A;color:#fff;font-size:13px;font-weight:600;text-align:center;padding:10px 14px;border-radius:8px;margin-bottom:16px}
+  .mast{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .wm{font-weight:800;font-size:20px;letter-spacing:-.3px}.wm .c{color:var(--accent)}
+  .shop{font-weight:700;font-size:20px;color:#16202A}
+  .crumb{color:#64727F;font-size:14px}
+  .priv{font-size:12.5px;color:#64727F;background:#EEF2F5;border:1px solid #E0E6EB;border-radius:8px;padding:9px 12px;margin:14px 0 22px}
+  .priv b{color:#16202A}
+  .card{background:#fff;border:1px solid #E2E8ED;border-radius:12px;padding:18px;margin-bottom:16px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#64727F;margin-bottom:12px;font-weight:700}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;text-decoration:none;border-radius:9px;
+    padding:10px 16px;cursor:pointer;border:1px solid transparent}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.ghost{background:#fff;color:#16202A;border-color:#D5DCE2}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .qr{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:14px}
+  .qr img{width:120px;height:120px;border:1px solid #E2E8ED;border-radius:10px;background:#fff}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:8px 14px;font-size:14.5px}
+  .kv .k{color:#64727F}
+  .hint{font-size:13px;color:#64727F;margin-top:8px}
+  .status{font-size:14px;background:#F0F7F2;border:1px solid #D6EADD;color:#1B7A43;border-radius:8px;padding:8px 11px;margin-top:12px;display:inline-block}
+  .soonrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid #EDF1F4}
+  .soonrow:first-of-type{border-top:none}
+  .soonrow .lab{color:#8A97A3}
+  .pill{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;background:#EEF2F5;color:#7A8794;border:1px solid #E0E6EB;border-radius:999px;padding:3px 9px}
+  .empty{font-style:italic;color:#64727F;font-size:14px;border-left:3px solid #E0E6EB;padding:4px 0 4px 12px;margin-top:12px}
+  details summary{cursor:pointer;font-weight:600;font-size:14px;color:#16202A}
+  details p{font-size:14px;color:#3C4753;margin-top:10px}
+  .cap{background:#F7F9FB;border:1px solid #E2E8ED;border-radius:8px;padding:11px 12px;font-size:13.5px;color:#3C4753}
+  .foot{font-size:12.5px;color:#8A97A3;text-align:center;margin-top:26px}
+  a{color:var(--accent)}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16202A;color:#fff;font-size:13px;
+    padding:9px 15px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s}
+  .toast.show{opacity:1}
+  .pm-lead{font-size:14.5px;margin-bottom:12px}
+  .seg{display:inline-flex;background:#EEF2F5;border:1px solid #E0E6EB;border-radius:10px;padding:3px;gap:3px;margin-bottom:14px}
+  .seg-opt{appearance:none;-webkit-appearance:none;border:0;background:transparent;font:inherit;font-weight:600;font-size:14px;color:#64727F;padding:8px 16px;border-radius:8px;cursor:pointer}
+  .seg-opt.is-on{background:#fff;color:#16202A;box-shadow:0 1px 3px rgba(22,32,42,.12)}
+  .pv-wrap{border:1px solid #E2E8ED;border-radius:14px;overflow:hidden;background:#F5F7F9;width:300px;max-width:100%;margin:2px 0 14px}
+  .pv-frame{width:100%;height:540px;border:0;display:block;background:#F5F7F9}
+  .modeurl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;margin-top:2px}
+  .modeurl .k{color:#64727F}
+  .modeurl a{font-weight:600;word-break:break-all;color:var(--accent)}
+</style></head>
+<body><div class="wrap">
+  <div class="demo-ribbon">DEMO · a sample of your partner dashboard — your real one looks just like this</div>
+  <div class="topbar"></div>
+  <div class="mast"><span class="wm">Ocean<span class="c">Safe</span></span><span class="crumb">partner dashboard</span></div>
+  <div class="shop">Hanalei Surf Co. (sample) <span class="crumb">· Hanalei</span></div>
+
+  <div class="priv">🔒 <b>This link is private to you.</b> It's an unguessable link — not a password — so anyone who has it can view this page. Don't post it publicly; bookmark it for yourself.</div>
+
+  <!-- 1 · live page + QR -->
+  <div class="card">
+    <h2>Your page &amp; QR card</h2>
+    <div class="row">
+      <a class="btn primary" href="https://oceansafety.app/p/demo" target="_blank" rel="noopener">View your live page ↗</a>
+      <button class="btn ghost" onclick="copy('https://oceansafety.app/p/demo')">Copy page link</button>
+    </div>
+    <div class="qr">
+      <img src="qr.png" alt="Your QR code" onerror="this.style.display='none'">
+      <div>
+        <div style="font-weight:600;margin-bottom:8px">Your card QR — points to your page</div>
+        <div class="row">
+          <a class="btn ghost sm" href="qr.png" download="demo-qr.png">Download PNG</a>
+          <a class="btn ghost sm" href="card.pdf" download="demo-card.pdf">Print-ready PDF</a>
+        </div>
+        <div class="hint">Drop the QR onto your own signage, receipts, or posts too.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b · page mode (Shop vs Affiliate) -->
+  <div class="card">
+    <h2>Your page mode</h2>
+    <p class="pm-lead">Pick what guests land on first. The preview updates as you choose, and your link below changes to match.</p>
+    <div class="seg" role="group" aria-label="Page mode">
+      <button type="button" class="seg-opt" data-mode="affiliate">Affiliate tours</button>
+      <button type="button" class="seg-opt" data-mode="shop">Your shop</button>
+    </div>
+    <div class="pv-wrap"><iframe id="pv" class="pv-frame" title="Live preview of your page" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
+    <div class="modeurl"><span class="k">Your link</span><a id="modeUrl" target="_blank" rel="noopener" href="#"></a><button class="btn ghost sm" type="button" onclick="copy(document.getElementById('modeUrl').textContent)">Copy</button></div>
+    <div class="hint">Tours earns you commission on guest bookings; Your shop sells your own products. Your link above updates to your choice, use it on your QR card and posts.</div>
+  </div>
+
+  <!-- 2 · reorder cards -->
+  <div class="card">
+    <h2>Need more cards?</h2>
+    <p style="font-size:14.5px">Cards walk out the door — that's the point. Reorder 200 more anytime for $100.</p>
+    <div class="status">Card kit — designed &amp; shipping to you</div>
+    <div class="row" style="margin-top:14px">
+      <a class="btn primary" href="mailto:mossmankauai@gmail.com?subject=More%20cards%20for%20Hanalei%20Surf%20Co.%20(sample)&amp;body=Hi%20Nick%2C%0A%0AHanalei%20Surf%20Co.%20(sample)%20(demo)%20would%20like%20to%20reorder%20200%20more%20cards%20(%24100%20per%20200%20cards).%0A%0AShip%20to%3A%0A%0AThanks!">Reorder 200 cards — $100 ↗</a>
+    </div>
+  </div>
+
+  <!-- 3 · your details + request a change -->
+  <div class="card">
+    <h2>What's live (read-only)</h2>
+    <div class="kv">
+      <span class="k">Shop</span><span>Hanalei Surf Co. (sample)</span>
+      <span class="k">Tagline</span><span>Surf &amp; snorkel rentals — sample shop</span>
+      <span class="k">Area</span><span>Hanalei</span>
+      <span class="k">Page</span><span><a href="https://oceansafety.app/p/demo" target="_blank" rel="noopener">https://oceansafety.app/p/demo</a></span>
+    </div>
+    <div class="hint">This is what's showing on your page now. To change anything — hours, a photo, your logo, a typo — just ask:</div>
+    <div class="row" style="margin-top:12px">
+      <a class="btn ghost" href="mailto:mossmankauai@gmail.com?subject=Update%20Hanalei%20Surf%20Co.%20(sample)&#39;s%20OceanSafe%20page&amp;body=Hi%20Nick%2C%0A%0APlease%20update%20the%20following%20on%20Hanalei%20Surf%20Co.%20(sample)&#39;s%20page%20(demo)%3A%0A%0A-%20%0A%0AThanks!">Request a change ↗</a>
+    </div>
+  </div>
+
+  <!-- 4 · plan & renewal -->
+  <div class="card">
+    <h2>Your plan</h2>
+    <div class="kv">
+      <span class="k">Plan</span><span>Gear partner</span>
+      <span class="k">Terms</span><span>$990 / year · we take 0% of your sales</span>
+      <span class="k">Renews</span><span>Jun 18, 2027</span>
+    </div>
+    <div class="hint">We'll email you before renewal — no surprise charges. To make changes, just reply to any of our emails.</div>
+  </div>
+
+  <!-- 8 · analytics (honest, coming soon) -->
+  <div class="card">
+    <h2>Visits &amp; scans</h2>
+    <div class="soonrow"><span class="lab">Page visits</span><span class="pill">Coming soon</span></div>
+    <div class="soonrow"><span class="lab">Card scans</span><span class="pill">Coming soon</span></div>
+    <div class="soonrow"><span class="lab">Taps to your page</span><span class="pill">Coming soon</span></div>
+    <div class="empty">Visit and scan counts turn on once analytics goes live — we'll email you the week it does. Nothing for you to set up.</div>
+  </div>
+
+  <!-- 9 · live store dashboard (coming soon) -->
+  <div class="card">
+    <h2>Your live store tools</h2>
+    <p style="font-size:14.5px">Real-time sales, editable products, and payouts — activating soon, behind a secure sign-in.</p>
+    <div class="row" style="margin-top:12px"><span class="pill">Activating soon</span></div>
+  </div>
+
+  <!-- 6 · share kit -->
+  <div class="card">
+    <h2>Spread the word</h2>
+    <p style="font-size:14.5px;margin-bottom:10px">Copy-paste caption for your socials:</p>
+    <div class="cap" id="cap">We&#39;ve partnered with OceanSafe 🌊 — scan our card for today&#39;s Kauaʻi beach-safety report before you get in the water. Stay safe out there! https://oceansafety.app/p/demo</div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn ghost sm" onclick="copy(document.getElementById('cap').textContent)">Copy caption</button>
+      <a class="btn ghost sm" href="qr.png" download="demo-qr.png">Get the QR image</a>
+    </div>
+  </div>
+
+  <!-- 7 · what's included -->
+  <div class="card">
+    <details>
+      <summary>What's included in your partnership</summary>
+      <p>Your own co-branded OceanSafe page with a live daily Kauaʻi ocean-safety report, a printed QR card kit for your counter, your shop featured as the local safety partner for your beach, the in-app shop, and this private dashboard. We build and keep it all current — you just hand out cards.</p>
+    </details>
+  </div>
+
+  <!-- 5 · contact -->
+  <div class="card">
+    <h2>Questions?</h2>
+    <p style="font-size:14.5px">Email or text Nick — a real person, same day. <a href="mailto:mossmankauai@gmail.com">mossmankauai@gmail.com</a></p>
+    <div class="hint">Reply to any email to change anything, or to cancel — no phone tree.</div>
+  </div>
+
+  <div class="foot">OceanSafe · https://oceansafety.app/demo/dashboard</div>
+</div>
+<div class="toast" id="toast">Copied</div>
+<script>
+  function copy(t){navigator.clipboard?.writeText(t).then(()=>{var e=document.getElementById('toast');e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1400)})}
+</script>
+<script>
+(function(){
+  var BASE='https://oceansafety.app/p/demo', allowed={shop:1,affiliate:1};
+  var mode=localStorage.getItem('os_page_mode'); if(!allowed[mode]) mode='affiliate';
+  var pv=document.getElementById('pv'), url=document.getElementById('modeUrl');
+  function apply(m){
+    if(!allowed[m]) return;
+    mode=m; try{localStorage.setItem('os_page_mode',m);}catch(e){}
+    var opts=document.querySelectorAll('.seg-opt');
+    for(var i=0;i<opts.length;i++){var on=opts[i].getAttribute('data-mode')===m;opts[i].classList.toggle('is-on',on);opts[i].setAttribute('aria-pressed',on?'true':'false');}
+    if(pv) pv.src='/p/demo?mode='+m;
+    if(url){ var u=BASE+'?mode='+m; url.textContent=u; url.setAttribute('href',u); }
+  }
+  var opts=document.querySelectorAll('.seg-opt');
+  for(var i=0;i<opts.length;i++){ (function(b){ b.addEventListener('click',function(){apply(b.getAttribute('data-mode'));}); })(opts[i]); }
+  apply(mode);
+})();
+</script>
+</body></html>
