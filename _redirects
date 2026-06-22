@@ -1,2 +1,5 @@
 # OceanSafe shop co-brand pages — clean URLs (rewrite, address bar stays /p/<shop>)
 /p/demo         /p/demo.html           200
+
+# Conditions proxy + cache (collapses per-visitor open-meteo/NOAA calls into one cached server fetch)
+/api/wx         /.netlify/functions/wx  200
