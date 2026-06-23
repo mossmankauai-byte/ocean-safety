@@ -5,3 +5,5 @@ Sitemap: https://oceansafety.app/sitemap.xml
 Sitemap: https://oceansafety.app/sitemap-maui.xml
 Sitemap: https://oceansafety.app/sitemap-oahu.xml
 Sitemap: https://oceansafety.app/sitemap-big-island.xml
+Sitemap: https://oceansafety.app/sitemap-ja.xml
+Sitemap: https://oceansafety.app/sitemap-hi.xml
