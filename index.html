@@ -47,7 +47,7 @@
 <script>
 (function(){
   // ▼▼▼ PASTE YOUR POSTHOG PROJECT API KEY HERE ▼▼▼
-  var OS_PH_KEY  = 'phc_YOUR_POSTHOG_PROJECT_KEY';
+  var OS_PH_KEY  = 'phc_kUmUGLTSt59DVjs4BiuWQBUmyrvVY6dzCsUWSgz6svLb';
   // US projects: https://us.i.posthog.com   ·   EU projects: https://eu.i.posthog.com
   var OS_PH_HOST = 'https://us.i.posthog.com';
   // ▲▲▲ ───────────────────────────────────────── ▲▲▲
@@ -1844,7 +1844,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
     </div>
   </div>
   <div id="offline-bar" style="background:#fef3c7;border-bottom:1px solid #c9a84c;padding:5px 14px;font-size:10px;color:#78530a;font-family:monospace;display:flex;align-items:center;gap:6px;flex-shrink:0">
-  <span>OFFLINE SNAPSHOT · Apr 25 2026 · Edit SNAP{} in JS to test scenarios</span>
+  <span>Loading live conditions…</span>
 </div>
 <button id="satToggle" onclick="toggleSat()" aria-label="Toggle satellite view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
 <button id="savedChip" class="saved-chip" onclick="openSavedSheet()" aria-label="View saved">
@@ -3601,7 +3601,7 @@ async function fetchLive(){
   }catch(e){
     console.warn('Live fetch failed, using snapshot:',e);
     const bar=document.getElementById('offline-bar');
-    if(bar) bar.innerHTML='⚠ Snapshot data — internet unavailable';
+    if(bar) bar.innerHTML='Using last-known conditions, verify before you enter the water';
   }
 }
 async function getCond(b){
