@@ -53,7 +53,7 @@
   // ▲▲▲ ───────────────────────────────────────── ▲▲▲
 
   var DNT = navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1';
-  var ENABLED = !!OS_PH_KEY && OS_PH_KEY.indexOf('YOUR_') === -1 && !DNT;
+  var ENABLED = !!OS_PH_KEY && OS_PH_KEY.indexOf('YOUR_') === -1 && !DNT && /(^|\.)oceansafety\.app$/i.test(location.hostname);
 
   // ── Visibility-aware view timer (a "view" = a tab map OR an open POI sheet) ──
   var view = null, startedAt = null, activeMs = 0;
