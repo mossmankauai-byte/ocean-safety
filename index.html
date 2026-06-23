@@ -1980,7 +1980,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
    reused by Maui, so region filters are only safe while B is single-island). */
 const ISLANDS = {
   kauai: {
-    slug:'kauai', name:'Kauaʻi', defaultSide:'east', sideKey:'os_side',
+    slug:'kauai', name:'Kauaʻi', live:true, defaultSide:'east', sideKey:'os_side',
     map:{ center:[22.05,-159.50], zoom:10, minZoom:10, maxBounds:null },
     seaLevel:{ lat:21.9788, lon:-159.3672 },
     geoBox:{ latMin:21.85, latMax:22.25, lonMin:-159.85, lonMax:-159.25 },
@@ -1995,7 +1995,7 @@ const ISLANDS = {
     data:null   // wired to B at step 1
   },
   maui: {
-    slug:'maui', name:'Maui', defaultSide:'west', sideKey:'os_side_maui',
+    slug:'maui', name:'Maui', live:true, defaultSide:'west', sideKey:'os_side_maui',
     map:{ center:[20.80,-156.33], zoom:10, minZoom:10, maxBounds:[[20.45,-156.75],[21.10,-155.95]] },
     seaLevel:{ lat:20.89, lon:-156.47 },
     geoBox:{ latMin:20.55, latMax:21.0, lonMin:-156.68, lonMax:-156.0 },
@@ -2010,7 +2010,7 @@ const ISLANDS = {
     data:null   // lazy-loaded from /data/maui.js at step 6
   }
 };
-const B=[
+let B=[
   {id:'anini',name:'ʻAnini Beach',n:'Anini',r:'North Shore',lat:22.2255,lon:-159.5012,
    facing:0,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'seasonal_active',lg_hours:'9am–5:30pm seasonal',sq:8,scenic:9,len:2200,
    depth:5,stream:false,rain_mm:40,tidal:false,west:false,kid:true,black:false,water_temp:78,
@@ -2173,8 +2173,14 @@ const B=[
 
 // Wire Kauaʻi's inlined beach array as island #1's dataset; set the active island.
 // ACTIVE/ISLANDS are top-level lexical bindings (classic scripts) → reachable from later inline scripts.
-ISLANDS.kauai.data = B;
-let ACTIVE = ISLANDS.kauai;
+// Resolve the active island from ?island= / localStorage / default. Only live islands are
+// selectable. (Each island's full dataset is attached after all data arrays are defined.)
+function resolveIsland(){
+  try { var p = new URLSearchParams(location.search).get('island'); if(p && ISLANDS[p] && ISLANDS[p].live) return p; } catch(e){}
+  try { var s = localStorage.getItem('os_island'); if(s && ISLANDS[s] && ISLANDS[s].live) return s; } catch(e){}
+  return 'kauai';
+}
+let ACTIVE = ISLANDS[resolveIsland()] || ISLANDS.kauai;
 try { window.ACTIVE = ACTIVE; window.ISLANDS = ISLANDS; } catch(e){}
 
 // Lazy-load an island's dataset on demand. Kauaʻi is inlined (data already set), so
@@ -2191,6 +2197,16 @@ window.ensureIsland = function(slug){
     s.onerror = function(){ reject(new Error('failed to load island data: '+slug)); };
     document.head.appendChild(s);
   });
+};
+
+// Switch islands via a clean reload (?island=slug). resolveIsland() picks it up and the whole
+// app initialises for that island from the start — no in-place teardown. Reliable + simple.
+window.switchIsland = function(slug){
+  if(!ISLANDS[slug] || !ISLANDS[slug].live) return;
+  if(ACTIVE && slug === ACTIVE.slug) return;
+  try { localStorage.setItem('os_island', slug); } catch(e){}
+  try { var u = new URL(location.href); u.searchParams.set('island', slug); location.href = u.toString(); }
+  catch(e){ location.href = location.pathname + '?island=' + slug; }
 };
 
 // POIS — full detail data, each card taps to detail sheet
@@ -2361,7 +2377,7 @@ const P={
 // CHANNELS — Kauai reef channels, rip zones, surge passages
 // dir_deg = direction water EXITS (flows toward)
 // severity = base 0-1 before tide/swell modulation
-const CHANNELS=[
+let CHANNELS=[
   {id:'kee_exit',name:"Ke'e Reef Exit",beach_id:'kee',
    lat:22.2218,lon:-159.5824,dir_deg:350,severity:.70,
    type:'reef_exit',
@@ -2401,7 +2417,7 @@ const CHANNELS=[
 ];
 
 // HIKES — top Kauai trails
-const HIKES=[
+let HIKES=[
   {id:'kalalau_2mi',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Kalalau-trail.JPG?width=800',name:'Kalalau Trail (Hanakāpīʻai)',n:'Kalalau 2mi',r:'Napali Coast',lat:22.2186,lon:-159.5832,
    difficulty:'strenuous',length_mi:4,elevation_ft:800,duration_hr:'4-5',
    tip:'Permit-free first 2 miles to Hanakāpīʻai Beach. DO NOT swim — 80+ drownings recorded. Continue 2 more miles inland to Hanakāpīʻai Falls.',
@@ -2445,7 +2461,7 @@ const HIKES=[
 ];
 
 // FAMILY ACTIVITIES — free or low-cost
-const ACTS=[
+let ACTS=[
   {id:'anaina_hou',name:'Anaina Hou Playground',n:'Anaina Hou',r:'North Shore',lat:22.2110,lon:-159.4090,
    type:'playground',price:'Free',hours:'9am–7pm daily',duration_min:60,
    tip:'17,000 sqft of play space partly built from recycled milk jugs. Hawaiian-themed structures, skateboard ramp, restrooms.',
@@ -2583,7 +2599,7 @@ const ACTS=[
 // STAYS — themed VRBO vacation rentals curated for the app's audience.
 // Each booking_url should carry your VRBO affiliate parameter (?adid=YOUR_AFFILIATE_ID).
 // Replace these placeholder VRBO IDs with real listings researched on vrbo.com.
-const STAYS = [
+let STAYS = [
 
   // HOTELS — Booking.com affiliate (sign up at partner.booking.com, append ?aid=MISSING_YOUR_AFF_ID_BOOKING).
   {id:'grand_hyatt_kauai', name:'Grand Hyatt Kauaʻi Resort & Spa', n:'Grand Hyatt', r:'South Shore',
@@ -2679,7 +2695,7 @@ function openStaySheet(id){
 
 
 // FARMERS MARKETS — only display during active hours
-const FMARKETS=[
+let FMARKETS=[
   // SUNSHINE MARKETS (Kauai County) — open 1.5 hrs from start
   {id:'fm_kilauea_thu',name:'Kīlauea Sunshine Market',n:'Kīlauea Mkt',r:'North Shore',
    lat:22.2153,lon:-159.4082,
@@ -2823,7 +2839,7 @@ const FMARKETS=[
 // OpenTable affiliate. Replace OPENTABLE_REF with your real OpenTable Affiliate ID once approved at opentable.com/affiliate.
 // Restaurants without restRid get a search-style link as fallback.
 const OPENTABLE_REF = 'MISSING_YOUR_OPENTABLE_REF'; // TODO: replace once OpenTable Affiliate account is approved. // TODO: replace with real ref code from OpenTable affiliate dashboard
-const FOODS=[
+let FOODS=[
   {id:'hamura_saimin',phone:'(808) 245-3271',name:'Hamura Saimin',n:'Hamura',r:'East Side',lat:21.9740,lon:-159.3760,
    type:'saimin / local',price:'$',hours:'10am–9:30pm Mon-Sat, closed Sun',
    tip:"Legendary 70+ year-old saimin shop. Order the Special Saimin and the lilikoi chiffon pie. Cash only, expect a wait, sit at the U-shaped counter for the full experience.",
@@ -2917,7 +2933,7 @@ const FOODS=[
 // drift. Treat tip text as a "usually" not a "guaranteed". When CLAUDE.md gets
 // updated to reflect this layer, also mention that subtab wiring needs an
 // item in SUBTABS or a dedicated tab.
-const FOOD_TRUCKS=[
+let FOOD_TRUCKS=[
   {id:'ft_porkys',name:"Porky's Kauai",n:"Porky's",r:'North Shore',lat:22.2122,lon:-159.4969,
    type:'food truck',price:'$$',hours:'11a-7p Tue-Sat (check IG)',
    tip:'Pulled-pork sandwiches and loco moco, often parked at the Hanalei Center pad. Cash + cards.',
@@ -2968,7 +2984,7 @@ const FOOD_TRUCKS=[
    tags:['food truck','pizza','dinner','family']}
 ];
 
-const GAS_STATIONS=[
+let GAS_STATIONS=[
   {id:'texaco_hanalei',name:'Texaco Hanalei',n:'Texaco Hanalei',r:'North Shore',lat:22.2128,lon:-159.5008,
    hours:'6am–9pm daily',brand:'Texaco',
    tip:'Last gas before the end of the road. Fill up here before heading to Tunnels, Kēʻē, or the Kalalau trailhead — there is no gas past Hanalei.'},
@@ -2998,7 +3014,7 @@ const GAS_STATIONS=[
    tip:'Last gas station on the west side. Top off before driving up Waimea Canyon Drive or out to Polihale Beach.'}
 ];
 
-const LOCAL_CRAFTS=[
+let LOCAL_CRAFTS=[
   {id:'kong_lung',phone:'(808) 828-1822',website:'https://konglungkauai.com',name:'Kong Lung Trading Co.',n:'Kong Lung',r:'North Shore',lat:22.2168,lon:-159.4036,
    type:'gifts & home',hours:'10am–6pm daily',
    tip:'Upscale gift shop in historic Kīlauea building — Hawaiian art, books, kitchenware, jewelry. Anchor of the Kīlauea town center for over 30 years.',
@@ -3033,7 +3049,7 @@ const LOCAL_CRAFTS=[
    tags:['food','granola','souvenir','wailua']}
 ];
 
-const GROCERIES=[
+let GROCERIES=[
   {id:'foodland_princeville',phone:'(808) 826-9880',website:'https://foodland.com',name:'Foodland Princeville',n:'Foodland Pville',r:'North Shore',lat:22.2245,lon:-159.4895,
    type:'full grocery',price:'$$',hours:'6am–10pm daily',
    tip:'Best north shore grocery. Has a poke counter, hot food, full deli. Pricier than Lihue but most convenient if you\'re staying in Princeville or Hanalei.',
@@ -3071,7 +3087,7 @@ const GROCERIES=[
 // DRINKS — Shopping > Drinks subtab. Independently-researched juice/açaí bars, local
 // coffee roasters, and a few bars/breweries. Coordinates are geocoded to each spot;
 // directions resolve by name (see dirUrl), so a town-level pin still routes correctly.
-const DRINKS=[
+let DRINKS=[
   {id:'kauai_juice_co',website:'https://www.kauaijuiceco.com/',name:'Kauai Juice Co.',n:'Kauai Juice',r:'East Side',lat:22.0876,lon:-159.3375,
    type:'cold-pressed juice & kombucha',price:'$$',hours:'Open daily',
    tip:'Organic cold-pressed juice and kombucha on tap with exotic local-fruit flavors. Locations in Kapaʻa, Kīlauea, and Kōloa.',
@@ -3524,7 +3540,7 @@ async function fetchLive(){
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), 8000);
     const slat=(+lat).toFixed(2), slon=(+lon).toFixed(2);
-    const _px = await fetch(`/api/wx?k=live&lat=${slat}&lon=${slon}`, {signal: ctrl.signal}).then(r=>r.json()).catch(()=>null);
+    const _px = await fetch(`/api/wx?k=live&lat=${slat}&lon=${slon}&island=${ACTIVE.slug}`, {signal: ctrl.signal}).then(r=>r.json()).catch(()=>null);
     clearTimeout(timeoutId);
     if(!_px || !_px.w) throw new Error('conditions proxy unavailable');
     const w=_px.w, s=_px.s||null, td=_px.td||null;
@@ -4127,7 +4143,7 @@ function matchTour(t, c){
   return (t && t.default) ? t.default : { level:'yes', reason:'Conditions look fine' };
 }
 
-const TOURS_LIBRARY = [
+let TOURS_LIBRARY = [
   {
     id: '951413', category: 'water',
     title: 'Na Pali Coast Snorkel Tour',
@@ -6078,7 +6094,7 @@ const ACTIVITY_OUTLOOKS = [
 ];
 
 // Per-region outlook view. Region key → display label and beach-data region string.
-const OUTLOOK_REGIONS = [
+let OUTLOOK_REGIONS = [
   {key:'all',   label:'All',   r:null},
   {key:'north', label:'North', r:'North Shore'},
   {key:'south', label:'South', r:'South Shore'},
@@ -6898,7 +6914,27 @@ function withReferrer(url){
 })();
 
 // BOOT
+// Attach Kauaʻi's inlined arrays as island #1's full dataset (now that every array exists).
+ISLANDS.kauai.data = { beaches:B, channels:CHANNELS, hikes:HIKES, acts:ACTS, stays:STAYS, fmarkets:FMARKETS, foods:FOODS, food_trucks:FOOD_TRUCKS, gas_stations:GAS_STATIONS, local_crafts:LOCAL_CRAFTS, groceries:GROCERIES, drinks:DRINKS, tours:TOURS_LIBRARY };
+
+// Re-point the global arrays at a NON-Kauaʻi island's dataset. Never called for Kauaʻi
+// (the boot gate below skips it), so Kauaʻi's bindings are never reassigned.
+function repointIslandGlobals(d){
+  if(!d) return;
+  B = d.beaches || []; CHANNELS = d.channels || []; HIKES = d.hikes || []; ACTS = d.acts || [];
+  STAYS = d.stays || []; FMARKETS = d.fmarkets || []; FOODS = d.foods || []; FOOD_TRUCKS = d.food_trucks || [];
+  GAS_STATIONS = d.gas_stations || []; LOCAL_CRAFTS = d.local_crafts || []; GROCERIES = d.groceries || [];
+  DRINKS = d.drinks || []; TOURS_LIBRARY = d.tours || [];
+  OUTLOOK_REGIONS = [{key:'all',label:'All',r:null}].concat((ACTIVE.regions||[]).map(function(rg){ return {key:rg.key,label:rg.label,r:rg.r}; }));
+}
+
 async function boot(){
+  // Multi-island: load + activate a non-Kauaʻi island's dataset before anything paints.
+  // Skipped entirely for Kauaʻi (inlined) -> zero-regression.
+  if (ACTIVE.slug !== 'kauai') {
+    try { await ensureIsland(ACTIVE.slug); repointIslandGlobals(ACTIVE.data); }
+    catch(e){ ACTIVE = ISLANDS.kauai; try { window.ACTIVE = ACTIVE; } catch(_){} }
+  }
   // ── Partner referral capture (QR codes, partner links) ──
   // ?ref=marriott / ?utm_source=hyatt → persist to localStorage so subsequent
   // affiliate clicks can be tagged for partner-revenue attribution (read by
@@ -7062,7 +7098,7 @@ if('serviceWorker' in navigator){
     try{
       var lats=ORDER.map(function(k){return SIDE_PTS[k].lat;}).join(',');
       var lons=ORDER.map(function(k){return SIDE_PTS[k].lon;}).join(',');
-      var url='/api/wx?k=side&lats='+lats+'&lons='+lons;
+      var url='/api/wx?k=side&lats='+lats+'&lons='+lons+'&island='+(window.ACTIVE?ACTIVE.slug:'kauai');
       var r=await fetch(url); if(!r.ok) return;
       var data=await r.json(); var arr=Array.isArray(data)?data:[data]; var sides={};
       ORDER.forEach(function(k,i){
@@ -7112,6 +7148,22 @@ if('serviceWorker' in navigator){
     var tb1=host.closest?host.closest('.tb1'):host.parentNode;
     if(tb1&&tb1.parentNode) tb1.parentNode.insertBefore(row,tb1.nextSibling);
     else host.parentNode.insertBefore(row,host.nextSibling);
+    // Island switcher row (only when >1 island is live) — sits above the shore chips, reuses chip styles.
+    try {
+      var liveIslands = Object.keys(ISLANDS).filter(function(s){ return ISLANDS[s] && ISLANDS[s].live; });
+      if(liveIslands.length > 1 && !document.getElementById('hdrIslandRow')){
+        var irow=document.createElement('div'); irow.id='hdrIslandRow'; irow.className='hdr-side-row';
+        irow.setAttribute('role','tablist'); irow.setAttribute('aria-label','Choose island');
+        liveIslands.forEach(function(s){
+          var ib=document.createElement('button'); ib.type='button';
+          ib.className='hdr-side'+(window.ACTIVE && s===ACTIVE.slug?' on':'');
+          ib.textContent=ISLANDS[s].name;
+          ib.addEventListener('click',function(){ window.switchIsland(s); });
+          irow.appendChild(ib);
+        });
+        if(row && row.parentNode) row.parentNode.insertBefore(irow, row);
+      }
+    } catch(e){}
   }
 
   function init(){ build(); window.fetchSideWeather(); }
