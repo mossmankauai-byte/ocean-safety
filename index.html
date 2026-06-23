@@ -3129,8 +3129,8 @@ function gate(b,c){
   // sheet shows the reason on the same rail as 'Surf Too High'. Never render a verdict on
   // surf we do not have.
   if(c.surf_unknown)return 'Conditions Unavailable';
-  if(c.rating>=C.th.rb2)return 'High Hazard Advisory';
-  if(bw(b,c))return 'Brown Water Advisory';
+  if(c.rating>=C.th.rb2)return 'High hazard, use extreme caution';
+  if(bw(b,c))return 'Brown water likely after heavy rain';
   if(rip(b,c)>C.th.rb)return 'Strong Currents';
   if(c.es>Math.max(C.ceil.snorkel,C.ceil.swim,C.ceil.walk))return 'Surf Too High';
   if(b.black&&!b.intents.length)return 'No Safe Activities';
@@ -4787,7 +4787,7 @@ function renderMap(){
       // advisory) instead of vanishing from the map. Absence reads as "nothing here", not
       // "hazard here" — a visible warning beats silence. Every other gate reason (surf too
       // high, conditions unavailable, strong currents) keeps the existing hidden behavior.
-      const _hiddenBrown = r.status === 'hidden' && r.reason === 'Brown Water Advisory' && !!(r._c && r._c.brown);
+      const _hiddenBrown = r.status === 'hidden' && r.reason === 'Brown water likely after heavy rain' && !!(r._c && r._c.brown);
       if(r.status==='hidden' && !_hiddenBrown)return;
       if(r.status==='warning' && !showDanger)return;
     }
@@ -5317,7 +5317,7 @@ function openSheet(id){
   const b=B.find(x=>x.id===id),r=scored[id];if(!b||!r)return;
   const c=r._c;
   const bg=b.photo?`url("${b.photo}"),${generativeBg(b)}`:generativeBg(b);
-  const stlbl={green:'Good Today',yellow:'Use Caution'}[r.status]||'';
+  const stlbl={green:'Calm conditions today',yellow:'Use Caution'}[r.status]||'';
   const kid=r.kid?`<div class="kidbadge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="5" cy="2.5" r="1.5"/><path d="M2 9 Q5 6.5 8 9"/></svg>Family Friendly</div>`:'';
   const lgBadge=b.lg_hours?`<div class="lg-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="5" cy="5" r="4"/><path d="M5 3 L5 5.5 L7 7" stroke-linecap="round"/></svg>${b.lg_hours}</div>`:'';
   const ibs=r.top.map(i=>`<div class="ib">${itlbl[i]||i}</div>`).join('');

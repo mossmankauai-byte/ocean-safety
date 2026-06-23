@@ -1,0 +1,17 @@
+# Security headers — brand InfoSec / vendor-scan readiness.
+# (Content-Security-Policy is intentionally NOT here yet: the app loads many third-party
+#  origins — Leaflet CDN, map tiles, Google Fonts, GetYourGuide/Viator widgets, PostHog,
+#  Wikimedia/Unsplash/Flickr images — so CSP is being built + tested separately to avoid
+#  breaking the map or the tour widgets.)
+# No X-Frame-Options: the app is an intentionally embeddable widget (hotels embed it).
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=(), usb=()
+
+# Keep demo / sample surfaces out of search engines.
+/demo/*
+  X-Robots-Tag: noindex, nofollow
+/p/demo
+  X-Robots-Tag: noindex, nofollow
