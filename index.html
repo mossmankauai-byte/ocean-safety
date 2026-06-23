@@ -2008,6 +2008,36 @@ const ISLANDS = {
       {key:'east',  label:'Hāna/East',  r:'East/Hāna',  centroid:{lat:20.76,lon:-155.99}}
     ],
     data:null   // lazy-loaded from /data/maui.js at step 6
+  },
+  oahu: {
+    slug:'oahu', name:'Oʻahu', live:true, defaultSide:'south', sideKey:'os_side_oahu',
+    map:{ center:[21.47,-157.97], zoom:10, minZoom:10, maxBounds:[[21.20,-158.32],[21.75,-157.55]] },
+    seaLevel:{ lat:21.28, lon:-157.83 },
+    geoBox:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
+    clamp:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
+    tideStation:'1612340',
+    regions:[
+      {key:'north',    label:'North Shore', r:'North Shore', centroid:{lat:21.65,lon:-158.06}},
+      {key:'windward', label:'Windward',    r:'Windward',    centroid:{lat:21.40,lon:-157.73}},
+      {key:'south',    label:'South',       r:'South Shore', centroid:{lat:21.275,lon:-157.82}},
+      {key:'leeward',  label:'Leeward',     r:'Leeward',     centroid:{lat:21.40,lon:-158.15}}
+    ],
+    data:null   // lazy-loaded from /data/oahu.js
+  },
+  hawaii: {
+    slug:'hawaii', name:'Hawaiʻi Island', live:true, defaultSide:'kona', sideKey:'os_side_hawaii',
+    map:{ center:[19.60,-155.50], zoom:9, minZoom:9, maxBounds:[[18.85,-156.15],[20.30,-154.75]] },
+    seaLevel:{ lat:19.64, lon:-155.99 },
+    geoBox:{ latMin:18.85, latMax:20.30, lonMin:-156.15, lonMax:-154.75 },
+    clamp:{ latMin:18.85, latMax:20.30, lonMin:-156.15, lonMax:-154.75 },
+    tideStation:'1617433',
+    regions:[
+      {key:'kona',   label:'Kona',      r:'Kona',      centroid:{lat:19.60,lon:-155.99}},
+      {key:'kohala', label:'Kohala',    r:'Kohala',    centroid:{lat:20.00,lon:-155.82}},
+      {key:'hilo',   label:'Hilo/Puna', r:'Hilo/Puna', centroid:{lat:19.70,lon:-155.05}},
+      {key:'kau',    label:'Kaʻū',      r:'Kaʻū',      centroid:{lat:19.13,lon:-155.50}}
+    ],
+    data:null   // lazy-loaded from /data/hawaii.js
   }
 };
 let B=[

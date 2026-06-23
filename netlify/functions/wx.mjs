@@ -20,6 +20,8 @@ const MARINE = 'https://marine-api.open-meteo.com/v1/marine';
 const ISLAND_WX = {
   kauai: { latMin: 21.7, latMax: 22.4,  lonMin: -160.1, lonMax: -159.2,  dLat: 21.9788, dLon: -159.3672, tide: '1611400' },
   maui:  { latMin: 20.5, latMax: 21.05, lonMin: -156.7, lonMax: -155.98, dLat: 20.89,   dLon: -156.47,   tide: '1615680' },
+  oahu:   { latMin: 21.2,  latMax: 21.75, lonMin: -158.32, lonMax: -157.55, dLat: 21.28, dLon: -157.83, tide: '1612340' },
+  hawaii: { latMin: 18.85, latMax: 20.30, lonMin: -156.15, lonMax: -154.75, dLat: 19.64, dLon: -155.99, tide: '1617433' },
 };
 const tidesUrl = (st) => 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'
   + `?date=today&station=${st}&product=predictions&datum=MLLW&time_zone=lst_ldt&interval=h&units=english&format=json`;

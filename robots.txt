@@ -3,3 +3,5 @@ Allow: /
 
 Sitemap: https://oceansafety.app/sitemap.xml
 Sitemap: https://oceansafety.app/sitemap-maui.xml
+Sitemap: https://oceansafety.app/sitemap-oahu.xml
+Sitemap: https://oceansafety.app/sitemap-big-island.xml
