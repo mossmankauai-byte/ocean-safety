@@ -3455,23 +3455,18 @@ async function fetchLive(){
     // Added `precipitation` to hourly params (alongside precipitation_probability) so we can
     // compute "rain until 3pm" / "rain at 2pm" style messages — Hawaii's rain pattern is on/off
     // throughout the day, and "is it raining now?" is less useful than "when will it stop?"
-    const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,uv_index&hourly=precipitation,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,uv_index_max,cloud_cover_mean,weather_code,sunrise,sunset&wind_speed_unit=mph&temperature_unit=fahrenheit&timezone=Pacific%2FHonolulu`;
-    // EXPLICIT marine model (&models=best_match). Without it, Open-Meteo can pick a model that
-    // has no data at this lat/lon and return HTTP 200 with an all-null wave payload (GH#1364).
-    // Pinning best_match makes the response deterministic; the fail-safe below still treats any
-    // null/NaN/missing wave height as a FETCH FAILURE rather than calm surf.
-    const surfUrl=`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=wave_height,wave_direction,wave_period&daily=wave_height_max,wave_direction_dominant,wave_period_max&models=best_match&length_unit=imperial&timezone=Pacific%2FHonolulu`;
-    // NOAA tide predictions for Nawiliwili (1611400) — the main Kauaʻi reference station.
-    const tideUrl=`https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=1611400&product=predictions&datum=MLLW&time_zone=lst_ldt&interval=h&units=english&format=json`;
-    // 8s timeout via AbortController so an API hang doesn't leave the loader spinning forever.
-    // On timeout we still fall through to the SNAP fallback path below.
+    // Conditions proxy (/api/wx): ONE cached server-side fetch instead of 3 direct open-meteo/NOAA
+    // hits, so a busy hotel lobby behind one IP can't throttle the free APIs. Coords snap to ~1km
+    // so nearby visitors share the Netlify CDN cache. Marine/tides may come back null; the fail-safe
+    // below treats any null/NaN/missing wave height as a FETCH FAILURE (never calm surf). On proxy
+    // failure we throw, and the SNAP fallback path below renders snapshot conditions.
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), 8000);
-    const [w,s,td] = await Promise.all([
-      fetch(url, {signal: ctrl.signal}).then(r=>r.json()),
-      fetch(surfUrl, {signal: ctrl.signal}).then(r=>r.json()).catch(()=>null),
-      fetch(tideUrl, {signal: ctrl.signal}).then(r=>r.json()).catch(()=>null)
-    ]).finally(() => clearTimeout(timeoutId));
+    const slat=(+lat).toFixed(2), slon=(+lon).toFixed(2);
+    const _px = await fetch(`/api/wx?k=live&lat=${slat}&lon=${slon}`, {signal: ctrl.signal}).then(r=>r.json()).catch(()=>null);
+    clearTimeout(timeoutId);
+    if(!_px || !_px.w) throw new Error('conditions proxy unavailable');
+    const w=_px.w, s=_px.s||null, td=_px.td||null;
     const c = w.current||{};
     // MARINE FAIL-SAFE (Open-Meteo GH#1364 + network faults): a valid surf reading is a
     // finite wave height. null / NaN / missing = FETCH FAILURE — never coerce to 0 ft or the
@@ -7015,9 +7010,7 @@ if('serviceWorker' in navigator){
     try{
       var lats=ORDER.map(function(k){return SIDE_PTS[k].lat;}).join(',');
       var lons=ORDER.map(function(k){return SIDE_PTS[k].lon;}).join(',');
-      var url='https://api.open-meteo.com/v1/forecast?latitude='+lats+'&longitude='+lons+
-        '&current=temperature_2m,wind_speed_10m,uv_index&daily=precipitation_probability_max'+
-        '&wind_speed_unit=mph&temperature_unit=fahrenheit&timezone=Pacific%2FHonolulu';
+      var url='/api/wx?k=side&lats='+lats+'&lons='+lons;
       var r=await fetch(url); if(!r.ok) return;
       var data=await r.json(); var arr=Array.isArray(data)?data:[data]; var sides={};
       ORDER.forEach(function(k,i){
