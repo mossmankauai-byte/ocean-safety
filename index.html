@@ -2239,6 +2239,59 @@ window.switchIsland = function(slug){
   catch(e){ location.href = location.pathname + '?island=' + slug; }
 };
 
+// ===== i18n: active UI language (en default). Additive — the English path is byte-identical. =====
+function resolveLang(){
+  try { var p=new URLSearchParams(location.search).get('lang'); if(p&&['en','ja','hi'].indexOf(p)>=0) return p; } catch(e){}
+  try { var s=localStorage.getItem('os_lang'); if(s&&['en','ja','hi'].indexOf(s)>=0) return s; } catch(e){}
+  return 'en';
+}
+var ACTIVE_LANG = resolveLang();
+try { window.ACTIVE_LANG = ACTIVE_LANG; document.documentElement.lang = ACTIVE_LANG; } catch(e){}
+window.switchLang = function(code){
+  if(['en','ja','hi'].indexOf(code)<0) return;
+  try { localStorage.setItem('os_lang', code); } catch(e){}
+  try { var u=new URL(location.href); if(code==='en') u.searchParams.delete('lang'); else u.searchParams.set('lang',code); location.href=u.toString(); }
+  catch(e){ location.href = location.pathname + (code==='en'?'':'?lang='+code); }
+};
+// DOM translation layer — runs ONLY for non-English; never touches the English source.
+(function(){
+  if(ACTIVE_LANG==='en') return;
+  var DICT=null, queued=false;
+  function norm(s){ return s.replace(/\s+/g,' ').trim(); }
+  function tnode(node){
+    var raw=node.nodeValue; if(!raw) return; var key=norm(raw); if(!key) return;
+    var t=DICT[key]; if(t!=null && t!==key){ var lead=(raw.match(/^\s*/)||[''])[0], trail=(raw.match(/\s*$/)||[''])[0]; node.nodeValue=lead+t+trail; }
+  }
+  function sweep(root){
+    if(!DICT||!root) return;
+    try{
+      if(root.nodeType===3){ tnode(root); return; }
+      var w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), nodes=[], n;
+      while((n=w.nextNode())) nodes.push(n);
+      nodes.forEach(tnode);
+      var els=root.querySelectorAll?root.querySelectorAll('[placeholder],[aria-label],[title]'):[];
+      Array.prototype.forEach.call(els,function(el){ ['placeholder','aria-label','title'].forEach(function(a){ var v=el.getAttribute(a); if(!v) return; var t=DICT[norm(v)]; if(t!=null&&t!==norm(v)) el.setAttribute(a,t); }); });
+    }catch(e){}
+  }
+  window._i18nSweep=sweep;
+  function start(){
+    try{
+      var obs=new MutationObserver(function(muts){
+        if(queued) return; queued=true;
+        (window.requestAnimationFrame||window.setTimeout)(function(){ queued=false;
+          muts.forEach(function(m){ for(var i=0;i<m.addedNodes.length;i++){ var nd=m.addedNodes[i]; if(nd.nodeType===1) sweep(nd); else if(nd.nodeType===3) tnode(nd); } });
+        });
+      });
+      obs.observe(document.body,{childList:true,subtree:true});
+    }catch(e){}
+    sweep(document.body);
+  }
+  var sc=document.createElement('script'); sc.src='/data/i18n-'+ACTIVE_LANG+'.js'; sc.async=false;
+  sc.onload=function(){ DICT=(window.I18N&&window.I18N[ACTIVE_LANG])||{}; if(document.body) start(); else document.addEventListener('DOMContentLoaded',start); };
+  sc.onerror=function(){};
+  (document.head||document.documentElement).appendChild(sc);
+})();
+
 // POIS — full detail data, each card taps to detail sheet
 const P={
   sbkapaa:{
@@ -7178,6 +7231,21 @@ if('serviceWorker' in navigator){
     var tb1=host.closest?host.closest('.tb1'):host.parentNode;
     if(tb1&&tb1.parentNode) tb1.parentNode.insertBefore(row,tb1.nextSibling);
     else host.parentNode.insertBefore(row,host.nextSibling);
+    // Language switcher row — EN / 日本語 / हिन्दी (reuses chip styles).
+    try {
+      if(!document.getElementById('hdrLangRow')){
+        var lrow=document.createElement('div'); lrow.id='hdrLangRow'; lrow.className='hdr-side-row';
+        lrow.setAttribute('aria-label','Language');
+        [['en','EN'],['ja','日本語'],['hi','हिन्दी']].forEach(function(LG){
+          var lb=document.createElement('button'); lb.type='button';
+          lb.className='hdr-side'+(((window.ACTIVE_LANG)||'en')===LG[0]?' on':'');
+          lb.textContent=LG[1];
+          lb.addEventListener('click',function(){ window.switchLang(LG[0]); });
+          lrow.appendChild(lb);
+        });
+        if(row && row.parentNode) row.parentNode.insertBefore(lrow, row);
+      }
+    } catch(e){}
     // Island switcher row (only when >1 island is live) — sits above the shore chips, reuses chip styles.
     try {
       var liveIslands = Object.keys(ISLANDS).filter(function(s){ return ISLANDS[s] && ISLANDS[s].live; });
