@@ -1972,6 +1972,44 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 //# sourceMappingURL=leaflet.js.map</script>
 <script>
 // BEACHES
+/* ===== MULTI-ISLAND CONFIG (Maui expansion — see ~/Desktop/OceanSafe/MULTI-ISLAND-PLAN.md) =====
+   Step 0: PURE ADDITIVE. Nothing references ISLANDS yet, so Kauaʻi behavior is byte-identical.
+   kauai values mirror the existing literals exactly (map init L3640, fetchLive gate L3450-54,
+   SIDE_PTS L7000-04, tide station in wx.mjs). INVARIANT: B[] holds exactly ONE island at a
+   time — NEVER concatenate two islands' beaches (the 'North Shore'/'South Shore' strings are
+   reused by Maui, so region filters are only safe while B is single-island). */
+const ISLANDS = {
+  kauai: {
+    slug:'kauai', name:'Kauaʻi', defaultSide:'east', sideKey:'os_side',
+    map:{ center:[22.05,-159.50], zoom:10, minZoom:10, maxBounds:null },
+    seaLevel:{ lat:21.9788, lon:-159.3672 },
+    geoBox:{ latMin:21.85, latMax:22.25, lonMin:-159.85, lonMax:-159.25 },
+    clamp:{ latMin:21.7, latMax:22.4, lonMin:-160.1, lonMax:-159.2 },
+    tideStation:'1611400',
+    regions:[
+      {key:'north', label:'North', r:'North Shore', centroid:{lat:22.205,lon:-159.503}},
+      {key:'east',  label:'East',  r:'East Side',   centroid:{lat:22.005,lon:-159.337}},
+      {key:'south', label:'South', r:'South Shore', centroid:{lat:21.880,lon:-159.460}},
+      {key:'west',  label:'West',  r:'West Side',   centroid:{lat:21.970,lon:-159.700}}
+    ],
+    data:null   // wired to B at step 1
+  },
+  maui: {
+    slug:'maui', name:'Maui', defaultSide:'west', sideKey:'os_side_maui',
+    map:{ center:[20.80,-156.33], zoom:10, minZoom:10, maxBounds:[[20.45,-156.75],[21.10,-155.95]] },
+    seaLevel:{ lat:20.89, lon:-156.47 },
+    geoBox:{ latMin:20.55, latMax:21.0, lonMin:-156.68, lonMax:-156.0 },
+    clamp:{ latMin:20.5, latMax:21.05, lonMin:-156.7, lonMax:-155.98 },
+    tideStation:'1615680',
+    regions:[
+      {key:'west',  label:'West Maui',  r:'West Maui',  centroid:{lat:20.92,lon:-156.69}},
+      {key:'south', label:'South Maui', r:'South Maui', centroid:{lat:20.71,lon:-156.45}},
+      {key:'north', label:'North Shore',r:'North Shore',centroid:{lat:20.93,lon:-156.36}},
+      {key:'east',  label:'Hāna/East',  r:'East/Hāna',  centroid:{lat:20.76,lon:-155.99}}
+    ],
+    data:null   // lazy-loaded from /data/maui.js at step 6
+  }
+};
 const B=[
   {id:'anini',name:'ʻAnini Beach',n:'Anini',r:'North Shore',lat:22.2255,lon:-159.5012,
    facing:0,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'seasonal_active',lg_hours:'9am–5:30pm seasonal',sq:8,scenic:9,len:2200,
@@ -2132,6 +2170,28 @@ const B=[
    tip:'10-minute walk down from the highway pullout north of Kapaʻa. Often empty. Strong currents, occasional clothing-optional users. Worth it for solitude and the cliffside trail.',
    photo:'https://live.staticflickr.com/5084/5358975080_a76fd012eb_b.jpg',pois:[]}
 ];
+
+// Wire Kauaʻi's inlined beach array as island #1's dataset; set the active island.
+// ACTIVE/ISLANDS are top-level lexical bindings (classic scripts) → reachable from later inline scripts.
+ISLANDS.kauai.data = B;
+let ACTIVE = ISLANDS.kauai;
+try { window.ACTIVE = ACTIVE; window.ISLANDS = ISLANDS; } catch(e){}
+
+// Lazy-load an island's dataset on demand. Kauaʻi is inlined (data already set), so
+// ensureIsland('kauai') resolves immediately and Kauaʻi never pays a fetch. Other islands
+// load /data/<slug>.js (which sets ISLANDS[slug].data); the service worker SWR-caches it.
+window.ensureIsland = function(slug){
+  return new Promise(function(resolve, reject){
+    var isl = ISLANDS[slug];
+    if(!isl){ reject(new Error('unknown island: '+slug)); return; }
+    if(isl.data){ resolve(isl); return; }
+    var s = document.createElement('script');
+    s.src = '/data/' + slug + '.js'; s.async = true;
+    s.onload  = function(){ isl.data ? resolve(isl) : reject(new Error('island data missing after load: '+slug)); };
+    s.onerror = function(){ reject(new Error('failed to load island data: '+slug)); };
+    document.head.appendChild(s);
+  });
+};
 
 // POIS — full detail data, each card taps to detail sheet
 const P={
@@ -3447,11 +3507,12 @@ async function fetchLive(){
     // Default is Līhuʻe (sea-level, central). Earlier default of 22.05/-159.5 fell on the
     // Kokeʻe highlands (~1,180 ft elevation) and returned cold mountain temperatures.
     const userLoc = window._userLocation;
-    const inKauai = userLoc
-      && userLoc.lat >= 21.85 && userLoc.lat <= 22.25
-      && userLoc.lon >= -159.85 && userLoc.lon <= -159.25;
-    const lat = inKauai ? userLoc.lat : 21.9788;
-    const lon = inKauai ? userLoc.lon : -159.3672;
+    const _gb = ACTIVE.geoBox;
+    const onIsland = userLoc
+      && userLoc.lat >= _gb.latMin && userLoc.lat <= _gb.latMax
+      && userLoc.lon >= _gb.lonMin && userLoc.lon <= _gb.lonMax;
+    const lat = onIsland ? userLoc.lat : ACTIVE.seaLevel.lat;
+    const lon = onIsland ? userLoc.lon : ACTIVE.seaLevel.lon;
     // Added `precipitation` to hourly params (alongside precipitation_probability) so we can
     // compute "rain until 3pm" / "rain at 2pm" style messages — Hawaii's rain pattern is on/off
     // throughout the day, and "is it raining now?" is less useful than "when will it stop?"
@@ -3637,7 +3698,8 @@ async function getCond(b){
 // MAP
 let map,mkrs={},ints=['snorkel','swim'],scored={};
 function initMap(){
-  map=L.map('map',{center:[22.05,-159.50],zoom:10,minZoom:10,zoomControl:false,attributionControl:false});
+  map=L.map('map',{center:ACTIVE.map.center,zoom:ACTIVE.map.zoom,minZoom:ACTIVE.map.minZoom,zoomControl:false,attributionControl:false});
+  if(ACTIVE.map.maxBounds) map.setMaxBounds(ACTIVE.map.maxBounds);
   window._streetTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'©OpenStreetMap ©CartoDB',subdomains:'abcd'}).addTo(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri'});
   window._isSat = false;
@@ -5908,7 +5970,7 @@ function wireTabs(){
         el.classList.add('active');
         const sb=document.getElementById('subtabs'); if(sb){ sb.innerHTML=''; sb.classList.remove('on'); }
         if(typeof closeSubtabMenu === 'function') closeSubtabMenu();
-        if(typeof map !== 'undefined' && map) map.setView([22.05, -159.50], 10, {animate:true});
+        if(typeof map !== 'undefined' && map) map.setView(ACTIVE.map.center, ACTIVE.map.zoom, {animate:true});
         closeSheet();   // clear any stale ?item route + document.title from a previously open detail sheet
         var _aff=(window.PARTNER_MODE==='affiliate');
         if(window.OSA) OSA.tab(_aff?'tours':'activities');
@@ -5925,7 +5987,7 @@ function wireTabs(){
       closeSheet();
       // Reset map to the default island view whenever the user switches main tabs,
       // so a previous zoom into one POI doesn't carry over to the new tab's content.
-      if(typeof map !== 'undefined' && map) map.setView([22.05, -159.50], 10, {animate:true});
+      if(typeof map !== 'undefined' && map) map.setView(ACTIVE.map.center, ACTIVE.map.zoom, {animate:true});
       renderMap();
       renderHikes();
       renderActs();
@@ -6920,12 +6982,7 @@ window._liveFetchedAt = null;
 // regionStatus() the outlook sheet uses. Unknown or stale surf renders an em dash with
 // the slate no-data dot (never the 99 sentinel, never a stale number presented as live).
 // Brown droplet = some beach on that shore trips the brown-water trigger today.
-const SHORE_CHIP_REGIONS = [
-  {key:'north', label:'North', r:'North Shore'},
-  {key:'east',  label:'East',  r:'East Side'},
-  {key:'south', label:'South', r:'South Shore'},
-  {key:'west',  label:'West',  r:'West Side'}
-];
+const SHORE_CHIP_REGIONS = (ACTIVE.regions||[]).map(rg => ({key:rg.key, label:rg.label, r:rg.r}));
 function updateShoreChips(){
   SHORE_CHIP_REGIONS.forEach(rg => {
     const el = document.getElementById('shore-' + rg.key);
@@ -6997,13 +7054,8 @@ if('serviceWorker' in navigator){
   /* Header weather-by-shore. Kauaʻi's coasts have very different microclimates, so the
      header reads the picked shore's own weather. One Open-Meteo call covers all four
      representative points. Falls back to the island reading until it loads or if it fails. */
-  var SIDE_PTS = {
-    north:{lat:22.205,lon:-159.503,label:'North'},
-    east: {lat:22.005,lon:-159.337,label:'East'},
-    south:{lat:21.880,lon:-159.460,label:'South'},
-    west: {lat:21.970,lon:-159.700,label:'West'}
-  };
-  var ORDER=['north','east','south','west'];
+  var SIDE_PTS = {}, ORDER = [];
+  (ACTIVE.regions||[]).forEach(function(rg){ ORDER.push(rg.key); SIDE_PTS[rg.key]={lat:rg.centroid.lat,lon:rg.centroid.lon,label:rg.label}; });
   function repaint(){ try{ if(typeof rescore==='function') rescore(); }catch(e){} }
 
   window.fetchSideWeather=async function(){
@@ -7025,7 +7077,7 @@ if('serviceWorker' in navigator){
 
   window.selectSide=function(side){
     window._activeSide=side;
-    try{ localStorage.setItem('os_side',side); }catch(e){}
+    try{ localStorage.setItem(ACTIVE.sideKey,side); }catch(e){}
     var els=document.querySelectorAll('.hdr-side');
     for(var i=0;i<els.length;i++) els[i].classList.toggle('on',els[i].getAttribute('data-side')===side);
     repaint();
@@ -7034,8 +7086,8 @@ if('serviceWorker' in navigator){
   function build(){
     var host=document.getElementById('hdrWx');
     if(!host||document.getElementById('hdrSideRow')) return;
-    var saved=null; try{ saved=localStorage.getItem('os_side'); }catch(e){}
-    window._activeSide=(saved&&SIDE_PTS[saved])?saved:'east';
+    var saved=null; try{ saved=localStorage.getItem(ACTIVE.sideKey); }catch(e){}
+    window._activeSide=(saved&&SIDE_PTS[saved])?saved:ACTIVE.defaultSide;
     if(!document.getElementById('hdrSideStyle')){
       var st=document.createElement('style'); st.id='hdrSideStyle';
       st.textContent='#hdrSurf{display:none!important}'+

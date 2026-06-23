@@ -11,7 +11,7 @@
 // To bust the cache after a meaningful deploy, bump CACHE_VERSION below.
 // Visitors get the new HTML on next launch (with a brief "Updating…" hop).
 
-const CACHE_VERSION = 'v22-2026-06-22';
+const CACHE_VERSION = 'v23-2026-06-22-multi-island';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -136,6 +136,21 @@ if (workbox) {
           maxEntries: 30,
           maxAgeSeconds: 365 * 24 * 60 * 60
         })
+      ]
+    })
+  );
+
+  // ---- Per-island data (/data/<slug>.js) — runtime SWR, NOT precached ----
+  // Deliberately kept out of the precache list above so Kauaʻi-only visitors never
+  // download other islands. Registered BEFORE the generic app-shell route so it owns
+  // its own cache bucket; the app-shell route would otherwise also catch these scripts.
+  workbox.routing.registerRoute(
+    ({ url }) => url.origin === self.location.origin && /^\/data\/[a-z0-9_-]+\.js$/.test(url.pathname),
+    new workbox.strategies.StaleWhileRevalidate({
+      cacheName: `island-data-${CACHE_VERSION}`,
+      plugins: [
+        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
+        new workbox.expiration.ExpirationPlugin({ maxEntries: 8, maxAgeSeconds: 30 * 24 * 60 * 60 })
       ]
     })
   );

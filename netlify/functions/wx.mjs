@@ -14,8 +14,15 @@
 const TZ = 'Pacific%2FHonolulu';
 const OM = 'https://api.open-meteo.com/v1/forecast';
 const MARINE = 'https://marine-api.open-meteo.com/v1/marine';
-const TIDES = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'
-  + '?date=today&station=1611400&product=predictions&datum=MLLW&time_zone=lst_ldt&interval=h&units=english&format=json';
+// Per-island weather config — bbox clamp, sea-level default coord, NOAA tide station.
+// Selected by the ?island= param; DEFAULTS to kauai when absent so existing callers /
+// cached URLs never break. island only ever indexes this fixed in-code map (no SSRF).
+const ISLAND_WX = {
+  kauai: { latMin: 21.7, latMax: 22.4,  lonMin: -160.1, lonMax: -159.2,  dLat: 21.9788, dLon: -159.3672, tide: '1611400' },
+  maui:  { latMin: 20.5, latMax: 21.05, lonMin: -156.7, lonMax: -155.98, dLat: 20.89,   dLon: -156.47,   tide: '1615680' },
+};
+const tidesUrl = (st) => 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'
+  + `?date=today&station=${st}&product=predictions&datum=MLLW&time_zone=lst_ldt&interval=h&units=english&format=json`;
 
 const LIVE_CUR = 'temperature_2m,relative_humidity_2m,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,uv_index';
 const LIVE_HRLY = 'precipitation,precipitation_probability';
@@ -59,17 +66,18 @@ export default async (req) => {
   }
 
   // k === 'live'
+  const isl = ISLAND_WX[url.searchParams.get('island')] || ISLAND_WX.kauai;
   let lat = parseFloat(url.searchParams.get('lat'));
   let lon = parseFloat(url.searchParams.get('lon'));
-  // default Līhuʻe (sea-level) if missing/out-of-Kauaʻi; snap to ~1km grid for cache sharing
-  if (!Number.isFinite(lat) || lat < 21.7 || lat > 22.4) lat = 21.9788;
-  if (!Number.isFinite(lon) || lon < -160.1 || lon > -159.2) lon = -159.3672;
+  // default to the island's sea-level coord if missing/off-island; snap to ~1km grid for cache sharing
+  if (!Number.isFinite(lat) || lat < isl.latMin || lat > isl.latMax) lat = isl.dLat;
+  if (!Number.isFinite(lon) || lon < isl.lonMin || lon > isl.lonMax) lon = isl.dLon;
   lat = +lat.toFixed(2); lon = +lon.toFixed(2);
 
   const fUrl = `${OM}?latitude=${lat}&longitude=${lon}&current=${LIVE_CUR}&hourly=${LIVE_HRLY}&daily=${LIVE_DAILY}&wind_speed_unit=mph&temperature_unit=fahrenheit&timezone=${TZ}`;
   const sUrl = `${MARINE}?latitude=${lat}&longitude=${lon}&current=${MAR_CUR}&daily=${MAR_DAILY}&models=best_match&length_unit=imperial&timezone=${TZ}`;
 
-  const [w, s, td] = await Promise.all([getJSON(fUrl), getJSON(sUrl), getJSON(TIDES)]);
+  const [w, s, td] = await Promise.all([getJSON(fUrl), getJSON(sUrl), getJSON(tidesUrl(isl.tide))]);
   if (!w) return json({ error: 'upstream' }, 502); // forecast is required; marine/tides may be null (app fail-safes)
   return json({ w, s, td });
 };
