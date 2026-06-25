@@ -3788,6 +3788,15 @@ async function getCond(b){
     golden, dow:new Date().getDay(), h
   };
   c.surf_unknown = surfUnknown;
+  // SOUTH-SWELL HONEST CAPTION flag. True exactly when reefFactor's relaxation is engaged —
+  // i.e. a reef break is taking an on-facing south swell, so the displayed open-water (offshore-Hs)
+  // number is conservative and the breaking face can run larger. Drives the informational note in
+  // the detail sheet. Same gate as the eff() swell branch, so it never shows when it isn't relevant.
+  c.reefUnderstate = false;
+  if(b.reef && !surfUnknown && Number.isFinite(D.sw_d) && Number.isFinite(D.sw_h)){
+    const a=(D.sw_d-b.facing+360)%360, n=a>180?a-360:a, cosS=Math.cos(n*Math.PI/180);
+    c.reefUnderstate = reefFactor(D.sw_d, D.sw_t, cosS, b) > REEF.base;
+  }
   // T4 BROWN: per-beach live upland discharge for the OR leg in bw(), TODAY only. The USGS feed is
   // LIVE (usgsEnabled:true); c.streamQ carries a fresh reading whenever the /api/wx proxy supplied
   // _px.q. FAIL-SAFE: a USGS outage / proxy without q leaves window._streamQ null/absent
@@ -5631,6 +5640,15 @@ function openSheet(id){
           : `<b>Box jellyfish likely today.</b> They move close to shore on south-facing beaches about 9 days after the full moon. Stings are common and painful, so cover exposed skin and check with a lifeguard before you swim.`}</span>
       </div>`
     : '';
+  // SOUTH-SWELL reef-understate note — informational (NOT a hazard amber). Shows only when
+  // reefFactor's relaxation is engaged (c.reefUnderstate), so the guest knows the displayed
+  // open-water surf number is conservative for this reef on today's south swell.
+  const _reefNotice = (c && c.reefUnderstate && !c.surf_unknown)
+    ? `<div style="margin:10px 0 4px;padding:9px 12px;background:#eef3f5;border-left:3px solid #5b8a9a;border-radius:8px;color:#33414a;font-size:12.5px;line-height:1.45;display:flex;align-items:flex-start;gap:8px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5b8a9a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M2 16 Q6 11 11 14 T20 13"/><path d="M3 21 Q7 17 13 19 T22 19"/></svg>
+        <span><b>Reef break.</b> On a south swell like today's, the surf here can break a good bit bigger than this open-water reading. Watch a few sets from shore before you go in, and check with a lifeguard if one's on duty.</span>
+      </div>`
+    : '';
   const pois=b.pois.map(poiCard).join('');
   const ps=pois?`<div class="slbl">Nearby</div><div class="prow">${pois}</div>`:'';
   const channels=(b.channels||[]).map(channelCard).join('');
@@ -5671,6 +5689,7 @@ function openSheet(id){
     ${weatherBar(c)}
     ${_bigSurfNotice}
     ${_jellyNotice}
+    ${_reefNotice}
     ${(typeof outlookChipsHtml === 'function') ? outlookChipsHtml(c) : ''}
     ${condIcons(c,b)}
     ${parkRow}
