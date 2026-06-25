@@ -8,8 +8,12 @@
 //   - GetYourGuide & affiliate widgets → NetworkFirst (3s)   — get fresh listings, cache if offline
 //   - HTML / JS / CSS / icons  → StaleWhileRevalidate         — fast loads, deploys land within minutes
 //
-// To bust the cache after a meaningful deploy, bump CACHE_VERSION below.
-// Visitors get the new HTML on next launch (with a brief "Updating…" hop).
+// CACHE NAMING (important): runtime caches use STABLE names with NO version suffix,
+// so a deploy does NOT wipe cached map tiles, beach photos, fonts, or weather.
+// Returning visitors stay fast instead of re-downloading everything on every publish
+// (that was the cause of the Largest-Contentful-Paint spikes on deploy days).
+// Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
+// it still ships new code on next launch; every other cache self-expires on its timer.
 
 const CACHE_VERSION = 'v25-2026-06-22';
 
@@ -17,10 +21,12 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox
 
 if (workbox) {
   workbox.setConfig({ debug: false });
-  workbox.core.setCacheNameDetails({ prefix: 'os', suffix: CACHE_VERSION });
+  // Stable prefix only — NO version suffix, so runtime caches survive deploys.
+  workbox.core.setCacheNameDetails({ prefix: 'os' });
 
   // ---- Precache the app shell so first-visit-offline shows the app ----
-  // Bump CACHE_VERSION above to invalidate.
+  // Keyed to CACHE_VERSION: bumping it ships new HTML/icons on next launch.
+  workbox.precaching.cleanupOutdatedCaches();
   workbox.precaching.precacheAndRoute([
     { url: '/',                         revision: CACHE_VERSION },
     { url: '/index.html',               revision: CACHE_VERSION },
@@ -36,7 +42,7 @@ if (workbox) {
   workbox.routing.registerRoute(
     /^https:\/\/[a-c]\.tile\.openstreetmap\.org\//,
     new workbox.strategies.CacheFirst({
-      cacheName: `osm-tiles-${CACHE_VERSION}`,
+      cacheName: 'osm-tiles',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
         new workbox.expiration.ExpirationPlugin({
@@ -52,7 +58,7 @@ if (workbox) {
   workbox.routing.registerRoute(
     /^https:\/\/[a-d]?\.?(basemaps\.cartocdn|tile\.openstreetmap|tiles\.stadiamaps)\.[a-z]+\//,
     new workbox.strategies.CacheFirst({
-      cacheName: `map-tiles-${CACHE_VERSION}`,
+      cacheName: 'map-tiles',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
         new workbox.expiration.ExpirationPlugin({
@@ -68,7 +74,7 @@ if (workbox) {
   workbox.routing.registerRoute(
     /^https:\/\/api\.open-meteo\.com\//,
     new workbox.strategies.StaleWhileRevalidate({
-      cacheName: `open-meteo-${CACHE_VERSION}`,
+      cacheName: 'open-meteo',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
         new workbox.expiration.ExpirationPlugin({
@@ -83,7 +89,7 @@ if (workbox) {
   workbox.routing.registerRoute(
     /^https:\/\/api\.tidesandcurrents\.noaa\.gov\//,
     new workbox.strategies.StaleWhileRevalidate({
-      cacheName: `noaa-tides-${CACHE_VERSION}`,
+      cacheName: 'noaa-tides',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
         new workbox.expiration.ExpirationPlugin({
@@ -98,7 +104,7 @@ if (workbox) {
   workbox.routing.registerRoute(
     /^https:\/\/upload\.wikimedia\.org\//,
     new workbox.strategies.CacheFirst({
-      cacheName: `wikimedia-${CACHE_VERSION}`,
+      cacheName: 'wikimedia',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
         new workbox.expiration.ExpirationPlugin({
@@ -114,7 +120,7 @@ if (workbox) {
   workbox.routing.registerRoute(
     /^https:\/\/(widget\.getyourguide|www\.viator)\.com\//,
     new workbox.strategies.NetworkFirst({
-      cacheName: `affiliate-${CACHE_VERSION}`,
+      cacheName: 'affiliate',
       networkTimeoutSeconds: 3,
       plugins: [
         new workbox.expiration.ExpirationPlugin({
@@ -129,7 +135,7 @@ if (workbox) {
   workbox.routing.registerRoute(
     /^https:\/\/fonts\.(googleapis|gstatic)\.com\//,
     new workbox.strategies.CacheFirst({
-      cacheName: `google-fonts-${CACHE_VERSION}`,
+      cacheName: 'google-fonts',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
         new workbox.expiration.ExpirationPlugin({
@@ -142,12 +148,14 @@ if (workbox) {
 
   // ---- App shell: same-origin HTML / JS / CSS / images / SVG ----
   // StaleWhileRevalidate so repeat opens are instant; a fresh deploy lands on next navigation.
+  // Stable cache name: a deploy revalidates changed files in the background instead of
+  // dumping the whole shell and forcing a cold re-download.
   workbox.routing.registerRoute(
     ({ request, url }) =>
       url.origin === self.location.origin &&
       ['document', 'script', 'style', 'image', 'font'].includes(request.destination),
     new workbox.strategies.StaleWhileRevalidate({
-      cacheName: `app-shell-${CACHE_VERSION}`,
+      cacheName: 'app-shell',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
         new workbox.expiration.ExpirationPlugin({
@@ -161,5 +169,18 @@ if (workbox) {
 
 // Take control immediately on update — so a deploy doesn't require closing all tabs.
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
+// One-time cleanup: reclaim space from OLD version-suffixed caches left by earlier
+// deploys (e.g. "osm-tiles-v24-2026-06-21", "os-precache-v25-2026-06-22"). The dated
+// -vNN-YYYY-MM-DD suffix is unique to the old scheme, so this never matches the new
+// stable caches or Workbox's own precache.
+const LEGACY_CACHE = /-v\d+-20\d\d-\d\d-\d\d$/;
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    const names = await caches.keys();
+    await Promise.all(
+      names.filter((n) => LEGACY_CACHE.test(n)).map((n) => caches.delete(n))
+    );
+    await self.clients.claim();
+  })());
+});

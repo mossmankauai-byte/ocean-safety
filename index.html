@@ -3117,10 +3117,102 @@ function surfDataStale(){
   if(!(t instanceof Date) || isNaN(t.getTime())) return true; // never fetched / failed → treat as stale
   return (Date.now() - t.getTime()) > MAX_DATA_AGE_MS;
 }
-function eff(surf,sd,b){const a=(sd-b.facing+360)%360,n=a>180?a-360:a;return surf*Math.max(0,Math.cos(n*Math.PI/180))*(b.reef?.4:1)}
+// ── FEED CALIBRATION (validated 2026-06-22; see weather-validation) ─────────────
+//   Each correction is MONOTONIC-UP — it can only hold or RAISE a displayed surf /
+//   wind / exposure / hazard reading, never lower one. Every fail-safe arm (null,
+//   SURF_UNAVAILABLE sentinel, SNAP fallback) is left byte-identical; only the
+//   real-number arm of each parse is calibrated.
+const FEED_CAL = {
+  // T1 SURF — Open-Meteo Marine best_match wave_height runs LOW (daily-max bias
+  // -0.85 ft, multiplicative). factor 1.12 = smallest factor that lifts big-surf
+  // (≥6 ft) POD 69%→100% at 0% daily FAR. Applied as max(raw, raw*factor) ⇒ MONOTONIC-UP.
+  surf: { factor: 1.12 },
+  // T2 SWELL DIRECTION — best_match wave_direction is UNBIASED (the prior "40° error"
+  // was a harness bug). Only change is a safety FLOOR on the cosine exposure factor in
+  // eff(): an uncertain swell direction must never let an exposed beach read as fully
+  // sheltered. FLOOR 0.30 — opposite-shore 6 ft swell still projects 1.8 ft, not 0.
+  swellDir: { model: 'best_match', field: 'wave_direction', exposureFloor: 0.30 },
+  // T3 WIND — wind_speed_10m is a smoothed sustained mean; truth (ASOS gusty trades)
+  // runs ~4.26 mph higher. Additive +4.0 (not multiplicative — a factor would inflate
+  // the high tail into false ≥25 mph alarms): within-5 61%→95.6%, 0 new ≥25 mph alarms.
+  // Applied to the real-number arm only (SNAP.wind fallback stays UNcalibrated).
+  wind: { addMph: 4.0 },
+  // T4 BROWN WATER — airport rain (Lihue) misses upland/watershed runoff. UNION (OR)
+  // the existing airport leg with a USGS NWIS daily-max discharge leg. UNION can ONLY
+  // ADD a fire ⇒ recall monotonic non-decreasing. FAIL-SAFE: a USGS outage fails the
+  // discharge leg to "no fire" (never high, never suppresses the airport leg).
+  // Thresholds: North Shore Hanalei 16103000 ≥1000 cfs (parser unions Wainiha 16108000);
+  // East Side SF Wailua 16060000 ≥800 cfs (additive only — airport stays primary there).
+  // LIVE here: USGS discharge is fetched server-side by the /api/wx proxy (wx.mjs) and
+  // arrives as _px.q ⇒ window._streamQ (NO client USGS fetch — owner instruction).
+  brown: {
+    usgsEnabled: true, // LIVE: USGS NWIS daily-max routed THROUGH the /api/wx proxy → window._streamQ
+    Q: { 'North Shore': { sites: ['16103000','16108000'], site: '16103000', cfs: 1000 }, 'East Side': { site: '16060000', cfs: 800 } }
+  }
+};
+// SAFETY-CONSTANT mirror of the exposure floor so eff() reads as a guarded function.
+const EXPOSURE_FLOOR = FEED_CAL.swellDir.exposureFloor; // 0.30 — see FEED_CAL.swellDir
+
+// ── BOX-JELLYFISH LUNAR ADVISORY ──────────────────────────────────────────
+// Hawaiian box jellyfish (Alatina alata) swarm nearshore to spawn 8–12 days
+// after the full moon (peak 8–10), on SOUTH-facing and leeward shores. Lunar,
+// predictable; the Waikiki Aquarium publishes the same calendar. This is an
+// ADDITIVE caution only: it never changes a pin color, never fails gate(), and
+// never makes a beach read safer. A missed window is the dangerous direction.
+// The mean-synodic anchor can read up to ~0.6 d off the true full moon through the
+// early 2030s; with a hard day>=8 edge that would suppress the caution on the FIRST
+// true swarm day. So we subtract driftMargin from the low edge (and add it to the
+// high edge): the additive caution ERRS EARLY and never misses the first peak day.
+// driftMargin 0.75 validated against real ephemeris 2026–2032 (0 misses; required 0.60).
+const JELLY = {
+  enabled: true,
+  refFullMoonMs: Date.UTC(2026, 4, 31, 8, 45, 0), // 2026-05-31T08:45:00Z (month 0-indexed)
+  synodicMs: 29.530588853 * 86400000,
+  driftMargin: 0.75,                  // days shaved off low edge / added to high edge (anchor-drift slack)
+  regions: { 'South Shore': true, 'West Side': true } // primary + leeward secondary
+};
+function jellyWindow(nowMs){
+  if(!JELLY.enabled) return { days:null, influx:false, peak:false };
+  const t = (typeof nowMs === 'number' && isFinite(nowMs)) ? nowMs : Date.now();
+  const delta = t - JELLY.refFullMoonMs;
+  const days = (((delta % JELLY.synodicMs) + JELLY.synodicMs) % JELLY.synodicMs) / 86400000;
+  const m = JELLY.driftMargin;        // err early: absorb anchor drift at both edges
+  return { days, influx: days >= 8 - m && days <= 12 + m, peak: days >= 8 - m && days <= 10 + m };
+}
+// jellyForBeach — {active, peak, days}. Active only on south/leeward regions in-window.
+function jellyForBeach(b, nowMs){
+  if(!JELLY.enabled || !b || !JELLY.regions[b.r]) return { active:false, peak:false, days:null };
+  const w = jellyWindow(nowMs);
+  return { active: w.influx, peak: w.peak, days: w.days };
+}
+
+// streamQOver(region) — true iff the live USGS daily-max discharge for `region` is at or
+// above that region's brown-water threshold. OR-only safety leg for bw()/FORECAST.brown.
+// Returns FALSE unless the owner has enabled the USGS feed AND a fresh finite reading
+// exists (the proxy supplied _px.q ⇒ window._streamQ) — so a disabled flag, a missing
+// feed, a proxy without q, or a USGS outage all fail to "no extra fire", leaving the
+// airport leg to govern exactly as today. Can only ADD a brown fire.
+function streamQOver(region){
+  if(!FEED_CAL.brown.usgsEnabled) return false;            // owner gate off → airport-only, today's behavior
+  const cfg = FEED_CAL.brown.Q[region]; if(!cfg) return false;
+  const q = window._streamQ; if(!q) return false;          // no live discharge object → no extra fire
+  const key = region === 'North Shore' ? 'north' : region === 'East Side' ? 'east' : null;
+  if(!key) return false;
+  const v = q[key];
+  return Number.isFinite(v) && v >= cfg.cfs;               // real finite reading ≥ threshold only
+}
+// ───────────────────────────────────────────────────────────────────────────────
+// T2 EXPOSURE FLOOR applied: Math.max(0,…) → Math.max(EXPOSURE_FLOOR,…). The floor only
+// RAISES the lower bound of the cosine factor, so eff() is MONOTONIC-UP vs the old form
+// for every (facing, swell) pair. surf here is already SURF_CAL-calibrated upstream.
+function eff(surf,sd,b){const a=(sd-b.facing+360)%360,n=a>180?a-360:a;return surf*Math.max(EXPOSURE_FLOOR,Math.cos(n*Math.PI/180))*(b.reef?.4:1)}
 function oc(wind,wd,b){const a=(wd-b.facing+360)%360,n=a>180?a-360:a;return wind*Math.cos(n*Math.PI/180)}
 function rip(b,c){return cl((C.rip[b.morph]||.7)*Math.min(1.5,(c.per||10)/12)*(c.tt==='falling'?1.2:1)*.6)}
-function bw(b,c){return b.stream&&c.rain>=(b.rain_mm||30)}
+// T4 BROWN: per-beach. Airport leg (c.rain mm×10 vs b.rain_mm — existing units convention, UNCHANGED)
+// OR'd with the region's USGS upland-discharge leg (c.streamQ, set in getCond for TODAY only). UNION
+// can only ADD a fire ⇒ no beach's brown-water sensitivity is ever lowered. The USGS feed is LIVE
+// (usgsEnabled:true); on a USGS/proxy outage c.streamQ is null so the airport leg governs alone.
+function bw(b,c){return b.stream && ( c.rain>=(b.rain_mm||30) || (c.streamQ!=null && c.streamQ>=(FEED_CAL.brown.Q[b.r]?.cfs ?? Infinity)) )}
 function crowd(d,h){const we=d===0||d===6,am=h<10;const k=!we&&am?1:!we?.8:am?.7:h<13?.5:.6;return k}
 function gate(b,c){
   // Hard fail-safe: if live surf is unknown (fetch failure / null marine payload), no
@@ -3136,7 +3228,7 @@ function gate(b,c){
   if(b.black&&!b.intents.length)return 'No Safe Activities';
   return null;
 }
-function kidOK(b,c){return b.kid&&b.sandy&&!c.surf_unknown&&c.es<=C.th.ks&&b.sb<=C.th.ksb&&c.wind<=C.th.kw&&c.tide>=C.th.kt&&!bw(b,c)&&c.rating<=1&&!b.black}
+function kidOK(b,c){return b.kid&&b.sandy&&!c.surf_unknown&&c.es<=C.th.ks&&b.sb<=C.th.ksb&&c.wind<=C.th.kw&&c.tide>=C.th.kt&&!bw(b,c)&&c.rating<=1&&!b.black&&!(c.jelly&&c.jelly.peak)}
 function score(b,c,ints){
   // Warning-only beaches always show, never hidden
   if(b.warning_only)return{status:'warning',reason:b.danger,sc:{},kid:false,top:[]};
@@ -3404,6 +3496,10 @@ function outlookChipsHtml(c){
   if(c.brown){
     chips.push(`<div class="outlook-cond-chip warn"><img src="${COND_ICONS['cond-brown-water']||''}" alt="" class="outlook-cond-ic">Brown water</div>`);
   }
+  if(c.jelly && c.jelly.active){
+    const jLbl = c.jelly.peak ? 'Box jellyfish · peak' : 'Box jellyfish likely';
+    chips.push(`<div class="outlook-cond-chip warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="outlook-cond-ic" style="width:14px;height:14px"><path d="M5 10a7 7 0 0 1 14 0v1H5z"/><path d="M8 11v4M11 11v6M13 11v6M16 11v4"/></svg>${jLbl}</div>`);
+  }
   if(typeof c.wind === 'number'){
     const w = c.wind;
     const k   = w < 14 ? 'cond-light-wind' : 'cond-strong-wind';
@@ -3467,6 +3563,11 @@ async function fetchLive(){
     clearTimeout(timeoutId);
     if(!_px || !_px.w) throw new Error('conditions proxy unavailable');
     const w=_px.w, s=_px.s||null, td=_px.td||null;
+    // T4 BROWN — USGS daily-MAX discharge comes THROUGH the proxy (wx.mjs fetches USGS NWIS
+    // server-side and parses it to _px.q = {north,east}; NO client USGS fetch — owner instruction).
+    // FAIL-SAFE: feed off, proxy without q (old cached response), or per-region null all leave
+    // window._streamQ null ⇒ streamQOver()/bw() add no fire ⇒ airport leg governs exactly as today.
+    window._streamQ = (FEED_CAL.brown.usgsEnabled && _px.q) ? _px.q : null;
     const c = w.current||{};
     // MARINE FAIL-SAFE (Open-Meteo GH#1364 + network faults): a valid surf reading is a
     // finite wave height. null / NaN / missing = FETCH FAILURE — never coerce to 0 ft or the
@@ -3475,12 +3576,16 @@ async function fetchLive(){
     const surfValid = !!(s && s.current && Number.isFinite(s.current.wave_height));
     // ?? (nullish) instead of || so a legitimate 0 (e.g. UV at night) isn't replaced by SNAP.
     LIVE = {
-      wind: Math.round(c.wind_speed_10m ?? SNAP.wind),
+      // T3 WIND_CAL: +addMph on the REAL-number arm only; SNAP.wind failure path stays UNcalibrated
+      // (preserves the ?? sentinel). corrected = raw + 4 ⇒ MONOTONIC-UP. [modeled, FEED_CAL.wind]
+      wind: Math.round(typeof c.wind_speed_10m === 'number' ? c.wind_speed_10m + FEED_CAL.wind.addMph : SNAP.wind),
       wd: Math.round(c.wind_direction_10m ?? SNAP.wd),
       cloud: Math.round(c.cloud_cover ?? SNAP.cloud),
       uv: Math.round(c.uv_index ?? SNAP.uv),
       rain: Math.round((c.precipitation ?? 0)*10),
-      surf: surfValid ? +s.current.wave_height.toFixed(1) : null,
+      // T1 SURF_CAL on the REAL-surf arm only (surfValid). max(raw, raw*factor) ⇒ MONOTONIC-UP.
+      // The `: null` fetch-failure arm is untouched (carries surf unknown). [modeled, FEED_CAL.surf]
+      surf: surfValid ? +Math.max(s.current.wave_height, s.current.wave_height*FEED_CAL.surf.factor).toFixed(1) : null,
       surf_unknown: !surfValid,
       swell_dir: surfValid ? Math.round(s.current.wave_direction ?? 0) : null,
       period: surfValid ? Math.round(s.current.wave_period ?? 0) : null,
@@ -3570,7 +3675,9 @@ async function fetchLive(){
         // finite and kept as-is.) The old `|| SNAP.surf` quietly turned both into calm surf.
         const surfRaw = (sd && sd.wave_height_max) ? sd.wave_height_max[i] : null;
         const surfDayValid = Number.isFinite(surfRaw);
-        const surf = surfDayValid ? +surfRaw.toFixed(1) : SURF_UNAVAILABLE;
+        // T1 SURF_CAL on the REAL-surf arm only (surfDayValid). max(raw, raw*factor) ⇒ MONOTONIC-UP.
+        // The SURF_UNAVAILABLE=99 sentinel arm is untouched. [modeled, FEED_CAL.surf]
+        const surf = surfDayValid ? +Math.max(surfRaw, surfRaw*FEED_CAL.surf.factor).toFixed(1) : SURF_UNAVAILABLE;
         const precip = wd.precipitation_sum ? wd.precipitation_sum[i] || 0 : 0;
         return {
           date: dateStr,
@@ -3583,13 +3690,21 @@ async function fetchLive(){
           surf_unknown: !surfDayValid,
           swell_dir: sd && sd.wave_direction_dominant ? Math.round(sd.wave_direction_dominant[i] || SNAP.swell_dir) : SNAP.swell_dir,
           period: sd && sd.wave_period_max ? Math.round(sd.wave_period_max[i] || SNAP.period) : SNAP.period,
-          wind: Math.round(wd.wind_speed_10m_max ? wd.wind_speed_10m_max[i] : SNAP.wind),
+          // T3 WIND_CAL: +addMph on the REAL daily-max arm only; SNAP.wind fallback stays UNcalibrated.
+          // corrected = raw + 4 ⇒ MONOTONIC-UP. (daily-max already carries some gust signal so +4 is
+          // slightly conservative here = safe direction.) [modeled, FEED_CAL.wind]
+          wind: Math.round(wd.wind_speed_10m_max ? wd.wind_speed_10m_max[i] + FEED_CAL.wind.addMph : SNAP.wind),
           cloud: Math.round(wd.cloud_cover_mean ? wd.cloud_cover_mean[i] : SNAP.cloud),
           precip: precip,
           precip_chance: wd.precipitation_probability_max ? (wd.precipitation_probability_max[i] ?? 0) : 0,
           uv: Math.round(wd.uv_index_max ? wd.uv_index_max[i] : SNAP.uv),
           weatherCode: wd.weather_code ? wd.weather_code[i] : 0,
-          brown: precip >= 20 // brown water risk only on genuinely heavy rain days (≥20 mm / ~0.8 in daily)
+          // T4 BROWN: airport precip (daily mm, true units) OR'd with the USGS upland-discharge leg
+          // for TODAY only (gauge is real-time; future-day Q is unknown so future days stay precip-only).
+          // UNION can only ADD a fire ⇒ recall monotonic non-decreasing. The USGS feed is LIVE
+          // (usgsEnabled:true); the Q leg fires only when streamQOver() sees a fresh reading over threshold.
+          // FAIL-SAFE: USGS outage / no proxy q ⇒ _streamQ null ⇒ streamQOver false ⇒ airport leg governs alone.
+          brown: precip >= 20 || (isToday && (streamQOver('North Shore') || streamQOver('East Side'))) // brown water risk on heavy rain (≥20 mm / ~0.8 in daily) OR today's upland discharge over threshold
         };
       });
       if(window._debugMode) console.log('FORECAST loaded',FORECAST);
@@ -3625,12 +3740,24 @@ async function getCond(b){
     golden, dow:new Date().getDay(), h
   };
   c.surf_unknown = surfUnknown;
+  // T4 BROWN: per-beach live upland discharge for the OR leg in bw(), TODAY only. The USGS feed is
+  // LIVE (usgsEnabled:true); c.streamQ carries a fresh reading whenever the /api/wx proxy supplied
+  // _px.q. FAIL-SAFE: a USGS outage / proxy without q leaves window._streamQ null/absent
+  // ⇒ streamQ null ⇒ bw()'s discharge arm adds nothing ⇒ the airport leg governs alone.
+  // MUST be set BEFORE c.brown below — bw(b,c) reads c.streamQ for its discharge OR-leg.
+  c.streamQ = (FEED_CAL.brown.usgsEnabled && window._streamQ)
+    ? (b.r === 'North Shore' ? window._streamQ.north : (b.r === 'East Side' ? window._streamQ.east : null))
+    : null;
   // Brown-water flag. bw(b,c) reads c.rain (mm×10, app convention) against the
   // beach's stream threshold — identical to the gate()/kidOK() callsites. This
   // was previously never set on the conditions object, so getRegionConditions()'s
   // `brown: conds.some(c=>c.brown)` always read undefined → false, leaving the
   // brown-water Stay-Close/outlook trigger dead. Setting it here revives it.
   c.brown = bw(b, c);
+  // Box-jellyfish lunar advisory — additive caution on south/leeward shores only.
+  // Never changes a pin color, never fails gate(); only feeds the chip + advisory banner
+  // and the kidOK() peak-days term. Outage-irrelevant (lunar math, no feed dependency).
+  c.jelly = jellyForBeach(b);
   return c;
 }
 
@@ -5445,6 +5572,17 @@ function openSheet(id){
         <span>${c.surf_unknown ? '<b>Surf data unavailable</b> · no lifeguard on duty. Treat conditions as unknown and use extra caution.' : '<b>Big surf today</b> · ' + _surfFt.toFixed(1) + ' ft and no lifeguard on duty. Strong currents likely; experienced surfers/swimmers only.'}</span>
       </div>`
     : '';
+  // BOX-JELLYFISH ADVISORY banner — south/leeward shores during the lunar window.
+  // Amber caution styling (matches _bigSurfNotice). Additive only; never changes the
+  // pin color or the verdict. Peak days (8–10 after the full moon) get firmer wording.
+  const _jellyNotice = (c && c.jelly && c.jelly.active)
+    ? `<div style="margin:10px 0 4px;padding:10px 12px;background:#fef3c7;border-left:3px solid #d97706;border-radius:8px;color:#78530a;font-size:13px;line-height:1.45;display:flex;align-items:flex-start;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M5 10a7 7 0 0 1 14 0v1H5z"/><path d="M8 11v4M11 11v6M13 11v6M16 11v4"/></svg>
+        <span>${c.jelly.peak
+          ? `<b>Box jellyfish, peak days.</b> 8 to 10 days after the full moon is when most stings happen on south and west shores. The stings hurt and can sometimes be serious. Cover up, swim where there's a lifeguard, and ask them about jellyfish first.`
+          : `<b>Box jellyfish likely today.</b> They move close to shore on south-facing beaches about 9 days after the full moon. Stings are common and painful, so cover exposed skin and check with a lifeguard before you swim.`}</span>
+      </div>`
+    : '';
   const pois=b.pois.map(poiCard).join('');
   const ps=pois?`<div class="slbl">Nearby</div><div class="prow">${pois}</div>`:'';
   const channels=(b.channels||[]).map(channelCard).join('');
@@ -5484,6 +5622,7 @@ function openSheet(id){
     <div class="dir-pill-row"><a class="dir-pill" href="${murl}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Get Directions</a></div>
     ${weatherBar(c)}
     ${_bigSurfNotice}
+    ${_jellyNotice}
     ${(typeof outlookChipsHtml === 'function') ? outlookChipsHtml(c) : ''}
     ${condIcons(c,b)}
     ${parkRow}
