@@ -27,8 +27,12 @@ const USGS = 'https://waterservices.usgs.gov/nwis/iv/'
 const LIVE_CUR = 'temperature_2m,relative_humidity_2m,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,uv_index';
 const LIVE_HRLY = 'precipitation,precipitation_probability';
 const LIVE_DAILY = 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,uv_index_max,cloud_cover_mean,weather_code,sunrise,sunset';
-const MAR_CUR = 'wave_height,wave_direction,wave_period';
-const MAR_DAILY = 'wave_height_max,wave_direction_dominant,wave_period_max';
+// SOUTH-SWELL FIX: forward the sea-state PARTITIONS (swell + wind-wave), not just the
+// collapsed total/dominant. The client's eff() needs the head-on swell partition to credit a
+// south-facing beach (the dominant total direction is the transverse trade wind-wave in summer).
+// Legacy total fields stay FIRST/unchanged; absent partitions are fail-safe on the client.
+const MAR_CUR = 'wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_period,swell_wave_direction,wind_wave_height,wind_wave_period,wind_wave_direction';
+const MAR_DAILY = 'wave_height_max,wave_direction_dominant,wave_period_max,swell_wave_height_max,swell_wave_period_max,swell_wave_direction_dominant,wind_wave_height_max,wind_wave_period_max,wind_wave_direction_dominant';
 const SIDE_CUR = 'temperature_2m,wind_speed_10m,uv_index';
 const SIDE_DAILY = 'precipitation_probability_max';
 

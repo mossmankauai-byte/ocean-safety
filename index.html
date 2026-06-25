@@ -3205,7 +3205,46 @@ function streamQOver(region){
 // T2 EXPOSURE FLOOR applied: Math.max(0,…) → Math.max(EXPOSURE_FLOOR,…). The floor only
 // RAISES the lower bound of the cosine factor, so eff() is MONOTONIC-UP vs the old form
 // for every (facing, swell) pair. surf here is already SURF_CAL-calibrated upstream.
-function eff(surf,sd,b){const a=(sd-b.facing+360)%360,n=a>180?a-360:a;return surf*Math.max(EXPOSURE_FLOOR,Math.cos(n*Math.PI/180))*(b.reef?.4:1)}
+// ── SOUTH-SWELL FIX (staged 2026-06-24; see weather-validation/MAG-MEMO.md) ──────────
+// proj(dir,b): the legacy exposure law — floored cosine of (swell vs facing) × static reef
+// damp. Factored out UNCHANGED so eff() reuses it per sea-state partition.
+function proj(dir,b){const a=(dir-b.facing+360)%360,n=a>180?a-360:a;return Math.max(EXPOSURE_FLOOR,Math.cos(n*Math.PI/180))*(b.reef?.4:1)}
+// hCal(h): calibrate a partition height the SAME monotonic-up way as the legacy total (T1 surf
+// factor) — max(h, h×factor) can only hold or raise.
+function hCal(h){return Math.max(h,h*FEED_CAL.surf.factor)}
+// REEF RELAXATION (Bug 2). A head-on, long-period SOUTH swell wraps onto a south-facing reef far
+// more than the blunt static 0.4 damp allows (Poʻipū read ~0.7 ft on a real 3–5 ft day). Relax
+// 0.4 → up to 1.0, period-ramped, ONLY when BOTH a south-sector swell SOURCE (swLo–swHi) AND a
+// south FACING (faceLo–faceHi) apply — so winter NW reef breaks (wrong facing AND wrong source)
+// are excluded and stay at 0.4. reefFactor ∈ [0.4,1.0] ALWAYS ⇒ never below static 0.4 ⇒
+// monotonic-up by construction. Constants are STAGED [assumption] pending the NWS-SRF backtest.
+const REEF={base:.4,max:1,T0:8,T1:14,swLo:140,swHi:235,faceLo:135,faceHi:225};
+function reefFactor(dir,T,cosOn,b){
+  if(!b.reef)return 1;
+  if(!(cosOn>0)||!Number.isFinite(T)||dir<REEF.swLo||dir>REEF.swHi||b.facing<REEF.faceLo||b.facing>REEF.faceHi)return REEF.base;
+  const r=Math.max(0,Math.min(1,(T-REEF.T0)/(REEF.T1-REEF.T0)));
+  return REEF.base+r*(REEF.max-REEF.base);
+}
+// eff(surf,sd,b,pt): effective on-beach surf. STARTS at the legacy value surf×proj(dominant)
+// — byte-identical to the old eff — then credits each ON-FACING sea-state PARTITION (Bug 1: the
+// single dominant-direction collapse discarded the head-on south swell the model already has).
+// Swell branch uses reefFactor (Bug 2); wind-wave branch keeps static 0.4 via proj(). Every step
+// is Math.max(v, non-negative) ⇒ eff_new ≥ eff_legacy for ALL inputs (monotonic-up: can never
+// under-warn vs today, can never lower a reading). pt is OPTIONAL: absent (SNAP/offline/old cached
+// proxy without partitions) ⇒ branches skipped ⇒ returns exactly the legacy value. NO period
+// amplifier on top — that rejected knob tripped winter 'Surf Too High' (see MAG-MEMO).
+function eff(surf,sd,b,pt){
+  let v=surf*proj(sd,b);
+  if(pt){
+    if(Number.isFinite(pt.sw_h)&&Number.isFinite(pt.sw_d)){
+      const a=(pt.sw_d-b.facing+360)%360,n=a>180?a-360:a,cosS=Math.cos(n*Math.PI/180);
+      v=Math.max(v,hCal(pt.sw_h)*Math.max(EXPOSURE_FLOOR,cosS)*reefFactor(pt.sw_d,pt.sw_t,cosS,b));
+    }
+    if(Number.isFinite(pt.ww_h)&&Number.isFinite(pt.ww_d))
+      v=Math.max(v,hCal(pt.ww_h)*proj(pt.ww_d,b));
+  }
+  return v;
+}
 function oc(wind,wd,b){const a=(wd-b.facing+360)%360,n=a>180?a-360:a;return wind*Math.cos(n*Math.PI/180)}
 function rip(b,c){return cl((C.rip[b.morph]||.7)*Math.min(1.5,(c.per||10)/12)*(c.tt==='falling'?1.2:1)*.6)}
 // T4 BROWN: per-beach. Airport leg (c.rain mm×10 vs b.rain_mm — existing units convention, UNCHANGED)
@@ -3589,6 +3628,15 @@ async function fetchLive(){
       surf_unknown: !surfValid,
       swell_dir: surfValid ? Math.round(s.current.wave_direction ?? 0) : null,
       period: surfValid ? Math.round(s.current.wave_period ?? 0) : null,
+      // SOUTH-SWELL FIX — sea-state PARTITIONS for eff()'s directional credit. Null-guarded: if
+      // wx.mjs hasn't been updated to forward these (old cached proxy), each is null and eff()
+      // falls back to the legacy dominant-direction term. SNAP/offline carries none ⇒ legacy.
+      sw_h: surfValid && Number.isFinite(s.current.swell_wave_height) ? s.current.swell_wave_height : null,
+      sw_t: surfValid && Number.isFinite(s.current.swell_wave_period) ? s.current.swell_wave_period : null,
+      sw_d: surfValid && Number.isFinite(s.current.swell_wave_direction) ? s.current.swell_wave_direction : null,
+      ww_h: surfValid && Number.isFinite(s.current.wind_wave_height) ? s.current.wind_wave_height : null,
+      ww_t: surfValid && Number.isFinite(s.current.wind_wave_period) ? s.current.wind_wave_period : null,
+      ww_d: surfValid && Number.isFinite(s.current.wind_wave_direction) ? s.current.wind_wave_direction : null,
       tide: SNAP.tide, tt: SNAP.tt
     };
     if(typeof c.temperature_2m === 'number') window._airTemp = c.temperature_2m;
@@ -3732,7 +3780,7 @@ async function getCond(b){
   // treated as a fetch failure: surf reads "unavailable", never a current calm "go".
   const surfUnknown = !!(D && D.surf_unknown) || !Number.isFinite(D.surf) || surfDataStale();
   const c = {
-    es: surfUnknown ? SURF_UNAVAILABLE : eff(D.surf,D.swell_dir,b),
+    es: surfUnknown ? SURF_UNAVAILABLE : eff(D.surf,D.swell_dir,b,D),
     oc:oc(D.wind,D.wd,b),
     tide:D.tide, per:D.period, tt:D.tt,
     wind:D.wind, cloud:D.cloud, uv:uvDay,
