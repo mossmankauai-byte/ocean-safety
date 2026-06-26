@@ -6524,7 +6524,9 @@ function renderSwellLayer(){
       +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.5}'
       +'.os-swell-drift{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 28px,rgba(255,255,255,.6) 28px 33px,rgba(255,255,255,.22) 33px 46px);animation:os_swelldrift 2.6s linear infinite;will-change:transform}'
       +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
-      +'#os-swell-badge{position:absolute;left:10px;bottom:88px;z-index:5;display:flex;align-items:center;gap:6px;background:rgba(8,40,50,.74);color:#eaf6f8;font:600 11.5px -apple-system,Arial,sans-serif;padding:5px 9px;border-radius:20px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none}';
+      +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
+      +'#os-swell-badge:hover{transform:scale(1.05)}'
+      +'.sw-ico{display:block;width:24px;height:24px;overflow:hidden;color:#eaf6f8}.sw-ico svg{display:block;width:24px;height:24px;overflow:hidden}';
     document.head.appendChild(st);
   }
   if(!document.getElementById('os-swell-svg')){
@@ -6545,7 +6547,10 @@ function renderSwellLayer(){
     const dirs=['N','NE','E','SE','S','SW','W','NW'];
     const cp=dirs[Math.round((s.sd%360)/45)%8];
     const on=!ov.classList.contains('off');
-    badge.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" style="transform:rotate('+((s.sd+180)%360)+'deg)" fill="none" stroke="#eaf6f8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg>Swell · from '+cp+' '+Math.round(s.sd)+'°'+(s.per?(' · '+s.per+'s'):'')+(on?'':' · tap to show');
+    badge.title='Swell from '+cp+' '+Math.round(s.sd)+'°'+(s.per?(' · '+s.per+'s'):'');
+    badge.setAttribute('aria-label',badge.title+(on?' · tap to hide drift':' · tap to show drift'));
+    badge.style.opacity=on?'1':'.5';
+    badge.innerHTML='<span class="sw-ico"><svg viewBox="0 0 24 18"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><animateTransform attributeName="transform" type="translate" from="0 0" to="-12 0" dur="2s" repeatCount="indefinite"/><path d="M-12 6 q3 -2.4 6 0 t6 0 t6 0 t6 0 t6 0 t6 0 t6 0 t6 0"/><path d="M-12 12 q3 -2.4 6 0 t6 0 t6 0 t6 0 t6 0 t6 0 t6 0 t6 0" opacity=".55"/></g></svg></span>';
   };
   let ov=document.getElementById('os-swell-overlay');
   if(!ov){
@@ -6553,7 +6558,7 @@ function renderSwellLayer(){
     ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><div class="os-swell-drift"></div></div></div>';
     const badge=document.createElement('div'); badge.id='os-swell-badge';
     badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
-    ov.appendChild(badge);
+    (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
     map.getContainer().appendChild(ov);
     try{ if(localStorage.getItem('os_swell_off')==='1') ov.classList.add('off'); }catch(e){}
     document.addEventListener('visibilitychange',()=>{ ov.classList.toggle('paused', document.hidden); });
@@ -6566,8 +6571,9 @@ function renderSwellLayer(){
   window._swellState={sd,per};
   // Only show the wave layer on beach-context tabs (Beaches + all its subtabs, and Family).
   const beachTab=(window._activeTab==='beaches'||window._activeTab==='acts');
-  if(sd===null||unknown||!beachTab){ ov.style.display='none'; return; }
-  ov.style.display='';
+  var _b=document.getElementById('os-swell-badge');
+  if(sd===null||unknown||!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; return; }
+  ov.style.display=''; if(_b)_b.style.display='flex';
   ov.querySelector('.os-swell-rot').style.transform='rotate('+sd+'deg)';
   updateClip();
   paint();
