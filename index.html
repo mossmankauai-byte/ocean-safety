@@ -6570,21 +6570,34 @@ const KAUAI_OUTLINE=[[22.0286,-159.788],[21.9587,-159.6909],[21.9415,-159.6539],
 // at this scale), drawn in a Leaflet pane BELOW the markers so the safety pins stay on top. It shows
 // direction + period only — NOT a measured per-spot wave field. CSS-only (0 KB), GPU-composited,
 // reduced-motion-safe, auto-paused off-tab. Tap the badge to hide (persisted). rotate(swell_dir) makes
-// the drift travel toward (swell_dir+180), i.e. the way the waves move.
+// rolling toward shore — a perspective horizon at the top, crest lines drawn as SVG <path>s.
+const _sw3={raf:0,t0:0,on:false};
+function _sw3Draw(frac){
+  const svg=document.querySelector('#os-swell-overlay .os-swell-3d'); if(!svg||typeof map==='undefined'||!map) return;
+  const sz=map.getSize(), W=sz.x, H=sz.y; if(W<2||H<2) return;
+  const N=16, yH=H*0.14, k=0.55, seg=Math.max(46,W/5);
+  if(svg.childElementCount!==N){ let h=''; for(let j=0;j<N;j++) h+='<path class="os-wf"></path>'; svg.innerHTML=h; }
+  const ch=svg.children;
+  for(let i=0;i<N;i++){
+    const d=i+1-frac, near=1/(1+d*k), y=yH+(H-yH)*near, amp=2+10*near;       // near=1 at shore (bottom) -> ~0 at horizon
+    let dd='M -12 '+y.toFixed(1);
+    for(let x=-12;x<W+12;x+=seg){ dd+=' Q '+(x+seg/2).toFixed(1)+' '+(y-amp).toFixed(1)+' '+(x+seg).toFixed(1)+' '+y.toFixed(1); }
+    const el=ch[i]; el.setAttribute('d',dd); el.setAttribute('stroke-width',(0.5+near*2.6).toFixed(2)); el.setAttribute('opacity',(0.08+0.6*near).toFixed(2));
+  }
+}
+function _sw3Tick(ts){ if(!_sw3.on) return; if(!_sw3.t0) _sw3.t0=ts; _sw3Draw(((ts-_sw3.t0)/2800)%1); _sw3.raf=requestAnimationFrame(_sw3Tick); }
+function _sw3Start(){ if(_sw3.on) return; _sw3.on=true; _sw3.t0=0; _sw3.raf=requestAnimationFrame(_sw3Tick); }
+function _sw3Stop(){ _sw3.on=false; if(_sw3.raf) cancelAnimationFrame(_sw3.raf); _sw3.raf=0; }
 function renderSwellLayer(){
   try{
   if(typeof map==='undefined' || !map) return;
   if(!document.getElementById('os-swell-css')){
     const st=document.createElement('style'); st.id='os-swell-css';
-    st.textContent='@keyframes os_swelldrift{from{transform:translateY(-54px)}to{transform:translateY(0)}}'
-      +'#os-swell-overlay{position:absolute;top:0;left:0;overflow:hidden;pointer-events:none}'
+    st.textContent='#os-swell-overlay{position:absolute;top:0;left:0;overflow:hidden;pointer-events:none}'
       +'#os-swell-overlay.off .os-swell-clip{display:none}'
-      +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
       +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
-      +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.4}'
-      +'.os-swell-drift{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.6) 3px,transparent 3px),linear-gradient(90deg,rgba(255,255,255,.6) 3px,transparent 3px);background-size:54px 54px;animation:os_swelldrift 1.3s linear infinite;will-change:transform}'
-      +'.os-swell-arrows{position:absolute;inset:0;width:100%;height:100%;opacity:.82}.os-arr{fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}'
-      +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
+      +'.os-swell-3d{position:absolute;inset:0;width:100%;height:100%;opacity:.72}'
+      +'.os-wf{fill:none;stroke:#fff;stroke-linecap:round}'
       +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
       +'#os-swell-badge:hover{transform:scale(1.05)}'
       +'.sw-ico{display:block;width:24px;height:24px;overflow:hidden;color:#eaf6f8}.sw-ico svg{display:block;width:24px;height:24px;overflow:hidden}';
@@ -6602,24 +6615,10 @@ function renderSwellLayer(){
     const pts=KAUAI_OUTLINE.map(pt=>map.latLngToContainerPoint(pt));
     const isl=pts.map((c,i)=>(i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1)).join(' ')+' Z';
     p.setAttribute('d', rect+' '+isl);
-    // Directional swell arrows: a grid of arrows in container coords pointing toward the swell-TRAVEL
-    // bearing (swell_dir+180). Same proven render path as the #14 rings — SVG <path> with viewBox+size
-    // set here — so it actually paints. Recomputed on pan/zoom; clipped to ocean by .os-swell-clip.
-    const svgA=document.querySelector('#os-swell-overlay .os-swell-arrows');
-    const ap=svgA?svgA.querySelector('.os-arr'):null;
-    if(svgA&&ap){
-      svgA.setAttribute('viewBox','0 0 '+sz.x+' '+sz.y); svgA.setAttribute('width',sz.x); svgA.setAttribute('height',sz.y);
-      const ss=window._swellState||{}; const B=Number.isFinite(ss.sd)?(ss.sd+180):0;
-      const r=B*Math.PI/180, ux=Math.sin(r), uy=-Math.cos(r), pxx=-uy, pyy=ux;
-      const L1=15, hd=9, step=92; let d='';
-      for(let gx=-sz.x*0.4; gx<sz.x*1.4; gx+=step) for(let gy=-sz.y*0.4; gy<sz.y*1.4; gy+=step){
-        const tx=gx+ux*L1, ty=gy+uy*L1, bx=gx-ux*L1, by=gy-uy*L1;
-        const lx=tx-ux*hd+pxx*hd*0.7, ly=ty-uy*hd+pyy*hd*0.7, rx=tx-ux*hd-pxx*hd*0.7, ry=ty-uy*hd-pyy*hd*0.7;
-        d+='M'+bx.toFixed(1)+' '+by.toFixed(1)+'L'+tx.toFixed(1)+' '+ty.toFixed(1)
-          +'M'+lx.toFixed(1)+' '+ly.toFixed(1)+'L'+tx.toFixed(1)+' '+ty.toFixed(1)+'L'+rx.toFixed(1)+' '+ry.toFixed(1);
-      }
-      ap.setAttribute('d', d);
-    }
+    // 3D-horizon waves SVG: set viewBox + width + height to the viewport — the proven render path
+    // (same as the #14 rings) so the rAF-drawn crest <path>s actually paint. Clipped to ocean.
+    const svg3=document.querySelector('#os-swell-overlay .os-swell-3d');
+    if(svg3){ svg3.setAttribute('viewBox','0 0 '+sz.x+' '+sz.y); svg3.setAttribute('width',sz.x); svg3.setAttribute('height',sz.y); }
     // Overlay lives in a Leaflet pane (z 450, below the marker pane) so beach pins paint over the
     // waves. The pane pans with the map, so size the overlay to the viewport and counter the
     // map-pane translate to keep the rings viewport-fixed (paths are in container coords).
@@ -6643,15 +6642,15 @@ function renderSwellLayer(){
   let ov=document.getElementById('os-swell-overlay');
   if(!ov){
     ov=document.createElement('div'); ov.id='os-swell-overlay';
-    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><div class="os-swell-drift"></div></div><svg class="os-swell-arrows" aria-hidden="true"><path class="os-arr"></path></svg></div>';
+    ov.innerHTML='<div class="os-swell-clip"><svg class="os-swell-3d" aria-hidden="true"></svg></div>';
     const badge=document.createElement('div'); badge.id='os-swell-badge';
-    badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
+    badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} if(ov.classList.contains('off')){window._sw3run=false;_sw3Stop();}else{window._sw3run=true;_sw3Start();} paint(); });
     (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
     // Custom pane below the marker pane (z 600) so beach pins paint OVER the waves.
     if(!map.getPane('swell')){ map.createPane('swell'); const _sp=map.getPane('swell'); _sp.style.zIndex='450'; _sp.style.pointerEvents='none'; }
     map.getPane('swell').appendChild(ov);
     try{ if(localStorage.getItem('os_swell_off')==='1') ov.classList.add('off'); }catch(e){}
-    document.addEventListener('visibilitychange',()=>{ ov.classList.toggle('paused', document.hidden); });
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden){_sw3Stop();}else if(window._sw3run){_sw3Start();} });
     map.on('move zoom moveend zoomend resize viewreset', updateClip);
   }
   const D=(typeof LIVE!=='undefined'&&LIVE)?LIVE:null;
@@ -6664,10 +6663,12 @@ function renderSwellLayer(){
   const _at=window._activeTab, _sub=window._activeSub;
   const beachTab=(_at==='beaches')||(_at==='acts'&&(_sub==='beaches'||_sub==='hazards'));
   var _b=document.getElementById('os-swell-badge');
-  if(sd===null||unknown||!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; return; }
+  if(sd===null||unknown||!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; window._sw3run=false; _sw3Stop(); return; }
   ov.style.display=''; if(_b)_b.style.display='flex';
-  ov.querySelector('.os-swell-rot').style.transform='rotate('+sd+'deg)';
   updateClip();
+  if(ov.classList.contains('off')){ window._sw3run=false; _sw3Stop(); }
+  else if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches){ window._sw3run=false; _sw3Stop(); _sw3Draw(0); }
+  else { window._sw3run=true; _sw3Start(); }
   paint();
   }catch(e){}
 }
