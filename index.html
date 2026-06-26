@@ -1519,6 +1519,15 @@ a{text-decoration:none;color:inherit}
 #locateBtn:hover{transform:scale(1.05)}
 #locateBtn svg{width:22px;height:22px}
 #locateBtn.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
+/* Family tab: the top map controls (status pill, satellite toggle, wave-squares badge)
+   sat too high and crowded the header — nudge the cluster down a touch on Family only.
+   Beaches/other tabs keep their original positions. */
+body[data-tab="acts"] .stbadge{top:40px}
+body[data-tab="acts"] .kidbadge{top:70px}
+body[data-tab="acts"] #satToggle{top:188px}
+body[data-tab="acts"] #os-swell-badge{top:188px}
+body[data-tab="acts"] #locateBtn{top:238px}
+body[data-tab="acts"] .saved-chip{top:243px}
 #locateBtn.searching svg{animation:locSpin 1.2s linear infinite}
 @keyframes locSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
@@ -6223,6 +6232,7 @@ function wireTabs(){
       document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.remove('active'));
       el.classList.add('active');
       window._activeTab = tabName;
+      document.body.dataset.tab = tabName;   // drives per-tab CSS (e.g. Family control offsets)
       if(window.OSA) OSA.tab(tabName);
       buildSubtabs(tabName);
       if(typeof updateLiveNow === 'function') updateLiveNow();
@@ -6256,6 +6266,7 @@ function wireTabs(){
   });
   // Initialize with Family subtabs since boot opens on the Family tab
   buildSubtabs('acts');
+  document.body.dataset.tab = window._activeTab || 'acts';   // seed per-tab CSS on boot
   // a11y: set initial aria-selected from the boot-active tab
   document.querySelectorAll('#tabs .tab').forEach(t=>t.setAttribute('aria-selected', t.classList.contains('active')?'true':'false'));
   // Analytics: start timing the initial (boot) tab view
@@ -6554,13 +6565,13 @@ function renderSwellLayer(){
   if(typeof map==='undefined' || !map) return;
   if(!document.getElementById('os-swell-css')){
     const st=document.createElement('style'); st.id='os-swell-css';
-    st.textContent='@keyframes os_swelldrift{from{transform:translateY(-46px)}to{transform:translateY(0)}}'
+    st.textContent='@keyframes os_swelldrift{from{transform:translateY(-54px)}to{transform:translateY(0)}}'
       +'#os-swell-overlay{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:401}'
       +'#os-swell-overlay.off .os-swell-clip{display:none}'
       +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
       +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
       +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.5}'
-      +'.os-swell-drift{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 28px,rgba(255,255,255,.6) 28px 33px,rgba(255,255,255,.22) 33px 46px);animation:os_swelldrift 2.6s linear infinite;will-change:transform}'
+      +'.os-swell-drift{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.6) 3px,transparent 3px),linear-gradient(90deg,rgba(255,255,255,.6) 3px,transparent 3px);background-size:54px 54px;animation:os_swelldrift 1.3s linear infinite;will-change:transform}'
       +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
       +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
       +'#os-swell-badge:hover{transform:scale(1.05)}'
