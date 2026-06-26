@@ -6566,14 +6566,14 @@ function renderSwellLayer(){
   if(typeof map==='undefined' || !map) return;
   if(!document.getElementById('os-swell-css')){
     const st=document.createElement('style'); st.id='os-swell-css';
-    st.textContent='@keyframes os_swellflow{to{stroke-dashoffset:-80}}'
+    st.textContent='@keyframes os_swelldrift{from{background-position:0 0}to{background-position:0 26px}}'
       +'#os-swell-overlay{position:absolute;top:0;left:0;overflow:hidden;pointer-events:none}'
       +'#os-swell-overlay.off .os-swell-clip{display:none}'
-      +'#os-swell-overlay.paused .os-swell-flow path{animation-play-state:paused}'
+      +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
       +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
-      +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.62}'
-      +'.os-swell-flow{position:absolute;inset:0;width:100%;height:100%}.os-swell-flow path{fill:none;stroke:#fff;stroke-width:2.8;stroke-linecap:round;stroke-dasharray:40 44;animation:os_swellflow 2.4s linear infinite}'
-      +'@media (prefers-reduced-motion:reduce){.os-swell-flow path{animation:none}}'
+      +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.62;perspective:140px;perspective-origin:50% 0}'
+      +'.os-swell-drift{position:absolute;left:-50%;top:-12%;width:200%;height:220%;transform:rotateX(66deg);transform-origin:50% 0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.6) 0 2px,transparent 2px 26px);animation:os_swelldrift 1.4s linear infinite;will-change:background-position;backface-visibility:hidden}'
+      +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
       +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
       +'#os-swell-badge:hover{transform:scale(1.05)}'
       +'.sw-ico{display:block;width:24px;height:24px;overflow:hidden;color:#eaf6f8}.sw-ico svg{display:block;width:24px;height:24px;overflow:hidden}';
@@ -6613,8 +6613,7 @@ function renderSwellLayer(){
   let ov=document.getElementById('os-swell-overlay');
   if(!ov){
     ov=document.createElement('div'); ov.id='os-swell-overlay';
-    var _fl='';for(var _x=18;_x<=300;_x+=34){_fl+='<path d="M'+_x+' -20 C '+(_x+15)+' 55,'+(_x-15)+' 130,'+_x+' 205 C '+(_x+15)+' 270,'+(_x-15)+' 330,'+_x+' 380"/>';}
-    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><svg class="os-swell-flow" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+_fl+'</svg></div></div>';
+    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><div class="os-swell-drift"></div></div></div>';
     const badge=document.createElement('div'); badge.id='os-swell-badge';
     badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
     (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
