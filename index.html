@@ -1514,6 +1514,10 @@ a{text-decoration:none;color:inherit}
 #satToggle{position:absolute;top:160px;right:12px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#0f4c5c;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
 #satToggle:hover{transform:scale(1.05)}
 #satToggle svg{width:22px;height:22px}
+#rainToggle{position:absolute;top:160px;right:112px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#0f4c5c;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
+#rainToggle:hover{transform:scale(1.05)}
+#rainToggle svg{width:22px;height:22px}
+#rainToggle.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
 
 #locateBtn{position:absolute;top:210px;right:12px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#0f4c5c;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
 #locateBtn:hover{transform:scale(1.05)}
@@ -1525,6 +1529,7 @@ a{text-decoration:none;color:inherit}
 body[data-tab="acts"] .stbadge,body[data-tab="beaches"] .stbadge{top:76px}
 body[data-tab="acts"] .kidbadge,body[data-tab="beaches"] .kidbadge{top:108px}
 body[data-tab="acts"] #satToggle{top:188px}
+body[data-tab="acts"] #rainToggle{top:188px}
 body[data-tab="acts"] #os-swell-badge{top:188px}
 body[data-tab="acts"] #locateBtn{top:238px}
 body[data-tab="acts"] .saved-chip{top:243px}
@@ -1861,6 +1866,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
   <span>Loading live conditions…</span>
 </div>
 <button id="satToggle" onclick="toggleSat()" aria-label="Toggle satellite view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
+<button id="rainToggle" onclick="toggleRain()" aria-label="Toggle rain radar" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 0 1-.5-7.97 5.5 5.5 0 0 1 10.7-1.3A4.5 4.5 0 0 1 17 16"/><line x1="8" y1="18.5" x2="7.2" y2="21"/><line x1="12" y1="18.5" x2="11.2" y2="22"/><line x1="16" y1="18.5" x2="15.2" y2="21"/></svg></button>
 <button id="savedChip" class="saved-chip" onclick="openSavedSheet()" aria-label="View saved">
   <svg viewBox="0 0 24 24" fill="#c9a84c" stroke="#c9a84c" stroke-width="1.5" stroke-linejoin="round" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
   <span class="saved-chip-count" id="savedCount">0</span>
@@ -5843,6 +5849,41 @@ function toggleSat(){
     window._satTile.addTo(map);
     window._isSat = true;
     document.getElementById('satToggle').classList.add('on');
+  }
+}
+
+// RAIN RADAR heat-map overlay — RainViewer (free NEXRAD radar, no API key). Colorized by intensity
+// (scheme 4). Drawn in a pane (z350) above the basemap, below the swell waves + safety pins. The
+// latest frame is refreshed every 5 min while on; the API + tiles are not service-worker-cached
+// (time-sensitive). Toggle button sits with the satellite + waves controls.
+window._rainOn=false; window._rainLayer=null; window._rainTimer=null;
+async function _rainFrameUrl(){
+  try{
+    const r=await fetch('https://api.rainviewer.com/public/weather-maps.json',{cache:'no-store'});
+    if(!r.ok) return null;
+    const j=await r.json(); const past=(j.radar&&j.radar.past)||[];
+    if(!past.length||!j.host) return null;
+    return j.host + past[past.length-1].path + '/256/{z}/{x}/{y}/4/1_1.png';
+  }catch(e){ return null; }
+}
+async function _rainRefresh(){
+  if(!window._rainOn || typeof map==='undefined' || !map || typeof L==='undefined') return;
+  const url=await _rainFrameUrl(); if(!url || !window._rainOn) return;
+  if(!map.getPane('rain')){ map.createPane('rain'); const p=map.getPane('rain'); p.style.zIndex='350'; p.style.pointerEvents='none'; }
+  const nl=L.tileLayer(url,{opacity:.6,maxZoom:19,pane:'rain',attribution:'Radar © RainViewer',updateWhenIdle:true}); nl.addTo(map);
+  const old=window._rainLayer; window._rainLayer=nl;
+  if(old) setTimeout(()=>{ try{map.removeLayer(old);}catch(e){} },400);   // swap without a flash
+}
+async function toggleRain(){
+  const btn=document.getElementById('rainToggle');
+  if(window._rainOn){
+    window._rainOn=false; if(btn){btn.classList.remove('on');btn.setAttribute('aria-pressed','false');}
+    if(window._rainTimer){clearInterval(window._rainTimer);window._rainTimer=null;}
+    if(window._rainLayer){try{map.removeLayer(window._rainLayer);}catch(e){} window._rainLayer=null;}
+  } else {
+    window._rainOn=true; if(btn){btn.classList.add('on');btn.setAttribute('aria-pressed','true');}
+    await _rainRefresh();
+    window._rainTimer=setInterval(_rainRefresh, 300000);
   }
 }
 
