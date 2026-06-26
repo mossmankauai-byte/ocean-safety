@@ -6582,7 +6582,8 @@ function renderSwellLayer(){
       +'#os-swell-overlay.off .os-swell-clip{display:none}'
       +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
       +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
-      +'.os-swell-drift{position:absolute;left:0;right:0;top:-30px;bottom:-30px;opacity:.6;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.6) 0 3px,transparent 3px 24px);animation:os_swelldrift 2.2s linear infinite;will-change:transform}'
+      +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.6}'
+      +'.os-swell-drift{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.6) 0 3px,transparent 3px 24px);animation:os_swelldrift 2.2s linear infinite;will-change:transform}'
       +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
       +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
       +'#os-swell-badge:hover{transform:scale(1.05)}'
@@ -6625,7 +6626,7 @@ function renderSwellLayer(){
   let ov=document.getElementById('os-swell-overlay');
   if(!ov){
     ov=document.createElement('div'); ov.id='os-swell-overlay';
-    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-drift"></div></div>';
+    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><div class="os-swell-drift"></div></div></div>';
     const badge=document.createElement('div'); badge.id='os-swell-badge';
     badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
     (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
@@ -6648,6 +6649,7 @@ function renderSwellLayer(){
   var _b=document.getElementById('os-swell-badge');
   if(sd===null||unknown||!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; return; }
   ov.style.display=''; if(_b)_b.style.display='flex';
+  var _rg=ov.querySelector('.os-swell-rot'); if(_rg) _rg.style.transform='rotate('+sd+'deg)';
   updateClip();
   paint();
   }catch(e){}
