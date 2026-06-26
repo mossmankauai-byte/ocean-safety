@@ -6494,6 +6494,56 @@ function renderOutlookSheet(){
     </div>`;
 }
 
+// SWELL DIRECTION map layer — ambient, stylized wave fronts drifting FROM today's forecast
+// swell bearing (LIVE.swell_dir), uniform across the island (deep-water swell direction is ~uniform
+// at this scale), drawn in a Leaflet pane BELOW the markers so the safety pins stay on top. It shows
+// direction + period only — NOT a measured per-spot wave field. CSS-only (0 KB), GPU-composited,
+// reduced-motion-safe, auto-paused off-tab. Tap the badge to hide (persisted). rotate(swell_dir) makes
+// the drift travel toward (swell_dir+180), i.e. the way the waves move.
+function renderSwellLayer(){
+  if(typeof map==='undefined' || !map) return;
+  if(!document.getElementById('os-swell-css')){
+    const st=document.createElement('style'); st.id='os-swell-css';
+    st.textContent='@keyframes os_swelldrift{from{transform:translateY(-46px)}to{transform:translateY(0)}}'
+      +'.leaflet-swell-pane{opacity:.28;pointer-events:none}'
+      +'.os-swell-rot{position:absolute;inset:-90%}'
+      +'.os-swell-drift{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(255,255,255,.34) 30px 34px,rgba(255,255,255,.12) 34px 46px);animation:os_swelldrift 2.6s linear infinite;will-change:transform}'
+      +'.leaflet-swell-pane.off .os-swell-rot{display:none}'
+      +'.leaflet-swell-pane.paused .os-swell-drift{animation-play-state:paused}'
+      +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
+      +'#os-swell-badge{position:absolute;left:10px;top:10px;z-index:480;display:flex;align-items:center;gap:6px;background:rgba(8,40,50,.66);color:#eaf6f8;font:600 11.5px -apple-system,Arial,sans-serif;padding:5px 9px;border-radius:20px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none}';
+    document.head.appendChild(st);
+  }
+  let pane=map.getPane('swell');
+  if(!pane){
+    pane=map.createPane('swell'); pane.style.zIndex=250;
+    pane.innerHTML='<div class="os-swell-rot"><div class="os-swell-drift"></div></div>';
+  }
+  let badge=document.getElementById('os-swell-badge');
+  const paint=()=>{
+    const s=window._swellState||{}; if(!Number.isFinite(s.sd)) return;
+    const dirs=['N','NE','E','SE','S','SW','W','NW'];
+    const cp=dirs[Math.round((s.sd%360)/45)%8];
+    const on=!pane.classList.contains('off');
+    badge.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" style="transform:rotate('+((s.sd+180)%360)+'deg)" fill="none" stroke="#eaf6f8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg>Swell · from '+cp+' '+Math.round(s.sd)+'°'+(s.per?(' · '+s.per+'s'):'')+(on?'':' · off');
+  };
+  if(!badge){
+    badge=document.createElement('div'); badge.id='os-swell-badge';
+    badge.addEventListener('click',()=>{ const off=pane.classList.toggle('off'); try{localStorage.setItem('os_swell_off',off?'1':'');}catch(e){} paint(); });
+    map.getContainer().appendChild(badge);
+    try{ if(localStorage.getItem('os_swell_off')==='1') pane.classList.add('off'); }catch(e){}
+    document.addEventListener('visibilitychange',()=>{ pane.classList.toggle('paused', document.hidden); });
+  }
+  const D=(typeof LIVE!=='undefined'&&LIVE)?LIVE:null;
+  const sd=(D&&Number.isFinite(D.swell_dir))?(((D.swell_dir%360)+360)%360):null;
+  const per=(D&&Number.isFinite(D.period))?Math.round(D.period):null;
+  const unknown=D?!!D.surf_unknown:true;
+  window._swellState={sd,per};
+  if(sd===null||unknown){ pane.style.display='none'; badge.style.display='none'; return; }
+  pane.style.display=''; badge.style.display='';
+  pane.querySelector('.os-swell-rot').style.transform='rotate('+sd+'deg)';
+  paint();
+}
 async function rescore(){
   await Promise.all(B.map(async b=>{
     const c=await getCond(b);
@@ -6502,6 +6552,7 @@ async function rescore(){
   }));
   renderMap();
   renderChannels();
+  renderSwellLayer();
   renderHikes();
   renderActs();
   renderMarkets();
