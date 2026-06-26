@@ -1518,6 +1518,10 @@ a{text-decoration:none;color:inherit}
 #rainToggle:hover{transform:scale(1.05)}
 #rainToggle svg{width:22px;height:22px}
 #rainToggle.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
+#fcBar{position:absolute;bottom:84px;left:50%;transform:translateX(-50%);z-index:700;display:none;align-items:center;gap:10px;background:rgba(8,40,50,.88);color:#eaf6f8;padding:7px 14px;border-radius:999px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 28px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#fcBar #fcTime{font-weight:600;min-width:66px;white-space:nowrap}
+#fcBar input[type=range]{width:150px;max-width:42vw;accent-color:#8fd3ff;cursor:pointer}
+#fcBar .fc-cap{opacity:.8;font-size:10.5px;white-space:nowrap}
 
 #locateBtn{position:absolute;top:210px;right:12px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#0f4c5c;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
 #locateBtn:hover{transform:scale(1.05)}
@@ -1866,7 +1870,8 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
   <span>Loading live conditions…</span>
 </div>
 <button id="satToggle" onclick="toggleSat()" aria-label="Toggle satellite view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
-<button id="rainToggle" onclick="toggleRain()" aria-label="Toggle rain radar" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 0 1-.5-7.97 5.5 5.5 0 0 1 10.7-1.3A4.5 4.5 0 0 1 17 16"/><line x1="8" y1="18.5" x2="7.2" y2="21"/><line x1="12" y1="18.5" x2="11.2" y2="22"/><line x1="16" y1="18.5" x2="15.2" y2="21"/></svg></button>
+<button id="rainToggle" onclick="toggleRain()" aria-label="Toggle 12-hour rain forecast" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 0 1-.5-7.97 5.5 5.5 0 0 1 10.7-1.3A4.5 4.5 0 0 1 17 16"/><line x1="8" y1="18.5" x2="7.2" y2="21"/><line x1="12" y1="18.5" x2="11.2" y2="22"/><line x1="16" y1="18.5" x2="15.2" y2="21"/></svg></button>
+<div id="fcBar" role="group" aria-label="Rain forecast time"><span id="fcTime">Now</span><input id="fcSlider" type="range" min="0" max="12" step="1" value="0" oninput="fcSlide(this.value)" aria-label="Forecast hours ahead"><span class="fc-cap">12&#8209;hr rain</span></div>
 <button id="savedChip" class="saved-chip" onclick="openSavedSheet()" aria-label="View saved">
   <svg viewBox="0 0 24 24" fill="#c9a84c" stroke="#c9a84c" stroke-width="1.5" stroke-linejoin="round" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
   <span class="saved-chip-count" id="savedCount">0</span>
@@ -5852,41 +5857,54 @@ function toggleSat(){
   }
 }
 
-// RAIN RADAR heat-map overlay — RainViewer (free NEXRAD radar, no API key). Colorized by intensity
-// (scheme 4). Drawn in a pane (z250) just above the basemap, BELOW the swell waves + POI markers. The
-// latest frame is refreshed every 5 min while on; the API + tiles are not service-worker-cached
-// (time-sensitive). Toggle button sits with the satellite + waves controls.
-window._rainOn=false; window._rainLayer=null; window._rainTimer=null;
-async function _rainFrameUrl(){
-  try{
-    const r=await fetch('https://api.rainviewer.com/public/weather-maps.json',{cache:'no-store'});
-    if(!r.ok) return null;
-    const j=await r.json(); const past=(j.radar&&j.radar.past)||[];
-    if(!past.length||!j.host) return null;
-    return j.host + past[past.length-1].path + '/256/{z}/{x}/{y}/4/1_1.png';
-  }catch(e){ return null; }
+// 12-HOUR RAIN FORECAST timeline — Open-Meteo hourly precipitation over a coarse Kauaʻi grid (ONE
+// bulk call, 20 points), rendered as soft heat blobs (translucent L.circle in a blurred pane, z250 —
+// below the swell waves + POI markers). A time slider scrubs Now → +12h. Refreshes every 30 min.
+// Not service-worker-cached (forecast). Toggle button sits with the satellite + waves controls.
+window._fcOn=false; window._fcData=null; window._fcCircles=null; window._fcTimes=null; window._fcBase=0; window._fcHour=0; window._fcTimer=null;
+const _FC_GRID=(function(){ var g=[],LA=[21.90,21.99,22.08,22.17],LO=[-159.76,-159.64,-159.52,-159.40,-159.28]; for(var a=0;a<LA.length;a++)for(var o=0;o<LO.length;o++)g.push([LA[a],LO[o]]); return g; })();
+function _fcColor(mm){ return mm<0.1?null : mm<0.4?'#8fd3ff' : mm<1?'#3aa0ff' : mm<2.5?'#ffd24d' : mm<6?'#ff8c3a' : '#ff4d4d'; }
+async function _fcFetch(){
+  var la=_FC_GRID.map(function(p){return p[0].toFixed(2);}).join(','), lo=_FC_GRID.map(function(p){return p[1].toFixed(2);}).join(',');
+  var url='https://api.open-meteo.com/v1/forecast?latitude='+la+'&longitude='+lo+'&hourly=precipitation&forecast_days=2&timezone=Pacific%2FHonolulu&cell_selection=nearest';
+  var r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw 0;
+  var d=await r.json(); var arr=Array.isArray(d)?d:[d];
+  var times=arr[0].hourly.time, off=arr[0].utc_offset_seconds||0;
+  var ln=new Date(Date.now()+off*1000), pad=function(n){return String(n).padStart(2,'0');};
+  var key=ln.getUTCFullYear()+'-'+pad(ln.getUTCMonth()+1)+'-'+pad(ln.getUTCDate())+'T'+pad(ln.getUTCHours())+':00';
+  var base=times.indexOf(key); if(base<0) base=Math.max(0,ln.getUTCHours());   // fallback to current hour-of-day (times start at local midnight), not midnight
+  window._fcData=arr; window._fcTimes=times; window._fcBase=base;
 }
-async function _rainRefresh(){
-  if(!window._rainOn || typeof map==='undefined' || !map || typeof L==='undefined') return;
-  const url=await _rainFrameUrl(); if(!url || !window._rainOn) return;
-  if(!map.getPane('rain')){ map.createPane('rain'); const p=map.getPane('rain'); p.style.zIndex='250'; p.style.pointerEvents='none'; }   // lowest overlay: just above the island/basemap (z200), BELOW overlays, swell (450), and all markers/POIs (markerPane 600)
-  // RainViewer radar tiles only exist to z7; at z8+ it returns a grey "zoom level not supported"
-  // placeholder. maxNativeZoom:7 makes Leaflet fetch radar only up to z7 and UPSCALE it for the
-  // app's zoom (z9.5+), so it shows a soft heat field instead of error tiles.
-  const nl=L.tileLayer(url,{opacity:.5,maxZoom:19,maxNativeZoom:7,pane:'rain',attribution:'Radar © RainViewer',updateWhenIdle:true}); nl.addTo(map);
-  const old=window._rainLayer; window._rainLayer=nl;
-  if(old) setTimeout(()=>{ try{map.removeLayer(old);}catch(e){} },400);   // swap without a flash
+function _fcRender(){
+  if(!window._fcData || typeof map==='undefined' || !map || typeof L==='undefined') return;
+  if(!map.getPane('rainfc')){ var p=map.createPane('rainfc'); p.style.zIndex='250'; p.style.pointerEvents='none'; p.style.filter='blur(16px)'; }   // z250: above island/basemap, BELOW swell (450) + POI markers (600). Blur = smooth heat field.
+  if(!window._fcCircles){ window._fcCircles=_FC_GRID.map(function(g){ return L.circle(g,{radius:6800,stroke:false,fillOpacity:0,pane:'rainfc'}).addTo(map); }); }
+  var idx=window._fcBase+window._fcHour;
+  window._fcCircles.forEach(function(c,i){
+    var row=window._fcData[i], mm=(row&&row.hourly.precipitation[idx])||0, col=_fcColor(mm);
+    if(col){ c.setStyle({fillColor:col, fillOpacity:Math.min(.75,.35+mm*0.1)}); } else { c.setStyle({fillOpacity:0}); }
+  });
+  var el=document.getElementById('fcTime');
+  if(el){ var t=window._fcTimes&&window._fcTimes[idx]; el.textContent = window._fcHour===0 ? 'Now' : ('+'+window._fcHour+'h · '+(t?t.slice(11,16):'')); }
 }
+function fcSlide(v){ window._fcHour=Math.max(0,Math.min(12, parseInt(v,10)||0)); _fcRender(); }
 async function toggleRain(){
-  const btn=document.getElementById('rainToggle');
-  if(window._rainOn){
-    window._rainOn=false; if(btn){btn.classList.remove('on');btn.setAttribute('aria-pressed','false');}
-    if(window._rainTimer){clearInterval(window._rainTimer);window._rainTimer=null;}
-    if(window._rainLayer){try{map.removeLayer(window._rainLayer);}catch(e){} window._rainLayer=null;}
+  var btn=document.getElementById('rainToggle'), bar=document.getElementById('fcBar');
+  if(window._fcOn){
+    window._fcOn=false; if(btn){btn.classList.remove('on');btn.setAttribute('aria-pressed','false');}
+    if(bar) bar.style.display='none';
+    if(window._fcTimer){clearInterval(window._fcTimer);window._fcTimer=null;}
+    if(window._fcCircles){ window._fcCircles.forEach(function(c){try{map.removeLayer(c);}catch(e){}}); window._fcCircles=null; }
   } else {
-    window._rainOn=true; if(btn){btn.classList.add('on');btn.setAttribute('aria-pressed','true');}
-    await _rainRefresh();
-    window._rainTimer=setInterval(_rainRefresh, 300000);
+    window._fcOn=true; window._fcHour=0; var sl=document.getElementById('fcSlider'); if(sl) sl.value=0;
+    if(btn){btn.classList.add('on');btn.setAttribute('aria-pressed','true');btn.disabled=true;}   // disable during fetch -> no double-tap re-entrancy
+    if(bar) bar.style.display='flex';
+    var ferr=false;
+    try{ await _fcFetch(); }catch(e){ ferr=true; var el=document.getElementById('fcTime'); if(el) el.textContent='forecast unavailable'; }
+    if(btn) btn.disabled=false;
+    if(!window._fcOn){ if(window._fcCircles){ window._fcCircles.forEach(function(c){try{map.removeLayer(c);}catch(e){}}); window._fcCircles=null; } return; }   // toggled off mid-fetch -> bail + clean up
+    if(!ferr) _fcRender();
+    window._fcTimer=setInterval(async function(){ if(!window._fcOn) return; try{ await _fcFetch(); _fcRender(); }catch(e){} }, 1800000);
   }
 }
 
