@@ -1522,8 +1522,8 @@ a{text-decoration:none;color:inherit}
 /* Family tab: the top map controls (status pill, satellite toggle, wave-squares badge)
    sat too high and crowded the header — nudge the cluster down a touch on Family only.
    Beaches/other tabs keep their original positions. */
-body[data-tab="acts"] .stbadge{top:52px}
-body[data-tab="acts"] .kidbadge{top:84px}
+body[data-tab="acts"] .stbadge,body[data-tab="beaches"] .stbadge{top:76px}
+body[data-tab="acts"] .kidbadge,body[data-tab="beaches"] .kidbadge{top:108px}
 body[data-tab="acts"] #satToggle{top:188px}
 body[data-tab="acts"] #os-swell-badge{top:188px}
 body[data-tab="acts"] #locateBtn{top:238px}
@@ -3842,7 +3842,7 @@ async function getCond(b){
 // MAP
 let map,mkrs={},ints=['snorkel','swim'],scored={};
 function initMap(){
-  map=L.map('map',{center:[22.05,-159.50],zoom:10,minZoom:10,zoomControl:false,attributionControl:false});
+  map=L.map('map',{center:[22.05,-159.50],zoom:9.5,minZoom:9,zoomSnap:0.5,zoomControl:false,attributionControl:false});
   // OFFLINE FALLBACK: map tiles are an external CDN the service worker can't cache, so with no
   // connection every tile 404s. errorTileUrl swaps each failed tile for a transparent 1px PNG, so
   // the .leaflet-container ocean-blue background shows through (a flat sea + the beach pins) instead
