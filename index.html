@@ -5853,7 +5853,7 @@ function toggleSat(){
 }
 
 // RAIN RADAR heat-map overlay — RainViewer (free NEXRAD radar, no API key). Colorized by intensity
-// (scheme 4). Drawn in a pane (z350) above the basemap, below the swell waves + safety pins. The
+// (scheme 4). Drawn in a pane (z250) just above the basemap, BELOW the swell waves + POI markers. The
 // latest frame is refreshed every 5 min while on; the API + tiles are not service-worker-cached
 // (time-sensitive). Toggle button sits with the satellite + waves controls.
 window._rainOn=false; window._rainLayer=null; window._rainTimer=null;
@@ -5869,8 +5869,8 @@ async function _rainFrameUrl(){
 async function _rainRefresh(){
   if(!window._rainOn || typeof map==='undefined' || !map || typeof L==='undefined') return;
   const url=await _rainFrameUrl(); if(!url || !window._rainOn) return;
-  if(!map.getPane('rain')){ map.createPane('rain'); const p=map.getPane('rain'); p.style.zIndex='350'; p.style.pointerEvents='none'; }
-  const nl=L.tileLayer(url,{opacity:.6,maxZoom:19,pane:'rain',attribution:'Radar © RainViewer',updateWhenIdle:true}); nl.addTo(map);
+  if(!map.getPane('rain')){ map.createPane('rain'); const p=map.getPane('rain'); p.style.zIndex='250'; p.style.pointerEvents='none'; }   // lowest overlay: just above the island/basemap (z200), BELOW overlays, swell (450), and all markers/POIs (markerPane 600)
+  const nl=L.tileLayer(url,{opacity:.5,maxZoom:19,pane:'rain',attribution:'Radar © RainViewer',updateWhenIdle:true}); nl.addTo(map);
   const old=window._rainLayer; window._rainLayer=nl;
   if(old) setTimeout(()=>{ try{map.removeLayer(old);}catch(e){} },400);   // swap without a flash
 }
