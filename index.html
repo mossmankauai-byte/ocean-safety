@@ -3275,15 +3275,22 @@ function score(b,c,ints){
   if(fail)return{status:'hidden',reason:fail,sc:{},kid:false,top:[]};
   const lm=C.lm[b.lg]||.25,r=rip(b,c),bwf=bw(b,c)?0:1;
   const sc={};
-  if(ints.includes('snorkel')&&b.intents.includes('snorkel'))
+  // SURF-CEILING GATE (safety, monotonic-toward-caution). ws() only zeros the WAVE
+  // sub-score past a ceiling — the wind/tide/rip/lifeguard/depth terms still sum to a
+  // positive score, so a too-rough beach used to keep RECOMMENDING snorkel/swim (they
+  // leaked into `top`, the chips, the bestTime window, and the "snorkel close to shore"
+  // tip) even when the hero strip already flagged them red. Drop the whole activity once
+  // effective surf exceeds the SAME ceiling _intentV uses for its red verdict (snorkel 2 ft,
+  // swim 3 ft, tidepools 2 ft). This can only REMOVE a recommendation, never add one.
+  if(ints.includes('snorkel')&&b.intents.includes('snorkel')&&c.es<=C.ceil.snorkel)
     sc.snorkel=cl((C.wt.snorkel.wave*ws(c.es,C.ceil.snorkel)+C.wt.snorkel.wind*Math.max(0,Math.pow(1-Math.max(0,c.oc)/15,1.5))+C.wt.snorkel.tide*gs(c.tide,2.5,1.5)+C.wt.snorkel.rip*Math.max(0,1-r*r)+C.wt.snorkel.lg*lm+C.wt.snorkel.depth*(b.depth<6?1:b.depth<10?.8:.5))*(b.sq/10)*bwf*C.isf);
-  if(ints.includes('swim')&&b.intents.includes('swim'))
+  if(ints.includes('swim')&&b.intents.includes('swim')&&c.es<=C.ceil.swim)
     sc.swim=cl((C.wt.swim.wave*ws(c.es,C.ceil.swim)+C.wt.swim.wind*Math.max(0,1-Math.abs(c.oc)/20)+C.wt.swim.tide*gs(c.tide,2,1.8)+C.wt.swim.rip*Math.max(0,1-r*r)+C.wt.swim.lg*lm+C.wt.swim.sb*Math.max(0,1-b.sb*c.es/30))*bwf*C.isf);
   if(ints.includes('sunset')&&b.intents.includes('sunset')){
     const fd=Math.abs(((b.facing-270)+360)%360),fn=fd>180?360-fd:fd;
     sc.sunset=cl(C.wt.sunset.facing*Math.max(.1,1-fn/180)+C.wt.sunset.cloud*Math.max(0,1-c.cloud/100)+C.wt.sunset.wind*Math.max(0,1-c.wind/18)+C.wt.sunset.crowd*crowd(c.dow,c.h));
   }
-  if(ints.includes('tidepools')&&b.intents.includes('tidepools')&&b.tidal)
+  if(ints.includes('tidepools')&&b.intents.includes('tidepools')&&b.tidal&&c.es<=2)
     sc.tidepools=cl(C.wt.tidepools.tide*gs(c.tide,.3,.4)+C.wt.tidepools.wave*ws(c.es,2)+C.wt.tidepools.wind*Math.max(0,1-c.wind/20));
   if(ints.includes('photography')&&b.intents.includes('photography')){
     const s=b.scenic/10;
@@ -6494,6 +6501,9 @@ function renderOutlookSheet(){
     </div>`;
 }
 
+// Simplified Kauaʻi coastline (OSM, 61 pts, [lat,lon]) — clips the swell drift to OCEAN only.
+// Kauaʻi-specific; a multi-island build needs the matching outline per island.
+const KAUAI_OUTLINE=[[22.0286,-159.788],[21.9587,-159.6909],[21.9415,-159.6539],[21.9281,-159.6449],[21.9177,-159.637],[21.9001,-159.6087],[21.9032,-159.596],[21.8996,-159.5874],[21.8962,-159.5812],[21.8933,-159.5726],[21.8896,-159.5585],[21.888,-159.544],[21.8862,-159.5311],[21.8829,-159.5269],[21.8866,-159.5051],[21.8844,-159.4992],[21.8845,-159.4938],[21.8846,-159.4872],[21.8818,-159.4825],[21.8813,-159.4759],[21.8783,-159.4711],[21.8755,-159.4627],[21.8714,-159.4497],[21.8685,-159.4434],[21.8759,-159.432],[21.8893,-159.4128],[21.8967,-159.4039],[21.9138,-159.3844],[21.9437,-159.349],[21.9499,-159.358],[21.9584,-159.3424],[21.9915,-159.3299],[21.9994,-159.3326],[22.0219,-159.3386],[22.0438,-159.3358],[22.0606,-159.3186],[22.076,-159.3164],[22.0804,-159.3128],[22.0899,-159.3051],[22.1027,-159.2987],[22.1327,-159.2939],[22.1442,-159.2942],[22.1724,-159.3139],[22.2013,-159.3329],[22.2143,-159.3545],[22.223,-159.3826],[22.2244,-159.3903],[22.2298,-159.399],[22.2284,-159.4048],[22.2254,-159.4534],[22.227,-159.4884],[22.2036,-159.5097],[22.2157,-159.5347],[22.2181,-159.5426],[22.2191,-159.5867],[22.2061,-159.605],[22.1971,-159.6227],[22.1865,-159.6369],[22.167,-159.6707],[22.1566,-159.708],[22.0526,-159.7844]];
 // SWELL DIRECTION map layer — ambient, stylized wave fronts drifting FROM today's forecast
 // swell bearing (LIVE.swell_dir), uniform across the island (deep-water swell direction is ~uniform
 // at this scale), drawn in a Leaflet pane BELOW the markers so the safety pins stay on top. It shows
@@ -6507,14 +6517,27 @@ function renderSwellLayer(){
     const st=document.createElement('style'); st.id='os-swell-css';
     st.textContent='@keyframes os_swelldrift{from{transform:translateY(-46px)}to{transform:translateY(0)}}'
       +'#os-swell-overlay{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:401}'
-      +'#os-swell-overlay.off .os-swell-rot{display:none}'
+      +'#os-swell-overlay.off .os-swell-clip{display:none}'
       +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
+      +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
       +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.5}'
       +'.os-swell-drift{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 28px,rgba(255,255,255,.6) 28px 33px,rgba(255,255,255,.22) 33px 46px);animation:os_swelldrift 2.6s linear infinite;will-change:transform}'
       +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
       +'#os-swell-badge{position:absolute;left:10px;bottom:88px;z-index:5;display:flex;align-items:center;gap:6px;background:rgba(8,40,50,.74);color:#eaf6f8;font:600 11.5px -apple-system,Arial,sans-serif;padding:5px 9px;border-radius:20px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none}';
     document.head.appendChild(st);
   }
+  if(!document.getElementById('os-swell-svg')){
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.id='os-swell-svg'; svg.setAttribute('width','0'); svg.setAttribute('height','0'); svg.style.cssText='position:absolute;width:0;height:0;left:0;top:0';
+    svg.innerHTML='<defs><clipPath id="os-ocean-clip" clipPathUnits="userSpaceOnUse"><path id="os-ocean-path" clip-rule="evenodd" d="M0 0"></path></clipPath></defs>';
+    document.body.appendChild(svg);
+  }
+  const updateClip=()=>{
+    const p=document.getElementById('os-ocean-path'); if(!p||typeof map==='undefined'||!map) return;
+    const sz=map.getSize();
+    const rect='M0 0 H'+sz.x+' V'+sz.y+' H0 Z';
+    const isl=KAUAI_OUTLINE.map((pt,i)=>{ const c=map.latLngToContainerPoint(pt); return (i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1); }).join(' ')+' Z';
+    p.setAttribute('d', rect+' '+isl);
+  };
   const paint=()=>{
     const ov=document.getElementById('os-swell-overlay'), badge=document.getElementById('os-swell-badge');
     const s=window._swellState||{}; if(!ov||!badge||!Number.isFinite(s.sd)) return;
@@ -6526,13 +6549,14 @@ function renderSwellLayer(){
   let ov=document.getElementById('os-swell-overlay');
   if(!ov){
     ov=document.createElement('div'); ov.id='os-swell-overlay';
-    ov.innerHTML='<div class="os-swell-rot"><div class="os-swell-drift"></div></div>';
+    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><div class="os-swell-drift"></div></div></div>';
     const badge=document.createElement('div'); badge.id='os-swell-badge';
     badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
     ov.appendChild(badge);
     map.getContainer().appendChild(ov);
     try{ if(localStorage.getItem('os_swell_off')==='1') ov.classList.add('off'); }catch(e){}
     document.addEventListener('visibilitychange',()=>{ ov.classList.toggle('paused', document.hidden); });
+    map.on('move zoom moveend zoomend resize viewreset', updateClip);
   }
   const D=(typeof LIVE!=='undefined'&&LIVE)?LIVE:null;
   const sd=(D&&Number.isFinite(D.swell_dir))?(((D.swell_dir%360)+360)%360):null;
@@ -6542,6 +6566,7 @@ function renderSwellLayer(){
   if(sd===null||unknown){ ov.style.display='none'; return; }
   ov.style.display='';
   ov.querySelector('.os-swell-rot').style.transform='rotate('+sd+'deg)';
+  updateClip();
   paint();
   }catch(e){}
 }
