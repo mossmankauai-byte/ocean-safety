@@ -1519,6 +1519,15 @@ a{text-decoration:none;color:inherit}
 #locateBtn:hover{transform:scale(1.05)}
 #locateBtn svg{width:22px;height:22px}
 #locateBtn.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
+/* Family tab: the top map controls (status pill, satellite toggle, wave-squares badge)
+   sat too high and crowded the header — nudge the cluster down a touch on Family only.
+   Beaches/other tabs keep their original positions. */
+body[data-tab="acts"] .stbadge{top:52px}
+body[data-tab="acts"] .kidbadge{top:84px}
+body[data-tab="acts"] #satToggle{top:188px}
+body[data-tab="acts"] #os-swell-badge{top:188px}
+body[data-tab="acts"] #locateBtn{top:238px}
+body[data-tab="acts"] .saved-chip{top:243px}
 #locateBtn.searching svg{animation:locSpin 1.2s linear infinite}
 @keyframes locSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
@@ -3275,15 +3284,22 @@ function score(b,c,ints){
   if(fail)return{status:'hidden',reason:fail,sc:{},kid:false,top:[]};
   const lm=C.lm[b.lg]||.25,r=rip(b,c),bwf=bw(b,c)?0:1;
   const sc={};
-  if(ints.includes('snorkel')&&b.intents.includes('snorkel'))
+  // SURF-CEILING GATE (safety, monotonic-toward-caution). ws() only zeros the WAVE
+  // sub-score past a ceiling — the wind/tide/rip/lifeguard/depth terms still sum to a
+  // positive score, so a too-rough beach used to keep RECOMMENDING snorkel/swim (they
+  // leaked into `top`, the chips, the bestTime window, and the "snorkel close to shore"
+  // tip) even when the hero strip already flagged them red. Drop the whole activity once
+  // effective surf exceeds the SAME ceiling _intentV uses for its red verdict (snorkel 2 ft,
+  // swim 3 ft, tidepools 2 ft). This can only REMOVE a recommendation, never add one.
+  if(ints.includes('snorkel')&&b.intents.includes('snorkel')&&c.es<=C.ceil.snorkel)
     sc.snorkel=cl((C.wt.snorkel.wave*ws(c.es,C.ceil.snorkel)+C.wt.snorkel.wind*Math.max(0,Math.pow(1-Math.max(0,c.oc)/15,1.5))+C.wt.snorkel.tide*gs(c.tide,2.5,1.5)+C.wt.snorkel.rip*Math.max(0,1-r*r)+C.wt.snorkel.lg*lm+C.wt.snorkel.depth*(b.depth<6?1:b.depth<10?.8:.5))*(b.sq/10)*bwf*C.isf);
-  if(ints.includes('swim')&&b.intents.includes('swim'))
+  if(ints.includes('swim')&&b.intents.includes('swim')&&c.es<=C.ceil.swim)
     sc.swim=cl((C.wt.swim.wave*ws(c.es,C.ceil.swim)+C.wt.swim.wind*Math.max(0,1-Math.abs(c.oc)/20)+C.wt.swim.tide*gs(c.tide,2,1.8)+C.wt.swim.rip*Math.max(0,1-r*r)+C.wt.swim.lg*lm+C.wt.swim.sb*Math.max(0,1-b.sb*c.es/30))*bwf*C.isf);
   if(ints.includes('sunset')&&b.intents.includes('sunset')){
     const fd=Math.abs(((b.facing-270)+360)%360),fn=fd>180?360-fd:fd;
     sc.sunset=cl(C.wt.sunset.facing*Math.max(.1,1-fn/180)+C.wt.sunset.cloud*Math.max(0,1-c.cloud/100)+C.wt.sunset.wind*Math.max(0,1-c.wind/18)+C.wt.sunset.crowd*crowd(c.dow,c.h));
   }
-  if(ints.includes('tidepools')&&b.intents.includes('tidepools')&&b.tidal)
+  if(ints.includes('tidepools')&&b.intents.includes('tidepools')&&b.tidal&&c.es<=2)
     sc.tidepools=cl(C.wt.tidepools.tide*gs(c.tide,.3,.4)+C.wt.tidepools.wave*ws(c.es,2)+C.wt.tidepools.wind*Math.max(0,1-c.wind/20));
   if(ints.includes('photography')&&b.intents.includes('photography')){
     const s=b.scenic/10;
@@ -3782,8 +3798,8 @@ async function getCond(b){
   const c = {
     es: surfUnknown ? SURF_UNAVAILABLE : eff(D.surf,D.swell_dir,b,D),
     oc:oc(D.wind,D.wd,b),
-    tide:D.tide, per:D.period, tt:D.tt,
-    wind:D.wind, cloud:D.cloud, uv:uvDay,
+    tide:D.tide, per:D.period, tt:D.tt, sd:D.swell_dir,
+    wind:D.wind, wd:D.wd, cloud:D.cloud, uv:uvDay,
     rain:D.rain, rating:0,
     golden, dow:new Date().getDay(), h
   };
@@ -3892,12 +3908,29 @@ function isDangerCondition(b, r, c){
 }
 
 const MK_DROP_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7c3.4 4.2 6.3 7.9 6.3 11.4a6.3 6.3 0 1 1-12.6 0C5.7 10.6 8.6 6.9 12 2.7z"/></svg>';
+// Injects the CSS for the two rip-current map treatments (per-pin dots + channel flow
+// streaks). Guarded so it runs once; mirrors the os-swell-css injection pattern.
+function ensureRipCSS(){
+  if(document.getElementById('os-rip-css')) return;
+  const st=document.createElement('style'); st.id='os-rip-css';
+  st.textContent=[
+    '.os-ripdot{position:absolute;top:-1px;right:-1px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.35);z-index:2;pointer-events:none}',
+    '.os-ripdot-hi{animation:osrippulse 1.3s ease-in-out infinite}',
+    '@keyframes osrippulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.45);opacity:.6}}',
+    '.os-rs{animation:osrs 1.5s ease-in-out infinite}',
+    '.os-rs.d2{animation-delay:.5s}.os-rs.d3{animation-delay:1s}',
+    '@keyframes osrs{0%{transform:translateY(3px);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateY(-15px);opacity:0}}',
+    '@media (prefers-reduced-motion: reduce){.os-ripdot-hi{animation:none}.os-rs{animation:none;opacity:1}}'
+  ].join('');
+  document.head.appendChild(st);
+}
 function mkIcon(b,r){
   // ── DANGER override: painted poi-hazard glyph when conditions are unsafe ──
   // Fires for warning_only beaches, brown water, big surf without lifeguard,
   // or proximity to a strong-current channel on a falling tide. Returns the
   // cream "do-not-enter" pictogram on a teal disk — unmistakable at a glance.
   const _c = (r && r._c) ? r._c : null;
+  ensureRipCSS();
   if(isDangerCondition(b, r, _c)){
     // Brown-water identification on the danger pin: ring + brown-tinted title pill with an
     // inline droplet, so the cause reads at a glance and can't be covered by a neighboring
@@ -3963,12 +3996,25 @@ function mkIcon(b,r){
     ? `<div class="mklbl mklbl-brown">${MK_DROP_SVG}${b.n}</div>`
     : `<div class="mklbl">${b.n}</div>`;
 
+  // Rip-risk dot — only on the Beaches > All subtab, an at-a-glance per-pin layer.
+  // Same bins/colors as the card's _ripRow (slate=Lower deliberately, NOT green→"safe").
+  const _ripDot = (window._activeTab==='beaches' && window._activeSub==='all' && _c && !b.warning_only) ? (()=>{
+    const rv = (typeof rip==='function') ? rip(b,_c) : 0;
+    let dc, lvl;
+    if(_c.surf_unknown){ dc='#d97706'; lvl='Rip risk (modeled): treat as elevated'; }
+    else if(rv>=0.55){   dc='#b91c1c'; lvl='Rip risk (modeled): high'; }
+    else if(rv>=0.30){   dc='#d97706'; lvl='Rip risk (modeled): elevated'; }
+    else {               dc='#5b8a9a'; lvl='Rip risk (modeled): lower'; }
+    const hi = (!_c.surf_unknown && rv>=0.55) ? ' os-ripdot-hi' : '';
+    return `<span class="os-ripdot${hi}" style="background:${dc}" aria-label="${lvl}" title="${lvl} — relative estimate, not a measurement"></span>`;
+  })() : '';
+
   if(glyphSrc){
     // Primary path: brand circular disk PNG with conditional disk color. Drop-shadow gives
     // it a slight lift off the map tiles; animation delay staggers the markers in on load.
     const delay = Math.round(Math.random() * 250);
     return L.divIcon({
-      html:`<div class="mkw${isBrown ? ' mk-brown' : ''}" style="animation-delay:${delay}ms" data-glyph="${glyphKey}"><img src="${glyphSrc}" alt="" style="width:42px;height:42px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.22))">${brownLbl}</div>`,
+      html:`<div class="mkw${isBrown ? ' mk-brown' : ''}" style="animation-delay:${delay}ms" data-glyph="${glyphKey}"><div style="position:relative">${_ripDot}<img src="${glyphSrc}" alt="" style="width:42px;height:42px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.22))"></div>${brownLbl}</div>`,
       className:'',iconSize:[120,72],iconAnchor:[60,46]
     });
   }
@@ -5005,15 +5051,6 @@ function channelStrength(ch){
   return strength;
 }
 
-// CHANNEL HAZARD PIN — static triangle with exclamation, color scaled by strength
-function arrowSVG(dirDeg,strength){
-  const col=strength>=.75?'#e05c4a':strength>=.5?'#e07856':strength>=.3?'#c9a84c':'#4db6ac';
-  return`<svg width="44" height="48" viewBox="0 0 44 48" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22 4 L42 42 L2 42 Z" fill="${col}" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
-    <text x="22" y="36" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff" font-family="Arial Black,Arial,sans-serif">!</text>
-  </svg>`;
-}
-
 let chMkrs={};
 let chHeat={};  // Heat map polygons by channel id
 
@@ -5154,13 +5191,30 @@ function renderChannels(){
   chHeat={};
   // Currents only paint on the Beaches > Hazards subtab — they're a hazard layer, not a default beach layer.
   if(!(window._activeTab === 'beaches' && window._activeSub === 'hazards')) return;
+  ensureRipCSS();
   CHANNELS.forEach(ch=>{
     const str=channelStrength(ch);
     // Reef heat-map overlay intentionally disabled — to be revisited later.
-    const sev=str>=.7?'High':str>=.4?'Moderate':'Low';
+    // Fail toward caution: if the channel's beach has no fresh surf data, show the same
+    // amber "treat as elevated" the per-pin rip dot uses — never a calm-looking low.
+    const _cb=B.find(x=>x.id===ch.beach_id);
+    const _ccond=_cb&&scored[_cb.id]?scored[_cb.id]._c:null;
+    let sev, col;
+    if(_ccond&&_ccond.surf_unknown){ sev='Elevated'; col='#d97706'; }
+    else { sev=str>=.7?'High':str>=.4?'Moderate':'Lower'; col=(sev==='High')?'#e05c4a':(sev==='Moderate')?'#e07856':'#5b8a9a'; }
+    // Flow-streak treatment: dashes drift seaward (rotated to ch.dir_deg) toward a fixed
+    // arrowhead; direction + relative strength read at a glance. No green-family color at a
+    // channel — slate is the deliberate "not a go-signal" low, matching the card/dot. Color
+    // is derived from sev so the dash color and the "<sev> current" label can never disagree.
+    const streak=`<svg aria-hidden="true" width="40" height="46" viewBox="0 0 40 46" style="transform:rotate(${ch.dir_deg}deg);overflow:visible">`
+      +`<g stroke="${col}" stroke-width="4" stroke-linecap="round" fill="none">`
+      +`<line class="os-rs" x1="20" y1="34" x2="20" y2="22"/>`
+      +`<line class="os-rs d2" x1="13" y1="36" x2="13" y2="25"/>`
+      +`<line class="os-rs d3" x1="27" y1="36" x2="27" y2="25"/>`
+      +`<path d="M12 14 L20 5 L28 14"/></g></svg>`;
     const icon=L.divIcon({
-      html:`<div class="chw">${arrowSVG(ch.dir_deg,str)}<div class="chlbl">${sev} current</div></div>`,
-      className:'',iconSize:[44,62],iconAnchor:[22,40]
+      html:`<div class="chw">${streak}<div class="chlbl">${sev} current</div></div>`,
+      className:'',iconSize:[40,60],iconAnchor:[20,23]
     });
     const mk=L.marker([ch.lat,ch.lon],{icon,zIndexOffset:-100}).addTo(map);
     mk.on('click',()=>openChannelSheet(ch.id));
@@ -5649,6 +5703,56 @@ function openSheet(id){
         <span><b>Reef break.</b> On a south swell like today's, the surf here can break a good bit bigger than this open-water reading. Watch a few sets from shore before you go in, and check with a lifeguard if one's on duty.</span>
       </div>`
     : '';
+  // WAVE-1 wind + tide chips — the two questions a swimmer reflexively asks
+  // ("which way is the wind" / "is the tide coming in or going out"). 0-KB inline SVG,
+  // static, honest labels ("forecast" / "predicted"); arrow + word so meaning never rides
+  // on color alone. oc>0 onshore (choppy), oc<0 offshore (cleaner). Falling tide flags the
+  // honest current-strength note (rip() amplifies x1.2 on the ebb).
+  const _windTideChips = (() => {
+    if(!c) return '';
+    const spd = Math.round(c.wind || 0);
+    const ocv = c.oc || 0;
+    const windWord = ocv > 2 ? 'Onshore' : ocv < -2 ? 'Offshore' : 'Cross-shore';
+    const haveDir = Number.isFinite(c.wd);
+    const blow = haveDir ? (c.wd + 180) % 360 : 0; // arrow points the way the wind blows TO
+    const falling = c.tt === 'falling';
+    const cell = (inner) => `<div style="flex:1;min-width:148px;display:flex;align-items:center;gap:9px;padding:8px 11px;background:#eef3f5;border:1px solid #d9e3e6;border-radius:8px">${inner}</div>`;
+    const windArrow = haveDir ? `<svg width="22" height="22" viewBox="0 0 24 24" style="flex-shrink:0;transform:rotate(${blow}deg)" fill="none" stroke="#33586a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg>` : '';
+    const tideArrow = `<svg width="20" height="20" viewBox="0 0 24 24" style="flex-shrink:0" fill="none" stroke="#33586a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${falling ? '<line x1="12" y1="4" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/>' : '<line x1="12" y1="20" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/>'}</svg>`;
+    const haveSwell = !c.surf_unknown && Number.isFinite(c.sd) && Number.isFinite(c.per);
+    const swBlow = haveSwell ? (c.sd + 180) % 360 : 0; // arrow points the way the swell travels
+    const swellCell = haveSwell ? cell(`<svg width="22" height="22" viewBox="0 0 24 24" style="flex-shrink:0;transform:rotate(${swBlow}deg)" fill="none" stroke="#33586a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg><div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">Swell ${Math.round(c.per)}s</div><div style="font-size:10.5px;color:var(--mute)">forecast swell</div></div>`) : '';
+    return `<div style="display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap">
+      ${cell(`${windArrow}<div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">${windWord} ${spd} mph</div><div style="font-size:10.5px;color:var(--mute)">forecast wind</div></div>`)}
+      ${cell(`${tideArrow}<div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">Tide ${falling ? 'falling' : 'rising'}</div><div style="font-size:10.5px;color:var(--mute)">${falling ? 'predicted · currents can run stronger' : 'predicted'}</div></div>`)}
+      ${swellCell}
+    </div>`;
+  })();
+  // BROWN-WATER notice — discrete advisory (NOT a plume blob/extent). Runoff after rain.
+  const _brownNotice = (c && c.brown)
+    ? `<div style="margin:10px 0 4px;padding:10px 12px;background:#f3ead9;border-left:3px solid #9a6a2f;border-radius:8px;color:#6b4a1e;font-size:13px;line-height:1.45;display:flex;align-items:flex-start;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9a6a2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11Z"/></svg>
+        <span><b>Brown water likely.</b> Runoff after heavy rain cuts visibility and water quality near stream mouths. If the water looks murky or brown, stay out until it clears.</span>
+      </div>`
+    : '';
+  // RIP RISK (modeled, relative) — rip() is a COARSE proxy (morph x period x falling-tide x1.2),
+  // NOT a measured or forecast field. 3 caution-erring bins by WORD (never color alone); never says
+  // "safe"; stale/missing marine|tide => "treat as elevated". Pairs with the Current Hazards list below.
+  const _ripRow = (() => {
+    if(!c || b.warning_only) return '';
+    const unknown = !!c.surf_unknown;                       // no fresh marine/tide -> err to elevated
+    const rv = (typeof rip === 'function') ? rip(b,c) : 0;  // 0..1
+    let word, sub, accent;
+    if(unknown){ word='Treat as elevated'; sub='conditions unavailable — ask a lifeguard'; accent='#d97706'; }
+    else if(rv >= 0.55){ word='High'; sub='strong seaward pull likely, more so on a falling tide'; accent='#b91c1c'; }
+    else if(rv >= 0.30){ word='Elevated'; sub='use caution and stay near a lifeguard'; accent='#d97706'; }
+    else { word='Lower'; sub='still use caution — conditions can change quickly'; accent='#5b8a9a'; }
+    const chNote = (b.channels && b.channels.length) ? ' Known channels are listed under Current Hazards below.' : '';
+    return `<div style="margin:8px 0 4px;padding:9px 12px;background:#f4f6f7;border-left:3px solid ${accent};border-radius:8px;color:#33414a;font-size:12.5px;line-height:1.45;display:flex;align-items:flex-start;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M3 13c3-4 6-4 9 0s6 4 9 0"/><path d="M6 20l-2-2 2-2M18 20l2-2-2-2"/></svg>
+        <span><b>Rip risk: ${word}.</b> ${sub}.${chNote} <span style="color:var(--mute)">Modeled relative estimate, not a measurement.</span></span>
+      </div>`;
+  })();
   const pois=b.pois.map(poiCard).join('');
   const ps=pois?`<div class="slbl">Nearby</div><div class="prow">${pois}</div>`:'';
   const channels=(b.channels||[]).map(channelCard).join('');
@@ -5689,7 +5793,10 @@ function openSheet(id){
     ${weatherBar(c)}
     ${_bigSurfNotice}
     ${_jellyNotice}
+    ${_brownNotice}
     ${_reefNotice}
+    ${_windTideChips}
+    ${_ripRow}
     ${(typeof outlookChipsHtml === 'function') ? outlookChipsHtml(c) : ''}
     ${condIcons(c,b)}
     ${parkRow}
@@ -6085,6 +6192,7 @@ function buildSubtabs(tabName){
         renderDrinks();
         renderMarkets();
       }
+      if(typeof renderSwellLayer==='function') renderSwellLayer();  // gate waves per subtab
     });
   });
 }
@@ -6125,6 +6233,7 @@ function wireTabs(){
       document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.remove('active'));
       el.classList.add('active');
       window._activeTab = tabName;
+      document.body.dataset.tab = tabName;   // drives per-tab CSS (e.g. Family control offsets)
       if(window.OSA) OSA.tab(tabName);
       buildSubtabs(tabName);
       if(typeof updateLiveNow === 'function') updateLiveNow();
@@ -6153,10 +6262,12 @@ function wireTabs(){
       if(pills) pills.style.display = 'none';
       // After buildSubtabs sets the default ints for beaches, run rescore so the map paints with that filter.
       if(window._activeTab === 'beaches') rescore();
+      else if(typeof renderSwellLayer==='function') renderSwellLayer();
     });
   });
   // Initialize with Family subtabs since boot opens on the Family tab
   buildSubtabs('acts');
+  document.body.dataset.tab = window._activeTab || 'acts';   // seed per-tab CSS on boot
   // a11y: set initial aria-selected from the boot-active tab
   document.querySelectorAll('#tabs .tab').forEach(t=>t.setAttribute('aria-selected', t.classList.contains('active')?'true':'false'));
   // Analytics: start timing the initial (boot) tab view
@@ -6441,6 +6552,95 @@ function renderOutlookSheet(){
     </div>`;
 }
 
+// Simplified Kauaʻi coastline (OSM, 61 pts, [lat,lon]) — clips the swell drift to OCEAN only.
+// Kauaʻi-specific; a multi-island build needs the matching outline per island.
+const KAUAI_OUTLINE=[[22.0286,-159.788],[21.9587,-159.6909],[21.9415,-159.6539],[21.9281,-159.6449],[21.9177,-159.637],[21.9001,-159.6087],[21.9032,-159.596],[21.8996,-159.5874],[21.8962,-159.5812],[21.8933,-159.5726],[21.8896,-159.5585],[21.888,-159.544],[21.8862,-159.5311],[21.8829,-159.5269],[21.8866,-159.5051],[21.8844,-159.4992],[21.8845,-159.4938],[21.8846,-159.4872],[21.8818,-159.4825],[21.8813,-159.4759],[21.8783,-159.4711],[21.8755,-159.4627],[21.8714,-159.4497],[21.8685,-159.4434],[21.8759,-159.432],[21.8893,-159.4128],[21.8967,-159.4039],[21.9138,-159.3844],[21.9437,-159.349],[21.9499,-159.358],[21.9584,-159.3424],[21.9915,-159.3299],[21.9994,-159.3326],[22.0219,-159.3386],[22.0438,-159.3358],[22.0606,-159.3186],[22.076,-159.3164],[22.0804,-159.3128],[22.0899,-159.3051],[22.1027,-159.2987],[22.1327,-159.2939],[22.1442,-159.2942],[22.1724,-159.3139],[22.2013,-159.3329],[22.2143,-159.3545],[22.223,-159.3826],[22.2244,-159.3903],[22.2298,-159.399],[22.2284,-159.4048],[22.2254,-159.4534],[22.227,-159.4884],[22.2036,-159.5097],[22.2157,-159.5347],[22.2181,-159.5426],[22.2191,-159.5867],[22.2061,-159.605],[22.1971,-159.6227],[22.1865,-159.6369],[22.167,-159.6707],[22.1566,-159.708],[22.0526,-159.7844]];
+// SWELL DIRECTION map layer — ambient, stylized wave fronts drifting FROM today's forecast
+// swell bearing (LIVE.swell_dir), uniform across the island (deep-water swell direction is ~uniform
+// at this scale), drawn in a Leaflet pane BELOW the markers so the safety pins stay on top. It shows
+// direction + period only — NOT a measured per-spot wave field. CSS-only (0 KB), GPU-composited,
+// reduced-motion-safe, auto-paused off-tab. Tap the badge to hide (persisted). rotate(swell_dir) makes
+// the drift travel toward (swell_dir+180), i.e. the way the waves move.
+function renderSwellLayer(){
+  try{
+  if(typeof map==='undefined' || !map) return;
+  if(!document.getElementById('os-swell-css')){
+    const st=document.createElement('style'); st.id='os-swell-css';
+    st.textContent='@keyframes os_swelldrift{from{background-position:0 0}to{background-position:0 26px}}'
+      +'#os-swell-overlay{position:absolute;top:0;left:0;overflow:hidden;pointer-events:none}'
+      +'#os-swell-overlay.off .os-swell-clip{display:none}'
+      +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
+      +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
+      +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.62;perspective:140px;perspective-origin:50% 0}'
+      +'.os-swell-drift{position:absolute;left:-50%;top:-12%;width:200%;height:220%;transform:rotateX(66deg);transform-origin:50% 0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.6) 0 2px,transparent 2px 26px);animation:os_swelldrift 1.4s linear infinite;will-change:background-position;backface-visibility:hidden}'
+      +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
+      +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
+      +'#os-swell-badge:hover{transform:scale(1.05)}'
+      +'.sw-ico{display:block;width:24px;height:24px;overflow:hidden;color:#eaf6f8}.sw-ico svg{display:block;width:24px;height:24px;overflow:hidden}';
+    document.head.appendChild(st);
+  }
+  if(!document.getElementById('os-swell-svg')){
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.id='os-swell-svg'; svg.setAttribute('width','0'); svg.setAttribute('height','0'); svg.style.cssText='position:absolute;width:0;height:0;left:0;top:0';
+    svg.innerHTML='<defs><clipPath id="os-ocean-clip" clipPathUnits="userSpaceOnUse"><path id="os-ocean-path" clip-rule="evenodd" d="M0 0"></path></clipPath></defs>';
+    document.body.appendChild(svg);
+  }
+  const updateClip=()=>{
+    const p=document.getElementById('os-ocean-path'); if(!p||typeof map==='undefined'||!map) return;
+    const sz=map.getSize();
+    const rect='M0 0 H'+sz.x+' V'+sz.y+' H0 Z';
+    const isl=KAUAI_OUTLINE.map((pt,i)=>{ const c=map.latLngToContainerPoint(pt); return (i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1); }).join(' ')+' Z';
+    p.setAttribute('d', rect+' '+isl);
+    // The overlay lives in a Leaflet pane (z 450) so beach markers (z 600) paint ABOVE the
+    // waves. That pane pans with the map, so size the overlay to the viewport and counter the
+    // map-pane translate to keep the drift mesh viewport-fixed (clip is in container coords).
+    const ov2=document.getElementById('os-swell-overlay');
+    if(ov2){ ov2.style.width=sz.x+'px'; ov2.style.height=sz.y+'px';
+      const pp=map.getPane&&map.getPane('mapPane'); const pos=(pp&&typeof L!=='undefined'&&L.DomUtil)?L.DomUtil.getPosition(pp):null;
+      if(pos) ov2.style.transform='translate('+(-pos.x)+'px,'+(-pos.y)+'px)';
+    }
+  };
+  const paint=()=>{
+    const ov=document.getElementById('os-swell-overlay'), badge=document.getElementById('os-swell-badge');
+    const s=window._swellState||{}; if(!ov||!badge||!Number.isFinite(s.sd)) return;
+    const dirs=['N','NE','E','SE','S','SW','W','NW'];
+    const cp=dirs[Math.round((s.sd%360)/45)%8];
+    const on=!ov.classList.contains('off');
+    badge.title='Swell from '+cp+' '+Math.round(s.sd)+'°'+(s.per?(' · '+s.per+'s'):'');
+    badge.setAttribute('aria-label',badge.title+(on?' · tap to hide drift':' · tap to show drift'));
+    badge.style.opacity=on?'1':'.5';
+    badge.innerHTML='<span class="sw-ico"><svg viewBox="0 0 24 18"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><animateTransform attributeName="transform" type="translate" from="0 0" to="-12 0" dur="2s" repeatCount="indefinite"/><path d="M-12 6 q3 -2.4 6 0 t6 0 t6 0 t6 0 t6 0 t6 0 t6 0 t6 0"/><path d="M-12 12 q3 -2.4 6 0 t6 0 t6 0 t6 0 t6 0 t6 0 t6 0 t6 0" opacity=".55"/></g></svg></span>';
+  };
+  let ov=document.getElementById('os-swell-overlay');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='os-swell-overlay';
+    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><div class="os-swell-drift"></div></div></div>';
+    const badge=document.createElement('div'); badge.id='os-swell-badge';
+    badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
+    (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
+    // Custom pane below the marker pane (z 600) so beach pins paint OVER the waves.
+    if(!map.getPane('swell')){ map.createPane('swell'); const _sp=map.getPane('swell'); _sp.style.zIndex='450'; _sp.style.pointerEvents='none'; }
+    map.getPane('swell').appendChild(ov);
+    try{ if(localStorage.getItem('os_swell_off')==='1') ov.classList.add('off'); }catch(e){}
+    document.addEventListener('visibilitychange',()=>{ ov.classList.toggle('paused', document.hidden); });
+    map.on('move zoom moveend zoomend resize viewreset', updateClip);
+  }
+  const D=(typeof LIVE!=='undefined'&&LIVE)?LIVE:null;
+  const sd=(D&&Number.isFinite(D.swell_dir))?(((D.swell_dir%360)+360)%360):null;
+  const per=(D&&Number.isFinite(D.period))?Math.round(D.period):null;
+  const unknown=D?!!D.surf_unknown:true;
+  window._swellState={sd,per};
+  // Wave layer: Beaches tab (all subtabs) + Family ONLY on its "beaches" subtab.
+  // Other Family subtabs (playground, scenic, …) get no waves.
+  const _at=window._activeTab, _sub=window._activeSub;
+  const beachTab=(_at==='beaches')||(_at==='acts'&&_sub==='beaches');
+  var _b=document.getElementById('os-swell-badge');
+  if(sd===null||unknown||!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; return; }
+  ov.style.display=''; if(_b)_b.style.display='flex';
+  ov.querySelector('.os-swell-rot').style.transform='rotate('+sd+'deg)';
+  updateClip();
+  paint();
+  }catch(e){}
+}
 async function rescore(){
   await Promise.all(B.map(async b=>{
     const c=await getCond(b);
@@ -6449,6 +6649,7 @@ async function rescore(){
   }));
   renderMap();
   renderChannels();
+  renderSwellLayer();
   renderHikes();
   renderActs();
   renderMarkets();
