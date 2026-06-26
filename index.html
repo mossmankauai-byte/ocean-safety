@@ -6571,14 +6571,14 @@ function renderSwellLayer(){
   if(typeof map==='undefined' || !map) return;
   if(!document.getElementById('os-swell-css')){
     const st=document.createElement('style'); st.id='os-swell-css';
-    st.textContent='@keyframes os_ringwrap{0%{transform:scale(1.5);opacity:0}14%{opacity:.7}82%{opacity:.5}100%{transform:scale(1);opacity:0}}'
+    st.textContent='@keyframes os_swelldrift{from{background-position:0 0}to{background-position:0 30px}}'
       +'#os-swell-overlay{position:absolute;top:0;left:0;overflow:hidden;pointer-events:none}'
       +'#os-swell-overlay.off .os-swell-clip{display:none}'
-      +'#os-swell-overlay.paused .os-ring{animation-play-state:paused}'
+      +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
       +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
-      +'.os-swell-rings{position:absolute;inset:0;width:100%;height:100%;opacity:.62;overflow:visible}'
-      +'.os-ring{fill:none;stroke:#fff;stroke-width:2.6;vector-effect:non-scaling-stroke;transform-box:view-box;animation:os_ringwrap 5s linear infinite;will-change:transform,opacity}'
-      +'@media (prefers-reduced-motion:reduce){.os-ring{animation:none;opacity:.45}}'
+      +'.os-swell-persp{position:absolute;inset:0;perspective:900px;perspective-origin:50% 0;opacity:.6;overflow:hidden}'
+      +'.os-swell-drift{position:absolute;left:-50%;top:0;width:200%;height:300%;transform:rotateX(63deg);transform-origin:50% 0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.6) 0 2px,transparent 2px 30px);animation:os_swelldrift 2s linear infinite;will-change:background-position}'
+      +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
       +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
       +'#os-swell-badge:hover{transform:scale(1.05)}'
       +'.sw-ico{display:block;width:24px;height:24px;overflow:hidden;color:#eaf6f8}.sw-ico svg{display:block;width:24px;height:24px;overflow:hidden}';
@@ -6596,14 +6596,10 @@ function renderSwellLayer(){
     const pts=KAUAI_OUTLINE.map(pt=>map.latLngToContainerPoint(pt));
     const isl=pts.map((c,i)=>(i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1)).join(' ')+' Z';
     p.setAttribute('d', rect+' '+isl);
-    // Island-wrapping swell rings (#14): each ring is the SAME coastline path, scaled about the
-    // island centroid via CSS so it animates from offshore inward onto the coast.
-    let cx=0,cy=0; for(var _i=0;_i<pts.length;_i++){ cx+=pts[_i].x; cy+=pts[_i].y; } cx/=pts.length; cy/=pts.length;
-    const svgR=document.querySelector('#os-swell-overlay .os-swell-rings');
-    if(svgR){ svgR.setAttribute('viewBox','0 0 '+sz.x+' '+sz.y); svgR.setAttribute('width',sz.x); svgR.setAttribute('height',sz.y);
-      const rings=svgR.querySelectorAll('.os-ring');
-      for(var _j=0;_j<rings.length;_j++){ rings[_j].setAttribute('d',isl); rings[_j].style.transformOrigin=cx.toFixed(1)+'px '+cy.toFixed(1)+'px'; }
-    }
+    // 3D horizon swell (#13): scale the CSS perspective to the viewport so the tilted crest grid
+    // stays visible at any screen size (a fixed small perspective collapsed it into nothing before).
+    const persp=document.querySelector('#os-swell-overlay .os-swell-persp');
+    if(persp){ persp.style.perspective=Math.round(Math.max(360,sz.y*1.15))+'px'; }
     // Overlay lives in a Leaflet pane (z 450, below the marker pane) so beach pins paint over the
     // waves. The pane pans with the map, so size the overlay to the viewport and counter the
     // map-pane translate to keep the rings viewport-fixed (paths are in container coords).
@@ -6627,8 +6623,7 @@ function renderSwellLayer(){
   let ov=document.getElementById('os-swell-overlay');
   if(!ov){
     ov=document.createElement('div'); ov.id='os-swell-overlay';
-    var _rings='';for(var _k=0;_k<5;_k++){_rings+='<path class="os-ring" style="animation-delay:'+(-_k)+'s"></path>';}
-    ov.innerHTML='<div class="os-swell-clip"><svg class="os-swell-rings" aria-hidden="true" preserveAspectRatio="none">'+_rings+'</svg></div>';
+    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-persp"><div class="os-swell-drift"></div></div></div>';
     const badge=document.createElement('div'); badge.id='os-swell-badge';
     badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
     (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
