@@ -3782,8 +3782,8 @@ async function getCond(b){
   const c = {
     es: surfUnknown ? SURF_UNAVAILABLE : eff(D.surf,D.swell_dir,b,D),
     oc:oc(D.wind,D.wd,b),
-    tide:D.tide, per:D.period, tt:D.tt,
-    wind:D.wind, cloud:D.cloud, uv:uvDay,
+    tide:D.tide, per:D.period, tt:D.tt, sd:D.swell_dir,
+    wind:D.wind, wd:D.wd, cloud:D.cloud, uv:uvDay,
     rain:D.rain, rating:0,
     golden, dow:new Date().getDay(), h
   };
@@ -5649,6 +5649,56 @@ function openSheet(id){
         <span><b>Reef break.</b> On a south swell like today's, the surf here can break a good bit bigger than this open-water reading. Watch a few sets from shore before you go in, and check with a lifeguard if one's on duty.</span>
       </div>`
     : '';
+  // WAVE-1 wind + tide chips — the two questions a swimmer reflexively asks
+  // ("which way is the wind" / "is the tide coming in or going out"). 0-KB inline SVG,
+  // static, honest labels ("forecast" / "predicted"); arrow + word so meaning never rides
+  // on color alone. oc>0 onshore (choppy), oc<0 offshore (cleaner). Falling tide flags the
+  // honest current-strength note (rip() amplifies x1.2 on the ebb).
+  const _windTideChips = (() => {
+    if(!c) return '';
+    const spd = Math.round(c.wind || 0);
+    const ocv = c.oc || 0;
+    const windWord = ocv > 2 ? 'Onshore' : ocv < -2 ? 'Offshore' : 'Cross-shore';
+    const haveDir = Number.isFinite(c.wd);
+    const blow = haveDir ? (c.wd + 180) % 360 : 0; // arrow points the way the wind blows TO
+    const falling = c.tt === 'falling';
+    const cell = (inner) => `<div style="flex:1;min-width:148px;display:flex;align-items:center;gap:9px;padding:8px 11px;background:#eef3f5;border:1px solid #d9e3e6;border-radius:8px">${inner}</div>`;
+    const windArrow = haveDir ? `<svg width="22" height="22" viewBox="0 0 24 24" style="flex-shrink:0;transform:rotate(${blow}deg)" fill="none" stroke="#33586a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg>` : '';
+    const tideArrow = `<svg width="20" height="20" viewBox="0 0 24 24" style="flex-shrink:0" fill="none" stroke="#33586a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${falling ? '<line x1="12" y1="4" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/>' : '<line x1="12" y1="20" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/>'}</svg>`;
+    const haveSwell = !c.surf_unknown && Number.isFinite(c.sd) && Number.isFinite(c.per);
+    const swBlow = haveSwell ? (c.sd + 180) % 360 : 0; // arrow points the way the swell travels
+    const swellCell = haveSwell ? cell(`<svg width="22" height="22" viewBox="0 0 24 24" style="flex-shrink:0;transform:rotate(${swBlow}deg)" fill="none" stroke="#33586a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg><div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">Swell ${Math.round(c.per)}s</div><div style="font-size:10.5px;color:var(--mute)">forecast swell</div></div>`) : '';
+    return `<div style="display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap">
+      ${cell(`${windArrow}<div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">${windWord} ${spd} mph</div><div style="font-size:10.5px;color:var(--mute)">forecast wind</div></div>`)}
+      ${cell(`${tideArrow}<div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">Tide ${falling ? 'falling' : 'rising'}</div><div style="font-size:10.5px;color:var(--mute)">${falling ? 'predicted · currents can run stronger' : 'predicted'}</div></div>`)}
+      ${swellCell}
+    </div>`;
+  })();
+  // BROWN-WATER notice — discrete advisory (NOT a plume blob/extent). Runoff after rain.
+  const _brownNotice = (c && c.brown)
+    ? `<div style="margin:10px 0 4px;padding:10px 12px;background:#f3ead9;border-left:3px solid #9a6a2f;border-radius:8px;color:#6b4a1e;font-size:13px;line-height:1.45;display:flex;align-items:flex-start;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9a6a2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11Z"/></svg>
+        <span><b>Brown water likely.</b> Runoff after heavy rain cuts visibility and water quality near stream mouths. If the water looks murky or brown, stay out until it clears.</span>
+      </div>`
+    : '';
+  // RIP RISK (modeled, relative) — rip() is a COARSE proxy (morph x period x falling-tide x1.2),
+  // NOT a measured or forecast field. 3 caution-erring bins by WORD (never color alone); never says
+  // "safe"; stale/missing marine|tide => "treat as elevated". Pairs with the Current Hazards list below.
+  const _ripRow = (() => {
+    if(!c || b.warning_only) return '';
+    const unknown = !!c.surf_unknown;                       // no fresh marine/tide -> err to elevated
+    const rv = (typeof rip === 'function') ? rip(b,c) : 0;  // 0..1
+    let word, sub, accent;
+    if(unknown){ word='Treat as elevated'; sub='conditions unavailable — ask a lifeguard'; accent='#d97706'; }
+    else if(rv >= 0.55){ word='High'; sub='strong seaward pull likely, more so on a falling tide'; accent='#b91c1c'; }
+    else if(rv >= 0.30){ word='Elevated'; sub='use caution and stay near a lifeguard'; accent='#d97706'; }
+    else { word='Lower'; sub='still use caution — conditions can change quickly'; accent='#5b8a9a'; }
+    const chNote = (b.channels && b.channels.length) ? ' Known channels are listed under Current Hazards below.' : '';
+    return `<div style="margin:8px 0 4px;padding:9px 12px;background:#f4f6f7;border-left:3px solid ${accent};border-radius:8px;color:#33414a;font-size:12.5px;line-height:1.45;display:flex;align-items:flex-start;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M3 13c3-4 6-4 9 0s6 4 9 0"/><path d="M6 20l-2-2 2-2M18 20l2-2-2-2"/></svg>
+        <span><b>Rip risk: ${word}.</b> ${sub}.${chNote} <span style="color:var(--mute)">Modeled relative estimate, not a measurement.</span></span>
+      </div>`;
+  })();
   const pois=b.pois.map(poiCard).join('');
   const ps=pois?`<div class="slbl">Nearby</div><div class="prow">${pois}</div>`:'';
   const channels=(b.channels||[]).map(channelCard).join('');
@@ -5689,7 +5739,10 @@ function openSheet(id){
     ${weatherBar(c)}
     ${_bigSurfNotice}
     ${_jellyNotice}
+    ${_brownNotice}
     ${_reefNotice}
+    ${_windTideChips}
+    ${_ripRow}
     ${(typeof outlookChipsHtml === 'function') ? outlookChipsHtml(c) : ''}
     ${condIcons(c,b)}
     ${parkRow}
