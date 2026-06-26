@@ -5870,7 +5870,10 @@ async function _rainRefresh(){
   if(!window._rainOn || typeof map==='undefined' || !map || typeof L==='undefined') return;
   const url=await _rainFrameUrl(); if(!url || !window._rainOn) return;
   if(!map.getPane('rain')){ map.createPane('rain'); const p=map.getPane('rain'); p.style.zIndex='250'; p.style.pointerEvents='none'; }   // lowest overlay: just above the island/basemap (z200), BELOW overlays, swell (450), and all markers/POIs (markerPane 600)
-  const nl=L.tileLayer(url,{opacity:.5,maxZoom:19,pane:'rain',attribution:'Radar © RainViewer',updateWhenIdle:true}); nl.addTo(map);
+  // RainViewer radar tiles only exist to z7; at z8+ it returns a grey "zoom level not supported"
+  // placeholder. maxNativeZoom:7 makes Leaflet fetch radar only up to z7 and UPSCALE it for the
+  // app's zoom (z9.5+), so it shows a soft heat field instead of error tiles.
+  const nl=L.tileLayer(url,{opacity:.5,maxZoom:19,maxNativeZoom:7,pane:'rain',attribution:'Radar © RainViewer',updateWhenIdle:true}); nl.addTo(map);
   const old=window._rainLayer; window._rainLayer=nl;
   if(old) setTimeout(()=>{ try{map.removeLayer(old);}catch(e){} },400);   // swap without a flash
 }
