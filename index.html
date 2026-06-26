@@ -6505,9 +6505,9 @@ function renderSwellLayer(){
   if(!document.getElementById('os-swell-css')){
     const st=document.createElement('style'); st.id='os-swell-css';
     st.textContent='@keyframes os_swelldrift{from{transform:translateY(-46px)}to{transform:translateY(0)}}'
-      +'.leaflet-swell-pane{opacity:.28;pointer-events:none}'
-      +'.os-swell-rot{position:absolute;inset:-90%}'
-      +'.os-swell-drift{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(255,255,255,.34) 30px 34px,rgba(255,255,255,.12) 34px 46px);animation:os_swelldrift 2.6s linear infinite;will-change:transform}'
+      +'.leaflet-swell-pane{opacity:.36;pointer-events:none}'
+      +'.os-swell-rot{position:absolute;left:-150vw;top:-150vh;width:300vw;height:300vh;transform-origin:center center}'
+      +'.os-swell-drift{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 28px,rgba(255,255,255,.5) 28px 33px,rgba(255,255,255,.18) 33px 46px);animation:os_swelldrift 2.6s linear infinite;will-change:transform}'
       +'.leaflet-swell-pane.off .os-swell-rot{display:none}'
       +'.leaflet-swell-pane.paused .os-swell-drift{animation-play-state:paused}'
       +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
