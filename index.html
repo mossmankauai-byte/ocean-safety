@@ -3838,8 +3838,13 @@ async function getCond(b){
 let map,mkrs={},ints=['snorkel','swim'],scored={};
 function initMap(){
   map=L.map('map',{center:[22.05,-159.50],zoom:10,minZoom:10,zoomControl:false,attributionControl:false});
-  window._streetTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'©OpenStreetMap ©CartoDB',subdomains:'abcd'}).addTo(map);
-  window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri'});
+  // OFFLINE FALLBACK: map tiles are an external CDN the service worker can't cache, so with no
+  // connection every tile 404s. errorTileUrl swaps each failed tile for a transparent 1px PNG, so
+  // the .leaflet-container ocean-blue background shows through (a flat sea + the beach pins) instead
+  // of a grid of broken-tile squares. Pins/markers are DOM, not tiles, so they still render offline.
+  const _blankTile='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  window._streetTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'©OpenStreetMap ©CartoDB',subdomains:'abcd',errorTileUrl:_blankTile}).addTo(map);
+  window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri',errorTileUrl:_blankTile});
   window._isSat = false;
 
   // ── Debug pin-coordinate audit feature ──
