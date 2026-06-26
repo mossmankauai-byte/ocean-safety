@@ -1522,12 +1522,17 @@ a{text-decoration:none;color:inherit}
 /* Family tab: the top map controls (status pill, satellite toggle, wave-squares badge)
    sat too high and crowded the header — nudge the cluster down a touch on Family only.
    Beaches/other tabs keep their original positions. */
-body[data-tab="acts"] .stbadge{top:76px}
-body[data-tab="acts"] .kidbadge{top:108px}
+body[data-tab="acts"] .stbadge,body[data-tab="beaches"] .stbadge{top:76px}
+body[data-tab="acts"] .kidbadge,body[data-tab="beaches"] .kidbadge{top:108px}
 body[data-tab="acts"] #satToggle{top:188px}
 body[data-tab="acts"] #os-swell-badge{top:188px}
 body[data-tab="acts"] #locateBtn{top:238px}
 body[data-tab="acts"] .saved-chip{top:243px}
+/* Collapsible wind/tide/swell chips in the beach card */
+summary.cond-fold-sum{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#5b7682;padding:5px 2px;-webkit-user-select:none;user-select:none}
+summary.cond-fold-sum::-webkit-details-marker{display:none}
+.cond-fold-sum .cf-chev{transition:transform .2s;color:#8aa0aa}
+details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 #locateBtn.searching svg{animation:locSpin 1.2s linear infinite}
 @keyframes locSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
@@ -3837,7 +3842,7 @@ async function getCond(b){
 // MAP
 let map,mkrs={},ints=['snorkel','swim'],scored={};
 function initMap(){
-  map=L.map('map',{center:[22.05,-159.50],zoom:10,minZoom:10,zoomControl:false,attributionControl:false});
+  map=L.map('map',{center:[22.05,-159.50],zoom:9.5,minZoom:9,zoomSnap:0.5,zoomControl:false,attributionControl:false});
   // OFFLINE FALLBACK: map tiles are an external CDN the service worker can't cache, so with no
   // connection every tile 404s. errorTileUrl swaps each failed tile for a transparent 1px PNG, so
   // the .leaflet-container ocean-blue background shows through (a flat sea + the beach pins) instead
@@ -5727,11 +5732,11 @@ function openSheet(id){
     const haveSwell = !c.surf_unknown && Number.isFinite(c.sd) && Number.isFinite(c.per);
     const swBlow = haveSwell ? (c.sd + 180) % 360 : 0; // arrow points the way the swell travels
     const swellCell = haveSwell ? cell(`<svg width="22" height="22" viewBox="0 0 24 24" style="flex-shrink:0;transform:rotate(${swBlow}deg)" fill="none" stroke="#33586a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg><div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">Swell ${Math.round(c.per)}s</div><div style="font-size:10.5px;color:var(--mute)">forecast swell</div></div>`) : '';
-    return `<div style="display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap">
+    return `<details class="cond-fold" open><summary class="cond-fold-sum"><svg class="cf-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>Wind, tide &amp; swell</summary><div style="display:flex;gap:8px;margin:8px 0 4px;flex-wrap:wrap">
       ${cell(`${windArrow}<div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">${windWord} ${spd} mph</div><div style="font-size:10.5px;color:var(--mute)">forecast wind</div></div>`)}
       ${cell(`${tideArrow}<div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">Tide ${falling ? 'falling' : 'rising'}</div><div style="font-size:10.5px;color:var(--mute)">${falling ? 'predicted · currents can run stronger' : 'predicted'}</div></div>`)}
       ${swellCell}
-    </div>`;
+    </div></details>`;
   })();
   // BROWN-WATER notice — discrete advisory (NOT a plume blob/extent). Runoff after rain.
   const _brownNotice = (c && c.brown)
@@ -6571,14 +6576,14 @@ function renderSwellLayer(){
   if(typeof map==='undefined' || !map) return;
   if(!document.getElementById('os-swell-css')){
     const st=document.createElement('style'); st.id='os-swell-css';
-    st.textContent=''
+    st.textContent='@keyframes os_swelldrift{from{background-position:0 0}to{background-position:0 30px}}'
       +'#os-swell-overlay{position:absolute;top:0;left:0;overflow:hidden;pointer-events:none}'
       +'#os-swell-overlay.off .os-swell-clip{display:none}'
-      +'#os-swell-overlay.paused .os-swell-flow path{animation-play-state:paused}'
+      +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
       +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
-      +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.62}'
-      +'.os-swell-flow{position:absolute;inset:0;width:100%;height:100%}.os-swell-flow path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round}'
-      +'@media (prefers-reduced-motion:reduce){.os-swell-flow path{animation:none}}'
+      +'.os-swell-persp{position:absolute;inset:0;perspective:900px;perspective-origin:50% 0;opacity:.6;overflow:hidden}'
+      +'.os-swell-drift{position:absolute;left:-50%;top:0;width:200%;height:300%;transform:rotateX(63deg);transform-origin:50% 0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.6) 0 2px,transparent 2px 30px);animation:os_swelldrift 2s linear infinite;will-change:background-position}'
+      +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
       +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
       +'#os-swell-badge:hover{transform:scale(1.05)}'
       +'.sw-ico{display:block;width:24px;height:24px;overflow:hidden;color:#eaf6f8}.sw-ico svg{display:block;width:24px;height:24px;overflow:hidden}';
@@ -6593,11 +6598,16 @@ function renderSwellLayer(){
     const p=document.getElementById('os-ocean-path'); if(!p||typeof map==='undefined'||!map) return;
     const sz=map.getSize();
     const rect='M0 0 H'+sz.x+' V'+sz.y+' H0 Z';
-    const isl=KAUAI_OUTLINE.map((pt,i)=>{ const c=map.latLngToContainerPoint(pt); return (i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1); }).join(' ')+' Z';
+    const pts=KAUAI_OUTLINE.map(pt=>map.latLngToContainerPoint(pt));
+    const isl=pts.map((c,i)=>(i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1)).join(' ')+' Z';
     p.setAttribute('d', rect+' '+isl);
-    // The overlay lives in a Leaflet pane (z 450) so beach markers (z 600) paint ABOVE the
-    // waves. That pane pans with the map, so size the overlay to the viewport and counter the
-    // map-pane translate to keep the drift mesh viewport-fixed (clip is in container coords).
+    // 3D horizon swell (#13): scale the CSS perspective to the viewport so the tilted crest grid
+    // stays visible at any screen size (a fixed small perspective collapsed it into nothing before).
+    const persp=document.querySelector('#os-swell-overlay .os-swell-persp');
+    if(persp){ persp.style.perspective=Math.round(Math.max(360,sz.y*1.15))+'px'; }
+    // Overlay lives in a Leaflet pane (z 450, below the marker pane) so beach pins paint over the
+    // waves. The pane pans with the map, so size the overlay to the viewport and counter the
+    // map-pane translate to keep the rings viewport-fixed (paths are in container coords).
     const ov2=document.getElementById('os-swell-overlay');
     if(ov2){ ov2.style.width=sz.x+'px'; ov2.style.height=sz.y+'px';
       const pp=map.getPane&&map.getPane('mapPane'); const pos=(pp&&typeof L!=='undefined'&&L.DomUtil)?L.DomUtil.getPosition(pp):null;
@@ -6618,10 +6628,7 @@ function renderSwellLayer(){
   let ov=document.getElementById('os-swell-overlay');
   if(!ov){
     ov=document.createElement('div'); ov.id='os-swell-overlay';
-    var _fl='';for(var _y=-50;_y<=350;_y+=34){_fl+='<path d="M -40 '+_y+' C 60 '+(_y-13)+', 140 '+(_y+13)+', 240 '+_y+' S 400 '+(_y-13)+', 460 '+_y+'"/>';}
-    var _rm=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    var _anim=_rm?'':'<animateTransform attributeName="transform" type="translate" from="0 0" to="0 34" dur="3.2s" repeatCount="indefinite"/>';
-    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><svg class="os-swell-flow" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g>'+_anim+_fl+'</g></svg></div></div>';
+    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-persp"><div class="os-swell-drift"></div></div></div>';
     const badge=document.createElement('div'); badge.id='os-swell-badge';
     badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
     (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
@@ -6644,7 +6651,6 @@ function renderSwellLayer(){
   var _b=document.getElementById('os-swell-badge');
   if(sd===null||unknown||!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; return; }
   ov.style.display=''; if(_b)_b.style.display='flex';
-  ov.querySelector('.os-swell-rot').style.transform='rotate('+sd+'deg)';
   updateClip();
   paint();
   }catch(e){}
