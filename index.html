@@ -6213,6 +6213,7 @@ function wireTabs(){
       if(pills) pills.style.display = 'none';
       // After buildSubtabs sets the default ints for beaches, run rescore so the map paints with that filter.
       if(window._activeTab === 'beaches') rescore();
+      else if(typeof renderSwellLayer==='function') renderSwellLayer();
     });
   });
   // Initialize with Family subtabs since boot opens on the Family tab
@@ -6563,7 +6564,9 @@ function renderSwellLayer(){
   const per=(D&&Number.isFinite(D.period))?Math.round(D.period):null;
   const unknown=D?!!D.surf_unknown:true;
   window._swellState={sd,per};
-  if(sd===null||unknown){ ov.style.display='none'; return; }
+  // Only show the wave layer on beach-context tabs (Beaches + all its subtabs, and Family).
+  const beachTab=(window._activeTab==='beaches'||window._activeTab==='acts');
+  if(sd===null||unknown||!beachTab){ ov.style.display='none'; return; }
   ov.style.display='';
   ov.querySelector('.os-swell-rot').style.transform='rotate('+sd+'deg)';
   updateClip();
