@@ -1522,8 +1522,8 @@ a{text-decoration:none;color:inherit}
 /* Family tab: the top map controls (status pill, satellite toggle, wave-squares badge)
    sat too high and crowded the header — nudge the cluster down a touch on Family only.
    Beaches/other tabs keep their original positions. */
-body[data-tab="acts"] .stbadge{top:40px}
-body[data-tab="acts"] .kidbadge{top:70px}
+body[data-tab="acts"] .stbadge{top:52px}
+body[data-tab="acts"] .kidbadge{top:84px}
 body[data-tab="acts"] #satToggle{top:188px}
 body[data-tab="acts"] #os-swell-badge{top:188px}
 body[data-tab="acts"] #locateBtn{top:238px}
@@ -6192,6 +6192,7 @@ function buildSubtabs(tabName){
         renderDrinks();
         renderMarkets();
       }
+      if(typeof renderSwellLayer==='function') renderSwellLayer();  // gate waves per subtab
     });
   });
 }
@@ -6566,7 +6567,7 @@ function renderSwellLayer(){
   if(!document.getElementById('os-swell-css')){
     const st=document.createElement('style'); st.id='os-swell-css';
     st.textContent='@keyframes os_swelldrift{from{transform:translateY(-54px)}to{transform:translateY(0)}}'
-      +'#os-swell-overlay{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:401}'
+      +'#os-swell-overlay{position:absolute;top:0;left:0;overflow:hidden;pointer-events:none}'
       +'#os-swell-overlay.off .os-swell-clip{display:none}'
       +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
       +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
@@ -6589,6 +6590,14 @@ function renderSwellLayer(){
     const rect='M0 0 H'+sz.x+' V'+sz.y+' H0 Z';
     const isl=KAUAI_OUTLINE.map((pt,i)=>{ const c=map.latLngToContainerPoint(pt); return (i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1); }).join(' ')+' Z';
     p.setAttribute('d', rect+' '+isl);
+    // The overlay lives in a Leaflet pane (z 450) so beach markers (z 600) paint ABOVE the
+    // waves. That pane pans with the map, so size the overlay to the viewport and counter the
+    // map-pane translate to keep the drift mesh viewport-fixed (clip is in container coords).
+    const ov2=document.getElementById('os-swell-overlay');
+    if(ov2){ ov2.style.width=sz.x+'px'; ov2.style.height=sz.y+'px';
+      const pp=map.getPane&&map.getPane('mapPane'); const pos=(pp&&typeof L!=='undefined'&&L.DomUtil)?L.DomUtil.getPosition(pp):null;
+      if(pos) ov2.style.transform='translate('+(-pos.x)+'px,'+(-pos.y)+'px)';
+    }
   };
   const paint=()=>{
     const ov=document.getElementById('os-swell-overlay'), badge=document.getElementById('os-swell-badge');
@@ -6608,7 +6617,9 @@ function renderSwellLayer(){
     const badge=document.createElement('div'); badge.id='os-swell-badge';
     badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
     (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
-    map.getContainer().appendChild(ov);
+    // Custom pane below the marker pane (z 600) so beach pins paint OVER the waves.
+    if(!map.getPane('swell')){ map.createPane('swell'); const _sp=map.getPane('swell'); _sp.style.zIndex='450'; _sp.style.pointerEvents='none'; }
+    map.getPane('swell').appendChild(ov);
     try{ if(localStorage.getItem('os_swell_off')==='1') ov.classList.add('off'); }catch(e){}
     document.addEventListener('visibilitychange',()=>{ ov.classList.toggle('paused', document.hidden); });
     map.on('move zoom moveend zoomend resize viewreset', updateClip);
@@ -6618,8 +6629,10 @@ function renderSwellLayer(){
   const per=(D&&Number.isFinite(D.period))?Math.round(D.period):null;
   const unknown=D?!!D.surf_unknown:true;
   window._swellState={sd,per};
-  // Only show the wave layer on beach-context tabs (Beaches + all its subtabs, and Family).
-  const beachTab=(window._activeTab==='beaches'||window._activeTab==='acts');
+  // Wave layer: Beaches tab (all subtabs) + Family ONLY on its "beaches" subtab.
+  // Other Family subtabs (playground, scenic, …) get no waves.
+  const _at=window._activeTab, _sub=window._activeSub;
+  const beachTab=(_at==='beaches')||(_at==='acts'&&_sub==='beaches');
   var _b=document.getElementById('os-swell-badge');
   if(sd===null||unknown||!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; return; }
   ov.style.display=''; if(_b)_b.style.display='flex';
