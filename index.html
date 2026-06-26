@@ -5863,7 +5863,7 @@ function toggleSat(){
 // Not service-worker-cached (forecast). Toggle button sits with the satellite + waves controls.
 window._fcOn=false; window._fcData=null; window._fcCircles=null; window._fcTimes=null; window._fcBase=0; window._fcHour=0; window._fcTimer=null;
 const _FC_GRID=(function(){ var g=[],LA=[21.90,21.99,22.08,22.17],LO=[-159.76,-159.64,-159.52,-159.40,-159.28]; for(var a=0;a<LA.length;a++)for(var o=0;o<LO.length;o++)g.push([LA[a],LO[o]]); return g; })();
-function _fcColor(mm){ return mm<0.1?null : mm<0.4?'#8fd3ff' : mm<1?'#3aa0ff' : mm<2.5?'#ffd24d' : mm<6?'#ff8c3a' : '#ff4d4d'; }
+function _fcColor(mm){ return mm<0.1?null : mm<0.4?'#f4b6e0' : mm<1?'#e0479e' : mm<2.5?'#c026d3' : mm<6?'#9333ea' : '#6d28d9'; }   // palette: magenta -> violet (high contrast on blue/green map)
 async function _fcFetch(){
   var la=_FC_GRID.map(function(p){return p[0].toFixed(2);}).join(','), lo=_FC_GRID.map(function(p){return p[1].toFixed(2);}).join(',');
   var url='https://api.open-meteo.com/v1/forecast?latitude='+la+'&longitude='+lo+'&hourly=precipitation&forecast_days=2&timezone=Pacific%2FHonolulu&cell_selection=nearest';
