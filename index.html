@@ -6494,25 +6494,6 @@ function renderOutlookSheet(){
     </div>`;
 }
 
-// TEMP DEBUG — visible readout to diagnose why the swell layer isn't showing. Remove after.
-function __swellDebug(){
-  try{
-    let d=document.getElementById('os-swell-debug');
-    if(!d){ d=document.createElement('div'); d.id='os-swell-debug'; d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#111;color:#3f3;font:11px/1.4 monospace;padding:6px 8px;white-space:pre-wrap'; document.body.appendChild(d); }
-    const ov=document.getElementById('os-swell-overlay');
-    const r=ov?ov.getBoundingClientRect():null;
-    const rot=ov?ov.querySelector('.os-swell-rot'):null;
-    const rr=rot?rot.getBoundingClientRect():null;
-    const cs=ov?getComputedStyle(ov):null;
-    const L=(typeof LIVE!=='undefined'&&LIVE)?LIVE:null;
-    const mc=(typeof map!=='undefined'&&map)?map.getContainer().getBoundingClientRect():null;
-    d.textContent='SWELL DEBUG ran='+(window.__swellRan||0)+' err='+(window.__swellErr||'none')
-      +'\nLIVE.swell_dir='+(L?L.swell_dir:'noLIVE')+' surf_unknown='+(L?L.surf_unknown:'?')+' period='+(L?L.period:'?')
-      +'\noverlay='+(!!ov)+' disp='+(cs?cs.display:'-')+' z='+(cs?cs.zIndex:'-')+' op='+(cs?cs.opacity:'-')+' size='+(r?Math.round(r.width)+'x'+Math.round(r.height):'-')
-      +'\nrot size='+(rr?Math.round(rr.width)+'x'+Math.round(rr.height):'-')+' tf='+(rot?rot.style.transform:'-')
-      +'\nmapContainer='+(mc?Math.round(mc.width)+'x'+Math.round(mc.height):'noMap');
-  }catch(e){}
-}
 // SWELL DIRECTION map layer — ambient, stylized wave fronts drifting FROM today's forecast
 // swell bearing (LIVE.swell_dir), uniform across the island (deep-water swell direction is ~uniform
 // at this scale), drawn in a Leaflet pane BELOW the markers so the safety pins stay on top. It shows
@@ -6520,8 +6501,8 @@ function __swellDebug(){
 // reduced-motion-safe, auto-paused off-tab. Tap the badge to hide (persisted). rotate(swell_dir) makes
 // the drift travel toward (swell_dir+180), i.e. the way the waves move.
 function renderSwellLayer(){
-  window.__swellRan=(window.__swellRan||0)+1; try{
-  if(typeof map==='undefined' || !map){ window.__swellErr='no map'; return; }
+  try{
+  if(typeof map==='undefined' || !map) return;
   if(!document.getElementById('os-swell-css')){
     const st=document.createElement('style'); st.id='os-swell-css';
     st.textContent='@keyframes os_swelldrift{from{transform:translateY(-46px)}to{transform:translateY(0)}}'
@@ -6562,7 +6543,7 @@ function renderSwellLayer(){
   ov.style.display='';
   ov.querySelector('.os-swell-rot').style.transform='rotate('+sd+'deg)';
   paint();
-  }catch(e){ window.__swellErr=String((e&&e.message)||e); }
+  }catch(e){}
 }
 async function rescore(){
   await Promise.all(B.map(async b=>{
@@ -6573,7 +6554,6 @@ async function rescore(){
   renderMap();
   renderChannels();
   renderSwellLayer();
-  if(typeof __swellDebug==='function') __swellDebug();
   renderHikes();
   renderActs();
   renderMarkets();
