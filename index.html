@@ -6576,13 +6576,13 @@ function renderSwellLayer(){
   if(typeof map==='undefined' || !map) return;
   if(!document.getElementById('os-swell-css')){
     const st=document.createElement('style'); st.id='os-swell-css';
-    st.textContent='@keyframes os_swelldrift{from{background-position:0 0}to{background-position:0 30px}}'
+    st.textContent='@keyframes os_swelldrift{from{transform:translateY(-54px)}to{transform:translateY(0)}}'
       +'#os-swell-overlay{position:absolute;top:0;left:0;overflow:hidden;pointer-events:none}'
       +'#os-swell-overlay.off .os-swell-clip{display:none}'
       +'#os-swell-overlay.paused .os-swell-drift{animation-play-state:paused}'
       +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
-      +'.os-swell-persp{position:absolute;inset:0;perspective:900px;perspective-origin:50% 0;opacity:.6;overflow:hidden}'
-      +'.os-swell-drift{position:absolute;left:-50%;top:0;width:200%;height:300%;transform:rotateX(63deg);transform-origin:50% 0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.6) 0 2px,transparent 2px 30px);animation:os_swelldrift 2s linear infinite;will-change:background-position}'
+      +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.62}'
+      +'.os-swell-drift{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.6) 3px,transparent 3px),linear-gradient(90deg,rgba(255,255,255,.6) 3px,transparent 3px);background-size:54px 54px;animation:os_swelldrift 1.3s linear infinite;will-change:transform}'
       +'@media (prefers-reduced-motion:reduce){.os-swell-drift{animation:none}}'
       +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
       +'#os-swell-badge:hover{transform:scale(1.05)}'
@@ -6601,10 +6601,6 @@ function renderSwellLayer(){
     const pts=KAUAI_OUTLINE.map(pt=>map.latLngToContainerPoint(pt));
     const isl=pts.map((c,i)=>(i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1)).join(' ')+' Z';
     p.setAttribute('d', rect+' '+isl);
-    // 3D horizon swell (#13): scale the CSS perspective to the viewport so the tilted crest grid
-    // stays visible at any screen size (a fixed small perspective collapsed it into nothing before).
-    const persp=document.querySelector('#os-swell-overlay .os-swell-persp');
-    if(persp){ persp.style.perspective=Math.round(Math.max(360,sz.y*1.15))+'px'; }
     // Overlay lives in a Leaflet pane (z 450, below the marker pane) so beach pins paint over the
     // waves. The pane pans with the map, so size the overlay to the viewport and counter the
     // map-pane translate to keep the rings viewport-fixed (paths are in container coords).
@@ -6628,7 +6624,7 @@ function renderSwellLayer(){
   let ov=document.getElementById('os-swell-overlay');
   if(!ov){
     ov=document.createElement('div'); ov.id='os-swell-overlay';
-    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-persp"><div class="os-swell-drift"></div></div></div>';
+    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><div class="os-swell-drift"></div></div></div>';
     const badge=document.createElement('div'); badge.id='os-swell-badge';
     badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
     (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
@@ -6651,6 +6647,7 @@ function renderSwellLayer(){
   var _b=document.getElementById('os-swell-badge');
   if(sd===null||unknown||!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; return; }
   ov.style.display=''; if(_b)_b.style.display='flex';
+  ov.querySelector('.os-swell-rot').style.transform='rotate('+sd+'deg)';
   updateClip();
   paint();
   }catch(e){}
