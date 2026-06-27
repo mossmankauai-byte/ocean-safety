@@ -2001,6 +2001,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 // BEACHES
 const B=[
   {id:'anini',name:'ʻAnini Beach',n:'Anini',r:'North Shore',lat:22.2255,lon:-159.5012,
+   caution:"Calm inside Kauaʻi's biggest reef in summer, but the channel and outer water turn dangerous in winter swell, and there have been drownings here. Stay inside the reef and check today's surf.",
    facing:0,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'seasonal_active',lg_hours:'9am–5:30pm seasonal',sq:8,scenic:9,len:2200,
    depth:5,stream:false,rain_mm:40,tidal:false,west:false,kid:true,black:false,water_temp:78,
    parking:'Small lot off Anini Rd. Fills fast on weekends — arrive before 8am.',
@@ -2025,6 +2026,7 @@ const B=[
    photo:'https://upload.wikimedia.org/wikipedia/commons/3/3d/Beach_at_Salt_Pond_Park%2C_Kauai%2C_Hawaii_%2841862317925%29.jpg',
    pois:['sunscreen','kauaisea']},
   {id:'hanalei',name:'Hanalei Bay',n:'Hanalei',r:'North Shore',lat:22.2097,lon:-159.5033,
+   caution:"A summer swim bay that closes to swimming roughly November through March, when big north swell and a strong river-mouth current take over. There have been drownings here. Swim near the lifeguard when flags allow.",
    facing:355,reef:false,morph:'open_beach',sb:4,sandy:true,lg:'seasonal_active',lg_hours:'9am–5:30pm seasonal',sq:4,scenic:10,len:7920,
    depth:9,stream:true,rain_mm:25,tidal:false,west:false,kid:false,black:false,water_temp:77,
    parking:'Black Pot Beach lot fills by 8am on weekends. Overflow parking on Weke Rd.',
@@ -2033,6 +2035,7 @@ const B=[
    photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Hanalei_Bay_2_-_Kauai.jpg/1280px-Hanalei_Bay_2_-_Kauai.jpg',
    pois:['napali','kayakwailua']},
   {id:'lydgate',name:'Lydgate Beach Park',n:'Lydgate',r:'East Side',lat:22.0388,lon:-159.3406,
+   caution:"The walled lagoon is calm and guarded, good for young kids. The open beach outside the breakwater has strong surf and current, and a drowning has happened there. Keep little ones inside the lagoon.",
    facing:90,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'full_time',lg_hours:'9am–5:30pm daily',sq:7,scenic:6,len:600,
    depth:4,stream:false,rain_mm:40,tidal:false,west:false,kid:true,black:false,water_temp:78,
    parking:'Large free lot — easiest beach access on the east side.',
@@ -2099,6 +2102,7 @@ const B=[
 
   // === SCOREABLE BEACHES (new additions with full data) ===
   {id:'tunnels',name:'Tunnels (Mākua)',n:'Tunnels',r:'North Shore',lat:22.2247,lon:-159.5675,
+   caution:"Great summer snorkeling, but there is no lifeguard, and winter swell turns the reef channels into strong exit currents. There have been drownings here. Summer and calm days only; watch from shore in any north swell.",
    facing:0,reef:true,morph:'lagoon',sb:2,sandy:true,lg:'none',lg_hours:'No lifeguard — closest at Haena',sq:9,scenic:10,len:1500,
    depth:6,stream:false,rain_mm:55,tidal:true,west:false,kid:true,black:false,water_temp:78,
    access_level:'moderate',parking:'Limited roadside spots on Kuhio Hwy. Walk in via Haena State Park lot.',
@@ -2106,6 +2110,7 @@ const B=[
    tip:'Best snorkel on the north shore in summer. Dangerous in winter — channels become exit rips.',
    photo:'https://live.staticflickr.com/5604/15774647476_747ac74f98_b.jpg',pois:['sbkapaa']},
   {id:'kealia',name:'Keālia Beach',n:'Kealia',r:'East Side',lat:22.0936,lon:-159.3033,
+   caution:"A heavy shorebreak drops straight onto the sand here and has caused serious injury. Best near the lifeguard tower on calm days; otherwise a beach to enjoy from the sand.",
    facing:90,reef:false,morph:'open',sb:6,sandy:true,lg:'full_time',lg_hours:'9am–5pm daily',sq:7,scenic:8,len:1500,
    depth:5,stream:false,rain_mm:40,tidal:false,west:false,kid:false,black:false,water_temp:78,
    access_level:'easy',parking:'Large paved lot off Kuhio Hwy. Restrooms.',
@@ -2127,6 +2132,7 @@ const B=[
    tip:'Wild and undeveloped — walk the heritage trail along the cliffs. Watch for monk seals.',
    photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Mahaulepu.jpg/1280px-Mahaulepu.jpg',pois:[]},
   {id:'wailua',name:'Wailua Beach',n:'Wailua',r:'East Side',lat:22.0445,lon:-159.3360,
+   caution:"No lifeguard. The river mouth and shorebreak create strong currents whenever there's east swell, and a drowning has happened here. Wade only, and stay out when surf is up.",
    facing:90,reef:false,morph:'open',sb:6,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:6,scenic:7,len:900,
    depth:5,stream:true,rain_mm:50,tidal:false,west:false,kid:false,black:false,water_temp:78,
    access_level:'easy',parking:'Roadside on Kuhio Hwy.',
@@ -2153,6 +2159,7 @@ const B=[
    tip:'Iconic Grand Hyatt-adjacent beach with the dramatic cliff (Makawehi) at the east end. Strong shorebreak — bodyboarders only, watch from shore otherwise. Sunrise walk to the lithified dunes is the move.',
    photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Keoniloa_Bay_and_Shipwreck_Beach%2C_Koloa_-_panoramio.jpg/1280px-Keoniloa_Bay_and_Shipwreck_Beach%2C_Koloa_-_panoramio.jpg',pois:[]},
   {id:'donkey',name:"Donkey Beach (Paliku)",n:'Donkey',r:'East Side',lat:22.1119,lon:-159.3092,
+   caution:"Remote and unguarded, fully open to east swell, with currents that have swept swimmers out before. Watch from the sand or wade only; not a place to swim when surf is running.",
    facing:90,reef:false,morph:'open_beach',sb:6,sandy:true,lg:'none',lg_hours:null,sq:4,scenic:7,len:500,
    depth:6,stream:false,rain_mm:35,tidal:false,west:false,kid:false,black:false,water_temp:78,
    intents:['walk','photography','sunrise'],
@@ -5782,6 +5789,7 @@ function openSheet(id){
       <div data-vi-partner-id="P00299666" data-vi-widget-ref="W-b5f9d263-bba4-410a-b17f-cd8196b9857e" data-vi-search-term="${viatorTerm}"></div>
     </div>
     <div style="font-size:10px;color:var(--mute);margin-top:6px;text-align:center;line-height:1.4"><strong>Tours via Viator.</strong> Bookings may earn a small commission at no extra cost to you.</div>`;
+  const caut=b.caution?`<div class="tip" style="background:#fef3c7;border-left:3px solid #d97706;color:#78530a;font-weight:600;align-items:flex-start"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9.5" x2="12" y2="13.5"/><circle cx="12" cy="17" r=".7" fill="#b45309" stroke="none"/></svg><span>${b.caution}</span></div>`:'';
   const tp=b.tip?`<div class="tip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#5a4217" stroke-width="1.3" stroke-linecap="round" flex-shrink="0"><circle cx="7" cy="7" r="5.5"/><line x1="7" y1="6" x2="7" y2="10"/><circle cx="7" cy="4.5" r=".6" fill="#5a4217"/></svg><span>${b.tip}</span></div>`:'';
   const rope=r.top.includes('snorkel')?`<div class="tip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#5a4217" stroke-width="1.3" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><polyline points="5,7 7,9 10,5.5"/></svg><span>Snorkel close to shore where you can stand. Rest often — ocean exertion is more tiring than it feels.</span></div>`:'';
   const parkRow=b.parking?`<div class="parking-row"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--mute)" stroke-width="1.3" stroke-linecap="round" flex-shrink="0"><rect x="1.5" y="2" width="11" height="10" rx="2"/><path d="M5 5 H7.5 Q9 5 9 6.5 Q9 8 7.5 8 H5 V10"/></svg><span>${b.parking}</span></div>`:'';
@@ -5821,7 +5829,7 @@ function openSheet(id){
       <div class="vis-row"><div class="vis-icon-lbl">UV</div>${uvBar(c.uv)}</div>
       <div class="vis-row" style="border-top:1px dashed var(--border);padding-top:10px"><div class="vis-icon-lbl">Tide</div><div class="vis-text"><span class="vis-lbl">${c.tt==='rising'?'Rising':c.tt==='falling'?'Falling':'Slack'}</span><span class="vis-num">${c.tide.toFixed(1)} ft</span></div></div>
     </div>
-    ${tp}${rope}${cs}${ps}${nas}
+    ${caut}${tp}${rope}${cs}${ps}${nas}
     <details style="margin-top:12px"><summary style="font-size:10px;color:var(--mute);cursor:pointer;text-transform:uppercase;letter-spacing:.06em">Tide today</summary>${tideGraph(c)}</details>
     <a href="${murl}" target="_blank" rel="noopener" class="dirbtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="1,8 15,1 9,8 15,15"/></svg>Get Directions</a>
     ${viatorBlock}`;
