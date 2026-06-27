@@ -1514,14 +1514,15 @@ a{text-decoration:none;color:inherit}
 #satToggle{position:absolute;top:160px;right:12px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#0f4c5c;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
 #satToggle:hover{transform:scale(1.05)}
 #satToggle svg{width:22px;height:22px}
-#rainToggle{position:absolute;top:160px;right:112px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#0f4c5c;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
+#rainToggle{position:absolute;top:160px;right:62px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#0f4c5c;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
 #rainToggle:hover{transform:scale(1.05)}
 #rainToggle svg{width:22px;height:22px}
 #rainToggle.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
-#fcBar{position:absolute;bottom:84px;left:50%;transform:translateX(-50%);z-index:700;display:none;align-items:center;gap:10px;background:rgba(8,40,50,.88);color:#eaf6f8;padding:7px 14px;border-radius:999px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 28px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#fcBar{position:absolute;top:212px;left:50%;transform:translateX(-50%);z-index:700;display:none;align-items:center;gap:9px;background:rgba(8,40,50,.9);color:#eaf6f8;padding:6px 12px;border-radius:999px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 132px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 #fcBar #fcTime{font-weight:600;min-width:66px;white-space:nowrap}
-#fcBar input[type=range]{width:150px;max-width:42vw;accent-color:#8fd3ff;cursor:pointer}
+#fcBar input[type=range]{width:140px;max-width:40vw;accent-color:#c026d3;cursor:pointer}
 #fcBar .fc-cap{opacity:.8;font-size:10.5px;white-space:nowrap}
+#fcBar #fcPlay{flex-shrink:0;width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#eaf6f8;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 
 #locateBtn{position:absolute;top:210px;right:12px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#0f4c5c;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
 #locateBtn:hover{transform:scale(1.05)}
@@ -1535,6 +1536,7 @@ body[data-tab="acts"] .kidbadge,body[data-tab="beaches"] .kidbadge{top:108px}
 body[data-tab="acts"] #satToggle{top:188px}
 body[data-tab="acts"] #rainToggle{top:188px}
 body[data-tab="acts"] #os-swell-badge{top:188px}
+body[data-tab="acts"] #fcBar{top:248px}
 body[data-tab="acts"] #locateBtn{top:238px}
 body[data-tab="acts"] .saved-chip{top:243px}
 /* Collapsible wind/tide/swell chips in the beach card */
@@ -1871,7 +1873,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 </div>
 <button id="satToggle" onclick="toggleSat()" aria-label="Toggle satellite view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
 <button id="rainToggle" onclick="toggleRain()" aria-label="Toggle 12-hour rain forecast" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 0 1-.5-7.97 5.5 5.5 0 0 1 10.7-1.3A4.5 4.5 0 0 1 17 16"/><line x1="8" y1="18.5" x2="7.2" y2="21"/><line x1="12" y1="18.5" x2="11.2" y2="22"/><line x1="16" y1="18.5" x2="15.2" y2="21"/></svg></button>
-<div id="fcBar" role="group" aria-label="Rain forecast time"><span id="fcTime">Now</span><input id="fcSlider" type="range" min="0" max="12" step="1" value="0" oninput="fcSlide(this.value)" aria-label="Forecast hours ahead"><span class="fc-cap">12&#8209;hr rain</span></div>
+<div id="fcBar" role="group" aria-label="Rain forecast time"><button id="fcPlay" onclick="fcPlayToggle()" aria-label="Pause forecast animation"></button><span id="fcTime">Now</span><input id="fcSlider" type="range" min="0" max="12" step="1" value="0" oninput="fcSlide(this.value)" aria-label="Forecast hours ahead"><span class="fc-cap">12&#8209;hr rain</span></div>
 <button id="savedChip" class="saved-chip" onclick="openSavedSheet()" aria-label="View saved">
   <svg viewBox="0 0 24 24" fill="#c9a84c" stroke="#c9a84c" stroke-width="1.5" stroke-linejoin="round" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
   <span class="saved-chip-count" id="savedCount">0</span>
@@ -5881,11 +5883,22 @@ function _fcRender(){
   var el=document.getElementById('fcTime');
   if(el){ var t=window._fcTimes&&window._fcTimes[idx]; el.textContent = window._fcHour===0 ? 'Now' : ('+'+window._fcHour+'h · '+(t?t.slice(11,16):'')); }
 }
-function fcSlide(v){ window._fcHour=Math.max(0,Math.min(12, parseInt(v,10)||0)); _fcRender(); }
+var _FC_PLAY_SVG='<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+var _FC_PAUSE_SVG='<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4.5" height="14" rx="1"/><rect x="13.5" y="5" width="4.5" height="14" rx="1"/></svg>';
+window._fcPlay=false; window._fcPlayTimer=null;
+function _fcPlayTick(){ if(!window._fcOn){ fcSetPlay(false); return; } window._fcHour=(window._fcHour+1)%13; var sl=document.getElementById('fcSlider'); if(sl) sl.value=window._fcHour; _fcRender(); }
+function fcSetPlay(on){
+  window._fcPlay=!!on;
+  if(window._fcPlayTimer){ clearInterval(window._fcPlayTimer); window._fcPlayTimer=null; }
+  if(on) window._fcPlayTimer=setInterval(_fcPlayTick, 850);
+  var b=document.getElementById('fcPlay'); if(b){ b.innerHTML = on?_FC_PAUSE_SVG:_FC_PLAY_SVG; b.setAttribute('aria-label', on?'Pause forecast animation':'Play forecast animation'); }
+}
+function fcPlayToggle(){ fcSetPlay(!window._fcPlay); }
+function fcSlide(v){ fcSetPlay(false); window._fcHour=Math.max(0,Math.min(12, parseInt(v,10)||0)); _fcRender(); }   // manual scrub pauses auto-play
 async function toggleRain(){
   var btn=document.getElementById('rainToggle'), bar=document.getElementById('fcBar');
   if(window._fcOn){
-    window._fcOn=false; if(btn){btn.classList.remove('on');btn.setAttribute('aria-pressed','false');}
+    window._fcOn=false; fcSetPlay(false); if(btn){btn.classList.remove('on');btn.setAttribute('aria-pressed','false');}
     if(bar) bar.style.display='none';
     if(window._fcTimer){clearInterval(window._fcTimer);window._fcTimer=null;}
     if(window._fcCircles){ window._fcCircles.forEach(function(c){try{map.removeLayer(c);}catch(e){}}); window._fcCircles=null; }
@@ -5897,7 +5910,7 @@ async function toggleRain(){
     try{ await _fcFetch(); }catch(e){ ferr=true; var el=document.getElementById('fcTime'); if(el) el.textContent='forecast unavailable'; }
     if(btn) btn.disabled=false;
     if(!window._fcOn){ if(window._fcCircles){ window._fcCircles.forEach(function(c){try{map.removeLayer(c);}catch(e){}}); window._fcCircles=null; } return; }   // toggled off mid-fetch -> bail + clean up
-    if(!ferr) _fcRender();
+    if(!ferr){ _fcRender(); fcSetPlay(true); }   // auto-play the 0->12h loop; user can pause or scrub
     window._fcTimer=setInterval(async function(){ if(!window._fcOn) return; try{ await _fcFetch(); _fcRender(); }catch(e){} }, 1800000);
   }
 }
@@ -6636,7 +6649,7 @@ function renderSwellLayer(){
       +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.6}'
       +'.os-swell-drift{position:absolute;inset:0;width:100%;height:100%}.os-wv-drift{animation:os_swelldrift 2.2s linear infinite;will-change:transform}.os-wv{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round}'
       +'@media (prefers-reduced-motion:reduce){.os-wv-drift{animation:none}}'
-      +'#os-swell-badge{position:absolute;right:62px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
+      +'#os-swell-badge{position:absolute;right:112px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
       +'#os-swell-badge:hover{transform:scale(1.05)}'
       +'.sw-ico{display:block;width:24px;height:24px;overflow:hidden;color:#eaf6f8}.sw-ico svg{display:block;width:24px;height:24px;overflow:hidden}';
     document.head.appendChild(st);
