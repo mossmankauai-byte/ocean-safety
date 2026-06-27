@@ -1518,10 +1518,10 @@ a{text-decoration:none;color:inherit}
 #rainToggle:hover{transform:scale(1.05)}
 #rainToggle svg{width:22px;height:22px}
 #rainToggle.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
-#fcBar{position:absolute;top:212px;left:50%;transform:translateX(-50%);z-index:700;display:none;align-items:center;gap:9px;background:rgba(8,40,50,.9);color:#eaf6f8;padding:6px 12px;border-radius:999px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 132px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-#fcBar #fcTime{font-weight:600;min-width:66px;white-space:nowrap}
-#fcBar input[type=range]{width:140px;max-width:40vw;accent-color:#c026d3;cursor:pointer}
-#fcBar .fc-cap{opacity:.8;font-size:10.5px;white-space:nowrap}
+#fcBar{position:absolute;top:212px;left:50%;transform:translateX(-50%);z-index:700;display:none;align-items:center;gap:8px;background:rgba(8,40,50,.9);color:#eaf6f8;padding:6px 11px;border-radius:999px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 120px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#fcBar #fcTime{font-weight:600;min-width:56px;white-space:nowrap;flex-shrink:0}
+#fcBar input[type=range]{width:140px;min-width:64px;max-width:42vw;accent-color:#c026d3;cursor:pointer}
+#fcBar .fc-cap{opacity:.8;font-size:10.5px;white-space:nowrap;flex-shrink:0}
 #fcBar #fcPlay{flex-shrink:0;width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#eaf6f8;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 
 #locateBtn{position:absolute;top:210px;right:12px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#0f4c5c;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
@@ -5871,6 +5871,7 @@ async function _fcFetch(){
   var base=times.indexOf(key); if(base<0) base=Math.max(0,ln.getUTCHours());   // fallback to current hour-of-day (times start at local midnight), not midnight
   window._fcData=arr; window._fcTimes=times; window._fcBase=base;
 }
+function _fcClockShort(hm){ if(!hm) return ''; var h=parseInt(hm.slice(0,2),10)||0, ap=h<12?'a':'p', h12=h%12; if(h12===0)h12=12; return h12+ap; }   // "14:00" -> "2p", "23:00" -> "11p", "00:00" -> "12a"
 function _fcRender(){
   if(!window._fcData || typeof map==='undefined' || !map || typeof L==='undefined') return;
   if(!map.getPane('rainfc')){ var p=map.createPane('rainfc'); p.style.zIndex='250'; p.style.pointerEvents='none'; p.style.filter='blur(16px)'; }   // z250: above island/basemap, BELOW swell (450) + POI markers (600). Blur = smooth heat field.
@@ -5881,7 +5882,7 @@ function _fcRender(){
     if(col){ c.setStyle({fillColor:col, fillOpacity:Math.min(.75,.35+mm*0.1)}); } else { c.setStyle({fillOpacity:0}); }
   });
   var el=document.getElementById('fcTime');
-  if(el){ var t=window._fcTimes&&window._fcTimes[idx]; el.textContent = window._fcHour===0 ? 'Now' : ('+'+window._fcHour+'h · '+(t?t.slice(11,16):'')); }
+  if(el){ var t=window._fcTimes&&window._fcTimes[idx], hm=t?t.slice(11,16):''; el.textContent = window._fcHour===0 ? 'Now' : ('+'+window._fcHour+'h '+_fcClockShort(hm)); }
 }
 var _FC_PLAY_SVG='<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 var _FC_PAUSE_SVG='<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4.5" height="14" rx="1"/><rect x="13.5" y="5" width="4.5" height="14" rx="1"/></svg>';
@@ -5907,7 +5908,7 @@ async function toggleRain(){
     if(btn){btn.classList.add('on');btn.setAttribute('aria-pressed','true');btn.disabled=true;}   // disable during fetch -> no double-tap re-entrancy
     if(bar) bar.style.display='flex';
     var ferr=false;
-    try{ await _fcFetch(); }catch(e){ ferr=true; var el=document.getElementById('fcTime'); if(el) el.textContent='forecast unavailable'; }
+    try{ await _fcFetch(); }catch(e){ ferr=true; var el=document.getElementById('fcTime'); if(el) el.textContent='no forecast'; }
     if(btn) btn.disabled=false;
     if(!window._fcOn){ if(window._fcCircles){ window._fcCircles.forEach(function(c){try{map.removeLayer(c);}catch(e){}}); window._fcCircles=null; } return; }   // toggled off mid-fetch -> bail + clean up
     if(!ferr){ _fcRender(); fcSetPlay(true); }   // auto-play the 0->12h loop; user can pause or scrub
