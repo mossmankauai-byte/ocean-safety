@@ -4660,6 +4660,36 @@ var PLAN_AREAS=[{key:'South Shore',label:'South'},{key:'East Side',label:'East'}
 var PLAN_VIBES=[{key:'chill',label:'Beach & chill',ints:['swim','walk']},{key:'snorkel',label:'Snorkel',ints:['snorkel']},{key:'family',label:'Family',ints:['swim','snorkel']},{key:'adventure',label:'Adventure',ints:['walk','tidepools']},{key:'food',label:'Foodie',ints:['swim','walk']}];
 var PLAN_KMETA={beach:{label:'Beach',color:'#0f4c5c'},drink:{label:'Coffee',color:'#4f46e5'},food:{label:'Eat',color:'#e07856'},walk:{label:'Walk',color:'#4a7c59'},bike:{label:'Ride',color:'#16a34a'},hike:{label:'Hike',color:'#4a7c59'},tour:{label:'Tour',color:'#c9a84c'}};
 function _planVibeObj(){var v=PLAN_VIBES.filter(function(x){return x.key===_planVibe;})[0];return v||PLAN_VIBES[0];}
+// --- Day-type feasibility -------------------------------------------------
+// Some day-types lead with getting IN the water (Snorkel, Family swim). When the forecast
+// won't support that — surf too big, surf unreadable, or no area beach rated swimmable today —
+// we LOCK the chip instead of planning a day that can't safely happen. The land-first vibes
+// (Beach & chill, Adventure, Foodie) always stay open; they degrade to a coastal walk.
+var PLAN_WATER_VIBES={snorkel:1,family:1};
+var _planVibeMsg=null; // transient reason shown when a locked chip is tapped
+function _planVibeFeasible(vkey){
+  if(!PLAN_WATER_VIBES[vkey]) return {ok:true};
+  var outlook=_planDayOutlook();
+  if(outlook==='unknown') return {ok:false,why:"surf can’t be read today — we won’t green-light the water"};
+  if(outlook==='rough') return {ok:false,why:'surf is too big around '+_planArea+' today'};
+  var v=PLAN_VIBES.filter(function(x){return x.key===vkey;})[0]; if(!v) return {ok:true};
+  var ready=(typeof scored!=='undefined' && scored && Object.keys(scored).length>0);
+  if(_planDay===0 && ready){
+    var any=B.some(function(b){
+      if(b.r!==_planArea || b.warning_only) return false;
+      if(!b.intents.some(function(i){return v.ints.indexOf(i)>=0;})) return false;
+      var st=scored[b.id]&&scored[b.id].status; return st==='green'||st==='yellow';
+    });
+    if(!any) return {ok:false,why:'no '+_planArea+' beach is calm enough for this today'};
+  }
+  return {ok:true};
+}
+// If the selected day-type just became infeasible (e.g. user flips to a rough day), fall back
+// to the first open day-type so the plan is never built on a locked vibe.
+function _planEnsureFeasibleVibe(){
+  if(_planVibeFeasible(_planVibe).ok) return;
+  for(var i=0;i<PLAN_VIBES.length;i++){ if(_planVibeFeasible(PLAN_VIBES[i].key).ok){ _planVibe=PLAN_VIBES[i].key; return; } }
+}
 function _planClip(s,n){s=s||'';return s.length>n?s.slice(0,n-1)+'…':s;}
 function _planSavedFirst(list,kind){return list.slice().sort(function(a,b){var sa=isSaved(kind,a.id)?1:0,sb=isSaved(kind,b.id)?1:0;return sb-sa;});}
 // West Side = Waimea Canyon / Kōkeʻe. Reuse the app's real HIKES (region strings vary: 'West Side','Kokee','Waimea Canyon').
@@ -4786,6 +4816,43 @@ function _planWhy(){
   return bits.join(' ');
 }
 
+// Route map: SVG geo-projection of the day's stops (NOT live Leaflet — that lifecycle ships blank
+// in a re-rendered sheet). Plots only slots that carry real lat/lon, numbered to match the ribbon.
+function _planRouteMap(){
+  var pts=(_planSlots||[]).map(function(s,i){return {i:i,kind:s.kind,ref:s.ref};})
+    .filter(function(p){return p.ref&&isFinite(p.ref.lat)&&isFinite(p.ref.lon);});
+  if(pts.length<2) return ''; // one or zero placeable stops → no meaningful map
+  var W=360,H=132,pad=26;
+  var lats=pts.map(function(p){return p.ref.lat;}),lons=pts.map(function(p){return p.ref.lon;});
+  var mnY=Math.min.apply(null,lats),mxY=Math.max.apply(null,lats),mnX=Math.min.apply(null,lons),mxX=Math.max.apply(null,lons);
+  function sx(l){return pad+((l-mnX)/((mxX-mnX)||1))*(W-2*pad);}
+  function sy(l){return pad+(1-(l-mnY)/((mxY-mnY)||1))*(H-2*pad);} // north = up
+  var P=pts.map(function(p){return {x:sx(p.ref.lon),y:sy(p.ref.lat),i:p.i,kind:p.kind};});
+  var d='M'+P.map(function(p){return p.x.toFixed(1)+' '+p.y.toFixed(1);}).join(' L ');
+  var route='<path d="'+d+'" fill="none" stroke="#0f4c5c" stroke-width="2.4" stroke-dasharray="2 5" stroke-linecap="round" opacity=".55"/>';
+  var dots=P.map(function(p){var c=(PLAN_KMETA[p.kind]||PLAN_KMETA.beach).color;
+    return '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="11" fill="'+c+'" stroke="#fff" stroke-width="2.5"/>'+
+           '<text x="'+p.x.toFixed(1)+'" y="'+(p.y+4).toFixed(1)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">'+(p.i+1)+'</text>';
+  }).join('');
+  return '<div class="plan-lbl" style="margin:2px 14px 0">Your route</div>'+
+    '<svg class="plan-route" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Route map of your day">'+route+dots+'</svg>';
+}
+// Boarding-pass stub (Style 1). Whole stub taps through to the swap chooser; heart saves the spot.
+function _planSlotStub(s,idx){
+  if(s.kind==='unknown'){
+    return '<div class="plan-stub stub-warn"><div class="plan-stub-top"><div class="plan-stub-pin" style="background:#9ca3af">!</div></div>'+
+      '<div class="plan-stub-when">Late morning</div><div class="plan-stub-nm">Conditions unavailable</div>'+
+      '<div class="plan-stub-sub">Check posted signs &amp; lifeguards before the water.</div></div>';
+  }
+  var m=PLAN_KMETA[s.kind]||PLAN_KMETA.beach, it=s.ref, name=it.name||it.title||it.n||'';
+  var heart=(s.kind==='tour')?'':heartButton(s.kind,it.id);
+  return '<div class="plan-stub" onclick="planSwap('+idx+')"><div class="plan-stub-top"><div class="plan-stub-pin" style="background:'+m.color+'">'+(idx+1)+'</div>'+heart+'</div>'+
+    '<div class="plan-stub-when">'+s.when+'</div>'+
+    '<div class="plan-stub-nm">'+name+'</div>'+
+    '<div class="plan-stub-tag" style="color:'+m.color+'">'+m.label+'</div>'+
+    '<div class="plan-stub-sub">'+_planClip(_planSlotSub(s),52)+'</div></div>';
+}
+
 function renderPlanDay(){
   injectPlanCss();
   var days=(typeof FORECAST!=='undefined'&&FORECAST&&FORECAST.length)?Math.min(7,FORECAST.length):1;
@@ -4797,23 +4864,32 @@ function renderPlanDay(){
     strip+='<button class="plan-dchip'+(i===_planDay?' on':'')+'" onclick="planSetDay('+i+')"><span class="plan-dw">'+lab+'</span><span class="plan-dn">'+dn+'</span><span class="plan-dot" style="background:'+dot+'"></span></button>';
   }
   var areaChips=PLAN_AREAS.map(function(a){return '<button class="plan-chip'+(a.key===_planArea?' on':'')+'" onclick="planSetArea(\''+a.key+'\')">'+a.label+'</button>';}).join('');
-  var vibeChips=PLAN_VIBES.map(function(v){return '<button class="plan-chip'+(v.key===_planVibe?' on':'')+'" onclick="planSetVibe(\''+v.key+'\')">'+v.label+'</button>';}).join('');
-  var rows=(_planSlots||[]).map(function(s,idx){return _planSlotRow(s,idx);}).join('');
-  var saveBtn=_planSaved?'<span class="plan-save saved">Saved ✓</span>':'<button class="plan-save" onclick="savePlanDay()">Save this day</button>';
+  var _vibeBlocked=null;
+  var vibeChips=PLAN_VIBES.map(function(v){
+    var fe=_planVibeFeasible(v.key);
+    if(fe.ok) return '<button class="plan-chip'+(v.key===_planVibe?' on':'')+'" onclick="planSetVibe(\''+v.key+'\')">'+v.label+'</button>';
+    if(!_vibeBlocked) _vibeBlocked={label:v.label,why:fe.why};
+    var lock='<svg class="plan-lock" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke-linecap="round"/></svg>';
+    return '<button class="plan-chip off" aria-disabled="true" title="'+v.label+' — '+fe.why+'" onclick="planVibeBlocked(\''+v.key+'\')">'+lock+v.label+'</button>';
+  }).join('');
+  var vibeNote='';
+  if(_planVibeMsg){ vibeNote='<div class="plan-vibe-note on">'+_planVibeMsg+'</div>'; }
+  else if(_vibeBlocked){ vibeNote='<div class="plan-vibe-note"><b>'+_vibeBlocked.label+'</b> is locked — '+_vibeBlocked.why+'.</div>'; }
+  var stubs=(_planSlots||[]).map(function(s,idx){return _planSlotStub(s,idx);}).join('');
   document.getElementById('sc').innerHTML=
     '<div class="poi-hero" style="background:linear-gradient(135deg,var(--ocean),#1a7a8a);color:#fff"><div><div class="poi-hero-name" style="color:#fff">Plan your day</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">Beaches & local spots, around the forecast</div></div></div>'+
     '<div class="plan-controls"><div class="plan-lbl">Pick your day</div><div class="plan-strip">'+strip+'</div>'+
       '<div class="plan-row2"><div class="plan-col"><div class="plan-lbl">Area</div><div class="plan-seg">'+areaChips+'</div></div>'+
-      '<div class="plan-col"><div class="plan-lbl">Type of day</div><div class="plan-seg">'+vibeChips+'</div></div></div>'+
+      '<div class="plan-col"><div class="plan-lbl">Type of day</div><div class="plan-seg">'+vibeChips+'</div>'+vibeNote+'</div></div>'+
       '<div class="plan-tours"><div class="plan-tours-l">Tours & paid activities<small>Add conditions-matched tours</small></div>'+
       '<button class="plan-toggle'+(_planTours?' on':'')+'" onclick="planToggleTours()" aria-pressed="'+_planTours+'"><span></span></button></div></div>'+
     '<div class="plan-why">'+_planWhy()+'</div>'+
-    '<div class="plan-day">'+rows+'</div>'+
-    '<div class="plan-foot">'+saveBtn+'<button class="plan-shuffle" onclick="planRandomize()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px"><path d="M16 3h5v5M21 3l-7 7M4 20l6-6M16 21h5v-5M14 14l7 7M4 4l5 5" stroke-linecap="round" stroke-linejoin="round"/></svg> Shuffle</button><span class="plan-note">Tap any item to swap it. Hearts save it.</span></div>'+
+    _planRouteMap()+'<div class="plan-ribbon">'+stubs+'</div>'+
+    '<div class="plan-foot"><button class="plan-shuffle" onclick="planRandomize()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px"><path d="M16 3h5v5M21 3l-7 7M4 20l6-6M16 21h5v-5M14 14l7 7M4 4l5 5" stroke-linecap="round" stroke-linejoin="round"/></svg> Shuffle</button><span class="plan-note">Tap any item to swap it. Hearts save it.</span></div>'+
     '<div class="plan-legal">Conditions change fast — always check posted signs and lifeguards before entering the water. A guide, not a safety guarantee.</div>';
   document.getElementById('sc').style.display='';
 }
-function planRebuild(){ _planSlots=buildPlanDay(); _planSaved=false; renderPlanDay(); }
+function planRebuild(){ _planVibeMsg=null; _planEnsureFeasibleVibe(); _planSlots=buildPlanDay(); _planSaved=false; renderPlanDay(); }
 function openPlanSheet(opts){
   if(!_planArea) _planArea='South Shore';
   planRebuild();
@@ -4825,6 +4901,13 @@ function openPlanInfo(id){ openPlanSheet(); }
 function planSetDay(i){ _planDay=i; _planRandom=false; planRebuild(); }
 function planSetArea(a){ _planArea=a; _planRandom=false; planRebuild(); }
 function planSetVibe(v){ _planVibe=v; _planRandom=false; planRebuild(); }
+// Tapping a LOCKED day-type: don't switch — surface why it's unavailable right under the chips.
+function planVibeBlocked(vkey){
+  var fe=_planVibeFeasible(vkey); if(fe.ok){ planSetVibe(vkey); return; }
+  var v=PLAN_VIBES.filter(function(x){return x.key===vkey;})[0];
+  _planVibeMsg='<b>'+(v?v.label:'That day')+'</b> isn’t a safe call right now — '+fe.why+'. Try Beach &amp; chill, Adventure, or Foodie.';
+  renderPlanDay();
+}
 function planToggleTours(){ _planTours=!_planTours; _planRandom=false; planRebuild(); }
 function planRandomize(){ _planRandom=true; planRebuild(); }
 
@@ -4877,6 +4960,12 @@ function injectPlanCss(){
     '.plan-seg{display:flex;flex-wrap:wrap;gap:6px}'+
     '.plan-chip{border:1px solid var(--border);background:#fff;color:var(--ink);border-radius:999px;padding:6px 11px;font-size:12.5px;line-height:1}'+
     '.plan-chip.on{background:var(--ocean);border-color:var(--ocean);color:#fff;font-weight:600}'+
+    '.plan-chip.off{background:#f1ece0;border-color:var(--border);color:var(--mute);cursor:not-allowed;display:inline-flex;align-items:center;gap:4px;text-decoration:line-through;text-decoration-color:rgba(0,0,0,.22)}'+
+    '.plan-chip.off .plan-lock{opacity:.8;flex:0 0 auto;text-decoration:none}'+
+    '.plan-vibe-note{font-size:11px;color:var(--mute);margin:7px 2px 0;line-height:1.4;display:flex;align-items:flex-start;gap:6px}'+
+    '.plan-vibe-note b{color:var(--ink)}'+
+    '.plan-vibe-note:before{content:"";flex:0 0 auto;width:6px;height:6px;border-radius:50%;background:#d97706;margin-top:4px}'+
+    '.plan-vibe-note.on{color:var(--ink)}.plan-vibe-note.on:before{background:#b5552f}'+
     '.plan-tours{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:11px;border-top:1px solid var(--border)}'+
     '.plan-tours-l{font-size:13px;font-weight:600}.plan-tours-l small{display:block;font-weight:400;color:var(--mute);font-size:11px;margin-top:1px}'+
     '.plan-toggle{width:44px;height:25px;border-radius:999px;border:1px solid var(--border);background:#e9e4d4;position:relative;flex:0 0 auto;transition:.18s}'+
@@ -4893,6 +4982,19 @@ function injectPlanCss(){
     '.plan-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-left:5px}'+
     '.plan-card-sub{font-size:11.5px;color:var(--mute);margin-top:2px}'+
     '.plan-book{margin-top:7px;font-size:11.5px;font-weight:600;color:var(--ocean);background:#fff;border:1px solid var(--ocean);border-radius:999px;padding:5px 11px}'+
+    '.plan-route{display:block;width:calc(100% - 28px);margin:4px 14px 10px;border-radius:13px;background:linear-gradient(180deg,#eaf1f0,#dfeae9);border:1px solid #d4ddda}'+
+    '.plan-ribbon{display:flex;gap:0;overflow-x:auto;padding:2px 14px 12px;-webkit-overflow-scrolling:touch}'+
+    '.plan-stub{flex:0 0 132px;position:relative;background:#fff;border:1px solid var(--border);border-radius:13px;padding:9px 11px;margin-right:19px;box-shadow:0 1px 2px rgba(40,33,20,.05);cursor:pointer}'+
+    '.plan-stub:last-child{margin-right:0}'+
+    '.plan-stub:after{content:"";position:absolute;right:-19px;top:46px;width:19px;border-top:2px dashed #cbc4b2}'+
+    '.plan-stub:last-child:after{display:none}'+
+    '.plan-stub-top{display:flex;align-items:center;justify-content:space-between;min-height:22px;margin-bottom:6px}'+
+    '.plan-stub-pin{width:22px;height:22px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;flex:0 0 auto}'+
+    '.plan-stub-when{font-size:10.5px;color:var(--mute);font-weight:700;margin-bottom:2px}'+
+    '.plan-stub-nm{font-size:12.5px;font-weight:700;line-height:1.22;color:var(--ink)}'+
+    '.plan-stub-tag{font-size:9px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;margin-top:2px}'+
+    '.plan-stub-sub{font-size:10.5px;color:var(--mute);line-height:1.3;margin-top:3px}'+
+    '.plan-stub.stub-warn{border-left:4px solid #9ca3af}'+
     '.plan-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px 4px}'+
     '.plan-save{font-size:13px;font-weight:600;color:#fff;background:var(--ocean);border-radius:10px;padding:9px 15px}'+
     '.plan-shuffle{font-size:13px;font-weight:600;color:var(--ocean);background:#fff;border:1px solid var(--ocean);border-radius:10px;padding:8px 14px;display:inline-flex;align-items:center;gap:5px}'+
