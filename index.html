@@ -4606,7 +4606,26 @@ function openToursSheet(){
    Reuses the app's REAL primitives: B (beaches), score()/getDayConditions()/FORECAST
    (conditions), FOODS/DRINKS (local spots), WALKS/PLAN_BIKE (new), TOURS_LIBRARY/
    pickFeaturedTour (opt-in tours), and the kbg_saves_v1 favorites (heartButton/isSaved). */
-var _planDay=0, _planArea='South Shore', _planVibe='chill', _planTours=false, _planPickSlot=-1, _planSlots=null, _planSaved=false;
+var _planDay=0, _planArea='South Shore', _planVibe='chill', _planTours=false, _planPickSlot=-1, _planSlots=null, _planSaved=false, _planRandom=false;
+function _planById(arr,id){return arr.filter(function(x){return x.id===id;})[0];}
+function _planParseHours(h){
+  if(!h) return null;
+  var s=(''+h).toLowerCase(), re=/(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m/g, m, t=[];
+  while((m=re.exec(s))){ var hr=parseInt(m[1],10)%12; if(m[3]==='p')hr+=12; hr+=(m[2]?parseInt(m[2],10)/60:0); t.push(hr); }
+  if(!t.length) return null;
+  return {open:Math.min.apply(null,t), close:Math.max.apply(null,t)};
+}
+// Is `item` plausibly open at a daypart (morning≈9a, lunch≈12:30p, dinner≈6p)? Unknown hours → true
+// (don't over-filter). Fixes a lunch-only spot (e.g. Pono Market 6a–2p) being suggested for dinner.
+function _planOpenFor(item, part){
+  var hr=_planParseHours(item && item.hours);
+  if(!hr) return true;
+  var target = part==='morning'?9 : part==='lunch'?12.5 : 18;
+  if(hr.close<=hr.open) return target>=hr.open;
+  return target>=hr.open && target<=hr.close;
+}
+// Pick the top choice normally, or a random valid one when Shuffle is on.
+function _planChoose(list){ if(!list||!list.length) return null; return (_planRandom && list.length>1) ? list[Math.floor(Math.random()*list.length)] : list[0]; }
 var PLAN_AREAS=[{key:'South Shore',label:'South'},{key:'East Side',label:'East'},{key:'North Shore',label:'North'}];
 var PLAN_VIBES=[{key:'chill',label:'Beach & chill',ints:['swim','walk']},{key:'snorkel',label:'Snorkel',ints:['snorkel']},{key:'adventure',label:'Adventure',ints:['walk','tidepools']},{key:'food',label:'Foodie',ints:['swim','walk']}];
 var PLAN_KMETA={beach:{label:'Beach',color:'#0f4c5c'},drink:{label:'Coffee',color:'#4f46e5'},food:{label:'Eat',color:'#e07856'},walk:{label:'Walk',color:'#4a7c59'},bike:{label:'Ride',color:'#16a34a'},tour:{label:'Tour',color:'#c9a84c'}};
@@ -4644,7 +4663,7 @@ function _planAfternoon(slots){
   if(_planArea==='East Side') return {when:'Afternoon',kind:'bike',ref:PLAN_BIKE[0]};
   if(_planDayOutlook()==='ok'){
     var usedB=slots.filter(function(s){return s.kind==='beach';}).map(function(s){return s.ref.id;});
-    var b2=_planGoodBeaches().filter(function(b){return usedB.indexOf(b.id)<0;})[0];
+    var b2=_planChoose(_planGoodBeaches().filter(function(b){return usedB.indexOf(b.id)<0;}));
     if(b2) return {when:'Afternoon',kind:'beach',ref:b2};
   }
   var w=_planSavedFirst(WALKS.filter(function(x){return x.r===_planArea;}),'walk')[0]||WALKS[0];
@@ -4652,8 +4671,11 @@ function _planAfternoon(slots){
 }
 function buildPlanDay(){
   var area=_planArea, c=getDayConditions(_planDay), slots=[];
-  var dr=_planSavedFirst(DRINKS.filter(function(x){return x.r===area;}),'drink')[0]||DRINKS.filter(function(x){return x.r===area;})[0]||DRINKS[0];
-  if(dr) slots.push({when:'Morning',kind:'drink',ref:dr});
+  var drList=DRINKS.filter(function(x){return x.r===area && _planOpenFor(x,'morning');}); if(!drList.length) drList=DRINKS.filter(function(x){return x.r===area;});
+  var morn=null, mornKind='drink';
+  if(area==='North Shore'){ var tri=_planById(FOODS,'trilogy_coffee'); if(tri){ morn=tri; mornKind='food'; } } // Trilogy Coffee lives in FOODS — save as 'food' so the heart resolves
+  if(!morn){ morn=_planChoose(_planSavedFirst(drList,'drink'))||drList[0]||DRINKS[0]; mornKind='drink'; }
+  if(morn) slots.push({when:'Morning',kind:mornKind,ref:morn});
   var outlook=_planDayOutlook();
   if(outlook==='unknown'){
     slots.push({when:'Late morning',kind:'unknown'});
@@ -4662,14 +4684,18 @@ function buildPlanDay(){
     slots.push({when:'Late morning',kind:(wr.kind||'walk'),ref:wr});
   } else {
     var good=_planGoodBeaches();
-    if(good.length) slots.push({when:'Late morning',kind:'beach',ref:good[0]});
+    if(good.length) slots.push({when:'Late morning',kind:'beach',ref:_planChoose(good)});
     else { var w=_planSavedFirst(WALKS.filter(function(x){return x.r===area;}),'walk')[0]||(area==='East Side'?PLAN_BIKE[0]:WALKS.filter(function(x){return x.r===area;})[0]||WALKS[0]); slots.push({when:'Late morning',kind:(w.kind||'walk'),ref:w}); }
   }
-  var lf=_planSavedFirst(FOODS.filter(function(x){return x.r===area;}),'food')[0]; if(lf) slots.push({when:'Lunch',kind:'food',ref:lf});
+  var lfList=FOODS.filter(function(x){return x.r===area && _planOpenFor(x,'lunch');}); if(!lfList.length) lfList=FOODS.filter(function(x){return x.r===area;});
+  var lf=_planChoose(_planSavedFirst(lfList,'food')); if(lf) slots.push({when:'Lunch',kind:'food',ref:lf});
   if(_planTours){ var t=pickFeaturedTour(c); if(t) slots.push({when:'Afternoon',kind:'tour',ref:t}); else slots.push(_planAfternoon(slots)); }
   else slots.push(_planAfternoon(slots));
   var usedFood=slots.filter(function(s){return s.kind==='food';}).map(function(s){return s.ref.id;});
-  var df=_planSavedFirst(FOODS.filter(function(x){return x.r===area && usedFood.indexOf(x.id)<0;}),'food')[0]; if(df) slots.push({when:'Evening',kind:'food',ref:df});
+  var dfList=FOODS.filter(function(x){return x.r===area && usedFood.indexOf(x.id)<0 && _planOpenFor(x,'dinner');});
+  if(!dfList.length) dfList=FOODS.filter(function(x){return x.r===area && _planOpenFor(x,'dinner');}); // relax "exclude lunch spot" BEFORE the open-for-dinner rule, so a lunch-only place never wins
+  if(!dfList.length) dfList=FOODS.filter(function(x){return x.r===area && usedFood.indexOf(x.id)<0;});
+  var df=_planChoose(_planSavedFirst(dfList,'food')); if(df) slots.push({when:'Evening',kind:'food',ref:df});
   return slots;
 }
 
@@ -4736,7 +4762,7 @@ function renderPlanDay(){
       '<button class="plan-toggle'+(_planTours?' on':'')+'" onclick="planToggleTours()" aria-pressed="'+_planTours+'"><span></span></button></div></div>'+
     '<div class="plan-why">'+_planWhy()+'</div>'+
     '<div class="plan-day">'+rows+'</div>'+
-    '<div class="plan-foot">'+saveBtn+'<span class="plan-note">Tap any item to swap it. Hearts save it to your list.</span></div>'+
+    '<div class="plan-foot">'+saveBtn+'<button class="plan-shuffle" onclick="planRandomize()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px"><path d="M16 3h5v5M21 3l-7 7M4 20l6-6M16 21h5v-5M14 14l7 7M4 4l5 5" stroke-linecap="round" stroke-linejoin="round"/></svg> Shuffle</button><span class="plan-note">Tap any item to swap it. Hearts save it.</span></div>'+
     '<div class="plan-legal">Conditions change fast — always check posted signs and lifeguards before entering the water. A guide, not a safety guarantee.</div>';
   document.getElementById('sc').style.display='';
 }
@@ -4749,17 +4775,18 @@ function openPlanSheet(opts){
 }
 function openPlanInfo(id){ openPlanSheet(); }
 
-function planSetDay(i){ _planDay=i; planRebuild(); }
-function planSetArea(a){ _planArea=a; planRebuild(); }
-function planSetVibe(v){ _planVibe=v; planRebuild(); }
-function planToggleTours(){ _planTours=!_planTours; planRebuild(); }
+function planSetDay(i){ _planDay=i; _planRandom=false; planRebuild(); }
+function planSetArea(a){ _planArea=a; _planRandom=false; planRebuild(); }
+function planSetVibe(v){ _planVibe=v; _planRandom=false; planRebuild(); }
+function planToggleTours(){ _planTours=!_planTours; _planRandom=false; planRebuild(); }
+function planRandomize(){ _planRandom=true; planRebuild(); }
 
 function planSwap(idx){
   _planPickSlot=idx;
   var s=_planSlots[idx], kind=s.kind, area=_planArea, opts=[];
   if(kind==='beach') opts=B.filter(function(b){return b.r===area && !b.warning_only;}).map(function(b){return {kind:'beach',it:b};});
-  else if(kind==='drink') opts=DRINKS.filter(function(x){return x.r===area;}).map(function(x){return {kind:'drink',it:x};});
-  else if(kind==='food') opts=FOODS.filter(function(x){return x.r===area;}).map(function(x){return {kind:'food',it:x};});
+  else if(kind==='drink'){ var dl=DRINKS.filter(function(x){return x.r===area && _planOpenFor(x,'morning');}); if(!dl.length)dl=DRINKS.filter(function(x){return x.r===area;}); opts=dl.map(function(x){return {kind:'drink',it:x};}); }
+  else if(kind==='food'){ var fpart=(s.when==='Morning')?'morning':(s.when==='Evening')?'dinner':'lunch'; var fl=FOODS.filter(function(x){return x.r===area && _planOpenFor(x,fpart);}); if(!fl.length)fl=FOODS.filter(function(x){return x.r===area;}); opts=fl.map(function(x){return {kind:'food',it:x};}); }
   else if(kind==='walk'||kind==='bike') opts=WALKS.filter(function(x){return x.r===area;}).map(function(x){return {kind:'walk',it:x};}).concat(PLAN_BIKE.filter(function(x){return x.r===area;}).map(function(x){return {kind:'bike',it:x};}));
   else { renderPlanDay(); return; }
   opts.sort(function(a,b){var sa=isSaved(a.kind,a.it.id)?1:0,sb=isSaved(b.kind,b.it.id)?1:0;return sb-sa;});
@@ -4820,6 +4847,7 @@ function injectPlanCss(){
     '.plan-book{margin-top:7px;font-size:11.5px;font-weight:600;color:var(--ocean);background:#fff;border:1px solid var(--ocean);border-radius:999px;padding:5px 11px}'+
     '.plan-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px 4px}'+
     '.plan-save{font-size:13px;font-weight:600;color:#fff;background:var(--ocean);border-radius:10px;padding:9px 15px}'+
+    '.plan-shuffle{font-size:13px;font-weight:600;color:var(--ocean);background:#fff;border:1px solid var(--ocean);border-radius:10px;padding:8px 14px;display:inline-flex;align-items:center;gap:5px}'+
     '.plan-save.saved{background:var(--safe)}'+
     '.plan-note{font-size:11px;color:var(--mute)}'+
     '.plan-legal{font-size:11px;color:var(--mute);line-height:1.45;padding:10px 14px 16px;border-top:1px solid var(--border);margin-top:8px}'+
