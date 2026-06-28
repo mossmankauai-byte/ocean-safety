@@ -1205,6 +1205,9 @@ a{text-decoration:none;color:inherit}
 .uvpill{padding:4px 10px;border-radius:999px;border:1.5px solid var(--gold);background:var(--gold-lt);font-size:11px;font-weight:600;color:#78530a}
 .hdr-wx{display:flex;gap:4px;align-items:stretch;flex-wrap:nowrap;flex-shrink:1;min-width:0}
 .hdr-fc{display:flex;gap:5px;overflow-x:auto;padding:2px 0 8px;margin:2px -2px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.hdr-fc-toggle{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;flex:0 0 auto;background:none;border:none;padding:2px 4px;color:var(--mute);cursor:pointer}
+.hdr-fc-tg-l{font-size:8.5px;font-weight:800;letter-spacing:.04em}
+.hdr-fc-chev{transition:transform .18s}
 .hdr-fc::-webkit-scrollbar{display:none}
 .hdr-fc-day{flex:0 0 auto;min-width:46px;padding:5px 6px 6px;border-radius:9px;background:var(--warm);border:1px solid var(--border);text-align:center;cursor:pointer;line-height:1.1;transition:transform .12s}
 .hdr-fc-day:active{transform:scale(.96)}
@@ -1876,6 +1879,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
           <span class="hdr-wx-v">—</span>
           <span class="hdr-wx-hint"></span>
         </div>
+        <button class="hdr-fc-toggle" id="hdrFcToggle" onclick="toggleHdrFc()" aria-label="Toggle 7-day forecast" aria-expanded="false" style="display:none"><span class="hdr-fc-tg-l">7-DAY</span><svg class="hdr-fc-chev" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
     </div>
     <div id="hdrFc" class="hdr-fc" aria-label="7-day forecast"></div>
@@ -4566,10 +4570,18 @@ function pickFeaturedTour(c){
 
 // Header 7-day forecast strip — paints from FORECAST (same data the Today's Outlook uses).
 // Hidden until live daily data arrives; tapping a day opens the Today's Outlook for that day.
+var _hdrFcOpen = (function(){ try{ return localStorage.getItem('hdrFcOpen')==='1'; }catch(e){ return false; } })();
+function toggleHdrFc(){ _hdrFcOpen=!_hdrFcOpen; try{ localStorage.setItem('hdrFcOpen', _hdrFcOpen?'1':'0'); }catch(e){} renderHeaderForecast(); }
 function renderHeaderForecast(){
   const el = document.getElementById('hdrFc');
+  const tg = document.getElementById('hdrFcToggle');
   if(!el) return;
-  if(typeof FORECAST === 'undefined' || !FORECAST || !FORECAST.length){ el.style.display='none'; return; }
+  const hasFc = !(typeof FORECAST === 'undefined' || !FORECAST || !FORECAST.length);
+  if(tg) tg.style.display = hasFc ? '' : 'none';
+  if(!hasFc){ el.style.display='none'; return; }
+  if(tg){ tg.setAttribute('aria-expanded', _hdrFcOpen?'true':'false'); var _ch=tg.querySelector('.hdr-fc-chev'); if(_ch) _ch.style.transform = _hdrFcOpen?'rotate(180deg)':''; }
+  // Collapsed by default so the strip doesn't lengthen the topbar / squeeze the map (overlaid buttons).
+  if(!_hdrFcOpen){ el.style.display='none'; return; }
   el.style.display='';
   const cur = (typeof _selectedDayIdx !== 'undefined') ? _selectedDayIdx : 0;
   el.innerHTML = FORECAST.map((f,i) => {
@@ -4626,12 +4638,14 @@ function _planOpenFor(item, part){
 }
 // Pick the top choice normally, or a random valid one when Shuffle is on.
 function _planChoose(list){ if(!list||!list.length) return null; return (_planRandom && list.length>1) ? list[Math.floor(Math.random()*list.length)] : list[0]; }
-var PLAN_AREAS=[{key:'South Shore',label:'South'},{key:'East Side',label:'East'},{key:'North Shore',label:'North'}];
-var PLAN_VIBES=[{key:'chill',label:'Beach & chill',ints:['swim','walk']},{key:'snorkel',label:'Snorkel',ints:['snorkel']},{key:'adventure',label:'Adventure',ints:['walk','tidepools']},{key:'food',label:'Foodie',ints:['swim','walk']}];
-var PLAN_KMETA={beach:{label:'Beach',color:'#0f4c5c'},drink:{label:'Coffee',color:'#4f46e5'},food:{label:'Eat',color:'#e07856'},walk:{label:'Walk',color:'#4a7c59'},bike:{label:'Ride',color:'#16a34a'},tour:{label:'Tour',color:'#c9a84c'}};
+var PLAN_AREAS=[{key:'South Shore',label:'South'},{key:'East Side',label:'East'},{key:'North Shore',label:'North'},{key:'West Side',label:'West'}];
+var PLAN_VIBES=[{key:'chill',label:'Beach & chill',ints:['swim','walk']},{key:'snorkel',label:'Snorkel',ints:['snorkel']},{key:'family',label:'Family',ints:['swim','snorkel']},{key:'adventure',label:'Adventure',ints:['walk','tidepools']},{key:'food',label:'Foodie',ints:['swim','walk']}];
+var PLAN_KMETA={beach:{label:'Beach',color:'#0f4c5c'},drink:{label:'Coffee',color:'#4f46e5'},food:{label:'Eat',color:'#e07856'},walk:{label:'Walk',color:'#4a7c59'},bike:{label:'Ride',color:'#16a34a'},hike:{label:'Hike',color:'#4a7c59'},tour:{label:'Tour',color:'#c9a84c'}};
 function _planVibeObj(){var v=PLAN_VIBES.filter(function(x){return x.key===_planVibe;})[0];return v||PLAN_VIBES[0];}
 function _planClip(s,n){s=s||'';return s.length>n?s.slice(0,n-1)+'…':s;}
 function _planSavedFirst(list,kind){return list.slice().sort(function(a,b){var sa=isSaved(kind,a.id)?1:0,sb=isSaved(kind,b.id)?1:0;return sb-sa;});}
+// West Side = Waimea Canyon / Kōkeʻe. Reuse the app's real HIKES (region strings vary: 'West Side','Kokee','Waimea Canyon').
+function _planWestHikes(){ return (typeof HIKES!=='undefined'?HIKES:[]).filter(function(h){ return ['West Side','Kokee','Waimea Canyon'].indexOf(h.r)>=0; }); }
 
 function _planStatusRank(st){ return st==='green'?3:st==='yellow'?2:st==='warning'?1:0; }
 // Island-wide outlook for the selected day (NOT a per-beach verdict). getDayConditions gives real
@@ -4649,6 +4663,7 @@ function _planGoodBeaches(){
   var ready=(typeof scored!=='undefined' && scored && Object.keys(scored).length>0);
   cands.sort(function(a,b){
     var sa=isSaved('beach',a.id)?1:0,sb=isSaved('beach',b.id)?1:0; if(sb!==sa) return sb-sa;
+    if(_planVibe==='family'){ var ka=a.kid?1:0,kb=b.kid?1:0; if(kb!==ka) return kb-ka; } // Family → kid-friendly/protected beaches first
     var ra=ready&&scored[a.id]?_planStatusRank(scored[a.id].status):1, rb=ready&&scored[b.id]?_planStatusRank(scored[b.id].status):1;
     if(rb!==ra) return rb-ra;
     return (b.sq||0)-(a.sq||0);
@@ -4660,6 +4675,12 @@ function _planGoodBeaches(){
   return cands;
 }
 function _planAfternoon(slots){
+  if(_planArea==='West Side'){
+    if(_planDayOutlook()==='ok'){ var sp=B.filter(function(b){return b.id==='salt_pond';})[0]; if(sp) return {when:'Afternoon',kind:'beach',ref:sp}; }
+    var usedH=slots.filter(function(s){return s.kind==='hike';}).map(function(s){return s.ref.id;});
+    var h2=_planChoose(_planSavedFirst(_planWestHikes().filter(function(h){return usedH.indexOf(h.id)<0;}),'hike'))||_planWestHikes()[0];
+    if(h2) return {when:'Afternoon',kind:'hike',ref:h2};
+  }
   if(_planArea==='East Side') return {when:'Afternoon',kind:'bike',ref:PLAN_BIKE[0]};
   if(_planDayOutlook()==='ok'){
     var usedB=slots.filter(function(s){return s.kind==='beach';}).map(function(s){return s.ref.id;});
@@ -4677,7 +4698,10 @@ function buildPlanDay(){
   if(!morn){ morn=_planChoose(_planSavedFirst(drList,'drink'))||drList[0]||DRINKS[0]; mornKind='drink'; }
   if(morn) slots.push({when:'Morning',kind:mornKind,ref:morn});
   var outlook=_planDayOutlook();
-  if(outlook==='unknown'){
+  if(area==='West Side'){
+    var wh=_planChoose(_planSavedFirst(_planWestHikes(),'hike'))||_planWestHikes()[0];
+    if(wh) slots.push({when:'Late morning',kind:'hike',ref:wh}); else slots.push({when:'Late morning',kind:'unknown'});
+  } else if(outlook==='unknown'){
     slots.push({when:'Late morning',kind:'unknown'});
   } else if(outlook==='rough'){
     var wr=_planSavedFirst(WALKS.filter(function(x){return x.r===area;}),'walk')[0]||(area==='East Side'?PLAN_BIKE[0]:WALKS.filter(function(x){return x.r===area;})[0]||WALKS[0]);
@@ -4711,6 +4735,7 @@ function _planSlotSub(s){
   }
   if(s.kind==='drink'||s.kind==='food') return (it.type||'')+' · '+it.r+(it.price?' · '+it.price:'');
   if(s.kind==='walk'||s.kind==='bike') return _planClip(it.note||'',80)+' · '+it.r;
+  if(s.kind==='hike') return (it.difficulty?it.difficulty.charAt(0).toUpperCase()+it.difficulty.slice(1):'Hike')+(it.length_mi?' · '+it.length_mi+' mi':'')+' · '+_planClip(it.tip||it.r,60);
   if(s.kind==='tour') return (it.subtitle||'')+' · conditions-matched';
   return '';
 }
@@ -4788,6 +4813,7 @@ function planSwap(idx){
   else if(kind==='drink'){ var dl=DRINKS.filter(function(x){return x.r===area && _planOpenFor(x,'morning');}); if(!dl.length)dl=DRINKS.filter(function(x){return x.r===area;}); opts=dl.map(function(x){return {kind:'drink',it:x};}); }
   else if(kind==='food'){ var fpart=(s.when==='Morning')?'morning':(s.when==='Evening')?'dinner':'lunch'; var fl=FOODS.filter(function(x){return x.r===area && _planOpenFor(x,fpart);}); if(!fl.length)fl=FOODS.filter(function(x){return x.r===area;}); opts=fl.map(function(x){return {kind:'food',it:x};}); }
   else if(kind==='walk'||kind==='bike') opts=WALKS.filter(function(x){return x.r===area;}).map(function(x){return {kind:'walk',it:x};}).concat(PLAN_BIKE.filter(function(x){return x.r===area;}).map(function(x){return {kind:'bike',it:x};}));
+  else if(kind==='hike') opts=_planWestHikes().map(function(h){return {kind:'hike',it:h};});
   else { renderPlanDay(); return; }
   opts.sort(function(a,b){var sa=isSaved(a.kind,a.it.id)?1:0,sb=isSaved(b.kind,b.it.id)?1:0;return sb-sa;});
   var list=opts.map(function(o){
@@ -4800,7 +4826,7 @@ function planSwap(idx){
     '<div class="plan-optlist">'+list+'</div>';
 }
 function planApply(idx,kind,id){
-  var arr=kind==='beach'?B:kind==='drink'?DRINKS:kind==='food'?FOODS:kind==='bike'?PLAN_BIKE:WALKS;
+  var arr=kind==='beach'?B:kind==='drink'?DRINKS:kind==='food'?FOODS:kind==='bike'?PLAN_BIKE:kind==='hike'?HIKES:WALKS;
   var it=arr.filter(function(x){return x.id===id;})[0]; if(!it) return;
   _planSlots[idx]={when:_planSlots[idx].when,kind:kind,ref:it};
   _planSaved=false; renderPlanDay();
