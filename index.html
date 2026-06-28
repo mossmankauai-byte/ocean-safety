@@ -2890,7 +2890,19 @@ const FOODS=[
   {id:'merrimans_kauai',phone:'(808) 742-8385',website:'https://merrimanshawaii.com',name:"Merriman's Fish House",n:"Merriman's",r:'South Shore',lat:21.8775,lon:-159.4665,
    type:'farm-to-table',price:'$$$$',hours:"5pm–8:30pm daily",
    tip:'Peter Merriman\u2019s upstairs fish house in the Shops at Kukuiʻula. Sustainable local seafood. The downstairs Gourmet Pizza is the casual sister option without reservations.',
-   tags:['farm_to_table','date_night','reservations','seafood'],reservations:true,restRid:'76544'}
+   tags:['farm_to_table','date_night','reservations','seafood'],reservations:true,restRid:'76544'},
+  {id:'wranglers_steakhouse',phone:'(808) 338-1218',name:"Wrangler's Steakhouse",n:'Wranglers',r:'West Side',lat:21.9573,lon:-159.6685,
+   type:'steakhouse / local',price:'$$',hours:"Mon–Fri 11am–8:30pm, closed Sat–Sun",
+   tip:'Paniolo-style steakhouse in old Waimea town; the kau-kau-tin plate lunch and the steaks are local favorites. Hours change seasonally — call ahead.',
+   tags:['local','dinner','waimea','steak']},
+  {id:'ishihara_market',phone:'(808) 338-1751',name:'Ishihara Market',n:'Ishihara',r:'West Side',lat:21.9571,lon:-159.6699,
+   type:'poke / plate lunch',price:'$',hours:'6am–7:30pm daily',
+   tip:'Old-school Waimea market with some of the island’s best poke and a hot deli — grab-and-go for a canyon picnic.',
+   tags:['poke','cheap','grab_n_go','waimea']},
+  {id:'japanese_grandma',phone:'(808) 335-5800',name:"Japanese Grandma's Café",n:'JP Grandma',r:'West Side',lat:21.9148,lon:-159.5912,
+   type:'Japanese / sushi',price:'$$$',hours:'11am–9pm Wed–Mon, closed Tue',
+   tip:'Hanapēpē sushi and Japanese comfort food; the West Side’s go-to dinner, especially on Friday Art Night. Reservations recommended.',
+   tags:['japanese','dinner','hanapepe','sushi'],reservations:true}
 ];
 
 // GROCERY STORES — basics for vacation rentals
@@ -3436,7 +3448,13 @@ const WALKS=[
   {id:'walk_kapaa',name:'Kapaʻa coastal path stroll',n:'Kapaʻa path',r:'East Side',area:'Kapaʻa',kind:'walk',note:'Flat seaside walk on the coastal path; shave ice in town.'},
   {id:'walk_lydgate',name:'Lydgate beach walk',n:'Lydgate walk',r:'East Side',area:'Wailua',kind:'walk',note:'Protected, family-easy walk by the rock-walled pools.'},
   {id:'walk_hanalei',name:'Hanalei Bay beach walk',n:'Hanalei walk',r:'North Shore',area:'Hanalei',kind:'walk',note:'Two-mile crescent bay to the historic pier.'},
-  {id:'walk_haena',name:'Hāʻena / Kēʻē beach walk',n:'Hāʻena walk',r:'North Shore',area:'Hāʻena',kind:'walk',note:'Reef-edge coast with Nāpali views; Hāʻena State Park needs a reservation.'}
+  {id:'walk_haena',name:'Hāʻena / Kēʻē beach walk',n:'Hāʻena walk',r:'North Shore',area:'Hāʻena',kind:'walk',note:'Reef-edge coast with Nāpali views; Hāʻena State Park needs a reservation.'},
+  {id:'wwk_canyon_lookout',name:'Waimea Canyon Lookout',n:'Canyon Lookout',r:'West Side',area:'Waimea Canyon',kind:'walk',note:'Drive-up overlook of the “Grand Canyon of the Pacific”; short paved path to the rail. Go in the morning before the clouds build.'},
+  {id:'wwk_swinging_bridge',name:'Hanapēpē Swinging Bridge',n:'Swinging Bridge',r:'West Side',area:'Hanapēpē',kind:'walk',note:'Historic wobbly footbridge over the Hanapēpē River in the old art town.'},
+  {id:'wwk_art_night',name:'Hanapēpē Friday Art Night',n:'Art Night',r:'West Side',area:'Hanapēpē',kind:'walk',note:'Fridays 5–9pm: galleries open late, food trucks and live music in Kauaʻi’s art town.'},
+  {id:'wwk_glass_beach',name:'Glass Beach (Port Allen)',n:'Glass Beach',r:'West Side',area:'ʻEleʻele',kind:'walk',note:'Sea-glass cove near Port Allen; tide-pools and a short rugged shoreline walk. Take only photos.'},
+  {id:'wwk_russian_fort',name:'Russian Fort Elizabeth',n:'Russian Fort',r:'West Side',area:'Waimea',kind:'walk',note:'1817 Russian-era fort ruins with Waimea River and bay views; easy interpretive loop.'},
+  {id:'wwk_kokee_museum',name:'Kōkeʻe Natural History Museum',n:'Kōkeʻe Museum',r:'West Side',area:'Kōkeʻe',kind:'walk',note:'Small museum and trail maps at ~3,600 ft; a good first stop before the canyon trails.'}
 ];
 const PLAN_BIKE=[
   {id:'bike_kahm',name:'Ke Ala Hele Makalae coastal path',n:'Coastal bike path',r:'East Side',area:'Kapaʻa',kind:'bike',note:'~8 mi paved oceanfront path (Lydgate to Ahihi Point), flat and family-easy. Walk it or rent a bike in Kapaʻa. Whales and monk seals Dec–Mar.'}
@@ -4677,6 +4695,8 @@ function _planGoodBeaches(){
 function _planAfternoon(slots){
   if(_planArea==='West Side'){
     if(_planDayOutlook()==='ok'){ var sp=B.filter(function(b){return b.id==='salt_pond';})[0]; if(sp) return {when:'Afternoon',kind:'beach',ref:sp}; }
+    var ww=_planChoose(_planSavedFirst(WALKS.filter(function(x){return x.r==='West Side';}),'walk'));
+    if(ww) return {when:'Afternoon',kind:'walk',ref:ww}; // a West thing-to-do (canyon lookout, Hanapēpē, Glass Beach, Russian Fort)
     var usedH=slots.filter(function(s){return s.kind==='hike';}).map(function(s){return s.ref.id;});
     var h2=_planChoose(_planSavedFirst(_planWestHikes().filter(function(h){return usedH.indexOf(h.id)<0;}),'hike'))||_planWestHikes()[0];
     if(h2) return {when:'Afternoon',kind:'hike',ref:h2};
@@ -4699,7 +4719,9 @@ function buildPlanDay(){
   if(morn) slots.push({when:'Morning',kind:mornKind,ref:morn});
   var outlook=_planDayOutlook();
   if(area==='West Side'){
-    var wh=_planChoose(_planSavedFirst(_planWestHikes(),'hike'))||_planWestHikes()[0];
+    var whs=_planWestHikes();
+    if(_planVibe==='family'||_planVibe==='chill'){ var easy=whs.filter(function(h){return (h.difficulty||'').toLowerCase()==='easy';}); if(easy.length) whs=easy; } // easy lookouts for family/chill
+    var wh=_planChoose(_planSavedFirst(whs,'hike'))||whs[0]||_planWestHikes()[0];
     if(wh) slots.push({when:'Late morning',kind:'hike',ref:wh}); else slots.push({when:'Late morning',kind:'unknown'});
   } else if(outlook==='unknown'){
     slots.push({when:'Late morning',kind:'unknown'});
