@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OceanSafety · Operator Console (Preview)</title>
+<style>
+  :root{
+    --ink:#0c2231; --ink-2:#37576b; --muted:#6b8597; --line:#dce6ec;
+    --bg:#f4f8fa; --card:#ffffff; --sea:#0a6e8c; --sea-2:#0d8bb0; --sea-deep:#073f55;
+    --sand:#e9dcc3; --good:#1f9d6b; --warn:#c9821b; --risk:#b4452f;
+    --shadow:0 1px 2px rgba(12,34,49,.05),0 8px 24px rgba(12,34,49,.06);
+    --radius:16px; --maxw:1120px;
+    --sample:#8a6d3b; --sample-bg:#fbf3e1;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ---- SAMPLE quarantine: full-surface watermark ---- */
+  .stage{position:relative}
+  .stage::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:repeating-linear-gradient(-45deg,
+      rgba(138,109,59,.05) 0 2px, transparent 2px 26px);
+  }
+  .stage::after{
+    content:"SAMPLE · ILLUSTRATIVE · NOT YOUR GUESTS";
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; letter-spacing:.16em; font-size:min(5.4vw,52px);
+    color:rgba(138,109,59,.06); transform:rotate(-24deg); white-space:nowrap;
+  }
+  .wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 18px 64px}
+  /* ---- sticky preview banner ---- */
+  .preview-bar{
+    position:sticky; top:0; z-index:30; background:linear-gradient(90deg,#3a2c12,#5a4316);
+    color:#fff6e2; border-bottom:1px solid #6b4f15;
+  }
+  .preview-bar .pb{max-width:var(--maxw); margin:0 auto; padding:9px 18px; display:flex; gap:12px; align-items:center; font-size:13px}
+  .preview-bar strong{color:#ffd98a; letter-spacing:.02em}
+  .preview-bar .dot{width:8px;height:8px;border-radius:50%;background:#ffce6a;flex:none;box-shadow:0 0 0 4px rgba(255,206,106,.18)}
+  /* ---- header ---- */
+  header.top{padding:26px 0 10px}
+  .brandrow{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap}
+  .brand{display:flex; align-items:center; gap:11px}
+  .brand .mark{width:34px;height:34px;flex:none}
+  .brand b{font-size:16px;letter-spacing:-.01em}
+  .brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+  .modeswitch{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff;font-size:12.5px;font-weight:600}
+  .modeswitch button{border:0;background:transparent;padding:7px 14px;color:var(--muted);cursor:default;display:flex;align-items:center;gap:6px}
+  .modeswitch .on{background:var(--sample-bg);color:var(--sample)}
+  .modeswitch .off{color:#aebecb}
+  .property{margin:18px 0 6px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .property h1{margin:0;font-size:23px;letter-spacing:-.02em}
+  .property .meta{font-size:12.5px;color:var(--muted)}
+  .period{display:flex;gap:6px}
+  .period b{background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--ink-2);font-weight:600}
+  .period b.sel{background:var(--sea);color:#fff;border-color:var(--sea)}
+  .freshness{margin-top:8px;font-size:12.5px;color:var(--sample);background:var(--sample-bg);border:1px solid #ecdcb6;border-radius:9px;padding:8px 12px;display:inline-flex;gap:8px;align-items:center}
+  /* ---- hero ---- */
+  .hero{margin-top:18px;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);background:var(--card);border:1px solid var(--line)}
+  .hero-img{position:relative;height:150px;background:linear-gradient(160deg,#0d8bb0,#073f55)}
+  .hero-img svg{position:absolute;inset:0;width:100%;height:100%}
+  .hero-body{display:grid;grid-template-columns:1.3fr 1fr;gap:0}
+  @media(max-width:720px){.hero-body{grid-template-columns:1fr}}
+  .ns{padding:22px 24px;border-right:1px solid var(--line)}
+  @media(max-width:720px){.ns{border-right:0;border-bottom:1px solid var(--line)}}
+  .ns .lab{font-size:12.5px;color:var(--ink-2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:8px}
+  .ns .big{font-size:54px;font-weight:800;letter-spacing:-.03em;line-height:1.02;margin:8px 0 2px}
+  .ns .big small{font-size:18px;font-weight:600;color:var(--muted)}
+  .ns .wow{font-size:13px;font-weight:700;color:var(--sea)}
+  .ns .sub{font-size:12.5px;color:var(--muted);margin-top:6px;max-width:46ch}
+  .companion{padding:22px 24px;background:#fbfdfe}
+  .companion .lab{font-size:11.5px;color:var(--ink-2);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .companion .num{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:6px 0 2px}
+  .floorpill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#7a5e1f;background:#f6ebd2;border-radius:999px;padding:3px 9px;text-transform:uppercase;letter-spacing:.04em}
+  .valueread{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink-2)}
+  .valueread b{color:var(--ink)}
+  /* ---- legend ---- */
+  .legend{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 4px}
+  .legend .li{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+  /* provenance icons */
+  .pv{width:13px;height:13px;flex:none;border-radius:50%}
+  .pv.measured{background:var(--sea);box-shadow:inset 0 0 0 2px #fff,0 0 0 1px var(--sea)}
+  .pv.modeled{background:linear-gradient(90deg,var(--sea) 50%,#cfe3ea 50%);box-shadow:0 0 0 1px var(--sea)}
+  .pv.assumption{background:transparent;border:1.5px dashed var(--ink-2)}
+  .pv.sample{border-radius:3px;background:repeating-linear-gradient(-45deg,var(--sample) 0 2px,#fff 2px 4px);box-shadow:0 0 0 1px var(--sample)}
+  .chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:6px;vertical-align:middle}
+  .chip.measured{color:var(--sea);background:#e4f1f5}
+  .chip.modeled{color:#5a6b2f;background:#eef2dd}
+  .chip.assumption{color:#7a6030;background:#f3ecdd}
+  .chip.sample{color:var(--sample);background:var(--sample-bg);border:1px dashed #d9c188}
+  /* ---- sections ---- */
+  section{margin-top:30px}
+  .sec-h{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+  .sec-h h2{margin:0;font-size:16.5px;letter-spacing:-.01em}
+  .sec-h p{margin:0;font-size:12.5px;color:var(--muted)}
+  .grid{display:grid;gap:14px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:720px){.g3,.g2{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);position:relative}
+  .card .title{font-size:12.5px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:8px;justify-content:space-between}
+  .card .title .l{display:flex;align-items:center;gap:7px}
+  .card .v{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:10px 0 0}
+  .card .v small{font-size:14px;font-weight:600;color:var(--muted)}
+  .card .cap{font-size:12px;color:var(--muted);margin-top:4px}
+  details.meth{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+  details.meth summary{font-size:11.5px;color:var(--sea);cursor:pointer;font-weight:600;list-style:none}
+  details.meth summary::-webkit-details-marker{display:none}
+  details.meth summary::before{content:"▸ ";color:var(--muted)}
+  details.meth[open] summary::before{content:"▾ "}
+  details.meth .body{font-size:11.5px;color:var(--ink-2);margin-top:7px;line-height:1.5}
+  details.meth code{background:#f0f5f7;border-radius:4px;padding:1px 5px;font-size:10.5px}
+  /* ranked list */
+  .rank{list-style:none;margin:8px 0 0;padding:0}
+  .rank li{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #eef3f5;font-size:13px}
+  .rank li:last-child{border-bottom:0}
+  .rank .n{width:18px;color:var(--muted);font-weight:700;font-size:12px}
+  .rank .bar{flex:1;height:7px;border-radius:4px;background:#eef3f5;overflow:hidden}
+  .rank .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sea-2),var(--sea))}
+  .rank .ct{width:46px;text-align:right;color:var(--ink-2);font-weight:700;font-size:12px}
+  .rank .kind{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;width:42px}
+  /* gauge */
+  .gauge{display:flex;align-items:center;gap:14px;margin-top:10px}
+  .ring{width:84px;height:84px;flex:none}
+  .gauge .gx b{font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .gauge .gx span{font-size:12px;color:var(--muted);display:block}
+  /* trigger bars */
+  .bars{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+  .bars .row{display:grid;grid-template-columns:84px 1fr 38px;align-items:center;gap:9px;font-size:12px}
+  .bars .row i{height:18px;border-radius:5px;display:block}
+  .bars .lab{color:var(--ink-2);font-weight:600;display:flex;align-items:center;gap:6px}
+  .hours{display:flex;align-items:flex-end;gap:2px;height:60px;margin-top:12px}
+  .hours i{flex:1;background:linear-gradient(180deg,var(--sea-2),#cfe7ee);border-radius:2px 2px 0 0;min-height:2px}
+  .hours-x{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-top:4px}
+  /* math calculator */
+  .calc{background:linear-gradient(180deg,#fbfdfe,#fff);border:1px solid var(--line)}
+  .calc .io{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:720px){.calc .io{grid-template-columns:1fr}}
+  .field{margin-bottom:11px}
+  .field label{font-size:12px;color:var(--ink-2);font-weight:600;display:block;margin-bottom:4px}
+  .field input{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 11px;font:inherit;font-size:14px;color:var(--ink);background:#fff}
+  .field input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  .field .hint{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .out{background:#0c2231;color:#eaf3f6;border-radius:13px;padding:16px 18px}
+  .out .row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+  .out .row:last-child{border-bottom:0}
+  .out .row b{font-size:17px;font-weight:800}
+  .out .be{margin-top:12px;font-size:13px;color:#bfe0ec;line-height:1.5}
+  .out .be b{color:#fff}
+  /* price strip */
+  .priceband{background:linear-gradient(135deg,#073f55,#0a6e8c);color:#eaf6fa;border-radius:20px;padding:22px 24px;box-shadow:var(--shadow)}
+  .priceband h2{margin:0 0 4px;color:#fff;font-size:18px}
+  .priceband .lead{font-size:13.5px;color:#cfe7f0;max-width:70ch}
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+  @media(max-width:720px){.tiers{grid-template-columns:1fr}}
+  .tier{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:15px}
+  .tier .t{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#a9d4e3;font-weight:700}
+  .tier .p{font-size:26px;font-weight:800;margin:6px 0 0;color:#fff}
+  .tier .p small{font-size:13px;font-weight:600;color:#bfe0ec}
+  .tier .rm{font-size:11.5px;color:#9ec9d8;margin-top:2px}
+  .tier .j{font-size:12px;color:#dcf0f6;margin-top:9px;line-height:1.45}
+  .tier.feat{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.32)}
+  .comps{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .comps .c{font-size:11.5px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:5px 11px;color:#dcf0f6}
+  .comps .c b{color:#fff}
+  .saypill{margin-top:16px;background:rgba(255,255,255,.1);border-left:3px solid #7fd4ec;border-radius:0 10px 10px 0;padding:12px 15px;font-size:13.5px;color:#fff;line-height:1.5}
+  /* privacy */
+  .privacy{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+  .privacy ul{margin:10px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  @media(max-width:720px){.privacy ul{grid-template-columns:1fr}}
+  .privacy li{font-size:12.5px;color:var(--ink-2);display:flex;gap:8px;align-items:flex-start}
+  .privacy li svg{flex:none;margin-top:1px}
+  .advlog{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+  .advlog th,.advlog td{text-align:left;padding:7px 9px;border-bottom:1px solid #eef3f5}
+  .advlog th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+  .advlog td{color:var(--ink-2)}
+  .trigtag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px}
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);line-height:1.6}
+  .note{font-size:12px;color:var(--muted);margin-top:8px}
+  .collapsible summary{cursor:pointer;list-style:none}
+  .collapsible summary::-webkit-details-marker{display:none}
+
+  /* ============ VIEW SWITCHER ============ */
+  .viewtabs{position:relative;z-index:2;display:flex;gap:6px;margin:18px 0 2px;flex-wrap:wrap}
+  .viewtabs button{appearance:none;font:inherit;font-size:13px;font-weight:700;color:var(--ink-2);
+    background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 15px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;transition:background .12s,color .12s,border-color .12s}
+  .viewtabs button:hover{border-color:#c3d4dd}
+  .viewtabs button[aria-selected="true"]{background:var(--sea);color:#fff;border-color:var(--sea)}
+  .viewtabs .vb-badge{font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 7px;background:#eef3f5;color:var(--muted)}
+  .viewtabs button[aria-selected="true"] .vb-badge{background:rgba(255,255,255,.24);color:#fff}
+  /* hide the analytics-only chrome (sample watermark + preview banner) while the real Places control is open */
+  .stage.places-on::before,.stage.places-on::after{display:none}
+  .stage.places-on .preview-bar{display:none}
+
+  /* ============ PLACES CONTROL ============ */
+  .pl-intro{font-size:13px;color:var(--ink-2);max-width:78ch;margin:2px 0 14px;line-height:1.55}
+  .pl-safety{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+    border-left:3px solid var(--risk);border-radius:12px;padding:13px 15px;margin:0 0 16px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+  .pl-safety svg{flex:none;margin-top:1px}
+  .pl-safety b{color:var(--ink)}
+  .pl-bar{position:sticky;top:0;z-index:20;background:var(--bg);
+    padding:12px 0;margin:0 0 6px;border-bottom:1px solid var(--line);
+    display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .pl-stats{display:flex;gap:7px;flex-wrap:wrap}
+  .pl-pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink-2);
+    background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+  .pl-pill .dot{width:9px;height:9px;border-radius:3px;flex:none}
+  .pl-pill .dot.feat{background:var(--sea)}
+  .pl-pill .dot.show{background:var(--good)}
+  .pl-pill .dot.off{background:#9fb0bb}
+  .pl-pill b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .pl-tools{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pl-tools input,.pl-tools select{font:inherit;font-size:13px;color:var(--ink);background:#fff;
+    border:1px solid var(--line);border-radius:9px;padding:7px 11px}
+  .pl-tools input{width:170px}
+  .pl-tools input:focus,.pl-tools select:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  .pl-btn{appearance:none;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border-radius:9px;padding:8px 13px;border:1px solid var(--line);background:#fff;color:var(--ink-2)}
+  .pl-btn:hover{border-color:#c3d4dd}
+  .pl-btn.primary{background:var(--sea);color:#fff;border-color:var(--sea)}
+  .pl-btn.primary:hover{background:var(--sea-2)}
+
+  .pl-cat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+  .pl-cat-h{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);background:#fbfdfe}
+  .pl-cat-h .cn{font-size:14px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+  .pl-cat-h .cc{font-size:11.5px;color:var(--muted);font-weight:600}
+  .pl-cat-h .bulk{margin-left:auto;display:flex;gap:6px}
+  .pl-cat-h .bulk button{appearance:none;font:inherit;font-size:11px;font-weight:700;color:var(--ink-2);background:#fff;border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer}
+  .pl-cat-h .bulk button:hover{border-color:#c3d4dd}
+  .pl-region{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:10px 16px 3px;background:#fff}
+  .pl-row{display:flex;align-items:center;gap:12px;padding:9px 16px;border-top:1px solid #eef3f5}
+  .pl-row:first-of-type{border-top:0}
+  .pl-row .nm{min-width:0;flex:1}
+  .pl-row .nm b{font-size:13.5px;font-weight:600;color:var(--ink);display:block;line-height:1.3}
+  .pl-row .nm .sub{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:7px;margin-top:1px;flex-wrap:wrap}
+  .pl-row.is-off{opacity:.62}
+  .pl-row.is-off .nm b{text-decoration:line-through;text-decoration-color:#c3d4dd}
+  .pl-row.is-feat{background:linear-gradient(90deg,rgba(10,110,140,.05),transparent)}
+  .lg-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px}
+  .lg-tag.full{color:#0a6e8c;background:#e4f1f5}
+  .lg-tag.seas{color:#7a5e1f;background:#f6ebd2}
+  .haz-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;color:var(--risk);background:#fbeae6;border-radius:5px;padding:1px 6px}
+  /* segmented 3-state control */
+  .seg{display:inline-flex;flex:none;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+  .seg button{appearance:none;font:inherit;font-size:11.5px;font-weight:700;color:var(--muted);background:#fff;
+    border:0;border-left:1px solid var(--line);padding:6px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .seg button:first-child{border-left:0}
+  .seg button[aria-pressed="true"][data-s="feature"]{background:var(--sea);color:#fff}
+  .seg button[aria-pressed="true"][data-s="show"]{background:var(--good);color:#fff}
+  .seg button[aria-pressed="true"][data-s="off"]{background:#5b7081;color:#fff}
+  .seg button[aria-pressed="true"][data-s="off"].haz{background:var(--warn);color:#fff}
+  .seg button[disabled]{cursor:not-allowed;color:#c3d4dd;background:repeating-linear-gradient(-45deg,#fff 0 4px,#f4f8fa 4px 8px)}
+  .seg button.haz-lock-note{cursor:help}
+  .pl-empty{padding:22px 16px;text-align:center;color:var(--muted);font-size:12.5px}
+  @media(max-width:680px){
+    .pl-row{flex-wrap:wrap}
+    .seg{width:100%}.seg button{flex:1;justify-content:center}
+    .pl-tools{margin-left:0;width:100%}.pl-tools input{flex:1;width:auto}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="preview-bar">
+    <div class="pb">
+      <span class="dot"></span>
+      <span><strong>PREVIEW</strong> — illustrative figures, not measured. This is what your dashboard <em>will</em> show once this property's telemetry is connected. No live guest data is present.</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header class="top">
+      <div class="brandrow">
+        <div class="brand">
+          <svg class="mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="20" cy="20" r="19" fill="#0a6e8c"/>
+            <path d="M5 24c3 0 3-3 6-3s3 3 6 3 3-3 6-3 3 3 6 3 3-3 6-3" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M20 8l2.6 5.6L28 14l-4 4 1 6-5-3-5 3 1-6-4-4 5.4-.4L20 8z" fill="#ffd98a"/>
+          </svg>
+          <div><b>OceanSafety</b><span>Operator Console</span></div>
+        </div>
+        <div class="modeswitch" role="group" aria-label="Data mode">
+          <button class="on" aria-pressed="true"><span class="pv sample"></span>Preview</button>
+          <button class="off" aria-pressed="false" title="Enable after this property's telemetry is connected" disabled>Live data · connect telemetry</button>
+        </div>
+      </div>
+
+      <div class="property">
+        <div>
+          <h1>Your Hotel</h1>
+          <div class="meta">slug <code style="font-size:11px;background:#eef3f5;padding:1px 5px;border-radius:4px">your-hotel</code> · North Shore · 252 keys · your property only — no cross-hotel comparison</div>
+        </div>
+        <div class="period" aria-label="Reporting period">
+          <b>7d</b><b class="sel">30d</b><b>90d</b>
+        </div>
+      </div>
+      <div class="freshness">
+        <span class="pv sample"></span>
+        No measured data yet · 0 of 60 days of telemetry connected · this view is a layout preview
+      </div>
+    </header>
+
+    <!-- VIEW SWITCHER -->
+    <nav class="viewtabs" role="tablist" aria-label="Console view">
+      <button role="tab" aria-selected="true" data-view="analytics">Analytics</button>
+      <button role="tab" aria-selected="false" data-view="places">Places on your app <span class="vb-badge" id="vbPlaces">—</span></button>
+    </nav>
+
+    <div id="view-analytics">
+    <!-- HERO / VALUE PANEL -->
+    <div class="hero">
+      <div class="hero-img" aria-hidden="true">
+        <svg viewBox="0 0 1120 150" preserveAspectRatio="none">
+          <defs><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0d8bb0"/><stop offset="1" stop-color="#073f55"/></linearGradient></defs>
+          <rect width="1120" height="150" fill="url(#sea)"/>
+          <path d="M0 96c120 0 120-22 240-22s120 22 240 22 120-22 240-22 120 22 240 22 120-22 160-22v76H0z" fill="#0a6e8c" opacity=".55"/>
+          <path d="M0 116c140 0 140-18 280-18s140 18 280 18 140-18 280-18 140 18 280 18v34H0z" fill="#06506a" opacity=".7"/>
+          <circle cx="940" cy="46" r="22" fill="#ffd98a" opacity=".85"/>
+        </svg>
+      </div>
+      <div class="hero-body">
+        <div class="ns">
+          <div class="lab"><span class="pv measured"></span> North star · POI taps per occupied unit <span class="chip sample">Sample</span></div>
+          <div class="big">~3.6<small> / occupied unit · wk</small></div>
+          <div class="wow">▲ ~12% vs prior 30d <span class="chip sample" style="margin-left:4px">Sample</span></div>
+          <div class="sub">How many times guests who scanned the in-room QR opened a beach, trail, or restaurant in the app to plan their day — per occupied unit, week over week. A tap is intent (“opened in app”), not a confirmed visit.</div>
+          <details class="meth"><summary>How this is computed</summary>
+            <div class="body"><b>Measured numerator / operator-reported denominator.</b> <code>poi_tap</code> events for this slug from the Worker daily rollup (<code>window.CGTrack.poi → /e → KV ev:slug:date</code>), divided by <code>unit_count × occupancy</code> you supply. The aggregate rollup counts taps and sessions separately with no per-session link, so this is taps-per-unit, not “sessions that tapped.” Goes <b>Measured</b> once a co-branded variant ships with a live endpoint and 60+ days of rollups exist.</div>
+          </details>
+        </div>
+        <div class="companion">
+          <div class="lab">Companion floor · New activated guests / occupied unit <span class="floorpill">Floor</span></div>
+          <div class="num">~0.8<small style="font-size:13px;font-weight:600;color:var(--muted)"> / unit · wk</small> <span class="chip sample">Sample</span></div>
+          <div class="cap"><code style="font-size:10.5px">session_start</code> fires once per 30-day guest cookie, so it counts first-opens — <b>not</b> repeat opens during a stay. Read it as a floor on engagement.</div>
+          <div class="valueread"><b>The honest read:</b> at the proposed rate this costs about <b>one comp room every 12 days</b>, or one incremental spa booking a month to break even — and this dashboard shows you, in your own data, whether that booking happened. <span class="chip modeled">Modeled</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROVENANCE LEGEND -->
+    <div class="legend" aria-label="How to read every number on this page">
+      <span class="li"><span class="pv measured"></span> <b style="color:var(--sea)">Measured</b>&nbsp;— real telemetry from your slug</span>
+      <span class="li"><span class="pv modeled"></span> <b style="color:#5a6b2f">Modeled</b>&nbsp;— formula on measured inputs</span>
+      <span class="li"><span class="pv assumption"></span> <b style="color:#7a6030">Assumption</b>&nbsp;— industry benchmark, unmeasured</span>
+      <span class="li"><span class="pv sample"></span> <b style="color:var(--sample)">Sample</b>&nbsp;— illustrative, no real source</span>
+    </div>
+
+    <!-- WHAT YOUR GUESTS ARE DOING -->
+    <section>
+      <div class="sec-h"><h2>What your guests are doing</h2><p>The concrete, anonymized behavior you’ll recognize as your own property.</p></div>
+      <div class="grid g3">
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Top destinations this week</span><span class="chip sample">Sample</span></div>
+          <ol class="rank">
+            <li><span class="n">1</span><span class="kind">Beach</span><span class="bar"><i style="width:100%"></i></span><span class="ct">~210</span></li>
+            <li><span class="n">2</span><span class="kind">Beach</span><span class="bar"><i style="width:74%"></i></span><span class="ct">~156</span></li>
+            <li><span class="n">3</span><span class="kind">Food</span><span class="bar"><i style="width:58%"></i></span><span class="ct">~122</span></li>
+            <li><span class="n">4</span><span class="kind">Hike</span><span class="bar"><i style="width:41%"></i></span><span class="ct">~86</span></li>
+            <li><span class="n">5</span><span class="kind">Food</span><span class="bar"><i style="width:29%"></i></span><span class="ct">~61</span></li>
+          </ol>
+          <div class="cap">Shown as “opened in the app,” never “guests visited.” Buckets under 5 sessions show “fewer than 5.”</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>poi_tap → roll.top[kind][id]</code> per slug. Concrete guest behavior — the most defensible operator artifact on the page. <b>Measured</b> once live.</div></details>
+        </div>
+
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Hotel-pick lift</span><span class="chip sample">Sample</span></div>
+          <div class="gauge">
+            <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
+              <path d="M18 2a16 16 0 1 1 0 32 16 16 0 0 1 0-32" fill="none" stroke="#eef3f5" stroke-width="4"/>
+              <path d="M18 2a16 16 0 0 1 0 32" fill="none" stroke="#0a6e8c" stroke-width="4" stroke-linecap="round" stroke-dasharray="63 100" transform="rotate(-90 18 18)"/>
+            </svg>
+            <div class="gx"><b>~63%</b><span>of pick-eligible taps land on your curated picks</span></div>
+          </div>
+          <div class="cap">Is your concierge’s curation working? Pick-eligible = beaches, hikes, food. Shave-ice, trucks &amp; crafts carry no house flag and are excluded.</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>poi_house_pick_tap ÷ pick-eligible poi_tap</code>, house flag from <code>HOTEL.picks</code>. A control you own — not a causal “curation caused a visit” claim. <b>Measured</b> once live.</div></details>
+        </div>
+
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> POI taps per session</span><span class="chip sample">Sample</span></div>
+          <div class="v">~2.4 <small>taps / session</small></div>
+          <div class="cap"><b>A ratio</b> (<code>poi_tap ÷ sessions</code>) — <b>not</b> the share of sessions that tapped. The aggregate rollup can’t identify which sessions tapped; a true session-activation rate is on the roadmap (needs a Worker schema change).</div>
+          <details class="meth"><summary>When guests use it (hourly)</summary>
+            <div class="hours" aria-hidden="true">
+              <i style="height:8%"></i><i style="height:6%"></i><i style="height:4%"></i><i style="height:5%"></i><i style="height:10%"></i><i style="height:22%"></i><i style="height:46%"></i><i style="height:72%"></i><i style="height:88%"></i><i style="height:74%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:44%"></i><i style="height:40%"></i><i style="height:38%"></i><i style="height:42%"></i><i style="height:50%"></i><i style="height:64%"></i><i style="height:70%"></i><i style="height:58%"></i><i style="height:40%"></i><i style="height:26%"></i><i style="height:16%"></i><i style="height:10%"></i>
+            </div>
+            <div class="hours-x"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>11p</span></div>
+            <div class="body" style="margin-top:6px">24 hourly buckets (<code>roll.hours[h]</code>), guest device-clock. Tells front-desk when to staff and when to push. <b>Measured</b> once live.</div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- BAD OCEAN DAY SAVES -->
+    <section>
+      <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the beach isn’t safe, what the app surfaced — and the on-property interest it captured.</p></div>
+      <div class="grid g3">
+        <div class="card" style="grid-column:span 2">
+          <div class="title"><span class="l"><span class="pv measured"></span> Stay-Close renders by trigger</span><span class="chip sample">Sample</span></div>
+          <div class="bars">
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#eaf1f6;color:#37576b">Brown water</span></span><i style="width:88%;background:#7a6a4a"></i><span>~58</span></div>
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#fbeede;color:#b4452f">High surf</span></span><i style="width:70%;background:#b4452f"></i><span>~46</span></div>
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#eef4ee;color:#1f9d6b">Rain</span></span><i style="width:55%;background:#3f7f9c"></i><span>~36</span></div>
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#f6f0e2;color:#c9821b">Wind</span></span><i style="width:33%;background:#c9821b"></i><span>~22</span></div>
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#f3eefb;color:#6b4fa0">UV</span></span><i style="width:20%;background:#6b4fa0"></i><span>~13</span></div>
+          </div>
+          <div class="cap">Trigger conditions are <b>measured</b> from Open-Meteo + NOAA. North Shore runs ~112 trigger-days/yr; South 60–80, East 50–70.</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>CGTrack.stayCloseRender → roll.triggers{}</code>. Counts panel renders on days a hazard actually fired. <b>Measured</b> once live.</div></details>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Amenity interest &amp; render→click</span><span class="chip sample">Sample</span></div>
+          <div class="v">~14% <small>render → click</small></div>
+          <div class="cap">Top labels: <b>Spa</b> ~22 · <b>On-site dining</b> ~18 · <b>Pool bar</b> ~11. A click = <b>amenity interest</b>, presented as interest — never “booked” or “revenue.”</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts ÷ renders. This measured rate <b>replaces</b> the assumed 50%×25% funnel guess in The Math below. <b>Measured</b> once live.</div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONCIERGE -->
+    <section>
+      <div class="sec-h"><h2>Concierge &amp; front-desk demand</h2><p>The cleanest near-cash lever: questions the app answered so your desk didn’t have to.</p></div>
+      <div class="grid g3">
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Concierge button taps</span><span class="chip sample">Sample</span></div>
+          <div class="v">~74</div>
+          <div class="cap">Taps on the in-app “call concierge” button — labeled <b>button tapped</b>, not connected calls.</div>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Self-serve look-ups</span><span class="chip sample">Sample</span></div>
+          <div class="v">~1,310</div>
+          <div class="cap">Beach / condition / POI look-ups guests answered themselves (<code>poi_tap + tab_change</code>) — front-desk questions deflected.</div>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv sample"></span> Labor saved</span><span class="chip sample">Sample</span></div>
+          <div class="v">— <small>set your rate in Your numbers</small></div>
+          <div class="cap">Deflected desk questions × your loaded rate. We don’t assert a dollar — enter your rate in <b>Your numbers</b> below and it computes there.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAFETY COVERAGE (collapsible add-on) -->
+    <section>
+      <details class="collapsible card" style="padding:18px">
+        <summary class="sec-h" style="margin:0;cursor:pointer">
+          <h2 style="display:flex;align-items:center;gap:8px"><span class="pv measured"></span> Safety-trigger coverage &amp; conditions-shown log</h2>
+          <p>Risk add-on · click to expand</p>
+        </summary>
+        <div style="margin-top:14px">
+          <p class="note" style="margin-top:0">A timestamped, exportable, aggregate record of when guests were shown current hazard conditions. Positioned as <b>risk-posture and documentation</b> — not a claim the app prevents drownings or is legally required. <span class="chip assumption">Lawyer-gated</span> before sold as liability value.</p>
+          <table class="advlog">
+            <thead><tr><th>Date</th><th>Trigger</th><th>Renders shown</th><th>Source</th></tr></thead>
+            <tbody>
+              <tr><td>—</td><td><span class="trigtag" style="background:#fbeede;color:#b4452f">High surf advisory</span></td><td>~46</td><td>NOAA</td></tr>
+              <tr><td>—</td><td><span class="trigtag" style="background:#eaf1f6;color:#37576b">Brown water</span></td><td>~58</td><td>DOH / rainfall</td></tr>
+              <tr><td>—</td><td><span class="trigtag" style="background:#f6f0e2;color:#c9821b">High wind</span></td><td>~22</td><td>Open-Meteo</td></tr>
+            </tbody>
+          </table>
+          <div class="cap" style="margin-top:8px">Coverage is measured at the <b>render</b> level, not per unique session (the aggregate rollup doesn’t link renders to distinct sessions). Exportable log carries a “SAMPLE DATA” stamp until telemetry connects.</div>
+        </div>
+      </details>
+    </section>
+
+    <!-- THE MATH -->
+    <section>
+      <div class="sec-h"><h2>Your numbers <span class="chip modeled" style="margin-left:6px">Your inputs · modeled</span></h2><p>The fields below start with example values — replace them with yours and the result appears. Nothing computes until you type, because this is your math, not our claim.</p></div>
+      <div class="card calc">
+        <div class="io">
+          <div>
+            <div class="field"><label>Stay-Close renders / week <span class="chip measured" style="font-size:9px;padding:1px 5px">Measured once live</span></label><input id="renders" type="number" value="175"><div class="hint">Matches the trigger breakdown above (58+46+36+22+13)</div></div>
+            <div class="field"><label>Render → click rate %</label><input id="ctr" type="number" value="14"><div class="hint">Replaces the assumed 50%×25% funnel guess with a measured rate</div></div>
+            <div class="field"><label>Click → incremental on-property spend %</label><input id="conv" type="number" value="38"><div class="hint">Your estimate until the pilot measures it — set it to whatever you’d defend</div></div>
+            <div class="field"><label>Avg on-property ticket $ (you supply)</label><input id="ticket" type="number" value="120"></div>
+            <div class="field"><label>Contribution margin % (you supply)</label><input id="margin" type="number" value="52"></div>
+            <div class="field"><label>Concierge labor deflected $ / week</label><input id="labor" type="number" value="64"><div class="hint">≈ 30 desk questions × 4 min × $32/hr loaded rate</div></div>
+          </div>
+          <div>
+            <div class="out">
+              <div class="row"><span>Amenity-interest clicks / wk</span><b id="oClicks">—</b></div>
+              <div class="row"><span>Recovered margin / yr <span class="chip modeled" style="background:#1b3a48;color:#bfe0ec">Your math</span></span><b id="oMargin">—</b></div>
+              <div class="row"><span>Concierge labor saved / yr <span class="chip modeled" style="background:#1b3a48;color:#bfe0ec">Your math</span></span><b id="oLabor">—</b></div>
+              <div class="row"><span>Conservative value floor / yr</span><b id="oFloor">—</b></div>
+              <div class="be">Enter your numbers above and your floor works out to a <b id="oRatio">—</b> value-to-price ratio against a <b>Property</b> tier of $750–$1,400/mo. It’s your figure, computed from your inputs — we don’t assert it.</div>
+            </div>
+            <div class="note" style="margin-top:12px;border-top:1px dashed var(--line);padding-top:10px">Every figure above uses <b>your inputs</b> or measured guest data. We don’t show industry-average guesses dressed up as your results — the pilot replaces the editable estimates with your property’s real render→click rate.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICE ARGUMENT -->
+    <section>
+      <div class="priceband">
+        <h2>Where this price sits</h2>
+        <div class="lead">You’re not buying an ROI claim from a vendor with no reference logos — you’re buying a number small enough to approve from petty cash, against a value story you can repeat to your asset manager and the dashboard that lets you audit it in your own data.</div>
+        <div class="tiers">
+          <div class="tier"><div class="t">Concierge · &lt;150 keys</div><div class="p">$300<small>/mo</small></div><div class="rm">$36–90 / room / yr</div><div class="j">Concierge labor saved alone ($3.2k–$13k/yr) covers it several times over. Read-only dashboard + weekly digest.</div></div>
+          <div class="tier feat"><div class="t">Property · 150–350 keys</div><div class="p">$750–1,400<small>/mo</small></div><div class="rm">$48–84 / room / yr</div><div class="j">The backbone tier. Break-even is roughly one incremental spa booking a month — and the calculator above shows that against your own numbers, never ours. Add-ons (risk-doc, owner reporting) lift to ~$1,550 without renegotiating the headline.</div></div>
+          <div class="tier"><div class="t">Brand · 350+ keys, multi-prop</div><div class="p">$2,000–3,500<small>/mo</small></div><div class="rm">$48–70 / room / yr</div><div class="j">Below INTELITY enterprise. Per-slug roll-up, no cross-hotel comparison. Captures ~30% of attributable Stay-Close value at scale.</div></div>
+        </div>
+        <div class="comps" aria-label="Comparable per-room pricing">
+          <span class="c"><b>Duve</b> ~$65/room/yr (analytics incl.)</span>
+          <span class="c"><b>Crave</b> ~$130/room/yr (tablet)</span>
+          <span class="c"><b>SuitePad</b> from $450/mo + hardware</span>
+          <span class="c"><b>Cloud PMS</b> $3–15/room/mo</span>
+          <span class="c">Hotel tech = 1.4–3% of revenue</span>
+        </div>
+        <div class="saypill">“At this rate it costs about one comp room every twelve days, or one incremental spa booking a month to break even — and this dashboard shows you, in your own data, whether that booking actually happened.” <span style="color:#bfe0ec">Every tier lands at or below Duve, the cleanest analytics-included comparable, while we’re Kauaʻi-specific.</span></div>
+        <div class="note" style="color:#bfe0ec;margin-top:14px">Repricing from the legacy annual to this monthly model is a <b>qualified yes</b>: justified in principle by the per-room math, but earned only once (1) the deployed app emits real events, (2) the funnel is measured not assumed, (3) 1–2 reference logos sign at intro pricing, (4) the liability lever is attorney-cleared. Until then: free pilot, not the monthly.</div>
+      </div>
+    </section>
+
+    <!-- PRIVACY -->
+    <section>
+      <div class="privacy">
+        <div class="sec-h" style="margin:0 0 4px"><h2>How we protect your guests</h2><p>Restraint is the feature.</p></div>
+        <ul>
+          <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> No names, room numbers, IP, or User-Agent stored</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> No persistent user ID, no ad pixels, no session replay</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> Opaque 8-byte session IDs · Do-Not-Track respected</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> Your property’s data only — no leaderboards, no cross-property attribution</li>
+        </ul>
+        <div class="note">Counts are a floor by design: privacy-respecting (DNT) guests aren’t tracked, and first-opens undercount repeat in-stay use. We’d rather show you a number you can trust than a bigger one you can’t.</div>
+      </div>
+    </section>
+
+    <footer>
+      <b>Reading this page:</b> every tile is tagged Measured / Modeled / Assumption / Sample. In this preview, all figures are <b>Sample</b> — illustrative placeholders, not your guests. Live mode renders only measured telemetry; a period with no data shows an empty state, never a seed number and never a movement figure against an empty prior week.<br><br>
+      <b>What makes it real:</b> (1) build the endpoint-injection step so co-branded variants post to the live Worker (today they ship disabled), (2) deploy the Worker + seed per-slug keys, (3) ship a co-branded variant with the live endpoint, (4) accumulate 60+ days of rollups. Until then this is a layout preview by design.<br><br>
+      OceanSafety · Operator Console · methodology &amp; data dictionary available on request · figures current as of preview build.
+    </footer>
+    </div><!-- /view-analytics -->
+
+    <!-- ============ PLACES CONTROL ============ -->
+    <div id="view-places" hidden>
+      <section class="places" style="margin-top:18px">
+        <div class="sec-h">
+          <h2>Places on your guest app</h2>
+          <p>Curate the beaches, trails, food &amp; shops your QR-branded app recommends.</p>
+        </div>
+        <p class="pl-intro">
+          Set each place to <b>★ Featured</b> (your house picks, surfaced first), <b>✓ Listed</b> (in the app as normal),
+          or hide it from your branded build. Your choices export as a config file applied to <b>your</b> co-branded app only —
+          they never change anyone else's. Nothing here is live guest data.
+        </p>
+        <div class="pl-safety">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l8.5 4.8v5.4c0 4.6-3.4 7.6-8.5 9-5.1-1.4-8.5-4.4-8.5-9V7.8L12 3z" stroke="#b4452f" stroke-width="1.6"/><path d="M12 8v5M12 16h.01" stroke="#b4452f" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div><b>Safety guardrail.</b> Hazardous spots — beaches with no lifeguard, warning-only beaches, and rip/surge channels —
+          can be moved off your <i>recommended</i> lists (<b>⊘ Not recommended</b>), but can't be deleted from a safety app.
+          Their hazard warning always stays visible if a guest searches for them. Calm, guarded beaches and all food/shops/trails can be hidden fully.</div>
+        </div>
+
+        <div class="pl-bar">
+          <div class="pl-stats" id="plStats"></div>
+          <div class="pl-tools">
+            <input id="plSearch" type="search" placeholder="Search places…" aria-label="Search places" />
+            <select id="plFilter" aria-label="Filter by category"><option value="">All categories</option></select>
+            <button class="pl-btn" id="plReset" title="Reset every place to Listed">Reset</button>
+            <button class="pl-btn primary" id="plExport">Export config</button>
+          </div>
+        </div>
+
+        <div id="plList"></div>
+
+        <footer style="margin-top:26px">
+          Changes save to this browser as you go. <b>Export config</b> produces the <code style="background:#f0f5f7;border-radius:4px;padding:1px 5px">places.json</code>
+          file that gets applied to your co-branded build — until then, edits are a local draft. Hazard locks are derived from the live OceanSafety beach dataset and can't be overridden here.
+        </footer>
+      </section>
+    </div><!-- /view-places -->
+  </div>
+</div>
+
+<script>
+  // The Math — modeled value calculator (all inputs editable, outputs clearly modeled)
+  function fmtK(n){ return n>=1000 ? "~$"+(n/1000).toFixed(n<10000?1:0)+"k" : "~$"+Math.round(n); }
+  function v(id){ return +document.getElementById(id).value||0; }
+  function set(id,t){ document.getElementById(id).textContent=t; }
+  var touched=false;  // nothing computes until the GM edits a field — no asserted result on load
+  function calc(){
+    if(!touched){ ['oClicks','oMargin','oLabor','oFloor','oRatio'].forEach(function(id){ set(id,'—'); }); return; }
+    var renders=v('renders'), ctr=v('ctr')/100, conv=v('conv')/100,
+        ticket=v('ticket'), margin=v('margin')/100, laborWk=v('labor');
+    var clicks=renders*ctr;
+    var marginYr=clicks*52*conv*ticket*margin;
+    var laborYr=laborWk*52;
+    var floor=marginYr+laborYr;
+    set('oClicks',"~"+Math.round(clicks));
+    set('oMargin',fmtK(marginYr));
+    set('oLabor',fmtK(laborYr));
+    set('oFloor',fmtK(floor));
+    var lo=floor/(1400*12), hi=floor/(750*12);               // vs Property tier $1,400 / $750 per mo
+    set('oRatio',"~"+lo.toFixed(1)+"–"+hi.toFixed(1)+"×");
+  }
+  ['renders','ctr','conv','ticket','margin','labor'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',function(){ touched=true; calc(); });
+  });
+  calc();
+</script>
+
+<script>
+/* ============ PLACES CONTROL ============ */
+(function(){
+  var SLUG = (document.querySelector('.property code') || {}).textContent || 'your-hotel';
+  SLUG = SLUG.trim();
+  var LSKEY = 'os_places_' + SLUG;
+
+  // Live OceanSafety Kauaʻi place dataset (h=1 → hazard-locked: no full hide, only "Not recommended").
+  var DATA = {"beaches":[{"id":"anini","n":"ʻAnini Beach","r":"North Shore","lg":"seasonal_active"},{"id":"poipu","n":"Poʻipū Beach Park","r":"South Shore","lg":"full_time"},{"id":"salt_pond","n":"Salt Pond Beach","r":"West Side","lg":"seasonal_active"},{"id":"hanalei","n":"Hanalei Bay","r":"North Shore","lg":"seasonal_active"},{"id":"lydgate","n":"Lydgate Beach Park","r":"East Side","lg":"full_time"},{"id":"kee","n":"Keʻe Beach","r":"North Shore End","lg":"seasonal_active"},{"id":"queens_bath","n":"Queen's Bath","r":"Princeville","h":1,"why":"No lifeguard on duty."},{"id":"brennecke","n":"Brennecke Beach","r":"South Shore","h":1,"why":"Warning-only beach: documented drownings, no safe entry."},{"id":"lumahai","n":"Lumahaʻi Beach","r":"North Shore","h":1,"why":"Warning-only beach: documented drownings, no safe entry."},{"id":"secret","n":"Secret Beach (Kauapea)","r":"North Shore","h":1,"why":"Warning-only beach: documented drownings, no safe entry."},{"id":"kalihiwai","n":"Kalihiwai Bay","r":"North Shore","h":1,"why":"Warning-only beach: documented drownings, no safe entry."},{"id":"polihale","n":"Polihale State Park","r":"West Side","h":1,"why":"Warning-only beach: documented drownings, no safe entry."},{"id":"koloa_landing","n":"Kōloa Landing","r":"South Shore","h":1,"why":"Warning-only beach: documented drownings, no safe entry."},{"id":"tunnels","n":"Tunnels (Mākua)","r":"North Shore","h":1,"why":"No lifeguard on duty."},{"id":"kealia","n":"Keālia Beach","r":"East Side","lg":"full_time"},{"id":"kalapaki","n":"Kalapakī Beach","r":"East Side","lg":"full_time"},{"id":"mahaulepu","n":"Māhāʻulepū Beach","r":"South Shore","h":1,"why":"No lifeguard on duty."},{"id":"wailua","n":"Wailua Beach","r":"East Side","h":1,"why":"No lifeguard on duty."},{"id":"kekaha","n":"Kekaha Beach Park","r":"West Side","lg":"seasonal_active"},{"id":"pakala","n":"Pakala (Infinities)","r":"West Side","h":1,"why":"No lifeguard on duty."},{"id":"shipwreck","n":"Shipwreck Beach (Keoneloa)","r":"South Shore","h":1,"why":"No lifeguard on duty."},{"id":"donkey","n":"Donkey Beach (Paliku)","r":"East Side","h":1,"why":"No lifeguard on duty."}],"channels":[{"id":"kee_exit","n":"Ke'e Reef Exit","h":1,"why":"Rip/surge channel — a hazard feature, not a recommendation."},{"id":"anini_gap","n":"ʻAnini Reef Gap","h":1,"why":"Rip/surge channel — a hazard feature, not a recommendation."},{"id":"hanalei_rip","n":"Hanalei River Rip","h":1,"why":"Rip/surge channel — a hazard feature, not a recommendation."},{"id":"tunnels_channel","n":"Tunnels Channel","h":1,"why":"Rip/surge channel — a hazard feature, not a recommendation."},{"id":"poipu_channel","n":"Poʻipū Channel","h":1,"why":"Rip/surge channel — a hazard feature, not a recommendation."},{"id":"queens_surge","n":"Queen's Bath Surge","h":1,"why":"Rip/surge channel — a hazard feature, not a recommendation."}],"hikes":[{"id":"kalalau_2mi","n":"Kalalau Trail (Hanakāpīʻai)","r":"Napali Coast"},{"id":"awaawapuhi","n":"ʻAwaʻawapuhi Trail","r":"Kokee"},{"id":"canyon","n":"Canyon Trail","r":"Waimea Canyon"},{"id":"sleeping_giant","n":"Sleeping Giant (Nounou East)","r":"East Side"},{"id":"pihea","n":"Pihea Trail to Alakaʻi","r":"Kokee"},{"id":"kuilau","n":"Kuilau Ridge Trail","r":"East Side"},{"id":"mahaulepu_trail","n":"Māhāʻulepū Heritage Trail","r":"South Shore"},{"id":"okolehao","n":"ʻŌkolehao Trail","r":"North Shore"}],"activities":[{"id":"anaina_hou","n":"Anaina Hou Playground","r":"North Shore"},{"id":"kilauea_lighthouse","n":"Kīlauea Point Lighthouse","r":"North Shore"},{"id":"lydgate_park","n":"Lydgate Park (Kamalani Playground)","r":"East Side"},{"id":"spouting_horn","n":"Spouting Horn Blowhole","r":"South Shore"},{"id":"hanapepe_swing","n":"Hanapepe Swinging Bridge","r":"West Side"},{"id":"limahuli","n":"Limahuli Garden","r":"North Shore"},{"id":"kauai_museum","n":"Kauai Museum","r":"East Side"},{"id":"fish_pier","n":"Anini Fishing Pier","r":"North Shore"},{"id":"salt_pond_park","n":"Salt Pond Beach Park","r":"West Side"},{"id":"kekaha_park","n":"Kekaha Neighborhood Center Park","r":"West Side"},{"id":"kapaa_beach_park","n":"Kapaʻa Beach Park","r":"East Side"},{"id":"mahaulepu_wildlife","n":"Mahaʻulepū Wildlife Walk","r":"South Shore"},{"id":"smiths_garden","n":"Smith's Tropical Paradise","r":"East Side"},{"id":"hanapepe_salt_ponds","n":"Hanapēpē Salt Ponds","r":"West Side"},{"id":"wailua_falls","n":"Wailua Falls","r":"East Side"},{"id":"opaekaa_falls","n":"ʻOpaekaʻa Falls Lookout","r":"East Side"},{"id":"kalalau_lookout","n":"Kalalau Lookout","r":"West Side"},{"id":"hanalei_lookout","n":"Hanalei Valley Lookout","r":"North Shore"},{"id":"puu_o_kila","n":"Puʻu o Kila Lookout","r":"West Side"},{"id":"old_koloa","n":"Old Kōloa Town","r":"South Shore"},{"id":"hanalei_town","n":"Hanalei Town","r":"North Shore"},{"id":"kilauea_town","n":"Kīlauea Town Center","r":"North Shore"},{"id":"allerton_garden","n":"Allerton Garden","r":"South Shore"},{"id":"wailua_heiau","n":"Wailua Heiau Complex","r":"East Side"},{"id":"russian_fort","n":"Russian Fort Elizabeth State Historical Park","r":"West Side"},{"id":"grove_farm","n":"Grove Farm Homestead Museum","r":"East Side"}],"food":[{"id":"hamura_saimin","n":"Hamura Saimin","r":"East Side"},{"id":"pono_market","n":"Pono Market","r":"East Side"},{"id":"jojos_shave","n":"JoJo's Shave Ice","r":"West Side"},{"id":"tip_top","n":"Tip Top Cafe","r":"East Side"},{"id":"banana_joes","n":"Banana Joe's Fruit Stand","r":"North Shore"},{"id":"trilogy_coffee","n":"Trilogy Coffee","r":"South Shore"},{"id":"java_kai_hanalei","n":"Java Kai Hanalei","r":"North Shore"},{"id":"da_crack","n":"Da Crack","r":"South Shore"},{"id":"marks_place","n":"Mark's Place","r":"East Side"},{"id":"kalalea_juice","n":"Kalalea Juice Hale","r":"East Side"},{"id":"spot_hanalei","n":"The Spot Hanalei","r":"North Shore"},{"id":"johnnys_market","n":"Johnny's Market","r":"North Shore"},{"id":"bar_acuda","n":"Bar Acuda","r":"North Shore"},{"id":"red_salt","n":"Red Salt at Koa Kea","r":"South Shore"},{"id":"beach_house","n":"The Beach House Restaurant","r":"South Shore"},{"id":"merrimans_kauai","n":"Merriman's Fish House","r":"South Shore"}],"foodTrucks":[{"id":"ft_porkys","n":"Porky's Kauai","r":"North Shore"},{"id":"ft_fishmarket","n":"Koloa Fish Market","r":"South Shore"},{"id":"ft_kickshaws","n":"Kickshaws","r":"East Side"},{"id":"ft_garden_island_chocolate","n":"Garden Island Chocolate","r":"North Shore"},{"id":"ft_alohamixplate","n":"Aloha Mixplate","r":"North Shore"},{"id":"ft_fresh_shave","n":"Wishing Well Shave Ice","r":"North Shore"},{"id":"ft_da_crack","n":"Da Crack","r":"South Shore"},{"id":"ft_smokeystreatery","n":"Smokey's Smokery","r":"West Side"},{"id":"ft_palate","n":"Palate Wine Bar truck","r":"West Side"},{"id":"ft_fishexpress","n":"Fish Express truck","r":"East Side"},{"id":"ft_kapaa_market","n":"Kapaʻa Wednesday Food Truck Lot","r":"East Side"},{"id":"ft_punapizza","n":"Puna Pizza truck","r":"North Shore"}],"markets":[{"id":"fm_kilauea_thu","n":"Kīlauea Sunshine Market","r":"North Shore"},{"id":"fm_hanapepe_thu","n":"Hanapepe Sunshine Market","r":"West Side"},{"id":"fm_koloa_mon","n":"Kōloa Sunshine Market","r":"South Shore"},{"id":"fm_kalaheo_tue","n":"Kalāheo Sunshine Market","r":"South Shore"},{"id":"fm_kapaa_wed","n":"Kapaʻa Sunshine Market","r":"East Side"},{"id":"fm_lihue_fri","n":"Līhuʻe Sunshine Market","r":"East Side"},{"id":"fm_kekaha_sat","n":"Kekaha Sunshine Market","r":"West Side"},{"id":"fm_hanalei_sat","n":"Hanalei Farmers Market","r":"North Shore"},{"id":"fm_anaina_hou_sat","n":"Anaina Hou Saturday Market","r":"North Shore"},{"id":"fm_lihue_sat","n":"Kauai Community Market","r":"East Side"}],"crafts":[{"id":"kong_lung","n":"Kong Lung Trading Co.","r":"North Shore"},{"id":"hanalei_trading","n":"Hanalei Trading Co.","r":"North Shore"},{"id":"hanapepe_art_walk","n":"Hanapēpē Friday Art Night","r":"West Side"},{"id":"kauai_coffee","n":"Kauai Coffee Visitor Center","r":"South Shore"},{"id":"kilohana_plantation","n":"Kilohana Plantation Shops","r":"Lihue"},{"id":"aloha_aina_apothecary","n":"Aloha ʻĀina Apothecary","r":"East Side"},{"id":"kauai_sea_salt","n":"Kauai Sea Salt Co.","r":"South Shore"},{"id":"anahola_granola","n":"Anahola Granola","r":"East Side"}],"groceries":[{"id":"foodland_princeville","n":"Foodland Princeville","r":"North Shore"},{"id":"big_save_hanalei","n":"Big Save Hanalei","r":"North Shore"},{"id":"healthy_hut","n":"Healthy Hut Market","r":"North Shore"},{"id":"big_save_kapaa","n":"Big Save Kapaʻa","r":"East Side"},{"id":"times_lihue","n":"Times Supermarket","r":"East Side"},{"id":"costco_lihue","n":"Costco Lihue","r":"East Side"},{"id":"living_foods_poipu","n":"Living Foods Market","r":"South Shore"},{"id":"big_save_koloa","n":"Big Save Kōloa","r":"South Shore"}],"gas":[{"id":"texaco_hanalei","n":"Texaco Hanalei","r":"North Shore"},{"id":"76_princeville","n":"76 Princeville","r":"North Shore"},{"id":"chevron_kapaa","n":"Chevron Kapaʻa","r":"East Side"},{"id":"aloha_wailua","n":"Aloha Wailua","r":"East Side"},{"id":"costco_lihue","n":"Costco Lihue (members)","r":"Lihue"},{"id":"76_lihue","n":"76 Lihue Airport","r":"Lihue"},{"id":"76_koloa","n":"76 Koloa","r":"South Shore"},{"id":"shell_hanapepe","n":"Shell Hanapēpē","r":"West Side"},{"id":"chevron_waimea","n":"Chevron Waimea","r":"West Side"}],"stays":[{"id":"grand_hyatt_kauai","n":"Grand Hyatt Kauaʻi Resort & Spa","r":"South Shore"},{"id":"1_hotel_hanalei","n":"1 Hotel Hanalei Bay","r":"North Shore"},{"id":"koa_kea_poipu","n":"Koa Kea Hotel & Resort","r":"South Shore"},{"id":"kauai_shores_kapaa","n":"Kauaʻi Shores Hotel","r":"East Side"},{"id":"sheraton_kauai","n":"Sheraton Kauaʻi Coconut Beach","r":"East Side"}]};
+
+  var CATS = [
+    {key:'beaches',    label:'Beaches'},
+    {key:'channels',   label:'Surf &amp; reef channels'},
+    {key:'hikes',      label:'Trails &amp; hikes'},
+    {key:'activities', label:'Sights &amp; activities'},
+    {key:'food',       label:'Restaurants &amp; cafés'},
+    {key:'foodTrucks', label:'Food trucks'},
+    {key:'markets',    label:"Farmers' markets"},
+    {key:'crafts',     label:'Local shops &amp; crafts'},
+    {key:'groceries',  label:'Groceries'},
+    {key:'gas',        label:'Gas stations'},
+    {key:'stays',      label:'Places to stay'}
+  ];
+  var REGION_ORDER = ['North Shore','North Shore End','Princeville','East Side','Lihue','South Shore','West Side','Napali Coast','Kokee','Waimea Canyon'];
+
+  function key(cat,id){ return cat+':'+id; }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  // ---- state ----
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(LSKEY)) || {}; } catch(e){ state = {}; }
+  function st(cat,id){ return state[key(cat,id)] || 'show'; }   // default = Listed
+  function setSt(cat,id,val){
+    if(val==='show') delete state[key(cat,id)]; else state[key(cat,id)] = val;
+    try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch(e){}
+  }
+  function persist(){ try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch(e){} }
+
+  // ---- rendering ----
+  var listEl = document.getElementById('plList');
+  var statsEl = document.getElementById('plStats');
+  var filterEl = document.getElementById('plFilter');
+  var searchEl = document.getElementById('plSearch');
+  var query = '';
+
+  // populate category filter
+  CATS.forEach(function(c){
+    var o = document.createElement('option'); o.value = c.key; o.innerHTML = c.label; filterEl.appendChild(o);
+  });
+
+  function segHTML(cat,it){
+    var cur = st(cat,it.id), haz = !!it.h;
+    var offLabel = haz ? '⊘ Not&nbsp;rec.' : '✕ Hide';
+    function b(s,label){
+      var extra = (s==='off' && haz) ? ' haz' : '';
+      return '<button type="button" class="'+extra.trim()+'" data-s="'+s+'" aria-pressed="'+(cur===s)+'">'+label+'</button>';
+    }
+    return '<div class="seg" data-cat="'+cat+'" data-id="'+esc(it.id)+'" data-haz="'+(haz?1:0)+'">'+
+      b('feature','★ Feature')+ b('show','✓ Listed')+ b('off',offLabel)+'</div>';
+  }
+  function rowHTML(cat,it){
+    var cur = st(cat,it.id), haz=!!it.h;
+    var cls = 'pl-row'+(cur==='feature'?' is-feat':'')+((cur==='off'&&!haz)?' is-off':'');
+    var sub = [];
+    if(it.lg==='full_time') sub.push('<span class="lg-tag full">Lifeguard · daily</span>');
+    else if(it.lg==='seasonal_active') sub.push('<span class="lg-tag seas">Lifeguard · seasonal</span>');
+    if(haz) sub.push('<span class="haz-tag" title="'+esc(it.why||'')+'">⚠ Hazard-locked</span>');
+    return '<div class="'+cls+'" data-cat="'+cat+'" data-id="'+esc(it.id)+'" data-name="'+esc(it.n).toLowerCase()+'">'+
+      '<div class="nm"><b>'+esc(it.n)+'</b>'+(sub.length?'<span class="sub">'+sub.join('')+'</span>':'')+'</div>'+
+      segHTML(cat,it)+'</div>';
+  }
+  function render(){
+    var html = '';
+    CATS.forEach(function(c){
+      if(filterEl.value && filterEl.value!==c.key) return;
+      var items = (DATA[c.key]||[]).filter(function(it){ return !query || it.n.toLowerCase().indexOf(query)>=0; });
+      if(!items.length) return;
+      html += '<div class="pl-cat" data-cat="'+c.key+'">';
+      html += '<div class="pl-cat-h"><div class="cn">'+c.label+'</div>'+
+              '<div class="cc">'+items.length+' place'+(items.length>1?'s':'')+'</div>'+
+              '<div class="bulk"><button data-bulk="feature">Feature all</button>'+
+              '<button data-bulk="show">List all</button></div></div>';
+      // group by region
+      var groups = {}, order = [];
+      items.forEach(function(it){ var r=it.r||'Other'; if(!groups[r]){groups[r]=[];order.push(r);} groups[r].push(it); });
+      order.sort(function(a,b){ var ia=REGION_ORDER.indexOf(a), ib=REGION_ORDER.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
+      order.forEach(function(r){
+        if(c.key!=='channels') html += '<div class="pl-region">'+esc(r)+'</div>';
+        groups[r].forEach(function(it){ html += rowHTML(c.key,it); });
+      });
+      html += '</div>';
+    });
+    listEl.innerHTML = html || '<div class="pl-empty">No places match your search.</div>';
+    stats();
+  }
+  function stats(){
+    var feat=0, hide=0, notrec=0, listed=0, custom=0;
+    CATS.forEach(function(c){ (DATA[c.key]||[]).forEach(function(it){
+      var s=st(c.key,it.id);
+      if(s==='feature') feat++;
+      else if(s==='off'){ if(it.h) notrec++; else hide++; }
+      else listed++;
+      if(s!=='show') custom++;
+    });});
+    statsEl.innerHTML =
+      '<span class="pl-pill"><span class="dot feat"></span><b>'+feat+'</b> Featured</span>'+
+      '<span class="pl-pill"><span class="dot show"></span><b>'+listed+'</b> Listed</span>'+
+      '<span class="pl-pill"><span class="dot off"></span><b>'+hide+'</b> Hidden</span>'+
+      (notrec?'<span class="pl-pill"><span class="dot off" style="background:var(--warn)"></span><b>'+notrec+'</b> Not&nbsp;rec.</span>':'');
+    var badge = document.getElementById('vbPlaces');
+    if(badge) badge.textContent = custom ? custom : '—';
+  }
+
+  // ---- interactions (event delegation) ----
+  listEl.addEventListener('click', function(e){
+    var segBtn = e.target.closest('.seg button');
+    if(segBtn){
+      var seg = segBtn.closest('.seg');
+      setSt(seg.dataset.cat, seg.dataset.id, segBtn.dataset.s);
+      render();
+      return;
+    }
+    var bulk = e.target.closest('[data-bulk]');
+    if(bulk){
+      var cat = bulk.closest('.pl-cat').dataset.cat;
+      var val = bulk.dataset.bulk;
+      (DATA[cat]||[]).forEach(function(it){
+        // never auto-hide via bulk; "Feature all" / "List all" only
+        setSt(cat, it.id, val);
+      });
+      render();
+    }
+  });
+  searchEl.addEventListener('input', function(){ query = this.value.trim().toLowerCase(); render(); });
+  filterEl.addEventListener('change', render);
+  document.getElementById('plReset').addEventListener('click', function(){
+    if(!confirm('Reset every place back to “Listed”? This clears your featured picks and hides.')) return;
+    state = {}; persist(); render();
+  });
+
+  // ---- export ----
+  document.getElementById('plExport').addEventListener('click', function(){
+    var out = { app:'oceansafety', island:'kauai', slug:SLUG, version:1,
+                featured:{}, hidden:[], notRecommended:[] };
+    CATS.forEach(function(c){ (DATA[c.key]||[]).forEach(function(it){
+      var s=st(c.key,it.id);
+      if(s==='feature'){ (out.featured[c.key]=out.featured[c.key]||[]).push(it.id); }
+      else if(s==='off'){
+        var rec={cat:c.key,id:it.id,name:it.n};
+        if(it.h) out.notRecommended.push(rec); else out.hidden.push(rec);
+      }
+    });});
+    var json = JSON.stringify(out,null,2);
+    var blob = new Blob([json],{type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'places-'+SLUG+'.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },100);
+    var btn=this, t=btn.textContent; btn.textContent='Downloaded ✓';
+    setTimeout(function(){ btn.textContent=t; }, 1600);
+  });
+
+  // ---- view switcher ----
+  var tabs = document.querySelectorAll('.viewtabs button');
+  var stage = document.querySelector('.stage');
+  var rendered = false;
+  function show(view){
+    tabs.forEach(function(t){ t.setAttribute('aria-selected', String(t.dataset.view===view)); });
+    document.getElementById('view-analytics').hidden = (view!=='analytics');
+    document.getElementById('view-places').hidden = (view!=='places');
+    stage.classList.toggle('places-on', view==='places');
+    if(view==='places' && !rendered){ render(); rendered=true; }
+    window.scrollTo(0,0);
+  }
+  tabs.forEach(function(t){ t.addEventListener('click', function(){ show(this.dataset.view); }); });
+
+  stats(); // seed the tab badge on load
+})();
+</script>
+</body>
+</html>
