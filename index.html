@@ -4604,13 +4604,11 @@ function renderHeaderForecast(){
   const cur = (typeof _selectedDayIdx !== 'undefined') ? _selectedDayIdx : 0;
   el.innerHTML = FORECAST.map((f,i) => {
     const sel = i === cur;
-    const surfCol = f.surf_unknown ? 'var(--mute)' : (f.es>6?'#b91c1c':f.es>3.5?'#92400e':'#15803d');
-    const surf = f.surf_unknown ? '—' : f.es.toFixed(1)+'ft';
+    // Surf/wave line removed from the 7-day strip (forecast surf reads off — pulled for review).
     return '<div class="hdr-fc-day'+(sel?' sel':'')+'" onclick="openOutlookForDay('+i+')" role="button" aria-label="'+f.label+' forecast">'
       + '<div class="hdr-fc-d">'+f.label+'</div>'
       + '<div class="hdr-fc-ic">'+weatherIconSVG(f.weatherCode)+'</div>'
       + '<div class="hdr-fc-t">'+f.tempMax+'°</div>'
-      + '<div class="hdr-fc-s" style="color:'+(sel?'rgba(255,255,255,.92)':surfCol)+'">'+surf+'</div>'
       + '</div>';
   }).join('');
 }
