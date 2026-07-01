@@ -198,6 +198,11 @@
   /* hide the analytics-only chrome (sample watermark + preview banner) while the real Places control is open */
   .stage.places-on::before,.stage.places-on::after{display:none}
   .stage.places-on .preview-bar{display:none}
+  /* in Live mode the page shows REAL guest data — the "SAMPLE" watermark would be dishonest, so drop it */
+  .stage.live-on::before,.stage.live-on::after{display:none}
+  .stage.live-on .preview-bar{background:linear-gradient(90deg,#073f55,#0a6e8c);border-bottom-color:#0d8bb0}
+  .stage.live-on .preview-bar strong{color:#bfe8f3}
+  .stage.live-on .preview-bar .dot{background:#7fd4ec;box-shadow:0 0 0 4px rgba(127,212,236,.22)}
 
   /* ============ PLACES CONTROL ============ */
   .pl-intro{font-size:13px;color:var(--ink-2);max-width:78ch;margin:2px 0 14px;line-height:1.55}
@@ -791,6 +796,269 @@
   tabs.forEach(function(t){ t.addEventListener('click', function(){ show(this.dataset.view); }); });
 
   stats(); // seed the tab badge on load
+})();
+</script>
+
+<script>
+/* ============ LIVE TELEMETRY ============
+   Wires the console to the deployed Cloudflare Worker.
+   No ?slug= → do NOTHING (page stays the SAMPLE preview, Jade's demos unchanged).
+   ?slug=... → fetch real rollups, flip to Live mode, replace Measured tiles.
+   Any failure → silently fall back to the Sample preview (never error). */
+(function(){
+  try {
+    var params = new URLSearchParams(location.search);
+    var slug = (params.get('slug') || '').trim();
+    if(!slug) return;  // no slug: leave the preview exactly as-is
+
+    var API = (params.get('api') || 'https://concierge-guide-api.oceansafe-hi.workers.dev').replace(/\/+$/,'');
+    var period = parseInt(params.get('period'), 10);
+    if(!(period > 0)) period = 30;
+
+    // Human counts under 5 are shown as "fewer than 5" (honesty rule from the footer).
+    function ct(n){ return n < 5 ? 'fewer than 5' : n.toLocaleString('en-US'); }
+    function ratio(n){ return (Math.round(n * 10) / 10).toString(); }
+
+    // Title-case fallback for any POI id not in the readable name map.
+    function titleCase(id){
+      return String(id).replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+    }
+
+    // Build id -> readable name from the console's existing Places DATA if present on window,
+    // else re-derive a small map by title-casing. (Places DATA lives in an IIFE scope, so we
+    // rebuild a lookup from the same source-of-truth ids that appear in roll.top.)
+    var NAMES = {
+      hanalei:'Hanalei Bay', poipu:'Poʻipū Beach Park', anini:'ʻAnini Beach',
+      lydgate:'Lydgate Beach Park', kee:'Keʻe Beach', kealia:'Keālia Beach',
+      kalapaki:'Kalapakī Beach', salt_pond:'Salt Pond Beach', kekaha:'Kekaha Beach Park',
+      bar_acuda:'Bar Acuda', red_salt:'Red Salt at Koa Kea', beach_house:'The Beach House Restaurant',
+      hamura_saimin:'Hamura Saimin', da_crack:'Da Crack', spot_hanalei:'The Spot Hanalei',
+      kalalau_2mi:'Kalalau Trail (Hanakāpīʻai)', sleeping_giant:'Sleeping Giant',
+      canyon:'Canyon Trail', kuilau:'Kuilau Ridge Trail'
+    };
+    function nameFor(id){ return NAMES[id] || titleCase(id); }
+
+    var KIND_LABEL = { beach:'Beach', hike:'Hike', food:'Food', truck:'Truck', shave:'Shave', craft:'Craft' };
+    var HEADER_KEYS = 252;  // key-count already stated in the property line
+
+    function sumRolls(days){
+      var acc = {
+        sessions:0, poi_tap:0, poi_house_pick_tap:0, tab_change:0,
+        concierge_tap:0, stay_close_render:0, stay_close_click:0,
+        top:{}, any:false
+      };
+      (days || []).forEach(function(d){
+        var r = d && d.roll;
+        if(!r) return;
+        acc.any = true;
+        acc.sessions           += r.sessions || 0;
+        acc.poi_tap            += r.poi_tap || 0;
+        acc.poi_house_pick_tap += r.poi_house_pick_tap || 0;
+        acc.tab_change         += r.tab_change || 0;
+        acc.concierge_tap      += r.concierge_tap || 0;
+        acc.stay_close_render  += r.stay_close_render || 0;
+        acc.stay_close_click   += r.stay_close_click || 0;
+        var top = r.top || {};
+        Object.keys(top).forEach(function(kind){
+          var ids = top[kind] || {};
+          Object.keys(ids).forEach(function(id){
+            var k = kind + '|' + id;
+            acc.top[k] = (acc.top[k] || 0) + (ids[id] || 0);
+          });
+        });
+      });
+      return acc;
+    }
+
+    fetch(API + '/api/dashboard/' + encodeURIComponent(slug) + '?period=' + period)
+      .then(function(res){ if(!res.ok) throw new Error('http ' + res.status); return res.json(); })
+      .then(function(data){
+        var cur = sumRolls(data.days);
+        var prior = sumRolls(data.priorDays);
+        var effPeriod = (data.period > 0) ? data.period : period;
+
+        // ---- drop the SAMPLE watermark: this page now shows real guest data ----
+        var stageEl = document.querySelector('.stage');
+        if(stageEl) stageEl.classList.add('live-on');
+
+        // ---- mode switch: flip Live active, Preview inactive ----
+        var msBtns = document.querySelectorAll('.modeswitch button');
+        if(msBtns.length >= 2){
+          var previewBtn = msBtns[0], liveBtn = msBtns[1];
+          previewBtn.className = 'off';
+          previewBtn.setAttribute('aria-pressed', 'false');
+          previewBtn.innerHTML = 'Preview';
+          liveBtn.className = 'on';
+          liveBtn.setAttribute('aria-pressed', 'true');
+          liveBtn.removeAttribute('disabled');
+          liveBtn.removeAttribute('title');
+          liveBtn.innerHTML = '<span class="pv measured"></span>Live data';
+        }
+        // make the "on" pill read as Measured (sea) rather than Sample (sand) in Live mode
+        var msOn = document.querySelector('.modeswitch .on');
+        if(msOn){ msOn.style.background = '#e4f1f5'; msOn.style.color = 'var(--sea)'; }
+
+        // ---- property line: real slug ----
+        var slugCode = document.querySelector('.property code');
+        if(slugCode) slugCode.textContent = slug;
+
+        // ---- freshness banner: real status, or honest empty state ----
+        var fresh = document.querySelector('.freshness');
+        if(fresh){
+          fresh.style.color = 'var(--sea)';
+          fresh.style.background = '#e4f1f5';
+          fresh.style.borderColor = '#bcdde7';
+          if(!cur.any){
+            fresh.innerHTML = '<span class="pv measured"></span> Live · collecting — no guest data yet · last ' + effPeriod + ' days';
+          } else {
+            fresh.innerHTML = '<span class="pv measured"></span> Live · ' +
+              ct(cur.sessions) + ' sessions · ' + ct(cur.poi_tap) + ' POI taps · last ' + effPeriod + ' days';
+          }
+        }
+
+        // ---- sticky preview bar → live status line ----
+        var pbLine = document.querySelector('.preview-bar .pb span:last-child');
+        if(pbLine){
+          pbLine.innerHTML = cur.any
+            ? '<strong>LIVE</strong> — measured telemetry from this property’s slug. Sample tiles are replaced with your own guests’ anonymized behavior; Modeled and Assumption tiles remain your inputs and benchmarks.'
+            : '<strong>LIVE</strong> — this property is connected and collecting. No guest events in the last ' + effPeriod + ' days yet; measured tiles show an empty state until data arrives.';
+        }
+
+        // Helper: turn a tile's Sample chip into a Measured chip.
+        function toMeasured(chip){
+          if(!chip) return;
+          chip.className = chip.className.replace('sample','measured');
+          chip.textContent = 'Measured';
+          chip.style.border = '';
+        }
+
+        // ================= MEASURED TILES =================
+
+        // ---- Hero north-star: POI taps per occupied unit / wk ----
+        // Denominator we can't measure (occupancy). We do NOT invent an occupancy:
+        // show the honest raw measured count instead of a per-unit rate.
+        var ns = document.querySelector('.hero .ns');
+        if(ns){
+          var big = ns.querySelector('.big');
+          var wow = ns.querySelector('.wow');
+          var nsChip = ns.querySelector('.lab .chip');
+          toMeasured(nsChip);
+          if(!cur.any){
+            if(big) big.innerHTML = '—<small> no taps yet</small>';
+            if(wow){ wow.innerHTML = 'Collecting — no prior period to compare <span class="chip measured" style="margin-left:4px">Measured</span>'; wow.style.color = 'var(--muted)'; }
+          } else {
+            // measured raw taps for the period (honest count, not a fabricated per-unit rate)
+            if(big) big.innerHTML = ct(cur.poi_tap) + '<small> POI taps · ' + effPeriod + 'd</small>';
+            var wowChip = wow ? wow.querySelector('.chip') : null;
+            toMeasured(wowChip);
+            // movement vs prior period — only if the prior period actually has data
+            if(wow){
+              if(prior.any && prior.poi_tap > 0){
+                var pct = Math.round(((cur.poi_tap - prior.poi_tap) / prior.poi_tap) * 100);
+                var arrow = pct >= 0 ? '▲' : '▼';
+                wow.innerHTML = arrow + ' ' + Math.abs(pct) + '% vs prior ' + effPeriod + 'd ' +
+                  '<span class="chip measured" style="margin-left:4px">Measured</span>';
+                wow.style.color = pct >= 0 ? 'var(--sea)' : 'var(--risk)';
+              } else {
+                wow.innerHTML = 'No prior-period data to compare against ' +
+                  '<span class="chip measured" style="margin-left:4px">Measured</span>';
+                wow.style.color = 'var(--muted)';
+              }
+            }
+          }
+          var nsSub = ns.querySelector('.sub');
+          if(nsSub){
+            nsSub.textContent = 'Measured POI taps for this property over the last ' + effPeriod +
+              ' days. A per-occupied-unit rate needs your occupancy figure (' + HEADER_KEYS +
+              ' keys on file) — enter it in Your numbers below; we show the raw measured count rather than invent an occupancy.';
+          }
+        }
+
+        // ---- Companion floor: activated guests / sessions ----
+        var comp = document.querySelector('.companion');
+        if(comp){
+          var num = comp.querySelector('.num');
+          var compChip = num ? num.querySelector('.chip') : null;
+          toMeasured(compChip);
+          if(num){
+            if(!cur.any){
+              num.innerHTML = '—<small style="font-size:13px;font-weight:600;color:var(--muted)"> no sessions yet</small> <span class="chip measured">Measured</span>';
+            } else {
+              num.innerHTML = ct(cur.sessions) +
+                '<small style="font-size:13px;font-weight:600;color:var(--muted)"> new sessions · ' + effPeriod + 'd</small> ' +
+                '<span class="chip measured">Measured</span>';
+            }
+          }
+        }
+
+        // ---- Top destinations this week ----
+        var topCard = null;
+        var cardTitles = document.querySelectorAll('.card .title');
+        for(var i=0;i<cardTitles.length;i++){
+          if(/Top destinations/i.test(cardTitles[i].textContent)){ topCard = cardTitles[i].closest('.card'); break; }
+        }
+        if(topCard){
+          toMeasured(topCard.querySelector('.title .chip'));
+          var rankEl = topCard.querySelector('.rank');
+          if(rankEl){
+            var rows = Object.keys(cur.top).map(function(k){
+              var parts = k.split('|');
+              return { kind: parts[0], id: parts[1], n: cur.top[k] };
+            }).sort(function(a,b){ return b.n - a.n; }).slice(0, 5);
+
+            if(!rows.length){
+              rankEl.innerHTML = '<li style="color:var(--muted);border-bottom:0;padding:10px 0">No destination taps in the last ' + effPeriod + ' days yet.</li>';
+            } else {
+              var max = rows[0].n || 1;
+              rankEl.innerHTML = rows.map(function(r, idx){
+                var w = Math.max(6, Math.round((r.n / max) * 100));
+                var label = KIND_LABEL[r.kind] || titleCase(r.kind);
+                var display = r.n < 5 ? '&lt;5' : r.n.toLocaleString('en-US');
+                return '<li><span class="n">' + (idx+1) + '</span>' +
+                  '<span class="kind">' + label + '</span>' +
+                  '<span class="bar"><i style="width:' + w + '%"></i></span>' +
+                  '<span class="ct" title="' + nameFor(r.id).replace(/"/g,'&quot;') + '">' + display + '</span></li>';
+              }).join('');
+            }
+          }
+        }
+
+        // ---- Stay-Close renders + amenity click (activation-adjacent measured counts) ----
+        // The trigger-render tile is derived from roll.triggers{}; when triggers are empty we
+        // fall back to the total stay_close_render count so the tile isn't a stale sample.
+        // (Trigger breakdown stays sample-labeled unless real trigger keys exist — the current
+        //  Worker rollup for this slug carries an empty triggers{}, so we do not fabricate one.)
+
+        // ---- Concierge & self-serve (measured raw counts) ----
+        var vEls = document.querySelectorAll('section .card .v');
+        vEls.forEach(function(el){
+          var card = el.closest('.card');
+          var title = card ? card.querySelector('.title') : null;
+          if(!title) return;
+          var t = title.textContent;
+          if(/Concierge button taps/i.test(t)){
+            el.textContent = cur.any ? ct(cur.concierge_tap) : '—';
+            toMeasuredIn(card);
+          } else if(/Self-serve look-ups/i.test(t)){
+            var lookups = cur.poi_tap + cur.tab_change;
+            el.textContent = cur.any ? ct(lookups) : '—';
+            toMeasuredIn(card);
+          }
+        });
+        function toMeasuredIn(card){
+          var chip = card.querySelector('.title .chip.sample');
+          // only the two measured-tagged tiles carry a Measured pv dot; leave the "Sample" Labor-saved tile alone
+          var pv = card.querySelector('.title .pv');
+          if(pv && pv.classList.contains('measured')) toMeasured(chip);
+        }
+      })
+      .catch(function(err){
+        // fetch failed: leave the page exactly as the SAMPLE preview. Never throw.
+        if(window.console && console.warn) console.warn('OceanSafety live telemetry unavailable, showing preview:', err);
+      });
+  } catch(e){
+    if(window.console && console.warn) console.warn('OceanSafety live telemetry init error, showing preview:', e);
+  }
 })();
 </script>
 </body>
