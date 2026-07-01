@@ -3766,6 +3766,8 @@ async function fetchLive(){
           LIVE.rain_at = startIdx !== null ? new Date(ht[startIdx]) : null;  // null = stays dry through lookahead
         }
         LIVE.rain_now_mm = nowMm;
+        // Retain the next-12h hourly precip (mm) + times for the WHEN intensity strip.
+        LIVE.rain_hourly = { mm: hp.slice(bestIdx, maxLookahead).map(x => (typeof x === 'number' ? x : 0)), t: ht.slice(bestIdx, maxLookahead) };
       }
     } else {
       LIVE.precip_chance = SNAP.precip_chance;
@@ -6860,6 +6862,37 @@ function bestTrailsForRegion(regionStr){
     })
     .slice(0, 4);
 }
+// WHEN rain view — a slim next-12h intensity strip (bar height = mm) + a plain-language line.
+// Shown in the outlook sheet when the precip chip is tapped. Reads LIVE.rain_hourly (retained
+// in fetchLive); degrades honestly to "outlook unavailable" — never a percentage.
+function rainStripHtml(){
+  const lv = (typeof LIVE !== 'undefined' && LIVE) ? LIVE : null;
+  const rh = lv && lv.rain_hourly;
+  const fmtH = d => { const x = (d instanceof Date) ? d : new Date(d); if(isNaN(+x)) return ''; const h = x.getHours(); return (((h + 11) % 12) + 1) + (h < 12 ? 'a' : 'p'); };
+  let head;
+  if(lv && lv.rain_state === 'on') head = lv.rain_until ? ('Showers now, clearing around ' + fmtH(lv.rain_until) + '.') : 'Showers on and off — no clear break in the next 12 hours.';
+  else if(lv && lv.rain_state === 'off' && lv.rain_at) head = 'Dry now. Showers moving in around ' + fmtH(lv.rain_at) + '.';
+  else if(lv && lv.rain_state === 'off') head = 'Dry, with no showers expected in the next 12 hours.';
+  else head = 'Rain outlook unavailable right now.';
+  const sub = 'Hawaiʻi showers are usually brief and warm, and can fall on one side of the island but not the other — check the beach you are headed to.';
+  let bars = '';
+  if(rh && rh.mm && rh.mm.length){
+    const mm = rh.mm.slice(0, 12), t = (rh.t || []).slice(0, 12);
+    const maxMm = Math.max(1, ...mm);
+    const cells = mm.map((v, i) => {
+      const ht = Math.max(2, Math.round((v / maxMm) * 30));
+      const col = (typeof _fcColor === 'function' && _fcColor(v)) ? _fcColor(v) : (v >= 0.5 ? '#bd2f80' : '#e2ddd0');
+      const lab = (i === 0) ? 'now' : ((t[i] && i % 3 === 0) ? fmtH(t[i]) : '');
+      return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1"><div style="width:100%;max-width:14px;height:' + ht + 'px;background:' + col + ';border-radius:2px 2px 0 0"></div><div style="font-size:8.5px;color:var(--mute);height:10px;line-height:10px">' + lab + '</div></div>';
+    }).join('');
+    bars = '<div style="display:flex;align-items:flex-end;gap:3px;height:44px;margin:11px 0 2px">' + cells + '</div>';
+  }
+  return '<div style="background:var(--sand,#fdf7e8);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:12px">'
+    + '<div style="font-size:13px;font-weight:700;color:var(--ink);line-height:1.35">' + head + '</div>'
+    + bars
+    + '<div style="font-size:10.5px;color:var(--mute);line-height:1.45;margin-top:' + (bars ? '4px' : '6px') + '">' + sub + '</div>'
+    + '</div>';
+}
 function renderOutlookSheet(){
   const region = OUTLOOK_REGIONS.find(x => x.key === window._outlookRegion) || OUTLOOK_REGIONS[0];
   const c = getRegionConditions(region.r);
@@ -6936,6 +6969,7 @@ function renderOutlookSheet(){
       </div>
     </div>
     ${regionTabs}
+    ${focus === 'precip' ? rainStripHtml() : ''}
     ${condChips}
     ${(()=>{
       const beachPicks = (typeof bestBeachesForRegion === 'function') ? bestBeachesForRegion(region.r) : [];
@@ -7173,25 +7207,27 @@ async function rescore(){
 
     // SURF lives on the per-shore map chips now, not in the header strip.
 
-    // PRECIP — chance of rain. Uses three icon tiers that match the chips & 7-day strip:
-    //   <30%  → cond-rain-chance  (cloud + drop + "?")  → "Chance"  · level=good
-    //   30-69%→ cond-rain          (cloud + drops)      → "Possible"· level=ok
-    //   ≥70%  → cond-rain-likely  (cloud + sun + heavy drops) → "Likely" · level=poor
-    // ?? (not ||) so a legitimate 0% probability still reads as "Dry" rather than falling
-    // back to SNAP. Falls back to SNAP only when the API field is genuinely missing/null.
-    const pc = (_sw && typeof _sw.precip_chance === 'number') ? _sw.precip_chance
-             : (typeof D.precip_chance === 'number') ? D.precip_chance
-             : (typeof SNAP.precip_chance === 'number' ? SNAP.precip_chance : 0);
-    const pcPct = Math.round(pc);
-    const precipLevel = pcPct < 30 ? 'good' : pcPct < 70 ? 'ok' : 'poor';
-    const precipHint  = pcPct < 5 ? 'Dry'
-                     : pcPct < 30 ? 'Chance'
-                     : pcPct < 70 ? 'Possible'
-                     : 'Likely';
-    const precipIconKey = pcPct < 30 ? 'cond-rain-chance'
-                       : pcPct < 70 ? 'cond-rain-likely'
-                       : 'cond-rain';
-    paintChip('hdrPrecip', `${pcPct}%`, precipHint, precipLevel);
+    // PRECIP — WHEN-based, not a %. An island-wide "% chance" is misleading in Hawaiʻi
+    // (it can rain on one side and not the other), so show the hourly-scan rain STATE from
+    // fetchLive instead: raining → "til <hour>", dry-but-coming → "rain <hour>", else "clear".
+    // Degrades to "—" when there's no hourly outlook (pre-fetch/offline) — never a % fallback.
+    const _fmtH = d => { if(!(d instanceof Date)) return ''; const h = d.getHours(); return (((h + 11) % 12) + 1) + (h < 12 ? 'a' : 'p'); };
+    const _lv = (typeof LIVE !== 'undefined' && LIVE) ? LIVE : null;
+    let precipVal, precipHint, precipLevel, precipIconKey;
+    if(_lv && _lv.rain_state === 'on'){
+      precipVal = 'Rain'; precipHint = _lv.rain_until ? ('til ' + _fmtH(_lv.rain_until)) : 'now';
+      precipLevel = 'poor'; precipIconKey = 'cond-rain';
+    } else if(_lv && _lv.rain_state === 'off' && _lv.rain_at){
+      precipVal = 'Dry'; precipHint = 'rain ' + _fmtH(_lv.rain_at);
+      precipLevel = 'ok'; precipIconKey = 'cond-rain-likely';
+    } else if(_lv && _lv.rain_state === 'off'){
+      precipVal = 'Dry'; precipHint = 'clear';
+      precipLevel = 'good'; precipIconKey = 'cond-rain-chance';
+    } else {
+      precipVal = '—'; precipHint = 'rain';
+      precipLevel = 'ok'; precipIconKey = 'cond-rain-chance';
+    }
+    paintChip('hdrPrecip', precipVal, precipHint, precipLevel);
     // Swap the icon image to match the tier. COND_ICONS holds base64 data URIs.
     const precipEl = document.getElementById('hdrPrecip');
     if(precipEl && typeof COND_ICONS !== 'undefined' && COND_ICONS[precipIconKey]){
