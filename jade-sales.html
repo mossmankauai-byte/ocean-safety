@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OceanSafe — Close Deals</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%230b485b'/%3E%3Cstop offset='1' stop-color='%231b6d83'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='30' fill='url(%23g)'/%3E%3Ccircle cx='46' cy='20' r='5' fill='%23e07856'/%3E%3Cpath d='M5 38 Q15 32 25 38 T45 38 T62 38' stroke='%23f5ecd7' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M5 46 Q15 40 25 46 T45 46 T62 46' stroke='%2394becc' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M5 53 Q15 48 25 53 T45 53 T62 53' stroke='%23c9a84c' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root{--ocean:#0f5266;--deep:#0a3a49;--gold:#b98d2e;--ink:#16242b;--mute:#67787f;--line:#e2eaec;--soft:#f1f7f8;--bg:#f5f9fa;--good:#1f8b5a;--goodbg:#e7f4ec;--warn:#9a6a12;--warnbg:#fbf3df}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:20px 16px 60px}
+  .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand svg{width:38px;height:38px}
+  .brand b{font-size:17px;font-weight:600;letter-spacing:.2px}
+  .brand span{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+  .kpis{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:11px;padding:8px 13px;text-align:center;min-width:82px}
+  .kpi .n{font-size:19px;font-weight:600;color:var(--ocean);line-height:1.1}
+  .kpi .l{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);margin-top:2px}
+
+  details.play{background:#fff;border:1px solid var(--line);border-radius:14px;margin:16px 0;overflow:hidden}
+  details.play>summary{list-style:none;cursor:pointer;padding:13px 16px;font-weight:600;font-size:14px;color:var(--deep);display:flex;align-items:center;gap:9px}
+  details.play>summary::-webkit-details-marker{display:none}
+  details.play>summary .chev{margin-left:auto;transition:transform .2s;color:var(--mute)}
+  details.play[open]>summary .chev{transform:rotate(90deg)}
+  .playbody{padding:2px 16px 16px;border-top:1px solid var(--line)}
+  .playbody h4{margin:14px 0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+  .fear{display:flex;gap:10px;padding:8px 0;border-top:1px dashed var(--line);font-size:13.5px}
+  .fear:first-of-type{border-top:0}
+  .fear b{color:var(--deep)}
+  .bands{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:6px}
+  .band{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12.5px}
+  .band b{display:block;color:var(--ocean);font-size:14px}
+
+  h2.sec{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:22px 2px 10px}
+  .addbar{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:14px}
+  .addbar input,.addbar select{border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:14px;color:var(--ink);background:#fff;outline:none}
+  .addbar input:focus,.addbar select:focus{border-color:var(--ocean)}
+  .addbar input.name{flex:1;min-width:140px}
+  .addbar input.rooms{width:96px}
+  .addbar button{background:var(--ocean);color:#fff;border:0;border-radius:9px;padding:9px 15px;font-size:14px;font-weight:500;cursor:pointer}
+  .addbar button:hover{background:var(--deep)}
+
+  .board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  .col{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:9px;min-height:90px}
+  .col .ch{font-size:11.5px;font-weight:600;color:var(--deep);display:flex;align-items:center;gap:6px;margin:2px 3px 9px}
+  .col .ch .dot{width:8px;height:8px;border-radius:50%}
+  .col .ch .ct{margin-left:auto;color:var(--mute);font-weight:500}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px;margin-bottom:8px;cursor:pointer;transition:border-color .12s,box-shadow .12s}
+  .card:hover{border-color:var(--ocean)}
+  .card.sel{border-color:var(--ocean);box-shadow:0 0 0 2px rgba(15,82,102,.14)}
+  .card .cn{font-size:13.5px;font-weight:600;line-height:1.25}
+  .card .cm{font-size:11px;color:var(--mute);margin-top:1px}
+  .card .cv{font-size:11.5px;color:var(--good);font-weight:600;margin-top:4px}
+  .card .mv{display:flex;gap:4px;margin-top:7px}
+  .card .mv button{flex:1;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:12px;padding:3px 0;cursor:pointer;color:var(--mute)}
+  .card .mv button:hover{border-color:var(--ocean);color:var(--ocean)}
+  .empty{font-size:11.5px;color:var(--mute);text-align:center;padding:8px 0}
+
+  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:0;margin-top:16px;overflow:hidden}
+  .panel .ph{background:linear-gradient(135deg,var(--deep),var(--ocean));color:#fff;padding:14px 17px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .panel .ph .who{font-size:17px;font-weight:600}
+  .panel .ph .st{font-size:11px;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.16);padding:4px 10px;border-radius:20px}
+  .panel .ph .del{margin-left:auto;background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;font-size:12px;padding:5px 10px;cursor:pointer}
+  .pbody{padding:16px 17px}
+  .step{margin-bottom:15px}
+  .step .k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+  .step .v{font-size:14.5px;line-height:1.5}
+  .say{background:var(--soft);border-left:3px solid var(--ocean);border-radius:0 10px 10px 0;padding:10px 13px;font-size:14px;line-height:1.5;font-style:italic;color:var(--deep)}
+  .obj{background:var(--warnbg);border:1px solid #eeddb4;border-radius:10px;padding:11px 13px;font-size:13.5px;line-height:1.5}
+  .obj .q{font-weight:600;color:var(--warn)}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .tools a,.tools button{display:inline-flex;align-items:center;gap:7px;text-decoration:none;font-size:13.5px;font-weight:500;padding:9px 13px;border-radius:10px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink)}
+  .tools a.primary{background:var(--gold);color:#241a06;border-color:var(--gold)}
+  .tools a:hover,.tools button:hover{border-color:var(--ocean)}
+  .tools a.primary:hover{filter:brightness(1.04);border-color:var(--gold)}
+  .nudge{font-size:13px;color:var(--mute);text-align:center;padding:22px 10px}
+  .mile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 17px;margin-top:16px}
+  .mile .mh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .mile .mh b{font-size:15px}
+  .mile .mh span{font-size:12.5px;color:var(--mute)}
+  .bar{height:10px;background:var(--soft);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-top:9px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ocean),#1d9e75)}
+  .foot{font-size:11.5px;color:var(--mute);margin-top:22px;line-height:1.5}
+  svg.ic{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+  @media(max-width:820px){ .board{grid-template-columns:1fr;gap:8px} .col{min-height:0} .kpis{width:100%;margin-left:0} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0b485b"/><stop offset="100%" stop-color="#1b6d83"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="url(#m)"/><circle cx="46" cy="20" r="5" fill="#e07856"/><path d="M5 38 Q15 32 25 38 T45 38 T62 38" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 46 Q15 40 25 46 T45 46 T62 46" stroke="#94becc" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".85"/><path d="M5 53 Q15 48 25 53 T45 53 T62 53" stroke="#c9a84c" stroke-width="2" fill="none" stroke-linecap="round" opacity=".75"/></svg>
+      <div><b>OceanSafe · Close Deals</b><span>Jade's sales cockpit</span></div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </div>
+
+  <details class="play">
+    <summary><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5L12 3z"/></svg> The winning play (tap to open) <svg class="ic chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+    <div class="playbody">
+      <h4>The move</h4>
+      <div class="step v">Lead with the <b>free 60-day pilot</b> — never price first. Sell the value as <b>fewer front-desk questions + safer guests + a duty-of-care record</b>, not "upsell revenue" (that's unproven until their pilot runs). Quote <b>per property</b>, not per room.</div>
+      <h4>Beat the 3 fears every GM has</h4>
+      <div class="fear"><b>“Will I look bad?”</b><span>&nbsp;→ It's a free pilot, no card, no risk. You'd be an early Kauaʻi partner at a founding rate.</span></div>
+      <div class="fear"><b>“Will it just sit unused?”</b><span>&nbsp;→ The pilot proves it on <i>their own</i> guests; the dashboard shows real usage at day 60.</span></div>
+      <div class="fear"><b>“Can I sign without procurement?”</b><span>&nbsp;→ It's a free trial, not a contract — one page, no card, they set the success bar.</span></div>
+      <h4>The price (per property / month) — only when they ask</h4>
+      <div class="bands">
+        <div class="band"><b>$400–500</b>Inn / B&amp;B · ≤20</div>
+        <div class="band"><b>$750–1,000</b>Boutique · 21–75</div>
+        <div class="band"><b>$1,000–1,400</b>Mid hotel · 76–200</div>
+        <div class="band"><b>$2,000+</b>Resort · 200+</div>
+        <div class="band"><b>$8 / room</b>Timeshare · /mo</div>
+        <div class="band"><b>$50–100 / unit</b>Rentals · /mo</div>
+      </div>
+    </div>
+  </details>
+
+  <h2 class="sec">Your pipeline</h2>
+  <div class="addbar">
+    <input class="name" id="dName" placeholder="Property name" autocomplete="off">
+    <select id="dType"><option value="hotel">Hotel</option><option value="timeshare">Timeshare</option><option value="rental">Rentals / PM</option></select>
+    <input class="rooms" id="dRooms" type="number" min="1" placeholder="Rooms" autocomplete="off">
+    <button id="addBtn"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add prospect</button>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div id="panelHost"></div>
+
+  <div class="mile" id="mile"></div>
+
+  <p class="foot">Your pipeline is saved privately in this browser only — no server, no one else sees it. Figures use the defended price bands; commission shown is 33% of first-year value on won deals. This tool guides the flow; the <b>demo kit</b> is what you show the guest.</p>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var KIT = "https://oceansafety.app/jade-live.html"; // password-locked demo kit
+  var LS = "jadeDeals_v1";
+  var STAGES = [
+    {id:"prospect", label:"Prospect",    color:"#8aa0a8", hint:"Identified"},
+    {id:"meeting",  label:"Meeting set", color:"#2d7fd6", hint:"They'll talk"},
+    {id:"pitched",  label:"Pitched",     color:"#b98d2e", hint:"Saw the app + pilot offer"},
+    {id:"pilot",    label:"Pilot live",  color:"#1d9e75", hint:"Placards in rooms"},
+    {id:"won",      label:"Won",          color:"#0f5266", hint:"Paying"}
+  ];
+  var PLAY = {
+    prospect: {
+      next:"Get the meeting. Text or email the GM a live link to their nearest beach's real conditions — let the product open the door.",
+      say:"Your front desk fields a stack of beach questions a day. I built something that answers them for your guests, free. 15 minutes this week?",
+      objq:"“Why should I take this meeting?”",
+      obja:"You're not buying anything — it's a free 60-day pilot. Worst case, you saw a sharp tool for your guests."
+    },
+    meeting: {
+      next:"Run the demo on THEIR nearest beaches. Then offer the free pilot. Do not talk price yet.",
+      say:"Here's your property's app, live — guests scan a placard in the room and see which beaches are safe today. Want to run it free for 60 days?",
+      objq:"“Who else uses this?”",
+      obja:"You'd be an early Kauaʻi partner — that's exactly why it's a free pilot and a founding rate. You set the bar it has to clear."
+    },
+    pitched: {
+      next:"Land the yes to the pilot. Let them define what 'success' means. Send the one-page agreement (no card).",
+      say:"No card, no IT lift, 60 days. You tell me what would make this a keeper — if we don't hit it, we walk. Fair?",
+      objq:"“Isn't there liability in telling guests a beach is safe?”",
+      obja:"It describes conditions and points to the lifeguard — it never guarantees. It's a duty-of-care record. (Final liability wording is attorney-reviewed before you lean on it.)"
+    },
+    pilot: {
+      next:"At ~day 55, book the readout. Show their REAL dashboard numbers against the bar they set, then ask for the yes.",
+      say:"Here's what your guests actually did in 60 days, against the bar you set. It's working — keep it going?",
+      objq:"“The numbers look small.”",
+      obja:"They're a floor by design — privacy guests aren't tracked and repeat use is undercounted. And they're real, measured on your property, not a vendor's model."
+    },
+    won: {
+      next:"Onboard them: lock the co-brand, confirm billing (annual-prepay works today), then ask for a referral to a peer GM.",
+      say:"Welcome aboard. Who else on-island should have this? A warm intro from you is worth more than any cold call.",
+      objq:"Keep them live",
+      obja:"Check in at the first monthly readout so the value stays visible — that's what makes the renewal a formality."
+    }
+  };
+
+  var deals = load(), selId = null;
+  function load(){ try{ return JSON.parse(localStorage.getItem(LS)) || []; }catch(e){ return []; } }
+  function save(){ try{ localStorage.setItem(LS, JSON.stringify(deals)); }catch(e){} }
+  function uid(){ return "d"+Math.random().toString(36).slice(2,8)+deals.length; }
+  function slug(s){ return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")||"prospect"; }
+  function money(n){ return "$"+Math.round(n).toLocaleString(); }
+  function monthly(d){
+    var r=+d.rooms||0;
+    if(d.type==="timeshare") return r*8;
+    if(d.type==="rental") return r*75;
+    if(r<=20) return 450; if(r<=75) return 875; if(r<=200) return 1200; return r>=350?3000:2000;
+  }
+  function annual(d){ return monthly(d)*12; }
+  function typeLabel(t){ return t==="timeshare"?"Timeshare":t==="rental"?"Rentals/PM":"Hotel"; }
+
+  var $=function(s){return document.querySelector(s);};
+  var board=$("#board"), kpis=$("#kpis"), host=$("#panelHost"), mile=$("#mile");
+
+  function add(){
+    var name=$("#dName").value.trim(); if(!name){ $("#dName").focus(); return; }
+    var d={id:uid(), name:name, type:$("#dType").value, rooms:+$("#dRooms").value||0, stage:"prospect"};
+    deals.push(d); save(); $("#dName").value=""; $("#dRooms").value=""; selId=d.id; render();
+  }
+  function moveDeal(id,dir){
+    var d=deals.find(function(x){return x.id===id;}); if(!d) return;
+    var i=STAGES.findIndex(function(s){return s.id===d.stage;});
+    i=Math.max(0,Math.min(STAGES.length-1,i+dir)); d.stage=STAGES[i].id; save(); render();
+  }
+  function del(id){ deals=deals.filter(function(x){return x.id!==id;}); if(selId===id) selId=null; save(); render(); }
+
+  function render(){
+    // KPIs
+    var won=deals.filter(function(d){return d.stage==="won";});
+    var wonARR=won.reduce(function(a,d){return a+annual(d);},0);
+    var pipe=deals.filter(function(d){return d.stage!=="won";}).reduce(function(a,d){return a+annual(d);},0);
+    kpis.innerHTML =
+      kpi(deals.length,"in pipeline") +
+      kpi(money(pipe),"open value") +
+      kpi(won.length,"won") +
+      kpi(money(wonARR*0.33),"your commission");
+
+    // Board
+    board.innerHTML = STAGES.map(function(s){
+      var items=deals.filter(function(d){return d.stage===s.id;});
+      var cards=items.map(function(d){ return cardHTML(d,s); }).join("") || '<div class="empty">—</div>';
+      return '<div class="col"><div class="ch"><span class="dot" style="background:'+s.color+'"></span>'+s.label+'<span class="ct">'+items.length+'</span></div>'+cards+'</div>';
+    }).join("");
+    board.querySelectorAll("[data-card]").forEach(function(el){
+      el.addEventListener("click",function(e){ if(e.target.closest("[data-mv]")) return; selId=el.getAttribute("data-card"); render(); });
+    });
+    board.querySelectorAll("[data-mv]").forEach(function(b){
+      b.addEventListener("click",function(e){ e.stopPropagation(); moveDeal(b.getAttribute("data-id"), +b.getAttribute("data-mv")); });
+    });
+
+    renderPanel();
+    renderMile(won.length, wonARR);
+  }
+  function kpi(n,l){ return '<div class="kpi"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+  function cardHTML(d,s){
+    var i=STAGES.findIndex(function(x){return x.id===s.id;});
+    return '<div class="card'+(selId===d.id?' sel':'')+'" data-card="'+d.id+'">'+
+      '<div class="cn">'+esc(d.name)+'</div>'+
+      '<div class="cm">'+typeLabel(d.type)+(d.rooms?' · '+d.rooms+' rms':'')+'</div>'+
+      '<div class="cv">'+money(annual(d))+'/yr</div>'+
+      '<div class="mv">'+
+        (i>0?'<button data-mv="-1" data-id="'+d.id+'">◀</button>':'<button data-mv="-1" data-id="'+d.id+'" disabled style="opacity:.35">◀</button>')+
+        (i<STAGES.length-1?'<button data-mv="1" data-id="'+d.id+'">▶</button>':'<button data-mv="1" data-id="'+d.id+'" disabled style="opacity:.35">▶</button>')+
+      '</div></div>';
+  }
+  function renderPanel(){
+    var d=deals.find(function(x){return x.id===selId;});
+    if(!d){ host.innerHTML='<div class="panel"><div class="nudge">Tap a prospect above to get the exact next move, what to say, and the objection to expect. Or add your first prospect to start.</div></div>'; return; }
+    var st=STAGES.find(function(s){return s.id===d.stage;}), p=PLAY[d.stage];
+    host.innerHTML =
+      '<div class="panel"><div class="ph"><span class="who">'+esc(d.name)+'</span>'+
+        '<span class="st" style="background:'+hexA(st.color)+'">'+st.label+'</span>'+
+        '<button class="del" data-del="'+d.id+'">Remove</button></div>'+
+      '<div class="pbody">'+
+        '<div class="step"><div class="k"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Do this next</div><div class="v">'+p.next+'</div></div>'+
+        '<div class="step"><div class="k"><svg class="ic" viewBox="0 0 24 24"><path d="M8 10h8M8 14h5M21 12a8 8 0 01-8 8H7l-4 3V12a8 8 0 018-8h2a8 8 0 018 8z"/></svg> Say this</div><div class="say">'+p.say+'</div></div>'+
+        '<div class="step"><div class="k"><svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.4 3.9a2 2 0 00-3.4 0z"/></svg> If they push back</div><div class="obj"><span class="q">'+p.objq+'</span><br>'+p.obja+'</div></div>'+
+        '<div class="tools">'+
+          '<a class="primary" href="'+KIT+'?ref='+slug(d.name)+'" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3h7v7M21 3l-9 9M10 5H5a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5"/></svg> Open the demo kit</a>'+
+          '<button data-copy="'+KIT+'?ref='+slug(d.name)+'"><svg class="ic" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg> Copy link to text them</button>'+
+          '<span class="tools" style="border:0;padding:0;color:var(--mute);font-size:12.5px;align-self:center">Kit password: oceansafe-reef-8319</span>'+
+        '</div>'+
+      '</div></div>';
+    host.querySelector("[data-del]").addEventListener("click",function(){ if(confirm("Remove "+d.name+"?")) del(d.id); });
+    host.querySelector("[data-copy]").addEventListener("click",function(){ copy(this.getAttribute("data-copy")); });
+  }
+  function renderMile(wonCount, wonARR){
+    var target=60000, pct=Math.min(100, Math.round(wonARR/target*100));
+    mile.innerHTML =
+      '<div class="mh"><b>Kauaʻi equity milestone</b><span>10% earns at $60k of won, retained annual revenue</span></div>'+
+      '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+      '<div style="font-size:12.5px;color:var(--mute);margin-top:7px">'+money(wonARR)+' won so far · '+pct+'% of the way · '+wonCount+' propert'+(wonCount===1?'y':'ies')+' closed. Counts only paying, retained deals.</div>';
+  }
+
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function hexA(hex){ return hex+"33"; }
+  function copy(t){ if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){toast("Link copied — paste it into a text");},function(){}); } }
+  var tEl;
+  function toast(m){ var e=document.createElement("div"); e.textContent=m; e.style.cssText="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0f5266;color:#fff;font-size:13.5px;padding:10px 16px;border-radius:11px;z-index:9;box-shadow:0 6px 20px rgba(0,0,0,.2)"; document.body.appendChild(e); clearTimeout(tEl); tEl=setTimeout(function(){e.remove();},1900); }
+
+  $("#addBtn").addEventListener("click",add);
+  $("#dName").addEventListener("keydown",function(e){ if(e.key==="Enter") add(); });
+  $("#dRooms").addEventListener("keydown",function(e){ if(e.key==="Enter") add(); });
+
+  // seed a couple of example prospects on first ever load so it's not empty
+  if(deals.length===0 && !localStorage.getItem(LS+"_seen")){
+    deals=[
+      {id:uid(),name:"Your Resort",type:"hotel",rooms:180,stage:"meeting"},
+      {id:uid(),name:"Coconut Coast Inn",type:"hotel",rooms:18,stage:"prospect"}
+    ];
+    localStorage.setItem(LS+"_seen","1"); save();
+  }
+  render();
+})();
+</script>
+</body>
+</html>
