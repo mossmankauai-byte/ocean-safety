@@ -46,6 +46,18 @@
     </div>
   </div>
 
+  <!-- fulfillment: how customers get their orders (partners.fulfillment_mode, 0013) -->
+  <div class="card" style="margin-top:14px" id="fulfillCard">
+    <div class="lbl">Fulfillment</div>
+    <p class="muted small" style="margin:0 0 10px">How customers get their order. Checkout only allows what you pick here.</p>
+    <div class="pills" id="fulfillPills" role="radiogroup" aria-label="How customers get their orders">
+      <button type="button" role="radio" aria-checked="false" data-fulfill="pickup">Pickup only</button>
+      <button type="button" role="radio" aria-checked="false" data-fulfill="ship">Shipping only</button>
+      <button type="button" role="radio" aria-checked="false" data-fulfill="both">Both</button>
+    </div>
+    <p class="muted small" id="fulfillNote" style="margin:10px 2px 0"></p>
+  </div>
+
   <!-- sales -->
   <div class="grid three" style="margin-top:14px">
     <div class="card"><div class="lbl">Sales this month</div><div class="big" id="mSales">—</div><div class="muted small" id="mCount">0 paid orders</div></div>
@@ -57,6 +69,16 @@
   <div class="card" style="margin-top:14px">
     <h2>Recent orders</h2>
     <div id="orders"><span class="muted small">…</span></div>
+  </div>
+
+  <!-- how you find out about an order — states only what actually happens today -->
+  <div class="card" style="margin-top:14px" id="notifyCard">
+    <div class="lbl">When an order comes in</div>
+    <ul class="muted small" style="margin:0;padding-left:18px;line-height:1.6">
+      <li style="margin:0 0 8px">The payment goes straight into <b>your own Square account</b>, so Square's usual payment notifications and receipts apply — you'll see it in your Square Dashboard or Square app. It arrives as a payment, not an order ticket, so it won't show up in a POS order queue.</li>
+      <li style="margin:0 0 8px">The order shows up under <b>Recent orders</b> above — pickup orders with the pickup code the customer shows you; ship orders say Ship, and the ship-to address is on the payment in your Square Dashboard. Your <a href="sales.html">Sales page</a> keeps the full history.</li>
+      <li style="margin:0">Once order email is switched on, we'll also email you each order — pickup orders include the pickup code; ship orders point you to the address on the order in your Square Dashboard.</li>
+    </ul>
   </div>
 </div>
 
@@ -78,6 +100,9 @@
 
     renderStoreType();
     $$("#seg button").forEach((b) => b.addEventListener("click", () => setStoreMode(b.dataset.mode)));
+    if (window.OCEANSAFE_DEMO) { try { partner.fulfillment_mode = localStorage.getItem("os_demo_fulfillment") || partner.fulfillment_mode; } catch (_) {} }
+    renderFulfillment();
+    $$("#fulfillPills button").forEach((b) => b.addEventListener("click", () => setFulfillment(b.dataset.fulfill)));
     payoutStatusToast();
     loadPayouts();
     loadSales();
@@ -98,6 +123,34 @@
     const { error } = await sb.from("partners").update({ store_mode: mode }).eq("id", partner.id);
     if (error) { partner.store_mode = prev; renderStoreType(); alert(error.message); return; }
     loadPayouts(); // connection + go-live state
+  }
+
+  // ── fulfillment mode: pickup only / shipping only / both ───────────────────
+  // Lives on the partner row (partners.fulfillment_mode, migration 0013);
+  // create-square-checkout enforces the same rule server-side. In demo mode the
+  // choice is saved to this browser only (localStorage), and the note says so.
+  const FULFILL_NOTE = {
+    pickup: "Customers pay in the app and pick up at your counter with a 4-letter pickup code.",
+    ship: "Customers pay in the app; Square collects their shipping address at checkout — it's on the order in your Square Dashboard.",
+    both: "Customers pick either at checkout: pickup (with a pickup code) or shipping.",
+  };
+  function renderFulfillment() {
+    const mode = partner.fulfillment_mode || "pickup";
+    $$("#fulfillPills button").forEach((b) => {
+      const on = b.dataset.fulfill === mode;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-checked", on ? "true" : "false");
+    });
+    el("fulfillNote").textContent = FULFILL_NOTE[mode]
+      + (window.OCEANSAFE_DEMO ? " (demo — your choice is saved in this browser only)" : "");
+  }
+  async function setFulfillment(mode) {
+    if (mode === (partner.fulfillment_mode || "pickup")) return;
+    const prev = partner.fulfillment_mode;
+    partner.fulfillment_mode = mode; renderFulfillment();
+    if (window.OCEANSAFE_DEMO) { try { localStorage.setItem("os_demo_fulfillment", mode); } catch (_) {} return; }
+    const { error } = await sb.from("partners").update({ fulfillment_mode: mode }).eq("id", partner.id);
+    if (error) { partner.fulfillment_mode = prev; renderFulfillment(); alert(error.message); }
   }
 
   // ── Get paid — DUAL RAIL: Square (primary/recommended) OR Stripe (alternative).
@@ -247,6 +300,22 @@
 
   // ── store status / go-live (gated on EITHER rail — Square or Stripe — being live) ─
   function renderLive(sellable) {
+    // ── Platform disable (partners.disabled_at, migration 0014) ───────────────
+    // OceanSafe turned this store off. The owner genuinely can't re-enable it
+    // (a DB trigger blocks clearing disabled_at from an owner write), so there
+    // is NO enable button — just a locked notice + the reason + how to reach us.
+    if (partner.disabled_at) {
+      const reason = partner.disabled_reason
+        ? `<p class="muted small" style="margin:0 0 12px">${esc(partner.disabled_reason)}</p>` : "";
+      el("liveBody").innerHTML =
+        `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+           <b>OceanSafe turned off your store</b><span class="badge b-red">turned off</span></div>
+         <p class="muted small" style="margin:0 0 12px">Your store is hidden in the app and can't take orders.</p>
+         ${reason}
+         <a class="btn ghost block" style="min-height:44px;display:flex;align-items:center;justify-content:center" href="mailto:aloha@oceansafety.app?subject=My%20OceanSafe%20store%20was%20turned%20off">Contact us</a>`;
+      return;
+    }
     const published = partner.status === "live";
     let html;
     if (published && !sellable) {
@@ -258,9 +327,11 @@
         <p class="muted small" style="margin:0 0 12px">Your store is visible in the OceanSafe app.</p>
         <button class="btn ghost block" id="liveBtn">Unpublish</button>`;
     } else if (sellable) {
-      html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Ready to go live</b><span class="badge b-amber">draft</span></div>
-        <p class="muted small" style="margin:0 0 12px">You're set up to get paid. Publish to show your store in the app.</p>
-        <button class="btn primary block" id="liveBtn">Go live</button>`;
+      // Set up to get paid but not live = the owner's store is turned off (or
+      // brand-new and never published). Read it plainly as "off" either way.
+      html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Your store is off</b><span class="badge b-amber">not showing</span></div>
+        <p class="muted small" style="margin:0 0 12px">You're set up to get paid, but your store isn't showing in the app. Turn it on to start selling.</p>
+        <button class="btn primary block" id="liveBtn">Turn my store on</button>`;
     } else {
       html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><b>Draft</b><span class="badge b-grey">hidden</span></div>
         <p class="muted small" style="margin:0 0 12px">Connect Square or Stripe first — your store stays private until then.</p>
@@ -274,7 +345,7 @@
     el("liveBtn").disabled = true; el("liveBtn").innerHTML = '<span class="spin"></span>';
     const { error } = await sb.from("partners").update({ status: makeLive ? "live" : "draft" }).eq("id", partner.id);
     if (error) {
-      el("liveBtn").disabled = false; el("liveBtn").textContent = makeLive ? "Go live" : "Unpublish";
+      el("liveBtn").disabled = false; el("liveBtn").textContent = makeLive ? "Turn my store on" : "Unpublish";
       const m = document.createElement("div"); m.className = "msg err"; m.textContent = error.message;
       el("liveBody").appendChild(m); return;
     }
@@ -289,7 +360,7 @@
       orders = window.demoData().orders; prodCount = 8;
     } else {
       const [o, p] = await Promise.all([
-        sb.from("orders").select("total_cents,status,created_at").eq("partner_id", partner.id).order("created_at", { ascending: false }),
+        sb.from("orders").select("total_cents,status,created_at,fulfillment,pickup_code").eq("partner_id", partner.id).order("created_at", { ascending: false }),
         sb.from("products").select("id", { count: "exact", head: true }).eq("partner_id", partner.id).eq("active", true),
       ]);
       orders = o.data; prodCount = p.count;
@@ -306,8 +377,12 @@
     const recent = (orders || []).slice(0, 8);
     if (!recent.length) { el("orders").innerHTML = `<span class="muted small">No orders yet.</span>`; return; }
     const badge = (s) => ({ paid: "b-green", pending: "b-amber", refunded: "b-grey", disputed: "b-red", failed: "b-red", expired: "b-grey", ready: "b-blue", collected: "b-green" }[s] || "b-grey");
-    el("orders").innerHTML = `<table><tr><th>When</th><th>Status</th><th style="text-align:right">Total</th></tr>${
-      recent.map((o) => `<tr><td>${new Date(o.created_at).toLocaleDateString()}</td><td><span class="badge ${badge(o.status)}">${o.status}</span></td><td style="text-align:right;font-weight:700">${money(o.total_cents)}</td></tr>`).join("")
+    // pickup orders show their code (the customer shows it at the counter);
+    // ship orders say Ship — the address is on the payment in Square.
+    const ful = (o) => o.fulfillment === "ship" ? "Ship"
+      : o.fulfillment === "pickup" ? (o.pickup_code ? `Pickup · <b>${esc(o.pickup_code)}</b>` : "Pickup") : "—";
+    el("orders").innerHTML = `<table><tr><th>When</th><th>Fulfillment</th><th>Status</th><th style="text-align:right">Total</th></tr>${
+      recent.map((o) => `<tr><td>${new Date(o.created_at).toLocaleDateString()}</td><td>${ful(o)}</td><td><span class="badge ${badge(o.status)}">${o.status}</span></td><td style="text-align:right;font-weight:700">${money(o.total_cents)}</td></tr>`).join("")
     }</table>`;
   }
 </script>

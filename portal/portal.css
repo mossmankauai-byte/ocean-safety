@@ -67,6 +67,13 @@ textarea{min-height:74px;resize:vertical}
 .seg button.on b{color:var(--ocean)}
 .seg button:hover{border-color:var(--ocean)}
 
+/* radio pills (fulfillment mode) — min 44px touch target, wraps at narrow widths */
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pills button{flex:1 1 auto;min-height:44px;font:inherit;font-size:13px;font-weight:700;padding:10px 14px;
+  border:1.5px solid var(--line);background:#fff;border-radius:22px;cursor:pointer;color:var(--ink)}
+.pills button.on{border-color:var(--ocean);background:#eef6f9;color:var(--ocean)}
+.pills button:hover{border-color:var(--ocean)}
+
 /* badges + status */
 .badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px}
 .b-grey{background:#eef2f3;color:#566} .b-green{background:#e6f6ec;color:#137a3a}
