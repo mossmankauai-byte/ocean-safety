@@ -392,6 +392,8 @@
     <nav class="viewtabs" role="tablist" aria-label="Console view">
       <button role="tab" aria-selected="true" data-view="overview">Overview</button>
       <button role="tab" aria-selected="false" data-view="guests">Guest activity</button>
+      <button role="tab" aria-selected="false" data-view="stayclose">Stay-Close</button>
+      <button role="tab" aria-selected="false" data-view="shop">Shop</button>
       <button role="tab" aria-selected="false" data-view="pricing">Pricing</button>
       <button role="tab" aria-selected="false" data-view="places">Places <span class="vb-badge" id="vbPlaces">—</span></button>
       <button type="button" id="tourBtn" class="tourbtn" title="Replay the two-minute dashboard tour">
@@ -546,31 +548,6 @@
       </div>
     </section>
 
-    <!-- BAD OCEAN DAY SAVES -->
-    <section>
-      <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the beach isn’t safe, what the app surfaced — and the on-property interest it captured.</p></div>
-      <div class="grid g3">
-        <div class="card" style="grid-column:span 2">
-          <div class="title"><span class="l"><span class="pv measured"></span> Stay-Close renders by trigger</span><span class="chip sample">Sample</span></div>
-          <div class="bars">
-            <div class="row"><span class="lab"><span class="trigtag" style="background:#eaf1f6;color:#37576b">Brown water</span></span><i style="width:88%;background:#7a6a4a"></i><span>~58</span></div>
-            <div class="row"><span class="lab"><span class="trigtag" style="background:#fbeede;color:#b4452f">High surf</span></span><i style="width:70%;background:#b4452f"></i><span>~46</span></div>
-            <div class="row"><span class="lab"><span class="trigtag" style="background:#eef4ee;color:#1f9d6b">Rain</span></span><i style="width:55%;background:#3f7f9c"></i><span>~36</span></div>
-            <div class="row"><span class="lab"><span class="trigtag" style="background:#f6f0e2;color:#c9821b">Wind</span></span><i style="width:33%;background:#c9821b"></i><span>~22</span></div>
-            <div class="row"><span class="lab"><span class="trigtag" style="background:#f3eefb;color:#6b4fa0">UV</span></span><i style="width:20%;background:#6b4fa0"></i><span>~13</span></div>
-          </div>
-          <div class="cap">Trigger conditions are <b>measured</b> from Open-Meteo + NOAA. North Shore runs ~112 trigger-days/yr; South 60–80, East 50–70.</div>
-          <details class="meth"><summary>How this is computed</summary><div class="body"><code>CGTrack.stayCloseRender → roll.triggers{}</code>. Counts panel renders on days a hazard actually fired. <b>Measured</b> once live.</div></details>
-        </div>
-        <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Amenity interest &amp; render→click</span><span class="chip sample">Sample</span></div>
-          <div class="v">~14% <small>render → click</small></div>
-          <div class="cap">Top labels: <b>Spa</b> ~22 · <b>On-site dining</b> ~18 · <b>Pool bar</b> ~11. A click = <b>amenity interest</b>, presented as interest — never “booked” or “revenue.”</div>
-          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts ÷ renders. This measured rate <b>replaces</b> the assumed 50%×25% funnel guess in The Math below. <b>Measured</b> once live.</div></details>
-        </div>
-      </div>
-    </section>
-
     <!-- CONCIERGE -->
     <section>
       <div class="sec-h"><h2>Concierge &amp; front-desk demand</h2><p>The cleanest near-cash lever: questions the app answered so your desk didn’t have to.</p></div>
@@ -616,6 +593,95 @@
     </section>
 
     </div><!-- /view-guests -->
+
+    <div id="view-stayclose" hidden>
+    <!-- BAD OCEAN DAY SAVES -->
+    <section>
+      <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the beach isn’t safe, what the app surfaced — and the on-property interest it captured.</p></div>
+      <div class="grid g3">
+        <div class="card" style="grid-column:span 2">
+          <div class="title"><span class="l"><span class="pv measured"></span> Stay-Close renders by trigger</span><span class="chip sample">Sample</span></div>
+          <div class="bars">
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#eaf1f6;color:#37576b">Brown water</span></span><i style="width:88%;background:#7a6a4a"></i><span>~58</span></div>
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#fbeede;color:#b4452f">High surf</span></span><i style="width:70%;background:#b4452f"></i><span>~46</span></div>
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#eef4ee;color:#1f9d6b">Rain</span></span><i style="width:55%;background:#3f7f9c"></i><span>~36</span></div>
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#f6f0e2;color:#c9821b">Wind</span></span><i style="width:33%;background:#c9821b"></i><span>~22</span></div>
+            <div class="row"><span class="lab"><span class="trigtag" style="background:#f3eefb;color:#6b4fa0">UV</span></span><i style="width:20%;background:#6b4fa0"></i><span>~13</span></div>
+          </div>
+          <div class="cap">Trigger conditions are <b>measured</b> from Open-Meteo + NOAA. North Shore runs ~112 trigger-days/yr; South 60–80, East 50–70.</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>CGTrack.stayCloseRender → roll.triggers{}</code>. Counts panel renders on days a hazard actually fired. <b>Measured</b> once live.</div></details>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Amenity interest &amp; render→click</span><span class="chip sample">Sample</span></div>
+          <div class="v">~14% <small>render → click</small></div>
+          <div class="cap">Top labels: <b>Spa</b> ~22 · <b>On-site dining</b> ~18 · <b>Pool bar</b> ~11. A click = <b>amenity interest</b>, presented as interest — never “booked” or “revenue.”</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts ÷ renders. This measured rate <b>replaces</b> the assumed 50%×25% funnel guess in The Math below. <b>Measured</b> once live.</div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEERED TO -->
+    <section>
+      <div class="sec-h"><h2>What guests were steered to</h2><p>The on-property options guests opened when the ocean was the wrong call.</p></div>
+      <div class="grid g3">
+        <div class="card" style="grid-column:span 2">
+          <div class="title"><span class="l"><span class="pv measured"></span> On-property interest by amenity</span><span class="chip sample">Sample</span></div>
+          <ol class="rank">
+            <li><span class="n">1</span><span style="flex:1">Spa treatments</span><span class="bar" style="flex:0 0 110px"><i style="width:100%"></i></span><span class="ct">~22</span></li>
+            <li><span class="n">2</span><span style="flex:1">On-site dining</span><span class="bar" style="flex:0 0 110px"><i style="width:82%"></i></span><span class="ct">~18</span></li>
+            <li><span class="n">3</span><span style="flex:1">Pool bar</span><span class="bar" style="flex:0 0 110px"><i style="width:50%"></i></span><span class="ct">~11</span></li>
+            <li><span class="n">4</span><span style="flex:1">Cabana rental</span><span class="bar" style="flex:0 0 110px"><i style="width:32%"></i></span><span class="ct">~7</span></li>
+            <li><span class="n">5</span><span style="flex:1">Gift shop</span><span class="bar" style="flex:0 0 110px"><i style="width:23%"></i></span><span class="ct">~5</span></li>
+          </ol>
+          <div class="cap">A tap is <b>amenity interest</b> — we never present it as booked or as revenue.</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts from the daily rollup. Labels come from your amenity menu (or ours, until you hand us yours). <b>Measured</b> once live.</div></details>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> On-property capture</span><span class="chip sample">Sample</span></div>
+          <div class="v">~31% <small>of bad-ocean sessions</small></div>
+          <div class="cap">Share of sessions on trigger days that opened at least one on-property option instead of leaving the app.</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body">Sessions with a <code>stayCloseClick</code> ÷ sessions with a <code>stayCloseRender</code>, same day. <b>Measured</b> once live.</div></details>
+        </div>
+      </div>
+    </section>
+    </div><!-- /view-stayclose -->
+
+    <div id="view-shop" hidden>
+    <!-- SHOP & TOWN -->
+    <section>
+      <div class="sec-h"><h2>Shop &amp; Town · local commerce</h2><p>What guests open in your gift shop and the Town tab — counted as taps, never claimed as sales.</p></div>
+      <div class="grid g3">
+        <div class="card" style="grid-column:span 2">
+          <div class="title"><span class="l"><span class="pv measured"></span> Top products guests opened</span><span class="chip sample">Sample</span></div>
+          <ol class="rank">
+            <li><span class="n">1</span><span style="flex:1">Reef-safe sunscreen · SPF 50</span><span class="bar" style="flex:0 0 110px"><i style="width:100%"></i></span><span class="ct">~64</span></li>
+            <li><span class="n">2</span><span style="flex:1">Kids rash guard</span><span class="bar" style="flex:0 0 110px"><i style="width:64%"></i></span><span class="ct">~41</span></li>
+            <li><span class="n">3</span><span style="flex:1">Beach towel set</span><span class="bar" style="flex:0 0 110px"><i style="width:52%"></i></span><span class="ct">~33</span></li>
+            <li><span class="n">4</span><span style="flex:1">Snorkel set rental</span><span class="bar" style="flex:0 0 110px"><i style="width:42%"></i></span><span class="ct">~27</span></li>
+            <li><span class="n">5</span><span style="flex:1">Kaua&#699;i coffee sampler</span><span class="bar" style="flex:0 0 110px"><i style="width:30%"></i></span><span class="ct">~19</span></li>
+          </ol>
+          <div class="cap">Product taps inside your co-branded app. A tap is <b>interest</b> — checkout happens in your store, on your rails.</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>poi_tap kind:product → roll.products{}</code> from the daily rollup, ranked by taps. <b>Measured</b> once live.</div></details>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Store opens</span><span class="chip sample">Sample</span></div>
+          <div class="v">~212</div>
+          <div class="cap">Guests opening your shop page from the Town tab or a product card.</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>shop_open</code> events for this slug from the daily rollup. <b>Measured</b> once live.</div></details>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Product tap &rarr; store</span><span class="chip sample">Sample</span></div>
+          <div class="v">~18% <small>continue rate</small></div>
+          <div class="cap">Share of product taps that continued into your store page — interest, not checkout.</div>
+        </div>
+        <div class="card" style="grid-column:span 2">
+          <div class="title"><span class="l"><span class="pv assumption"></span> Sales attribution</span><span class="chip assumption">Store connect · optional</span></div>
+          <div class="cap" style="margin-top:6px">Today we count opens and taps only. When your store connects (Square), this tab adds <b>attributed orders</b> — aggregate counts, no card data, no guest identity. Until then we won&rsquo;t show a dollar figure here, because we&rsquo;d be guessing.</div>
+        </div>
+      </div>
+    </section>
+    </div><!-- /view-shop -->
+
 
     <div id="view-pricing" hidden>
     <!-- THE MATH -->
@@ -931,7 +997,7 @@
   var rendered = false;
   function show(view){
     tabs.forEach(function(t){ t.setAttribute('aria-selected', String(t.dataset.view===view)); });
-    ['overview','guests','pricing','places'].forEach(function(v){
+    ['overview','guests','stayclose','shop','pricing','places'].forEach(function(v){
       var el = document.getElementById('view-'+v);
       if(el) el.hidden = (v!==view);
     });
