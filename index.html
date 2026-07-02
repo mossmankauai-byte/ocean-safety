@@ -8194,12 +8194,18 @@ if('serviceWorker' in navigator){
       if(!sid){ sid = Math.random().toString(36).slice(2,10); localStorage.setItem('cg_sid', sid); }
     }catch(e){ sid = Math.random().toString(36).slice(2,10); }
     var q = [], timer = null;
-    function flush(){
+    // NOTE: no fetch keepalive here — Chrome silently drops keepalive fetches once
+    // the service worker controls the page. Timer flushes use a plain fetch; the
+    // page-close flush uses sendBeacon (which survives unload without keepalive).
+    function flush(final){
       timer = null;
       if(!q.length) return;
       var body = JSON.stringify({ slug: slug, events: q.splice(0, q.length) });
+      if(final && navigator.sendBeacon){
+        try{ if(navigator.sendBeacon(API, new Blob([body], { type:'text/plain' }))) return; }catch(e){}
+      }
       try{
-        fetch(API, { method:'POST', headers:{'Content-Type':'text/plain'}, body: body, keepalive: true })
+        fetch(API, { method:'POST', headers:{'Content-Type':'text/plain'}, body: body })
           .catch(function(){});
       }catch(e){}
     }
@@ -8207,10 +8213,10 @@ if('serviceWorker' in navigator){
       ev.sid = sid; ev.h = new Date().getHours();
       q.push(ev);
       if(q.length >= 20){ if(timer){ clearTimeout(timer); timer = null; } flush(); }
-      else if(!timer){ timer = setTimeout(flush, 4000); }
+      else if(!timer){ timer = setTimeout(function(){ flush(); }, 4000); }
     }
-    addEventListener('pagehide', flush);
-    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') flush(); });
+    addEventListener('pagehide', function(){ flush(true); });
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') flush(true); });
     push({ type:'session_start',
            dev: (/Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'),
            lang: (navigator.language || '').slice(0,5) });
