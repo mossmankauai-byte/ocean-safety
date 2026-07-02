@@ -191,6 +191,23 @@
   .collapsible summary{cursor:pointer;list-style:none}
   .collapsible summary::-webkit-details-marker{display:none}
 
+  /* ============ ITEM MANAGERS (amenities / products) ============ */
+  .mg-list{display:flex;flex-direction:column}
+  .mg-row{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line)}
+  .mg-row:last-child{border-bottom:0}
+  .mg-nm{min-width:0;flex:1;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .mg-nm b{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .mg-nm span{font-size:11.5px;color:var(--muted)}
+  .mg-x{appearance:none;border:1px solid var(--line);background:transparent;color:var(--muted);width:24px;height:24px;
+    border-radius:7px;cursor:pointer;font-size:14px;line-height:1;flex:none}
+  .mg-x:hover{color:var(--risk);border-color:var(--risk)}
+  .mg-empty{padding:14px 2px;font-size:12.5px;color:var(--muted)}
+  .mg-add{display:grid;grid-template-columns:1fr 1.2fr auto;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+  @media(max-width:680px){.mg-add{grid-template-columns:1fr}}
+  .mg-add input{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:9px;padding:8px 11px;min-width:0}
+  .mg-add input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  .mg-foot{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+
   /* ============ VIEW SWITCHER ============ */
   .viewtabs{position:relative;z-index:2;display:flex;gap:6px;margin:18px 0 2px;flex-wrap:wrap}
   .viewtabs button{appearance:none;font:inherit;font-size:13px;font-weight:700;color:var(--ink-2);
@@ -392,8 +409,8 @@
     <nav class="viewtabs" role="tablist" aria-label="Console view">
       <button role="tab" aria-selected="true" data-view="overview">Overview</button>
       <button role="tab" aria-selected="false" data-view="guests">Guest activity</button>
-      <button role="tab" aria-selected="false" data-view="stayclose">Stay-Close</button>
-      <button role="tab" aria-selected="false" data-view="shop">Shop</button>
+      <button role="tab" aria-selected="false" data-view="stayclose">Stay-Close <span class="vb-badge" id="vbStay">—</span></button>
+      <button role="tab" aria-selected="false" data-view="shop">Shop <span class="vb-badge" id="vbShop">—</span></button>
       <button role="tab" aria-selected="false" data-view="pricing">Pricing</button>
       <button role="tab" aria-selected="false" data-view="places">Places <span class="vb-badge" id="vbPlaces">—</span></button>
       <button type="button" id="tourBtn" class="tourbtn" title="Replay the two-minute dashboard tour">
@@ -595,6 +612,19 @@
     </div><!-- /view-guests -->
 
     <div id="view-stayclose" hidden>
+    <!-- AMENITY MANAGER -->
+    <section>
+      <div class="sec-h"><h2>Your amenity menu</h2><p>What Stay-Close steers guests to when the ocean is the wrong call. Edits save as a draft in this browser; Export sends the menu into your app build.</p></div>
+      <div class="card" id="mgAmenities">
+        <div class="mg-list" id="amList"></div>
+        <div class="mg-add">
+          <input id="amA" placeholder="Amenity — e.g. Anara Spa" autocomplete="off">
+          <input id="amB" placeholder="Detail (optional) — e.g. lobby level · 9a–7p · ext. 53" autocomplete="off">
+          <button class="pl-btn primary" id="amAdd">Add amenity</button>
+        </div>
+        <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Export config</button></div>
+      </div>
+    </section>
     <!-- BAD OCEAN DAY SAVES -->
     <section>
       <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the beach isn’t safe, what the app surfaced — and the on-property interest it captured.</p></div>
@@ -634,7 +664,7 @@
             <li><span class="n">5</span><span style="flex:1">Gift shop</span><span class="bar" style="flex:0 0 110px"><i style="width:23%"></i></span><span class="ct">~5</span></li>
           </ol>
           <div class="cap">A tap is <b>amenity interest</b> — we never present it as booked or as revenue.</div>
-          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts from the daily rollup. Labels come from your amenity menu (or ours, until you hand us yours). <b>Measured</b> once live.</div></details>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts from the daily rollup. Labels come from your amenity menu above. <b>Measured</b> once live.</div></details>
         </div>
         <div class="card">
           <div class="title"><span class="l"><span class="pv measured"></span> On-property capture</span><span class="chip sample">Sample</span></div>
@@ -647,6 +677,19 @@
     </div><!-- /view-stayclose -->
 
     <div id="view-shop" hidden>
+    <!-- PRODUCT MANAGER -->
+    <section>
+      <div class="sec-h"><h2>Your products</h2><p>What your gift shop offers inside the app. Edits save as a draft in this browser; Export sends the list into your app build — checkout stays on your rails.</p></div>
+      <div class="card" id="mgProducts">
+        <div class="mg-list" id="prList"></div>
+        <div class="mg-add">
+          <input id="prA" placeholder="Product — e.g. Reef-safe sunscreen · SPF 50" autocomplete="off">
+          <input id="prB" placeholder="Price (optional) — e.g. $24" autocomplete="off">
+          <button class="pl-btn primary" id="prAdd">Add product</button>
+        </div>
+        <div class="mg-foot"><span class="cap"><b id="prCount">0</b> products in your shop</span><span style="flex:1"></span><button class="pl-btn" id="prReset">Reset</button><button class="pl-btn primary" id="prExport">Export config</button></div>
+      </div>
+    </section>
     <!-- SHOP & TOWN -->
     <section>
       <div class="sec-h"><h2>Shop &amp; Town · local commerce</h2><p>What guests open in your gift shop and the Town tab — counted as taps, never claimed as sales.</p></div>
@@ -1328,13 +1371,17 @@
   // Each stop: which view tab to open, what to highlight, and what to say.
   var STEPS = [
     { center:true, title:'Welcome to your dashboard',
-      body:'Two minutes, six stops — then it’s yours. This is where you’ll see what guests do in your app and control what it recommends. You can replay this anytime with the <b>Tour</b> button up top.' },
-    { view:'overview', sel:'.viewtabs', title:'Four views, one dashboard',
-      body:'<b>Overview</b> is the day-to-day pulse, <b>Guest activity</b> the detail, <b>Pricing</b> your payback math, and <b>Places</b> controls what your branded app recommends. Everything here is your property only.' },
+      body:'Two minutes, eight stops — then it’s yours. This is where you’ll see what guests do in your app and control what it recommends. You can replay this anytime with the <b>Tour</b> button up top.' },
+    { view:'overview', sel:'.viewtabs', title:'Six views, one dashboard',
+      body:'<b>Overview</b> is the day-to-day pulse and <b>Guest activity</b> the detail. <b>Stay-Close</b> and <b>Shop</b> hold your amenities and products, <b>Pricing</b> is your payback math, and <b>Places</b> controls what your app recommends. Everything here is your property only.' },
     { view:'overview', sel:'.hero .ns', title:'The one number to watch',
       body:'How often guests open a beach, trail, or restaurant in the app to plan their day — per occupied unit. Anything tagged <b>Sample</b> is illustrative until your telemetry connects; live mode only ever shows measured data.' },
     { view:'guests', sel:'#view-guests section', title:'What guests actually want',
       body:'Guest activity shows the demand — which beaches and places guests open most, and how that lines up with what you feature. It’s the evidence for your curation choices, never guesswork.' },
+    { view:'stayclose', sel:'#mgAmenities', title:'Stay-Close runs on your menu',
+      body:'When the ocean is the wrong call, the app steers guests to what you offer instead — spa, dining, cabanas. Add or edit your amenity menu right here; <b>Export config</b> sends it into your app build.' },
+    { view:'shop', sel:'#mgProducts', title:'Your shop, inside the app',
+      body:'Add the products you want guests to see. The app counts taps as interest — checkout stays in your store, on your rails. Metrics stay <b>Sample</b> until your telemetry connects.' },
     { view:'pricing', sel:'.card.calc', title:'Your numbers, your math',
       body:'Type your own occupancy, rates, and margins — the payback computes from <b>what you enter</b>, not from our claims. Nothing calculates until you touch a field.' },
     { view:'places', sel:'.pl-safety', title:'Safety comes pre-set',
@@ -1421,6 +1468,68 @@
   // First login: run automatically once.
   var done = null; try{ done = localStorage.getItem(KEY); }catch(e){}
   if(!done) setTimeout(start, 900);
+})();
+</script>
+<script>
+/* ============ AMENITY & PRODUCT MANAGERS ============ */
+(function(){
+  var SLUG = ((document.querySelector('.property code')||{}).textContent||'your-hotel').trim();
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function manager(cfg){
+    var LS = 'os_'+cfg.key+'_'+SLUG, items = null;
+    try{ items = JSON.parse(localStorage.getItem(LS)); }catch(e){}
+    if(!Array.isArray(items)) items = cfg.seeds.map(function(x){ return {a:x[0], b:x[1]}; });
+    function save(){ try{ localStorage.setItem(LS, JSON.stringify(items)); }catch(e){} }
+    function render(){
+      var el = document.getElementById(cfg.ids.list);
+      el.innerHTML = items.length ? items.map(function(it,i){
+        return '<div class="mg-row"><div class="mg-nm"><b>'+esc(it.a)+'</b>'+(it.b?'<span>'+esc(it.b)+'</span>':'')+
+               '</div><button type="button" class="mg-x" data-i="'+i+'" title="Remove">&times;</button></div>';
+      }).join('') : '<div class="mg-empty">Nothing yet — add your first below.</div>';
+      document.getElementById(cfg.ids.count).textContent = items.length;
+      var badge = document.getElementById(cfg.ids.badge);
+      if(badge) badge.textContent = items.length || '—';
+      save();
+    }
+    document.getElementById(cfg.ids.list).addEventListener('click', function(e){
+      var x = e.target.closest('.mg-x'); if(!x) return;
+      items.splice(+x.dataset.i, 1); render();
+    });
+    function add(){
+      var a = document.getElementById(cfg.ids.a), b = document.getElementById(cfg.ids.b);
+      var va = a.value.trim(); if(!va) { a.focus(); return; }
+      items.push({a:va, b:b.value.trim()}); a.value=''; b.value=''; a.focus(); render();
+    }
+    document.getElementById(cfg.ids.add).addEventListener('click', add);
+    [cfg.ids.a, cfg.ids.b].forEach(function(id){
+      document.getElementById(id).addEventListener('keydown', function(e){ if(e.key==='Enter') add(); });
+    });
+    document.getElementById(cfg.ids.reset).addEventListener('click', function(){
+      if(!confirm('Reset to the starter list? Your edits here will be cleared.')) return;
+      items = cfg.seeds.map(function(x){ return {a:x[0], b:x[1]}; }); render();
+    });
+    document.getElementById(cfg.ids.export).addEventListener('click', function(){
+      var out = { app:'oceansafety', slug:SLUG, version:1 };
+      out[cfg.exportKey] = items.map(cfg.toExport);
+      var blob = new Blob([JSON.stringify(out,null,2)], {type:'application/json'});
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = cfg.key+'-'+SLUG+'.json';
+      document.body.appendChild(link); link.click();
+      setTimeout(function(){ URL.revokeObjectURL(link.href); link.remove(); }, 100);
+      var btn = this, t = btn.textContent; btn.textContent = 'Downloaded ✓';
+      setTimeout(function(){ btn.textContent = t; }, 1600);
+    });
+    render();
+  }
+  manager({ key:'amenities', exportKey:'amenities',
+    ids:{list:'amList', a:'amA', b:'amB', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
+    seeds:[['Spa treatments',''],['On-site dining',''],['Pool bar',''],['Cabana rental',''],['Gift shop','']],
+    toExport:function(it){ return {label:it.a, value:it.b}; } });
+  manager({ key:'products', exportKey:'products',
+    ids:{list:'prList', a:'prA', b:'prB', add:'prAdd', reset:'prReset', export:'prExport', count:'prCount', badge:'vbShop'},
+    seeds:[['Reef-safe sunscreen · SPF 50','$24'],['Kids rash guard','$32'],['Beach towel set','$45'],['Snorkel set rental','$25/day'],['Kaua\u02bbi coffee sampler','$19']],
+    toExport:function(it){ return {name:it.a, price:it.b}; } });
 })();
 </script>
 </body>
