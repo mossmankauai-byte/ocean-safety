@@ -206,16 +206,6 @@
   @media(max-width:680px){.mg-add{grid-template-columns:1fr}}
   .mg-add input{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:9px;padding:8px 11px;min-width:0}
   .mg-add input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
-  .mg-nm .mg-sub{flex-basis:100%;font-size:11px;color:var(--muted);line-height:1.45;word-break:break-word}
-  .mg-more{margin-top:2px}
-  .mg-more summary{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 2px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;list-style:none;user-select:none}
-  .mg-more summary::-webkit-details-marker{display:none}
-  .mg-more summary svg{flex:none;transition:transform .12s}
-  .mg-more[open] summary svg{transform:rotate(90deg)}
-  .mg-more-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:4px}
-  @media(max-width:680px){.mg-more-grid{grid-template-columns:1fr}}
-  .mg-more-grid input{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:9px;padding:8px 11px;min-width:0;min-height:44px}
-  .mg-more-grid input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
   .mg-foot{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
 
   /* ============ VIEW SWITCHER ============ */
@@ -628,19 +618,10 @@
       <div class="card" id="mgAmenities">
         <div class="mg-list" id="amList"></div>
         <div class="mg-add">
-          <input id="amA" placeholder="Amenity — e.g. Spa treatments" autocomplete="off">
-          <input id="amB" placeholder="Detail (optional) — e.g. adults only after 6p" autocomplete="off">
+          <input id="amA" placeholder="Amenity — e.g. Anara Spa" autocomplete="off">
+          <input id="amB" placeholder="Detail (optional) — e.g. lobby level · 9a–7p · ext. 53" autocomplete="off">
           <button class="pl-btn primary" id="amAdd">Add amenity</button>
         </div>
-        <details class="mg-more">
-          <summary><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 1.5 6.5 5 3 8.5"/></svg>More details (optional)</summary>
-          <div class="mg-more-grid">
-            <input id="amLoc" placeholder="Location — e.g. lobby level" autocomplete="off">
-            <input id="amHours" placeholder="Hours — e.g. 9a–7p" autocomplete="off">
-            <input id="amPhone" type="tel" placeholder="Phone — e.g. ext. 53" autocomplete="off">
-            <input id="amWeb" type="url" placeholder="Website — e.g. https://yourresort.com/spa" autocomplete="off">
-          </div>
-        </details>
         <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Export config</button></div>
       </div>
     </section>
@@ -706,15 +687,6 @@
           <input id="prB" placeholder="Price (optional) — e.g. $24" autocomplete="off">
           <button class="pl-btn primary" id="prAdd">Add product</button>
         </div>
-        <details class="mg-more">
-          <summary><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 1.5 6.5 5 3 8.5"/></svg>More details (optional)</summary>
-          <div class="mg-more-grid">
-            <input id="prDetail" placeholder="Detail — e.g. mineral formula, 6 oz" autocomplete="off">
-            <input id="prLoc" placeholder="Where sold — e.g. gift shop, lobby level" autocomplete="off">
-            <input id="prPhone" type="tel" placeholder="Phone — e.g. ext. 41" autocomplete="off">
-            <input id="prWeb" type="url" placeholder="Product URL — e.g. https://yourshop.com/sunscreen" autocomplete="off">
-          </div>
-        </details>
         <div class="mg-foot"><span class="cap"><b id="prCount">0</b> products in your shop</span><span style="flex:1"></span><button class="pl-btn" id="prReset">Reset</button><button class="pl-btn primary" id="prExport">Export config</button></div>
       </div>
     </section>
@@ -815,6 +787,21 @@
           <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> Your property’s data only — no leaderboards, no cross-property attribution</li>
         </ul>
         <div class="note">Counts are a floor by design: privacy-respecting (DNT) guests aren’t tracked, and first-opens undercount repeat in-stay use. We’d rather show you a number you can trust than a bigger one you can’t.</div>
+      </div>
+    </section>
+
+    <!-- PILOT AGREEMENT DOWNLOAD -->
+    <section>
+      <div class="sec-h"><h2>Ready to start</h2><p>The free 30-day pilot terms — one page, no card, cancel anytime.</p></div>
+      <div class="card" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <div class="title"><span class="l">Free 30-day pilot agreement</span></div>
+          <div class="cap" style="margin-top:7px;max-width:58ch">One page. Property name and key-count are blank write-in lines — print and sign by hand, or send it for e-signature. Same terms either way; the clock starts when telemetry connects.</div>
+        </div>
+        <a href="assets/OceanSafe-Pilot-Agreement.pdf" target="_blank" rel="noopener" download style="display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:#241d04;font-weight:600;font-size:14px;text-decoration:none;padding:13px 19px;border-radius:12px;white-space:nowrap">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+          Download the agreement (PDF)
+        </a>
       </div>
     </section>
 
@@ -1508,18 +1495,10 @@
     try{ items = JSON.parse(localStorage.getItem(LS)); }catch(e){}
     if(!Array.isArray(items)) items = cfg.seeds.map(function(x){ return {a:x[0], b:x[1]}; });
     function save(){ try{ localStorage.setItem(LS, JSON.stringify(items)); }catch(e){} }
-    function subline(it){
-      return (cfg.fields||[]).map(function(f){
-        var v = it[f.key]; if(!v) return '';
-        return f.key==='website' ? String(v).replace(/^https?:\/\//,'') : v;
-      }).filter(Boolean).join(' · ');
-    }
     function render(){
       var el = document.getElementById(cfg.ids.list);
       el.innerHTML = items.length ? items.map(function(it,i){
-        var sub = subline(it);
         return '<div class="mg-row"><div class="mg-nm"><b>'+esc(it.a)+'</b>'+(it.b?'<span>'+esc(it.b)+'</span>':'')+
-               (sub?'<div class="mg-sub">'+esc(sub)+'</div>':'')+
                '</div><button type="button" class="mg-x" data-i="'+i+'" title="Remove">&times;</button></div>';
       }).join('') : '<div class="mg-empty">Nothing yet — add your first below.</div>';
       document.getElementById(cfg.ids.count).textContent = items.length;
@@ -1534,16 +1513,10 @@
     function add(){
       var a = document.getElementById(cfg.ids.a), b = document.getElementById(cfg.ids.b);
       var va = a.value.trim(); if(!va) { a.focus(); return; }
-      var it = {a:va, b:b.value.trim()};
-      (cfg.fields||[]).forEach(function(f){
-        var el = document.getElementById(f.id), v = el.value.trim();
-        if(v) it[f.key] = v;
-        el.value = '';
-      });
-      items.push(it); a.value=''; b.value=''; a.focus(); render();
+      items.push({a:va, b:b.value.trim()}); a.value=''; b.value=''; a.focus(); render();
     }
     document.getElementById(cfg.ids.add).addEventListener('click', add);
-    [cfg.ids.a, cfg.ids.b].concat((cfg.fields||[]).map(function(f){ return f.id; })).forEach(function(id){
+    [cfg.ids.a, cfg.ids.b].forEach(function(id){
       document.getElementById(id).addEventListener('keydown', function(e){ if(e.key==='Enter') add(); });
     });
     document.getElementById(cfg.ids.reset).addEventListener('click', function(){
@@ -1566,14 +1539,12 @@
   }
   manager({ key:'amenities', exportKey:'amenities',
     ids:{list:'amList', a:'amA', b:'amB', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
-    fields:[{id:'amLoc',key:'location'},{id:'amHours',key:'hours'},{id:'amPhone',key:'phone'},{id:'amWeb',key:'website'}],
     seeds:[['Spa treatments',''],['On-site dining',''],['Pool bar',''],['Cabana rental',''],['Gift shop','']],
-    toExport:function(it){ return {label:it.a, value:it.b, location:it.location||'', hours:it.hours||'', phone:it.phone||'', website:it.website||''}; } });
+    toExport:function(it){ return {label:it.a, value:it.b}; } });
   manager({ key:'products', exportKey:'products',
     ids:{list:'prList', a:'prA', b:'prB', add:'prAdd', reset:'prReset', export:'prExport', count:'prCount', badge:'vbShop'},
-    fields:[{id:'prDetail',key:'detail'},{id:'prLoc',key:'location'},{id:'prPhone',key:'phone'},{id:'prWeb',key:'website'}],
     seeds:[['Reef-safe sunscreen · SPF 50','$24'],['Kids rash guard','$32'],['Beach towel set','$45'],['Snorkel set rental','$25/day'],['Kaua\u02bbi coffee sampler','$19']],
-    toExport:function(it){ return {name:it.a, price:it.b, detail:it.detail||'', location:it.location||'', phone:it.phone||'', website:it.website||''}; } });
+    toExport:function(it){ return {name:it.a, price:it.b}; } });
 })();
 </script>
 </body>
