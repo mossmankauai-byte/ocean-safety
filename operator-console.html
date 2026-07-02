@@ -382,7 +382,7 @@
         <span><b style="color:#0a3a4a">Rep mode</b> · your sales tools — only you see this</span>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a href="jade-sales.html" target="_blank" rel="noopener" style="background:#0a4b5e;color:#fff;font-size:13.5px;text-decoration:none;padding:9px 15px;border-radius:9px;white-space:nowrap">Sales cockpit ›</a>
+        <a href="jade-sales.html" target="_blank" rel="noopener" style="background:#0a4b5e;color:#fff;font-size:13.5px;text-decoration:none;padding:9px 15px;border-radius:9px;white-space:nowrap">Sales dashboard ›</a>
         <a id="repLink" href="jade-live.html" target="_blank" rel="noopener" style="background:#0a6e8c;color:#fff;font-size:13.5px;text-decoration:none;padding:9px 15px;border-radius:9px;white-space:nowrap">Open the demo kit ›</a>
       </div>
     </div>
@@ -408,7 +408,7 @@
       </div>
       <div class="hero-body">
         <div class="ns">
-          <div class="lab"><span class="pv measured"></span> North star · POI taps per occupied unit <span class="chip sample">Sample</span></div>
+          <div class="lab"><span class="pv measured"></span> Guest usage · POI taps per occupied unit <span class="chip sample">Sample</span></div>
           <div class="big">~3.6<small> / occupied unit · wk</small></div>
           <div class="wow">▲ ~12% vs prior 30d <span class="chip sample" style="margin-left:4px">Sample</span></div>
           <div class="sub">How many times guests who scanned the in-room QR opened a beach, trail, or restaurant in the app to plan their day — per occupied unit, week over week. A tap is intent (“opened in app”), not a confirmed visit.</div>
@@ -1080,7 +1080,7 @@
 
         // ================= MEASURED TILES =================
 
-        // ---- Hero north-star: POI taps per occupied unit / wk ----
+        // ---- Hero metric: POI taps per occupied unit / wk ----
         // Denominator we can't measure (occupancy). We do NOT invent an occupancy:
         // show the honest raw measured count instead of a per-unit rate.
         var ns = document.querySelector('.hero .ns');
@@ -1260,7 +1260,7 @@
       body:'Two minutes, six stops — then it’s yours. This is where you’ll see what guests do in your app and control what it recommends. You can replay this anytime with the <b>Tour</b> button up top.' },
     { view:'overview', sel:'.viewtabs', title:'Four views, one dashboard',
       body:'<b>Overview</b> is the day-to-day pulse, <b>Guest activity</b> the detail, <b>Pricing</b> your payback math, and <b>Places</b> controls what your branded app recommends. Everything here is your property only.' },
-    { view:'overview', sel:'.hero .ns', title:'Your north-star number',
+    { view:'overview', sel:'.hero .ns', title:'The one number to watch',
       body:'How often guests open a beach, trail, or restaurant in the app to plan their day — per occupied unit. Anything tagged <b>Sample</b> is illustrative until your telemetry connects; live mode only ever shows measured data.' },
     { view:'guests', sel:'#view-guests section', title:'What guests actually want',
       body:'Guest activity shows the demand — which beaches and places guests open most, and how that lines up with what you feature. It’s the evidence for your curation choices, never guesswork.' },
