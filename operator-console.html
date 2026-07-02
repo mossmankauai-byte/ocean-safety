@@ -386,7 +386,7 @@
         <a id="repLink" href="jade-live.html" target="_blank" rel="noopener" style="background:#0a6e8c;color:#fff;font-size:13.5px;text-decoration:none;padding:9px 15px;border-radius:9px;white-space:nowrap">Open the demo kit ›</a>
       </div>
     </div>
-    <script>(function(){try{var p=new URLSearchParams(location.search);if(p.get('rep')==='1'||p.get('jade')==='1'){var b=document.getElementById('repbar');if(b)b.style.display='flex';var s=p.get('slug');if(s){var l=document.getElementById('repLink');if(l)l.href='jade-live.html?ref='+encodeURIComponent(s);}}}catch(e){}})();</script>
+    <script>(function(){try{var p=new URLSearchParams(location.search);if(p.get('rep')==='1'||p.get('jade')==='1'){var b=document.getElementById('repbar');if(b)b.style.display='flex';var reveal=function(){var r=document.querySelectorAll('.rep-only');for(var i=0;i<r.length;i++){r[i].hidden=false;}};if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',reveal);}else{reveal();}var s=p.get('slug');if(s){var l=document.getElementById('repLink');if(l)l.href='jade-live.html?ref='+encodeURIComponent(s);}}}catch(e){}})();</script>
 
     <!-- VIEW SWITCHER -->
     <nav class="viewtabs" role="tablist" aria-label="Console view">
@@ -653,7 +653,7 @@
         <div class="tiers">
           <div class="tier"><div class="t">Concierge · &lt;150 keys</div><div class="p">$300<small>/mo</small></div><div class="rm">$36–90 / room / yr</div><div class="j">Concierge labor saved alone ($3.2k–$13k/yr) covers it several times over. Read-only dashboard + weekly digest.</div></div>
           <div class="tier feat"><div class="t">Property · 150–350 keys</div><div class="p">$750–1,400<small>/mo</small></div><div class="rm">$48–84 / room / yr</div><div class="j">The backbone tier. Break-even is roughly one incremental spa booking a month — and the calculator above shows that against your own numbers, never ours. Add-ons (risk-doc, owner reporting) lift to ~$1,550 without renegotiating the headline.</div></div>
-          <div class="tier"><div class="t">Brand · 350+ keys, multi-prop</div><div class="p">$2,000–3,500<small>/mo</small></div><div class="rm">$48–70 / room / yr</div><div class="j">Below INTELITY enterprise. Per-slug roll-up, no cross-hotel comparison. Captures ~30% of attributable Stay-Close value at scale.</div></div>
+          <div class="tier"><div class="t">Brand · 350+ keys, multi-prop</div><div class="p">$2,000–3,500<small>/mo</small></div><div class="rm">$48–70 / room / yr</div><div class="j">Below INTELITY enterprise. Per-slug roll-up, no cross-hotel comparison.<span class="rep-only" hidden> Captures ~30% of attributable Stay-Close value at scale.</span></div></div>
         </div>
         <div class="comps" aria-label="Comparable per-room pricing">
           <span class="c"><b>Duve</b> ~$65/room/yr (analytics incl.)</span>
@@ -683,7 +683,7 @@
 
     <footer>
       <b>Reading this page:</b> every tile is tagged Measured / Modeled / Assumption / Sample. In this preview, all figures are <b>Sample</b> — illustrative placeholders, not your guests. Live mode renders only measured telemetry; a period with no data shows an empty state, never a seed number and never a movement figure against an empty prior week.<br><br>
-      <b>What makes it real:</b> (1) build the endpoint-injection step so co-branded variants post to the live Worker (today they ship disabled), (2) deploy the Worker + seed per-slug keys, (3) ship a co-branded variant with the live endpoint, (4) accumulate 60+ days of rollups. Until then this is a layout preview by design.<br><br>
+      <b>What makes it real:</b> live telemetry from your property&rsquo;s co-branded guest app — the pilot switches it on, and 60+ days of measured rollups replace every Sample figure. Until then this is a layout preview by design.<span class="rep-only" hidden> Internal: (1) build the endpoint-injection step so co-branded variants post to the live Worker (today they ship disabled), (2) deploy the Worker + seed per-slug keys, (3) ship a co-branded variant with the live endpoint, (4) accumulate 60+ days of rollups.</span><br><br>
       OceanSafety · Operator Console · methodology &amp; data dictionary available on request · figures current as of preview build.
     </footer>
     </div><!-- /view-pricing -->
