@@ -1064,10 +1064,15 @@
 
         // ---- sticky preview bar → live status line ----
         var pbLine = document.querySelector('.preview-bar .pb span:last-child');
+        var isDemo = /^demo(-|$)/.test(slug);
         if(pbLine){
-          pbLine.innerHTML = cur.any
-            ? '<strong>LIVE</strong> — measured telemetry from this property’s slug. Sample tiles are replaced with your own guests’ anonymized behavior; Modeled and Assumption tiles remain your inputs and benchmarks.'
-            : '<strong>LIVE</strong> — this property is connected and collecting. No guest events in the last ' + effPeriod + ' days yet; measured tiles show an empty state until data arrives.';
+          if(isDemo){
+            pbLine.innerHTML = '<strong>LIVE DEMO</strong> — a real, working dashboard on a shared demo property. The numbers are measured events from this demo (open the guest app through your demo link, tap around, and watch them move) — not a real hotel’s guests. Your own property starts fresh at pilot.';
+          } else {
+            pbLine.innerHTML = cur.any
+              ? '<strong>LIVE</strong> — measured telemetry from this property’s slug. Sample tiles are replaced with your own guests’ anonymized behavior; Modeled and Assumption tiles remain your inputs and benchmarks.'
+              : '<strong>LIVE</strong> — this property is connected and collecting. No guest events in the last ' + effPeriod + ' days yet; measured tiles show an empty state until data arrives.';
+          }
         }
 
         // Helper: turn a tile's Sample chip into a Measured chip.

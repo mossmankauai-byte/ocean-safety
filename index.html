@@ -8176,5 +8176,55 @@ if('serviceWorker' in navigator){
   window.storeBuy = storeBuy;
 })();
 </script>
+
+<script>
+/* ── Partner/demo telemetry (CGTrack-lite) ──────────────────────────────────
+   Feeds the operator dashboard. ACTIVE ONLY when the page is opened through a
+   partner/demo link carrying ?ref=<slug>; organic visitors emit NOTHING.
+   Anonymous by design (matches the worker): no IP/UA persisted server-side,
+   opaque random session id, whitelisted event types, batched, fail-silent. */
+(function(){
+  try{
+    var slug = (new URLSearchParams(location.search).get('ref') || '').trim().toLowerCase();
+    if(!slug || !/^[a-z0-9-]{2,64}$/.test(slug)) return;
+    var API = 'https://concierge-guide-api.oceansafe-hi.workers.dev/e';
+    var sid = null;
+    try{
+      sid = localStorage.getItem('cg_sid');
+      if(!sid){ sid = Math.random().toString(36).slice(2,10); localStorage.setItem('cg_sid', sid); }
+    }catch(e){ sid = Math.random().toString(36).slice(2,10); }
+    var q = [], timer = null;
+    function flush(){
+      timer = null;
+      if(!q.length) return;
+      var body = JSON.stringify({ slug: slug, events: q.splice(0, q.length) });
+      try{
+        fetch(API, { method:'POST', headers:{'Content-Type':'text/plain'}, body: body, keepalive: true })
+          .catch(function(){});
+      }catch(e){}
+    }
+    function push(ev){
+      ev.sid = sid; ev.h = new Date().getHours();
+      q.push(ev);
+      if(q.length >= 20){ if(timer){ clearTimeout(timer); timer = null; } flush(); }
+      else if(!timer){ timer = setTimeout(flush, 4000); }
+    }
+    addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') flush(); });
+    push({ type:'session_start',
+           dev: (/Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'),
+           lang: (navigator.language || '').slice(0,5) });
+    function wrap(obj, key, fn){
+      var orig = obj && obj[key];
+      if(typeof orig !== 'function') return;
+      obj[key] = function(){ try{ fn.apply(null, arguments); }catch(e){} return orig.apply(this, arguments); };
+    }
+    if(window.OSA){
+      wrap(OSA, 'tab',  function(name){ push({ type:'tab_change', to: String(name||'').slice(0,32) }); });
+      wrap(OSA, 'item', function(kind, id){ push({ type:'poi_tap', kind: String(kind||'').slice(0,16), id: String(id||'').slice(0,64) }); });
+    }
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
