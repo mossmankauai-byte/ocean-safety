@@ -9,8 +9,11 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=(), usb=()
+  # Allow large image previews in Search / Discover (thumbnail-size directive; does NOT force indexing).
+  X-Robots-Tag: max-image-preview:large
 
 # Keep demo / sample surfaces out of search engines.
+# (More-specific X-Robots-Tag below wins for these paths, so they stay noindex.)
 /demo/*
   X-Robots-Tag: noindex, nofollow
 /p/demo

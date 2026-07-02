@@ -183,7 +183,7 @@
             <div class="beach"><div class="dot" style="background:var(--flag-yellow)">MD</div><div><b>Shipwreck Beach</b><div class="m">Moderate · shorebreak today</div></div></div>
             <div class="beach"><div class="dot" style="background:var(--flag-red)">HI</div><div><b>Queen’s Bath</b><div class="m">High hazard · do not enter</div></div></div>
             <div class="h2">Your week · unit 214</div>
-            <div class="beach"><div class="dot" style="background:var(--green)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 15.9 7.4 18.2l.9-5.1L4.5 9.1l5.2-.8z"/></svg></div><div><b>6 beaches explored</b><div class="m">Day 5 of 7 · Marriott’s Your Resort</div></div></div>
+            <div class="beach"><div class="dot" style="background:var(--green)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 15.9 7.4 18.2l.9-5.1L4.5 9.1l5.2-.8z"/></svg></div><div><b>6 beaches explored</b><div class="m">Day 5 of 7 · Your Resort</div></div></div>
           </div>
         </div>
         <div class="scrim" id="scrim"></div>
@@ -242,13 +242,13 @@
 <script>
 (function(){
   "use strict";
-  var RESORT = "Marriott’s Your Resort";
+  var RESORT = "Your Resort";
   var FEES = {tour:150, owner:100, referral:50}, FULFILL=0.15;
   var STORE = "oceansafe_ts_leads_v2";
   // each segment (QR) has its own deal menu — set in the Operator Portal
   var DEALS = {
     renter:   {d0:{ic:"tour",t:"Sunset dinner cruise",d:"Nāpali coast · for two",v:180}, d1:{ic:"lei",t:"Lūʻau for two",d:"Poʻipū · incl. transport",v:300}, d2:{ic:"credit",t:"$200 resort credit",d:"dining / spa on-property",v:200}},
-    exchange: {d0:{ic:"snorkel",t:"Snorkel sail for two",d:"south shore reef",v:160}, d1:{ic:"dining",t:"$150 dining credit",d:"any on-site restaurant",v:150}, d2:{ic:"spa",t:"$175 spa credit",d:"Waiohai spa",v:175}},
+    exchange: {d0:{ic:"snorkel",t:"Snorkel sail for two",d:"south shore reef",v:160}, d1:{ic:"dining",t:"$150 dining credit",d:"any on-site restaurant",v:150}, d2:{ic:"spa",t:"$175 spa credit",d:"the resort spa",v:175}},
     owner:    {d0:{ic:"points",t:"15,000 bonus points",d:"added to your account",v:300}, d1:{ic:"dining",t:"$250 owner dining credit",d:"any on-site restaurant",v:250}, d2:{ic:"lei",t:"Lūʻau for two",d:"Poʻipū · incl. transport",v:300}}
   };
   var GIFTS = DEALS.renter; // reassigned to the scanned segment's deals on open()
