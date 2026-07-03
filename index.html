@@ -4958,6 +4958,10 @@ function renderToursSheetContent(){
     ? `Forecast for ${FORECAST[_selectedDayIdx].dayName}, ${FORECAST[_selectedDayIdx].shortDate}: ${condStrip}`
     : `Recommendation based on today: ${condStrip}`;
 
+  // Word the prefilled tour-desk SMS uses for the condition color's day: the
+  // day the guest actually has selected, never "today" for a Thursday badge.
+  const askDay = (useForecast && _selectedDayIdx > 0) ? FORECAST[_selectedDayIdx].dayName : 'today';
+
   const featuredCard = `
     <div class="poi-hero" style="background:linear-gradient(135deg,${featured.color},#1a7a8a)">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">${featured.icon}</div>
@@ -4972,7 +4976,8 @@ function renderToursSheetContent(){
     </div>
     <div style="margin-top:12px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;min-height:170px">
       <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${featured.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="${_gygPid()}"><span style="display:none">Powered by GetYourGuide</span></div>
-    </div>`;
+    </div>
+    ${_tourAskRow(featured.title, featuredMatch.level, askDay)}`;
 
   const scoreOf = lvl => lvl === 'yes' ? 2 : lvl === 'maybe' ? 1 : 0;
   const tourSections = TOURS_LIBRARY
@@ -5005,6 +5010,7 @@ function renderToursSheetContent(){
           <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px;min-height:140px">
             <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${t.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="${_gygPid()}"><span style="display:none">Powered by GetYourGuide</span></div>
           </div>
+          ${_tourAskRow(t.title, m.level, askDay)}
         </div>`;
     }).join('');
 
@@ -5917,6 +5923,7 @@ function openSheet(id){
         <div><div class="poi-hero-name" style="color:#fff">${_bw.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${_bw.r} • Caution beach</div></div>
       </div>
       <div style="background:#fef3c7;border-left:3px solid #d97706;padding:12px 14px;margin-bottom:14px;border-radius:8px;color:#78530a;font-weight:600;font-size:14px;line-height:1.4"><span style="margin-right:6px">ⓘ</span>${_bw.danger}</div>
+      ${_amenityPanel(_amenityCondStates(_bw, null, null))}
       <div class="poi-grid">
         <div class="poi-cell"><div class="poi-cell-l">Lifeguard</div><div class="poi-cell-v" style="font-size:11px">${_bw.lg_hours||'None'}</div></div>
         <div class="poi-cell"><div class="poi-cell-l">Water temp</div><div class="poi-cell-v">${_bw.water_temp||77}°F</div></div>
@@ -6185,6 +6192,7 @@ function openSheet(id){
     ${_reefNotice}
     ${_windTideChips}
     ${_ripRow}
+    ${_amenityPanel(_amenityCondStates(b, r, c))}
     ${(typeof outlookChipsHtml === 'function') ? outlookChipsHtml(c) : ''}
     ${condIcons(c,b)}
     ${parkRow}
@@ -7734,6 +7742,30 @@ function _viatorPid(){
 }
 // HTML-escape for config-sourced strings (promo titles etc.).
 function _pesc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+// Per-unit telemetry dimension: ?u=<unit> on a QR link (a door card in room
+// 204 prints ?ref=demo-resort&u=204) persists like the referrer and rides
+// every worker emit as an optional short id, so a rental fleet has per-unit
+// history from the first card. Sanitized hard (a-z 0-9 hyphen, 16 chars max);
+// anything else → absent. Never guest-typed, never PII. The worker rolls it
+// into roll.units{}; emits still happen ONLY when ?ref is in the current URL.
+function _activeUnitId(){
+  try {
+    const clean = v => String(v || '').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0, 16);
+    const raw = new URLSearchParams(location.search).get('u');
+    if(raw !== null){
+      const u = clean(raw);
+      const slug = _activeRefSlug() || '';
+      if(u){ try{ localStorage.setItem('cg_unit', slug + ':' + u); }catch(e){} return u; }
+    }
+    // stored unit only counts for the property whose card set it — a guest who
+    // scanned Hotel A's room card must not carry that unit id into Hotel B
+    const stored = String(localStorage.getItem('cg_unit') || '');
+    const i = stored.indexOf(':');
+    if(i < 0) return null; // legacy unscoped value: drop rather than misattribute
+    const curSlug = _activeRefSlug() || '';
+    return (stored.slice(0, i) === curSlug && curSlug) ? (clean(stored.slice(i + 1)) || null) : null;
+  } catch(e){ return null; }
+}
 // Partner event → PostHog (existing OSA.track hook) + a one-event POST to the
 // same telemetry worker the CGTrack-lite block at the end of this page uses,
 // with its same privacy rule: the worker emit happens only when THIS page
@@ -7744,10 +7776,78 @@ function _partnerTrack(type, label){
   try {
     const slug = (new URLSearchParams(location.search).get('ref') || '').trim().toLowerCase();
     if(!slug || !/^[a-z0-9-]{2,64}$/.test(slug)) return;
+    const u = _activeUnitId();
     fetch('https://concierge-guide-api.oceansafe-hi.workers.dev/e', {
       method: 'POST', headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ slug: slug, events: [{ type: type, label: label, h: new Date().getHours() }] })
+      body: JSON.stringify({ slug: slug, u: u || undefined, events: [{ type: type, label: label, h: new Date().getHours() }] })
     }).catch(function(){});
+  } catch(e){}
+}
+// sms: URI prefill fails SILENTLY on most desktops (no handler, or a handler
+// that ignores ?body=). Crude but reliable gate: mobile UA or a real
+// multi-touch screen gets the sms: composer; everything else gets the visible
+// number + copy fallback so the guest is never left with a dead button.
+function _smsCapable(){
+  try {
+    var ua = navigator.userAgent;
+    if(/iPhone|iPad|iPod|Android/i.test(ua)) return true;
+    // iPadOS 13+ reports as Macintosh but is touch — real Macs have 0 touch points
+    return /Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1;
+  } catch(e){ return false; }
+}
+// Prefilled tour-desk SMS body: activity + the condition color the app is
+// already showing for it + which property the guest is at. Hard 140-char cap,
+// dropping the least important parts first. No guest data of any kind — the
+// guest reviews and sends the text themselves from their own phone.
+function _tourLeadBody(name, cond, dayWord){
+  const parts = ['Interested in: ' + String(name || '').slice(0, 60)];
+  if(cond) parts.push('conditions ' + cond + ' ' + (dayWord || 'today'));
+  const prop = String((window._partnerCfg && window._partnerCfg.name) || '').slice(0, 30);
+  if(prop) parts.push('guest at ' + prop);
+  let s = parts.join(' - ') + '. Can you check availability?';
+  while(s.length > 140 && parts.length > 1){ parts.pop(); s = parts.join(' - ') + '. Can you check availability?'; }
+  return s.slice(0, 140);
+}
+// Per-activity "ask the tour desk" row for the tours sheet — the hot-lead
+// relay. Renders ONLY when the active partner config has a tour-desk phone;
+// organic/no-config renders return '' (byte-identical sheet). Mobile: sms:
+// composer prefilled via _tourLeadBody. Desktop: copy-the-message fallback
+// with the desk number shown. Tap = tour_lead event (label 'sms|<activity>'
+// or 'copy|<activity>', 4+48 chars, inside the 64-char label cap) — counted
+// as a composer-open in the console, never as a sent message or a booking.
+function _tourAskRow(title, level, dayWord){
+  const td = window._partnerCfg && window._partnerCfg.tourDesk;
+  const phone = (td && td.phone) ? String(td.phone).replace(/[^+0-9]/g,'') : '';
+  if(!phone) return '';
+  const cond = level === 'yes' ? 'green' : level === 'maybe' ? 'yellow' : 'red';
+  const body = _tourLeadBody(title, cond, dayWord);
+  const lbl = String(title || '').replace(/\|/g,'/').slice(0, 48);
+  const st = 'display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:44px;margin-top:8px;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid var(--border);background:#fff;color:var(--ocean,#0f4c5c);cursor:pointer;font-family:inherit;text-align:center';
+  const svg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.5-.8L3 21l1.9-5.5A8.4 8.4 0 1 1 21 11.5Z"/></svg>';
+  if(_smsCapable()){
+    return `<a href="sms:${phone}?&body=${encodeURIComponent(body)}" data-lbl="${_pesc(lbl)}" onclick="_tourAskTrack(this)" style="${st}">${svg}<span>Text the tour desk about this</span></a>`;
+  }
+  return `<button type="button" data-body="${_pesc(body)}" data-phone="${phone}" data-lbl="${_pesc(lbl)}" onclick="_tourAskCopy(this)" style="${st}">${svg}<span data-ask-note>Ask the tour desk — copies a ready-to-send message</span></button>`;
+}
+function _tourAskTrack(el){
+  try { _partnerTrack('tour_lead', 'sms|' + (el.getAttribute('data-lbl') || '')); } catch(e){}
+}
+function _tourAskCopy(btn){
+  try {
+    _partnerTrack('tour_lead', 'copy|' + (btn.getAttribute('data-lbl') || ''));
+    const phone = btn.getAttribute('data-phone') || '';
+    const note = btn.querySelector('[data-ask-note]');
+    const done = function(){ if(note) note.textContent = 'Message copied — text it to ' + phone; };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(btn.getAttribute('data-body') || '').then(done, done);
+    else done();
+  } catch(e){}
+}
+function _deskCopy(btn, phone){
+  try {
+    _partnerTrack('tour_lead', 'copy');
+    const done = function(){ btn.textContent = 'Copied'; };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(String(phone || '')).then(done, done);
+    else done();
   } catch(e){}
 }
 // "Ask the tour desk" — renders ONLY when the active partner config carries a
@@ -7760,12 +7860,125 @@ function _tourDeskCard(){
   const phone = td.phone ? String(td.phone).replace(/[^+0-9]/g,'') : '';
   const email = td.email ? String(td.email).replace(/[^a-zA-Z0-9@._+-]/g,'') : '';
   const btn = 'display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;min-height:44px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none';
-  const smsBtn = phone ? `<a href="sms:${phone}" onclick="_partnerTrack('tour_lead','sms')" style="${btn};background:var(--ocean,#0f4c5c);color:#fff"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.5-.8L3 21l1.9-5.5A8.4 8.4 0 1 1 21 11.5Z"/></svg>Text the tour desk</a>` : '';
+  // Mobile: sms: composer. Desktop: sms: prefill fails silently on most
+  // desktops (judge flag), so show the number itself (tel: still works for
+  // continuity/VoIP setups) plus a copy button — never a dead button.
+  const smsBtn = phone ? (_smsCapable()
+    ? `<a href="sms:${phone}" onclick="_partnerTrack('tour_lead','sms')" style="${btn};background:var(--ocean,#0f4c5c);color:#fff"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.5-.8L3 21l1.9-5.5A8.4 8.4 0 1 1 21 11.5Z"/></svg>Text the tour desk</a>`
+    : `<a href="tel:${phone}" onclick="_partnerTrack('tour_lead','tel')" style="${btn};background:var(--ocean,#0f4c5c);color:#fff"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8.1 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z"/></svg>${phone}</a><button type="button" onclick="_deskCopy(this,'${phone}')" style="${btn};flex:0 0 auto;background:#fff;border:1px solid var(--border);color:var(--ink);cursor:pointer;font-family:inherit">Copy</button>`) : '';
   const mailBtn = email ? `<a href="mailto:${email}" onclick="_partnerTrack('tour_lead','email')" style="${btn};background:#fff;border:1px solid var(--border);color:var(--ink)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m2.5 7 9.5 6 9.5-6"/></svg>Email</a>` : '';
   return `<div style="margin-top:14px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">
     <div style="font-weight:700;font-size:13px;color:var(--ink)">Ask the tour desk</div>
     <div style="font-size:11px;color:var(--mute);margin:2px 0 10px;line-height:1.4">Not sure what fits your group or today's conditions? The resort tour desk can check availability and book it for you.</div>
     <div style="display:flex;gap:8px">${smsBtn}${mailBtn}</div>
+  </div>`;
+}
+// ── Partner amenity panel (Stay-Close Revenue Days) ─────────────────────────
+// The hotel's own amenities (from partner-config amenities[]) shown on the
+// beach sheet BELOW the safety verdict, gated by each amenity's showWhen.
+//
+// STRUCTURALLY READ-ONLY with respect to the safety layer: the reader
+// _amenityCondStates(b, r, c) only READS the verdict objects score()/gate()
+// already produced and reduces them to an array of plain strings; the panel
+// renderer _amenityPanel() receives ONLY those strings (it is never handed
+// the b/r/c objects), so no amenity code path can reach, let alone mutate,
+// anything the verdict pipeline reads. Safety verdicts take zero input from
+// this layer.
+//
+// Condition keys (what each showWhen value is keyed on in the app):
+//   red_flag    — b.warning_only / r.status==='warning' (score()'s warning-only
+//                 branch), OR r.status==='hidden' with a gate() hazard reason:
+//                 'High hazard, use extreme caution' | 'Strong Currents' |
+//                 'Surf Too High'. NOT 'Conditions Unavailable' (a data outage
+//                 is unknown, not a red flag).
+//   brown_water — c.brown, the per-beach flag getCond() sets via bw(b,c)
+//                 (airport rain OR live USGS discharge).
+//   rain        — today's daily rainfall >= 5 mm: FORECAST[0].precip (true mm),
+//                 a heavy-rain gate consistent with Stay-Close's intent;
+//                 falls back to c.rain/10 (c.rain is mm×10 per the bw() units
+//                 convention) when FORECAST hasn't arrived.
+//   always      — (or a missing/empty showWhen) renders regardless.
+// Unrecognized showWhen values never match — a config typo hides the amenity
+// rather than showing a conditional offer unconditionally.
+function _amenityCondStates(b, r, c){
+  const states = [];
+  const HAZARD_REASONS = ['High hazard, use extreme caution', 'Strong Currents', 'Surf Too High'];
+  if((b && b.warning_only) || (r && r.status === 'warning') ||
+     (r && r.status === 'hidden' && HAZARD_REASONS.indexOf(r.reason) >= 0)) states.push('red_flag');
+  if(c && c.brown) states.push('brown_water');
+  const mm = (typeof FORECAST !== 'undefined' && Array.isArray(FORECAST) && FORECAST[0] && typeof FORECAST[0].precip === 'number')
+    ? FORECAST[0].precip
+    : ((c && typeof c.rain === 'number') ? c.rain / 10 : 0);
+  if(mm >= 5) states.push('rain');
+  return states;
+}
+// Tap → amenity_tap event. The condition that showed the offer rides in the
+// existing 64-char label slot as "name|condition" (name clipped to 48 so the
+// longest condition, brown_water at 11 chars, always fits: 48+1+11=60) —
+// chosen over adding a new event field because the worker's promo_tap
+// label-map pattern handles it with zero schema change. Fires on expand only
+// (not collapse), so one open = one tap.
+function _amenityTap(btn, idx, cond){
+  try {
+    const body = document.getElementById('amenityBody' + idx);
+    if(!body) return;
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : '';
+    btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+    if(!open){
+      const list = (window._partnerCfg && window._partnerCfg.amenities) || [];
+      const a = list[idx];
+      const nm = String((a && a.name) || '').replace(/\|/g,'/').slice(0, 48);
+      if(nm) _partnerTrack('amenity_tap', nm + '|' + (cond || 'calm'));
+    }
+  } catch(e){}
+}
+// Renders the "Provided by <hotel>" panel from plain strings only (see the
+// structural note above). Returns '' when there's no config, no amenities, or
+// nothing matches today's conditions — the no-config beach sheet is unchanged.
+function _amenityPanel(states){
+  const cfg = window._partnerCfg;
+  const list = (cfg && Array.isArray(cfg.amenities)) ? cfg.amenities : [];
+  if(!list.length) return '';
+  states = Array.isArray(states) ? states : [];
+  const primary = states[0] || 'calm';
+  const rows = list.map((a, i) => ({ a, i }))
+    .filter(x => {
+      if(!x.a || !x.a.name) return false;
+      const sw = String(x.a.showWhen || 'always');
+      return sw === 'always' || states.indexOf(sw) >= 0;
+    });
+  if(!rows.length) return '';
+  const CTX = {
+    red_flag: 'The ocean is the wrong call right now — these are on the property.',
+    brown_water: 'With runoff in the water today, these are on the property.',
+    rain: 'A good rainy-day list — all on the property.',
+    calm: 'On the property, whenever you want a break from the beach.'
+  };
+  const body = rows.map(x => {
+    const a = x.a;
+    const price = a.price ? `<span style="flex-shrink:0;font-size:12px;font-weight:700;color:var(--ocean,#0f4c5c)">${_pesc(a.price)}</span>` : '';
+    const detail = a.detail ? `<div style="font-size:11.5px;color:var(--mute);line-height:1.45">${_pesc(a.detail)}</div>` : '';
+    return `<button type="button" onclick="_amenityTap(this,${x.i},'${primary}')" aria-expanded="false" style="display:block;width:100%;min-height:44px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-top:8px;cursor:pointer;text-align:left;font-family:inherit">
+      <span style="display:flex;align-items:center;gap:10px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 21h18"/><path d="M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>
+        <span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink)">${_pesc(a.name)}</span>
+        ${price}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+      <span id="amenityBody${x.i}" style="display:none;padding:8px 2px 2px 25px">
+        ${detail}
+        <div style="font-size:11px;color:var(--mute);margin-top:${a.detail ? '4px' : '0'}">Ask at the front desk to book or check today's availability.</div>
+      </span>
+    </button>`;
+  }).join('');
+  return `<div style="margin:10px 0 4px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-weight:700;font-size:13px;color:var(--ink)">Provided by ${_pesc(cfg.name || 'Your Resort')}</div>
+      <span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);background:#fff;border:1px solid var(--border);border-radius:999px;padding:2px 7px">Property offer</span>
+    </div>
+    <div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">${CTX[primary] || CTX.calm} Separate from the safety report above — the ocean call never changes for an offer.</div>
+    ${body}
   </div>`;
 }
 // Partner promotions — the hotel's house offers (spa special, happy hour)
@@ -8367,10 +8580,14 @@ if('serviceWorker' in navigator){
     // NOTE: no fetch keepalive here — Chrome silently drops keepalive fetches once
     // the service worker controls the page. Timer flushes use a plain fetch; the
     // page-close flush uses sendBeacon (which survives unload without keepalive).
+    // Optional per-unit id (?u= on the QR link, persisted like the referrer)
+    // rides every batch — same sanitizer as _partnerTrack's emits.
+    var unit = null;
+    try { unit = (typeof _activeUnitId === 'function') ? _activeUnitId() : null; } catch(e){}
     function flush(final){
       timer = null;
       if(!q.length) return;
-      var body = JSON.stringify({ slug: slug, events: q.splice(0, q.length) });
+      var body = JSON.stringify({ slug: slug, u: unit || undefined, events: q.splice(0, q.length) });
       if(final && navigator.sendBeacon){
         try{ if(navigator.sendBeacon(API, new Blob([body], { type:'text/plain' }))) return; }catch(e){}
       }

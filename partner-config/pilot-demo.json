@@ -15,5 +15,25 @@
   "tourDesk": {
     "phone": "+18085550100",
     "email": "tourdesk@example.com"
-  }
+  },
+  "amenities": [
+    {
+      "name": "Pool bar",
+      "detail": "Swim-up seats and shaded tables, 10a-6p",
+      "price": "",
+      "showWhen": "red_flag"
+    },
+    {
+      "name": "Spa treatments",
+      "detail": "Lobby level - same-day openings most mornings",
+      "price": "",
+      "showWhen": "rain"
+    },
+    {
+      "name": "Cabana rental",
+      "detail": "Half-day or full-day, towel service included",
+      "price": "$45/half-day",
+      "showWhen": "always"
+    }
+  ]
 }

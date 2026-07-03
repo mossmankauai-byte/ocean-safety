@@ -206,6 +206,11 @@
   @media(max-width:680px){.mg-add{grid-template-columns:1fr}}
   .mg-add input{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:9px;padding:8px 11px;min-width:0}
   .mg-add input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  /* amenity add-row variant: 4th column for the Show-when picker */
+  .mg-add.am{grid-template-columns:1fr 1.2fr auto auto}
+  @media(max-width:680px){.mg-add.am{grid-template-columns:1fr}}
+  .mg-add.am select{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:9px;padding:8px 11px;min-width:0;min-height:44px;cursor:pointer}
+  .mg-add.am select:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
   .mg-nm .mg-sub{flex-basis:100%;font-size:11px;color:var(--muted);line-height:1.45;word-break:break-word}
   .mg-more{margin-top:2px}
   .mg-more summary{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 2px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;list-style:none;user-select:none}
@@ -643,24 +648,45 @@
     <div id="view-stayclose" hidden>
     <!-- AMENITY MANAGER -->
     <section>
-      <div class="sec-h"><h2>Your amenity menu</h2><p>What Stay-Close steers guests to when the ocean is the wrong call. Edits save as a draft in this browser; Export sends the menu into your app build.</p></div>
+      <div class="sec-h"><h2>Your amenity menu</h2><p>What Stay-Close steers guests to when the ocean is the wrong call. Edits save as a draft in this browser; the <b>Export partner config</b> button on the Promotions tab carries your menu into your live guide. The download button below is only for the legacy build flow.</p></div>
       <div class="card" id="mgAmenities">
         <div class="mg-list" id="amList"></div>
-        <div class="mg-add">
+        <div class="mg-add am">
           <input id="amA" placeholder="Amenity — e.g. Spa treatments" autocomplete="off">
           <input id="amB" placeholder="Detail (optional) — e.g. adults only after 6p" autocomplete="off">
+          <select id="amWhen" aria-label="Show when — which guest-app conditions surface this amenity">
+            <option value="">Show: always</option>
+            <option value="red_flag">Show: red-flag surf days</option>
+            <option value="rain">Show: rainy days</option>
+            <option value="brown_water">Show: brown-water days</option>
+          </select>
           <button class="pl-btn primary" id="amAdd">Add amenity</button>
         </div>
         <details class="mg-more">
           <summary><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 1.5 6.5 5 3 8.5"/></svg>More details (optional)</summary>
           <div class="mg-more-grid">
+            <input id="amPrice" placeholder="Price (optional) — e.g. $45/half-day" autocomplete="off">
             <input id="amLoc" placeholder="Location — e.g. lobby level" autocomplete="off">
             <input id="amHours" placeholder="Hours — e.g. 9a–7p" autocomplete="off">
             <input id="amPhone" type="tel" placeholder="Phone — e.g. ext. 53" autocomplete="off">
             <input id="amWeb" type="url" placeholder="Website — e.g. https://yourresort.com/spa" autocomplete="off">
           </div>
         </details>
-        <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Export config</button></div>
+        <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Download amenity list</button></div>
+      </div>
+    </section>
+    <!-- SIMULATE RED-FLAG DAY (demo preview — never live data) -->
+    <section>
+      <div class="sec-h"><h2>Simulate a red-flag day</h2><p>A flat-ocean demo of the mechanic: preview what the guest app's amenity panel <b>would</b> show under a beach's safety verdict on a high-surf day, built from your draft menu above. Preview only — it records nothing, shows nothing to guests, and has no path into the safety verdict.</p></div>
+      <div class="card" id="mgSimulate">
+        <button type="button" class="pl-btn primary" id="simToggle" aria-pressed="false" style="min-height:44px">SIMULATE red-flag day</button>
+        <div id="simPane" hidden style="margin-top:12px">
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;background:#f6f0e2;border:1px dashed #c9821b;border-radius:9px;color:#7a5a12;font-size:12px;font-weight:700;letter-spacing:.02em">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9821b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9.5" x2="12" y2="13.5"/><circle cx="12" cy="17" r=".7" fill="#c9821b" stroke="none"/></svg>
+            <span>SIMULATION — preview only. Not live conditions, not guest data; nothing here is recorded.</span>
+          </div>
+          <div id="simPanel" style="margin-top:10px"></div>
+        </div>
       </div>
     </section>
     <!-- TOUR DESK -->
@@ -675,6 +701,14 @@
         </div>
         <div class="cap" id="tdHint" hidden style="margin-top:6px;color:var(--sample)"></div>
         <div class="mg-foot"><span class="cap"><b id="tdCount">0</b> of 4 set — blank fields fall back to OceanSafe defaults</span><span style="flex:1"></span><button class="pl-btn" id="tdClear">Clear</button></div>
+      </div>
+      <div class="grid g3" style="margin-top:14px">
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Guest handoff taps (measured)</span><span class="chip sample">Sample</span></div>
+          <div class="v">~12 <small>composer-opens · 7d</small></div>
+          <div class="cap">Guest taps that opened a text or email draft to <b>your</b> tour desk from the guide. This counts <b>contact taps</b> — a guest opening the message screen, or copying the number on desktop — not sent messages, and never bookings.</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>tour_lead → roll.tour_leads{}</code> from the daily rollup. Labels: <code>sms</code> / <code>email</code> / <code>tel</code> / <code>copy</code> from the tour-desk card, and <code>sms|&lt;activity&gt;</code> from per-activity asks on the tours sheet (so you also see <b>which</b> activity the guest asked about). Guest-initiated only; no guest identity is ever attached. Per-unit QR links (<code>&amp;u=&lt;room&gt;</code> on the door card) roll the same activity into <code>roll.units{}</code> for per-room reporting. <b>Measured</b> once live.</div></details>
+        </div>
       </div>
     </section>
     <!-- BAD OCEAN DAY SAVES -->
@@ -723,6 +757,12 @@
           <div class="v">~31% <small>of bad-ocean sessions</small></div>
           <div class="cap">Share of sessions on trigger days that opened at least one on-property option instead of leaving the app.</div>
           <details class="meth"><summary>How this is computed</summary><div class="body">Sessions with a <code>stayCloseClick</code> ÷ sessions with a <code>stayCloseRender</code>, same day. <b>Measured</b> once live.</div></details>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Amenity panel taps</span><span class="chip sample">Sample</span></div>
+          <div class="v">~19 <small>taps · with the condition that fired</small></div>
+          <div class="cap">Taps on your condition-gated amenity offers in the guest app (the "Provided by" panel under a beach verdict), each counted with the condition that showed it<span class="sample-eg"> — e.g. <b>Pool bar · red-flag</b> ~9</span>. A tap = interest, never "booked" or "revenue."</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>amenity_tap → roll.amenity_taps{}</code> from the daily rollup, label = <code>amenity|condition</code> (red_flag / rain / brown_water / calm). <b>Measured</b> once live.</div></details>
         </div>
       </div>
     </section>
@@ -1197,6 +1237,7 @@
       var acc = {
         sessions:0, poi_tap:0, poi_house_pick_tap:0, tab_change:0,
         concierge_tap:0, stay_close_render:0, stay_close_click:0,
+        amenity_tap:0, tour_lead:0,
         top:{}, any:false
       };
       (days || []).forEach(function(d){
@@ -1210,6 +1251,8 @@
         acc.concierge_tap      += r.concierge_tap || 0;
         acc.stay_close_render  += r.stay_close_render || 0;
         acc.stay_close_click   += r.stay_close_click || 0;
+        acc.amenity_tap        += r.amenity_tap || 0;
+        acc.tour_lead          += r.tour_lead || 0;
         var top = r.top || {};
         Object.keys(top).forEach(function(kind){
           var ids = top[kind] || {};
@@ -1400,9 +1443,16 @@
             var lookups = cur.poi_tap + cur.tab_change;
             el.textContent = cur.any ? ct(lookups) : '—';
             toMeasuredIn(card);
+          } else if(/Amenity panel taps/i.test(t)){
+            el.textContent = cur.any ? ct(cur.amenity_tap) : '—';
+            toMeasuredIn(card);
+          } else if(/Guest handoff taps/i.test(t)){
+            el.textContent = cur.any ? ct(cur.tour_lead) : '—';
+            toMeasuredIn(card);
           }
         });
         function toMeasuredIn(card){
+          var eg = card.querySelector('.sample-eg'); if(eg) eg.remove();
           var chip = card.querySelector('.title .chip.sample');
           // only the two measured-tagged tiles carry a Measured pv dot; leave the "Sample" Labor-saved tile alone
           var pv = card.querySelector('.title .pv');
@@ -1582,6 +1632,7 @@
     function subline(it){
       return (cfg.fields||[]).map(function(f){
         var v = it[f.key]; if(!v) return '';
+        if(f.fmt) return f.fmt(v);
         return f.key==='website' ? String(v).replace(/^https?:\/\//,'') : v;
       }).filter(Boolean).join(' · ');
     }
@@ -1623,6 +1674,7 @@
     });
     document.getElementById(cfg.ids.export).addEventListener('click', function(){
       var out = { app:'oceansafety', slug:SLUG, version:1 };
+      if(cfg.exportNote) out._note = cfg.exportNote;
       out[cfg.exportKey] = items.map(cfg.toExport);
       if(cfg.extendExport) cfg.extendExport(out);
       var blob = new Blob([JSON.stringify(out,null,2)], {type:'application/json'});
@@ -1635,6 +1687,9 @@
       setTimeout(function(){ btn.textContent = t; }, 1600);
     });
     render();
+    // Expose the live draft so other exports (the canonical partner config on
+    // the Promotions tab) can carry it. Callers must not mutate.
+    return { items: function(){ return items; } };
   }
   // ---- Tour desk: the property's own affiliate IDs + contact. Draft lives in this
   // browser; it exports in the partner config (Promotions tab) as affiliates + tourDesk.
@@ -1687,9 +1742,15 @@
     } };
   })();
 
-  manager({ key:'amenities', exportKey:'amenities',
+  // Human-readable Show-when labels for the draft rows (raw values ride the export).
+  var AM_WHEN_LABEL = { red_flag:'Shows on red-flag surf days', rain:'Shows on rainy days', brown_water:'Shows on brown-water days' };
+  var amenityMgr = manager({ key:'amenities', exportKey:'amenities',
+    exportNote:'Legacy build file — NOT the partner config. Do not commit to /partner-config/. The live-guide menu exports from the Promotions tab (Export partner config).',
     ids:{list:'amList', a:'amA', b:'amB', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
-    fields:[{id:'amLoc',key:'location'},{id:'amHours',key:'hours'},{id:'amPhone',key:'phone'},{id:'amWeb',key:'website'}],
+    // amWhen is a <select>; add() clearing it to '' re-selects the "Show: always"
+    // option (value=""), and an empty value is simply not stored — absent
+    // showWhen means "always" everywhere downstream.
+    fields:[{id:'amPrice',key:'price'},{id:'amWhen',key:'showWhen',fmt:function(v){ return AM_WHEN_LABEL[v]||''; }},{id:'amLoc',key:'location'},{id:'amHours',key:'hours'},{id:'amPhone',key:'phone'},{id:'amWeb',key:'website'}],
     seeds:[['Spa treatments',''],['On-site dining',''],['Pool bar',''],['Cabana rental',''],['Gift shop','']],
     toExport:function(it){ return {label:it.a, value:it.b, location:it.location||'', hours:it.hours||'', phone:it.phone||'', website:it.website||''}; } });
   manager({ key:'products', exportKey:'products',
@@ -1782,6 +1843,14 @@
         if(td.email) out.tourDesk.email = td.email;
       }
       out.promotions = items.map(function(it){ return {title:it.title, file:it.file, pdf:it.data, expires:it.expires||''}; });
+      // Amenity menu (Stay-Close tab draft) rides the same canonical config in
+      // the runtime shape the guest app reads: {name, detail, price, showWhen}.
+      // The standalone amenities-<slug>.json export keeps its legacy shape.
+      var amItems = (amenityMgr && amenityMgr.items()) || [];
+      var amOut = amItems.filter(function(it){ return it && it.a; }).map(function(it){
+        return { name: it.a, detail: it.b||'', price: it.price||'', showWhen: it.showWhen||'always' };
+      });
+      if(amOut.length) out.amenities = amOut;
       var blob = new Blob([JSON.stringify(out,null,2)], {type:'application/json'});
       var link = document.createElement('a'); link.href = URL.createObjectURL(blob);
       link.download = 'partner-config-'+SLUG+'.json';
@@ -1790,6 +1859,56 @@
       var btn=this, t=btn.textContent; btn.textContent='Downloaded ✓'; setTimeout(function(){ btn.textContent=t; }, 1600);
     });
     render();
+  })();
+
+  // ---- Simulate red-flag day: banner-labeled SIMULATION preview of the guest
+  // amenity panel on a high-surf day. Pure client-side render of the draft
+  // menu — no events emitted, no fetches, no writes; live data and the safety
+  // verdict are untouched by construction (this code renders into #simPanel
+  // and reads nothing but the draft list). ----
+  (function(){
+    var toggle = document.getElementById('simToggle'), pane = document.getElementById('simPane'), panel = document.getElementById('simPanel');
+    if(!toggle || !pane || !panel) return;
+    var on = false;
+    function propertyName(){
+      var el = document.querySelector('.property h1');
+      return (el && el.textContent.trim()) || 'Your Hotel';
+    }
+    function renderSim(){
+      if(!on) return;
+      var items = ((amenityMgr && amenityMgr.items()) || []).filter(function(it){
+        var sw = (it && it.showWhen) || 'always';
+        return it && it.a && (sw === 'always' || sw === 'red_flag');
+      });
+      var rows = items.length ? items.map(function(it){
+        return '<div style="min-height:44px;padding:10px 12px;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;margin-top:8px">'+
+          '<div style="display:flex;align-items:center;gap:10px">'+
+          '<span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink)">'+esc(it.a)+'</span>'+
+          (it.price ? '<span style="flex-shrink:0;font-size:12px;font-weight:700;color:var(--sea)">'+esc(it.price)+'</span>' : '')+
+          '</div>'+
+          (it.b ? '<div style="font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.45">'+esc(it.b)+'</div>' : '')+
+          '</div>';
+      }).join('') : '<div class="mg-empty">Nothing would show — add an amenity above, or set one to "Show: red-flag surf days".</div>';
+      panel.innerHTML =
+        '<div style="padding:10px 12px;background:#fbeede;border-left:3px solid #b4452f;border-radius:8px;color:#7c2d12;font-size:12.5px;line-height:1.45"><b>High surf today.</b> The app just gave this guest the honest bad news about the beach. (Simulated verdict — the real one always comes from live NOAA / Open-Meteo data and is never edited by this preview.)</div>'+
+        '<div style="margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px">'+
+        '<div style="font-weight:700;font-size:13px;color:var(--ink)">Provided by '+esc(propertyName())+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">What the guest sees directly below that verdict — your amenities set to "always" or "red-flag surf days". Each tap is counted with the condition that fired it.</div>'+
+        rows+'</div>';
+    }
+    toggle.addEventListener('click', function(){
+      on = !on;
+      pane.hidden = !on;
+      toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+      toggle.textContent = on ? 'End simulation' : 'SIMULATE red-flag day';
+      renderSim();
+    });
+    // Keep the preview current while the operator edits the menu above.
+    var mg = document.getElementById('mgAmenities');
+    if(mg){
+      mg.addEventListener('click', function(){ setTimeout(renderSim, 0); });
+      mg.addEventListener('keydown', function(){ setTimeout(renderSim, 0); });
+    }
   })();
 })();
 </script>
