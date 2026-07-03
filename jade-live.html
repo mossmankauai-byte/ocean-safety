@@ -216,10 +216,11 @@
   <section class="panel" id="panel-prop">
     <div class="glass prop">
       <h2 class="serif">Free 30-day pilot <span id="forWho" style="color:var(--gold)"></span></h2>
-      <p class="subh">No card, no IT lift. You watch your own numbers, and at day 30 you keep it or walk.</p>
+      <p class="subh">The pilot earns while it runs — your offers in guests' pockets, and tour-desk earnings included from day one: big-ticket tour requests route to your own desk at your commission. No card, no IT lift. You watch your own numbers, and at day 30 you keep it or walk.</p>
 
       <ul class="plist">
         <li>Your co-branded guest app, live <b id="pBand">Mid hotel</b></li>
+        <li>Tour-desk earnings during the pilot <b style="color:var(--calm)">yours, included</b></li>
         <li>Then, if you keep it <b id="pPrice">$1,200 / mo</b></li>
         <li>Per room, per year <b id="pPer">$120</b></li>
         <li>Pilot cost <b style="color:var(--calm)">$0 for 30 days</b></li>
@@ -234,7 +235,7 @@
       <div class="steps">
         <div class="step"><div class="n">1</div><p>We set up your co-branded app and beaches.</p></div>
         <div class="step"><div class="n">2</div><p>Placards land in rooms within a week.</p></div>
-        <div class="step"><div class="n">3</div><p>At day 60 you see your real usage and decide.</p></div>
+        <div class="step"><div class="n">3</div><p>At day 30 you see your real usage and earnings, and decide.</p></div>
       </div>
 
       <div class="mbtns">
@@ -390,8 +391,8 @@
     var occRooms=n*o, qWeek=occRooms*1, hrs=qWeek*52*3/60, val=hrs*30;
     $("#hrsV").innerHTML="~"+Math.round(hrs/10)*10+"<small>&nbsp;hrs/yr</small>";
     $("#hrsSub").textContent="≈ "+money(Math.round(val/100)*100)+" of desk time absorbed";
-    $("#roiNote").innerHTML="At "+n+" rooms you're the <b style='color:var(--ink);font-weight:500'>"+b.name+"</b> band. Flat price means the per-room cost falls as the property grows — "+
-      "<span style='color:var(--ink2)'>break-even is about one extra spa, dinner or tour booking every "+(days>=1?Math.round(days):days.toFixed(1))+" days</span>. "+
+    $("#roiNote").innerHTML="At "+n+" rooms you're the <b style='color:var(--ink);font-weight:500'>"+b.name+"</b> band. "+
+      "<span style='color:var(--ink2)'>In our model the guide earns the license back before it costs you anything: break-even at this band is roughly one extra spa, dinner or tour booking every "+(days>=1?Math.round(days):days.toFixed(1))+" days. Everything above that is the property's upside: your promotions, your Stay-Close days, your tour desk's commissions.</span> "+
       "Front-desk and break-even figures are <b style='color:var(--ink);font-weight:500'>modeled</b>; the pilot measures the real number for this property.";
     // sync proposal
     $("#pBand").textContent=b.name; $("#pPrice").textContent=money(b.mo)+" / mo"; $("#pPer").textContent=money(per);

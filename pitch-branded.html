@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>OceanSafe — what your property earns · branded / flagged</title>
+<link rel="icon" type="image/png" href="icons/apple-touch-icon.png">
+<style>
+  :root{
+    --bg:#08121a; --ink:#EAF2F5; --ink2:#AFC2CC; --ink3:#7E939E;
+    --gold:#D9B26A; --gold-ink:#12202A; --calm:#5DCAA5; --caution:#EFC873;
+    --glass:rgba(20,35,44,.55); --glass-2:rgba(28,45,55,.62); --line:rgba(233,242,245,.12); --line-2:rgba(233,242,245,.20);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:.5;z-index:0;pointer-events:none}
+  .orb.a{width:520px;height:520px;background:#12715a;top:-160px;right:-120px}
+  .orb.b{width:460px;height:460px;background:#9a7a1e;bottom:-180px;left:-140px;opacity:.42}
+  .wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:20px 18px 44px}
+  .serif{font-family:Georgia,"Times New Roman",serif}
+  svg.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
+  .glass{background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(135%);backdrop-filter:blur(18px) saturate(135%);border:1px solid var(--line);border-radius:var(--radius)}
+
+  header.top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .logo{display:flex;align-items:center;gap:9px}
+  .logo b{font-weight:500;font-size:16px;letter-spacing:.2px}
+  .logo span{display:block;font-size:11.5px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase}
+  .seg{margin-left:auto;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);
+    border:1px solid var(--gold);border-radius:20px;padding:6px 14px;white-space:nowrap}
+  .printbtn{appearance:none;font:inherit;font-size:13px;color:var(--ink2);background:transparent;border:1px solid var(--line-2);
+    border-radius:11px;min-height:44px;padding:10px 16px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;margin-left:10px}
+  .printbtn:hover{border-color:var(--gold);color:var(--gold)}
+
+  .qual{padding:13px 16px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;border-color:var(--line-2)}
+  .qual .qt{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);flex:0 0 auto}
+  .qual .q{font-size:13.5px;color:var(--ink2)}
+  .qual .q b{color:var(--ink);font-weight:600}
+  .qual .verdict{font-size:13px;color:var(--gold);flex-basis:100%}
+
+  .hero{padding:20px 22px;margin-bottom:12px}
+  .hero h1{margin:0 0 8px;font-size:26px;font-weight:500;letter-spacing:-.01em}
+  .hero .be{font-size:15.5px;color:var(--ink);background:rgba(93,202,165,.12);border:1px solid rgba(93,202,165,.35);
+    border-radius:12px;padding:11px 14px;margin:10px 0 8px;line-height:1.5}
+  .hero .be b{color:var(--calm);font-weight:600}
+  .hero p{margin:0;font-size:14px;color:var(--ink2)}
+  .tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:5px;border:1px solid var(--line-2);color:var(--ink3);margin-left:5px;white-space:nowrap}
+
+  table.streams{width:100%;border-collapse:collapse;font-size:13.5px}
+  .streams th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);font-weight:600;text-align:left;
+    padding:10px 14px;border-bottom:1px solid var(--line-2)}
+  .streams td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink2);line-height:1.45}
+  .streams tr:last-child td{border-bottom:0}
+  .streams td.s{color:var(--ink);font-weight:600;white-space:nowrap}
+  .streams td.m{white-space:nowrap;color:var(--gold)}
+  .streams td.m small{display:block;color:var(--ink3);font-weight:400;white-space:normal}
+  .streams .totrow td{border-top:1px solid var(--line-2);color:var(--ink);font-weight:600}
+  .streams .totrow td.m{color:var(--gold)}
+  .tblwrap{overflow-x:auto;margin-bottom:12px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .box{padding:16px 18px}
+  .box h2{margin:0 0 8px;font-size:15px;font-weight:600}
+  .box p{margin:0 0 8px;font-size:13px;color:var(--ink2);line-height:1.55}
+  .box p:last-child{margin-bottom:0}
+  .box ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink2);line-height:1.6}
+  .ask{border-color:rgba(217,178,106,.5)}
+  .ask h2{color:var(--gold)}
+  .foot{margin-top:12px;font-size:11px;color:var(--ink3);line-height:1.5}
+
+  @media(max-width:720px){ .grid{grid-template-columns:1fr} .hero h1{font-size:21px} }
+  @media print{
+    body{background:#fff;color:#111}
+    .orb,.printbtn{display:none}
+    :root{--ink:#111;--ink2:#333;--ink3:#666;--glass:#fff;--line:#ccc;--line-2:#999;--gold:#8a6a1f;--calm:#1f7a58}
+    .glass{border:1px solid #bbb;-webkit-backdrop-filter:none;backdrop-filter:none}
+    .hero .be{background:#f2f8f5}
+    .wrap{max-width:none;padding:0}
+  }
+</style>
+</head>
+<body>
+<div class="orb a"></div><div class="orb b"></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="logo">
+      <svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><defs><linearGradient id="osGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0b485b"/><stop offset="100%" stop-color="#1b6d83"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="url(#osGrad)"/><circle cx="46" cy="20" r="5" fill="#e07856"/><path d="M5 38 Q15 32 25 38 T45 38 T62 38" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 46 Q15 40 25 46 T45 46 T62 46" stroke="#94becc" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.85"/><path d="M5 53 Q15 48 25 53 T45 53 T62 53" stroke="#c9a84c" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.75"/></svg>
+      <div><b class="serif">OceanSafe</b><span>What your property earns</span></div>
+    </div>
+    <div class="seg">Branded / flagged property</div>
+    <button class="printbtn" type="button" onclick="window.print()"><svg class="ic" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg> Print</button>
+  </header>
+
+  <section class="glass qual">
+    <span class="qt">Right sheet?</span>
+    <span class="q">1. Do you take payments on <b>Square</b>?</span>
+    <span class="q">2. Can you edit your <b>confirmation emails</b> locally, without corporate?</span>
+    <span class="verdict">If either answer is no — true of most branded and flagged properties — this is your sheet. Two yeses? Ask for the independent-property sheet instead.</span>
+  </section>
+
+  <section class="glass hero">
+    <h1 class="serif">Most guest apps are a cost you tolerate. This one pays you back.</h1>
+    <div class="be"><b>Break-even is about one guest in ten opening the app</b> at a mid-band (~$1,000/mo) license — the fraction rises with the larger bands. In our model, that adoption level covers the license — everything above it is your upside. The free 30-day pilot exists to measure your property's real number.</div>
+    <p>Your guests already check the ocean every morning. The guide carries your name, and it routes the spending to you: your spa specials, your cabanas on the good days, your tour desk's commissions. Nothing below is a discount engine — the default is full-price offers and capacity fill.</p>
+  </section>
+
+  <div class="glass tblwrap">
+    <table class="streams">
+      <tr><th>Stream</th><th>What it does for you</th><th>Monthly to your property</th></tr>
+      <tr>
+        <td class="s">Promotions tab</td>
+        <td>Your spa specials and happy hours on the phone of every guest using the guide — weekly and standing offers, full price by default. Your current tool for this is a lobby easel.</td>
+        <td class="m">$400–1,400 <span class="tag">modeled</span><small>base ~$800 · in the pilot</small></td>
+      </tr>
+      <tr>
+        <td class="s">Stay-Close revenue days</td>
+        <td>Rough or rainy day: the guide leads with your spa, dining and pool bar. Perfect day: your cabanas and gear, filled by 9am. Capacity fill and share capture — spend stays on property.</td>
+        <td class="m">$900–3,200 <span class="tag">modeled</span><small>base ~$1,800 · in the pilot</small></td>
+      </tr>
+      <tr>
+        <td class="s">Tour-desk earnings</td>
+        <td>Big-ticket tour requests route to your concierge desk, which closes at your full negotiated commission. Tours your desk doesn't carry pay your own affiliate account (~8%) — never ours.</td>
+        <td class="m">$500–1,000 <span class="tag">modeled</span><small>at the 8% affiliate floor; more with your own operator deals · included in the free pilot</small></td>
+      </tr>
+      <tr>
+        <td class="s">Pre-arrival channel</td>
+        <td>One link in your booking-confirmation email puts the guide in guests' hands before they land — it lifts every line above. Branded properties usually need corporate sign-off to edit those emails; we plan that into the rollout rather than promise it week one.</td>
+        <td class="m">Multiplier<small>no dollar line until your pilot measures it</small></td>
+      </tr>
+      <tr class="totrow">
+        <td class="s">Combined base</td>
+        <td>Overlap between Promotions and Stay-Close is netted out — the streams are not summed as fully additive.</td>
+        <td class="m">~$3,400/mo gross <span class="tag">modeled</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="grid">
+    <section class="glass box">
+      <h2>The honest math</h2>
+      <ul>
+        <li>Every figure is from our model of a 250-room property at 75% occupancy, with a 40–60% haircut for spending that would have happened anyway. Nothing here is measured at your property yet — the pilot does that.</li>
+        <li><b style="color:var(--ink)">Base case:</b> roughly two times the license back in contribution — modeled against a mid-band (~$1,000/mo) license; the larger bands narrow the multiple.</li>
+        <li><b style="color:var(--ink)">Low case (15% of guests open the app):</b> the model only washes against the license. We say that plainly rather than claim profit-center status.</li>
+        <li>In our model, tour-desk earnings plus one bad-weather week of Stay-Close alone plausibly cover the license.</li>
+      </ul>
+    </section>
+    <section class="glass box ask">
+      <h2>The ask: a free 30-day pilot</h2>
+      <p>No card, no IT lift, cancel anytime in writing. Tour-desk earning is included in the pilot — you feel the money before you pay anything.</p>
+      <p>At day 30 you see your own adoption and revenue numbers on your operator dashboard, and the keep-or-walk decision runs on your data, not our model. If you keep it: a flat monthly rate by key count (≤20 keys $450 · 21–75 $875 · 76–200 $1,000–$1,400 · 200+ $2,000 · 350+ $2,500–$3,500).</p>
+    </section>
+  </div>
+
+  <p class="foot">Safety first, always: beach verdicts and hazard ratings are computed with zero input from any revenue layer, and the agreement says so in writing. Taps are measured by us; revenue is confirmed on your systems — your POS, your promo codes, your affiliate dashboard.</p>
+</div>
+</body>
+</html>
