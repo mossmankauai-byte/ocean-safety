@@ -13,7 +13,7 @@ window.sb = sb;
 const DEMO = /YOUR-PROJECT|REPLACE_ME|^$/.test(CFG.SUPABASE_URL || "") || /REPLACE_ME|^$/.test(CFG.SUPABASE_PUBLISHABLE_KEY || "");
 window.OCEANSAFE_DEMO = DEMO;
 const DEMO_PARTNER = { id: "demo", name: "Your Shop (demo)", slug: "your-shop", store_mode: "storefront",
-  status: "live", stripe_charges_enabled: true, stripe_payouts_enabled: true, stripe_onboarded_at: "2026-06-01", platform_fee_bps: 1000, amazon_tag: "oceansafety-20", fulfillment_mode: "both" };
+  status: "live", stripe_charges_enabled: true, stripe_payouts_enabled: true, stripe_onboarded_at: "2026-06-01", platform_fee_bps: 670, amazon_tag: "oceansafety-20", fulfillment_mode: "both" };
 window.demoData = function () {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const pat = [2200,0,1800,4900,2200,0,0,6600,2200,1800,0,4900,2200,8800,0,2200,1800,4900,6600,2200,0,11000,2200,4900,1800,8800,2200,6600,4900,13200];
