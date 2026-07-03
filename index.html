@@ -4971,7 +4971,7 @@ function renderToursSheetContent(){
       <span><strong>Why ${useForecast && _selectedDayIdx > 0 ? 'this day' : 'now'}:</strong> ${featuredMatch.reason}</span>
     </div>
     <div style="margin-top:12px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;min-height:170px">
-      <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${featured.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="FV7E5LX"><span style="display:none">Powered by GetYourGuide</span></div>
+      <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${featured.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="${_gygPid()}"><span style="display:none">Powered by GetYourGuide</span></div>
     </div>`;
 
   const scoreOf = lvl => lvl === 'yes' ? 2 : lvl === 'maybe' ? 1 : 0;
@@ -5003,7 +5003,7 @@ function renderToursSheetContent(){
           </div>
           <div style="font-size:11px;color:var(--mute);margin-bottom:8px;padding-left:2px;line-height:1.4">${m.reason}</div>
           <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px;min-height:140px">
-            <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${t.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="FV7E5LX"><span style="display:none">Powered by GetYourGuide</span></div>
+            <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${t.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="${_gygPid()}"><span style="display:none">Powered by GetYourGuide</span></div>
           </div>
         </div>`;
     }).join('');
@@ -5020,6 +5020,7 @@ function renderToursSheetContent(){
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" style="flex-shrink:0"><circle cx="7" cy="7" r="5.5"/><line x1="7" y1="6" x2="7" y2="10"/><circle cx="7" cy="4.5" r=".6" fill="currentColor"/></svg>
       <span>${dateContext}. <b>A general guide, not a safety guarantee.</b> Tour operators make the final call on conditions and may cancel or reroute — follow their guidance.</span>
     </div>
+    ${_tourDeskCard()}
     <div class="slbl" style="margin-top:18px">More Curated Tours</div>
     <div style="font-size:11px;color:var(--mute);margin-top:-4px;margin-bottom:2px">Hand-picked operators, condition-checked daily</div>
     ${tourSections}
@@ -5032,7 +5033,7 @@ function renderToursSheetContent(){
   const gs = document.createElement('script');
   gs.src = 'https://widget.getyourguide.com/dist/pa.umd.production.min.js';
   gs.async = true; gs.defer = true;
-  gs.setAttribute('data-gyg-partner-id', 'FV7E5LX');
+  gs.setAttribute('data-gyg-partner-id', _gygPid());
   gs.dataset.gygScript = '1';
   gs.onload = () => { _gygScriptLoaded = true; };
   document.head.appendChild(gs);
@@ -6152,9 +6153,10 @@ function openSheet(id){
   const viatorTerm = (b.r || 'Kauai').replace(/[^a-zA-Z0-9 ]/g,'').trim() || 'Kauai';
   const viatorBlock = `<div class="slbl">Nearby Tours</div>
     <div style="margin-top:4px;min-height:180px">
-      <div data-vi-partner-id="P00299666" data-vi-widget-ref="W-b5f9d263-bba4-410a-b17f-cd8196b9857e" data-vi-search-term="${viatorTerm}"></div>
+      <div data-vi-partner-id="${_viatorPid()}" data-vi-widget-ref="W-b5f9d263-bba4-410a-b17f-cd8196b9857e" data-vi-search-term="${viatorTerm}"></div>
     </div>
-    <div style="font-size:10px;color:var(--mute);margin-top:6px;text-align:center;line-height:1.4"><strong>Tours via Viator.</strong> Bookings may earn a small commission at no extra cost to you.</div>`;
+    <div style="font-size:10px;color:var(--mute);margin-top:6px;text-align:center;line-height:1.4"><strong>Tours via Viator.</strong> Bookings may earn a small commission at no extra cost to you.</div>
+    ${_tourDeskCard()}`;
   const caut=b.caution?`<div class="tip" style="background:#fef3c7;border-left:3px solid #d97706;color:#78530a;font-weight:600;align-items:flex-start"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9.5" x2="12" y2="13.5"/><circle cx="12" cy="17" r=".7" fill="#b45309" stroke="none"/></svg><span>${b.caution}</span></div>`:'';
   const tp=b.tip?`<div class="tip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#5a4217" stroke-width="1.3" stroke-linecap="round" flex-shrink="0"><circle cx="7" cy="7" r="5.5"/><line x1="7" y1="6" x2="7" y2="10"/><circle cx="7" cy="4.5" r=".6" fill="#5a4217"/></svg><span>${b.tip}</span></div>`:'';
   const rope=r.top.includes('snorkel')?`<div class="tip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#5a4217" stroke-width="1.3" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><polyline points="5,7 7,9 10,5.5"/></svg><span>Snorkel close to shore where you can stand. Rest often — ocean exertion is more tiring than it feels.</span></div>`:'';
@@ -7642,6 +7644,7 @@ function applyRouteFromURL(){
 // Known partner slug → friendly display name. Add entries here as new QR
 // codes go out the door (kept in sync with Operations Dashboard outreach).
 const PARTNER_NAMES = {
+  'demo-resort': 'Your Resort', 'pilot-demo': 'Your Resort',   // pilot demo — pairs with /partner-config/demo-resort.json
   marriott: 'The Westin Princeville',
   hyatt: 'Grand Hyatt Kauaʻi',
   '1hotel': '1 Hotel Hanalei Bay',
@@ -7699,6 +7702,163 @@ function withReferrer(url){
   } catch(e){ return url; }
 }
 
+// ── Runtime partner config (?ref=<slug> → /partner-config/<slug>.json) ──
+// Per-hotel pilot behavior without a separate app build: when a partner slug
+// is active (?ref on this load, or the referrer persisted by boot() on an
+// earlier visit), fetch /partner-config/<slug>.json from this same repo and
+// apply it. Missing file, bad JSON, offline — anything short of a valid
+// config — leaves _partnerCfg null and every surface below inert, so the
+// no-config app behaves exactly as before. Deploying a config = committing
+// that JSON to the live repo (the operator console's "Export config" is the
+// source of the shape; there is no instant publish).
+window._partnerCfg = null;
+function _activeRefSlug(){
+  try {
+    const params = new URLSearchParams(location.search);
+    const raw = params.get('ref') || params.get('utm_source') || localStorage.getItem('referrer') || '';
+    const slug = raw.toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0, 32);
+    return slug || null;
+  } catch(e){ return null; }
+}
+// Affiliate IDs — config override with the app's own IDs as the fallback, so
+// a no-config render is identical to today's. Read at render time: both tour
+// widgets re-inject their divs + loader script on every sheet open, so a
+// config that resolves after a very early tap is picked up on the next open.
+function _gygPid(){
+  const a = window._partnerCfg && window._partnerCfg.affiliates;
+  return (a && a.gyg_partner_id) || 'FV7E5LX';
+}
+function _viatorPid(){
+  const a = window._partnerCfg && window._partnerCfg.affiliates;
+  return (a && a.viator_pid) || 'P00299666';
+}
+// HTML-escape for config-sourced strings (promo titles etc.).
+function _pesc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+// Partner event → PostHog (existing OSA.track hook) + a one-event POST to the
+// same telemetry worker the CGTrack-lite block at the end of this page uses,
+// with its same privacy rule: the worker emit happens only when THIS page
+// load carries ?ref=<slug>; organic visitors emit nothing. Fail-silent.
+function _partnerTrack(type, label){
+  label = String(label || '').slice(0, 64);
+  try { if(window.OSA && typeof OSA.track === 'function') OSA.track(type, { label: label }); } catch(e){}
+  try {
+    const slug = (new URLSearchParams(location.search).get('ref') || '').trim().toLowerCase();
+    if(!slug || !/^[a-z0-9-]{2,64}$/.test(slug)) return;
+    fetch('https://concierge-guide-api.oceansafe-hi.workers.dev/e', {
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ slug: slug, events: [{ type: type, label: label, h: new Date().getHours() }] })
+    }).catch(function(){});
+  } catch(e){}
+}
+// "Ask the tour desk" — renders ONLY when the active partner config carries a
+// tourDesk contact. Routes the lead to the hotel's own desk (sms:/mailto:),
+// logging the tap as tour_lead. Returns '' with no config, so the tours and
+// beach sheets that embed it are unchanged for organic visitors.
+function _tourDeskCard(){
+  const td = window._partnerCfg && window._partnerCfg.tourDesk;
+  if(!td || (!td.phone && !td.email)) return '';
+  const phone = td.phone ? String(td.phone).replace(/[^+0-9]/g,'') : '';
+  const email = td.email ? String(td.email).replace(/[^a-zA-Z0-9@._+-]/g,'') : '';
+  const btn = 'display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;min-height:44px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none';
+  const smsBtn = phone ? `<a href="sms:${phone}" onclick="_partnerTrack('tour_lead','sms')" style="${btn};background:var(--ocean,#0f4c5c);color:#fff"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.5-.8L3 21l1.9-5.5A8.4 8.4 0 1 1 21 11.5Z"/></svg>Text the tour desk</a>` : '';
+  const mailBtn = email ? `<a href="mailto:${email}" onclick="_partnerTrack('tour_lead','email')" style="${btn};background:#fff;border:1px solid var(--border);color:var(--ink)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m2.5 7 9.5 6 9.5-6"/></svg>Email</a>` : '';
+  return `<div style="margin-top:14px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">
+    <div style="font-weight:700;font-size:13px;color:var(--ink)">Ask the tour desk</div>
+    <div style="font-size:11px;color:var(--mute);margin:2px 0 10px;line-height:1.4">Not sure what fits your group or today's conditions? The resort tour desk can check availability and book it for you.</div>
+    <div style="display:flex;gap:8px">${smsBtn}${mailBtn}</div>
+  </div>`;
+}
+// Partner promotions — the hotel's house offers (spa special, happy hour)
+// from the config's promotions list. Rendered as a card strip pinned to the
+// top of the Town tab: Town is the app's commerce surface, so offers sit next
+// to shopping and food instead of crowding the safety tabs. Expired offers
+// (expires < today) never render. Tap = promo_tap event + opens the flyer.
+// "Ends Dec 31" from a yyyy-mm-dd string — parsed by parts (no Date(), no UTC drift).
+function _promoEndsLabel(exp){
+  const m = String(exp||'').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!m) return String(exp||'');
+  const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return (MO[+m[2]-1]||m[2]) + ' ' + (+m[3]);
+}
+function _promoOpen(idx){
+  try {
+    const promos = (window._partnerCfg && window._partnerCfg.promotions) || [];
+    const p = promos[idx];
+    if(!p) return;
+    _partnerTrack('promo_tap', p.title || '');
+    // data: flyers were pre-converted to blob URLs at load (popup blockers
+    // eat window.open calls made after an async hop, and browsers refuse
+    // top-frame navigation to data: URLs outright).
+    let u = p._pdfUrl;
+    if(!u && p.pdf && !/^data:/i.test(p.pdf)) u = p.pdf;
+    if(u) window.open(u, '_blank', 'noopener');
+  } catch(e){}
+}
+function _renderPartnerPromos(cfg){
+  const promos = Array.isArray(cfg && cfg.promotions) ? cfg.promotions : [];
+  const now = new Date();
+  const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  promos.forEach(p => {
+    if(!p || typeof p.pdf !== 'string') return;
+    if(/^data:/i.test(p.pdf)){
+      try { fetch(p.pdf).then(r => r.blob()).then(b => { p._pdfUrl = URL.createObjectURL(b); }).catch(function(){}); } catch(e){}
+    } else { p._pdfUrl = p.pdf; }
+  });
+  const live = promos.map((p, i) => ({ p, i }))
+    .filter(x => x.p && x.p.title && !(x.p.expires && String(x.p.expires).slice(0,10) < todayStr));
+  if(!live.length) return;
+  const subbar = document.getElementById('subtabs');
+  if(!subbar || document.getElementById('partnerPromos')) return;
+  if(!document.getElementById('partnerPromoStyle')){
+    const st = document.createElement('style');
+    st.id = 'partnerPromoStyle';
+    // Floats over the bottom of the map like the shore chips (which live at
+    // bottom:96px), one band above them — no flow change, so the map and the
+    // absolutely-positioned overlay controls keep today's exact geometry.
+    // pointer-events gating keeps the map draggable between/around the cards.
+    st.textContent = '#partnerPromos{display:none}'
+      + 'body[data-tab="shopping"] #partnerPromos{position:absolute;left:10px;right:10px;bottom:140px;z-index:545;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;pointer-events:none}'
+      + '#partnerPromos::-webkit-scrollbar{display:none}'
+      + '#partnerPromos button,#partnerPromos div[role=note]{pointer-events:auto}';
+    document.head.appendChild(st);
+  }
+  const strip = document.createElement('div');
+  strip.id = 'partnerPromos';
+  strip.setAttribute('aria-label', 'Offers from ' + (cfg.name || 'your resort'));
+  strip.innerHTML = live.map(x => {
+    const ends = x.p.expires ? `<span style="font-size:10px;color:var(--mute);white-space:nowrap">Ends ${_pesc(_promoEndsLabel(x.p.expires))}</span>` : '';
+    const hasPdf = typeof x.p.pdf === 'string' && x.p.pdf;
+    const tag = hasPdf ? 'button' : 'div';
+    const attrs = hasPdf ? `type="button" onclick="_promoOpen(${x.i})"` : 'role="note"';
+    const cur = hasPdf ? 'cursor:pointer;' : 'cursor:default;';
+    return `<${tag} ${attrs} style="flex:0 0 auto;display:flex;align-items:center;gap:9px;min-height:44px;max-width:260px;padding:8px 12px;background:rgba(255,255,255,.96);border:1px solid rgba(15,76,92,.15);border-radius:11px;${cur}text-align:left;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.14)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+      <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_pesc(x.p.title)}</span>${ends}</span>
+    </${tag}>`;
+  }).join('');
+  subbar.insertAdjacentElement('afterend', strip);
+}
+// Kick off the config fetch at parse time. The tour widgets only initialize
+// when a sheet renders (user tap), so the config almost always resolves
+// first; a tap that beats the fetch renders once with the default IDs and
+// the next sheet open picks the config up. No slug → resolved null, no fetch.
+window._partnerCfgReady = (function(){
+  const slug = _activeRefSlug();
+  if(!slug || !window.fetch) return Promise.resolve(null);
+  let ctl = null, timer = null;
+  try { ctl = new AbortController(); timer = setTimeout(() => ctl.abort(), 20000); } catch(e){}
+  return fetch('/partner-config/' + slug + '.json', ctl ? { signal: ctl.signal } : {})
+    .then(r => (r.ok ? r.json() : null))
+    .then(cfg => {
+      if(timer) clearTimeout(timer);
+      if(cfg && typeof cfg === 'object' && !Array.isArray(cfg)){
+        window._partnerCfg = cfg;
+        try { _renderPartnerPromos(cfg); } catch(e){}
+      }
+      return window._partnerCfg;
+    })
+    .catch(() => { if(timer) clearTimeout(timer); return null; });
+})();
 
 // ── Dynamic per-beach og:image injection ──
 // When the URL has ?beach=<id> for one of the 6 photographed beaches, swap the
@@ -8064,8 +8224,9 @@ if('serviceWorker' in navigator){
     ]
   };
   var STORE_CATALOG = STORE_DEMO_CATALOG;   // pilot: always show this shop's products
-  // Wire these to go live: FUNCTIONS_BASE = Supabase functions URL, PUBLISHABLE_KEY = anon key.
-  var STORE_CFG = { FUNCTIONS_BASE:"", PUBLISHABLE_KEY:"" };
+  // LIVE rail (same values as /portal/config.js — the publishable key is safe in
+  // the browser; RLS + the Edge Function's own gates guard everything).
+  var STORE_CFG = { FUNCTIONS_BASE:"https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1", PUBLISHABLE_KEY:"sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um" };
   // Product categories drive the in-shop navigation (replaced the old weather filters).
   var STORE_CATEGORIES = [
     { k:"all",       label:"All" },
@@ -8090,10 +8251,15 @@ if('serviceWorker' in navigator){
   function storeBuy(slug,pid){
     if(!slug||!pid){ storeToast("Sorry — that item can't be checked out right now."); return; }
     if(!STORE_CFG.FUNCTIONS_BASE){ storeToast("Preview only — checkout works once your live shop is set up."); return; }
-    fetch(STORE_CFG.FUNCTIONS_BASE+"/create-checkout",{ method:"POST", headers:{ "Content-Type":"application/json","Authorization":"Bearer "+STORE_CFG.PUBLISHABLE_KEY }, body:JSON.stringify({ slug:slug, items:[{ product_id:pid, qty:1 }] }) })
-      .then(function(r){ return r.json().then(function(o){ return { ok:r.ok, o:o }; }); })
-      .then(function(x){ var dest=_su(x.o&&x.o.checkout_url); if(!x.ok||!dest){ throw new Error((x.o&&x.o.error)?(typeof x.o.error==="string"?x.o.error:"checkout unavailable"):"checkout unavailable"); } location.href=dest; })
-      .catch(function(e){ storeToast(String(e.message||e)); });
+    storeToast("One moment — setting up checkout…");
+    // Square rail: prices are looked up server-side; the fn 409s in plain English
+    // ("this shop isn't open for orders right now") when a shop can't take orders.
+    // v1 is pickup-only — the catalog carries no fulfillment mode for the shop, and
+    // the server enforces the shop's real mode (partners.fulfillment_mode) anyway.
+    fetch(STORE_CFG.FUNCTIONS_BASE+"/create-square-checkout",{ method:"POST", headers:{ "Content-Type":"application/json","Authorization":"Bearer "+STORE_CFG.PUBLISHABLE_KEY }, body:JSON.stringify({ slug:slug, items:[{ product_id:pid, qty:1 }], fulfillment:"pickup" }) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(o){ return { ok:r.ok, o:o }; }); })
+      .then(function(x){ var dest=_su(x.o&&x.o.checkout_url); if(!x.ok||!dest){ throw new Error((x.o&&typeof x.o.error==="string"&&x.o.error)?x.o.error:"Checkout didn't go through — please try again in a minute."); } location.href=dest; })
+      .catch(function(e){ storeToast(String((e&&e.message)||"Checkout didn't go through — please try again in a minute.")); });
   }
   function _storeCard(shop,p){
     var ph=_si(p.title);
@@ -8133,6 +8299,10 @@ if('serviceWorker' in navigator){
     if(prod.sizes && prod.sizes.length && !_storeSize){ storeToast("Pick a size first."); return; }
     var u=_su((prod.buy_url && prod.buy_url!=="#") ? prod.buy_url : PILOT_BUY_URL);
     if(u){ window.open(u,"_blank","noopener"); return; }
+    // Live Square checkout — ONLY for real catalog products (Supabase UUID ids).
+    // The inline placeholder catalog (ids like "d1") keeps the note below, so the
+    // guest app behaves exactly as before until a real shop catalog is loaded.
+    if(STORE_CFG.FUNCTIONS_BASE && shop && shop.slug && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(prod.id||""))){ storeBuy(shop.slug,prod.id); return; }
     storeToast("Online checkout is coming soon — thanks for stopping by!");
   }
   function _renderDetail(){

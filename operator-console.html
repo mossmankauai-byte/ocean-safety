@@ -228,6 +228,13 @@
   .promo-card .pc-ic{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.7);display:grid;place-items:center;flex:none;color:#8a5208}
   .promo-card .pc-t{display:block;font-size:13px;font-weight:760;color:#5d3c0c}
   .promo-card .pc-d{display:block;font-size:11px;color:#8a5208;margin-top:1px}
+  /* promotions: per-flyer expiry + taps line */
+  .pr-meta{flex-basis:100%;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+  .pr-exp{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+  .pr-exp input{font:inherit;font-size:12.5px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:9px;padding:6px 9px;min-height:44px;min-width:0}
+  .pr-exp input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  .mg-row.expired b,.mg-row.expired .mg-sub{opacity:.55}
+  .chip.expired{color:#9db3bc;background:rgba(157,179,188,.14)}
 
   /* ============ VIEW SWITCHER ============ */
   .viewtabs{position:relative;z-index:2;display:flex;gap:6px;margin:18px 0 2px;flex-wrap:wrap}
@@ -656,6 +663,20 @@
         <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Export config</button></div>
       </div>
     </section>
+    <!-- TOUR DESK -->
+    <section>
+      <div class="sec-h"><h2>Tour desk earnings</h2><p>Your own affiliate IDs — tour bookings from your guide pay <b>your</b> accounts. Included in the free pilot. Saves as a draft in this browser; the <b>Export partner config</b> button on the Promotions tab carries these into your live guide.</p></div>
+      <div class="card" id="mgTourDesk">
+        <div class="mg-more-grid">
+          <input id="tdGyg" placeholder="GetYourGuide Partner ID (optional) — e.g. YOURRESORT" autocomplete="off">
+          <input id="tdViator" placeholder="Viator PID (optional) — e.g. P00012345" autocomplete="off">
+          <input id="tdPhone" type="tel" placeholder="Tour desk phone — e.g. ext. 71" autocomplete="off">
+          <input id="tdEmail" type="email" placeholder="Tour desk email — e.g. tours@yourresort.com" autocomplete="off">
+        </div>
+        <div class="cap" id="tdHint" hidden style="margin-top:6px;color:var(--sample)"></div>
+        <div class="mg-foot"><span class="cap"><b id="tdCount">0</b> of 4 set — blank fields fall back to OceanSafe defaults</span><span style="flex:1"></span><button class="pl-btn" id="tdClear">Clear</button></div>
+      </div>
+    </section>
     <!-- BAD OCEAN DAY SAVES -->
     <section>
       <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the beach isn’t safe, what the app surfaced — and the on-property interest it captured.</p></div>
@@ -894,7 +915,7 @@
     <!-- ============ PROMOTIONS ============ -->
     <div id="view-promos" hidden>
     <section>
-      <div class="sec-h"><h2>Promotions</h2><p>Drop in a PDF flyer — a happy-hour, spa special, or event. It saves here as a draft with a guest preview; <b>Export config</b> sends it into your app build. No designer, no developer.</p></div>
+      <div class="sec-h"><h2>Promotions</h2><p>Drop in a PDF flyer — a happy-hour, spa special, or event. It saves here as a draft with a guest preview; <b>Export partner config</b> downloads the exact file that goes live for your property (flyers, tour-desk IDs and all). Give each flyer an optional <b>Runs until</b> date — lapsed flyers grey out here and leave the guest preview. No designer, no developer.</p></div>
       <div class="card" id="mgPromos">
         <div class="promo-drop" id="promoDrop" tabindex="0" role="button" aria-label="Add a PDF flyer">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9.5 14.5 12 12l2.5 2.5"/></svg>
@@ -903,7 +924,7 @@
           <input id="promoFile" type="file" accept="application/pdf" hidden>
         </div>
         <div class="mg-list" id="promoList"></div>
-        <div class="mg-foot"><span class="cap"><b id="promoCount">0</b> promotions</span><span style="flex:1"></span><button class="pl-btn" id="promoReset">Clear all</button><button class="pl-btn primary" id="promoExport">Export config</button></div>
+        <div class="mg-foot"><span class="cap"><b id="promoCount">0</b> promotions</span><span style="flex:1"></span><button class="pl-btn" id="promoReset">Clear all</button><button class="pl-btn primary" id="promoExport">Export partner config</button></div>
       </div>
     </section>
     <section>
@@ -1455,7 +1476,7 @@
     { view:'guests', sel:'#view-guests section', title:'What guests actually want',
       body:'Guest activity shows the demand — which beaches and places guests open most, and how that lines up with what you feature. It’s the evidence for your curation choices, never guesswork.' },
     { view:'stayclose', sel:'#mgAmenities', title:'Stay-Close runs on your menu',
-      body:'When the ocean is the wrong call, the app steers guests to what you offer instead — spa, dining, cabanas. Add or edit your amenity menu right here; <b>Export config</b> sends it into your app build.' },
+      body:'When the ocean is the wrong call, the app steers guests to what you offer instead — spa, dining, cabanas. Add or edit your amenity menu right here, plus your own tour-desk affiliate IDs just below it. The menu exports here; your IDs ride the <b>partner config</b> exported from the Promotions tab.' },
     { view:'shop', sel:'#mgProducts', title:'Your shop, inside the app',
       body:'Add the products you want guests to see. The app counts taps as interest — checkout stays in your store, on your rails. Metrics stay <b>Sample</b> until your telemetry connects.' },
     { view:'pricing', sel:'.card.calc', title:'Your numbers, your math',
@@ -1465,7 +1486,7 @@
     { view:'places', sel:'.pl-bar', title:'Curate in seconds',
       body:'Search or filter, then set any place to <b>★ Featured</b> (your house picks), <b>✓ Listed</b>, or hide it. When your list feels right, <b>Export config</b> downloads the file that gets applied to your branded app — yours only.' },
     { view:'promos', sel:'#mgPromos', title:'Drop in a promo flyer',
-      body:'Have a happy-hour or spa special? Drag a PDF flyer here — it saves as a draft with a guest preview, and <b>Export config</b> sends it into your app build. No designer, no developer.' },
+      body:'Have a happy-hour or spa special? Drag a PDF flyer here — it saves as a draft with a guest preview, and <b>Export partner config</b> downloads the file that goes live for your property. Give it a <b>Runs until</b> date and lapsed flyers leave the guest preview on their own. No designer, no developer.' },
     { center:true, title:'That’s the tour', last:true,
       body:'Explore freely — your Places choices save as a draft in this browser as you go. Questions? Your OceanSafe contact is one text away. Replay this anytime with the <b>Tour</b> button.' }
   ];
@@ -1603,6 +1624,7 @@
     document.getElementById(cfg.ids.export).addEventListener('click', function(){
       var out = { app:'oceansafety', slug:SLUG, version:1 };
       out[cfg.exportKey] = items.map(cfg.toExport);
+      if(cfg.extendExport) cfg.extendExport(out);
       var blob = new Blob([JSON.stringify(out,null,2)], {type:'application/json'});
       var link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -1614,6 +1636,57 @@
     });
     render();
   }
+  // ---- Tour desk: the property's own affiliate IDs + contact. Draft lives in this
+  // browser; it exports in the partner config (Promotions tab) as affiliates + tourDesk.
+  var tourDesk = (function(){
+    var LS = 'os_tourdesk_'+SLUG;
+    var F = [
+      {id:'tdGyg',    key:'gygPartnerId', ok:/^[A-Za-z0-9_-]{3,}$/, warn:'GetYourGuide Partner IDs are usually letters and numbers, no spaces.'},
+      {id:'tdViator', key:'viatorPid',    ok:/^[A-Za-z0-9]{4,}$/,   warn:'Viator PIDs look like P00012345.'},
+      {id:'tdPhone',  key:'phone'},
+      {id:'tdEmail',  key:'email',        ok:/@/,                   warn:'That email looks incomplete — double-check it.'}
+    ];
+    var data = null;
+    try{ data = JSON.parse(localStorage.getItem(LS)); }catch(e){}
+    if(!data || typeof data !== 'object' || Array.isArray(data)) data = {};
+    function save(){ try{ localStorage.setItem(LS, JSON.stringify(data)); }catch(e){} }
+    function refresh(){
+      var warns = [], n = 0;
+      F.forEach(function(f){
+        var v = (data[f.key]||'').trim();
+        if(!v) return;
+        n++;
+        if(f.ok && !f.ok.test(v)) warns.push(f.warn);
+      });
+      document.getElementById('tdCount').textContent = n;
+      var hint = document.getElementById('tdHint');
+      hint.hidden = !warns.length;
+      hint.textContent = warns.join(' ');
+    }
+    F.forEach(function(f){
+      var el = document.getElementById(f.id);
+      el.value = data[f.key]||'';
+      el.addEventListener('input', function(){ data[f.key] = el.value.trim(); save(); refresh(); });
+    });
+    document.getElementById('tdClear').addEventListener('click', function(){
+      if(!confirm('Clear the tour desk fields? The next export falls back to OceanSafe defaults.')) return;
+      data = {};
+      F.forEach(function(f){ document.getElementById(f.id).value = ''; });
+      save(); refresh();
+    });
+    refresh();
+    return { forExport:function(){
+      var any = F.some(function(f){ return (data[f.key]||'').trim(); });
+      if(!any) return null;
+      return {
+        gygPartnerId:(data.gygPartnerId||'').trim(),
+        viatorPid:(data.viatorPid||'').trim(),
+        phone:(data.phone||'').trim(),
+        email:(data.email||'').trim()
+      };
+    } };
+  })();
+
   manager({ key:'amenities', exportKey:'amenities',
     ids:{list:'amList', a:'amA', b:'amB', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
     fields:[{id:'amLoc',key:'location'},{id:'amHours',key:'hours'},{id:'amPhone',key:'phone'},{id:'amWeb',key:'website'}],
@@ -1635,29 +1708,47 @@
         list=document.getElementById('promoList'), prev=document.getElementById('promoPreview'),
         cnt=document.getElementById('promoCount'), badge=document.getElementById('vbPromos');
     function fmtSize(b){ return b>=1048576 ? (b/1048576).toFixed(1)+' MB' : Math.max(1,Math.round(b/1024))+' KB'; }
+    // "Runs until" is inclusive: a flyer expires the day AFTER its date. ISO strings compare safely.
+    function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+    function isExpired(it){ return !!(it.expires && it.expires < todayISO()); }
     function render(){
       list.innerHTML = items.length ? items.map(function(it,i){
-        return '<div class="mg-row"><div class="mg-nm"><b>'+esc(it.title)+'</b>'+
+        var exp = isExpired(it);
+        return '<div class="mg-row'+(exp?' expired':'')+'"><div class="mg-nm"><b>'+esc(it.title)+'</b>'+(exp?'<span class="chip expired">Expired</span>':'')+
                '<div class="mg-sub">'+esc(it.file)+' · '+esc(it.size||'')+' · <a href="'+it.data+'" target="_blank" rel="noopener">View flyer</a></div>'+
+               '<div class="pr-meta"><label class="pr-exp">Runs until <input type="date" data-i="'+i+'" value="'+esc(it.expires||'')+'"></label><span>&mdash; taps · Sample until live</span></div>'+
                '</div><button type="button" class="mg-x" data-i="'+i+'" title="Remove">&times;</button></div>';
       }).join('') : '<div class="mg-empty">No promotions yet — drop a PDF flyer above.</div>';
       cnt.textContent = items.length;
       if(badge) badge.textContent = items.length || '—';
-      prev.innerHTML = items.length ? items.map(function(it){
+      // Guest preview shows ACTIVE flyers only — expired ones stay in the draft list above.
+      var active = items.filter(function(it){ return !isExpired(it); });
+      prev.innerHTML = active.length ? active.map(function(it){
         return '<a class="promo-card" href="'+it.data+'" target="_blank" rel="noopener">'+
                '<span class="pc-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>'+
                '<span class="pc-b"><span class="pc-t">'+esc(it.title)+'</span><span class="pc-d">Tap to view · from your property</span></span></a>';
-      }).join('') : '<div class="mg-empty">Your guest promo card previews here once you add a flyer.</div>';
+      }).join('') : '<div class="mg-empty">'+(items.length ? 'No active promotions — every flyer is past its Runs-until date.' : 'Your guest promo card previews here once you add a flyer.')+'</div>';
       save();
     }
     list.addEventListener('click', function(e){
       var x = e.target.closest('.mg-x'); if(!x) return;
       items.splice(+x.dataset.i,1); render();
     });
+    // Per-promo taps: the guest app emits event "promoTap" with label = promo title
+    // (same rollup as stayCloseClick). The taps line above stays Sample until telemetry is live.
+    list.addEventListener('change', function(e){
+      var d = e.target.closest('input[type="date"]'); if(!d) return;
+      var it = items[+d.dataset.i]; if(!it) return;
+      var was = isExpired(it);
+      it.expires = d.value || '';
+      save();
+      if(isExpired(it) !== was) render();
+    });
     function handle(f){
       if(!f) return;
       if(f.type!=='application/pdf' && !/\.pdf$/i.test(f.name)){ alert('Please choose a PDF file.'); return; }
       if(f.size > MAXB){ alert('That PDF is '+fmtSize(f.size)+'. Please keep flyers under 4 MB so they load fast for guests.'); return; }
+      if(f.size > 300*1024){ alert('Heads up: this flyer is '+fmtSize(f.size)+'. Flyers over ~300 KB make the guest config slower to load on hotel wifi — it will still work, but smaller is snappier.'); }
       var r = new FileReader();
       r.onload = function(){ items.push({ title: f.name.replace(/\.pdf$/i,''), file: f.name, size: fmtSize(f.size), data: r.result }); render(); };
       r.readAsDataURL(f);
@@ -1673,10 +1764,27 @@
       items = []; render();
     });
     document.getElementById('promoExport').addEventListener('click', function(){
-      var out = { app:'oceansafety', slug:SLUG, version:1, promotions: items.map(function(it){ return {title:it.title, file:it.file, pdf:it.data}; }) };
+      // Canonical runtime shape — the EXACT file the guest app fetches at
+      // /partner-config/<slug>.json (see partner-config/demo-resort.json).
+      // Extra keys (app/slug/version/file) are provenance; the runtime ignores them.
+      var out = { app:'oceansafety', slug:SLUG, version:1 };
+      var propEl = document.querySelector('.property h1');
+      out.name = (propEl && propEl.textContent.trim()) || 'Your Hotel';
+      var td = tourDesk.forExport();
+      if(td && (td.gygPartnerId || td.viatorPid)){
+        out.affiliates = {};
+        if(td.gygPartnerId) out.affiliates.gyg_partner_id = td.gygPartnerId;
+        if(td.viatorPid) out.affiliates.viator_pid = td.viatorPid;
+      }
+      if(td && (td.phone || td.email)){
+        out.tourDesk = {};
+        if(td.phone) out.tourDesk.phone = td.phone;
+        if(td.email) out.tourDesk.email = td.email;
+      }
+      out.promotions = items.map(function(it){ return {title:it.title, file:it.file, pdf:it.data, expires:it.expires||''}; });
       var blob = new Blob([JSON.stringify(out,null,2)], {type:'application/json'});
       var link = document.createElement('a'); link.href = URL.createObjectURL(blob);
-      link.download = 'promotions-'+SLUG+'.json';
+      link.download = 'partner-config-'+SLUG+'.json';
       document.body.appendChild(link); link.click();
       setTimeout(function(){ URL.revokeObjectURL(link.href); link.remove(); }, 100);
       var btn=this, t=btn.textContent; btn.textContent='Downloaded ✓'; setTimeout(function(){ btn.textContent=t; }, 1600);

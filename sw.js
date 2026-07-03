@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v69-2026-07-02';
+const CACHE_VERSION = 'v70-2026-07-02';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -146,6 +146,11 @@ if (workbox) {
     })
   );
 
+  // NOTE: /partner-config/*.json deliberately has NO route here — a fetch()
+  // for JSON has request.destination "" so the app-shell route below never
+  // matches, and it must stay that way: a stale partner config means stale
+  // promos/affiliate IDs for a hotel. If a same-origin catch-all is ever
+  // added, exclude /partner-config/ explicitly.
   // ---- App shell: same-origin HTML / JS / CSS / images / SVG ----
   // StaleWhileRevalidate so repeat opens are instant; a fresh deploy lands on next navigation.
   // Stable cache name: a deploy revalidates changed files in the background instead of

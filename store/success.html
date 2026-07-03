@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f4c5c">
+<title>Payment processing — Kauaʻi Beach Guide</title>
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="shortcut icon" href="/icons/favicon.ico">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<style>
+:root{
+  --ocean:#0f4c5c;--ocean-lt:#ebf6fa;--gold:#c9a84c;--gold-lt:#fff8d4;
+  --ink:#1a1a1a;--mute:#6b7280;--border:#ede8d6;--warm:#fdfaf2;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;background:#fefbf3;color:var(--ink);font-family:-apple-system,sans-serif}
+body{display:flex;align-items:center;justify-content:center;padding:24px 18px}
+.card{width:100%;max-width:430px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px 22px 22px;box-shadow:0 6px 24px rgba(15,76,92,.08)}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.brand img{width:38px;height:38px;border-radius:9px;box-shadow:0 1px 3px rgba(15,76,92,.15);display:block}
+.bname{font-size:19px;color:var(--ocean);font-style:italic;font-weight:700;letter-spacing:-.3px;line-height:.95}
+.bsub{font-size:10px;color:var(--mute);letter-spacing:.04em;margin-top:3px}
+h1{font-size:21px;font-weight:800;line-height:1.25;margin-bottom:8px}
+.lead{font-size:13.5px;color:var(--mute);line-height:1.55;margin-bottom:18px}
+.pickup{display:none;background:var(--ocean-lt);border:1.5px solid rgba(15,76,92,.18);border-radius:14px;padding:16px 14px;text-align:center;margin-bottom:18px}
+.pickup.show{display:block}
+.pickup .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ocean);margin-bottom:6px}
+.pickup .code{font-size:44px;font-weight:800;letter-spacing:.14em;color:var(--ocean);line-height:1.1;font-variant-numeric:tabular-nums}
+.pickup .hint{font-size:12px;color:#0a5a72;margin-top:8px;line-height:1.45}
+.ref{display:none;font-size:11.5px;color:var(--mute);margin-bottom:18px}
+.ref.show{display:block}
+.back{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;background:var(--ocean);color:#fff;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none}
+.back svg{flex:0 0 auto}
+.fine{font-size:11px;color:var(--mute);line-height:1.5;margin-top:14px;text-align:center}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="brand">
+    <img src="/icons/favicon-48.png" alt="" width="38" height="38">
+    <div>
+      <div class="bname">Kauaʻi Beach Guide</div>
+      <div class="bsub">OCEAN SAFETY APP</div>
+    </div>
+  </div>
+  <h1>Thanks — your payment is processing</h1>
+  <p class="lead">Square is finishing your payment now. You&rsquo;ll get Square&rsquo;s receipt by email once it goes through.</p>
+  <section class="pickup" id="pickupBox">
+    <div class="lbl">Your pickup code</div>
+    <div class="code" id="pickupCode"></div>
+    <div class="hint">Show this code at the counter when you pick up your order.</div>
+  </section>
+  <p class="ref" id="orderRef"></p>
+  <a class="back" href="/">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+    Back to the beach guide
+  </a>
+  <p class="fine">Questions about your order? The shop you bought from is your fastest contact — their details are on the Square receipt.</p>
+</main>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  // Pickup code: 4 chars from the no-ambiguity alphabet the server uses.
+  var code = String(q.get('pickup') || '').trim().toUpperCase();
+  if(/^[A-HJ-NP-Z2-9]{4}$/.test(code)){
+    document.getElementById('pickupCode').textContent = code;
+    document.getElementById('pickupBox').classList.add('show');
+  }
+  // Order id: show a short reference so a guest can quote it to the shop.
+  var order = String(q.get('order') || '').trim();
+  if(/^[0-9a-f-]{8,40}$/i.test(order)){
+    var ref = document.getElementById('orderRef');
+    ref.textContent = 'Order reference: ' + order.slice(0,8).toUpperCase();
+    ref.classList.add('show');
+  }
+})();
+</script>
+</body>
+</html>
