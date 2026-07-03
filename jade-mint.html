@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>OceanSafe — mint a pilot</title>
+<link rel="icon" type="image/png" href="icons/apple-touch-icon.png">
+<style>
+  :root{
+    --bg:#08121a; --ink:#EAF2F5; --ink2:#AFC2CC; --ink3:#7E939E;
+    --gold:#D9B26A; --gold-ink:#12202A; --calm:#5DCAA5; --caution:#EFC873; --rough:#E88E7B;
+    --glass:rgba(20,35,44,.55); --glass-2:rgba(28,45,55,.62); --line:rgba(233,242,245,.12); --line-2:rgba(233,242,245,.20);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    color:var(--ink); background:var(--bg); min-height:100vh; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:.5;z-index:0;pointer-events:none}
+  .orb.a{width:520px;height:520px;background:#12715a;top:-160px;right:-120px}
+  .orb.b{width:460px;height:460px;background:#9a7a1e;bottom:-180px;left:-140px;opacity:.42}
+  .wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:22px 16px 70px}
+  svg.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3.5px;flex-shrink:0}
+  .glass{background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(135%);backdrop-filter:blur(18px) saturate(135%);border:1px solid var(--line);border-radius:var(--radius)}
+
+  header.top{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo img{width:34px;height:34px;border-radius:9px;display:block}
+  .logo b{font-weight:500;font-size:16px;letter-spacing:.2px;display:block}
+  .logo span{display:block;font-size:11px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase}
+
+  .card{padding:16px;margin-bottom:13px}
+  .card h2{margin:0 0 4px;font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .card .sub{font-size:12.5px;color:var(--ink3);margin:0 0 12px;line-height:1.5}
+  .fld{margin-bottom:12px}
+  .fld:last-child{margin-bottom:2px}
+  .fld label{display:block;font-size:12px;color:var(--ink3);margin:0 0 5px;letter-spacing:.02em}
+  .fld label em{font-style:normal;color:#5f747f}
+  .inp{width:100%;background:rgba(9,18,25,.55);border:1px solid var(--line-2);color:var(--ink);
+    font-size:15px;padding:11px 12px;border-radius:11px;outline:none;font-family:inherit;-webkit-appearance:none}
+  .inp::placeholder{color:#5f747f}
+  .inp:focus{border-color:var(--gold)}
+  .slugrow{display:flex;align-items:center;gap:0;background:rgba(9,18,25,.55);border:1px solid var(--line-2);border-radius:11px}
+  .slugrow:focus-within{border-color:var(--gold)}
+  .slugrow .pre{font-size:12.5px;color:var(--ink3);padding:11px 0 11px 12px;white-space:nowrap}
+  .slugrow input{flex:1;min-width:0;background:transparent;border:0;color:var(--ink);font-size:15px;padding:11px 12px 11px 2px;outline:none;font-family:inherit}
+
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;
+    font-size:15px;font-weight:600;padding:12px 16px;border-radius:13px;cursor:pointer;border:1px solid transparent;
+    text-decoration:none;font-family:inherit}
+  .btn.pri{background:var(--gold);color:var(--gold-ink)}
+  .btn.pri:hover{filter:brightness(1.05)}
+  .btn.pri[disabled]{opacity:.55;cursor:default}
+  .btn.sec{background:transparent;border-color:var(--line-2);color:var(--ink)}
+  .btn.sec:hover{border-color:var(--gold);color:var(--gold)}
+
+  .err{display:none;margin:12px 0 0;padding:11px 13px;border-radius:11px;border:1px solid rgba(232,142,123,.4);
+    background:rgba(232,142,123,.1);color:var(--rough);font-size:13.5px;line-height:1.5}
+  .err.on{display:block}
+
+  .preview-pill{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.07em;
+    text-transform:uppercase;color:var(--caution);border:1px solid rgba(239,200,115,.45);border-radius:999px;padding:3px 10px}
+
+  #success{display:none}
+  #success.on{display:block}
+  #mintForm.off{display:none}
+  .qrbox{background:#fff;border-radius:14px;padding:10px;width:200px;margin:4px auto 10px}
+  .qrbox canvas{display:block;width:100%;height:auto}
+  .urlrow{display:flex;align-items:center;gap:8px;margin:8px 0}
+  .urlrow .u{flex:1;min-width:0;font-size:13px;color:var(--ink2);background:rgba(9,18,25,.55);border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .copybtn{flex-shrink:0;min-height:40px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);
+    background:transparent;color:var(--ink2);font-size:12.5px;cursor:pointer;font-family:inherit}
+  .copybtn:hover{border-color:var(--gold);color:var(--gold)}
+  .klabel{font-size:11px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin:14px 0 2px}
+  .agree{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  @media (max-width:430px){.agree{grid-template-columns:1fr}}
+  .agree .opt{border:1px solid var(--line-2);border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px}
+  .agree .opt p{margin:0;font-size:12px;color:var(--ink3);line-height:1.5;flex:1}
+  .foot{font-size:11.5px;color:var(--ink3);line-height:1.55;margin-top:14px}
+  a.plain{color:var(--gold);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="orb a"></div><div class="orb b"></div>
+<div class="wrap">
+
+  <header class="top">
+    <div class="logo">
+      <img src="icons/apple-touch-icon.png" alt="OceanSafe">
+      <div><b>OceanSafe</b><span>Mint a pilot</span></div>
+    </div>
+  </header>
+
+  <form id="mintForm" onsubmit="return _mint(event)">
+    <div class="card glass" id="keyCard">
+      <h2><svg class="ic" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m3 3L21 8m-3.5-3.5L19 6"/></svg>Mint key</h2>
+      <p class="sub">Paste it once — it stays on this phone. Nick has the key.</p>
+      <div class="fld">
+        <input class="inp" type="password" id="mintKey" placeholder="Mint key" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="card glass">
+      <h2><svg class="ic" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>Property</h2>
+      <p class="sub">Only the name is required — everything else can be added later from the operator console.</p>
+      <div class="fld">
+        <label for="propName">Property name</label>
+        <input class="inp" id="propName" placeholder="Your Resort" autocomplete="off" oninput="_nameChanged()">
+      </div>
+      <div class="fld">
+        <label for="slug">Guest link</label>
+        <div class="slugrow">
+          <span class="pre">oceansafety.app/?ref=</span>
+          <input id="slug" placeholder="your-resort" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="_slugEdited=true">
+        </div>
+      </div>
+      <div class="fld">
+        <label for="tdPhone">Tour-desk phone <em>— powers "Text the tour desk"</em></label>
+        <input class="inp" id="tdPhone" type="tel" placeholder="+1 808 555 0100" autocomplete="off">
+      </div>
+      <div class="fld">
+        <label for="tdEmail">Tour-desk email <em>— optional</em></label>
+        <input class="inp" id="tdEmail" type="email" placeholder="tourdesk@property.com" autocomplete="off">
+      </div>
+      <div class="fld">
+        <label for="gygId">GetYourGuide partner ID <em>— optional</em></label>
+        <input class="inp" id="gygId" placeholder="ABC123" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <div class="fld">
+        <label for="viatorId">Viator PID <em>— optional</em></label>
+        <input class="inp" id="viatorId" placeholder="P00123456" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+    </div>
+
+    <button class="btn pri" type="submit" id="goBtn">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      Make it live
+    </button>
+    <div class="err" id="errBox" role="alert"></div>
+    <p class="foot">What this mints is a <b style="color:var(--ink2)">pilot preview</b> — the guest app shows a visible "Pilot preview" tag until the agreement is signed. Nothing claims a contract.</p>
+  </form>
+
+  <div id="success">
+    <div class="card glass" style="text-align:center">
+      <div class="preview-pill" style="margin-bottom:8px">
+        <svg class="ic" style="width:13px;height:13px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2.5 2.5"/></svg>
+        Live — pilot preview
+      </div>
+      <h2 style="justify-content:center;font-size:17px" id="okName">Your Resort</h2>
+      <p class="sub" style="margin-bottom:6px">Scan from the GM's phone — their branded app, telemetry counting now.</p>
+      <div class="qrbox"><canvas id="qrCanvas" aria-label="QR code to the live pilot app"></canvas></div>
+      <div class="urlrow"><div class="u" id="liveUrl"></div><button type="button" class="copybtn" onclick="_copy('liveUrl', this)">Copy</button></div>
+      <div class="klabel">Lobby TV / screen mode</div>
+      <div class="urlrow"><div class="u" id="screenUrl"></div><button type="button" class="copybtn" onclick="_copy('screenUrl', this)">Copy</button></div>
+      <p class="foot" style="margin-top:6px">Hotel wifi blocking the link? Use the mirror: <span id="mirrorUrl" style="color:var(--ink2)"></span></p>
+    </div>
+
+    <div class="card glass">
+      <h2><svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg>Pilot agreement</h2>
+      <p class="sub">Two ways to sign — pick whichever fits the room. Jade never signs for the LLC; Nick countersigns every agreement.</p>
+      <div class="agree">
+        <div class="opt">
+          <a class="btn sec" href="pilot-agreement.html" target="_blank" rel="noopener">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+            Print &amp; sign
+          </a>
+          <p>The GM signs in the room. Photograph the signed page and send it to Nick — he countersigns and returns their copy.</p>
+        </div>
+        <div class="opt">
+          <a class="btn sec" id="esignBtn" href="#">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><path d="M2 6h20v12H2z"/></svg>
+            E-signature
+          </a>
+          <p>Emails Nick the property details — he sends the SignWell link and the GM signs from their inbox.</p>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="btn sec" onclick="_reset()">Mint another property</button>
+  </div>
+
+</div>
+
+<script>
+/* ── API base. The stored key is only ever sent to the production worker;
+   an ?api= override is honored ONLY on localhost so the form can be driven
+   against a local stub without touching prod. ─────────────────────────── */
+var API = 'https://concierge-guide-api.oceansafe-hi.workers.dev';
+try {
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+    var _o = new URLSearchParams(location.search).get('api');
+    if (_o) API = _o;
+    else API = '';   // same-origin stub by default when served locally
+  }
+} catch(e){}
+
+/* ── Mint key: #fragment (a link Nick texts Jade once) or localStorage.
+   Stored only after a successful mint, so a typo never sticks. ─────────── */
+var KEY_LS = 'os_mint_key';
+(function(){
+  try {
+    var frag = (location.hash || '').replace(/^#/, '');
+    if (frag) {
+      document.getElementById('mintKey').value = frag;
+      history.replaceState(null, '', location.pathname + location.search);
+    } else {
+      var saved = localStorage.getItem(KEY_LS);
+      if (saved) document.getElementById('mintKey').value = saved;
+    }
+  } catch(e){}
+})();
+
+/* ── Slug auto-derived from the property name until Jade edits it. ─────── */
+var _slugEdited = false;
+function _slugify(s){
+  return String(s || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 32);
+}
+function _nameChanged(){
+  if (_slugEdited) return;
+  document.getElementById('slug').value = _slugify(document.getElementById('propName').value);
+}
+
+function _err(msg){
+  var box = document.getElementById('errBox');
+  box.textContent = msg;
+  box.classList.add('on');
+}
+
+function _mint(ev){
+  ev.preventDefault();
+  document.getElementById('errBox').classList.remove('on');
+
+  var key   = document.getElementById('mintKey').value.trim();
+  var name  = document.getElementById('propName').value.trim();
+  var slug  = _slugify(document.getElementById('slug').value.trim());
+  var phone = document.getElementById('tdPhone').value.replace(/[^+0-9]/g, '');
+  var email = document.getElementById('tdEmail').value.trim();
+  var gyg   = document.getElementById('gygId').value.trim();
+  var via   = document.getElementById('viatorId').value.trim();
+
+  if (!key)  return _err('Paste the mint key first — Nick has it.'), false;
+  if (!name) return _err('The property name is the one required field.'), false;
+  if (!/^[a-z0-9-]{3,32}$/.test(slug)) return _err('The guest link needs 3-32 letters, numbers or dashes.'), false;
+  document.getElementById('slug').value = slug;
+
+  var config = { name: name };
+  if (phone || email) {
+    config.tourDesk = {};
+    if (phone) config.tourDesk.phone = phone;
+    if (email) config.tourDesk.email = email;
+  }
+  if (gyg || via) {
+    config.affiliates = {};
+    if (gyg) config.affiliates.gyg_partner_id = gyg;
+    if (via) config.affiliates.viator_pid = via;
+  }
+
+  var btn = document.getElementById('goBtn');
+  btn.disabled = true;
+  btn.textContent = 'Making it live…';
+
+  var ctl = null, timer = null;
+  try { ctl = new AbortController(); timer = setTimeout(function(){ ctl.abort(); }, 20000); } catch(e){}
+
+  fetch(API + '/cfg', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({ slug: slug, config: config }),
+    signal: ctl ? ctl.signal : undefined
+  })
+  .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { status: r.status, data: d }; }); })
+  .then(function(res){
+    if (timer) clearTimeout(timer);
+    if (res.status === 200 && res.data && res.data.ok) {
+      try { localStorage.setItem(KEY_LS, key); } catch(e){}
+      _showSuccess(name, slug);
+      return;
+    }
+    if (res.status === 401) return _err('That key wasn’t accepted. Check it and try again.');
+    if (res.status === 409) {
+      var next = /-\d+$/.test(slug) ? slug.replace(/\d+$/, function(n){ return String(+n + 1); }) : slug + '-2';
+      document.getElementById('slug').value = next;
+      _slugEdited = true;
+      return _err('That guest link is taken. Try “' + next + '” — it’s filled in for you.');
+    }
+    if (res.status === 413) return _err('That config is too large to mint.');
+    _err('The mint didn’t go through (' + res.status + '). Try again, or text Nick.');
+  })
+  .catch(function(){
+    if (timer) clearTimeout(timer);
+    _err('No connection to the mint service. Check wifi and try again.');
+  })
+  .finally(function(){
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Make it live';
+  });
+  return false;
+}
+
+function _showSuccess(name, slug){
+  var live   = 'https://oceansafety.app/?ref=' + slug;
+  var screen = 'https://oceansafety.app/?ref=' + slug + '&mode=screen';
+  var mirror = 'https://ocean-safety.netlify.app/?ref=' + slug;
+  document.getElementById('okName').textContent = name;
+  document.getElementById('liveUrl').textContent = live;
+  document.getElementById('screenUrl').textContent = screen;
+  document.getElementById('mirrorUrl').textContent = mirror;
+  var mail = 'mailto:mossmankauai@gmail.com'
+    + '?subject=' + encodeURIComponent('Pilot e-sign — ' + name + ' (' + slug + ')')
+    + '&body=' + encodeURIComponent(
+        'Nick — please send the SignWell pilot agreement.\n\n'
+        + 'Property: ' + name + '\n'
+        + 'Slug: ' + slug + '\n'
+        + 'Live pilot preview: ' + live + '\n\n'
+        + 'GM name + email for the SignWell: \n');
+  document.getElementById('esignBtn').setAttribute('href', mail);
+  try { _lsDrawQR(document.getElementById('qrCanvas'), live); }
+  catch(e){ document.querySelector('.qrbox').style.display = 'none'; }
+  document.getElementById('mintForm').classList.add('off');
+  document.getElementById('success').classList.add('on');
+  try { window.scrollTo(0, 0); } catch(e){}
+}
+
+function _reset(){
+  document.getElementById('success').classList.remove('on');
+  document.getElementById('mintForm').classList.remove('off');
+  document.getElementById('propName').value = '';
+  document.getElementById('slug').value = '';
+  document.getElementById('tdPhone').value = '';
+  document.getElementById('tdEmail').value = '';
+  document.getElementById('gygId').value = '';
+  document.getElementById('viatorId').value = '';
+  _slugEdited = false;
+}
+
+function _copy(id, btn){
+  var text = document.getElementById(id).textContent;
+  var done = function(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); };
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done); return; }
+  } catch(e){}
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); done();
+  } catch(e){}
+}
+
+/* ── Compact QR encoder — same Project Nayuki qrcodegen port (MIT) the
+   lobby-screen build in index.html embeds; copied verbatim because that
+   copy lives inside the mode=screen IIFE and isn't reachable from here.
+   No CDN dependency (strict self-contained rule). ──────────────────────── */
+  function _qrMatrix(text){
+    var bytes = [];
+    var enc = unescape(encodeURIComponent(text));
+    for (var i = 0; i < enc.length; i++) bytes.push(enc.charCodeAt(i));
+    var ECC_PER_BLOCK = [0,10,16,26,18,24,16];
+    var NUM_BLOCKS    = [0, 1, 1, 1, 2, 2, 4];
+    function rawDataModules(ver){
+      var r = (16*ver + 128)*ver + 64;
+      if (ver >= 2){
+        var na = Math.floor(ver/7) + 2;
+        r -= (25*na - 10)*na - 55;
+        if (ver >= 7) r -= 36;
+      }
+      return r;
+    }
+    var version = -1;
+    for (var v = 1; v <= 6; v++){
+      var cap = Math.floor(rawDataModules(v)/8) - ECC_PER_BLOCK[v]*NUM_BLOCKS[v];
+      if (4 + 8 + bytes.length*8 <= cap*8){ version = v; break; }
+    }
+    if (version < 0) throw new Error('QR: text too long');
+    var size = version*4 + 17;
+    var bits = [];
+    function appendBits(val, len){ for (var i = len-1; i >= 0; i--) bits.push((val >>> i) & 1); }
+    appendBits(4, 4);
+    appendBits(bytes.length, version <= 9 ? 8 : 16);
+    bytes.forEach(function(b){ appendBits(b, 8); });
+    var dataCapBits = (Math.floor(rawDataModules(version)/8) - ECC_PER_BLOCK[version]*NUM_BLOCKS[version]) * 8;
+    appendBits(0, Math.min(4, dataCapBits - bits.length));
+    appendBits(0, (8 - bits.length % 8) % 8);
+    for (var pad = 0xEC; bits.length < dataCapBits; pad ^= 0xEC ^ 0x11) appendBits(pad, 8);
+    var dataCw = [];
+    for (var i = 0; i < bits.length; i += 8){
+      var b8 = 0;
+      for (var j = 0; j < 8; j++) b8 = (b8 << 1) | bits[i+j];
+      dataCw.push(b8);
+    }
+    function gfMul(x, y){
+      var z = 0;
+      for (var i = 7; i >= 0; i--){
+        z = (z << 1) ^ ((z >>> 7) * 0x11D);
+        z ^= ((y >>> i) & 1) * x;
+      }
+      return z & 0xFF;
+    }
+    function rsDivisor(degree){
+      var result = [];
+      for (var i = 0; i < degree - 1; i++) result.push(0);
+      result.push(1);
+      var root = 1;
+      for (var i = 0; i < degree; i++){
+        for (var j = 0; j < result.length; j++){
+          result[j] = gfMul(result[j], root);
+          if (j + 1 < result.length) result[j] ^= result[j+1];
+        }
+        root = gfMul(root, 0x02);
+      }
+      return result;
+    }
+    function rsRemainder(data, divisor){
+      var result = divisor.map(function(){ return 0; });
+      data.forEach(function(b){
+        var factor = b ^ result.shift();
+        result.push(0);
+        divisor.forEach(function(coef, i){ result[i] ^= gfMul(coef, factor); });
+      });
+      return result;
+    }
+    var numBlocks = NUM_BLOCKS[version], blockEccLen = ECC_PER_BLOCK[version];
+    var rawCw = Math.floor(rawDataModules(version)/8);
+    var numShortBlocks = numBlocks - rawCw % numBlocks;
+    var shortBlockLen = Math.floor(rawCw / numBlocks);
+    var blocks = [];
+    var rsDiv = rsDivisor(blockEccLen);
+    for (var i = 0, k = 0; i < numBlocks; i++){
+      var dat = dataCw.slice(k, k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1));
+      k += dat.length;
+      var ecc = rsRemainder(dat, rsDiv);
+      if (i < numShortBlocks) dat.push(-1);
+      blocks.push(dat.concat(ecc));
+    }
+    var allCw = [];
+    for (var col = 0; col < blocks[0].length; col++){
+      blocks.forEach(function(block, j){
+        if (col !== shortBlockLen - blockEccLen || j >= numShortBlocks){
+          var val = block[col];
+          if (val >= 0) allCw.push(val);
+        }
+      });
+    }
+    var modules = [], isFunction = [];
+    for (var i = 0; i < size; i++){
+      modules.push(new Array(size).fill(false));
+      isFunction.push(new Array(size).fill(false));
+    }
+    function setFn(x, y, on){ modules[y][x] = on; isFunction[y][x] = true; }
+    for (var i = 0; i < size; i++){ setFn(6, i, i % 2 === 0); setFn(i, 6, i % 2 === 0); }
+    function drawFinder(cx, cy){
+      for (var dy = -4; dy <= 4; dy++) for (var dx = -4; dx <= 4; dx++){
+        var d = Math.max(Math.abs(dx), Math.abs(dy));
+        var x = cx + dx, y = cy + dy;
+        if (x >= 0 && x < size && y >= 0 && y < size) setFn(x, y, d !== 2 && d !== 4);
+      }
+    }
+    drawFinder(3, 3); drawFinder(size - 4, 3); drawFinder(3, size - 4);
+    function alignPositions(ver){
+      if (ver === 1) return [];
+      var na = Math.floor(ver/7) + 2;
+      var step = Math.ceil((ver*4 + 4) / (na*2 - 2)) * 2;
+      var result = [6];
+      for (var pos = ver*4 + 10; result.length < na; pos -= step) result.splice(1, 0, pos);
+      return result;
+    }
+    var aps = alignPositions(version);
+    for (var i = 0; i < aps.length; i++) for (var j = 0; j < aps.length; j++){
+      if ((i === 0 && j === 0) || (i === 0 && j === aps.length-1) || (i === aps.length-1 && j === 0)) continue;
+      for (var dy = -2; dy <= 2; dy++) for (var dx = -2; dx <= 2; dx++)
+        setFn(aps[i] + dx, aps[j] + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+    }
+    function drawFormatBits(mask){
+      var data = (0 << 3) | mask; // ECC level M = 0b00
+      var rem = data;
+      for (var i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+      var fb = ((data << 10) | rem) ^ 0x5412;
+      for (var i = 0; i <= 5; i++) setFn(8, i, ((fb >>> i) & 1) !== 0);
+      setFn(8, 7, ((fb >>> 6) & 1) !== 0);
+      setFn(8, 8, ((fb >>> 7) & 1) !== 0);
+      setFn(7, 8, ((fb >>> 8) & 1) !== 0);
+      for (var i = 9; i < 15; i++) setFn(14 - i, 8, ((fb >>> i) & 1) !== 0);
+      for (var i = 0; i < 8; i++) setFn(size - 1 - i, 8, ((fb >>> i) & 1) !== 0);
+      for (var i = 8; i < 15; i++) setFn(8, size - 15 + i, ((fb >>> i) & 1) !== 0);
+      setFn(8, size - 8, true);
+    }
+    drawFormatBits(0);
+    var bitIdx = 0;
+    for (var right = size - 1; right >= 1; right -= 2){
+      if (right === 6) right = 5;
+      for (var vert = 0; vert < size; vert++){
+        for (var j = 0; j < 2; j++){
+          var x = right - j;
+          var upward = ((right + 1) & 2) === 0;
+          var y = upward ? size - 1 - vert : vert;
+          if (!isFunction[y][x] && bitIdx < allCw.length * 8){
+            modules[y][x] = ((allCw[bitIdx >>> 3] >>> (7 - (bitIdx & 7))) & 1) !== 0;
+            bitIdx++;
+          }
+        }
+      }
+    }
+    function maskBit(mask, x, y){
+      switch (mask){
+        case 0: return (x + y) % 2 === 0;
+        case 1: return y % 2 === 0;
+        case 2: return x % 3 === 0;
+        case 3: return (x + y) % 3 === 0;
+        case 4: return (Math.floor(x/3) + Math.floor(y/2)) % 2 === 0;
+        case 5: return x*y % 2 + x*y % 3 === 0;
+        case 6: return (x*y % 2 + x*y % 3) % 2 === 0;
+        case 7: return ((x + y) % 2 + x*y % 3) % 2 === 0;
+      }
+    }
+    function applyMask(mask){
+      for (var y = 0; y < size; y++) for (var x = 0; x < size; x++)
+        if (!isFunction[y][x] && maskBit(mask, x, y)) modules[y][x] = !modules[y][x];
+    }
+    function penalty(){
+      var result = 0;
+      for (var pass = 0; pass < 2; pass++){
+        for (var i = 0; i < size; i++){
+          var runColor = false, runs = [], colors = [];
+          for (var j = 0; j < size; j++){
+            var c = pass === 0 ? modules[i][j] : modules[j][i];
+            if (j === 0 || c !== runColor){ runs.push(1); colors.push(c); runColor = c; }
+            else runs[runs.length-1]++;
+          }
+          for (var r = 0; r < runs.length; r++) if (runs[r] >= 5) result += 3 + (runs[r] - 5);
+          for (var r = 0; r < runs.length; r++){
+            if (!colors[r] || runs[r] % 3 !== 0) continue;
+            var n = runs[r] / 3;
+            if (r-2 >= 0 && r+2 < runs.length &&
+                colors[r-1] === false && runs[r-1] === n &&
+                colors[r-2] === true  && runs[r-2] === n &&
+                colors[r+1] === false && runs[r+1] === n &&
+                colors[r+2] === true  && runs[r+2] === n){
+              var leftLight  = (r - 3 < 0) ? size : (colors[r-3] === false ? runs[r-3] : 0);
+              var rightLight = (r + 3 >= runs.length) ? size : (colors[r+3] === false ? runs[r+3] : 0);
+              if (leftLight >= 4) result += 40;
+              if (rightLight >= 4) result += 40;
+            }
+          }
+        }
+      }
+      for (var y = 0; y < size-1; y++) for (var x = 0; x < size-1; x++){
+        var c = modules[y][x];
+        if (c === modules[y][x+1] && c === modules[y+1][x] && c === modules[y+1][x+1]) result += 3;
+      }
+      var dark = 0;
+      for (var y = 0; y < size; y++) for (var x = 0; x < size; x++) if (modules[y][x]) dark++;
+      var total = size*size;
+      result += (Math.ceil(Math.abs(dark*20 - total*10) / total) - 1) * 10;
+      return result;
+    }
+    var chosenMask = -1, minPenalty = Infinity;
+    for (var m = 0; m < 8; m++){
+      applyMask(m); drawFormatBits(m);
+      var p = penalty();
+      if (p < minPenalty){ minPenalty = p; chosenMask = m; }
+      applyMask(m); // xor is its own inverse — undo
+    }
+    applyMask(chosenMask);
+    drawFormatBits(chosenMask);
+    return { modules: modules, size: size };
+  }
+
+  function _lsDrawQR(canvas, text){
+    var q = _qrMatrix(text);
+    var quiet = 4, scale = 8;
+    var px = (q.size + quiet*2) * scale;
+    canvas.width = px; canvas.height = px;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, px, px);
+    ctx.fillStyle = '#10222b';
+    for (var y = 0; y < q.size; y++) for (var x = 0; x < q.size; x++)
+      if (q.modules[y][x]) ctx.fillRect((x + quiet)*scale, (y + quiet)*scale, scale, scale);
+  }
+
+</script>
+</body>
+</html>

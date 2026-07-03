@@ -7732,16 +7732,26 @@ function _activeRefSlug(){
 // a no-config render is identical to today's. Read at render time: both tour
 // widgets re-inject their divs + loader script on every sheet open, so a
 // config that resolves after a very early tap is picked up on the next open.
+function _affSafe(v, def){ return (typeof v === 'string' && /^[A-Za-z0-9_-]{1,32}$/.test(v)) ? v : def; }
 function _gygPid(){
   const a = window._partnerCfg && window._partnerCfg.affiliates;
-  return (a && a.gyg_partner_id) || 'FV7E5LX';
+  return _affSafe(a && a.gyg_partner_id, 'FV7E5LX');
 }
 function _viatorPid(){
   const a = window._partnerCfg && window._partnerCfg.affiliates;
-  return (a && a.viator_pid) || 'P00299666';
+  return _affSafe(a && a.viator_pid, 'P00299666');
 }
 // HTML-escape for config-sourced strings (promo titles etc.).
 function _pesc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+// "Pilot preview" pill — configs minted via the worker (unsigned pilots)
+// carry preview:true and get this honest, unobtrusive tag wherever the
+// partner name renders. Committed configs without the flag render exactly
+// as before; no config renders nothing.
+function _previewTag(){
+  const cfg = window._partnerCfg;
+  if(!(cfg && cfg.preview === true)) return '';
+  return '<span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#8a6d1f;background:#fdf6e3;border:1px solid #e9d9b0;border-radius:999px;padding:2px 7px;flex-shrink:0">Pilot preview</span>';
+}
 // Per-unit telemetry dimension: ?u=<unit> on a QR link (a door card in room
 // 204 prints ?ref=demo-resort&u=204) persists like the referrer and rides
 // every worker emit as an optional short id, so a rental fleet has per-unit
@@ -7976,6 +7986,7 @@ function _amenityPanel(states){
     <div style="display:flex;align-items:center;gap:8px">
       <div style="font-weight:700;font-size:13px;color:var(--ink)">Provided by ${_pesc(cfg.name || 'Your Resort')}</div>
       <span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);background:#fff;border:1px solid var(--border);border-radius:999px;padding:2px 7px">Property offer</span>
+      ${_previewTag()}
     </div>
     <div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">${CTX[primary] || CTX.calm} Separate from the safety report above — the ocean call never changes for an offer.</div>
     ${body}
@@ -8002,9 +8013,8 @@ function _promoOpen(idx){
     // data: flyers were pre-converted to blob URLs at load (popup blockers
     // eat window.open calls made after an async hop, and browsers refuse
     // top-frame navigation to data: URLs outright).
-    let u = p._pdfUrl;
-    if(!u && p.pdf && !/^data:/i.test(p.pdf)) u = p.pdf;
-    if(u) window.open(u, '_blank', 'noopener');
+    // _pdfUrl is set only after _renderPartnerPromos vetted the source; never open p.pdf raw.
+    if(p._pdfUrl) window.open(p._pdfUrl, '_blank', 'noopener');
   } catch(e){}
 }
 function _renderPartnerPromos(cfg){
@@ -8013,9 +8023,12 @@ function _renderPartnerPromos(cfg){
   const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
   promos.forEach(p => {
     if(!p || typeof p.pdf !== 'string') return;
-    if(/^data:/i.test(p.pdf)){
+    // Only a real PDF may become a flyer: a data:application/pdf URL, or an
+    // https:// link. Rejects data:text/html and javascript: (blob would
+    // inherit our origin and run as the app — stored-XSS via a poisoned config).
+    if(/^data:application\/pdf[;,]/i.test(p.pdf)){
       try { fetch(p.pdf).then(r => r.blob()).then(b => { p._pdfUrl = URL.createObjectURL(b); }).catch(function(){}); } catch(e){}
-    } else { p._pdfUrl = p.pdf; }
+    } else if(/^https:\/\//i.test(p.pdf)){ p._pdfUrl = p.pdf; }
   });
   const live = promos.map((p, i) => ({ p, i }))
     .filter(x => x.p && x.p.title && !(x.p.expires && String(x.p.expires).slice(0,10) < todayStr));
@@ -8060,8 +8073,16 @@ window._partnerCfgReady = (function(){
   if(!slug || !window.fetch) return Promise.resolve(null);
   let ctl = null, timer = null;
   try { ctl = new AbortController(); timer = setTimeout(() => ctl.abort(), 20000); } catch(e){}
-  return fetch('/partner-config/' + slug + '.json', ctl ? { signal: ctl.signal } : {})
-    .then(r => (r.ok ? r.json() : null))
+  const opts = ctl ? { signal: ctl.signal } : {};
+  // Committed file first; on 404/failure fall back to the telemetry worker's
+  // minted config (KV pcfg:<slug>, written by the Jade mint page). Both
+  // fetches share the one 20s abort envelope. Both missing → resolved null →
+  // every partner surface inert, exactly as before the fallback existed.
+  return fetch('/partner-config/' + slug + '.json', opts)
+    .then(r => (r.ok ? r.json() : Promise.reject(new Error('no committed config'))))
+    .catch(() => fetch('https://concierge-guide-api.oceansafe-hi.workers.dev/cfg/' + slug, opts)
+      .then(r => (r.ok ? r.json() : null))
+      .catch(() => null))
     .then(cfg => {
       if(timer) clearTimeout(timer);
       if(cfg && typeof cfg === 'object' && !Array.isArray(cfg)){
@@ -8596,7 +8617,16 @@ function updateFreshnessIndicator(){
     window._partnerCfgReady.then(function(cfg){
       if (cfg && cfg.name){
         var el = document.getElementById('oslProp');
-        if (el) el.textContent = cfg.name;
+        if (el){
+          el.textContent = cfg.name;
+          // Minted (unsigned) pilot configs are honestly labeled on the TV too.
+          if (cfg.preview === true){
+            var pv = document.createElement('span');
+            pv.textContent = 'Pilot preview';
+            pv.style.cssText = 'font-size:.34em;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.75;margin-left:.8em;vertical-align:middle;border:1px solid currentColor;border-radius:999px;padding:.15em .7em';
+            el.appendChild(pv);
+          }
+        }
       }
     });
   }
