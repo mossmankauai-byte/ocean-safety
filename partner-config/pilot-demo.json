@@ -1,6 +1,7 @@
 {
   "_note": "GM-DEMO partner config (?ref=pilot-demo): same shape as demo-resort but with OceanSafe's REAL affiliate IDs so the GetYourGuide/Viator widgets render live during a demo (DEMO123-style fake IDs make the widgets show a failed-to-load state). Bookings made here pay OceanSafe's accounts \u2014 this slug is for demos, never for a real property.",
   "name": "Your Resort",
+  "screenBeaches": ["poipu", "mahaulepu", "shipwreck", "kalapaki", "salt_pond"],
   "affiliates": {
     "gyg_partner_id": "FV7E5LX",
     "viator_pid": "P00299666"

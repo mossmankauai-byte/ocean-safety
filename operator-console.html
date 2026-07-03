@@ -711,6 +711,32 @@
         </div>
       </div>
     </section>
+    <!-- LOBBY SCREEN -->
+    <section>
+      <div class="sec-h"><h2>Lobby screen</h2><p>A full-screen conditions board for your lobby TV: your nearest beaches with today&rsquo;s verdicts in large type, your property name, and a QR guests scan to open your guide on their phone. Data refreshes itself every 15 minutes.</p></div>
+      <div class="card" id="mgLobbyScreen">
+        <div class="mg-more-grid">
+          <input id="lsScreenUrl" readonly value="" aria-label="Lobby screen URL" onclick="this.select()">
+          <button class="pl-btn primary" id="lsScreenCopy" type="button" style="min-height:44px;white-space:nowrap">Copy link</button>
+        </div>
+        <div class="cap" style="margin-top:8px"><b>Setup:</b> works in any browser on your lobby TV — open the link and put the browser full-screen. Chromecast and Fire-stick friendly: cast a Chrome tab to the TV, or open the link in the stick&rsquo;s own browser. No install, no account, nothing for IT to maintain.</div>
+      </div>
+      <script>(function(){
+        try{
+          var p=new URLSearchParams(location.search);
+          var slug=(p.get('slug')||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,32);
+          if(!slug){var el=document.querySelector('.property code');slug=el?el.textContent.trim():'your-hotel';}
+          var url='https://oceansafety.app/?ref='+encodeURIComponent(slug)+'&mode=screen';
+          var inp=document.getElementById('lsScreenUrl');if(inp)inp.value=url;
+          var btn=document.getElementById('lsScreenCopy');
+          if(btn)btn.addEventListener('click',function(){
+            var done=function(){btn.textContent='Copied';setTimeout(function(){btn.textContent='Copy link';},1600);};
+            if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(done,function(){if(inp){inp.select();done();}});}
+            else if(inp){inp.select();try{document.execCommand('copy');done();}catch(e){}}
+          });
+        }catch(e){}
+      })();</script>
+    </section>
     <!-- BAD OCEAN DAY SAVES -->
     <section>
       <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the beach isn’t safe, what the app surfaced — and the on-property interest it captured.</p></div>

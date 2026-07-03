@@ -8222,6 +8222,475 @@ function updateFreshnessIndicator(){
   const timeStr = t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   sub.innerHTML = `<span class="bsub-live">LIVE · ${timeStr}</span>`;
 }
+// ── LOBBY SCREEN MODE (?ref=<slug>&mode=screen) ─────────────────────────────
+// Full-screen rotating conditions board for a property's lobby TV. Rides the
+// normal app boot underneath (fetchLive/rescore keep running on their 15-min
+// cycle); this overlay only READS `scored` — it never changes app state, and
+// with mode=screen absent this entire block is a single early-return no-op.
+// Honesty: the footer always shows the data's as-of time; a wifi blip falls
+// back to the last-good localStorage snapshot VISIBLY marked "refreshing".
+(function(){
+  try {
+    if (new URLSearchParams(location.search).get('mode') !== 'screen') return;
+  } catch(e){ return; }
+
+  var LS_SLUG = _activeRefSlug() || '';
+  var LS_URL  = 'https://oceansafety.app/' + (LS_SLUG ? '?ref=' + LS_SLUG : '');
+  var LS_CACHE_KEY = 'os_screen_last_' + (LS_SLUG || 'island');
+
+  // ── Compact QR encoder (byte mode, ECC M, versions 1-6, auto mask). ──
+  // Port of Project Nayuki's qrcodegen (MIT); output verified module-for-module
+  // against the `qrcode` npm reference across versions 1-6 and all 8 masks.
+  // Hard-capped at version 6 (~106 bytes — every ?ref URL fits in v4) because
+  // v7+ needs the version-info blocks this port deliberately leaves out.
+  // No CDN dependency — the lobby TV renders its QR fully offline-capable.
+  function _qrMatrix(text){
+    var bytes = [];
+    var enc = unescape(encodeURIComponent(text));
+    for (var i = 0; i < enc.length; i++) bytes.push(enc.charCodeAt(i));
+    var ECC_PER_BLOCK = [0,10,16,26,18,24,16];
+    var NUM_BLOCKS    = [0, 1, 1, 1, 2, 2, 4];
+    function rawDataModules(ver){
+      var r = (16*ver + 128)*ver + 64;
+      if (ver >= 2){
+        var na = Math.floor(ver/7) + 2;
+        r -= (25*na - 10)*na - 55;
+        if (ver >= 7) r -= 36;
+      }
+      return r;
+    }
+    var version = -1;
+    for (var v = 1; v <= 6; v++){
+      var cap = Math.floor(rawDataModules(v)/8) - ECC_PER_BLOCK[v]*NUM_BLOCKS[v];
+      if (4 + 8 + bytes.length*8 <= cap*8){ version = v; break; }
+    }
+    if (version < 0) throw new Error('QR: text too long');
+    var size = version*4 + 17;
+    var bits = [];
+    function appendBits(val, len){ for (var i = len-1; i >= 0; i--) bits.push((val >>> i) & 1); }
+    appendBits(4, 4);
+    appendBits(bytes.length, version <= 9 ? 8 : 16);
+    bytes.forEach(function(b){ appendBits(b, 8); });
+    var dataCapBits = (Math.floor(rawDataModules(version)/8) - ECC_PER_BLOCK[version]*NUM_BLOCKS[version]) * 8;
+    appendBits(0, Math.min(4, dataCapBits - bits.length));
+    appendBits(0, (8 - bits.length % 8) % 8);
+    for (var pad = 0xEC; bits.length < dataCapBits; pad ^= 0xEC ^ 0x11) appendBits(pad, 8);
+    var dataCw = [];
+    for (var i = 0; i < bits.length; i += 8){
+      var b8 = 0;
+      for (var j = 0; j < 8; j++) b8 = (b8 << 1) | bits[i+j];
+      dataCw.push(b8);
+    }
+    function gfMul(x, y){
+      var z = 0;
+      for (var i = 7; i >= 0; i--){
+        z = (z << 1) ^ ((z >>> 7) * 0x11D);
+        z ^= ((y >>> i) & 1) * x;
+      }
+      return z & 0xFF;
+    }
+    function rsDivisor(degree){
+      var result = [];
+      for (var i = 0; i < degree - 1; i++) result.push(0);
+      result.push(1);
+      var root = 1;
+      for (var i = 0; i < degree; i++){
+        for (var j = 0; j < result.length; j++){
+          result[j] = gfMul(result[j], root);
+          if (j + 1 < result.length) result[j] ^= result[j+1];
+        }
+        root = gfMul(root, 0x02);
+      }
+      return result;
+    }
+    function rsRemainder(data, divisor){
+      var result = divisor.map(function(){ return 0; });
+      data.forEach(function(b){
+        var factor = b ^ result.shift();
+        result.push(0);
+        divisor.forEach(function(coef, i){ result[i] ^= gfMul(coef, factor); });
+      });
+      return result;
+    }
+    var numBlocks = NUM_BLOCKS[version], blockEccLen = ECC_PER_BLOCK[version];
+    var rawCw = Math.floor(rawDataModules(version)/8);
+    var numShortBlocks = numBlocks - rawCw % numBlocks;
+    var shortBlockLen = Math.floor(rawCw / numBlocks);
+    var blocks = [];
+    var rsDiv = rsDivisor(blockEccLen);
+    for (var i = 0, k = 0; i < numBlocks; i++){
+      var dat = dataCw.slice(k, k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1));
+      k += dat.length;
+      var ecc = rsRemainder(dat, rsDiv);
+      if (i < numShortBlocks) dat.push(-1);
+      blocks.push(dat.concat(ecc));
+    }
+    var allCw = [];
+    for (var col = 0; col < blocks[0].length; col++){
+      blocks.forEach(function(block, j){
+        if (col !== shortBlockLen - blockEccLen || j >= numShortBlocks){
+          var val = block[col];
+          if (val >= 0) allCw.push(val);
+        }
+      });
+    }
+    var modules = [], isFunction = [];
+    for (var i = 0; i < size; i++){
+      modules.push(new Array(size).fill(false));
+      isFunction.push(new Array(size).fill(false));
+    }
+    function setFn(x, y, on){ modules[y][x] = on; isFunction[y][x] = true; }
+    for (var i = 0; i < size; i++){ setFn(6, i, i % 2 === 0); setFn(i, 6, i % 2 === 0); }
+    function drawFinder(cx, cy){
+      for (var dy = -4; dy <= 4; dy++) for (var dx = -4; dx <= 4; dx++){
+        var d = Math.max(Math.abs(dx), Math.abs(dy));
+        var x = cx + dx, y = cy + dy;
+        if (x >= 0 && x < size && y >= 0 && y < size) setFn(x, y, d !== 2 && d !== 4);
+      }
+    }
+    drawFinder(3, 3); drawFinder(size - 4, 3); drawFinder(3, size - 4);
+    function alignPositions(ver){
+      if (ver === 1) return [];
+      var na = Math.floor(ver/7) + 2;
+      var step = Math.ceil((ver*4 + 4) / (na*2 - 2)) * 2;
+      var result = [6];
+      for (var pos = ver*4 + 10; result.length < na; pos -= step) result.splice(1, 0, pos);
+      return result;
+    }
+    var aps = alignPositions(version);
+    for (var i = 0; i < aps.length; i++) for (var j = 0; j < aps.length; j++){
+      if ((i === 0 && j === 0) || (i === 0 && j === aps.length-1) || (i === aps.length-1 && j === 0)) continue;
+      for (var dy = -2; dy <= 2; dy++) for (var dx = -2; dx <= 2; dx++)
+        setFn(aps[i] + dx, aps[j] + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+    }
+    function drawFormatBits(mask){
+      var data = (0 << 3) | mask; // ECC level M = 0b00
+      var rem = data;
+      for (var i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+      var fb = ((data << 10) | rem) ^ 0x5412;
+      for (var i = 0; i <= 5; i++) setFn(8, i, ((fb >>> i) & 1) !== 0);
+      setFn(8, 7, ((fb >>> 6) & 1) !== 0);
+      setFn(8, 8, ((fb >>> 7) & 1) !== 0);
+      setFn(7, 8, ((fb >>> 8) & 1) !== 0);
+      for (var i = 9; i < 15; i++) setFn(14 - i, 8, ((fb >>> i) & 1) !== 0);
+      for (var i = 0; i < 8; i++) setFn(size - 1 - i, 8, ((fb >>> i) & 1) !== 0);
+      for (var i = 8; i < 15; i++) setFn(8, size - 15 + i, ((fb >>> i) & 1) !== 0);
+      setFn(8, size - 8, true);
+    }
+    drawFormatBits(0);
+    var bitIdx = 0;
+    for (var right = size - 1; right >= 1; right -= 2){
+      if (right === 6) right = 5;
+      for (var vert = 0; vert < size; vert++){
+        for (var j = 0; j < 2; j++){
+          var x = right - j;
+          var upward = ((right + 1) & 2) === 0;
+          var y = upward ? size - 1 - vert : vert;
+          if (!isFunction[y][x] && bitIdx < allCw.length * 8){
+            modules[y][x] = ((allCw[bitIdx >>> 3] >>> (7 - (bitIdx & 7))) & 1) !== 0;
+            bitIdx++;
+          }
+        }
+      }
+    }
+    function maskBit(mask, x, y){
+      switch (mask){
+        case 0: return (x + y) % 2 === 0;
+        case 1: return y % 2 === 0;
+        case 2: return x % 3 === 0;
+        case 3: return (x + y) % 3 === 0;
+        case 4: return (Math.floor(x/3) + Math.floor(y/2)) % 2 === 0;
+        case 5: return x*y % 2 + x*y % 3 === 0;
+        case 6: return (x*y % 2 + x*y % 3) % 2 === 0;
+        case 7: return ((x + y) % 2 + x*y % 3) % 2 === 0;
+      }
+    }
+    function applyMask(mask){
+      for (var y = 0; y < size; y++) for (var x = 0; x < size; x++)
+        if (!isFunction[y][x] && maskBit(mask, x, y)) modules[y][x] = !modules[y][x];
+    }
+    function penalty(){
+      var result = 0;
+      for (var pass = 0; pass < 2; pass++){
+        for (var i = 0; i < size; i++){
+          var runColor = false, runs = [], colors = [];
+          for (var j = 0; j < size; j++){
+            var c = pass === 0 ? modules[i][j] : modules[j][i];
+            if (j === 0 || c !== runColor){ runs.push(1); colors.push(c); runColor = c; }
+            else runs[runs.length-1]++;
+          }
+          for (var r = 0; r < runs.length; r++) if (runs[r] >= 5) result += 3 + (runs[r] - 5);
+          for (var r = 0; r < runs.length; r++){
+            if (!colors[r] || runs[r] % 3 !== 0) continue;
+            var n = runs[r] / 3;
+            if (r-2 >= 0 && r+2 < runs.length &&
+                colors[r-1] === false && runs[r-1] === n &&
+                colors[r-2] === true  && runs[r-2] === n &&
+                colors[r+1] === false && runs[r+1] === n &&
+                colors[r+2] === true  && runs[r+2] === n){
+              var leftLight  = (r - 3 < 0) ? size : (colors[r-3] === false ? runs[r-3] : 0);
+              var rightLight = (r + 3 >= runs.length) ? size : (colors[r+3] === false ? runs[r+3] : 0);
+              if (leftLight >= 4) result += 40;
+              if (rightLight >= 4) result += 40;
+            }
+          }
+        }
+      }
+      for (var y = 0; y < size-1; y++) for (var x = 0; x < size-1; x++){
+        var c = modules[y][x];
+        if (c === modules[y][x+1] && c === modules[y+1][x] && c === modules[y+1][x+1]) result += 3;
+      }
+      var dark = 0;
+      for (var y = 0; y < size; y++) for (var x = 0; x < size; x++) if (modules[y][x]) dark++;
+      var total = size*size;
+      result += (Math.ceil(Math.abs(dark*20 - total*10) / total) - 1) * 10;
+      return result;
+    }
+    var chosenMask = -1, minPenalty = Infinity;
+    for (var m = 0; m < 8; m++){
+      applyMask(m); drawFormatBits(m);
+      var p = penalty();
+      if (p < minPenalty){ minPenalty = p; chosenMask = m; }
+      applyMask(m); // xor is its own inverse — undo
+    }
+    applyMask(chosenMask);
+    drawFormatBits(chosenMask);
+    return { modules: modules, size: size };
+  }
+
+  function _lsDrawQR(canvas, text){
+    var q = _qrMatrix(text);
+    var quiet = 4, scale = 8;
+    var px = (q.size + quiet*2) * scale;
+    canvas.width = px; canvas.height = px;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, px, px);
+    ctx.fillStyle = '#10222b';
+    for (var y = 0; y < q.size; y++) for (var x = 0; x < q.size; x++)
+      if (q.modules[y][x]) ctx.fillRect((x + quiet)*scale, (y + quiet)*scale, scale, scale);
+  }
+
+  // ── Which beaches rotate. Optional partner-config extension screenBeaches:
+  // ["poipu","brennecke",...] (beach ids) picks the property's nearest; absent
+  // or invalid → the island's marquee (lifeguarded) beaches. warning_only
+  // caution beaches carry no live verdict and never rotate onto a lobby TV.
+  function _lsBeaches(){
+    var cfg = window._partnerCfg;
+    var list = [];
+    if (cfg && Array.isArray(cfg.screenBeaches)){
+      cfg.screenBeaches.forEach(function(id){
+        var b = B.find(function(x){ return x.id === id && !x.warning_only; });
+        if (b) list.push(b);
+      });
+    }
+    if (!list.length) list = B.filter(function(b){ return !b.warning_only && b.lg && b.lg !== 'none'; });
+    return list;
+  }
+
+  // One beach → the large-type row the board shows. Reads the SAME scored/
+  // gate verdicts the app renders; unknown surf is never shown as calm.
+  function _lsRow(b){
+    var r = scored[b.id];
+    if (!r || !r._c) return null;
+    var c = r._c;
+    var unknown = !!c.surf_unknown || !Number.isFinite(c.es) || c.es >= SURF_UNAVAILABLE;
+    var word, cls;
+    if (unknown){ word = 'Conditions unavailable'; cls = 'na'; }
+    else if (r.status === 'green'){ word = 'Great today'; cls = 'ok'; }
+    else if (r.status === 'yellow'){ word = 'Use caution'; cls = 'warn'; }
+    else if (r.reason){ word = r.reason; cls = 'bad'; }
+    else { word = 'Calmer water elsewhere today'; cls = 'warn'; }
+    return {
+      name: b.name, region: b.r || '',
+      word: word, cls: cls,
+      surf: unknown ? '—' : c.es.toFixed(1) + ' ft',
+      wind: (typeof c.wind === 'number') ? Math.round(c.wind) + ' mph' : '—',
+      lg: b.lg_hours || ''
+    };
+  }
+
+  function _lsLiveRows(){
+    if (typeof LIVE === 'undefined' || !LIVE || surfDataStale()) return null;
+    var rows = _lsBeaches().map(_lsRow).filter(Boolean);
+    return rows.length ? rows : null;
+  }
+  function _lsSaveCache(rows){
+    try {
+      localStorage.setItem(LS_CACHE_KEY, JSON.stringify({
+        t: (window._liveFetchedAt || new Date()).toISOString(), rows: rows
+      }));
+    } catch(e){}
+  }
+  function _lsLoadCache(){
+    try {
+      var raw = JSON.parse(localStorage.getItem(LS_CACHE_KEY) || 'null');
+      if (raw && Array.isArray(raw.rows) && raw.rows.length && raw.t) return raw;
+    } catch(e){}
+    return null;
+  }
+
+  // ── Build the overlay. All styles injected here so a no-mode load leaves
+  // the document's CSS byte-identical.
+  var css = document.createElement('style');
+  css.textContent =
+    '#osLobby{position:fixed;inset:0;z-index:2147483000;background:#0b2531;color:#f2ede0;' +
+      'font-family:Georgia,"Times New Roman",serif;display:flex;flex-direction:column;overflow:hidden;cursor:none}' +
+    '#osLobby *{box-sizing:border-box}' +
+    '.osl-jit{flex:1;display:flex;flex-direction:column;min-height:0;transition:transform 2s ease}' +
+    '.osl-head{display:flex;align-items:baseline;justify-content:space-between;gap:2vw;padding:3.2vh 3.5vw 0}' +
+    '.osl-prop{font-size:3.6vh;font-weight:700;letter-spacing:.02em}' +
+    '.osl-sub{font-size:2.2vh;opacity:.75;font-family:system-ui,-apple-system,sans-serif}' +
+    '.osl-main{flex:1;display:flex;align-items:stretch;gap:3vw;padding:2.5vh 3.5vw;min-height:0}' +
+    '.osl-card{flex:1;display:flex;flex-direction:column;justify-content:center;gap:2.4vh;min-width:0}' +
+    '.osl-bname{font-size:8.5vh;line-height:1.05;font-weight:700;letter-spacing:-.01em}' +
+    '.osl-region{font-size:2.4vh;opacity:.7;font-family:system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.14em}' +
+    '.osl-verdict{display:inline-flex;align-items:center;gap:1.6vh;font-size:4.6vh;font-weight:700;' +
+      'font-family:system-ui,-apple-system,sans-serif;padding:1.6vh 2.4vh;border-radius:1.6vh;align-self:flex-start}' +
+    '.osl-verdict::before{content:"";width:2.4vh;height:2.4vh;border-radius:50%;background:currentColor;flex-shrink:0}' +
+    '.osl-verdict.ok{background:rgba(46,158,99,.16);color:#5fd598}' +
+    '.osl-verdict.warn{background:rgba(217,119,6,.16);color:#f0b153}' +
+    '.osl-verdict.bad{background:rgba(185,28,28,.18);color:#f38b8b}' +
+    '.osl-verdict.na{background:rgba(148,163,184,.14);color:#aebbca}' +
+    '.osl-nums{display:flex;gap:4vw;font-family:system-ui,-apple-system,sans-serif}' +
+    '.osl-num .v{font-size:5.4vh;font-weight:700}.osl-num .l{font-size:2vh;opacity:.65;text-transform:uppercase;letter-spacing:.12em}' +
+    '.osl-lg{font-size:2.1vh;opacity:.7;font-family:system-ui,-apple-system,sans-serif}' +
+    '.osl-rail{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh}' +
+    '.osl-qrbox{background:#fff;border-radius:2vh;padding:1.2vh}' +
+    '.osl-qrbox canvas{display:block;width:26vh;height:26vh;image-rendering:pixelated}' +
+    '.osl-scan{font-size:2.3vh;font-family:system-ui,-apple-system,sans-serif;text-align:center;opacity:.85;max-width:30vh;line-height:1.35}' +
+    '.osl-dots{display:flex;gap:1.2vh;justify-content:center;padding:0 0 1vh}' +
+    '.osl-dots i{width:1.2vh;height:1.2vh;border-radius:50%;background:rgba(242,237,224,.25)}' +
+    '.osl-dots i.on{background:#d9a441}' +
+    '.osl-foot{display:flex;align-items:center;justify-content:center;gap:1.2vh;padding:0 3.5vw 2.6vh;' +
+      'font-size:2vh;font-family:system-ui,-apple-system,sans-serif;opacity:.8;text-align:center}' +
+    '.osl-foot.stale{color:#f0b153;opacity:1}' +
+    '.osl-wait{font-size:3.2vh;opacity:.7;font-family:system-ui,-apple-system,sans-serif}';
+  document.head.appendChild(css);
+
+  var root = document.createElement('div');
+  root.id = 'osLobby';
+  root.setAttribute('role', 'main');
+  root.setAttribute('aria-label', 'Lobby conditions board');
+  root.innerHTML =
+    '<div class="osl-jit" id="oslJit">' +
+      '<div class="osl-head">' +
+        '<div class="osl-prop" id="oslProp">OceanSafe &middot; Kaua&#699;i</div>' +
+        '<div class="osl-sub">Today&rsquo;s beach conditions</div>' +
+      '</div>' +
+      '<div class="osl-main">' +
+        '<div class="osl-card" id="oslCard"><div class="osl-wait">Loading live conditions&hellip;</div></div>' +
+        '<div class="osl-rail">' +
+          '<div class="osl-qrbox"><canvas id="oslQr" aria-label="QR code to the full beach guide"></canvas></div>' +
+          '<div class="osl-scan">Scan for the full live guide on your phone</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="osl-dots" id="oslDots"></div>' +
+      '<div class="osl-foot" id="oslFoot">Live conditions &middot; oceansafety.app</div>' +
+    '</div>';
+  document.body.appendChild(root);
+  try { _lsDrawQR(document.getElementById('oslQr'), LS_URL); }
+  catch(e){ var _r = root.querySelector('.osl-rail'); if (_r) _r.style.display = 'none'; }
+
+  // Partner name from the runtime config once it resolves.
+  if (window._partnerCfgReady && window._partnerCfgReady.then){
+    window._partnerCfgReady.then(function(cfg){
+      if (cfg && cfg.name){
+        var el = document.getElementById('oslProp');
+        if (el) el.textContent = cfg.name;
+      }
+    });
+  }
+
+  // Keep the display awake where the browser allows it; silently fall back
+  // (TV browsers without the API just rely on their own no-sleep setting).
+  var _lsWakeSentinel = null;
+  function _lsWakeLock(){
+    if (!(navigator.wakeLock && navigator.wakeLock.request)) return;
+    if (_lsWakeSentinel && !_lsWakeSentinel.released) return;
+    navigator.wakeLock.request('screen').then(function(sen){ _lsWakeSentinel = sen; }).catch(function(){});
+  }
+  _lsWakeLock();
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) _lsWakeLock();
+  });
+
+  // ── Render loop: 12s per beach, slight position jitter against burn-in.
+  var _lsIdx = 0, _lsJit = 0, _lsLastSave = 0;
+  var JITTER = [[0,0],[6,-4],[-5,5],[4,6],[-6,-5],[5,0],[0,5],[-4,0],[0,-6]];
+  function _lsFmtTime(d){
+    try { return d.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}); }
+    catch(e){ return '' + d; }
+  }
+  function _lsRender(){
+    var rows = _lsLiveRows(), fromCache = false, asOf = null;
+    if (rows){
+      asOf = window._liveFetchedAt || new Date();
+      var _ts = asOf.getTime ? asOf.getTime() : 0;
+      if (_ts !== _lsLastSave){ _lsSaveCache(rows); _lsLastSave = _ts; }
+    } else {
+      var cached = _lsLoadCache();
+      // a safety board must not show day-old surf: cache is for wifi blips, not outages
+      if (cached && (Date.now() - cached.t) > 6*60*60*1000) cached = null;
+      if (cached){ rows = cached.rows; asOf = new Date(cached.t); fromCache = true; }
+    }
+    var card = document.getElementById('oslCard');
+    var foot = document.getElementById('oslFoot');
+    var dots = document.getElementById('oslDots');
+    if (!rows){
+      card.innerHTML = '<div class="osl-wait">Loading live conditions&hellip;</div>';
+      foot.textContent = 'Live conditions · oceansafety.app';
+      foot.classList.remove('stale');
+      dots.innerHTML = '';
+      return;
+    }
+    _lsIdx = _lsIdx % rows.length;
+    var row = rows[_lsIdx];
+    card.innerHTML =
+      '<div class="osl-region"></div>' +
+      '<div class="osl-bname"></div>' +
+      '<div class="osl-verdict ' + row.cls + '"><span></span></div>' +
+      '<div class="osl-nums">' +
+        '<div class="osl-num"><div class="v" id="oslSurf"></div><div class="l">Surf</div></div>' +
+        '<div class="osl-num"><div class="v" id="oslWind"></div><div class="l">Wind</div></div>' +
+      '</div>' +
+      '<div class="osl-lg"></div>';
+    card.querySelector('.osl-region').textContent = row.region;
+    card.querySelector('.osl-bname').textContent = row.name;
+    card.querySelector('.osl-verdict span').textContent = row.word;
+    card.querySelector('#oslSurf').textContent = row.surf;
+    card.querySelector('#oslWind').textContent = row.wind;
+    card.querySelector('.osl-lg').textContent = row.lg ? 'Lifeguard: ' + row.lg : '';
+    dots.innerHTML = rows.map(function(_, i){
+      return '<i' + (i === _lsIdx ? ' class="on"' : '') + '></i>';
+    }).join('');
+    var t = asOf ? _lsFmtTime(asOf) : '';
+    if (asOf && asOf.toDateString() !== new Date().toDateString()){
+      var _MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      t = _MO[asOf.getMonth()] + ' ' + asOf.getDate() + ', ' + t;
+    }
+    var staleLive = !fromCache && asOf && (Date.now() - asOf.getTime() > 30*60*1000);
+    foot.textContent = 'Live conditions · as of ' + t + ' · oceansafety.app' +
+      ((fromCache || staleLive) ? ' — refreshing…' : '');
+    foot.classList.toggle('stale', fromCache || staleLive);
+  }
+  function _lsTick(){
+    if (!document.hidden) _lsWakeLock();
+    _lsIdx++;
+    _lsJit = (_lsJit + 1) % JITTER.length;
+    var jit = document.getElementById('oslJit');
+    if (jit) jit.style.transform = 'translate(' + JITTER[_lsJit][0] + 'px,' + JITTER[_lsJit][1] + 'px)';
+    _lsRender();
+  }
+  // First data usually lands within a few seconds of boot; poll fast until the
+  // first successful paint, then settle into the 12s rotation.
+  var _lsWarmN = 0;
+  var _lsWarm = setInterval(function(){
+    if ((typeof scored !== 'undefined' && _lsLiveRows()) || ++_lsWarmN > 120){ clearInterval(_lsWarm); _lsRender(); }
+  }, 1000);
+  _lsRender();
+  setInterval(_lsTick, 12000);
+})();
+
 // Apply ?beach=/?hike=/etc. once boot has painted, otherwise the sheet
 // opens against an empty scored map and races the loader.
 const _origBoot = boot;

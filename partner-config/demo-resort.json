@@ -1,6 +1,7 @@
 {
   "_note": "DEMO partner config for the ?ref=demo-resort pilot flow. All values are placeholders: affiliate IDs are valid-shaped but fake (DEMO123 / P00000000 pay nobody), the phone is a 555 number, the email is example.com. Copy this shape for a real hotel; deploying = committing /partner-config/<slug>.json to the live repo.",
   "name": "Your Resort",
+  "screenBeaches": ["poipu", "mahaulepu", "shipwreck", "kalapaki", "salt_pond"],
   "affiliates": {
     "gyg_partner_id": "DEMO123",
     "viator_pid": "P00000000"
