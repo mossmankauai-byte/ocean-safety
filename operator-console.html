@@ -473,7 +473,7 @@
           <div class="lab">Companion floor · New activated guests / occupied unit <span class="floorpill">Floor</span></div>
           <div class="num">~0.8<small style="font-size:13px;font-weight:600;color:var(--muted)"> / unit · wk</small> <span class="chip sample">Sample</span></div>
           <div class="cap"><code style="font-size:10.5px">session_start</code> fires once per 30-day guest cookie, so it counts first-opens — <b>not</b> repeat opens during a stay. Read it as a floor on engagement.</div>
-          <div class="valueread"><b>The honest read:</b> at the proposed rate this costs about <b>one comp room every 12 days</b>, or one incremental spa booking a month to break even — and this dashboard shows you, in your own data, whether that booking happened. <span class="chip modeled">Modeled</span></div>
+          <div class="valueread"><b>The honest read:</b> this dashboard shows you, in your own data, exactly what guests did in your app — so you judge the value against your own numbers, not a claim from us.</div>
         </div>
       </div>
     </div>
@@ -615,8 +615,8 @@
         </div>
         <div class="card">
           <div class="title"><span class="l"><span class="pv sample"></span> Labor saved</span><span class="chip sample">Sample</span></div>
-          <div class="v">— <small>set your rate in Your numbers</small></div>
-          <div class="cap">Deflected desk questions × your loaded rate. We don’t assert a dollar — enter your rate in <b>Your numbers</b> below and it computes there.</div>
+          <div class="v">— <small>deflected questions × your desk rate</small></div>
+          <div class="cap">Deflected desk questions are the near-cash lever. We don’t assert a dollar — multiply the measured count by your own loaded desk rate to value it on your terms.</div>
         </div>
       </div>
     </section>
@@ -757,7 +757,7 @@
           <div class="title"><span class="l"><span class="pv measured"></span> Amenity interest &amp; render→click</span><span class="chip sample">Sample</span></div>
           <div class="v">~14% <small>render → click</small></div>
           <div class="cap">Top labels: <b>Spa</b> ~22 · <b>On-site dining</b> ~18 · <b>Pool bar</b> ~11. A click = <b>amenity interest</b>, presented as interest — never “booked” or “revenue.”</div>
-          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts ÷ renders. This measured rate <b>replaces</b> the assumed 50%×25% funnel guess in The Math below. <b>Measured</b> once live.</div></details>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts ÷ renders. <b>Measured</b> once live — a real render→click rate, never an assumed funnel.</div></details>
         </div>
       </div>
     </section>
@@ -854,42 +854,15 @@
 
 
     <div id="view-pricing" hidden>
-    <!-- THE MATH -->
-    <section>
-      <div class="sec-h"><h2>Your numbers <span class="chip modeled" style="margin-left:6px">Your inputs · modeled</span></h2><p>The fields below start with example values — replace them with yours and the result appears. Nothing computes until you type, because this is your math, not our claim.</p></div>
-      <div class="card calc">
-        <div class="io">
-          <div>
-            <div class="field"><label>Stay-Close renders / week <span class="chip measured" style="font-size:9px;padding:1px 5px">Measured once live</span></label><input id="renders" type="number" value="175"><div class="hint">Matches the trigger breakdown above (58+46+36+22+13)</div></div>
-            <div class="field"><label>Render → click rate %</label><input id="ctr" type="number" value="14"><div class="hint">Replaces the assumed 50%×25% funnel guess with a measured rate</div></div>
-            <div class="field"><label>Click → incremental on-property spend %</label><input id="conv" type="number" value="38"><div class="hint">Your estimate until the pilot measures it — set it to whatever you’d defend</div></div>
-            <div class="field"><label>Avg on-property ticket $ (you supply)</label><input id="ticket" type="number" value="120"></div>
-            <div class="field"><label>Contribution margin % (you supply)</label><input id="margin" type="number" value="52"></div>
-            <div class="field"><label>Concierge labor deflected $ / week</label><input id="labor" type="number" value="64"><div class="hint">≈ 30 desk questions × 4 min × $32/hr loaded rate</div></div>
-          </div>
-          <div>
-            <div class="out">
-              <div class="row"><span>Amenity-interest clicks / wk</span><b id="oClicks">—</b></div>
-              <div class="row"><span>Recovered margin / yr <span class="chip modeled" style="background:#1b3a48;color:#bfe0ec">Your math</span></span><b id="oMargin">—</b></div>
-              <div class="row"><span>Concierge labor saved / yr <span class="chip modeled" style="background:#1b3a48;color:#bfe0ec">Your math</span></span><b id="oLabor">—</b></div>
-              <div class="row"><span>Conservative value floor / yr</span><b id="oFloor">—</b></div>
-              <div class="be">Enter your numbers above and your floor works out to a <b id="oRatio">—</b> value-to-price ratio against a <b>Property</b> tier of $750–$1,400/mo. It’s your figure, computed from your inputs — we don’t assert it.</div>
-            </div>
-            <div class="note" style="margin-top:12px;border-top:1px dashed var(--line);padding-top:10px">Every figure above uses <b>your inputs</b> or measured guest data. We don’t show industry-average guesses dressed up as your results — the pilot replaces the editable estimates with your property’s real render→click rate.</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- PRICE ARGUMENT -->
     <section>
       <div class="priceband">
         <h2>Where this price sits</h2>
         <div class="lead">You’re not buying an ROI claim from a vendor with no reference logos — you’re buying a number small enough to approve from petty cash, against a value story you can repeat to your asset manager and the dashboard that lets you audit it in your own data.</div>
         <div class="tiers">
-          <div class="tier"><div class="t">Concierge · &lt;150 keys</div><div class="p">$300<small>/mo</small></div><div class="rm">$36–90 / room / yr</div><div class="j">Concierge labor saved alone ($3.2k–$13k/yr) covers it several times over. Read-only dashboard + weekly digest.</div></div>
-          <div class="tier feat"><div class="t">Property · 150–350 keys</div><div class="p">$750–1,400<small>/mo</small></div><div class="rm">$48–84 / room / yr</div><div class="j">The backbone tier. Break-even is roughly one incremental spa booking a month — and the calculator above shows that against your own numbers, never ours. Add-ons (risk-doc, owner reporting) lift to ~$1,550 without renegotiating the headline.</div></div>
-          <div class="tier"><div class="t">Brand · 350+ keys, multi-prop</div><div class="p">$2,000–3,500<small>/mo</small></div><div class="rm">$48–70 / room / yr</div><div class="j">Below INTELITY enterprise. Per-slug roll-up, no cross-hotel comparison.<span class="rep-only" hidden> Captures ~30% of attributable Stay-Close value at scale.</span></div></div>
+          <div class="tier"><div class="t">Concierge · &lt;150 keys</div><div class="p">$300<small>/mo</small></div><div class="rm">$36–90 / room / yr</div><div class="j">The entry tier. Read-only dashboard + weekly digest.</div></div>
+          <div class="tier feat"><div class="t">Property · 150–350 keys</div><div class="p">$750–1,400<small>/mo</small></div><div class="rm">$48–84 / room / yr</div><div class="j">The backbone tier. Add-ons (risk-doc, owner reporting) lift to ~$1,550 without renegotiating the headline.</div></div>
+          <div class="tier"><div class="t">Brand · 350+ keys, multi-prop</div><div class="p">$2,000–3,500<small>/mo</small></div><div class="rm">$48–70 / room / yr</div><div class="j">Below INTELITY enterprise. Per-slug roll-up, no cross-hotel comparison.</div></div>
         </div>
         <div class="comps" aria-label="Comparable per-room pricing">
           <span class="c"><b>Duve</b> ~$65/room/yr (analytics incl.)</span>
@@ -898,8 +871,8 @@
           <span class="c"><b>Cloud PMS</b> $3–15/room/mo</span>
           <span class="c">Hotel tech = 1.4–3% of revenue</span>
         </div>
-        <div class="saypill">“At this rate it costs about one comp room every twelve days, or one incremental spa booking a month to break even — and this dashboard shows you, in your own data, whether that booking actually happened.” <span style="color:#bfe0ec">Every tier lands at or below Duve, the cleanest analytics-included comparable, while we’re Kauaʻi-specific.</span></div>
-        <div class="note" style="color:#bfe0ec;margin-top:14px">Repricing from the legacy annual to this monthly model is a <b>qualified yes</b>: justified in principle by the per-room math, but earned only once (1) the deployed app emits real events, (2) the funnel is measured not assumed, (3) 1–2 reference logos sign at intro pricing, (4) the liability lever is attorney-cleared. Until then: free pilot, not the monthly.</div>
+        <div class="saypill">“Start free for 30 days, no card. At day 30 the dashboard shows you, in your own data, exactly what guests did in your app — then you decide whether it’s worth the monthly.” <span style="color:#bfe0ec">Every tier lands at or below Duve, the cleanest analytics-included comparable, while we’re Kauaʻi-specific.</span></div>
+        <div class="note" style="color:#bfe0ec;margin-top:14px">Repricing from the legacy annual to this monthly model is earned only once (1) the deployed app emits real events, (2) the funnel is measured not assumed, (3) 1–2 reference logos sign at intro pricing, (4) the liability lever is attorney-cleared. Until then: free pilot, not the monthly.</div>
       </div>
     </section>
 
@@ -1000,33 +973,6 @@
     </div><!-- /view-promos -->
   </div>
 </div>
-
-<script>
-  // The Math — modeled value calculator (all inputs editable, outputs clearly modeled)
-  function fmtK(n){ return n>=1000 ? "~$"+(n/1000).toFixed(n<10000?1:0)+"k" : "~$"+Math.round(n); }
-  function v(id){ return +document.getElementById(id).value||0; }
-  function set(id,t){ document.getElementById(id).textContent=t; }
-  var touched=false;  // nothing computes until the GM edits a field — no asserted result on load
-  function calc(){
-    if(!touched){ ['oClicks','oMargin','oLabor','oFloor','oRatio'].forEach(function(id){ set(id,'—'); }); return; }
-    var renders=v('renders'), ctr=v('ctr')/100, conv=v('conv')/100,
-        ticket=v('ticket'), margin=v('margin')/100, laborWk=v('labor');
-    var clicks=renders*ctr;
-    var marginYr=clicks*52*conv*ticket*margin;
-    var laborYr=laborWk*52;
-    var floor=marginYr+laborYr;
-    set('oClicks',"~"+Math.round(clicks));
-    set('oMargin',fmtK(marginYr));
-    set('oLabor',fmtK(laborYr));
-    set('oFloor',fmtK(floor));
-    var lo=floor/(1400*12), hi=floor/(750*12);               // vs Property tier $1,400 / $750 per mo
-    set('oRatio',"~"+lo.toFixed(1)+"–"+hi.toFixed(1)+"×");
-  }
-  ['renders','ctr','conv','ticket','margin','labor'].forEach(function(id){
-    document.getElementById(id).addEventListener('input',function(){ touched=true; calc(); });
-  });
-  calc();
-</script>
 
 <script>
 /* ============ PLACES CONTROL ============ */
@@ -1396,7 +1342,7 @@
           if(nsSub){
             nsSub.textContent = 'Measured POI taps for this property over the last ' + effPeriod +
               ' days. A per-occupied-unit rate needs your occupancy figure (' + HEADER_KEYS +
-              ' keys on file) — enter it in Your numbers below; we show the raw measured count rather than invent an occupancy.';
+              ' keys on file); we show the raw measured count rather than invent an occupancy.';
           }
         }
 
@@ -1544,9 +1490,9 @@
   // Each stop: which view tab to open, what to highlight, and what to say.
   var STEPS = [
     { center:true, title:'Welcome to your dashboard',
-      body:'Two minutes, nine stops — then it’s yours. This is where you’ll see what guests do in your app and control what it recommends. You can replay this anytime with the <b>Tour</b> button up top.' },
+      body:'Two minutes, eight stops — then it’s yours. This is where you’ll see what guests do in your app and control what it recommends. You can replay this anytime with the <b>Tour</b> button up top.' },
     { view:'overview', sel:'.viewtabs', title:'Seven views, one dashboard',
-      body:'<b>Overview</b> is the day-to-day pulse and <b>Guest activity</b> the detail. <b>Stay-Close</b> and <b>Shop</b> hold your amenities and products, <b>Pricing</b> is your payback math, <b>Places</b> controls what your app recommends, and <b>Promotions</b> drops a PDF flyer into the guide. Everything here is your property only.' },
+      body:'<b>Overview</b> is the day-to-day pulse and <b>Guest activity</b> the detail. <b>Stay-Close</b> and <b>Shop</b> hold your amenities and products, <b>Pricing</b> lays out what it costs and the free pilot, <b>Places</b> controls what your app recommends, and <b>Promotions</b> drops a PDF flyer into the guide. Everything here is your property only.' },
     { view:'overview', sel:'.hero .ns', title:'The one number to watch',
       body:'How often guests open a beach, trail, or restaurant in the app to plan their day — per occupied unit. Anything tagged <b>Sample</b> is illustrative until your telemetry connects; live mode only ever shows measured data.' },
     { view:'guests', sel:'#view-guests section', title:'What guests actually want',
@@ -1555,8 +1501,6 @@
       body:'When the ocean is the wrong call, the app steers guests to what you offer instead — spa, dining, cabanas. Add or edit your amenity menu right here, plus your own tour-desk affiliate IDs just below it. The menu exports here; your IDs ride the <b>partner config</b> exported from the Promotions tab.' },
     { view:'shop', sel:'#mgProducts', title:'Your shop, inside the app',
       body:'Add the products you want guests to see. The app counts taps as interest — checkout stays in your store, on your rails. Metrics stay <b>Sample</b> until your telemetry connects.' },
-    { view:'pricing', sel:'.card.calc', title:'Your numbers, your math',
-      body:'Type your own occupancy, rates, and margins — the payback computes from <b>what you enter</b>, not from our claims. Nothing calculates until you touch a field.' },
     { view:'places', sel:'.pl-safety', title:'Safety comes pre-set',
       body:'Hazardous spots — no lifeguard, warning-only beaches, rip channels — start as <b>⊘ Not recommended</b>. They can’t be deleted from a safety app, and their hazard warnings always stay visible to guests.' },
     { view:'places', sel:'.pl-bar', title:'Curate in seconds',

@@ -100,25 +100,6 @@
   .btn.sec:hover{border-color:var(--gold);color:var(--gold)}
   .btn.wide{flex:none;width:100%}
 
-  /* ROI */
-  .roi{padding:18px}
-  .roi .ctrls{display:flex;flex-wrap:wrap;gap:18px;margin-bottom:6px}
-  .ctrl{flex:1 1 200px}
-  .ctrl label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink3);margin-bottom:7px}
-  .ctrl label b{color:var(--ink);font-weight:500}
-  input[type=range]{width:100%;accent-color:var(--gold)}
-  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:18px}
-  .stat{padding:14px 15px;background:rgba(9,18,25,.4);border:1px solid var(--line);border-radius:13px}
-  .stat .k{font-size:12px;color:var(--ink3);margin-bottom:5px;display:flex;align-items:center;gap:6px}
-  .stat .v{font-size:23px;font-weight:500;letter-spacing:.2px}
-  .stat .v small{font-size:13px;color:var(--ink3);font-weight:400}
-  .stat .sub{font-size:11.5px;color:var(--ink3);margin-top:3px}
-  .vs{font-size:11.5px;padding:2px 8px;border-radius:20px;margin-left:6px}
-  .vs.below{background:rgba(93,202,165,.16);color:var(--calm)}
-  .vs.above{background:rgba(239,200,115,.16);color:var(--caution)}
-  .tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:5px;border:1px solid var(--line-2);color:var(--ink3);margin-left:6px}
-  .note{font-size:11.5px;color:var(--ink3);margin-top:16px;line-height:1.5}
-
   /* proposal */
   .prop{padding:18px}
   .prop h2{font-size:18px;font-weight:500;margin:0 0 3px}
@@ -163,7 +144,6 @@
 
   <nav class="tabs glass" role="tablist">
     <button class="on" data-panel="demo" role="tab"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Demo</button>
-    <button data-panel="roi" role="tab"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-6"/></svg> ROI</button>
     <button data-panel="prop" role="tab"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg> Proposal</button>
   </nav>
 
@@ -171,45 +151,6 @@
   <section class="panel on" id="panel-demo">
     <p class="lead"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M9 18l6-6-6-6"/></svg> Tap any card to show <span class="who">&nbsp;what your guests see&nbsp;</span> then open it live.</p>
     <div class="tiles" id="tiles"></div>
-  </section>
-
-  <!-- ROI -->
-  <section class="panel" id="panel-roi">
-    <div class="glass roi">
-      <div class="ctrls">
-        <div class="ctrl">
-          <label>Rooms / units <b id="roomsV">120</b></label>
-          <input type="range" id="rooms" min="6" max="400" value="120" step="1">
-        </div>
-        <div class="ctrl">
-          <label>Occupancy <b id="occV">80%</b></label>
-          <input type="range" id="occ" min="40" max="100" value="80" step="1">
-        </div>
-      </div>
-      <div class="grid2">
-        <div class="stat">
-          <div class="k"><svg class="ic" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Your price <span class="tag">band</span></div>
-          <div class="v" id="priceV">$1,200<small>/mo</small></div>
-          <div class="sub" id="priceSub">Mid hotel · ≈ $14,400 / yr</div>
-        </div>
-        <div class="stat">
-          <div class="k"><svg class="ic" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M3 21h18M6 21V9l6-4 6 4v12M10 21v-5h4v5"/></svg> Per room / year <span class="tag">measured</span></div>
-          <div class="v" id="perRoomV">$120</div>
-          <div class="sub" id="perRoomSub">Duve ~$72 · Crave ~$130 / room / yr</div>
-        </div>
-        <div class="stat">
-          <div class="k"><svg class="ic" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M20 6L9 17l-5-5"/></svg> Break-even <span class="tag">modeled</span></div>
-          <div class="v" id="beV">111<small>&nbsp;bookings/yr</small></div>
-          <div class="sub" id="beSub">≈ one extra booking every 3 days</div>
-        </div>
-        <div class="stat">
-          <div class="k"><svg class="ic" viewBox="0 0 24 24" style="width:15px;height:15px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Front-desk time saved <span class="tag">modeled</span></div>
-          <div class="v" id="hrsV">~250<small>&nbsp;hrs/yr</small></div>
-          <div class="sub" id="hrsSub">≈ $7,500 of desk time absorbed</div>
-        </div>
-      </div>
-      <p class="note" id="roiNote"></p>
-    </div>
   </section>
 
   <!-- PROPOSAL -->
@@ -243,7 +184,7 @@
         <button class="btn sec" id="copyLink"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg> Copy demo link</button>
       </div>
 
-      <p class="disc" id="disc">Enter a property name above to personalise this page. Figures are labeled measured / modeled — the pilot measures this property's real numbers. Liability and duty-of-care language is not a legal guarantee and is pending counsel review.</p>
+      <p class="disc" id="disc">Enter a property name above to personalise this page. The pilot shows this property's own real numbers on your dashboard at day 30. Liability and duty-of-care language is not a legal guarantee and is pending counsel review.</p>
     </div>
   </section>
 </div>
@@ -367,38 +308,6 @@
     };
   });
 
-  // ---- ROI ----
-  var rooms=$("#rooms"), occ=$("#occ");
-  function band(n){
-    if(n<=20) return {name:"Inn / B&B", mo:450};
-    if(n<=75) return {name:"Boutique", mo:875};
-    if(n<=200) return {name:"Mid hotel", mo:1200};
-    return {name:"Resort", mo: n>=350?3000:2000};
-  }
-  function money(n){ return "$"+Math.round(n).toLocaleString(); }
-  function calcROI(){
-    var n=+rooms.value, o=+occ.value/100;
-    var b=band(n), yr=b.mo*12, per=yr/n;
-    $("#roomsV").textContent=n; $("#occV").textContent=(+occ.value)+"%";
-    $("#priceV").innerHTML=money(b.mo)+"<small>/mo</small>";
-    $("#priceSub").textContent=b.name+" · ≈ "+money(yr)+" / yr";
-    $("#perRoomV").textContent=money(per);
-    $("#perRoomSub").innerHTML="You're <b style='color:var(--ink);font-weight:500'>"+(per>130?"above Crave":per>72?"in the Duve–Crave range":"below Duve")+"</b> · Duve ~$72, Crave ~$130";
-    var be=Math.round(yr/130); var days=(365/be);
-    $("#beV").innerHTML=be+"<small>&nbsp;bookings/yr</small>";
-    $("#beSub").textContent="≈ one extra booking every "+(days>=1?Math.round(days):days.toFixed(1))+" day"+(Math.round(days)===1?"":"s");
-    // desk time: occupied rooms * ~1 beach question / occupied room / week * 3 min
-    var occRooms=n*o, qWeek=occRooms*1, hrs=qWeek*52*3/60, val=hrs*30;
-    $("#hrsV").innerHTML="~"+Math.round(hrs/10)*10+"<small>&nbsp;hrs/yr</small>";
-    $("#hrsSub").textContent="≈ "+money(Math.round(val/100)*100)+" of desk time absorbed";
-    $("#roiNote").innerHTML="At "+n+" rooms you're the <b style='color:var(--ink);font-weight:500'>"+b.name+"</b> band. "+
-      "<span style='color:var(--ink2)'>In our model the guide earns the license back before it costs you anything: break-even at this band is roughly one extra spa, dinner or tour booking every "+(days>=1?Math.round(days):days.toFixed(1))+" days. Everything above that is the property's upside: your promotions, your Stay-Close days, your tour desk's commissions.</span> "+
-      "Front-desk and break-even figures are <b style='color:var(--ink);font-weight:500'>modeled</b>; the pilot measures the real number for this property.";
-    // sync proposal
-    $("#pBand").textContent=b.name; $("#pPrice").textContent=money(b.mo)+" / mo"; $("#pPer").textContent=money(per);
-  }
-  rooms.oninput=calcROI; occ.oninput=calcROI;
-
   // ---- proposal / personalisation ----
   function syncName(){
     var dn=displayName();
@@ -411,7 +320,7 @@
   $("#startPilot").onclick=function(){
     var dn=displayName();
     var subj=encodeURIComponent("OceanSafe free 30-day pilot — "+dn);
-    var body=encodeURIComponent("Property: "+dn+"\nNearest beaches: "+(selBeaches.join(", ")||"—")+"\nRooms: "+rooms.value+
+    var body=encodeURIComponent("Property: "+dn+"\nNearest beaches: "+(selBeaches.join(", ")||"—")+
       "\n\nStarting a free 30-day pilot (no card). Please confirm the go-live date and who receives the room placards.");
     window.location.href="mailto:?subject="+subj+"&body="+body;
   };
@@ -426,7 +335,6 @@
 
   // init
   var saved=localStorage.getItem("jadeProperty"); if(saved){ pname.value=saved; syncName(); }
-  calcROI();
 })();
 </script>
 </body>
