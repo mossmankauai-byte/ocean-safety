@@ -8630,7 +8630,7 @@ function updateFreshnessIndicator(){
     } else {
       var cached = _lsLoadCache();
       // a safety board must not show day-old surf: cache is for wifi blips, not outages
-      if (cached && (Date.now() - cached.t) > 6*60*60*1000) cached = null;
+      if (cached && (Date.now() - new Date(cached.t).getTime()) > 6*60*60*1000) cached = null;
       if (cached){ rows = cached.rows; asOf = new Date(cached.t); fromCache = true; }
     }
     var card = document.getElementById('oslCard');
