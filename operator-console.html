@@ -349,6 +349,49 @@
   .checklist .ck.na{background:var(--hair-soft);color:var(--muted)}
   .checklist .st{margin-left:auto;font-size:11px;color:var(--muted);font-weight:600}
   .gapadd{font-size:11px;font-weight:600;color:var(--sea);white-space:nowrap}
+
+  /* ============ "WHAT GUESTS SEE" LIVE PREVIEWS (2026-07-08) ============ */
+  .gp-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .gp-chips{display:flex;gap:6px;flex-wrap:wrap}
+  .gp-chip{appearance:none;font:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink-2);
+    background:var(--surf-2);border:1px solid var(--hair);border-radius:999px;padding:6px 12px}
+  .gp-chip:hover{border-color:#2f5b66}
+  .gp-chip[aria-pressed="true"]{background:var(--sea);color:#06232c;border-color:var(--sea)}
+  .gp-replay{appearance:none;font:inherit;font-size:12px;font-weight:700;cursor:pointer;color:var(--sea);
+    background:transparent;border:1px solid rgba(92,196,220,.45);border-radius:999px;padding:6px 13px;
+    margin-left:auto;display:inline-flex;align-items:center;gap:6px}
+  .gp-replay:hover{border-color:var(--sea);background:rgba(92,196,220,.10)}
+  /* the phone frame — a light guest-app island inside the dark console */
+  .gp-phone{width:340px;max-width:100%;margin:16px auto 6px;background:#071219;border-radius:38px;padding:11px;
+    border:1px solid rgba(255,255,255,.10);box-shadow:0 22px 48px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.10)}
+  .gp-screen{
+    /* the guest app's own light palette, scoped to the screen */
+    --ocean:#0f4c5c;--ocean-lt:#ebf6fa;--ink:#1a1a1a;--mute:#6b7280;--border:#ede8d6;--warm:#fdfaf2;
+    position:relative;background:#fefbf3;border-radius:28px;overflow:hidden;padding:36px 12px 18px;min-height:210px;
+    color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-variant-numeric:normal;text-align:left}
+  .gp-screen::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:84px;height:16px;background:#071219;border-radius:9px}
+  .gp-empty{padding:46px 18px;text-align:center;font-size:13px;color:var(--mute);line-height:1.5}
+  .gp-note{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+  /* guest shop card anatomy (mirrors .os-store-* in the guest app) */
+  .gp-shop{background:#fff;border:1px solid var(--border);border-radius:16px;padding:15px}
+  .gp-shead{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+  .gp-slogo{width:40px;height:40px;border-radius:10px;background:var(--ocean);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;flex:0 0 auto}
+  .gp-sname{font-size:15px;font-weight:800;line-height:1.1;color:var(--ink)}
+  .gp-smeta{font-size:11.5px;color:var(--mute);margin-top:2px}
+  .gp-spill{margin-left:auto;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:4px 9px;border-radius:20px;white-space:nowrap;background:var(--ocean-lt);color:#0a5a72}
+  .gp-prods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .gp-prod{border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+  .gp-pimg{aspect-ratio:1/1;background:linear-gradient(135deg,#eef4f6,#dbe8ec);display:flex;align-items:center;justify-content:center}
+  .gp-phi{font-size:44px;line-height:1;color:#9fb2bb;font-weight:600}
+  .gp-pbody{padding:9px 10px 11px;display:flex;flex-direction:column;gap:5px;flex:1}
+  .gp-ptitle{font-size:12.5px;font-weight:600;line-height:1.25;color:var(--ink)}
+  .gp-pprice{font-size:14px;font-weight:800;color:var(--ink)}
+  .gp-pbuy{margin-top:6px;border:0;border-radius:9px;padding:9px;font:inherit;font-size:12.5px;font-weight:700;text-align:center;background:var(--ocean);color:#fff;cursor:default}
+  /* pop-in: panel slides up + fades, rows stagger (first reveal per load + Replay) */
+  @keyframes gpPop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .gp-pop .gp-panel{animation:gpPop .38s cubic-bezier(.2,.85,.35,1) both}
+  .gp-pop .gp-it{animation:gpPop .34s cubic-bezier(.2,.85,.35,1) both}
+  @media (prefers-reduced-motion:reduce){.gp-pop .gp-panel,.gp-pop .gp-it{animation:none}}
 </style>
 </head>
 <body class="textured">
@@ -670,11 +713,31 @@
       <div class="card" id="mgAmenities">
         <div class="mg-list" id="amList"></div>
         <div class="mg-add">
-          <input id="amA" placeholder="Amenity — e.g. Anara Spa" autocomplete="off">
+          <input id="amA" placeholder="Amenity — e.g. The Spa" autocomplete="off">
           <input id="amB" placeholder="Detail (optional) — e.g. lobby level · 9a–7p · ext. 53" autocomplete="off">
           <button class="pl-btn primary" id="amAdd">Add amenity</button>
         </div>
         <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Export config</button></div>
+      </div>
+    </section>
+    <!-- WHAT GUESTS SEE — STAY-CLOSE LIVE PREVIEW -->
+    <section>
+      <div class="sec-h"><h2>What guests see — live preview</h2><p>Your draft menu above, rendered exactly as the guest app shows it on a bad-ocean day.</p></div>
+      <div class="card">
+        <div class="gp-top">
+          <div class="gp-chips" role="group" aria-label="Preview ocean condition" id="gpAmChips">
+            <button type="button" class="gp-chip" data-cond="calm" aria-pressed="true">Calm</button>
+            <button type="button" class="gp-chip" data-cond="red_flag" aria-pressed="false">High surf</button>
+            <button type="button" class="gp-chip" data-cond="brown_water" aria-pressed="false">Brown water</button>
+            <button type="button" class="gp-chip" data-cond="rain" aria-pressed="false">Rainy day</button>
+          </div>
+          <button type="button" class="gp-replay" id="gpAmReplay" title="Replay the pop-in animation">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/></svg>
+            Replay
+          </button>
+        </div>
+        <div class="gp-phone"><div class="gp-screen"><div id="gpAmenity"></div></div></div>
+        <div class="gp-note">A preview of what guests see — built live from your draft menu above, not measured data. Tap an amenity to expand it, just like a guest would.</div>
       </div>
     </section>
     <!-- BAD OCEAN DAY SAVES -->
@@ -740,6 +803,20 @@
           <button class="pl-btn primary" id="prAdd">Add product</button>
         </div>
         <div class="mg-foot"><span class="cap"><b id="prCount">0</b> products in your shop</span><span style="flex:1"></span><button class="pl-btn" id="prReset">Reset</button><button class="pl-btn primary" id="prExport">Export config</button></div>
+      </div>
+    </section>
+    <!-- WHAT GUESTS SEE — SHOP LIVE PREVIEW -->
+    <section>
+      <div class="sec-h"><h2>What guests see — live preview</h2><p>Your draft product list above, rendered as the in-app shop guests browse.</p></div>
+      <div class="card">
+        <div class="gp-top">
+          <button type="button" class="gp-replay" id="gpPrReplay" title="Replay the pop-in animation">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/></svg>
+            Replay
+          </button>
+        </div>
+        <div class="gp-phone"><div class="gp-screen"><div id="gpShop"></div></div></div>
+        <div class="gp-note">A preview of what guests see — built live from your draft list above, not measured data. The Buy button is inert here; real checkout stays on your rails.</div>
       </div>
     </section>
     <!-- SHOP & TOWN -->
@@ -910,7 +987,7 @@
   function fmtK(n){ return n>=1000 ? "~$"+(n/1000).toFixed(n<10000?1:0)+"k" : "~$"+Math.round(n); }
   function v(id){ return +document.getElementById(id).value||0; }
   function set(id,t){ document.getElementById(id).textContent=t; }
-  var touched=false;  // nothing computes until the GM edits a field — no asserted result on load
+  var touched=false;  // nothing computes until the operator edits a field — no asserted result on load
   function calc(){
     if(!touched){ ['oClicks','oMargin','oLabor','oFloor','oRatio'].forEach(function(id){ set(id,'—'); }); return; }
     var renders=v('renders'), ctr=v('ctr')/100, conv=v('conv')/100,
@@ -1557,6 +1634,7 @@
       var badge = document.getElementById(cfg.ids.badge);
       if(badge) badge.textContent = items.length || '—';
       save();
+      if(cfg.onChange) cfg.onChange(items);
     }
     document.getElementById(cfg.ids.list).addEventListener('click', function(e){
       var x = e.target.closest('.mg-x'); if(!x) return;
