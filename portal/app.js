@@ -29,12 +29,12 @@ window.demoData = function () {
     const fulfillment = fulfills[n % fulfills.length];
     const status = statuses[n % statuses.length];
     const o = { id, total_cents: amt, status, fulfillment, created_at: d.toISOString() };
-    if (fulfillment === "pickup") o.pickup_code = "P" + String(1000 + n).slice(-4);
+    if (fulfillment === "pickup") o.pickup_code = ["NALU", "HONU", "REEF", "TIDE", "SURF", "PALM", "WAVE", "SAND"][n % 8];
     if (fulfillment === "ship" && status === "shipped") o.tracking = "1Z" + String(900000 + n);
     orders.push(o);
     items.push({ order_id: id, title: titles[n % titles.length], qty: 1, price_cents: amt });
   });
-  orders.push({ id: "demo-0", total_cents: 3400, status: "pending", fulfillment: "pickup", pickup_code: "P0000", created_at: today.toISOString() });
+  orders.push({ id: "demo-0", total_cents: 3400, status: "pending", fulfillment: "pickup", pickup_code: "LIMU", created_at: today.toISOString() });
   // Rental examples (orders.rental_return_due, 0015) — clearly demo: one due
   // back tomorrow 4pm, one overdue since yesterday 10am. The pickup code
   // doubles as the claim ticket; deposits/reminder texts live in the seller's
@@ -137,4 +137,88 @@ function parseAsin(input) {
 }
 function affiliateLink(asin, tag) {
   return asin && tag ? `https://www.amazon.com/dp/${asin}/ref=nosim?tag=${encodeURIComponent(tag)}` : null;
+}
+
+// ── first-open guided tour ───────────────────────────────────────────────────
+// Ported from operator-console.html's tour engine, restyled light (portal.css).
+// Pages call osPortalTour({ key, steps, button, auto, delay }):
+//   key    localStorage flag — set when the tour finishes (or is skipped)
+//   steps  [{ center:true, title, body } or { sel:"#id", title, body }]
+//   button optional element that replays the tour on click
+//   auto   run once automatically when the key isn't set yet
+// Stops whose target is missing or hidden are dropped when the tour starts, so
+// a partial page (say, Square not connected yet) never shows a dead stop — and
+// if NO target is visible the tour doesn't run and the key is NOT consumed.
+function osPortalTour(opts) {
+  const root = document.createElement("div");
+  root.className = "os-tour";
+  root.innerHTML =
+    '<div class="tor-block"></div><div class="tor-hi off"></div>' +
+    '<div class="tor-card"><div class="tc-top"><span class="tc-step"></span><button type="button" class="tc-skip">Skip tour</button></div>' +
+    "<h4></h4><p></p>" +
+    '<div class="tc-foot"><span class="tor-dots"></span><button type="button" class="tor-btn tc-back">Back</button><button type="button" class="tor-btn primary tc-next">Next</button></div></div>';
+  document.body.appendChild(root);
+  const hi = $(".tor-hi", root), card = $(".tor-card", root),
+    stepEl = $(".tc-step", root), titleEl = $("h4", card), bodyEl = $("p", card),
+    dotsEl = $(".tor-dots", root), backBtn = $(".tc-back", root),
+    nextBtn = $(".tc-next", root), skipBtn = $(".tc-skip", root);
+
+  let STEPS = [], idx = -1, curEl = null, active = false;
+  const shown = (n) => !!(n && n.getClientRects().length && getComputedStyle(n).visibility !== "hidden");
+
+  function position() {
+    if (!active || !curEl) return;
+    const r = curEl.getBoundingClientRect(), pad = 9;
+    hi.style.top = r.top - pad + "px"; hi.style.left = r.left - pad + "px";
+    hi.style.width = r.width + pad * 2 + "px"; hi.style.height = r.height + pad * 2 + "px";
+    const ch = card.offsetHeight, cw = card.offsetWidth, vw = innerWidth, vh = innerHeight;
+    const top = r.bottom + pad + 14 + ch < vh ? r.bottom + pad + 14 : Math.max(12, r.top - pad - 14 - ch);
+    const left = Math.min(Math.max(12, r.left), vw - cw - 12);
+    card.style.top = top + "px"; card.style.left = left + "px";
+  }
+  function setStep(i) {
+    idx = i; const s = STEPS[i];
+    stepEl.textContent = "Step " + (i + 1) + " of " + STEPS.length;
+    titleEl.innerHTML = s.title; bodyEl.innerHTML = s.body;
+    $$("i", dotsEl).forEach((d, j) => { d.className = j === i ? "on" : ""; });
+    backBtn.style.display = i === 0 ? "none" : "";
+    nextBtn.textContent = STEPS.length === 1 ? "Got it" : i === STEPS.length - 1 ? "Finish" : i === 0 ? "Start the tour" : "Next";
+    if (s.center) {
+      // "tc-center", not "center" — portal.css already uses .center as a
+      // full-viewport flex utility, which would stretch the card to 100vh.
+      curEl = null; card.classList.add("tc-center"); hi.classList.add("off");
+      card.style.top = ""; card.style.left = "";
+      return;
+    }
+    card.classList.remove("tc-center");
+    curEl = document.querySelector(s.sel);
+    // belt-and-suspenders: a target that vanished mid-tour skips forward
+    if (!shown(curEl)) { if (i < STEPS.length - 1) setStep(i + 1); else end(true); return; }
+    hi.classList.remove("off");
+    curEl.scrollIntoView({ block: "center" });
+    position();
+    setTimeout(position, 250);
+  }
+  function start() {
+    STEPS = opts.steps.filter((s) => s.center || shown(document.querySelector(s.sel)));
+    if (!STEPS.some((s) => !s.center)) return; // nothing to point at — don't run, don't consume the key
+    dotsEl.innerHTML = STEPS.length === 1 ? "" : STEPS.map(() => "<i></i>").join("");
+    $(".tc-top", card).style.display = STEPS.length === 1 ? "none" : "";
+    active = true; root.classList.add("on"); setStep(0);
+  }
+  function end(markDone) {
+    active = false; root.classList.remove("on"); curEl = null; hi.classList.add("off");
+    if (markDone) { try { localStorage.setItem(opts.key, "1"); } catch (_) {} }
+  }
+  nextBtn.addEventListener("click", () => { if (idx >= STEPS.length - 1) end(true); else setStep(idx + 1); });
+  backBtn.addEventListener("click", () => { if (idx > 0) setStep(idx - 1); });
+  skipBtn.addEventListener("click", () => end(true));
+  document.addEventListener("keydown", (e) => { if (active && e.key === "Escape") end(true); });
+  let raf = false;
+  const onMove = () => { if (raf) return; raf = true; requestAnimationFrame(() => { raf = false; position(); }); };
+  addEventListener("scroll", onMove, true); addEventListener("resize", onMove);
+  if (opts.button) opts.button.addEventListener("click", (e) => { e.preventDefault(); start(); });
+  let done = null;
+  try { done = localStorage.getItem(opts.key); } catch (_) {}
+  if (opts.auto && !done) setTimeout(start, opts.delay || 700);
 }

@@ -1,48 +1,55 @@
 {
-  "_note": "DEMO partner config for the ?ref=demo-resort pilot flow. All values are placeholders: affiliate IDs are valid-shaped but fake (DEMO123 / P00000000 pay nobody), the phone is a 555 number, the email is example.com. Copy this shape for a real hotel; deploying = committing /partner-config/<slug>.json to the live repo.",
-  "name": "Your Resort",
-  "screenBeaches": ["poipu", "mahaulepu", "shipwreck", "kalapaki", "salt_pond"],
-  "affiliates": {
-    "gyg_partner_id": "DEMO123",
-    "viator_pid": "P00000000"
+ "_note": "DEMO partner config for the ?ref=demo-resort pilot flow. All values are placeholders: affiliate IDs are valid-shaped but fake (DEMO123 / P00000000 pay nobody), the phone is a 555 number, the email is example.com. Copy this shape for a real hotel; deploying = committing /partner-config/<slug>.json to the live repo.",
+ "name": "Your Resort",
+ "screenBeaches": [
+  "poipu",
+  "mahaulepu",
+  "shipwreck",
+  "kalapaki",
+  "salt_pond"
+ ],
+ "affiliates": {
+  "gyg_partner_id": "DEMO123",
+  "viator_pid": "P00000000"
+ },
+ "promotions": [
+  {
+   "title": "Sunset dinner — guests save 15%",
+   "pdf": "https://ocean-safety.netlify.app/assets/flyers/sunset-dinner.pdf",
+   "expires": "2030-12-31"
   },
-  "promotions": [
-    {
-      "title": "Sunset dinner — guests save 15%",
-      "pdf": "data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj4KZW5kb2JqCjMgMCBvYmoKPDwgL1R5cGUgL1BhZ2UgL1BhcmVudCAyIDAgUiAvTWVkaWFCb3ggWzAgMCA2MTIgNzkyXSAvUmVzb3VyY2VzIDw8IC9Gb250IDw8IC9GMSA0IDAgUiA+PiA+PiAvQ29udGVudHMgNSAwIFIgPj4KZW5kb2JqCjQgMCBvYmoKPDwgL1R5cGUgL0ZvbnQgL1N1YnR5cGUgL1R5cGUxIC9CYXNlRm9udCAvSGVsdmV0aWNhID4+CmVuZG9iago1IDAgb2JqCjw8IC9MZW5ndGggMzM5ID4+CnN0cmVhbQpCVCAvRjEgMjggVGYgNzIgNzAwIFRkIChZb3VyIFJlc29ydCkgVGogRVQKQlQgL0YxIDE2IFRmIDcyIDY2OCBUZCAoU2FtcGxlIG9mZmVyIGZseWVyKSBUaiBFVApCVCAvRjEgMTIgVGYgNzIgNjIwIFRkIChTdW5zZXQgZGlubmVyIC0gcmVzb3J0IGd1ZXN0cyBzYXZlIDE1JS4pIFRqIEVUCkJUIC9GMSAxMiBUZiA3MiA2MDAgVGQgKFNob3cgdGhpcyBmbHllciBhdCB0aGUgaG9zdCBzdGFuZC4gRGVtbyBkb2N1bWVudCBmb3IgdGhlKSBUaiBFVApCVCAvRjEgMTIgVGYgNzIgNTg0IFRkIChPY2VhblNhZmUgcGlsb3QgLSByZXBsYWNlIHdpdGggdGhlIHByb3BlcnR5J3MgcmVhbCBQREYuKSBUaiBFVAoKZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgNgowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA1OCAwMDAwMCBuIAowMDAwMDAwMTE1IDAwMDAwIG4gCjAwMDAwMDAyNDEgMDAwMDAgbiAKMDAwMDAwMDMxMSAwMDAwMCBuIAp0cmFpbGVyCjw8IC9TaXplIDYgL1Jvb3QgMSAwIFIgPj4Kc3RhcnR4cmVmCjcwMQolJUVPRgo=",
-      "expires": "2030-12-31"
-    },
-    {
-      "title": "Spa morning — off-peak pricing before 11am",
-      "expires": "2030-12-31"
-    },
-    {
-      "title": "Expired example — must never render",
-      "expires": "2020-01-01"
-    }
-  ],
-  "tourDesk": {
-    "phone": "+18085550100",
-    "email": "tourdesk@example.com"
+  {
+   "title": "Spa morning — off-peak pricing before 11am",
+   "expires": "2030-12-31",
+   "pdf": "https://ocean-safety.netlify.app/assets/flyers/spa-morning.pdf"
   },
-  "amenities": [
-    {
-      "name": "Pool bar",
-      "detail": "Swim-up seats and shaded tables, 10a-6p",
-      "price": "",
-      "showWhen": "red_flag"
-    },
-    {
-      "name": "Spa treatments",
-      "detail": "Lobby level - same-day openings most mornings",
-      "price": "",
-      "showWhen": "rain"
-    },
-    {
-      "name": "Cabana rental",
-      "detail": "Half-day or full-day, towel service included",
-      "price": "$45/half-day",
-      "showWhen": "always"
-    }
-  ]
+  {
+   "title": "Expired example — must never render",
+   "expires": "2020-01-01"
+  }
+ ],
+ "tourDesk": {
+  "phone": "+18085550100",
+  "email": "tourdesk@example.com"
+ },
+ "amenities": [
+  {
+   "name": "Pool bar",
+   "detail": "Swim-up seats and shaded tables, 10a-6p",
+   "price": "",
+   "showWhen": "red_flag"
+  },
+  {
+   "name": "Spa treatments",
+   "detail": "Lobby level - same-day openings most mornings",
+   "price": "",
+   "showWhen": "rain"
+  },
+  {
+   "name": "Cabana rental",
+   "detail": "Half-day or full-day, towel service included",
+   "price": "$45/half-day",
+   "showWhen": "always"
+  }
+ ]
 }

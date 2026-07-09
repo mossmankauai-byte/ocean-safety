@@ -96,3 +96,146 @@ td{padding:10px;border-top:1px solid var(--line);vertical-align:middle}
 .hide{display:none}
 .spin{display:inline-block;width:15px;height:15px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:s .7s linear infinite}
 @keyframes s{to{transform:rotate(360deg)}}
+
+/* ── first-open guided tour (engine lives in app.js: osPortalTour) ──────────── */
+.nav a#tourLink{min-height:44px;display:inline-flex;align-items:center}
+.os-tour{position:fixed;inset:0;z-index:400;display:none}
+.os-tour.on{display:block}
+.tor-block{position:absolute;inset:0;pointer-events:auto}
+.tor-hi{position:fixed;border-radius:14px;pointer-events:none;
+  box-shadow:0 0 0 2px #fff,0 0 0 4000px rgba(10,54,64,.55);
+  transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1),opacity .2s}
+.tor-hi.off{opacity:0}
+.tor-card{position:fixed;width:min(358px,calc(100vw - 28px));background:#fff;color:var(--ink);
+  border:1px solid var(--line);border-radius:16px;padding:16px 17px 14px;pointer-events:auto;
+  box-shadow:0 8px 18px rgba(10,54,64,.18),0 24px 60px rgba(10,54,64,.25);
+  transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1)}
+.tor-card.tc-center{left:50%!important;top:50%!important;transform:translate(-50%,-50%);width:min(410px,calc(100vw - 28px));text-align:center;padding:26px 24px 20px}
+.tor-card .tc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.tor-card .tc-step{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.tor-card .tc-skip{margin-left:auto;appearance:none;background:none;border:0;font:inherit;font-size:11px;font-weight:600;color:var(--mute);cursor:pointer;padding:16px 10px;margin:-14px -6px}
+.tor-card .tc-skip:hover{color:var(--ink);text-decoration:underline}
+.tor-card h4{margin:0 0 6px;font-size:15.5px;letter-spacing:-.01em;color:var(--ink)}
+.tor-card p{margin:0;font-size:12.5px;line-height:1.55;color:#33424d}
+.tor-card p b{color:var(--ink)}
+.tor-card .tc-foot{display:flex;align-items:center;gap:10px;margin-top:14px}
+.tor-card.tc-center .tc-foot{justify-content:center}
+.tor-dots{display:flex;gap:5px;margin-right:auto}
+.tor-card.tc-center .tor-dots{margin-right:0}
+.tor-dots i{width:6px;height:6px;border-radius:50%;background:#d4dde1;transition:background .2s,transform .2s}
+.tor-dots i.on{background:var(--ocean);transform:scale(1.25)}
+.tor-btn{appearance:none;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border-radius:9px;padding:10px 16px;min-height:44px;border:1.5px solid var(--line);background:#fff;color:var(--ink)}
+.tor-btn:hover{border-color:var(--ocean)}
+.tor-btn.primary{background:var(--ocean);color:#fff;border-color:var(--ocean)}
+.tor-btn.primary:hover{background:var(--ocean-deep)}
+@media(max-width:560px){.tor-card{width:calc(100vw - 20px)}}
+
+/* ── "What guests see" storefront preview (products page) ───────────────────
+   Phone-framed miniature of the guest app's store card. The .os-store-* rules
+   below are copied from index.html with the GUEST palette hardcoded (the
+   portal's theme vars differ) and scoped under .gp-screen so nothing leaks
+   into portal styles. Buy is deliberately inert — it's a preview. */
+.gp-phone{width:352px;max-width:100%;margin:0 auto;background:#0d1418;border-radius:46px;padding:11px;
+  box-shadow:0 24px 55px rgba(10,54,64,.30),0 4px 14px rgba(10,54,64,.16)}
+.gp-screen{background:#fefbf3;border-radius:36px;overflow:hidden;min-height:330px;color:#1a1a1a;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+.gp-status{display:flex;align-items:center;justify-content:space-between;padding:13px 24px 0;font-size:11.5px;font-weight:700}
+.gp-sicons{display:flex;align-items:center;gap:5px}
+.gp-sicons svg{display:block}
+.gp-grab{width:38px;height:4px;border-radius:3px;background:#ddd5c2;margin:10px auto}
+#gpShop{padding:0 12px 18px}
+.gp-screen .os-store-shop{background:#fff;border:1px solid #ede8d6;border-radius:16px;padding:15px}
+.gp-screen .os-store-shead{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.gp-screen .os-store-logo{width:40px;height:40px;border-radius:10px;background:#0f4c5c;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;flex:0 0 auto;overflow:hidden}
+.gp-screen .os-store-logo img{width:100%;height:100%;object-fit:cover}
+.gp-screen .os-store-sname{font-size:15px;font-weight:800;line-height:1.1;color:#1a1a1a}
+.gp-screen .os-store-smeta{font-size:11.5px;color:#6b7280;margin-top:2px}
+.gp-screen .os-store-pill{margin-left:auto;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:4px 9px;border-radius:20px;white-space:nowrap}
+.gp-screen .os-store-pill.demo{background:#fff8d4;color:#92600a}
+.gp-screen .os-store-demo{display:flex;align-items:flex-start;gap:8px;background:#fff8d4;border:1px solid #f0e2bf;color:#7c5b14;border-radius:10px;padding:9px 12px;margin:0 0 12px;font-size:11.5px;line-height:1.45}
+.gp-screen .os-store-prods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gp-screen .os-store-prod{border:1px solid #ede8d6;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+.gp-screen .os-store-pimg{position:relative;overflow:hidden;aspect-ratio:1/1;background:linear-gradient(135deg,#eef4f6,#dbe8ec);display:flex;align-items:center;justify-content:center;color:#9fb2bb}
+.gp-screen .os-store-pimg img{width:100%;height:100%;object-fit:cover}
+.gp-screen .os-store-phi{font-size:52px;line-height:1;opacity:.9}
+.gp-screen .os-store-demotag{position:absolute;top:6px;left:6px;background:rgba(28,28,28,.82);color:#fff;font-size:9px;font-weight:800;letter-spacing:.07em;padding:2px 6px;border-radius:5px;text-transform:uppercase;pointer-events:none}
+.gp-screen .os-store-pbody{padding:9px 10px 11px;display:flex;flex-direction:column;gap:5px;flex:1}
+.gp-screen .os-store-ptitle{font-size:12.5px;font-weight:600;line-height:1.25;color:#1a1a1a}
+.gp-screen .os-store-prow{display:flex;align-items:center;gap:6px;margin-top:auto}
+.gp-screen .os-store-price{font-size:14px;font-weight:800;color:#1a1a1a}
+.gp-screen .os-store-btn{margin-top:6px;border:0;border-radius:9px;padding:9px;font:inherit;font-size:12.5px;font-weight:700;text-align:center;display:block;width:100%}
+.gp-screen .os-store-btn.buy{background:#0f4c5c;color:#fff;pointer-events:none}
+.gp-screen .os-store-empty{font-size:13px;color:#6b7280;text-align:center;padding:30px 14px;line-height:1.55}
+
+/* ── dashboard warmth pass: header band, icon chips, stat tiles, hover lift ──
+   Additive only — every functional id (payCard, liveCard, fulfillCard,
+   fulfillPills, orders, ordersCard, notifyCard, tourLink) is untouched. */
+.dash-hero{position:relative;overflow:hidden;border-radius:var(--radius);margin:16px 0 14px;padding:20px 20px 30px;color:#fff;
+  background:linear-gradient(118deg,#0a3640,#0f4c5c 52%,#186178)}
+.dh-waves{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:44px;display:block;pointer-events:none}
+.dh-inner{position:relative;display:flex;align-items:center;gap:14px}
+.dh-mark{width:46px;height:46px;flex:0 0 auto;border-radius:50%;box-shadow:0 0 0 3px rgba(255,255,255,.14),0 4px 12px rgba(0,0,0,.25)}
+.dh-kicker{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#e3c878}
+.dash-hero h1{margin:2px 0 3px;color:#fff}
+.dh-sub{font-size:12.5px;color:rgba(255,255,255,.78)}
+@media(max-width:480px){.dash-hero{padding:16px 16px 26px}.dh-mark{width:38px;height:38px}}
+
+.with-ico{display:flex;align-items:center;gap:8px}
+.icochip{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;flex:0 0 auto}
+.icochip svg{width:14px;height:14px;display:block}
+.ic-teal{background:#e4f0f4;color:#0f4c5c}
+.ic-green{background:#e6f6ec;color:#137a3a}
+.ic-gold{background:#f7f0dc;color:#8a6d1f}
+.ic-blue{background:#ecebff;color:#4b45c6}
+.ic-amber{background:#fdf0dd;color:#92600a}
+
+.card.stat{position:relative;overflow:hidden}
+.card.stat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.st-teal::before{background:linear-gradient(90deg,#0f4c5c,#4a93a8)}
+.st-green::before{background:linear-gradient(90deg,#16a34a,#6fd39a)}
+.st-gold::before{background:linear-gradient(90deg,#c9a84c,#e8d391)}
+
+body.dash .card{transition:transform .16s ease,box-shadow .16s ease}
+@media(hover:hover){body.dash .card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(10,54,64,.09)}}
+/* phones: stack the dashboard grids; the orders table scrolls in its own box
+   (pre-existing 375px blowout — the rental Return-due column is wide) */
+#orders{overflow-x:auto}
+@media(max-width:560px){.grid.two,.grid.three{grid-template-columns:1fr}}
+
+/* ── promotions page: photo header, drag-drop upload card, guest preview ──── */
+.promo-hero{position:relative;overflow:hidden;border-radius:var(--radius);margin:16px 0 0;min-height:150px;
+  display:flex;align-items:flex-end;gap:10px;color:#fff;background:#0f4c5c}
+.promo-hero .ph-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 68%}
+.promo-hero .ph-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,54,64,.08) 18%,rgba(10,54,64,.82))}
+.promo-hero .ph-body{position:relative;padding:18px 18px 14px;flex:1;min-width:0}
+.promo-hero h1{margin:0 0 4px;color:#fff}
+.promo-hero p{margin:0;font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.9);max-width:52ch}
+.promo-hero .btn{position:relative;margin:0 16px 14px;flex:0 0 auto}
+@media(max-width:520px){.promo-hero{flex-direction:column;align-items:stretch}.promo-hero .btn{align-self:flex-start}}
+
+.drop-card{width:100%;margin-top:14px;border:2px dashed #b9cdd4;border-radius:var(--radius);background:#fbfdfe;
+  padding:20px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font:inherit;text-align:left;color:var(--ink);
+  transition:border-color .15s,background .15s}
+.drop-card:hover,.drop-card.over{border-color:var(--ocean);background:#eef6f9}
+.drop-card .dc-ico{width:42px;height:42px;border-radius:12px;background:#e4f0f4;color:#0f4c5c;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.drop-card .dc-ico svg{width:20px;height:20px}
+.drop-card .dc-t{display:block;font-size:14px;font-weight:700}
+.drop-card .dc-s{display:block;font-size:12px;color:var(--mute);margin-top:2px;line-height:1.45}
+
+.promo-card{display:flex;align-items:flex-start;gap:12px;padding:13px 2px;border-top:1px solid var(--line)}
+.promo-card:first-of-type{border-top:0}
+.msg+.promo-card{border-top:0}
+
+/* guest-side promo preview inside the shared phone frame (.gp-phone/.gp-screen) */
+#gpPromo{padding:0 12px 18px}
+.gp-screen .os-promo-map{position:relative;border-radius:14px;min-height:200px;overflow:hidden;
+  background:linear-gradient(155deg,#e7f1f4 0%,#d3e5ea 55%,#cfe0d6 100%)}
+.gp-screen .os-promo-tab{position:absolute;top:10px;left:10px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+  background:rgba(255,255,255,.9);color:#0a5a72;border-radius:20px;padding:4px 9px}
+.gp-screen .os-promo-strip{position:absolute;left:8px;right:8px;bottom:10px;display:flex;flex-direction:column;gap:7px}
+.gp-screen .os-promo-chip{display:flex;align-items:center;gap:9px;padding:8px 12px;background:rgba(255,255,255,.96);
+  border:1px solid rgba(15,76,92,.15);border-radius:11px;box-shadow:0 2px 8px rgba(0,0,0,.14);text-align:left}
+.gp-screen .os-promo-chip svg{width:16px;height:16px;flex-shrink:0;display:block}
+.gp-screen .os-promo-t{font-size:12px;font-weight:700;color:#1c2227;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gp-screen .os-promo-e{font-size:10px;color:#6b7682;white-space:nowrap}
+.gp-screen .os-promo-none{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:#5c6b74;padding:20px;line-height:1.5}

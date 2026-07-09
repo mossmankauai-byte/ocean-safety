@@ -19,11 +19,23 @@
   </nav></div>
 
 <div class="wrap" style="max-width:680px">
-  <div style="display:flex;align-items:center;gap:12px">
-    <h1 style="flex:1">Promotions</h1>
-    <button class="btn primary" id="addBtn">+ Add promotion</button>
+  <!-- photo header — accent only (assets/stock/poipu-sunset.jpg, CC-licensed,
+       served from /assets/ in production). If it can't load, the teal band stays. -->
+  <div class="promo-hero">
+    <img class="ph-img" src="/assets/stock/poipu-sunset.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+    <div class="ph-scrim"></div>
+    <div class="ph-body">
+      <h1>Promotions</h1>
+      <p>Give guests a reason to walk over tonight. Upload a PDF flyer — a sale, a coupon, an event — and it shows on your in-app page while it's live and inside its dates.</p>
+    </div>
+    <button class="btn" id="addBtn" style="background:#fff;color:var(--ocean)">+ Add promotion</button>
   </div>
-  <p class="muted small" style="margin:0 2px">Upload a PDF flyer (a sale, a coupon, an event). It shows in your in-app page while it's live and inside its dates.</p>
+
+  <!-- drag-drop upload — opens the same form below; a dropped PDF lands straight in it -->
+  <button class="drop-card" id="dropCard" type="button">
+    <span class="dc-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+    <span style="flex:1;min-width:0"><span class="dc-t">Drop your PDF flyer here</span><span class="dc-s">or tap to open the form — PDF flyer up to ~4MB. Set the dates and it runs itself.</span></span>
+  </button>
 
   <div class="card hide" id="editor" style="margin-top:14px">
     <h2 id="edTitle">Add promotion</h2>
@@ -49,6 +61,25 @@
   <div class="card" style="margin-top:14px">
     <div id="list"><span class="muted small">Loading…</span></div>
   </div>
+
+  <!-- "What guests see" — phone-framed preview of how live offers surface in the
+       app's Town tab. Mirrors the guest promo chip anatomy (tag SVG + title +
+       "Ends <date>"); it's a preview, taps don't open anything here. -->
+  <div id="guestPromoPreview" style="margin-top:28px">
+    <h2 style="margin:0 2px 3px">What guests see</h2>
+    <div class="muted small" style="margin:0 2px 14px">Live offers float over the Town tab in the OceanSafe app — a tap opens your flyer. This preview updates with your list above.</div>
+    <div class="gp-phone">
+      <div class="gp-screen">
+        <div class="gp-status"><span>9:41</span><span class="gp-sicons">
+          <svg width="15" height="10" viewBox="0 0 15 10" fill="currentColor" aria-hidden="true"><rect x="0" y="6" width="2.6" height="4" rx="0.8"/><rect x="4" y="4" width="2.6" height="6" rx="0.8"/><rect x="8" y="2" width="2.6" height="8" rx="0.8"/><rect x="12" y="0" width="2.6" height="10" rx="0.8" opacity=".35"/></svg>
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M1 3.5a9 9 0 0 1 12 0"/><path d="M3.2 5.9a6 6 0 0 1 7.6 0"/><circle cx="7" cy="8.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+          <svg width="21" height="10" viewBox="0 0 21 10" aria-hidden="true"><rect x="0.5" y="0.5" width="17" height="9" rx="2.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="12" height="6" rx="1.4" fill="currentColor"/><rect x="18.7" y="3" width="1.8" height="4" rx="0.9" fill="currentColor" opacity=".4"/></svg>
+        </span></div>
+        <div class="gp-grab"></div>
+        <div id="gpPromo"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -68,14 +99,51 @@
     el("save").addEventListener("click", save);
     el("del").addEventListener("click", remove);
     el("live").addEventListener("change", () => el("liveChk").classList.toggle("on", el("live").checked));
+    // drag-drop upload card: click opens the form; a dropped PDF lands in it.
+    // (openEditor clears the file input, so the drop assigns AFTER opening.)
+    const drop = el("dropCard");
+    drop.addEventListener("click", () => openEditor(null));
+    drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+    drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+    drop.addEventListener("drop", (e) => {
+      e.preventDefault(); drop.classList.remove("over");
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      openEditor(null);
+      if (f) { try { const dt = new DataTransfer(); dt.items.add(f); el("pdf").files = dt.files; } catch (_) {} }
+    });
     load();
   })();
 
+  // DEMO-only sample offers — generic wording (never a real business), always
+  // labeled SAMPLE, dates relative to today so they always read as live.
+  function demoPromos() {
+    const d = (days) => { const t = new Date(); t.setDate(t.getDate() + days); return t.toISOString().slice(0, 10); };
+    return [
+      { id: "demo-pr1", title: "Sunset dinner — guests save 15%", starts_at: d(-2), ends_at: d(12), status: "live", _sample: true },
+      { id: "demo-pr2", title: "Spa morning — off-peak before 11am", starts_at: d(0), ends_at: d(30), status: "live", _sample: true },
+    ];
+  }
+  const TAG_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
+  function promoCardsHtml(rows) {
+    return rows.map((p) => `<div class="promo-card">
+      <span class="icochip ic-gold" aria-hidden="true">${TAG_SVG}</span>
+      <div style="flex:1;min-width:0"><b>${esc(p.title || "Untitled")}</b>${p._sample ? ' <span class="badge b-amber" style="margin-left:4px">Sample</span>' : ""}
+        <div class="muted small" style="margin-top:2px">${esc(p.starts_at || "—")} → ${esc(p.ends_at || "—")}</div></div>
+      <span class="badge ${p.status === "live" ? "b-green" : "b-grey"}">${esc(p.status)}</span>
+    </div>`).join("");
+  }
+
   async function load() {
-    if (window.OCEANSAFE_DEMO) { el("list").innerHTML = `<div class="msg info">Demo mode — add your Supabase keys in <code>config.js</code> to manage real promotions.</div>`; return; }
+    if (window.OCEANSAFE_DEMO) {
+      promos = demoPromos();
+      el("list").innerHTML = `<div class="msg info">Demo mode — the two sample promotions below show how offers look. Add your Supabase keys in <code>config.js</code> to manage real ones.</div>` + promoCardsHtml(promos);
+      renderPromoPreview(promos);
+      return;
+    }
     const { data, error } = await sb.from("promotions").select("*").eq("partner_id", partner.id).order("created_at", { ascending: false });
     if (error) { el("list").innerHTML = `<span class="msg err">${error.message}</span>`; return; }
     promos = data || [];
+    renderPromoPreview(promos);
     if (!promos.length) { el("list").innerHTML = `<span class="muted small">No promotions yet.</span>`; return; }
     el("list").innerHTML = `<table><tr><th>Title</th><th>Runs</th><th>Status</th><th></th></tr>${
       promos.map((p) => `<tr>
@@ -138,6 +206,41 @@
   }
   function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
   function safeUrl(u) { const s = String(u ?? "").trim(); return /^https:\/\//i.test(s) ? s : ""; }
+
+  // ── "What guests see" preview ───────────────────────────────────────────────
+  // Mirrors the guest app's promo chip (index.html _renderPartnerPromos): tag
+  // SVG + title + "Ends <Mon D>", floating over a Town-tab stand-in. Same rules
+  // the app applies: live status only, inside the date window. Date label is
+  // parsed by parts (no Date()) to match the app and avoid UTC drift.
+  function endsLabel(exp) {
+    const m = String(exp || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return String(exp || "");
+    const MO = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return (MO[+m[2] - 1] || m[2]) + " " + (+m[3]);
+  }
+  function renderPromoPreview(rows) {
+    const host = el("gpPromo");
+    if (!host) return;
+    const now = new Date();
+    const today = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+    const live = (rows || []).filter((p) => p.status === "live"
+      && !(p.ends_at && String(p.ends_at).slice(0, 10) < today)
+      && !(p.starts_at && String(p.starts_at).slice(0, 10) > today));
+    const chips = live.map((p) => `<div class="os-promo-chip">
+      <span style="width:16px;height:16px;flex:0 0 auto;color:#0f4c5c">${TAG_SVG}</span>
+      <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span class="os-promo-t">${esc(p.title || "Untitled")}</span>${p.ends_at ? `<span class="os-promo-e">Ends ${esc(endsLabel(p.ends_at))}</span>` : ""}</span>
+    </div>`).join("");
+    host.innerHTML = `<div class="os-promo-map">
+      <svg viewBox="0 0 320 200" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">
+        <path d="M0 128 Q60 108 120 126 T240 120 T320 128 L320 200 L0 200 Z" fill="#bcd9e2" opacity=".6"/>
+        <path d="M0 150 Q80 135 160 148 T320 146 L320 200 L0 200 Z" fill="#a9cfda" opacity=".55"/>
+      </svg>
+      <span class="os-promo-tab">Town tab · preview</span>
+      ${live.length
+        ? `<div class="os-promo-strip">${chips}</div>`
+        : '<div class="os-promo-none">Your live offers float here,<br>exactly as guests see them.</div>'}
+    </div>`;
+  }
 </script>
 </body>
 </html>

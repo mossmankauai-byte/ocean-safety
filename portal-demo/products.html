@@ -94,6 +94,27 @@
   <div class="card" style="margin-top:14px">
     <div id="list"><span class="muted small">Loading…</span></div>
   </div>
+
+  <!-- "What guests see" — phone-framed live preview of this shop exactly as it
+       renders inside the guest app's Shop tab. Markup + styles mirror the app's
+       .os-store-* card (index.html); it re-renders with every product-list
+       render via the load() wrapper at the bottom of the script. Buy is inert
+       here — it's a preview, not a working checkout. -->
+  <div id="guestPreview" style="margin-top:28px">
+    <h2 style="margin:0 2px 3px">What guests see</h2>
+    <div class="muted small" style="margin:0 2px 14px">Your shop exactly as it renders inside the OceanSafe app — it updates as you edit. Buy works in the live app, not in this preview.</div>
+    <div class="gp-phone">
+      <div class="gp-screen">
+        <div class="gp-status"><span>9:41</span><span class="gp-sicons">
+          <svg width="15" height="10" viewBox="0 0 15 10" fill="currentColor" aria-hidden="true"><rect x="0" y="6" width="2.6" height="4" rx="0.8"/><rect x="4" y="4" width="2.6" height="6" rx="0.8"/><rect x="8" y="2" width="2.6" height="8" rx="0.8"/><rect x="12" y="0" width="2.6" height="10" rx="0.8" opacity=".35"/></svg>
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M1 3.5a9 9 0 0 1 12 0"/><path d="M3.2 5.9a6 6 0 0 1 7.6 0"/><circle cx="7" cy="8.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+          <svg width="21" height="10" viewBox="0 0 21 10" aria-hidden="true"><rect x="0.5" y="0.5" width="17" height="9" rx="2.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="12" height="6" rx="1.4" fill="currentColor"/><rect x="18.7" y="3" width="1.8" height="4" rx="0.9" fill="currentColor" opacity=".4"/></svg>
+        </span></div>
+        <div class="gp-grab"></div>
+        <div id="gpShop"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -130,6 +151,14 @@
     if (window.OCEANSAFE_DEMO || (partner.square_merchant_id && !partner.square_revoked_at)) {
       el("sqImportCard").classList.remove("hide");
       el("sqImport").addEventListener("click", importFromSquare);
+      // One-time spotlight on the import card (engine in app.js). Only wired
+      // when the card is actually shown, so the flag isn't consumed early —
+      // it still fires later, the first visit after Square gets connected.
+      osPortalTour({
+        key: "os_portal_import_hint_v1", auto: true,
+        steps: [{ sel: "#sqImportCard", title: "Bring your items in from Square",
+          body: "One tap brings your Square items in — they start hidden until you switch them on. Add photos where they're missing, then turn on the ones to show." }],
+      });
     }
     load();
   })();
@@ -313,6 +342,76 @@
   }
   function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
   function safeUrl(u) { const s = String(u ?? "").trim(); return /^https?:\/\//i.test(s) ? s : ""; }
+
+  // ── "What guests see" live preview ──────────────────────────────────────────
+  // A faithful miniature of the guest app's store card (index.html .os-store-*
+  // markup, styles scoped under .gp-screen in portal.css), rendered from the
+  // same rows the list above shows. Guests only ever see ACTIVE products, so
+  // the preview filters to them — that's the point of showing it. Demo import
+  // rows can't be toggled on, so demo mode previews them switched on, with an
+  // explicit note saying so. Buy is inert (pointer-events off in portal.css).
+  function gpInitial(s) { return esc((String(s || "?").trim()[0] || "?").toUpperCase()); }
+  // Pre-import/pre-add SAMPLE items (rental-flavored) so owners can picture the
+  // shop before anything exists. Honesty rules: every card carries a SAMPLE tag,
+  // a line in the frame says they're samples, and they NEVER render once even
+  // one real row exists (hidden or not) — real products always win.
+  const GP_SAMPLES = [
+    { title: "Kayak — half-day", price_cents: 4500 },
+    { title: "Snorkel set — 24 hours", price_cents: 2200 },
+    { title: "Beach chairs (pair) — day", price_cents: 1800 },
+    { title: "Boogie board — day", price_cents: 1500 },
+  ];
+  function gpSampleCard(p) {
+    return `<div class="os-store-prod" title="Sample item — replaced by your real products">` +
+      `<div class="os-store-pimg"><span class="os-store-phi">${gpInitial(p.title)}</span><span class="os-store-demotag">Sample</span></div>` +
+      `<div class="os-store-pbody"><div class="os-store-ptitle">${esc(p.title)}</div>` +
+      `<div class="os-store-prow"><span class="os-store-price">${esc(money(p.price_cents))}</span></div>` +
+      `<button class="os-store-btn buy" type="button" tabindex="-1">Buy</button></div></div>`;
+  }
+  function gpCard(p) {
+    const buyable = p.stock == null || p.stock > 0;
+    const img = safeUrl(p.image_url);
+    const imgHtml = img
+      ? `<img src="${esc(img)}" alt="" onerror="this.style.display='none'">`
+      : `<span class="os-store-phi">${gpInitial(p.title)}</span>`;
+    return `<div class="os-store-prod" title="Buy works in the live app, not in this preview">` +
+      `<div class="os-store-pimg">${imgHtml}${window.OCEANSAFE_DEMO ? '<span class="os-store-demotag">Demo</span>' : ""}</div>` +
+      `<div class="os-store-pbody"><div class="os-store-ptitle">${esc(p.title)}</div>` +
+      `<div class="os-store-prow"><span class="os-store-price">${esc(money(p.price_cents))}</span></div>` +
+      `<button class="os-store-btn buy" type="button" tabindex="-1"${buyable ? "" : ' disabled style="opacity:.5"'}>${buyable ? "Buy" : "Sold out"}</button></div></div>`;
+  }
+  function renderGuestPreview(rows) {
+    const host = el("gpShop");
+    if (!host) return;
+    const live = (rows || []).filter((p) => window.OCEANSAFE_DEMO || p.active);
+    const shopName = (partner && partner.name) || "Your shop";
+    const logo = safeUrl(partner && partner.logo_url);
+    const head = `<div class="os-store-shead"><div class="os-store-logo">${
+      logo ? `<img src="${esc(logo)}" alt="">` : gpInitial(shopName)
+    }</div><div><div class="os-store-sname">${esc(shopName)}</div><div class="os-store-smeta">${
+      live.length ? `${live.length} ${live.length === 1 ? "item" : "items"}` : "Your storefront in the OceanSafe app"
+    }</div></div><span class="os-store-pill demo">Preview</span></div>`;
+    const note = window.OCEANSAFE_DEMO && live.length
+      ? '<div class="os-store-demo">Demo items, shown switched on. In your live shop, guests only see products marked Active.</div>' : "";
+    // Nothing visible yet: if the shop truly has zero rows (pre-import/pre-add),
+    // show the SAMPLE items; if rows exist but none are active, keep the plain
+    // "publish" nudge — samples must never sit next to a real catalog.
+    const body = live.length
+      ? `<div class="os-store-prods">${live.map(gpCard).join("")}</div>`
+      : (rows || []).length
+        ? '<div class="os-store-empty">Publish your first product and it appears here, exactly as guests will see it.</div>'
+        : '<div class="os-store-demo">Sample items — replaced by yours the moment you add or import.</div>' +
+          `<div class="os-store-prods">${GP_SAMPLES.map(gpSampleCard).join("")}</div>`;
+    host.innerHTML = `<div class="os-store-shop">${head}${note}${body}</div>`;
+  }
+  // Live-bind: every list render also refreshes the preview. load() is wrapped
+  // ONCE here — add / edit / toggle / delete / import all funnel through it, so
+  // there's no polling and no second data fetch.
+  const _loadList = load;
+  load = async function () {
+    await _loadList();
+    renderGuestPreview(window.OCEANSAFE_DEMO ? (demoSynced || []) : products);
+  };
 </script>
 </body>
 </html>

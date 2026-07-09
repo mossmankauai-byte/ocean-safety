@@ -191,7 +191,7 @@
   .collapsible summary{cursor:pointer;list-style:none}
   .collapsible summary::-webkit-details-marker{display:none}
 
-  /* ============ ITEM MANAGERS (amenities / products) ============ */
+  /* ============ ITEM MANAGER (amenities) ============ */
   .mg-list{display:flex;flex-direction:column}
   .mg-row{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line)}
   .mg-row:last-child{border-bottom:0}
@@ -372,21 +372,14 @@
   .gp-screen::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:84px;height:16px;background:#071219;border-radius:9px}
   .gp-empty{padding:46px 18px;text-align:center;font-size:13px;color:var(--mute);line-height:1.5}
   .gp-note{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
-  /* guest shop card anatomy (mirrors .os-store-* in the guest app) */
-  .gp-shop{background:#fff;border:1px solid var(--border);border-radius:16px;padding:15px}
-  .gp-shead{display:flex;align-items:center;gap:11px;margin-bottom:12px}
-  .gp-slogo{width:40px;height:40px;border-radius:10px;background:var(--ocean);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;flex:0 0 auto}
-  .gp-sname{font-size:15px;font-weight:800;line-height:1.1;color:var(--ink)}
-  .gp-smeta{font-size:11.5px;color:var(--mute);margin-top:2px}
-  .gp-spill{margin-left:auto;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:4px 9px;border-radius:20px;white-space:nowrap;background:var(--ocean-lt);color:#0a5a72}
-  .gp-prods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .gp-prod{border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
-  .gp-pimg{aspect-ratio:1/1;background:linear-gradient(135deg,#eef4f6,#dbe8ec);display:flex;align-items:center;justify-content:center}
-  .gp-phi{font-size:44px;line-height:1;color:#9fb2bb;font-weight:600}
-  .gp-pbody{padding:9px 10px 11px;display:flex;flex-direction:column;gap:5px;flex:1}
-  .gp-ptitle{font-size:12.5px;font-weight:600;line-height:1.25;color:var(--ink)}
-  .gp-pprice{font-size:14px;font-weight:800;color:var(--ink)}
-  .gp-pbuy{margin-top:6px;border:0;border-radius:9px;padding:9px;font:inherit;font-size:12.5px;font-weight:700;text-align:center;background:var(--ocean);color:#fff;cursor:default}
+  /* the looping demo image shown by default (the GIF carries its own phone frame) */
+  .gp-demo{display:block;width:100%;max-width:365px;height:auto;margin:14px auto 4px;border-radius:26px}
+  /* the display rules above would defeat the hidden attribute — enforce it for the demo/live swap */
+  .gp-chips[hidden],.gp-replay[hidden],.gp-demo[hidden],.gp-phone[hidden]{display:none}
+  .gp-try{appearance:none;font:inherit;font-size:12px;font-weight:700;cursor:pointer;color:var(--sea);
+    background:transparent;border:1px solid rgba(92,196,220,.45);border-radius:999px;padding:6px 13px;
+    display:inline-flex;align-items:center;gap:6px}
+  .gp-try:hover{border-color:var(--sea);background:rgba(92,196,220,.10)}
   /* pop-in: panel slides up + fades, rows stagger (first reveal per load + Replay) */
   @keyframes gpPop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   .gp-pop .gp-panel{animation:gpPop .38s cubic-bezier(.2,.85,.35,1) both}
@@ -453,7 +446,6 @@
       <button role="tab" aria-selected="true" data-view="overview">Overview</button>
       <button role="tab" aria-selected="false" data-view="guests">Guest activity</button>
       <button role="tab" aria-selected="false" data-view="stayclose">Stay-Close <span class="vb-badge" id="vbStay">—</span></button>
-      <button role="tab" aria-selected="false" data-view="shop">Shop <span class="vb-badge" id="vbShop">—</span></button>
       <button role="tab" aria-selected="false" data-view="pricing">Pricing</button>
       <button role="tab" aria-selected="false" data-view="places">Places <span class="vb-badge" id="vbPlaces">—</span></button>
       <button type="button" id="tourBtn" class="tourbtn" title="Replay the two-minute dashboard tour">
@@ -720,24 +712,29 @@
         <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Export config</button></div>
       </div>
     </section>
-    <!-- WHAT GUESTS SEE — STAY-CLOSE LIVE PREVIEW -->
+    <!-- WHAT GUESTS SEE — STAY-CLOSE PREVIEW (GIF demo by default, interactive on "Try it live") -->
     <section>
-      <div class="sec-h"><h2>What guests see — live preview</h2><p>Your draft menu above, rendered exactly as the guest app shows it on a bad-ocean day.</p></div>
+      <div class="sec-h"><h2>What guests see</h2><p>How the guest app steers to your amenities when the ocean is the wrong call — try it live with your own draft menu.</p></div>
       <div class="card">
         <div class="gp-top">
-          <div class="gp-chips" role="group" aria-label="Preview ocean condition" id="gpAmChips">
+          <div class="gp-chips" role="group" aria-label="Preview ocean condition" id="gpAmChips" hidden>
             <button type="button" class="gp-chip" data-cond="calm" aria-pressed="true">Calm</button>
             <button type="button" class="gp-chip" data-cond="red_flag" aria-pressed="false">High surf</button>
             <button type="button" class="gp-chip" data-cond="brown_water" aria-pressed="false">Brown water</button>
             <button type="button" class="gp-chip" data-cond="rain" aria-pressed="false">Rainy day</button>
           </div>
-          <button type="button" class="gp-replay" id="gpAmReplay" title="Replay the pop-in animation">
+          <button type="button" class="gp-replay" id="gpAmReplay" title="Replay the pop-in animation" hidden>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/></svg>
             Replay
           </button>
+          <button type="button" class="gp-try" id="gpAmTry" title="Drive the panel yourself — condition chips plus your draft menu above">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            <span id="gpAmTryLbl">Try it live</span>
+          </button>
         </div>
-        <div class="gp-phone"><div class="gp-screen"><div id="gpAmenity"></div></div></div>
-        <div class="gp-note">A preview of what guests see — built live from your draft menu above, not measured data. Tap an amenity to expand it, just like a guest would.</div>
+        <img id="gpAmGif" class="gp-demo" src="assets/stayclose-preview.gif" width="365" alt="Guest view: the Stay-Close amenity list adapting to ocean conditions">
+        <div class="gp-phone" id="gpAmPhone" hidden><div class="gp-screen"><div id="gpAmenity"></div></div></div>
+        <div class="gp-note">A preview of what guests see — not measured data. The demo loops through ocean conditions; <b>Try it live</b> builds the panel from your draft menu above, and you can tap an amenity to expand it just like a guest.</div>
       </div>
     </section>
     <!-- BAD OCEAN DAY SAVES -->
@@ -790,69 +787,6 @@
       </div>
     </section>
     </div><!-- /view-stayclose -->
-
-    <div id="view-shop" hidden>
-    <!-- PRODUCT MANAGER -->
-    <section>
-      <div class="sec-h"><h2>Your products</h2><p>What your gift shop offers inside the app. Edits save as a draft in this browser; Export sends the list into your app build — checkout stays on your rails.</p></div>
-      <div class="card" id="mgProducts">
-        <div class="mg-list" id="prList"></div>
-        <div class="mg-add">
-          <input id="prA" placeholder="Product — e.g. Reef-safe sunscreen · SPF 50" autocomplete="off">
-          <input id="prB" placeholder="Price (optional) — e.g. $24" autocomplete="off">
-          <button class="pl-btn primary" id="prAdd">Add product</button>
-        </div>
-        <div class="mg-foot"><span class="cap"><b id="prCount">0</b> products in your shop</span><span style="flex:1"></span><button class="pl-btn" id="prReset">Reset</button><button class="pl-btn primary" id="prExport">Export config</button></div>
-      </div>
-    </section>
-    <!-- WHAT GUESTS SEE — SHOP LIVE PREVIEW -->
-    <section>
-      <div class="sec-h"><h2>What guests see — live preview</h2><p>Your draft product list above, rendered as the in-app shop guests browse.</p></div>
-      <div class="card">
-        <div class="gp-top">
-          <button type="button" class="gp-replay" id="gpPrReplay" title="Replay the pop-in animation">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/></svg>
-            Replay
-          </button>
-        </div>
-        <div class="gp-phone"><div class="gp-screen"><div id="gpShop"></div></div></div>
-        <div class="gp-note">A preview of what guests see — built live from your draft list above, not measured data. The Buy button is inert here; real checkout stays on your rails.</div>
-      </div>
-    </section>
-    <!-- SHOP & TOWN -->
-    <section>
-      <div class="sec-h"><h2>Shop &amp; Town · local commerce</h2><p>What guests open in your gift shop and the Town tab — counted as taps, never claimed as sales.</p></div>
-      <div class="grid g3">
-        <div class="card" style="grid-column:span 2">
-          <div class="title"><span class="l"><span class="pv measured"></span> Top products guests opened</span><span class="chip sample">Sample</span></div>
-          <ol class="rank">
-            <li><span class="n">1</span><span style="flex:1">Reef-safe sunscreen · SPF 50</span><span class="bar" style="flex:0 0 110px"><i style="width:100%"></i></span><span class="ct">~64</span></li>
-            <li><span class="n">2</span><span style="flex:1">Kids rash guard</span><span class="bar" style="flex:0 0 110px"><i style="width:64%"></i></span><span class="ct">~41</span></li>
-            <li><span class="n">3</span><span style="flex:1">Beach towel set</span><span class="bar" style="flex:0 0 110px"><i style="width:52%"></i></span><span class="ct">~33</span></li>
-            <li><span class="n">4</span><span style="flex:1">Snorkel set rental</span><span class="bar" style="flex:0 0 110px"><i style="width:42%"></i></span><span class="ct">~27</span></li>
-            <li><span class="n">5</span><span style="flex:1">Kaua&#699;i coffee sampler</span><span class="bar" style="flex:0 0 110px"><i style="width:30%"></i></span><span class="ct">~19</span></li>
-          </ol>
-          <div class="cap">Product taps inside your co-branded app. A tap is <b>interest</b> — checkout happens in your store, on your rails.</div>
-          <details class="meth"><summary>How this is computed</summary><div class="body"><code>poi_tap kind:product → roll.products{}</code> from the daily rollup, ranked by taps. <b>Measured</b> once live.</div></details>
-        </div>
-        <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Store opens</span><span class="chip sample">Sample</span></div>
-          <div class="v">~212</div>
-          <div class="cap">Guests opening your shop page from the Town tab or a product card.</div>
-          <details class="meth"><summary>How this is computed</summary><div class="body"><code>shop_open</code> events for this slug from the daily rollup. <b>Measured</b> once live.</div></details>
-        </div>
-        <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Product tap &rarr; store</span><span class="chip sample">Sample</span></div>
-          <div class="v">~18% <small>continue rate</small></div>
-          <div class="cap">Share of product taps that continued into your store page — interest, not checkout.</div>
-        </div>
-        <div class="card" style="grid-column:span 2">
-          <div class="title"><span class="l"><span class="pv assumption"></span> Sales attribution</span><span class="chip assumption">Store connect · optional</span></div>
-          <div class="cap" style="margin-top:6px">Today we count opens and taps only. When your store connects (Square), this tab adds <b>attributed orders</b> — aggregate counts, no card data, no guest identity. Until then we won&rsquo;t show a dollar figure here, because we&rsquo;d be guessing.</div>
-        </div>
-      </div>
-    </section>
-    </div><!-- /view-shop -->
 
 
     <div id="view-pricing" hidden>
@@ -1184,7 +1118,7 @@
   var rendered = false;
   function show(view){
     tabs.forEach(function(t){ t.setAttribute('aria-selected', String(t.dataset.view===view)); });
-    ['overview','guests','stayclose','shop','pricing','places'].forEach(function(v){
+    ['overview','guests','stayclose','pricing','places'].forEach(function(v){
       var el = document.getElementById('view-'+v);
       if(el) el.hidden = (v!==view);
     });
@@ -1515,17 +1449,15 @@
   // Each stop: which view tab to open, what to highlight, and what to say.
   var STEPS = [
     { center:true, title:'Welcome to your dashboard',
-      body:'Two minutes, eight stops — then it’s yours. This is where you’ll see what guests do in your app and control what it recommends. You can replay this anytime with the <b>Tour</b> button up top.' },
-    { view:'overview', sel:'.viewtabs', title:'Six views, one dashboard',
-      body:'<b>Overview</b> is the day-to-day pulse and <b>Guest activity</b> the detail. <b>Stay-Close</b> and <b>Shop</b> hold your amenities and products, <b>Pricing</b> is your payback math, and <b>Places</b> controls what your app recommends. Everything here is your property only.' },
+      body:'Two minutes, start to finish — then it’s yours. This is where you’ll see what guests do in your app and control what it recommends. You can replay this anytime with the <b>Tour</b> button up top.' },
+    { view:'overview', sel:'.viewtabs', title:'Five views, one dashboard',
+      body:'<b>Overview</b> is the day-to-day pulse and <b>Guest activity</b> the detail. <b>Stay-Close</b> holds your amenity menu, <b>Pricing</b> is your payback math, and <b>Places</b> controls what your app recommends. Everything here is your property only.' },
     { view:'overview', sel:'.hero .ns', title:'The one number to watch',
       body:'How often guests open a beach, trail, or restaurant in the app to plan their day — per occupied unit. Anything tagged <b>Sample</b> is illustrative until your telemetry connects; live mode only ever shows measured data.' },
     { view:'guests', sel:'#view-guests section', title:'What guests actually want',
       body:'Guest activity shows the demand — which beaches and places guests open most, and how that lines up with what you feature. It’s the evidence for your curation choices, never guesswork.' },
     { view:'stayclose', sel:'#mgAmenities', title:'Stay-Close runs on your menu',
       body:'When the ocean is the wrong call, the app steers guests to what you offer instead — spa, dining, cabanas. Add or edit your amenity menu right here; <b>Export config</b> sends it into your app build.' },
-    { view:'shop', sel:'#mgProducts', title:'Your shop, inside the app',
-      body:'Add the products you want guests to see. The app counts taps as interest — checkout stays in your store, on your rails. Metrics stay <b>Sample</b> until your telemetry connects.' },
     { view:'pricing', sel:'.card.calc', title:'Your numbers, your math',
       body:'Type your own occupancy, rates, and margins — the payback computes from <b>what you enter</b>, not from our claims. Nothing calculates until you touch a field.' },
     { view:'places', sel:'.pl-safety', title:'Safety comes pre-set',
@@ -1615,7 +1547,7 @@
 })();
 </script>
 <script>
-/* ============ AMENITY & PRODUCT MANAGERS ============ */
+/* ============ AMENITY MANAGER ============ */
 (function(){
   var SLUG = ((document.querySelector('.property code')||{}).textContent||'your-hotel').trim();
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
@@ -1667,14 +1599,99 @@
     });
     render();
   }
+
+  /* ---- "What guests see" live preview — the guest app's Stay-Close panel, built from the draft above ---- */
+  function gpName(){
+    var h = document.querySelector('.property h1');
+    return ((h && h.textContent) || '').trim() || 'Your Resort';
+  }
+  // Context lines copied verbatim from the guest app's _amenityPanel (index.html).
+  var GP_CTX = {
+    red_flag: 'The ocean is the wrong call right now — these are on the property.',
+    brown_water: 'With runoff in the water today, these are on the property.',
+    rain: 'A good rainy-day list — all on the property.',
+    calm: 'On the property, whenever you want a break from the beach.'
+  };
+  var gpCond = 'calm';
+  var gpItems = { amenities: [] };
+  function gpAmenityHTML(items){
+    if(!items.length) return '<div class="gp-empty">Add an amenity above and watch it appear here.</div>';
+    var rows = items.map(function(it, i){
+      var detail = it.b ? '<div style="font-size:11.5px;color:var(--mute);line-height:1.45">'+esc(it.b)+'</div>' : '';
+      return '<button type="button" class="gp-it" data-gpam="'+i+'" aria-expanded="false" style="display:block;width:100%;min-height:44px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-top:8px;cursor:pointer;text-align:left;font-family:inherit;animation-delay:'+(80+i*40)+'ms">'+
+        '<span style="display:flex;align-items:center;gap:10px">'+
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ocean)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 21h18"/><path d="M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>'+
+          '<span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink)">'+esc(it.a)+'</span>'+
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>'+
+        '</span>'+
+        '<span class="gp-abody" style="display:none;padding:8px 2px 2px 25px">'+detail+
+          '<div style="font-size:11px;color:var(--mute);margin-top:'+(it.b ? '4px' : '0')+'">Ask at the front desk to book or check today&rsquo;s availability.</div>'+
+        '</span>'+
+      '</button>';
+    }).join('');
+    return '<div class="gp-panel" style="padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+        '<div style="font-weight:700;font-size:13px;color:var(--ink)">Provided by '+esc(gpName())+'</div>'+
+        '<span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);background:#fff;border:1px solid var(--border);border-radius:999px;padding:2px 7px">Property offer</span>'+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">'+(GP_CTX[gpCond]||GP_CTX.calm)+' Separate from the safety report above — the ocean call never changes for an offer.</div>'+
+      rows+
+    '</div>';
+  }
+  function gpEl(){ return document.getElementById('gpAmenity'); }
+  function gpRender(){
+    var el = gpEl(); if(!el) return;
+    el.innerHTML = gpAmenityHTML(gpItems.amenities);
+  }
+  function gpPop(){
+    var el = gpEl(); if(!el) return;
+    el.classList.remove('gp-pop'); void el.offsetWidth; el.classList.add('gp-pop');
+    // Drop the class once the animation is done, so later tab flips
+    // (display:none -> block restarts CSS animations) don't replay it —
+    // pop runs on first reveal per page load + Replay only.
+    clearTimeout(el._gpT);
+    var n = el.querySelectorAll('.gp-it').length;
+    el._gpT = setTimeout(function(){ el.classList.remove('gp-pop'); }, 620 + n*40);
+  }
+  var gpAmWrap = document.getElementById('gpAmenity');
+  if(gpAmWrap) gpAmWrap.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-gpam]'); if(!btn) return;
+    var body = btn.querySelector('.gp-abody'); if(!body) return;
+    var open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    btn.setAttribute('aria-expanded', String(!open));
+  });
+  var gpChips = document.getElementById('gpAmChips');
+  if(gpChips) gpChips.addEventListener('click', function(e){
+    var c = e.target.closest('.gp-chip'); if(!c) return;
+    gpCond = c.dataset.cond;
+    gpChips.querySelectorAll('.gp-chip').forEach(function(b){ b.setAttribute('aria-pressed', String(b===c)); });
+    gpRender();
+  });
+  var gpAmRe = document.getElementById('gpAmReplay');
+  if(gpAmRe) gpAmRe.addEventListener('click', function(){ gpPop(); });
+
+  /* ---- GIF demo <-> live panel toggle ---- */
+  var gpAmGif = document.getElementById('gpAmGif');
+  var gpAmPhone = document.getElementById('gpAmPhone');
+  var gpAmTry = document.getElementById('gpAmTry');
+  var gpAmTryLbl = document.getElementById('gpAmTryLbl');
+  var gpLiveOn = false;
+  if(gpAmTry) gpAmTry.addEventListener('click', function(){
+    gpLiveOn = !gpLiveOn;
+    if(gpAmGif) gpAmGif.hidden = gpLiveOn;
+    if(gpAmPhone) gpAmPhone.hidden = !gpLiveOn;
+    if(gpChips) gpChips.hidden = !gpLiveOn;
+    if(gpAmRe) gpAmRe.hidden = !gpLiveOn;
+    if(gpAmTryLbl) gpAmTryLbl.textContent = gpLiveOn ? 'Back to demo' : 'Try it live';
+    if(gpLiveOn) gpPop();
+  });
+
   manager({ key:'amenities', exportKey:'amenities',
     ids:{list:'amList', a:'amA', b:'amB', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
     seeds:[['Spa treatments',''],['On-site dining',''],['Pool bar',''],['Cabana rental',''],['Gift shop','']],
-    toExport:function(it){ return {label:it.a, value:it.b}; } });
-  manager({ key:'products', exportKey:'products',
-    ids:{list:'prList', a:'prA', b:'prB', add:'prAdd', reset:'prReset', export:'prExport', count:'prCount', badge:'vbShop'},
-    seeds:[['Reef-safe sunscreen · SPF 50','$24'],['Kids rash guard','$32'],['Beach towel set','$45'],['Snorkel set rental','$25/day'],['Kaua\u02bbi coffee sampler','$19']],
-    toExport:function(it){ return {name:it.a, price:it.b}; } });
+    toExport:function(it){ return {label:it.a, value:it.b}; },
+    onChange:function(items){ gpItems.amenities = items; gpRender(); } });
 })();
 </script>
 </body>

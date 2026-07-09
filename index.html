@@ -1385,7 +1385,9 @@ a{text-decoration:none;color:inherit}
 .tab.active{color:var(--ocean)}
 .tab.active::before{content:'';position:absolute;top:0;left:30%;right:30%;height:2.5px;background:var(--gold);border-radius:0 0 2px 2px}
 
-.live-now-chip{position:absolute;top:160px;left:12px;z-index:550;background:rgba(253,242,214,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:6px 11px;display:flex;gap:7px;align-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s, box-shadow .18s;font-family:'DM Sans',sans-serif;max-width:calc(100% - 80px)}
+/* top:220px clears the subtab row (row bottom measures 212px at both 430px and 1280px
+   viewports — was 160px, which overlapped the pills by ~13px). */
+.live-now-chip{position:absolute;top:220px;left:12px;z-index:550;background:rgba(253,242,214,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:6px 11px;display:flex;gap:7px;align-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s, box-shadow .18s;font-family:'DM Sans',sans-serif;max-width:calc(100% - 80px)}
 .live-now-chip:active{transform:scale(.97)}
 .live-now-chip:hover{box-shadow:0 6px 16px rgba(0,0,0,.18)}
 .live-now-label{color:#8a6b0a;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:9px;white-space:nowrap}
@@ -3842,6 +3844,7 @@ async function fetchLive(){
       });
       if(window._debugMode) console.log('FORECAST loaded',FORECAST);
       if(typeof renderHeaderForecast === 'function') renderHeaderForecast();
+      if(typeof layoutOutlookChip === 'function') requestAnimationFrame(layoutOutlookChip);
     }
 
     if(window._debugMode) console.log('LIVE conditions loaded',LIVE);
@@ -4595,7 +4598,7 @@ function pickFeaturedTour(c){
 // Header 7-day forecast strip — paints from FORECAST (same data the Today's Outlook uses).
 // Hidden until live daily data arrives; tapping a day opens the Today's Outlook for that day.
 var _hdrFcOpen = (function(){ try{ return localStorage.getItem('hdrFcOpen')==='1'; }catch(e){ return false; } })();
-function toggleHdrFc(){ _hdrFcOpen=!_hdrFcOpen; try{ localStorage.setItem('hdrFcOpen', _hdrFcOpen?'1':'0'); }catch(e){} renderHeaderForecast(); }
+function toggleHdrFc(){ _hdrFcOpen=!_hdrFcOpen; try{ localStorage.setItem('hdrFcOpen', _hdrFcOpen?'1':'0'); }catch(e){} renderHeaderForecast(); if(typeof layoutOutlookChip==='function') requestAnimationFrame(layoutOutlookChip); }
 function renderHeaderForecast(){
   const el = document.getElementById('hdrFc');
   const tg = document.getElementById('hdrFcToggle');
@@ -4618,6 +4621,36 @@ function renderHeaderForecast(){
       + '</div>';
   }).join('');
 }
+// The outlook chip + North pill live in the band under the header, but the
+// header's height is dynamic (7-DAY strip, offline bar) and the rain scrub
+// bar (#fcBar) shares the band — a fixed CSS top collides in some state.
+// So: measure the real stack and place chip below it, North pill below chip.
+function layoutOutlookChip(){
+  var chip = document.getElementById('liveNow'); if(!chip) return;
+  var host = chip.offsetParent; if(!host) return;          // chip not rendered — skip
+  var hostTop = host.getBoundingClientRect().top;
+  var st = document.getElementById('subtabs');
+  var base = st ? st.getBoundingClientRect().bottom : 212;
+  var bar = document.getElementById('fcBar');
+  if(bar && bar.style.display === 'flex' && bar.offsetParent){
+    base = Math.max(base, bar.getBoundingClientRect().bottom);
+  }
+  chip.style.top = Math.round(base - hostTop + 8) + 'px';
+  var n = document.getElementById('shore-north');
+  if(n) n.style.top = Math.round(chip.getBoundingClientRect().bottom - hostTop + 8) + 'px';
+}
+addEventListener('resize', function(){ requestAnimationFrame(layoutOutlookChip); });
+// The header stack grows asynchronously (weather chips, 7-DAY strip, offline
+// bar all render after boot) — watch it directly instead of chasing call sites.
+addEventListener('DOMContentLoaded', function(){
+  layoutOutlookChip();
+  if(window.ResizeObserver){
+    var ro = new ResizeObserver(function(){ requestAnimationFrame(layoutOutlookChip); });
+    ['topbar','tabs','subtabs'].forEach(function(id){
+      var el = document.getElementById(id); if(el) ro.observe(el);
+    });
+  }
+});
 function openOutlookForDay(i){
   if(typeof _selectedDayIdx !== 'undefined') _selectedDayIdx = i;
   renderHeaderForecast();
@@ -6285,12 +6318,14 @@ async function toggleRain(){
   if(window._fcOn){
     window._fcOn=false; fcSetPlay(false); if(btn){btn.classList.remove('on');btn.setAttribute('aria-pressed','false');}
     if(bar) bar.style.display='none';
+    if(typeof layoutOutlookChip==='function') requestAnimationFrame(layoutOutlookChip);
     if(window._fcTimer){clearInterval(window._fcTimer);window._fcTimer=null;}
     if(window._fcCircles){ window._fcCircles.forEach(function(c){try{map.removeLayer(c);}catch(e){}}); window._fcCircles=null; }
   } else {
     window._fcOn=true; window._fcHour=0; var sl=document.getElementById('fcSlider'); if(sl) sl.value=0;
     if(btn){btn.classList.add('on');btn.setAttribute('aria-pressed','true');btn.disabled=true;}   // disable during fetch -> no double-tap re-entrancy
     if(bar) bar.style.display='flex';
+    if(typeof layoutOutlookChip==='function') requestAnimationFrame(layoutOutlookChip);
     var ferr=false;
     try{ await _fcFetch(); }catch(e){ ferr=true; var el=document.getElementById('fcTime'); if(el) el.textContent='no forecast'; }
     if(btn) btn.disabled=false;
@@ -6695,6 +6730,7 @@ function wireTabs(){
       el.classList.add('active');
       window._activeTab = tabName;
       document.body.dataset.tab = tabName;   // drives per-tab CSS (e.g. Family control offsets)
+      if(typeof layoutOutlookChip === 'function') requestAnimationFrame(layoutOutlookChip);
       if(window.OSA) OSA.tab(tabName);
       buildSubtabs(tabName);
       if(typeof updateLiveNow === 'function') updateLiveNow();
@@ -6729,6 +6765,7 @@ function wireTabs(){
   // Initialize with Family subtabs since boot opens on the Family tab
   buildSubtabs('acts');
   document.body.dataset.tab = window._activeTab || 'acts';   // seed per-tab CSS on boot
+  if(typeof layoutOutlookChip === 'function') requestAnimationFrame(layoutOutlookChip);
   // a11y: set initial aria-selected from the boot-active tab
   document.querySelectorAll('#tabs .tab').forEach(t=>t.setAttribute('aria-selected', t.classList.contains('active')?'true':'false'));
   // Analytics: start timing the initial (boot) tab view
@@ -7995,10 +8032,11 @@ function _amenityPanel(states){
   </div>`;
 }
 // Partner promotions — the hotel's house offers (spa special, happy hour)
-// from the config's promotions list. Rendered as a card strip pinned to the
-// top of the Town tab: Town is the app's commerce surface, so offers sit next
-// to shopping and food instead of crowding the safety tabs. Expired offers
-// (expires < today) never render. Tap = promo_tap event + opens the flyer.
+// from the config's promotions list. Surfaced as a compact floating offer-tag
+// chip on the Town tab (Town is the app's commerce surface) with a count
+// badge; tapping it pulls up a bottom sheet listing the live offers. Expired
+// offers (expires < today) never render. Offer tap = promo_tap event + opens
+// the flyer via _promoOpen.
 // "Ends Dec 31" from a yyyy-mm-dd string — parsed by parts (no Date(), no UTC drift).
 function _promoEndsLabel(exp){
   const m = String(exp||'').match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -8036,35 +8074,66 @@ function _renderPartnerPromos(cfg){
     .filter(x => x.p && x.p.title && !(x.p.expires && String(x.p.expires).slice(0,10) < todayStr));
   if(!live.length) return;
   const subbar = document.getElementById('subtabs');
-  if(!subbar || document.getElementById('partnerPromos')) return;
+  if(!subbar || document.getElementById('promoChip')) return;
+  window._promoLive = live;
   if(!document.getElementById('partnerPromoStyle')){
     const st = document.createElement('style');
     st.id = 'partnerPromoStyle';
-    // Floats over the bottom of the map like the shore chips (which live at
-    // bottom:96px), one band above them — no flow change, so the map and the
-    // absolutely-positioned overlay controls keep today's exact geometry.
-    // pointer-events gating keeps the map draggable between/around the cards.
-    st.textContent = '#partnerPromos{display:none}'
-      + 'body[data-tab="shopping"] #partnerPromos{position:absolute;left:10px;right:10px;bottom:140px;z-index:545;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;pointer-events:none}'
-      + '#partnerPromos::-webkit-scrollbar{display:none}'
-      + '#partnerPromos button,#partnerPromos div[role=note]{pointer-events:auto}';
+    // Compact chip floating over the bottom-left of the map — same cream-glass
+    // recipe as .live-now-chip (radius 13, blur, 0 4px 12px shadow). bottom:148px
+    // keeps it one band above the shore chips (bottom:96px) and clear of the
+    // bottom tab bar. Town-only via body[data-tab="shopping"]; the display:none →
+    // flex flip restarts the one-shot pop each time the user enters Town.
+    st.textContent = '#promoChip{display:none}'
+      + 'body[data-tab="shopping"] #promoChip{position:absolute;left:12px;bottom:148px;z-index:545;display:flex;align-items:center;background:rgba(253,242,214,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:9px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s,box-shadow .18s;font-family:\'DM Sans\',sans-serif;animation:promoChipPop .45s ease-out 1}'
+      + '#promoChip:active{transform:scale(.97)}'
+      + '#promoChip:hover{box-shadow:0 6px 16px rgba(0,0,0,.18)}'
+      + '@keyframes promoChipPop{0%{transform:scale(.8);opacity:0}65%{transform:scale(1.07);opacity:1}100%{transform:scale(1)}}'
+      + '@media (prefers-reduced-motion:reduce){#promoChip{animation:none!important}}'
+      + '#promoChipCount{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:var(--ocean,#0f4c5c);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(253,242,214,.94);box-sizing:border-box;line-height:1}';
     document.head.appendChild(st);
   }
-  const strip = document.createElement('div');
-  strip.id = 'partnerPromos';
-  strip.setAttribute('aria-label', 'Offers from ' + (cfg.name || 'your resort'));
-  strip.innerHTML = live.map(x => {
-    const ends = x.p.expires ? `<span style="font-size:10px;color:var(--mute);white-space:nowrap">Ends ${_pesc(_promoEndsLabel(x.p.expires))}</span>` : '';
+  const chip = document.createElement('button');
+  chip.id = 'promoChip';
+  chip.type = 'button';
+  chip.setAttribute('aria-label', 'Offers from ' + (cfg.name || 'your resort') + ' — ' + live.length + ' available, tap to view');
+  chip.setAttribute('onclick', '_promoSheetOpen()');
+  chip.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>'
+    + '<span id="promoChipCount" aria-hidden="true">' + live.length + '</span>';
+  subbar.insertAdjacentElement('afterend', chip);
+}
+// Pull-up sheet listing the live offers — rides the app's existing #sheet/#overlay/#drag
+// chassis, so the grabber, rounded top, backdrop tap, swipe-down and Escape dismissal
+// are all pre-wired (and every tab switch closeSheet()s it). Tapping an offer goes
+// through the EXISTING _promoOpen (promo_tap telemetry + vetted _pdfUrl) — this sheet
+// is only a picker, it never touches p.pdf itself.
+function _promoSheetOpen(){
+  const live = window._promoLive || [];
+  if(!live.length) return;
+  const name = (window._partnerCfg && window._partnerCfg.name) || 'your resort';
+  const tagSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
+  const rows = live.map(x => {
+    const ends = x.p.expires ? `<span style="display:block;font-size:11px;color:var(--mute);margin-top:2px">Ends ${_pesc(_promoEndsLabel(x.p.expires))}</span>` : '';
     const hasPdf = typeof x.p.pdf === 'string' && x.p.pdf;
     const tag = hasPdf ? 'button' : 'div';
     const attrs = hasPdf ? `type="button" onclick="_promoOpen(${x.i})"` : 'role="note"';
-    const cur = hasPdf ? 'cursor:pointer;' : 'cursor:default;';
-    return `<${tag} ${attrs} style="flex:0 0 auto;display:flex;align-items:center;gap:9px;min-height:44px;max-width:260px;padding:8px 12px;background:rgba(255,255,255,.96);border:1px solid rgba(15,76,92,.15);border-radius:11px;${cur}text-align:left;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.14)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
-      <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_pesc(x.p.title)}</span>${ends}</span>
+    const chev = hasPdf ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>' : '';
+    return `<${tag} ${attrs} style="display:flex;align-items:center;gap:11px;width:100%;min-height:52px;padding:12px;background:#fff;border:1px solid var(--border);border-radius:12px;${hasPdf ? 'cursor:pointer;' : 'cursor:default;'}text-align:left;font-family:inherit">
+      ${tagSvg}
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700;color:var(--ink);line-height:1.3">${_pesc(x.p.title)}</span>${ends}</span>
+      ${chev}
     </${tag}>`;
   }).join('');
-  subbar.insertAdjacentElement('afterend', strip);
+  const sc = document.getElementById('sc');
+  sc.style.display = '';
+  sc.innerHTML = `
+    <div style="padding:6px 2px 0">
+      <div style="font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:600;color:var(--ink)">Offers from ${_pesc(name)}</div>
+      <div style="font-size:12px;color:var(--mute);margin-top:3px;line-height:1.4">Property offers — separate from the safety report. The ocean call never changes for an offer.</div>
+    </div>
+    <div aria-label="Offers from ${_pesc(name)}" style="display:flex;flex-direction:column;gap:8px;margin-top:12px">${rows}</div>`;
+  document.getElementById('sheet').classList.add('on');
+  document.getElementById('overlay').classList.add('on');
 }
 // Kick off the config fetch at parse time. The tour widgets only initialize
 // when a sheet renders (user tap), so the config almost always resolves
