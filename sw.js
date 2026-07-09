@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v93-2026-07-09';
+const CACHE_VERSION = 'v94-2026-07-09';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -151,6 +151,18 @@ if (workbox) {
   // matches, and it must stay that way: a stale partner config means stale
   // promos/affiliate IDs for a hotel. If a same-origin catch-all is ever
   // added, exclude /partner-config/ explicitly.
+  // ---- Jade sales tools: always fresh ----
+  // /jade*.html change often and must never render a stale build for Jade — NetworkFirst
+  // (fetch fresh online, fall back to cache offline) instead of the StaleWhileRevalidate below.
+  workbox.routing.registerRoute(
+    ({ url }) => url.origin === self.location.origin && /^\/jade[a-z-]*\.html$/.test(url.pathname),
+    new workbox.strategies.NetworkFirst({
+      cacheName: "jade-pages",
+      networkTimeoutSeconds: 4,
+      plugins: [ new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }) ]
+    })
+  );
+
   // ---- App shell: same-origin HTML / JS / CSS / images / SVG ----
   // StaleWhileRevalidate so repeat opens are instant; a fresh deploy lands on next navigation.
   // Stable cache name: a deploy revalidates changed files in the background instead of
