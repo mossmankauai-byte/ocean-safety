@@ -67,6 +67,19 @@
   .stage.live-on .preview-bar{background:var(--sea-tint);color:#0a4b60;border-bottom-color:#c4dde8}
   .stage.live-on .preview-bar strong{color:var(--sea)}
   .stage.live-on .preview-bar .dot{background:var(--sea);box-shadow:0 0 0 4px rgba(14,110,140,.16)}
+  /* ---- DEMO look (no ?slug): dress the sample preview as a confident, live-style
+       dashboard behind ONE honest ribbon. Scoped to .demo-live, which JS adds only
+       when there is no slug — the ?slug live path never receives this class, so its
+       real-data / honest-empty states are untouched. ---- */
+  .demo-ribbon{display:none}
+  .stage.demo-live .demo-ribbon{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:7px 14px;background:var(--sea-tint);color:#0a4b60;border-bottom:1px solid #c4dde8;
+    font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+  .demo-ribbon .dr-dot{width:7px;height:7px;border-radius:50%;background:var(--sea);flex:none}
+  .stage.demo-live::before,.stage.demo-live::after{display:none}   /* drop the SAMPLE watermark */
+  .stage.demo-live .preview-bar{display:none}                      /* drop the amber PREVIEW strip */
+  .stage.demo-live .freshness{display:none}                        /* drop the "0 of 60 days" banner */
+  .stage.demo-live .chip.sample{display:none}                      /* demote per-card Sample chips → the ribbon */
   /* ---- header ---- */
   header.top{padding:26px 0 10px}
   .brandrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
@@ -181,13 +194,13 @@
   .hm-phones{position:relative;height:320px;min-width:0}
   .hm-shot{position:absolute;top:26px;right:170px;width:150px;border-radius:16px;transform:rotate(-7deg);
     border:1px solid rgba(248,243,232,.25);box-shadow:0 18px 40px rgba(0,0,0,.45)}
-  .hm-gif{position:absolute;top:0;right:10px;width:200px;border-radius:22px;box-shadow:0 22px 48px rgba(0,0,0,.5)}
+  .hm-main{position:absolute;top:0;right:10px;width:200px;border-radius:22px;box-shadow:0 22px 48px rgba(0,0,0,.5)}
   @media(max-width:900px){
     .hm-inner{grid-template-columns:1fr}
     .hm-copy h2{font-size:25px}
     .hm-phones{height:300px;width:300px;max-width:100%;margin:6px auto 0}
     .hm-shot{right:160px;width:132px}
-    .hm-gif{width:186px;right:4px}
+    .hm-main{width:186px;right:4px}
   }
   @media(max-width:560px){.hm-inner{padding:26px 22px 24px}}
   /* quick actions */
@@ -253,9 +266,17 @@
   .mg-empty{padding:14px 2px;font-size:12.5px;color:var(--muted)}
   .mg-add{display:grid;grid-template-columns:1fr 1.2fr auto;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
   @media(max-width:680px){.mg-add{grid-template-columns:1fr}}
-  .mg-add input{font:inherit;font-size:13px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 11px;min-width:0}
-  .mg-add input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
-  .mg-add input::placeholder{color:#95a6ad}
+  .mg-add input,.mg-contact input{font:inherit;font-size:13px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 11px;min-width:0}
+  .mg-add input:focus,.mg-contact input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  .mg-add input::placeholder,.mg-contact input::placeholder{color:#95a6ad}
+  /* optional phone/hours behind a subtle reveal, so the add row stays tidy */
+  .mg-more{appearance:none;background:transparent;border:0;font:inherit;font-size:11.5px;font-weight:700;color:var(--sea);cursor:pointer;padding:9px 2px 0;display:inline-flex;align-items:center;gap:5px}
+  .mg-more:hover{text-decoration:underline}
+  .mg-more svg{transition:transform .15s}
+  .mg-more[aria-expanded="true"] svg{transform:rotate(45deg)}
+  .mg-contact{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  @media(max-width:680px){.mg-contact{grid-template-columns:1fr}}
+  .mg-contact[hidden]{display:none}
   .mg-foot{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
 
   /* ============ VIEW SWITCHER ============ */
@@ -333,6 +354,12 @@
     .pl-tools{margin-left:0;width:100%}.pl-tools input{flex:1;width:auto}
   }
 
+  /* ============ LOBBY SCREEN — the live conditions board in a 16:9 frame ============ */
+  .lobby-frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--sea-deep);border:1px solid var(--line)}
+  .lobby-iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+  .lobby-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .lobby-cap{margin:0;font-size:12.5px;color:var(--muted);max-width:62ch}
+
   /* ============ "WHAT GUESTS SEE" LIVE PREVIEWS (2026-07-08) ============ */
   .gp-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .gp-chips{display:flex;gap:6px;flex-wrap:wrap}
@@ -355,14 +382,8 @@
   .gp-screen::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:84px;height:16px;background:#071219;border-radius:9px}
   .gp-empty{padding:46px 18px;text-align:center;font-size:13px;color:var(--mute);line-height:1.5}
   .gp-note{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
-  /* the looping demo image shown by default (the GIF carries its own phone frame) */
-  .gp-demo{display:block;width:100%;max-width:365px;height:auto;margin:14px auto 4px;border-radius:26px}
-  /* the display rules above would defeat the hidden attribute — enforce it for the demo/live swap */
-  .gp-chips[hidden],.gp-replay[hidden],.gp-demo[hidden],.gp-phone[hidden]{display:none}
-  .gp-try{appearance:none;font:inherit;font-size:12px;font-weight:700;cursor:pointer;color:var(--sea);
-    background:transparent;border:1px solid rgba(14,110,140,.35);border-radius:999px;padding:6px 13px;
-    display:inline-flex;align-items:center;gap:6px}
-  .gp-try:hover{border-color:var(--sea);background:var(--sea-tint)}
+  /* the .gp-* display rules above would defeat the hidden attribute — enforce it for chips/replay */
+  .gp-chips[hidden],.gp-replay[hidden],.gp-phone[hidden]{display:none}
   /* pop-in: panel slides up + fades, rows stagger (first reveal per load + Replay) */
   @keyframes gpPop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   .gp-pop .gp-panel{animation:gpPop .38s cubic-bezier(.2,.85,.35,1) both}
@@ -399,6 +420,11 @@
 </head>
 <body class="textured">
 <div class="stage quiet-view">
+
+  <div class="demo-ribbon" id="demoRibbon" aria-label="Sample data notice">
+    <span class="dr-dot" aria-hidden="true"></span>
+    Sample data — demo numbers, not a real property
+  </div>
 
   <div class="preview-bar">
     <div class="pb">
@@ -482,7 +508,7 @@
         </div>
         <div class="hm-phones" aria-hidden="true">
           <img class="hm-shot" src="assets/shot-family-waves.jpg" alt="" loading="lazy">
-          <img class="hm-gif" src="assets/stayclose-preview.gif" alt="The guest guide adapting to ocean conditions">
+          <img class="hm-main" src="assets/shot-stayclose.jpg" alt="The guest guide on a phone, showing beach safety with the property's amenities" loading="lazy">
         </div>
       </div>
     </section>
@@ -521,6 +547,20 @@
           <span>One page &mdash; no card, no subscription, cancel anytime. Telemetry switches on when it&rsquo;s signed.</span>
           <span class="go">Download the PDF <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></span>
         </a>
+      </div>
+    </section>
+
+    <!-- LOBBY SCREEN — the live conditions board, scaled into a 16:9 frame -->
+    <section aria-label="Lobby screen">
+      <div class="sec-h"><h2>Lobby screen</h2><p>The big-screen conditions board your guests glance at on the way out the door &mdash; this is the live board, running now.</p></div>
+      <div class="card">
+        <div class="lobby-frame">
+          <iframe class="lobby-iframe" data-guide-screen-frame src="https://oceansafety.app/?ref=your-hotel&amp;mode=screen" title="Live beach-conditions board for your lobby" loading="lazy" referrerpolicy="no-referrer"></iframe>
+        </div>
+        <div class="lobby-foot">
+          <p class="lobby-cap">A big-screen conditions board with a scan-to-open QR for your lobby or pool deck.</p>
+          <a class="pl-btn primary" data-guide-screen href="https://oceansafety.app/?ref=your-hotel&amp;mode=screen" target="_blank" rel="noopener">Open screen mode <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L9 15"/></svg></a>
+        </div>
       </div>
     </section>
 
@@ -709,35 +749,38 @@
         <div class="mg-list" id="amList"></div>
         <div class="mg-add">
           <input id="amA" placeholder="Amenity — e.g. The Spa" autocomplete="off">
-          <input id="amB" placeholder="Detail (optional) — e.g. lobby level · 9a–7p · ext. 53" autocomplete="off">
+          <input id="amB" placeholder="Detail (optional) — e.g. lobby level, day passes" autocomplete="off">
           <button class="pl-btn primary" id="amAdd">Add amenity</button>
+        </div>
+        <button type="button" class="mg-more" id="amMore" aria-expanded="false" aria-controls="amContact">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Contact info
+        </button>
+        <div class="mg-contact" id="amContact" hidden>
+          <input id="amPhone" placeholder="Phone (optional) — e.g. (808) 555-0142" autocomplete="off" inputmode="tel">
+          <input id="amHours" placeholder="Hours (optional) — e.g. 9a–7p daily" autocomplete="off">
         </div>
         <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Export config</button></div>
       </div>
     </section>
-    <!-- WHAT GUESTS SEE — STAY-CLOSE PREVIEW (GIF demo by default, interactive on "Try it live") -->
+    <!-- WHAT GUESTS SEE — STAY-CLOSE PREVIEW (always-live guest panel, built from the draft menu) -->
     <section>
-      <div class="sec-h"><h2>What guests see</h2><p>How the guest app steers to your amenities when the ocean is the wrong call — try it live with your own draft menu.</p></div>
+      <div class="sec-h"><h2>What guests see</h2><p>How the guest app steers to your amenities when the ocean is the wrong call — live from your own draft menu.</p></div>
       <div class="card" id="gpAmCard">
         <div class="gp-top">
-          <div class="gp-chips" role="group" aria-label="Preview ocean condition" id="gpAmChips" hidden>
+          <div class="gp-chips" role="group" aria-label="Preview ocean condition" id="gpAmChips">
             <button type="button" class="gp-chip" data-cond="calm" aria-pressed="true">Calm</button>
             <button type="button" class="gp-chip" data-cond="red_flag" aria-pressed="false">High surf</button>
             <button type="button" class="gp-chip" data-cond="brown_water" aria-pressed="false">Brown water</button>
             <button type="button" class="gp-chip" data-cond="rain" aria-pressed="false">Rainy day</button>
           </div>
-          <button type="button" class="gp-replay" id="gpAmReplay" title="Replay the pop-in animation" hidden>
+          <button type="button" class="gp-replay" id="gpAmReplay" title="Replay the pop-in animation">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/></svg>
             Replay
           </button>
-          <button type="button" class="gp-try" id="gpAmTry" title="Drive the panel yourself — condition chips plus your draft menu above">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
-            <span id="gpAmTryLbl">Try it live</span>
-          </button>
         </div>
-        <img id="gpAmGif" class="gp-demo" src="assets/stayclose-preview.gif" width="365" alt="Guest view: the Stay-Close amenity list adapting to ocean conditions">
-        <div class="gp-phone" id="gpAmPhone" hidden><div class="gp-screen"><div id="gpAmenity"></div></div></div>
-        <div class="gp-note">A preview of what guests see — not measured data. The demo loops through ocean conditions; <b>Try it live</b> builds the panel from your draft menu above, and you can tap an amenity to expand it just like a guest.</div>
+        <div class="gp-phone" id="gpAmPhone"><div class="gp-screen"><div id="gpAmenity"></div></div></div>
+        <div class="gp-note">The exact panel guests see &mdash; built live from your draft menu above. Switch the ocean condition with the chips, and tap an amenity to expand its hours and phone, just like a guest. Not measured data.</div>
       </div>
     </section>
     <!-- BAD OCEAN DAY SAVES -->
@@ -1067,7 +1110,16 @@
   try {
     var params = new URLSearchParams(location.search);
     var slug = (params.get('slug') || '').trim();
-    if(!slug) return;  // no slug: leave the preview exactly as-is
+    if(!slug){
+      // No slug = the DEMO. Dress the sample preview as a confident, live-style dashboard,
+      // behind ONE honest "Sample data" ribbon (CSS-revealed by .demo-live). The ?slug live
+      // path never gets this class, so its real-data and honest-empty states are untouched.
+      var demoStage = document.querySelector('.stage');
+      if(demoStage) demoStage.classList.add('demo-live');
+      var demoPill = document.querySelector('.modeswitch .on');
+      if(demoPill){ demoPill.textContent = 'Demo'; demoPill.style.background = 'var(--bg-2)'; demoPill.style.color = 'var(--muted)'; }
+      return;
+    }
 
     var API = (params.get('api') || 'https://concierge-guide-api.oceansafe-hi.workers.dev').replace(/\/+$/,'');
     var period = parseInt(params.get('period'), 10);
@@ -1325,7 +1377,7 @@
     { view:'stayclose', sel:'#mgAmenities', title:'Your amenity menu',
       body:'When the ocean is the wrong call, the guide steers guests to what you offer instead — spa, dining, cabanas. Edits save as a draft in this browser; <b>Export config</b> sends the menu into your app build.' },
     { view:'stayclose', sel:'#gpAmCard', title:'Watch it as a guest',
-      body:'The demo loops through ocean conditions. <b>Try it live</b> rebuilds the panel from your own draft menu, and you can tap an amenity to expand it just like a guest.' },
+      body:'This is the exact panel guests see, built live from your draft menu. Switch the ocean condition with the chips, and tap an amenity to expand its hours and phone — just like a guest.' },
     { view:'promos', sel:'#pmDrop', title:'Drop a promotion',
       body:'Drag a PDF flyer here and guests get an offer chip in the guide’s Town tab — the preview shows the exact card they’ll tap. Drafts stay in this browser until you export.' },
     { view:'guests', sel:'#view-guests section', title:'Then — and only then — the data',
@@ -1422,12 +1474,16 @@
   function manager(cfg){
     var LS = 'os_'+cfg.key+'_'+SLUG, items = null;
     try{ items = JSON.parse(localStorage.getItem(LS)); }catch(e){}
-    if(!Array.isArray(items)) items = cfg.seeds.map(function(x){ return {a:x[0], b:x[1]}; });
+    // seeds → items; back-compat so old {a,b} drafts still load, carrying optional phone/hours.
+    function seedItems(){ return cfg.seeds.map(function(x){ return {a:x[0], b:x[1]||'', phone:x[2]||'', hours:x[3]||''}; }); }
+    if(!Array.isArray(items)) items = seedItems();
+    items = items.map(function(it){ it = it || {}; return {a:it.a||'', b:it.b||'', phone:it.phone||'', hours:it.hours||''}; });
     function save(){ try{ localStorage.setItem(LS, JSON.stringify(items)); }catch(e){} }
     function render(){
       var el = document.getElementById(cfg.ids.list);
       el.innerHTML = items.length ? items.map(function(it,i){
-        return '<div class="mg-row"><div class="mg-nm"><b>'+esc(it.a)+'</b>'+(it.b?'<span>'+esc(it.b)+'</span>':'')+
+        var extra = (it.b?'<span>'+esc(it.b)+'</span>':'')+(it.hours?'<span>Open '+esc(it.hours)+'</span>':'')+(it.phone?'<span>Call '+esc(it.phone)+'</span>':'');
+        return '<div class="mg-row"><div class="mg-nm"><b>'+esc(it.a)+'</b>'+extra+
                '</div><button type="button" class="mg-x" data-i="'+i+'" title="Remove">&times;</button></div>';
       }).join('') : '<div class="mg-empty">Nothing yet — add your first below.</div>';
       document.getElementById(cfg.ids.count).textContent = items.length;
@@ -1443,15 +1499,19 @@
     function add(){
       var a = document.getElementById(cfg.ids.a), b = document.getElementById(cfg.ids.b);
       var va = a.value.trim(); if(!va) { a.focus(); return; }
-      items.push({a:va, b:b.value.trim()}); a.value=''; b.value=''; a.focus(); render();
+      var ph = cfg.ids.phone && document.getElementById(cfg.ids.phone);
+      var hr = cfg.ids.hours && document.getElementById(cfg.ids.hours);
+      items.push({a:va, b:b.value.trim(), phone:ph?ph.value.trim():'', hours:hr?hr.value.trim():''});
+      a.value=''; b.value=''; if(ph) ph.value=''; if(hr) hr.value=''; a.focus(); render();
     }
     document.getElementById(cfg.ids.add).addEventListener('click', add);
-    [cfg.ids.a, cfg.ids.b].forEach(function(id){
-      document.getElementById(id).addEventListener('keydown', function(e){ if(e.key==='Enter') add(); });
+    [cfg.ids.a, cfg.ids.b, cfg.ids.phone, cfg.ids.hours].forEach(function(id){
+      var el = id && document.getElementById(id);
+      if(el) el.addEventListener('keydown', function(e){ if(e.key==='Enter') add(); });
     });
     document.getElementById(cfg.ids.reset).addEventListener('click', function(){
       if(!confirm('Reset to the starter list? Your edits here will be cleared.')) return;
-      items = cfg.seeds.map(function(x){ return {a:x[0], b:x[1]}; }); render();
+      items = seedItems(); render();
     });
     document.getElementById(cfg.ids.export).addEventListener('click', function(){
       var out = { app:'oceansafety', slug:SLUG, version:1 };
@@ -1485,16 +1545,23 @@
   function gpAmenityHTML(items){
     if(!items.length) return '<div class="gp-empty">Add an amenity above and watch it appear here.</div>';
     var rows = items.map(function(it, i){
+      // Expanded body, same contract + order as the guest app _amenityPanel (index.html):
+      // detail → hours (Open …) → phone (tel: Call …); front-desk fallback only when no phone.
       var detail = it.b ? '<div style="font-size:11.5px;color:var(--mute);line-height:1.45">'+esc(it.b)+'</div>' : '';
+      var hours = it.hours ? '<div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mute);margin-top:4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Open '+esc(it.hours)+'</div>' : '';
+      var phone = '';
+      if(it.phone){
+        var tel = String(it.phone).replace(/[^+0-9]/g,'');
+        phone = '<a href="tel:'+esc(tel)+'" onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ocean);text-decoration:none;margin-top:4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.68 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.24a2 2 0 0 1 2.11-.45c.74.32 1.53.55 2.34.68A2 2 0 0 1 22 16.92z"/></svg>Call '+esc(it.phone)+'</a>';
+      }
+      var fallback = it.phone ? '' : '<div style="font-size:11px;color:var(--mute);margin-top:'+((it.b||it.hours) ? '4px' : '0')+'">Ask at the front desk to book or check today&rsquo;s availability.</div>';
       return '<button type="button" class="gp-it" data-gpam="'+i+'" aria-expanded="false" style="display:block;width:100%;min-height:44px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-top:8px;cursor:pointer;text-align:left;font-family:inherit;animation-delay:'+(80+i*40)+'ms">'+
         '<span style="display:flex;align-items:center;gap:10px">'+
           '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ocean)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 21h18"/><path d="M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>'+
           '<span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink)">'+esc(it.a)+'</span>'+
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>'+
         '</span>'+
-        '<span class="gp-abody" style="display:none;padding:8px 2px 2px 25px">'+detail+
-          '<div style="font-size:11px;color:var(--mute);margin-top:'+(it.b ? '4px' : '0')+'">Ask at the front desk to book or check today&rsquo;s availability.</div>'+
-        '</span>'+
+        '<span class="gp-abody" style="display:none;padding:8px 2px 2px 25px">'+detail+hours+phone+fallback+'</span>'+
       '</button>';
     }).join('');
     return '<div class="gp-panel" style="padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">'+
@@ -1539,26 +1606,30 @@
   var gpAmRe = document.getElementById('gpAmReplay');
   if(gpAmRe) gpAmRe.addEventListener('click', function(){ gpPop(); });
 
-  /* ---- GIF demo <-> live panel toggle ---- */
-  var gpAmGif = document.getElementById('gpAmGif');
-  var gpAmPhone = document.getElementById('gpAmPhone');
-  var gpAmTry = document.getElementById('gpAmTry');
-  var gpAmTryLbl = document.getElementById('gpAmTryLbl');
-  var gpLiveOn = false;
-  if(gpAmTry) gpAmTry.addEventListener('click', function(){
-    gpLiveOn = !gpLiveOn;
-    if(gpAmGif) gpAmGif.hidden = gpLiveOn;
-    if(gpAmPhone) gpAmPhone.hidden = !gpLiveOn;
-    if(gpChips) gpChips.hidden = !gpLiveOn;
-    if(gpAmRe) gpAmRe.hidden = !gpLiveOn;
-    if(gpAmTryLbl) gpAmTryLbl.textContent = gpLiveOn ? 'Back to demo' : 'Try it live';
-    if(gpLiveOn) gpPop();
+  /* ---- "Contact info" reveal — optional phone/hours inputs, tucked away until needed ---- */
+  var amMore = document.getElementById('amMore'), amContact = document.getElementById('amContact');
+  if(amMore && amContact) amMore.addEventListener('click', function(){
+    var open = amContact.hidden;
+    amContact.hidden = !open;
+    amMore.setAttribute('aria-expanded', String(open));
+    if(open){ var f = document.getElementById('amPhone'); if(f) f.focus(); }
   });
 
+  /* The live panel is always shown now — replay its pop-in each time Stay-Close opens. */
+  var scTab = document.querySelector('.viewtabs button[data-view="stayclose"]');
+  if(scTab) scTab.addEventListener('click', function(){ setTimeout(gpPop, 40); });
+
   manager({ key:'amenities', exportKey:'amenities',
-    ids:{list:'amList', a:'amA', b:'amB', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
-    seeds:[['Spa treatments',''],['On-site dining',''],['Pool bar',''],['Cabana rental',''],['Gift shop','']],
-    toExport:function(it){ return {label:it.a, value:it.b}; },
+    ids:{list:'amList', a:'amA', b:'amB', phone:'amPhone', hours:'amHours', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
+    seeds:[
+      ['Spa treatments','Lobby level · massage, facials, day passes','(808) 555-0142','9a–7p daily'],
+      ['On-site dining','Oceanview restaurant + poolside grill','(808) 555-0155','7a–9p'],
+      ['Pool bar','Cocktails, shave ice & light bites','',''],
+      ['Cabana rental','Full-day shade with towel service','(808) 555-0170','8a–5p'],
+      ['Gift shop','Sundries, resort wear & local goods','','']
+    ],
+    // Export in the shared amenity contract {name,detail,price,phone,hours,showWhen} the guest app reads.
+    toExport:function(it){ return {name:it.a, detail:it.b, price:'', phone:it.phone||'', hours:it.hours||'', showWhen:'always'}; },
     onChange:function(items){ gpItems.amenities = items; gpRender(); } });
 })();
 </script>
@@ -1751,6 +1822,9 @@
     });
     document.querySelectorAll('[data-guide-screen]').forEach(function(a){
       a.href = 'https://oceansafety.app/?ref=' + encodeURIComponent(REF) + '&mode=screen';
+    });
+    document.querySelectorAll('[data-guide-screen-frame]').forEach(function(f){
+      f.src = 'https://oceansafety.app/?ref=' + encodeURIComponent(REF) + '&mode=screen';
     });
   }catch(e){}
 })();
