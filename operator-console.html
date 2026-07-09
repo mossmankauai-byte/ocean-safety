@@ -432,14 +432,14 @@
           <div class="wow">▲ ~12% vs prior 30d <span class="chip sample" style="margin-left:4px">Sample</span></div>
           <div class="sub">How many times guests who scanned the in-room QR opened a beach, trail, or restaurant in the app to plan their day — per occupied unit, week over week. A tap is intent (“opened in app”), not a confirmed visit.</div>
           <details class="meth"><summary>How this is computed</summary>
-            <div class="body"><b>Measured numerator / operator-reported denominator.</b> <code>poi_tap</code> events for this slug from the Worker daily rollup (<code>window.CGTrack.poi → /e → KV ev:slug:date</code>), divided by <code>unit_count × occupancy</code> you supply. The aggregate rollup counts taps and sessions separately with no per-session link, so this is taps-per-unit, not “sessions that tapped.” Goes <b>Measured</b> once a co-branded variant ships with a live endpoint and 60+ days of rollups exist.</div>
+            <div class="body"><b>Counted, not estimated.</b> Place taps from your property’s app build, counted daily by our collector, divided by the rooms-and-occupancy figure you supply. It counts taps per unit — not which guest tapped. The label flips to <b>Measured</b> once your co-branded app is live with 60+ days of counts.</div>
           </details>
         </div>
         <div class="companion">
           <div class="lab">Companion floor · New activated guests / occupied unit <span class="floorpill">Floor</span></div>
           <div class="num">~0.8<small style="font-size:13px;font-weight:600;color:var(--muted)"> / unit · wk</small> <span class="chip sample">Sample</span></div>
-          <div class="cap"><code style="font-size:10.5px">session_start</code> fires once per 30-day guest cookie, so it counts first-opens — <b>not</b> repeat opens during a stay. Read it as a floor on engagement.</div>
-          <div class="valueread"><b>The honest read:</b> at the proposed rate this costs about <b>one comp room every 12 days</b>, or one incremental spa booking a month to break even — and this dashboard shows you, in your own data, whether that booking happened. <span class="chip modeled">Modeled</span></div>
+          <div class="cap">Counts each guest’s <b>first</b> open in a 30-day window — repeat opens during a stay aren’t counted, so read it as the floor, not the ceiling.</div>
+          <div class="valueread"><b>What to watch:</b> if this floor holds while guest usage climbs, the guide is being adopted — new guests keep finding it, and the ones who have it keep coming back.</div>
         </div>
       </div>
     </div>
@@ -451,6 +451,58 @@
       <span class="li"><span class="pv assumption"></span> <b style="color:#7a6030">Assumption</b>&nbsp;— industry benchmark, unmeasured</span>
       <span class="li"><span class="pv sample"></span> <b style="color:var(--sample)">Sample</b>&nbsp;— illustrative, no real source</span>
     </div>
+
+    <!-- THIS WEEK AT A GLANCE (canonical sample dataset — matches hotel-insights-demo) -->
+    <section>
+      <div class="sec-h"><h2>This month at a glance</h2><p>The four numbers worth a look before the 8am standup.</p></div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Guest sessions</span><span class="chip sample">Sample</span></div>
+          <div class="big">~180<small> / day</small></div>
+          <div class="cap">Peaking Saturday — guests carry the guide through the whole stay, not just check-in day.</div>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Staying close</span><span class="chip sample">Sample</span></div>
+          <div class="big">46%<small> of checks within 10 min</small></div>
+          <div class="cap">On high-surf days it jumps to 71% — staff the pool deck and cabanas for a busier mid-morning.</div>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Top beach</span><span class="chip sample">Sample</span></div>
+          <div class="big">Poʻipū<small> 29% of beach checks</small></div>
+          <div class="cap">Brief the concierge desk; shuttle, towel and gear demand follow it.</div>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Busiest planning hour</span><span class="chip sample">Sample</span></div>
+          <div class="big">8am<small> then 2pm · 8pm</small></div>
+          <div class="cap">Guests plan at breakfast, by the pool, and the night before — time offers to that clock.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHEN GUESTS PLAN + TOP BEACHES -->
+    <section>
+      <div class="sec-h"><h2>When guests plan — and what they check</h2><p>Put concierge coverage and offers where the sessions already are.</p></div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Planning windows</span><span class="chip sample">Sample</span></div>
+          <div class="bars">
+            <div class="row"><span class="lab">Breakfast 7–9am</span><i style="width:100%;background:var(--sea)"></i><b>52</b></div>
+            <div class="row"><span class="lab">Poolside 1–3pm</span><i style="width:87%;background:var(--sea)"></i><b>45</b></div>
+            <div class="row"><span class="lab">Night before 7–9pm</span><i style="width:62%;background:var(--sea)"></i><b>32</b></div>
+          </div>
+          <div class="cap">Three windows carry 129 of a typical day’s ~180 sessions. Send the luau reminder when guests are deciding — not when the marketing calendar says so.</div>
+        </div>
+        <div class="card">
+          <div class="title"><span class="l"><span class="pv measured"></span> Beaches your guests check</span><span class="chip sample">Sample</span></div>
+          <ol class="rank">
+            <li><span class="n">1</span><span style="flex:1">Poʻipū Beach Park</span><span class="bar" style="flex:0 0 110px"><i style="width:100%"></i></span><span class="ct">1,410</span></li>
+            <li><span class="n">2</span><span style="flex:1">Brennecke’s</span><span class="bar" style="flex:0 0 110px"><i style="width:59%"></i></span><span class="ct">830</span></li>
+            <li><span class="n">3</span><span style="flex:1">Shipwreck</span><span class="bar" style="flex:0 0 110px"><i style="width:51%"></i></span><span class="ct">720</span></li>
+          </ol>
+          <div class="cap">Poʻipū runs almost twice anywhere else. Full ranking and offer taps live in <b>Guest activity</b>.</div>
+        </div>
+      </div>
+    </section>
 
     <!-- DUTY-OF-CARE COMPLETENESS -->
     <section>

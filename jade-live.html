@@ -100,21 +100,7 @@
   .btn.sec:hover{border-color:var(--gold);color:var(--gold)}
   .btn.wide{flex:none;width:100%}
 
-  /* proposal */
-  .prop{padding:18px}
-  .prop h2{font-size:18px;font-weight:500;margin:0 0 3px}
-  .prop .subh{font-size:13px;color:var(--ink3);margin:0 0 16px}
-  .plist{list-style:none;margin:0 0 4px;padding:0}
-  .plist li{display:flex;gap:11px;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
-  .plist li:first-child{border-top:0}
-  .plist li b{color:var(--gold);font-weight:500;white-space:nowrap;margin-left:auto}
-  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--calm);background:rgba(93,202,165,.14);padding:5px 11px;border-radius:20px;margin:2px 6px 2px 0}
-  .steps{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
-  .step{flex:1 1 150px;background:rgba(9,18,25,.4);border:1px solid var(--line);border-radius:12px;padding:12px}
-  .step .n{width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--gold-ink);font-size:12px;display:flex;align-items:center;justify-content:center;margin-bottom:7px}
-  .step p{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.45}
-  .disc{font-size:11px;color:var(--ink3);margin-top:16px;line-height:1.55;border-top:1px solid var(--line);padding-top:12px}
-  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:80;opacity:0;
+    .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:80;opacity:0;
     background:var(--gold);color:var(--gold-ink);font-size:13.5px;padding:11px 18px;border-radius:12px;transition:.25s;pointer-events:none}
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
   @media(max-width:520px){ .wrap{padding:16px 12px 50px} .thumb{height:104px} }
@@ -144,48 +130,12 @@
 
   <nav class="tabs glass" role="tablist">
     <button class="on" data-panel="demo" role="tab"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Demo</button>
-    <button data-panel="prop" role="tab"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg> Proposal</button>
   </nav>
 
   <!-- DEMO -->
   <section class="panel on" id="panel-demo">
     <p class="lead"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M9 18l6-6-6-6"/></svg> Tap any card to show <span class="who">&nbsp;what your guests see&nbsp;</span> then open it live.</p>
     <div class="tiles" id="tiles"></div>
-  </section>
-
-  <!-- PROPOSAL -->
-  <section class="panel" id="panel-prop">
-    <div class="glass prop">
-      <h2 class="serif">Free 30-day pilot <span id="forWho" style="color:var(--gold)"></span></h2>
-      <p class="subh">The pilot earns while it runs — your offers in guests' pockets, and tour-desk earnings included from day one: big-ticket tour requests route to your own desk at your commission. No card, no IT lift. You watch your own numbers, and at day 30 you keep it or walk.</p>
-
-      <ul class="plist">
-        <li>Your co-branded guest app, live <b id="pBand">Mid hotel</b></li>
-        <li>Tour-desk earnings during the pilot <b style="color:var(--calm)">yours, included</b></li>
-        <li>Then, if you keep it <b id="pPrice">$1,200 / mo</b></li>
-        <li>Per room, per year <b id="pPer">$120</b></li>
-        <li>Pilot cost <b style="color:var(--calm)">$0 for 30 days</b></li>
-      </ul>
-
-      <div style="margin:12px 0 4px">
-        <span class="pill"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> Cancel anytime</span>
-        <span class="pill"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> Aggregate data only</span>
-        <span class="pill"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M20 6L9 17l-5-5"/></svg> No guest personal data</span>
-      </div>
-
-      <div class="steps">
-        <div class="step"><div class="n">1</div><p>We set up your co-branded app and beaches.</p></div>
-        <div class="step"><div class="n">2</div><p>Placards land in rooms within a week.</p></div>
-        <div class="step"><div class="n">3</div><p>At day 30 you see your real usage and earnings, and decide.</p></div>
-      </div>
-
-      <div class="mbtns">
-        <a class="btn pri" id="startPilot"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Start the free pilot</a>
-        <button class="btn sec" id="copyLink"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg> Copy demo link</button>
-      </div>
-
-      <p class="disc" id="disc">Enter a property name above to personalise this page. The pilot shows this property's own real numbers on your dashboard at day 30. Liability and duty-of-care language is not a legal guarantee and is pending counsel review.</p>
-    </div>
   </section>
 </div>
 
@@ -195,8 +145,8 @@
 <script>
 (function(){
   "use strict";
-  var LIVE = "https://oceansafety.app";
-  var OPCONSOLE = "https://oceansafety.app/operator-console.html";
+  var LIVE = "https://ocean-safety.netlify.app";
+  var OPCONSOLE = "https://ocean-safety.netlify.app/operator-console.html";
 
   // Real Kauaʻi beaches (geographic place names) for the near-property picker.
   var BEACHES = ["Hanalei Bay","Poʻipū Beach Park","Keʻe Beach","ʻAnini","Kalihiwai","Secret Beach","Tunnels (Makua)","Shipwreck","Māhāʻulepū","Salt Pond","Lydgate","Polihale"];
@@ -227,12 +177,7 @@
      guests:"the one screen your guests never see.",
      you:"how much your app gets used and which beaches guests check. Sample data until your pilot fills it in.",
      live:true, op:true, url:OPCONSOLE, param:"slug",
-     ic:'<rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 13h3M14 13h3M12 18v3M8 21h8"/>'},
-    {id:"trust", label:"Where the ratings come from", teaser:"Why a GM can trust it.",
-     guests:"the honest sourcing behind every flag: real buoys, NOAA and USGS, calibrated toward caution.",
-     you:"the answer to “what if it's wrong”: it describes the water, points to the lifeguard, never guarantees.",
-     live:true, tab:"beaches",
-     ic:'<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/>'}
+     ic:'<rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 13h3M14 13h3M12 18v3M8 21h8"/>'}
   ];
 
   // Embedded screenshots go here as { id: "data:image/...," }. Missing → styled placeholder (never broken).
@@ -308,22 +253,12 @@
     };
   });
 
-  // ---- proposal / personalisation ----
+  // ---- personalisation ----
   function syncName(){
     var dn=displayName();
-    $("#forWho").textContent = dn==="Your Resort" ? "" : "· "+dn;
-    $("#disc").firstChild && null;
     localStorage.setItem("jadeProperty", pname.value||"");
   }
   pname.addEventListener("input", syncName);
-  $("#copyLink").onclick=function(){ copy(LIVE+"?ref="+slug(), "Demo link copied for "+displayName()); };
-  $("#startPilot").onclick=function(){
-    var dn=displayName();
-    var subj=encodeURIComponent("OceanSafe free 30-day pilot — "+dn);
-    var body=encodeURIComponent("Property: "+dn+"\nNearest beaches: "+(selBeaches.join(", ")||"—")+
-      "\n\nStarting a free 30-day pilot (no card). Please confirm the go-live date and who receives the room placards.");
-    window.location.href="mailto:?subject="+subj+"&body="+body;
-  };
 
   // ---- helpers ----
   var toast=$("#toast"), tt;
