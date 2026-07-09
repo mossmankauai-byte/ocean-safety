@@ -101,6 +101,9 @@
   .chip.modeled{color:#55682c;background:#edf1da}
   .chip.assumption{color:#755b28;background:#f2ead7}
   .chip.sample{color:var(--sample);background:var(--sample-bg);border:1px dashed #d5bd85}
+  .chip.live{color:var(--good);background:#e2efe8}
+  .chip.build{color:var(--muted);background:transparent;border:1px dashed var(--line)}
+  .bars.wlab .row{grid-template-columns:118px 1fr 40px}
   .legend{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 4px}
   .legend .li{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-2);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 11px}
   /* ---- sections & cards ---- */
@@ -188,7 +191,7 @@
   }
   @media(max-width:560px){.hm-inner{padding:26px 22px 24px}}
   /* quick actions */
-  .qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .qa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:14px}
   @media(max-width:980px){.qa-grid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:560px){.qa-grid{grid-template-columns:1fr}}
   .qa{appearance:none;text-align:left;font:inherit;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
@@ -506,6 +509,12 @@
           <span>See exactly what a guest sees, on your property&rsquo;s own link.</span>
           <span class="go">oceansafety.app <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L9 15"/></svg></span>
         </a>
+        <a class="qa" data-guide-screen href="https://oceansafety.app/?ref=your-hotel&amp;mode=screen" target="_blank" rel="noopener">
+          <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></span>
+          <b>Lobby screen</b>
+          <span>A big-screen beach-conditions board for your lobby or pool deck.</span>
+          <span class="go">Open screen mode <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L9 15"/></svg></span>
+        </a>
         <a class="qa gold" href="assets/OceanSafe-Pilot-Agreement.pdf" target="_blank" rel="noopener" download>
           <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 15h6"/><path d="M9 11h3"/></svg></span>
           <b>Free-use agreement</b>
@@ -518,6 +527,7 @@
     </div><!-- /view-home -->
 
     <div id="view-guests" hidden>
+    <!-- Guest-activity numbers mirror hotel-insights-demo.html canonical DATA — keep in sync (2026-07-09) -->
     <!-- PROVENANCE LEGEND -->
     <div class="legend" aria-label="How to read every number on this page">
       <span class="li"><span class="pv measured"></span> <b style="color:var(--sea)">Measured</b>&nbsp;— real telemetry from your slug</span>
@@ -525,145 +535,156 @@
       <span class="li"><span class="pv assumption"></span> <b style="color:#755b28">Assumption</b>&nbsp;— industry benchmark, unmeasured</span>
       <span class="li"><span class="pv sample"></span> <b style="color:var(--sample)">Sample</b>&nbsp;— illustrative, no real source</span>
     </div>
-    <!-- DEMAND VS CURATION -->
+    <p class="note" style="margin:10px 0 0"><b>Live now</b> tiles become real the day telemetry switches on; <b>In build</b> tiles need a small Worker change first. Sample window: 30-day month, ~300 rooms.</p>
+
+    <!-- A · GUEST SESSIONS PER DAY (flagship, measurable at launch) -->
     <section>
-      <div class="sec-h"><h2>Demand vs. what you feature</h2><p>Where guest interest is going, and how it lines up with your house picks.</p></div>
+      <div class="sec-h"><h2>Guest sessions per day</h2><p>How much your guests use the guide — the measurable-at-launch flagship.</p></div>
+      <div class="card">
+        <div class="title"><span class="l"><span class="pv measured"></span> Guest sessions per day</span><span><span class="chip live">Live now</span> <span class="chip sample">Sample</span></span></div>
+        <div class="v">180 <small>sessions / day</small></div>
+        <div class="bars wlab" style="margin-top:14px">
+          <div class="row"><span class="lab">Mon</span><i style="width:88%;background:var(--sea)"></i><span>172</span></div>
+          <div class="row"><span class="lab">Tue</span><i style="width:86%;background:var(--sea)"></i><span>168</span></div>
+          <div class="row"><span class="lab">Wed</span><i style="width:89%;background:var(--sea)"></i><span>175</span></div>
+          <div class="row"><span class="lab">Thu</span><i style="width:93%;background:var(--sea)"></i><span>182</span></div>
+          <div class="row"><span class="lab">Fri</span><i style="width:97%;background:var(--sea)"></i><span>190</span></div>
+          <div class="row"><span class="lab">Sat</span><i style="width:100%;background:var(--gold)"></i><span>196</span></div>
+          <div class="row"><span class="lab">Sun</span><i style="width:90%;background:var(--sea)"></i><span>177</span></div>
+        </div>
+        <div class="cap">About <b>180 sessions a day</b>, peaking <b>Saturday</b> (196) — guests carry the guide through the whole stay, not just check-in day. Of ~<b>5,400</b> sessions this month, ~<b>4,140</b> fell on green-surf days and ~<b>1,260</b> on high-surf days.</div>
+        <details class="meth"><summary>How this is computed</summary><div class="body"><code>sessions ÷ days in window</code> per slug, split by day-of-week and by surf state. The first weeks measure how fast your in-room QR gets picked up; the number builds from there. <b>Measured</b> once live.</div></details>
+      </div>
+    </section>
+
+    <!-- B · WHEN GUESTS PLAN -->
+    <section>
+      <div class="sec-h"><h2>When guests plan</h2><p>The hours guests open the guide — put staffing and offers on that clock.</p></div>
+      <div class="card">
+        <div class="title"><span class="l"><span class="pv measured"></span> When guests plan (hour of day)</span><span><span class="chip live">Live now</span> <span class="chip sample">Sample</span></span></div>
+        <div class="bars wlab" style="margin-top:12px">
+          <div class="row"><span class="lab">Breakfast · 7&ndash;9a</span><i style="width:100%;background:var(--sea)"></i><span>52</span></div>
+          <div class="row"><span class="lab">Poolside · 1&ndash;3p</span><i style="width:87%;background:var(--sea)"></i><span>45</span></div>
+          <div class="row"><span class="lab">Night before · 7&ndash;9p</span><i style="width:62%;background:var(--sea)"></i><span>32</span></div>
+        </div>
+        <div class="hours" aria-hidden="true" style="margin-top:16px">
+          <i style="height:18%"></i><i style="height:55%"></i><i style="height:100%"></i><i style="height:82%"></i><i style="height:36%"></i><i style="height:27%"></i><i style="height:41%"></i><i style="height:55%"></i><i style="height:86%"></i><i style="height:64%"></i><i style="height:41%"></i><i style="height:32%"></i><i style="height:36%"></i><i style="height:45%"></i><i style="height:64%"></i><i style="height:36%"></i>
+        </div>
+        <div class="hours-x"><span>6a</span><span>11a</span><span>4p</span><span>9p</span></div>
+        <div class="cap">Guests plan <b>at breakfast</b>, <b>by the pool at 2pm</b>, and <b>the night before</b> — put your offers and front-desk coverage on that clock, not on the marketing calendar.</div>
+        <details class="meth"><summary>How this is computed</summary><div class="body">16 hourly buckets (<code>roll.hours[h]</code>), guest device-clock, averaged over the window. Three windows carry the day: Breakfast 52, Poolside 45, Night-before 32. <b>Measured</b> once live.</div></details>
+      </div>
+    </section>
+
+    <!-- C · STAYING CLOSE (the hotel's core value line) -->
+    <section>
+      <div class="sec-h"><h2>Staying close</h2><p>The share of guest checks within ten minutes of your door.</p></div>
+      <div class="card">
+        <div class="title"><span class="l"><span class="pv measured"></span> Checks within ~10 min of the front desk</span><span><span class="chip live">Live now</span> <span class="chip sample">Sample</span></span></div>
+        <div class="v">46% <small>of checks are close to home</small></div>
+        <div class="bars wlab" style="margin-top:14px">
+          <div class="row"><span class="lab">Green-surf days</span><i style="width:54%;background:var(--good)"></i><span>38%</span></div>
+          <div class="row"><span class="lab">High-surf days</span><i style="width:100%;background:var(--risk)"></i><span>71%</span></div>
+          <div class="row"><span class="lab">All days</span><i style="width:65%;background:var(--sea)"></i><span>46%</span></div>
+        </div>
+        <div class="cap">Nearly half of what your guests check is within ten minutes of your front desk — when the number runs high, your amenities are winning the day. On high-surf days it jumps to about <b>7 in 10</b> (38% &rarr; 71%). <span class="chip build">In build</span> the green vs high-surf split needs a Worker schema change; the 46% headline is live at launch.</div>
+      </div>
+    </section>
+
+    <!-- D · TOMORROW'S HEADS-UP -->
+    <section>
+      <div class="sec-h"><h2>Tomorrow&rsquo;s heads-up</h2><p>What a high-surf advisory does to where your guests plan.</p></div>
+      <div class="card">
+        <div class="title"><span class="l"><span class="pv assumption"></span> Near-property planning, by day type</span><span><span class="chip build">In build</span> <span class="chip sample">Sample</span></span></div>
+        <div class="bars wlab" style="margin-top:12px">
+          <div class="row"><span class="lab">Typical surf</span><i style="width:54%;background:var(--good)"></i><span>38%</span></div>
+          <div class="row"><span class="lab">High-surf advisory</span><i style="width:100%;background:var(--risk)"></i><span>71%</span></div>
+        </div>
+        <div class="cap">High surf tomorrow: near-property planning nearly doubles (<b>38% &rarr; 71%</b>) — staff the pool deck, cabanas, and beach bar for a busier mid-morning. A read on where guests will look, not a claim about where they go or that anything was prevented.</div>
+      </div>
+    </section>
+
+    <!-- E · THE BEACHES YOUR GUESTS CHECK -->
+    <section>
+      <div class="sec-h"><h2>The beaches your guests check</h2><p>Which beaches your guests read up on, ranked — and which you haven&rsquo;t featured yet.</p></div>
       <div class="grid g2">
         <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Guests want these — not featured</span><span class="chip sample">Sample</span></div>
+          <div class="title"><span class="l"><span class="pv measured"></span> Beaches your guests check, ranked</span><span><span class="chip live">Live now</span> <span class="chip sample">Sample</span></span></div>
           <ol class="rank">
-            <li><span class="n">1</span><span style="flex:1">Queen's Bath</span><span class="bar" style="flex:0 0 110px"><i style="width:86%"></i></span><span class="ct">142</span><span class="gapadd">+ add</span></li>
-            <li><span class="n">2</span><span style="flex:1">Hāʻena tide pools</span><span class="bar" style="flex:0 0 110px"><i style="width:64%"></i></span><span class="ct">106</span><span class="gapadd">+ add</span></li>
-            <li><span class="n">3</span><span style="flex:1">Kalihiwai overlook</span><span class="bar" style="flex:0 0 110px"><i style="width:47%"></i></span><span class="ct">78</span><span class="gapadd">+ add</span></li>
+            <li><span class="n">1</span><span style="flex:1">Po&#699;ip&#363; Beach Park</span><span class="bar" style="flex:0 0 96px"><i style="width:100%"></i></span><span class="ct">1,410</span></li>
+            <li><span class="n">2</span><span style="flex:1">Brennecke&#39;s</span><span class="bar" style="flex:0 0 96px"><i style="width:59%"></i></span><span class="ct">830</span></li>
+            <li><span class="n">3</span><span style="flex:1">Shipwreck</span><span class="bar" style="flex:0 0 96px"><i style="width:51%"></i></span><span class="ct">720</span></li>
+            <li><span class="n">4</span><span style="flex:1">Baby Beach (Po&#699;ip&#363;)</span><span class="bar" style="flex:0 0 96px"><i style="width:43%"></i></span><span class="ct">610</span></li>
+            <li><span class="n">5</span><span style="flex:1">M&#257;h&#257;&#699;ulep&#363; (Gillin&#39;s)</span><span class="bar" style="flex:0 0 96px"><i style="width:38%"></i></span><span class="ct">540</span></li>
+            <li><span class="n">6</span><span style="flex:1">L&#257;wa&#699;i Beach</span><span class="bar" style="flex:0 0 96px"><i style="width:32%"></i></span><span class="ct">450</span></li>
+            <li><span class="n">7</span><span style="flex:1">All others</span><span class="bar" style="flex:0 0 96px"><i style="width:21%"></i></span><span class="ct">300</span></li>
           </ol>
-          <div class="cap">Top spots your guests open that aren't in your picks. Suppressed when tap counts are too low to be meaningful.</div>
+          <div class="cap">Your guests check <b>Po&#699;ip&#363; Beach Park</b> almost twice as often as anywhere else — about <b>29%</b> of all beach checks. Brief the front desk before the questions arrive, and stock towels and gear accordingly.</div>
         </div>
         <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> What guests come for</span><span class="chip sample">Sample</span></div>
-          <div class="bars">
-            <div class="row"><span class="lab">Beaches</span><i style="width:100%;background:var(--sea)"></i><b>38%</b></div>
-            <div class="row"><span class="lab">Eats</span><i style="width:63%;background:var(--sea)"></i><b>24%</b></div>
-            <div class="row"><span class="lab">Tours</span><i style="width:47%;background:var(--sea)"></i><b>18%</b></div>
-            <div class="row"><span class="lab">Safety</span><i style="width:32%;background:var(--sea)"></i><b>12%</b></div>
-            <div class="row"><span class="lab">Trip</span><i style="width:21%;background:var(--sea)"></i><b>8%</b></div>
-          </div>
-          <div class="cap">Share of tab opens — navigation interest, not time spent.</div>
+          <div class="title"><span class="l"><span class="pv measured"></span> Checked — not yet a house pick</span><span><span class="chip live">Live now</span> <span class="chip sample">Sample</span></span></div>
+          <ol class="rank">
+            <li><span class="n">1</span><span style="flex:1">M&#257;h&#257;&#699;ulep&#363; (Gillin&#39;s)</span><span class="bar" style="flex:0 0 90px"><i style="width:100%"></i></span><span class="ct">540</span><span class="gapadd">+ add</span></li>
+            <li><span class="n">2</span><span style="flex:1">L&#257;wa&#699;i Beach</span><span class="bar" style="flex:0 0 90px"><i style="width:83%"></i></span><span class="ct">450</span><span class="gapadd">+ add</span></li>
+          </ol>
+          <div class="cap">Beaches your guests open often that aren&rsquo;t in your featured picks yet — same counts as the ranked list, reframed as a curation cue. Feature them from <b>Places</b>. Suppressed when tap counts are too low to be meaningful.</div>
         </div>
       </div>
     </section>
-    <!-- CONDITIONS & OUTBOUND -->
+
+    <!-- F · OFFERS THAT LAND (on-property amenities — replaces the old 3rd-party "Outbound interest" card) -->
     <section>
-      <div class="sec-h"><h2>Conditions &amp; outbound interest</h2><p>How guests plan around the ocean, and the local links they tap.</p></div>
+      <div class="sec-h"><h2>Offers that land</h2><p>Taps on your own amenities and offers — normalized per 100 sessions.</p></div>
+      <div class="card">
+        <div class="title"><span class="l"><span class="pv measured"></span> Taps on your amenities, this month</span><span><span class="chip live">Live now</span> <span class="chip sample">Sample</span></span></div>
+        <ol class="rank">
+          <li><span class="n">1</span><span style="flex:1">Beach bar happy hour<br><small style="color:var(--muted);font-weight:400">11.9 taps / 100 sessions · peaks 4pm</small></span><span class="bar" style="flex:0 0 90px"><i style="width:100%"></i></span><span class="ct">640</span></li>
+          <li><span class="n">2</span><span style="flex:1">Cabana<br><small style="color:var(--muted);font-weight:400">8.9 taps / 100 sessions · peaks 9am</small></span><span class="bar" style="flex:0 0 90px"><i style="width:75%"></i></span><span class="ct">480</span></li>
+          <li><span class="n">3</span><span style="flex:1">Activity desk<br><small style="color:var(--muted);font-weight:400">7.6 taps / 100 sessions · peaks 8pm</small></span><span class="bar" style="flex:0 0 90px"><i style="width:64%"></i></span><span class="ct">410</span></li>
+          <li><span class="n">4</span><span style="flex:1">Luau night<br><small style="color:var(--muted);font-weight:400">6.5 taps / 100 sessions · peaks 8pm</small></span><span class="bar" style="flex:0 0 90px"><i style="width:55%"></i></span><span class="ct">350</span></li>
+          <li><span class="n">5</span><span style="flex:1">The Spa<br><small style="color:var(--muted);font-weight:400">4.4 taps / 100 sessions · peaks 2pm</small></span><span class="bar" style="flex:0 0 90px"><i style="width:38%"></i></span><span class="ct">240</span></li>
+        </ol>
+        <div class="inset-card" style="margin-top:14px;background:var(--tint);border:1px solid var(--line);border-radius:11px;padding:12px 13px">
+          <div class="title" style="font-size:11.5px"><span class="l">Cabana taps per 100 sessions, by surf</span><span><span class="chip build">In build</span> <span class="chip sample">Sample</span></span></div>
+          <div class="bars wlab" style="margin-top:10px">
+            <div class="row"><span class="lab">Green surf</span><i style="width:54%;background:var(--good)"></i><span>7.4</span></div>
+            <div class="row"><span class="lab">High surf</span><i style="width:100%;background:var(--risk)"></i><span>13.7</span></div>
+          </div>
+        </div>
+        <div class="cap">Per-100-sessions normalizes for traffic. The beach bar wins overall, but <b>cabana taps nearly double when the surf comes up</b> (7.4 &rarr; 13.7 per 100) — your high-surf staffing cue. A tap is <b>interest</b> — the click, never a booking or revenue.</div>
+        <details class="meth"><summary>How this is computed</summary><div class="body"><code>poi_tap</code> on amenity cards ÷ (rooms ÷ 100) for the window; peak hour from <code>roll.hours[h]</code>. Amenities come from your Stay-Close menu. Stop renewing offers nobody touches; give the winners better placement. <b>Measured</b> once live.</div></details>
+      </div>
+    </section>
+
+    <!-- G · WHO'S SCANNING YOUR QR (not-yet-live metric) -->
+    <section>
+      <div class="sec-h"><h2>Who&rsquo;s scanning your QR</h2><p>Source markets and language mix — useful for staffing and language support.</p></div>
       <div class="grid g2">
         <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Planned on rough-ocean days</span><span class="chip sample">Sample</span></div>
-          <ol class="rank">
-            <li><span class="n">1</span><span style="flex:1">Calmer south-shore beach</span><span class="bar" style="flex:0 0 110px"><i style="width:78%"></i></span><span class="ct">61</span></li>
-            <li><span class="n">2</span><span style="flex:1">Protected cove / tide pools</span><span class="bar" style="flex:0 0 110px"><i style="width:55%"></i></span><span class="ct">43</span></li>
-            <li><span class="n">3</span><span style="flex:1">Trail or land activity</span><span class="bar" style="flex:0 0 110px"><i style="width:41%"></i></span><span class="ct">32</span></li>
-          </ol>
-          <div class="cap">On days our feed flagged a beach, the spots guests opened instead — planning intent, not where they actually went, and never a claim we prevented an incident.</div>
-        </div>
-        <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Outbound interest</span><span class="chip sample">Sample</span></div>
-          <ol class="rank">
-            <li><span class="n">1</span><span style="flex:1">Snorkel tour booking</span><span class="bar" style="flex:0 0 110px"><i style="width:72%"></i></span><span class="ct">54</span></li>
-            <li><span class="n">2</span><span style="flex:1">Bike-path rental</span><span class="bar" style="flex:0 0 110px"><i style="width:58%"></i></span><span class="ct">41</span></li>
-            <li><span class="n">3</span><span style="flex:1">Beach-gear shop</span><span class="bar" style="flex:0 0 110px"><i style="width:44%"></i></span><span class="ct">28</span></li>
-          </ol>
-          <div class="cap">Tour, activity, and shop links guests tapped. A tap is interest — we count the click, never a booking or revenue.</div>
-        </div>
-      </div>
-    </section>
-    <!-- WHAT YOUR GUESTS ARE DOING -->
-    <section>
-      <div class="sec-h"><h2>What your guests are doing</h2><p>The concrete, anonymized behavior you’ll recognize as your own property.</p></div>
-      <div class="grid g3">
-        <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Top destinations this week</span><span class="chip sample">Sample</span></div>
-          <ol class="rank">
-            <li><span class="n">1</span><span class="kind">Beach</span><span class="bar"><i style="width:100%"></i></span><span class="ct">~210</span></li>
-            <li><span class="n">2</span><span class="kind">Beach</span><span class="bar"><i style="width:74%"></i></span><span class="ct">~156</span></li>
-            <li><span class="n">3</span><span class="kind">Food</span><span class="bar"><i style="width:58%"></i></span><span class="ct">~122</span></li>
-            <li><span class="n">4</span><span class="kind">Hike</span><span class="bar"><i style="width:41%"></i></span><span class="ct">~86</span></li>
-            <li><span class="n">5</span><span class="kind">Food</span><span class="bar"><i style="width:29%"></i></span><span class="ct">~61</span></li>
-          </ol>
-          <div class="cap">Shown as “opened in the app,” never “guests visited.” Buckets under 5 sessions show “fewer than 5.”</div>
-          <details class="meth"><summary>How this is computed</summary><div class="body"><code>poi_tap → roll.top[kind][id]</code> per slug. Concrete guest behavior — the most defensible operator artifact on the page. <b>Measured</b> once live.</div></details>
-        </div>
-
-        <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Hotel-pick lift</span><span class="chip sample">Sample</span></div>
-          <div class="gauge">
-            <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
-              <path d="M18 2a16 16 0 1 1 0 32 16 16 0 0 1 0-32" fill="none" stroke="#eef3f5" stroke-width="4"/>
-              <path d="M18 2a16 16 0 0 1 0 32" fill="none" stroke="#0a6e8c" stroke-width="4" stroke-linecap="round" stroke-dasharray="63 100" transform="rotate(-90 18 18)"/>
-            </svg>
-            <div class="gx"><b>~63%</b><span>of pick-eligible taps land on your curated picks</span></div>
+          <div class="title"><span class="l"><span class="pv assumption"></span> Guest origin, share of sessions</span><span><span class="chip build">In build</span> <span class="chip sample">Sample</span></span></div>
+          <div class="bars wlab" style="margin-top:12px">
+            <div class="row"><span class="lab">US West</span><i style="width:100%;background:var(--sea)"></i><span>34%</span></div>
+            <div class="row"><span class="lab">US Midwest/South</span><i style="width:65%;background:var(--sea)"></i><span>22%</span></div>
+            <div class="row"><span class="lab">US East</span><i style="width:47%;background:var(--sea)"></i><span>16%</span></div>
+            <div class="row"><span class="lab">Canada</span><i style="width:35%;background:var(--sea)"></i><span>12%</span></div>
+            <div class="row"><span class="lab">Japan</span><i style="width:24%;background:var(--sea)"></i><span>8%</span></div>
+            <div class="row"><span class="lab">Australia/NZ</span><i style="width:12%;background:var(--sea)"></i><span>4%</span></div>
+            <div class="row"><span class="lab">Europe</span><i style="width:9%;background:var(--sea)"></i><span>3%</span></div>
+            <div class="row"><span class="lab">Other</span><i style="width:3%;background:var(--sea)"></i><span>1%</span></div>
           </div>
-          <div class="cap">Is your concierge’s curation working? Pick-eligible = beaches, hikes, food. Shave-ice, trucks &amp; crafts carry no house flag and are excluded.</div>
-          <details class="meth"><summary>How this is computed</summary><div class="body"><code>poi_house_pick_tap ÷ pick-eligible poi_tap</code>, house flag from <code>HOTEL.picks</code>. A control you own — not a causal “curation caused a visit” claim. <b>Measured</b> once live.</div></details>
+          <div class="cap">Know which markets your in-room QR guests come from, so marketing follows real scans.</div>
         </div>
-
         <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> POI taps per session</span><span class="chip sample">Sample</span></div>
-          <div class="v">~2.4 <small>taps / session</small></div>
-          <div class="cap"><b>A ratio</b> (<code>poi_tap ÷ sessions</code>) — <b>not</b> the share of sessions that tapped. The aggregate rollup can’t identify which sessions tapped; a true session-activation rate is on the roadmap (needs a Worker schema change).</div>
-          <details class="meth"><summary>When guests use it (hourly)</summary>
-            <div class="hours" aria-hidden="true">
-              <i style="height:8%"></i><i style="height:6%"></i><i style="height:4%"></i><i style="height:5%"></i><i style="height:10%"></i><i style="height:22%"></i><i style="height:46%"></i><i style="height:72%"></i><i style="height:88%"></i><i style="height:74%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:44%"></i><i style="height:40%"></i><i style="height:38%"></i><i style="height:42%"></i><i style="height:50%"></i><i style="height:64%"></i><i style="height:70%"></i><i style="height:58%"></i><i style="height:40%"></i><i style="height:26%"></i><i style="height:16%"></i><i style="height:10%"></i>
-            </div>
-            <div class="hours-x"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>11p</span></div>
-            <div class="body" style="margin-top:6px">24 hourly buckets (<code>roll.hours[h]</code>), guest device-clock. Tells front-desk when to staff and when to push. <b>Measured</b> once live.</div>
-          </details>
+          <div class="title"><span class="l"><span class="pv assumption"></span> Session language</span><span><span class="chip build">In build</span> <span class="chip sample">Sample</span></span></div>
+          <div class="bars wlab" style="margin-top:12px">
+            <div class="row"><span class="lab">English</span><i style="width:100%;background:var(--sea)"></i><span>87%</span></div>
+            <div class="row"><span class="lab">Japanese</span><i style="width:9%;background:var(--sea)"></i><span>8%</span></div>
+            <div class="row"><span class="lab">Other</span><i style="width:6%;background:var(--sea)"></i><span>5%</span></div>
+          </div>
+          <div class="cap">The front desk knows which languages to staff for before the season turns.</div>
         </div>
       </div>
     </section>
-
-    <!-- CONCIERGE -->
-    <section>
-      <div class="sec-h"><h2>Concierge &amp; front-desk demand</h2><p>The cleanest near-cash lever: questions the app answered so your desk didn’t have to.</p></div>
-      <div class="grid g3">
-        <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Concierge button taps</span><span class="chip sample">Sample</span></div>
-          <div class="v">~74</div>
-          <div class="cap">Taps on the in-app “call concierge” button — labeled <b>button tapped</b>, not connected calls.</div>
-        </div>
-        <div class="card">
-          <div class="title"><span class="l"><span class="pv measured"></span> Self-serve look-ups</span><span class="chip sample">Sample</span></div>
-          <div class="v">~1,310</div>
-          <div class="cap">Beach / condition / POI look-ups guests answered themselves (<code>poi_tap + tab_change</code>) — front-desk questions deflected.</div>
-        </div>
-        <div class="card">
-          <div class="title"><span class="l"><span class="pv sample"></span> Labor saved</span><span class="chip sample">Sample</span></div>
-          <div class="v">— <small>your rate × deflected questions</small></div>
-          <div class="cap">Deflected desk questions × your loaded rate. We don’t assert a dollar figure — that math is yours to run, in your own spreadsheet, with a rate you’d defend.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SAFETY COVERAGE (collapsible add-on) -->
-    <section>
-      <details class="collapsible card" style="padding:18px">
-        <summary class="sec-h" style="margin:0;cursor:pointer">
-          <h2 style="display:flex;align-items:center;gap:8px"><span class="pv measured"></span> Safety-trigger coverage &amp; conditions-shown log</h2>
-          <p>Risk add-on · click to expand</p>
-        </summary>
-        <div style="margin-top:14px">
-          <p class="note" style="margin-top:0">A timestamped, exportable, aggregate record of when guests were shown current hazard conditions. Positioned as <b>risk-posture and documentation</b> — not a claim the app prevents drownings or is legally required. <span class="chip assumption">Lawyer-gated</span> before sold as liability value.</p>
-          <table class="advlog">
-            <thead><tr><th>Date</th><th>Trigger</th><th>Renders shown</th><th>Source</th></tr></thead>
-            <tbody>
-              <tr><td>—</td><td><span class="trigtag" style="background:#fbeede;color:#b4452f">High surf advisory</span></td><td>~46</td><td>NOAA</td></tr>
-              <tr><td>—</td><td><span class="trigtag" style="background:#eaf1f6;color:#37576b">Brown water</span></td><td>~58</td><td>DOH / rainfall</td></tr>
-              <tr><td>—</td><td><span class="trigtag" style="background:#f6f0e2;color:#c9821b">High wind</span></td><td>~22</td><td>Open-Meteo</td></tr>
-            </tbody>
-          </table>
-          <div class="cap" style="margin-top:8px">Coverage is measured at the <b>render</b> level, not per unique session (the aggregate rollup doesn’t link renders to distinct sessions). Exportable log carries a “SAMPLE DATA” stamp until telemetry connects.</div>
-        </div>
-      </details>
-    </section>
-
 
     <!-- PRIVACY -->
     <section>
@@ -673,9 +694,9 @@
           <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> No names, room numbers, IP, or User-Agent stored</li>
           <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> No persistent user ID, no ad pixels, no session replay</li>
           <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> Opaque 8-byte session IDs · Do-Not-Track respected</li>
-          <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> Your property’s data only — no leaderboards, no cross-property attribution</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16"><path d="M8 1l6 2v4c0 4-3 7-6 8-3-1-6-4-6-8V3l6-2z" fill="none" stroke="#1f9d6b" stroke-width="1.4"/><path d="M5.5 8l1.8 1.8L11 6" fill="none" stroke="#1f9d6b" stroke-width="1.4" stroke-linecap="round"/></svg> Your property&rsquo;s data only — no leaderboards, no cross-property attribution</li>
         </ul>
-        <div class="note">Counts are a floor by design: privacy-respecting (DNT) guests aren’t tracked, and first-opens undercount repeat in-stay use. We’d rather show you a number you can trust than a bigger one you can’t.</div>
+        <div class="note">Everything here is your guests as a group — counts and percentages; we never store or report an individual guest, a device, or a room. Think occupancy report, not surveillance. Counts are a floor by design: privacy-respecting (DNT) guests aren&rsquo;t tracked, and first-opens undercount repeat in-stay use.</div>
       </div>
     </section>
     </div><!-- /view-guests -->
@@ -738,7 +759,7 @@
         <div class="card">
           <div class="title"><span class="l"><span class="pv measured"></span> Amenity interest &amp; render→click</span><span class="chip sample">Sample</span></div>
           <div class="v">~14% <small>render → click</small></div>
-          <div class="cap">Top labels: <b>Spa</b> ~22 · <b>On-site dining</b> ~18 · <b>Pool bar</b> ~11. A click = <b>amenity interest</b>, presented as interest — never “booked” or “revenue.”</div>
+          <div class="cap"><b>Bad-ocean-day steering only</b> — top labels: <b>Spa</b> ~22 · <b>On-site dining</b> ~18 · <b>Pool bar</b> ~11. Indoor amenities lead here because the ocean is the wrong call; the whole-month <b>Offers that land</b> in Guest activity ranks differently (beach bar and cabanas on top). A click = <b>amenity interest</b>, presented as interest — never “booked” or “revenue.”</div>
           <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts ÷ renders. This measured rate <b>replaces</b> any assumed funnel guess — no benchmark dressed up as your result. <b>Measured</b> once live.</div></details>
         </div>
       </div>
@@ -757,7 +778,7 @@
             <li><span class="n">4</span><span style="flex:1">Cabana rental</span><span class="bar" style="flex:0 0 110px"><i style="width:32%"></i></span><span class="ct">~7</span></li>
             <li><span class="n">5</span><span style="flex:1">Gift shop</span><span class="bar" style="flex:0 0 110px"><i style="width:23%"></i></span><span class="ct">~5</span></li>
           </ol>
-          <div class="cap">A tap is <b>amenity interest</b> — we never present it as booked or as revenue.</div>
+          <div class="cap">This is the <b>bad-ocean-day steering</b> mix, on trigger days only — a different scope from the whole-month <b>Offers that land</b> in Guest activity. A tap is <b>amenity interest</b> — we never present it as booked or as revenue.</div>
           <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts from the daily rollup. Labels come from your amenity menu above. <b>Measured</b> once live.</div></details>
         </div>
         <div class="card">
@@ -1179,7 +1200,7 @@
         var topCard = null;
         var cardTitles = document.querySelectorAll('.card .title');
         for(var i=0;i<cardTitles.length;i++){
-          if(/Top destinations/i.test(cardTitles[i].textContent)){ topCard = cardTitles[i].closest('.card'); break; }
+          if(/beaches your guests check|top destinations/i.test(cardTitles[i].textContent)){ topCard = cardTitles[i].closest('.card'); break; }
         }
         if(topCard){
           toMeasured(topCard.querySelector('.title .chip'));
@@ -1308,7 +1329,7 @@
     { view:'promos', sel:'#pmDrop', title:'Drop a promotion',
       body:'Drag a PDF flyer here and guests get an offer chip in the guide’s Town tab — the preview shows the exact card they’ll tap. Drafts stay in this browser until you export.' },
     { view:'guests', sel:'#view-guests section', title:'Then — and only then — the data',
-      body:'Which beaches and places guests open most. Everything stays <b>Sample</b> until your telemetry is on; live mode only ever shows measured counts, and a tap is interest — never a booking.' },
+      body:'How many guests a day, when they plan, and which beaches and offers they open — the same read your guests give you by using the guide. Everything stays <b>Sample</b> until your telemetry is on; live mode only ever shows measured counts, and a tap is interest — never a booking.' },
     { view:'places', sel:'.pl-safety', title:'Places, with safety pre-set',
       body:'Curate what your guide recommends. Hazardous spots start as <b>⊘ Not recommended</b> and can’t be deleted from a safety app — their hazard warnings always stay visible to guests.' },
     { center:true, title:'It’s yours', last:true,
@@ -1727,6 +1748,9 @@
     var REF = (qp.get('slug')||'').trim() || SLUG;
     document.querySelectorAll('[data-guide-link]').forEach(function(a){
       a.href = 'https://oceansafety.app/?ref=' + encodeURIComponent(REF);
+    });
+    document.querySelectorAll('[data-guide-screen]').forEach(function(a){
+      a.href = 'https://oceansafety.app/?ref=' + encodeURIComponent(REF) + '&mode=screen';
     });
   }catch(e){}
 })();
