@@ -77,7 +77,8 @@
     <ul class="muted small" style="margin:0;padding-left:18px;line-height:1.6">
       <li style="margin:0 0 8px">The payment goes straight into <b>your own Square account</b>, so Square's usual payment notifications and receipts apply — you'll see it in your Square Dashboard or Square app. It arrives as a payment, not an order ticket, so it won't show up in a POS order queue.</li>
       <li style="margin:0 0 8px">The order shows up under <b>Recent orders</b> above — pickup orders with the pickup code the customer shows you; ship orders say Ship, and the ship-to address is on the payment in your Square Dashboard. Your <a href="sales.html">Sales page</a> keeps the full history.</li>
-      <li style="margin:0">Once order email is switched on, we'll also email you each order — pickup orders include the pickup code; ship orders point you to the address on the order in your Square Dashboard.</li>
+      <li style="margin:0 0 8px">Once order email is switched on, we'll also email you each order — pickup orders include the pickup code; ship orders point you to the address on the order in your Square Dashboard.</li>
+      <li style="margin:0">Rental orders show their return time here; the pickup code doubles as the claim ticket. Deposits and any reminder texts run in <b>your</b> Square, not through OceanSafe.</li>
     </ul>
   </div>
 </div>
@@ -363,13 +364,15 @@
   }
 
   // ── sales summary ───────────────────────────────────────────────────────────
+  let recentOrders = [];
   async function loadSales() {
     let orders, prodCount;
     if (window.OCEANSAFE_DEMO) {
       orders = window.demoData().orders; prodCount = 8;
     } else {
       const [o, p] = await Promise.all([
-        sb.from("orders").select("total_cents,status,created_at,fulfillment,pickup_code").eq("partner_id", partner.id).order("created_at", { ascending: false }),
+        // rental_return_due needs migration 0015 (deploys before this page).
+        sb.from("orders").select("id,total_cents,status,created_at,fulfillment,pickup_code,rental_return_due").eq("partner_id", partner.id).order("created_at", { ascending: false }),
         sb.from("products").select("id", { count: "exact", head: true }).eq("partner_id", partner.id).eq("active", true),
       ]);
       orders = o.data; prodCount = p.count;
@@ -383,16 +386,53 @@
     el("mCount").textContent = `${paidThisMonth.length} paid order${paidThisMonth.length === 1 ? "" : "s"}`;
     el("mPayout").textContent = money(Math.round(cents * 0.933));
 
-    const recent = (orders || []).slice(0, 8);
-    if (!recent.length) { el("orders").innerHTML = `<span class="muted small">No orders yet.</span>`; return; }
-    const badge = (s) => ({ paid: "b-green", pending: "b-amber", refunded: "b-grey", disputed: "b-red", failed: "b-red", expired: "b-grey", ready: "b-blue", collected: "b-green" }[s] || "b-grey");
+    recentOrders = (orders || []).slice(0, 8);
+    renderOrders();
+  }
+
+  function renderOrders() {
+    if (!recentOrders.length) { el("orders").innerHTML = `<span class="muted small">No orders yet.</span>`; return; }
+    const badge = (s) => ({ paid: "b-green", pending: "b-amber", refunded: "b-grey", disputed: "b-red", failed: "b-red", expired: "b-grey", ready: "b-blue", collected: "b-green", returned: "b-green" }[s] || "b-grey");
     // pickup orders show their code (the customer shows it at the counter);
     // ship orders say Ship — the address is on the payment in Square.
     const ful = (o) => o.fulfillment === "ship" ? "Ship"
       : o.fulfillment === "pickup" ? (o.pickup_code ? `Pickup · <b>${esc(o.pickup_code)}</b>` : "Pickup") : "—";
-    el("orders").innerHTML = `<table><tr><th>When</th><th>Fulfillment</th><th>Status</th><th style="text-align:right">Total</th></tr>${
-      recent.map((o) => `<tr><td>${new Date(o.created_at).toLocaleDateString()}</td><td>${ful(o)}</td><td><span class="badge ${badge(o.status)}">${o.status}</span></td><td style="text-align:right;font-weight:700">${money(o.total_cents)}</td></tr>`).join("")
+    // Rentals (orders.rental_return_due, 0015): the column only appears when a
+    // rental is in the list. Overdue = past due and not yet returned/refunded.
+    // The pickup code doubles as the claim ticket, so no extra ticket column.
+    const hasRental = recentOrders.some((o) => o.rental_return_due);
+    el("orders").innerHTML = `<table><tr><th>When</th><th>Fulfillment</th>${hasRental ? "<th>Return due</th>" : ""}<th>Status</th><th style="text-align:right">Total</th></tr>${
+      recentOrders.map((o) => `<tr><td>${new Date(o.created_at).toLocaleDateString()}</td><td>${ful(o)}</td>${hasRental ? `<td>${returnCell(o)}</td>` : ""}<td><span class="badge ${badge(o.status)}">${o.status}</span></td><td style="text-align:right;font-weight:700">${money(o.total_cents)}</td></tr>`).join("")
     }</table>`;
+    $$("#orders [data-return]").forEach((b) => b.addEventListener("click", () => markReturned(b.dataset.return, b)));
+  }
+
+  // Return-due cell: plain date + due-back time; amber "overdue" when late.
+  function returnCell(o) {
+    if (!o.rental_return_due) return "—";
+    const due = new Date(o.rental_return_due);
+    const when = due.toLocaleDateString() + " " + due.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    const late = due < new Date() && o.status !== "returned" && o.status !== "refunded";
+    const canReturn = ["paid", "ready", "collected"].includes(o.status);
+    return (late ? `<span style="color:var(--amber);font-weight:700">${when} · overdue</span>` : when)
+      + (canReturn ? `<button type="button" class="btn ghost" style="display:block;min-height:44px;padding:6px 12px;margin-top:6px;font-size:12.5px" data-return="${esc(o.id)}">Mark returned</button>` : "");
+  }
+
+  // Owner marks a rental returned — same owner-update rail as the rest of the
+  // order lifecycle (orders_owner_update RLS, 0007; 'returned' allowed by 0015).
+  async function markReturned(id, btn) {
+    btn.disabled = true; btn.innerHTML = '<span class="spin" style="border-color:var(--ocean);border-top-color:transparent"></span>';
+    if (!window.OCEANSAFE_DEMO) {
+      const { data: updated, error } = await sb.from("orders").update({ status: "returned" }).eq("id", id).select("id");
+      if (error || !updated || updated.length === 0) {
+        btn.disabled = false; btn.textContent = "Mark returned";
+        alert(error ? error.message : "Couldn't update that order — refresh and try again.");
+        return;
+      }
+    }
+    const o = recentOrders.find((x) => x.id === id);
+    if (o) o.status = "returned";
+    renderOrders();
   }
 </script>
 </body>

@@ -35,6 +35,19 @@ window.demoData = function () {
     items.push({ order_id: id, title: titles[n % titles.length], qty: 1, price_cents: amt });
   });
   orders.push({ id: "demo-0", total_cents: 3400, status: "pending", fulfillment: "pickup", pickup_code: "P0000", created_at: today.toISOString() });
+  // Rental examples (orders.rental_return_due, 0015) — clearly demo: one due
+  // back tomorrow 4pm, one overdue since yesterday 10am. The pickup code
+  // doubles as the claim ticket; deposits/reminder texts live in the seller's
+  // own Square, never in OceanSafe.
+  const rDue = new Date(today); rDue.setDate(rDue.getDate() + 1); rDue.setHours(16, 0, 0, 0);
+  orders.push({ id: "demo-r1", total_cents: 4500, status: "paid", fulfillment: "pickup", pickup_code: "RENT",
+    rental_return_due: rDue.toISOString(), created_at: today.toISOString() });
+  items.push({ order_id: "demo-r1", title: "Beach chair set — day rental (demo)", qty: 1, price_cents: 4500 });
+  const rLate = new Date(today); rLate.setDate(rLate.getDate() - 1); rLate.setHours(10, 0, 0, 0);
+  const rOut = new Date(today); rOut.setDate(rOut.getDate() - 3);
+  orders.push({ id: "demo-r2", total_cents: 9800, status: "collected", fulfillment: "pickup", pickup_code: "KAYK",
+    rental_return_due: rLate.toISOString(), created_at: rOut.toISOString() });
+  items.push({ order_id: "demo-r2", title: "Kayak — 3-day rental (demo)", qty: 1, price_cents: 9800 });
   orders.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
   // Inventory: one sold out (0), one unlimited (null), the rest counted.
   const products = [
