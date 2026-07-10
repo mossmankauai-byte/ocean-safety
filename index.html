@@ -8771,11 +8771,12 @@ function updateFreshnessIndicator(){
   // static; session-only; demo-param gated (this whole IIFE is under ?demo=freepaid).
   (function osfpCurtain(){
     var A = '/assets/shot-fp-';
-    var ROWS = [
-      {n:1,k:'brand',t:'Your logo and welcome',s:'The guide opens in their name — not ours.'},
-      {n:2,k:'offer',t:'A timed offer, on the guest’s phone',s:'A promotion pops up during the window they set.'},
-      {n:3,k:'pick', t:'Their picks, starred in gold',s:'The beaches they recommend get a gold badge.'},
-      {n:4,k:'amen', t:'Every amenity, in full',s:'Free shows one. Paid shows all — hours, phone, price.'}
+    // Guest-guide diffs — side-by-side FREE|PAID screenshot pairs.
+    var GUEST = [
+      {k:'brand',t:'Your logo and welcome',s:'The guide opens in their name — not ours.'},
+      {k:'offer',t:'A timed offer, on the guest’s phone',s:'A promotion pops up during the window they set.'},
+      {k:'pick', t:'Their picks, starred in gold',s:'The beaches they recommend get a gold badge.'},
+      {k:'amen', t:'Every amenity, in full',s:'Free shows one; paid shows all — hours, phone, price.'}
     ];
     function ensureStyle(){
       if(document.getElementById('oscStyle')) return;
@@ -8787,26 +8788,41 @@ function updateFreshnessIndicator(){
        +'@keyframes oscIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}'
        +'.osc-x{position:absolute;top:9px;right:9px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:none;background:#f0ece0;border-radius:50%;color:#5c7480;cursor:pointer;padding:0;z-index:2}'
        +'.osc-h{font-size:17px;font-weight:800;color:#12333d;padding-right:34px;letter-spacing:-.01em}'
-       +'.osc-sub{font-size:12.5px;color:#5c7480;margin-top:3px;line-height:1.4}'
-       +'.osc-row{margin-top:15px}'
-       +'.osc-cap{display:flex;gap:9px;align-items:flex-start}'
-       +'.osc-num{flex:none;width:21px;height:21px;border-radius:50%;background:#c89132;color:#fff;font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}'
+       +'.osc-sub{font-size:12.5px;color:#5c7480;margin-top:3px;line-height:1.45}'
+       +'.osc-sec{display:flex;align-items:center;gap:10px;margin:22px 0 2px;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#8a6d1f}'
+       +'.osc-sec::after{content:"";flex:1;height:1px;background:#ece3cf}'
+       +'.osc-row{margin-top:14px}'
        +'.osc-t{font-size:13.5px;font-weight:800;color:#12333d;line-height:1.25}'
-       +'.osc-s{font-size:11.5px;color:#5c7480;line-height:1.35;margin-top:1px}'
-       +'.osc-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;align-items:start}'
-       +'.osc-cell{position:relative;margin:0;border:1px solid #e7e0cf;border-radius:12px;overflow:hidden;background:#f6f3ea}'
-       +'.osc-cell-paid{border-color:#e2c583;box-shadow:0 0 0 2px rgba(200,145,50,.22)}'
-       +'.osc-cell img{display:block;width:100%;height:auto}'
-       +'.osc-tag{position:absolute;top:6px;left:6px;font-size:9px;font-weight:800;letter-spacing:.06em;padding:2px 6px;border-radius:6px;z-index:1}'
-       +'.osc-free{color:#5c7480;background:rgba(255,255,255,.92)}'
-       +'.osc-paid{color:#fff;background:#c89132}'
-       +'.osc-cta{margin-top:18px;display:flex;flex-direction:column;gap:9px}'
+       +'.osc-s{font-size:11.5px;color:#5c7480;line-height:1.4;margin-top:2px}'
+       +'.osc-pair{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}'
+       +'.osc-cell{margin:0;border:1px solid #e7e0cf;border-radius:12px;overflow:hidden;background:#fff}'
+       +'.osc-cell-paid{border-color:#e2c583;box-shadow:0 0 0 2px rgba(200,145,50,.20)}'
+       +'.osc-lab{font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:5px 9px}'
+       +'.osc-lab-free{color:#5c7480;background:#f2efe6}'
+       +'.osc-lab-paid{color:#fff;background:#c89132}'
+       +'.osc-lab-both{color:#0f5a6e;background:#e2eef1}'
+       +'.osc-cell img{display:block;width:100%;height:128px;object-fit:cover;object-position:top center;background:#eef1f2}'
+       +'.osc-panel{margin:9px 0 0;border:1px solid #e7e0cf;border-radius:12px;overflow:hidden;background:#fff}'
+       +'.osc-panel-paid{border-color:#e2c583;box-shadow:0 0 0 2px rgba(200,145,50,.20)}'
+       +'.osc-panel img{display:block;width:100%;height:auto}'
+       +'.osc-cta{margin-top:20px;display:flex;flex-direction:column;gap:9px}'
        +'.osc-go{min-height:47px;border:none;border-radius:12px;background:#0f4c5c;color:#fff;font-size:14.5px;font-weight:800;font-family:inherit;cursor:pointer}'
        +'.osc-live{min-height:44px;border:none;background:none;color:#0f4c5c;font-size:13px;font-weight:700;font-family:inherit;text-decoration:underline;cursor:pointer}'
        +'.osc-foot{margin-top:12px;font-size:11px;color:#8aa0a8;line-height:1.45;text-align:center}'
        +'.osc-table{background:none;border:none;color:#5c7480;font-size:11.5px;font-weight:700;font-family:inherit;text-decoration:underline;cursor:pointer;padding:0}'
-       +'@media (prefers-reduced-motion:reduce){.osc-card{animation:none}}';
+       +'@media (prefers-reduced-motion:reduce){.osc-card{animation:none}}'
+       +'body:has(#osfpCurtain.on) #swUpdateToast{display:none!important}';
       document.head.appendChild(st);
+    }
+    function pairRow(r){
+      return '<div class="osc-row"><div class="osc-t">'+r.t+'</div><div class="osc-s">'+r.s+'</div>'
+        +'<div class="osc-pair">'
+        +'<figure class="osc-cell"><figcaption class="osc-lab osc-lab-free">Free</figcaption><img loading="lazy" src="'+A+r.k+'-free.jpg" alt="Free plan: '+r.t+'"></figure>'
+        +'<figure class="osc-cell osc-cell-paid"><figcaption class="osc-lab osc-lab-paid">Paid</figcaption><img loading="lazy" src="'+A+r.k+'-paid.jpg" alt="Paid plan: '+r.t+'"></figure>'
+        +'</div></div>';
+    }
+    function panel(cls,labcls,lab,src,alt){
+      return '<figure class="osc-panel '+cls+'"><figcaption class="osc-lab '+labcls+'">'+lab+'</figcaption><img loading="lazy" src="'+A+src+'.jpg" alt="'+alt+'"></figure>';
     }
     var built=false;
     function build(){
@@ -8814,23 +8830,28 @@ function updateFreshnessIndicator(){
       var ov=document.createElement('div'); ov.id='osfpCurtain';
       ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true'); ov.setAttribute('aria-label','Free versus paid, side by side');
       var xSvg='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
-      var rows=ROWS.map(function(r){
-        return '<div class="osc-row"><div class="osc-cap"><span class="osc-num">'+r.n+'</span><div><div class="osc-t">'+r.t+'</div><div class="osc-s">'+r.s+'</div></div></div>'
-          +'<div class="osc-pair">'
-          +'<figure class="osc-cell"><span class="osc-tag osc-free">FREE</span><img loading="lazy" src="'+A+r.k+'-free.jpg" alt="Free plan: '+r.t+'"></figure>'
-          +'<figure class="osc-cell osc-cell-paid"><span class="osc-tag osc-paid">PAID</span><img loading="lazy" src="'+A+r.k+'-paid.jpg" alt="Paid plan: '+r.t+'"></figure>'
-          +'</div></div>';
-      }).join('');
+      var guestRows=GUEST.map(pairRow).join('');
+      var dash=''
+        +'<div class="osc-row"><div class="osc-t">The full picture — free</div><div class="osc-s">Guest sessions, when they plan, what they tap. Full analytics, never gated — on either plan.</div>'
+        + panel('','osc-lab-both','Free + Paid — included','analytics','Full guest analytics on both plans')
+        +'</div>'
+        +'<div class="osc-row"><div class="osc-t">Promotions — drop a flyer, capture the demand</div><div class="osc-s">Free shows the demand you’re not capturing; paid lets you act — drag in a PDF flyer, set a window, and it becomes an offer chip plus a timed pop-up on their phones.</div>'
+        + panel('','osc-lab-free','Free — the demand, locked','promo-free','Free plan: locked promotions and idle-demand estimate')
+        + panel('osc-panel-paid','osc-lab-paid','Paid · $649/mo — drag & drop','promo-paid','Paid plan: drag-and-drop flyer with a timed pop-up window')
+        +'</div>';
       ov.innerHTML='<div class="osc-card">'
         +'<button type="button" class="osc-x" data-osc-x aria-label="Close">'+xSvg+'</button>'
         +'<div class="osc-h">Free vs paid, side by side</div>'
-        +'<div class="osc-sub">The same safety guide on both plans. Paid makes it theirs — see it, then make it real.</div>'
-        +rows
+        +'<div class="osc-sub">The same safety guide on both plans. Paid makes it theirs — and turns guest demand into revenue.</div>'
+        +'<div class="osc-sec">In the guest’s guide</div>'
+        +guestRows
+        +'<div class="osc-sec">In your dashboard</div>'
+        +dash
         +'<div class="osc-cta">'
         +'<button type="button" class="osc-go" data-osc-go>See it as your property</button>'
         +'<button type="button" class="osc-live" data-osc-live>Explore the live guide</button>'
         +'</div>'
-        +'<div class="osc-foot">Safety data and analytics are complete on both plans — never gated. <button type="button" class="osc-table" data-osc-table>See the full table</button></div>'
+        +'<div class="osc-foot">Safety data and full analytics are on both plans — never gated. <button type="button" class="osc-table" data-osc-table>See the full table</button></div>'
         +'</div>';
       document.body.appendChild(ov);
       ov.addEventListener('click',function(e){
@@ -8842,8 +8863,12 @@ function updateFreshnessIndicator(){
       });
       if(!window.__oscEsc){ window.__oscEsc=true; document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&window.__osCurtainUp) closeLive(); }); }
     }
-    function show(){ build(); document.getElementById('osfpCurtain').classList.add('on'); window.__osCurtainUp=true; }
-    function hide(){ var o=document.getElementById('osfpCurtain'); if(o)o.classList.remove('on'); window.__osCurtainUp=false; try{sessionStorage.setItem('os_demo_curtain_seen','1');}catch(e){} }
+    // The app's SW "New version available" toast is z-index 99999 and can fire on
+    // first load — keep it from floating over the demo overlay while it's up.
+    function _tstz(v){ var t=document.getElementById('swUpdateToast'); if(t) t.style.display=v; }
+    function show(){ build(); document.getElementById('osfpCurtain').classList.add('on'); window.__osCurtainUp=true;
+      _tstz('none'); setTimeout(function(){ if(window.__osCurtainUp) _tstz('none'); },1200); setTimeout(function(){ if(window.__osCurtainUp) _tstz('none'); },3000); }
+    function hide(){ var o=document.getElementById('osfpCurtain'); if(o)o.classList.remove('on'); window.__osCurtainUp=false; _tstz(''); try{sessionStorage.setItem('os_demo_curtain_seen','1');}catch(e){} }
     function closeLive(){ hide(); try{sessionStorage.setItem('os_demo_card_seen','1');}catch(e){} var c=document.getElementById('demoNameCard'); if(c)c.remove(); }
     function closeName(){ hide(); var i=document.getElementById('demoNameInput'); if(i){ try{i.focus();}catch(e){} } }
     window.__osOpenCurtain=show;
