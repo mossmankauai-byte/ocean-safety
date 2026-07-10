@@ -1182,14 +1182,28 @@
     var holder = document.createElement('span'); holder.className = 'osd-brandmark';
     var chip = document.createElement('span'); chip.className = 'osd-lockup';
     chip.textContent = brandInitials(name); chip.setAttribute('aria-label', name);
+    // Premium monogram — gradient keyed to a name-derived hue; vector-sharp fallback.
+    var _s = name || '', _hue = 0;
+    for(var _i=0;_i<_s.length;_i++){ _hue = (_hue*31 + _s.charCodeAt(_i)) % 360; }
+    chip.style.cssText = 'width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;'
+      + 'background:linear-gradient(150deg,hsl('+_hue+',46%,35%),hsl('+((_hue+24)%360)+',54%,23%));'
+      + 'color:#fff;font-family:inherit;font-weight:800;font-size:14px;letter-spacing:.02em;border-radius:9px;'
+      + 'box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 1px 3px rgba(15,76,92,.22)';
     if(domain){
       var img = document.createElement('img'); img.className = 'osd-logo'; img.alt = name;
+      // Co-brand wordmark sizing (desktop header has room for width).
+      img.style.cssText = 'height:34px;width:auto;max-width:160px;object-fit:contain;background:#fff;border-radius:6px;display:block';
       chip.style.display = 'none';
+      // curated local (svg → png) → Clearbit hi-res → monogram
+      var chain = ['/assets/hotel-logos/'+domain+'.svg','/assets/hotel-logos/'+domain+'.png',
+                   'https://logo.clearbit.com/'+domain+'?size=256&format=png'];
+      var step = 0;
       img.onerror = function(){
-        img.onerror = function(){ img.style.display = 'none'; chip.style.display = ''; };
-        img.src = 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128';
+        step++;
+        if(step < chain.length){ img.src = chain[step]; return; }
+        img.onerror = null; img.style.display = 'none'; chip.style.display = '';
       };
-      img.src = 'https://logo.clearbit.com/' + domain + '?size=128';
+      img.src = chain[0];
       holder.appendChild(img);
     }
     holder.appendChild(chip);

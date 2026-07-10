@@ -7858,37 +7858,49 @@ function _demoInitials(name){
   return (w.length >= 2 ? (w[0].charAt(0) + w[1].charAt(0)) : s.slice(0, 2)).toUpperCase().slice(0, 2);
 }
 function _demoLockupChip(name){
+  // Premium monogram — a crisp gradient tile keyed to a hue derived from the
+  // property name, so a hotel without a fetchable logo still reads as a real brand
+  // mark (vector-sharp at any DPR) instead of a flat square or a blurry favicon.
   var chip = document.createElement('div');
-  chip.className = 'brand-icon';
+  chip.className = 'brand-icon brand-logo-demo';
   chip.textContent = _demoInitials(name);            // textContent → escaped
   chip.setAttribute('role', 'img');
   chip.setAttribute('aria-label', String(name || 'Property') + ' logo');
-  chip.style.cssText = 'display:flex;align-items:center;justify-content:center;background:#0f4c5c;color:#fff;font-family:"DM Sans",sans-serif;font-weight:800;font-size:15px;letter-spacing:.02em;line-height:1;text-transform:uppercase';
+  var s = String(name || ''), hue = 0;
+  for(var i=0;i<s.length;i++){ hue = (hue * 31 + s.charCodeAt(i)) % 360; }
+  chip.style.cssText = 'width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;'
+    + 'background:linear-gradient(150deg,hsl('+hue+',46%,35%),hsl('+((hue+24)%360)+',54%,23%));'
+    + 'color:#fff;font-family:"DM Sans",sans-serif;font-weight:800;font-size:14.5px;letter-spacing:.02em;line-height:1;'
+    + 'text-transform:uppercase;border-radius:9px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 1px 3px rgba(15,76,92,.22)';
   return chip;
 }
-// Hotel logo <img> with a fallback chain: clearbit → google favicon → text
-// lockup. domain is pre-validated by _demoLogo(); src is set by property (no HTML
-// string) so a hostile value can never inject. No external DNS in this build env
-// means both remote hops fail and the chip shows — real logos render live only.
+// Hotel logo <img> with a fallback chain: curated local asset (svg → png) →
+// Clearbit at hi-res → premium monogram. domain is pre-validated by _demoLogo()
+// (/^[a-z0-9.-]+\.[a-z]+$/ — no slashes) so it is safe in the local path; every
+// src is set by property (no HTML string) so a hostile value can never inject.
+// Rendered as a co-brand wordmark (34px tall, auto width) — NOT squeezed into the
+// old 40px square, which is what made wide hotel logos look bad.
 function _demoLogoImg(domain, name){
   var img = document.createElement('img');
-  img.className = 'brand-icon';
+  img.className = 'brand-icon brand-logo-demo';
   img.alt = (String(name || '') || domain) + ' logo';
   img.setAttribute('referrerpolicy', 'no-referrer');
-  img.style.cssText = 'object-fit:contain;background:#fff';
+  img.style.cssText = 'width:auto;height:34px;max-width:132px;border-radius:7px;object-fit:contain;background:#fff;box-shadow:none';
+  var chain = [
+    '/assets/hotel-logos/' + domain + '.svg',
+    '/assets/hotel-logos/' + domain + '.png',
+    'https://logo.clearbit.com/' + encodeURIComponent(domain) + '?size=256&format=png'
+  ];
   var step = 0;
   img.onerror = function(){
     step++;
-    if(step === 1){
-      img.src = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domain) + '&sz=128';
-    } else {
-      img.onerror = null;
-      var chip = _demoLockupChip(name || domain);
-      chip.id = 'demoBrandMark';
-      if(img.parentNode) img.parentNode.replaceChild(chip, img);
-    }
+    if(step < chain.length){ img.src = chain[step]; return; }
+    img.onerror = null;
+    var chip = _demoLockupChip(name || domain);
+    chip.id = 'demoBrandMark';
+    if(img.parentNode) img.parentNode.replaceChild(chip, img);
   };
-  img.src = 'https://logo.clearbit.com/' + encodeURIComponent(domain) + '?size=128';
+  img.src = chain[0];
   return img;
 }
 // ── House picks (operator "★ Featured" places) ──
@@ -7942,6 +7954,11 @@ function _applyDemoBrand(){
     var repl = domain ? _demoLogoImg(domain, name) : _demoLockupChip(name);
     repl.id = 'demoBrandMark';
     mark.parentNode.replaceChild(repl, mark);
+    // The co-brand mark stands in for the "Kauaʻi" location wordmark — hide it so a
+    // wide hotel logo has room next to the weather chips (the property name is in
+    // the welcome banner). Restored automatically on any non-branded render.
+    var bt = document.querySelector('#topbar .brand-text');
+    if(bt) bt.style.display = 'none';
     if(!document.getElementById('demoBrandTag')){
       var tag = document.createElement('div');
       tag.id = 'demoBrandTag';
