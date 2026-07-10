@@ -1143,7 +1143,7 @@
     <footer id="dataFoot">
       <b>Reading the data views:</b> every tile is tagged Measured / Modeled / Assumption / Sample. In this preview, all figures are <b>Sample</b> — illustrative placeholders, not your guests. Live mode renders only measured telemetry; a period with no data shows an empty state, never a seed number and never a movement figure against an empty prior week.<br><br>
       <b>What makes it real:</b> live telemetry from your property&rsquo;s co-branded guest app — the pilot switches it on, and 60+ days of measured rollups replace every Sample figure. Until then the data views are a layout preview by design.<span class="rep-only" hidden> Internal: (1) build the endpoint-injection step so co-branded variants post to the live Worker (today they ship disabled), (2) deploy the Worker + seed per-slug keys, (3) ship a co-branded variant with the live endpoint, (4) accumulate 60+ days of rollups.</span><br><br>
-      OceanSafety · Operator Console · methodology &amp; data dictionary available on request.
+      OceanSafety · Operator Console · <a href="operator-methodology.html" style="color:var(--sea);font-weight:600">methodology &amp; data dictionary</a>.
     </footer>
   </div>
 </div>
@@ -2919,6 +2919,7 @@ function mount(PS){
       '<div style="font-size:11px;color:var(--muted);margin-top:6px">Gold line = '+medFoot+'; a property still connecting shows “No data yet” and is left out of the median.</div>' +
       '<div class="pf-occ"><label for="pfOcc">Occupancy override</label><input id="pfOcc" type="number" min="20" max="100" step="5" value="100" inputmode="numeric"> <span>% — recomputes per <i>occupied</i> rooms</span></div>' +
       '<div class="cap" id="pfV1Note">Per-100-rooms assumes full occupancy <span class="chip assumption">Assumption</span> — rooms ≠ occupied rooms, so a low-occupancy property can look under-adopted at identical engagement. A conversation prompt, never a verdict.</div>' +
+      '<details class="meth"><summary>How this is computed</summary><div class="body"><code>sessions ÷ (rooms × occ%) × 100</code> per property; gold line = median of reporting properties. Ships at 100% occupancy — Hawaii’s 73.9% average (DBEDT/HTA 2025) is the recommended override. A still-connecting property is left out of the median. <b>Measured</b> once live.</div></details>' +
       '</div></section>';
 
   /* ---- 2 · within-portfolio benchmark ---- */
@@ -2940,6 +2941,7 @@ function mount(PS){
       '<div class="pf-leg"><span><i style="background:var(--sea)"></i>above median</span><span><i style="background:#a9bcc4"></i>below median</span><span><i style="background:var(--gold)"></i>median</span></div>' +
       '<div class="pf-split"><div class="sp-h">Stay-Close click-rate (render → click) · <span style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--muted)">'+ctrFoot+'</span></div>'+ctrRows+'</div>' +
       '<div class="cap">Rate differences under ~15 points at these volumes aren’t distinguishable — they render as “within noise,” not a ranking. The question this view earns: “why does one property sit under its own portfolio median?”</div>' +
+      '<details class="meth"><summary>How this is computed</summary><div class="body">Adoption bar: <code>(property rate − portfolio median) ÷ median × 100</code>. Click-rate split: <code>stay_close_click ÷ stay_close_render</code>, both denominators ≥50 events. Under ~15 pts reads as within noise, never a ranking. <b>Measured</b> once live.</div></details>' +
       '</div></section>';
 
   /* ---- 3 · hazard-day guest reach (OPS framing) ---- */
@@ -2955,7 +2957,7 @@ function mount(PS){
       '<span class="pftrack"><span class="pfstack" style="width:'+pct(r.n,trigMax)+'%">'+segs+'</span></span>'+
       '<span class="val">'+cell(r.n)+'</span></div>';
   }).join('');
-  var v3leg = PS.map(function(P,i){ return '<span><i style="background:'+PSHADES[i%PSHADES.length]+'"></i>'+esc(shortName(P))+'</span>'; }).join('');
+  var v3leg = PS.map(function(P,i){ return reporting(P) ? '<span><i style="background:'+PSHADES[i%PSHADES.length]+'"></i>'+esc(shortName(P))+'</span>' : ''; }).join('');
   var v3 =
     '<section aria-label="Hazard-day guest reach">' +
       '<div class="sec-h"><h2>Hazard-day guest reach</h2><p>Stay-Close renders by trigger — portfolio total, stacked by property.</p></div>' +
@@ -2963,6 +2965,7 @@ function mount(PS){
       '<div style="margin-top:12px">'+v3rows+'</div>' +
       '<div class="pf-leg">'+v3leg+'</div>' +
       '<div class="cap">The ops read: staff and stock indoor alternatives — F&amp;B, spa, activities — when surf is up, portfolio-wide on the same forecast. A render is a panel shown, counted; interest and reach, never bookings.</div>' +
+      '<details class="meth"><summary>How this is computed</summary><div class="body"><code>stay_close_render</code> counted on hazard-flagged days (<code>roll.triggers{}</code>), portfolio total stacked by property. A render is reach, never a booking. <b>Measured</b> once live.</div></details>' +
       '</div></section>';
 
   /* ---- 4 · cross-property demand map ---- */
@@ -2993,6 +2996,7 @@ function mount(PS){
       '<div style="margin-top:8px">'+v4body+'</div>' +
       '<div class="pf-regchips">'+regChips+'</div>' +
       '<div class="cap">One negotiation instead of three: pooled tap volume is the group’s leverage with tour, food and rental partners, and the concierge’s pre-book list. “Guests who tapped interest in X” — interest, never bookings, and that label travels with any number you quote.</div>' +
+      '<details class="meth"><summary>How this is computed</summary><div class="body"><code>Σ poi_tap</code> pooled across the group by place, grouped by kind; region pills share the pooled total. Interest expressed, never a booking. <b>Measured</b> once live.</div></details>' +
       '</div></section>';
 
   /* ---- 5 · promo + amenity league (portfolio-pooled) ---- */
@@ -3004,15 +3008,17 @@ function mount(PS){
       '<div class="card"><div class="title"><span class="l">Promo taps, pooled</span>'+cardChips()+'</div>' +
         '<ol class="rank">'+rankRows(promoPool,{limit:6, denom:labelSessions(PS,'promos')})+'</ol>' +
         '<div class="pf-split"><div class="sp-h">Per-property promo tap-rate — both denominators ≥ 50 events</div>'+splitRows(PS,'promoTap')+'</div>' +
-        '<div class="cap">Which offer runs portfolio-wide and which dies. Ranked by raw taps; the per-100 rate divides by the sessions of the properties that ran it, not the whole group — <b>interest, never bookings</b>, and no rate renders below 50 events.</div></div>' +
+        '<div class="cap">Which offer runs portfolio-wide and which dies. Ranked by raw taps; the per-100 rate divides by the sessions of the properties that ran it, not the whole group — <b>interest, never bookings</b>, and no rate renders below 50 events.</div>' +
+        '<details class="meth"><summary>How this is computed</summary><div class="body">Ranked by pooled <code>promo_tap</code>; per-100 rate = <code>taps ÷ (Σ sessions where the offer ran) × 100</code> — local denominator, never the portfolio total. No rate below 50 events. <b>Measured</b> once live.</div></details></div>' +
       '<div class="card"><div class="title"><span class="l">Amenity taps, pooled</span>'+cardChips()+'</div>' +
         '<ol class="rank">'+rankRows(amenPool,{limit:6, denom:labelSessions(PS,'amenityTaps')})+'</ol>' +
         '<div class="pf-split"><div class="sp-h">Per-property amenity tap-rate — both denominators ≥ 50 events</div>'+splitRows(PS,'amenityTap')+'</div>' +
-        '<div class="cap">Which Stay-Close menu entries keep their real estate across the group. A tap is <b>interest</b> — the click, never a booking or revenue.</div></div>' +
+        '<div class="cap">Which Stay-Close menu entries keep their real estate across the group. A tap is <b>interest</b> — the click, never a booking or revenue.</div>' +
+        '<details class="meth"><summary>How this is computed</summary><div class="body">Ranked by pooled <code>amenity_tap</code>; per-100 rate divides by the sessions of the properties that ran each entry, both sides ≥50 events. A tap is interest, never a booking. <b>Measured</b> once live.</div></details></div>' +
       '</div></section>';
 
   /* ---- 6 · unit engagement tiers + dead-unit list (frozen privacy firewall) ---- */
-  var v6rows = PS.filter(function(P){ return P.units; }).map(function(P){
+  var v6rows = PS.filter(function(P){ return reporting(P) && P.units; }).map(function(P){
     var u=P.units, tot=(u.active+u.light+u.none)||1;
     return '<div class="pfrow">'+pnLab(P)+
       '<span class="pfstack" style="background:var(--hair-soft)">'+
@@ -3021,7 +3027,7 @@ function mount(PS){
         '<i style="width:'+(u.none/tot*100)+'%;background:#e3dcc9"></i></span>'+
       '<span class="val">'+cell(u.active)+' · '+cell(u.light)+' · '+cell(u.none)+'</span></div>';
   }).join('');
-  var v6dead = PS.filter(function(P){ return P.units; }).map(function(P){
+  var v6dead = PS.filter(function(P){ return reporting(P) && P.units; }).map(function(P){
     var u=P.units;
     var ids = (u.dead && u.dead.length) ? '<span class="ids">'+u.dead.map(esc).join(' · ')+(u.more>u.dead.length ? ' · +'+fN(u.more-u.dead.length)+' more' : '')+'</span>' : '<span class="ids">'+cell(u.none)+' units</span>';
     return '<li><b>'+esc(shortName(P))+'</b><span class="pf-propchip">'+cell(u.none)+' silent</span>'+ids+'</li>';
@@ -3033,10 +3039,12 @@ function mount(PS){
       '<div class="card"><div class="title"><span class="l">Active · Light · None, 30-day tiers</span><span>'+provChip()+' <span class="chip build">taps, not visits</span></span></div>' +
         '<div style="margin-top:12px">'+v6rows+'</div>' +
         '<div class="pf-leg"><span><i style="background:var(--sea)"></i>Active (5+ taps)</span><span><i style="background:#9cc6d6"></i>Light (1–4)</span><span><i style="background:#e3dcc9"></i>None (0)</span></div>' +
-        '<div class="cap">Tiers only, by design — never per-unit daily activity. Unit activity counts events (<b>taps, not visits</b>) until per-unit sessions ship in the Worker.</div></div>' +
+        '<div class="cap">Tiers only, by design — never per-unit daily activity. Unit activity counts events (<b>taps, not visits</b>) until per-unit sessions ship in the Worker.</div>' +
+        '<details class="meth"><summary>How this is computed</summary><div class="body">Per property: <code>Active = units with ≥5 taps</code>, <code>Light = 1–4</code>, <code>None = rooms − units seen</code>. Counts <b>taps, not visits</b>; tiers only (frozen privacy firewall). <b>Measured</b> once live.</div></details></div>' +
       '<div class="card"><div class="title"><span class="l">Dead-unit list — no activity in 30 days</span>'+cardChips()+'</div>' +
         '<ul class="pf-dead">'+v6dead+'</ul>' +
-        '<div class="cap">The housekeeping fix: <b>re-place the QR</b> in silent units — lost cards and drawer-stashed stands are the usual culprits, and the cheapest adoption lever in the building.</div></div>' +
+        '<div class="cap">The housekeeping fix: <b>re-place the QR</b> in silent units — lost cards and drawer-stashed stands are the usual culprits, and the cheapest adoption lever in the building.</div>' +
+        '<details class="meth"><summary>How this is computed</summary><div class="body">Units in the <code>None</code> tier — <code>0 taps in 30 days</code>. A sample of IDs is shown for re-placing the QR; tiers only, never per-unit daily activity. <b>Measured</b> once live.</div></details></div>' +
       '</div></section>';
 
   /* ---- 7 · portfolio tour-interest totals (pooled ONLY) ---- */
@@ -3047,6 +3055,7 @@ function mount(PS){
       '<div class="card"><div class="title"><span class="l">Tour-interest taps, pooled</span>'+cardChips()+'</div>' +
       '<ol class="rank">'+rankRows(tourPool,{limit:8})+'</ol>' +
       '<div class="cap">Which tour partners to contract, pointed at pooled measured interest. <b>A lead is interest, never a booked tour</b> — per-property per-label splits don’t render at these volumes; the pooled '+WINDOW_DAYS+'-day total is the honest number.</div>' +
+      '<details class="meth"><summary>How this is computed</summary><div class="body"><code>Σ tour_lead</code> pooled by label across the group; per-property × per-label splits are withheld at these volumes. A lead is interest, never a booked tour. <b>Measured</b> once live.</div></details>' +
       '</div></section>';
 
   /* ---- 8 · house-pick report (list form) ---- */
@@ -3064,15 +3073,18 @@ function mount(PS){
     v8body =
       '<div class="grid g2">' +
       '<div class="card"><div class="title"><span class="l">Picks earning taps</span>'+cardChips()+'</div><ul class="pf-picklist">'+tapsList+'</ul>' +
-        '<div class="cap">Curated picks your guests measurably open — the co-brand curation earning its keep.</div></div>' +
+        '<div class="cap">Curated picks your guests measurably open — the co-brand curation earning its keep.</div>' +
+        '<details class="meth"><summary>How this is computed</summary><div class="body"><code>poi_house_pick_tap</code> per curated pick, pooled across the group and ranked. A tap is interest, never a booking. <b>Measured</b> once live.</div></details></div>' +
       '<div class="card"><div class="title"><span class="l">Picks earning none</span>'+cardChips()+'</div><ul class="pf-picklist">'+noneList+'</ul>' +
-        '<div class="cap"><b>Swap the quiet ones</b> — a pick slot guests never tap is free real estate. Re-curate from each property’s Places tab.</div></div>' +
+        '<div class="cap"><b>Swap the quiet ones</b> — a pick slot guests never tap is free real estate. Re-curate from each property’s Places tab.</div>' +
+        '<details class="meth"><summary>How this is computed</summary><div class="body">Curated picks with <code>0 house-pick taps</code> over the window — free real estate to re-curate. <b>Measured</b> once live.</div></details></div>' +
       '</div>';
   } else {
     var hptTot = 0; PS.forEach(function(P){ hptTot += P.hpt||0; });
     v8body = '<div class="card"><div class="title"><span class="l">House-pick taps, pooled</span>'+cardChips()+'</div>' +
       '<div class="v">'+cell(hptTot)+' <small>house-pick taps · '+WINDOW_DAYS+'d</small></div>' +
-      '<div class="cap">The per-pick list renders from this group’s curated-picks config once it’s provisioned. <b>Swap the quiet ones</b> when it lands.</div></div>';
+      '<div class="cap">The per-pick list renders from this group’s curated-picks config once it’s provisioned. <b>Swap the quiet ones</b> when it lands.</div>' +
+      '<details class="meth"><summary>How this is computed</summary><div class="body"><code>Σ poi_house_pick_tap</code> pooled across the group; the per-pick split renders once the curated-picks config is provisioned. <b>Measured</b> once live.</div></details></div>';
   }
   var v8 =
     '<section aria-label="House picks">' +
