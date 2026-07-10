@@ -738,7 +738,7 @@
     <section aria-label="Multiple properties" id="multiPropSec">
       <div class="sec-h"><h2>Multiple properties?</h2><p>We link them at signing &mdash; one portfolio dashboard across the whole group.</p></div>
       <div class="card">
-        <p style="margin:2px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.6;max-width:70ch">Run more than one property? <b>We link them at signing</b> &mdash; every property, one portfolio dashboard: adoption, demand, promotions and units across the whole group, with per-property drill-down.</p>
+        <p style="margin:2px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.6;max-width:70ch">Run more than one property? <b>We link them at signing</b> &mdash; every property, one portfolio dashboard: adoption, demand and promotions across the whole group, with per-property drill-down.</p>
         <div class="pm-featwrap" style="margin-top:12px;border-bottom:0;padding-bottom:0">
           <div class="pm-feat">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17.5 17.5h3.5V21"/></svg>
@@ -750,7 +750,7 @@
           </div>
           <div class="pm-feat">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15v3M11 11v7M15 13v5M19 8v10"/></svg>
-            <span class="tx"><b>3 &middot; The portfolio view appears in this console</b><span>Adoption per property, pooled demand, promotion and unit engagement &mdash; with drill-down to each property&rsquo;s own dashboard.</span></span>
+            <span class="tx"><b>3 &middot; The portfolio view appears in this console</b><span>Adoption per property, pooled demand and promotion performance &mdash; with drill-down to each property&rsquo;s own dashboard.</span></span>
           </div>
         </div>
         <div class="lockcard-btns"><a class="pl-btn primary" href="mailto:aloha@oceansafety.app?subject=Link%20my%20properties">Link my properties</a></div>
@@ -2689,10 +2689,6 @@
   .pf-occ{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:12px;flex-wrap:wrap}
   .pf-occ input{width:74px;font:inherit;font-size:13px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
   .pf-occ input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
-  .pf-dead{list-style:none;margin:10px 0 0;padding:0}
-  .pf-dead li{font-size:12.5px;color:var(--ink-2);display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--hair-soft)}
-  .pf-dead li:last-child{border-bottom:0}
-  .pf-dead .ids{color:var(--muted);font-size:11.5px}
   .pf-picklist{list-style:none;margin:8px 0 0;padding:0}
   .pf-picklist li{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--hair-soft);font-size:13px}
   .pf-picklist li:last-child{border-bottom:0}
@@ -2720,8 +2716,7 @@
    layer, not captions: 28-day windows per property; weekly deltas render only at
    portfolio level AND with 5+ properties pooled; any rate needs BOTH denominators
    >= 50 events (else "collecting — n of 50"); breakdown cells under 5 print "<5";
-   unit activity renders as 30-day Active/Light/None tiers only — never per-unit
-   daily activity (frozen privacy firewall) — and is labeled taps, not visits. */
+   (Per-unit views were removed 2026-07-10: no per-room QR codes exist.) */
 (function(){
 'use strict';
 if(!window.OS_GROUP) return;   // no ?group → the console is exactly as before
@@ -2762,7 +2757,7 @@ function mergeFullRolls(days){
   var acc = { sessions:0, poi_tap:0, poi_house_pick_tap:0, tab_change:0, concierge_tap:0,
     stay_close_render:0, stay_close_click:0, promo_tap:0, tour_lead:0, amenity_tap:0,
     hours:[], tabs:{}, top:{}, triggers:{}, amenities:{}, promos:{}, tour_leads:{},
-    amenity_taps:{}, device:{}, lang:{}, units:{}, any:false };
+    amenity_taps:{}, device:{}, lang:{}, any:false };
   var h; for(h=0;h<24;h++) acc.hours[h]=0;
   function addMap(dst,src){ if(!src) return; Object.keys(src).forEach(function(k){ dst[k]=(dst[k]||0)+(src[k]||0); }); }
   (days||[]).forEach(function(d){
@@ -2775,7 +2770,7 @@ function mergeFullRolls(days){
     if(r.hours && r.hours.length){ for(h=0;h<24;h++) acc.hours[h]+=r.hours[h]||0; }
     addMap(acc.tabs,r.tabs); addMap(acc.triggers,r.triggers); addMap(acc.amenities,r.amenities);
     addMap(acc.promos,r.promos); addMap(acc.tour_leads,r.tour_leads); addMap(acc.amenity_taps,r.amenity_taps);
-    addMap(acc.device,r.device); addMap(acc.lang,r.lang); addMap(acc.units,r.units);
+    addMap(acc.device,r.device); addMap(acc.lang,r.lang);
     var top=r.top||{};
     Object.keys(top).forEach(function(kind){ var ids=top[kind]||{}; Object.keys(ids).forEach(function(id){
       var k=kind+'|'+id; acc.top[k]=(acc.top[k]||0)+(ids[id]||0); }); });
@@ -2786,22 +2781,18 @@ function mergeFullRolls(days){
 /* ---------- live path: a merged rollup → the renderer's per-property shape ---------- */
 function liveP(p, roll){
   var top=[];
-  var units=null;
   if(roll){
     Object.keys(roll.top).forEach(function(k){
       var i=k.indexOf('|');
       top.push({ kind:k.slice(0,i), name:titleCase(k.slice(i+1)), n:roll.top[k] });
     });
-    var a=0,l=0,seen=0;
-    Object.keys(roll.units).forEach(function(u){ seen++; if(roll.units[u]>=5) a++; else l++; });
-    units={ active:a, light:l, none:Math.max(0,(p.rooms||0)-seen), dead:[], more:Math.max(0,(p.rooms||0)-seen) };
   }
   return { cfg:p, prov:(roll&&roll.any)?'live':'nodata',
     sessions:roll?roll.sessions:0, poiTap:roll?roll.poi_tap:0, hpt:roll?roll.poi_house_pick_tap:0,
     triggers:roll?roll.triggers:{}, scr:roll?roll.stay_close_render:0, scc:roll?roll.stay_close_click:0,
     amenityTap:roll?roll.amenity_tap:0, amenityTaps:roll?roll.amenity_taps:{},
     promoTap:roll?roll.promo_tap:0, promos:roll?roll.promos:{},
-    tourLead:roll?roll.tour_lead:0, tours:roll?roll.tour_leads:{}, top:top, units:units };
+    tourLead:roll?roll.tour_lead:0, tours:roll?roll.tour_leads:{}, top:top };
 }
 
 /* ---------- demo dataset: 3 fictional properties, distinct volumes; the flagship's
@@ -2819,8 +2810,7 @@ function buildDemoPS(){
             {kind:'beach',name:'Shipwreck',n:720}, {kind:'beach',name:'Baby Beach (Poʻipū)',n:610},
             {kind:'beach',name:'Māhāʻulepū (Gillin’s)',n:540}, {kind:'beach',name:'Lāwaʻi Beach',n:450},
             {kind:'food',name:'The Beach House',n:210}, {kind:'food',name:'Da Crack',n:160}, {kind:'food',name:'Red Salt',n:120},
-            {kind:'hike',name:'Māhāʻulepū Heritage Trail',n:190}, {kind:'hike',name:'Canyon Trail',n:80} ],
-      units:{ active:96, light:84, none:120, dead:['1104','1212','1318','1402','1523','1610','1717','1804'], more:112 } },
+            {kind:'hike',name:'Māhāʻulepū Heritage Trail',n:190}, {kind:'hike',name:'Canyon Trail',n:80} ] },
     'demo-princeville': { sessions:2660, poiTap:2380, hpt:610,
       triggers:{ 'High surf':88, 'Rain':61, 'Wind':30, 'Brown water':24, 'UV':8 },
       scr:211, scc:26, amenityTap:680,
@@ -2830,8 +2820,7 @@ function buildDemoPS(){
       top:[ {kind:'beach',name:'Hanalei Bay',n:760}, {kind:'beach',name:'ʻAnini Beach',n:430},
             {kind:'beach',name:'Keʻe Beach',n:310}, {kind:'beach',name:'Kalihiwai Bay',n:120},
             {kind:'food',name:'Bar Acuda',n:140}, {kind:'food',name:'The Spot Hanalei',n:95},
-            {kind:'hike',name:'Kalalau (Hanakāpīʻai)',n:210}, {kind:'hike',name:'ʻŌkolehao Trail',n:60} ],
-      units:{ active:39, light:43, none:58, dead:['A-204','B-112','B-317','C-101','C-208','D-114'], more:52 } },
+            {kind:'hike',name:'Kalalau (Hanakāpīʻai)',n:210}, {kind:'hike',name:'ʻŌkolehao Trail',n:60} ] },
     'demo-wailua': { sessions:1120, poiTap:1010, hpt:240,
       triggers:{ 'Brown water':34, 'Rain':28, 'High surf':18, 'Wind':9, 'UV':4 },
       scr:93, scc:9, amenityTap:187,
@@ -2841,10 +2830,9 @@ function buildDemoPS(){
       top:[ {kind:'beach',name:'Lydgate Beach Park',n:320}, {kind:'beach',name:'Keālia Beach',n:240},
             {kind:'beach',name:'Kalapakī Beach',n:90},
             {kind:'food',name:'Hamura Saimin',n:85}, {kind:'food',name:'Pono Market',n:40},
-            {kind:'hike',name:'Sleeping Giant',n:70}, {kind:'hike',name:'Kuilau Ridge',n:35} ],
-      units:{ active:21, light:18, none:21, dead:['3F','7A','9E','12A','14B','18D','21C','22B'], more:13 } }
+            {kind:'hike',name:'Sleeping Giant',n:70}, {kind:'hike',name:'Kuilau Ridge',n:35} ] }
   };
-  return g.props.map(function(p){ var r=d[p.slug]||{sessions:0,poiTap:0,hpt:0,triggers:{},scr:0,scc:0,amenityTap:0,amenityTaps:{},promoTap:0,promos:{},tourLead:0,tours:{},top:[],units:null}; r.cfg=p; r.prov='sample'; return r; });
+  return g.props.map(function(p){ var r=d[p.slug]||{sessions:0,poiTap:0,hpt:0,triggers:{},scr:0,scc:0,amenityTap:0,amenityTaps:{},promoTap:0,promos:{},tourLead:0,tours:{},top:[]}; r.cfg=p; r.prov='sample'; return r; });
 }
 
 /* demo house-pick report data (group-level; live groups derive from their picks config) */
@@ -3098,36 +3086,6 @@ function mount(PS){
         '<details class="meth"><summary>How this is computed</summary><div class="body">Ranked by pooled <code>amenity_tap</code>; per-100 rate divides by the sessions of the properties that ran each entry, both sides ≥50 events. A tap is interest, never a booking. <b>Measured</b> once live.</div></details></div>' +
       '</div></section>';
 
-  /* ---- 6 · unit engagement tiers + dead-unit list (frozen privacy firewall) ---- */
-  var v6rows = PS.filter(function(P){ return reporting(P) && P.units; }).map(function(P){
-    var u=P.units, tot=(u.active+u.light+u.none)||1;
-    return '<div class="pfrow">'+pnLab(P)+
-      '<span class="pfstack" style="background:var(--hair-soft)">'+
-        '<i style="width:'+(u.active/tot*100)+'%;background:var(--sea)"></i>'+
-        '<i style="width:'+(u.light/tot*100)+'%;background:#9cc6d6"></i>'+
-        '<i style="width:'+(u.none/tot*100)+'%;background:#e3dcc9"></i></span>'+
-      '<span class="val">'+cell(u.active)+' · '+cell(u.light)+' · '+cell(u.none)+'</span></div>';
-  }).join('');
-  var v6dead = PS.filter(function(P){ return reporting(P) && P.units; }).map(function(P){
-    var u=P.units;
-    var ids = (u.dead && u.dead.length) ? '<span class="ids">'+u.dead.map(esc).join(' · ')+(u.more>u.dead.length ? ' · +'+fN(u.more-u.dead.length)+' more' : '')+'</span>' : '<span class="ids">'+cell(u.none)+' units</span>';
-    return '<li><b>'+esc(shortName(P))+'</b><span class="pf-propchip">'+cell(u.none)+' silent</span>'+ids+'</li>';
-  }).join('');
-  var v6 =
-    '<section aria-label="Unit engagement">' +
-      '<div class="sec-h"><h2>Unit engagement</h2><p>30-day tiers per property — <b>taps, not visits</b>.</p></div>' +
-      '<div class="grid g2">' +
-      '<div class="card"><div class="title"><span class="l">Active · Light · None, 30-day tiers</span><span>'+provChip()+' <span class="chip build">taps, not visits</span></span></div>' +
-        '<div style="margin-top:12px">'+v6rows+'</div>' +
-        '<div class="pf-leg"><span><i style="background:var(--sea)"></i>Active (5+ taps)</span><span><i style="background:#9cc6d6"></i>Light (1–4)</span><span><i style="background:#e3dcc9"></i>None (0)</span></div>' +
-        '<div class="cap">Tiers only, by design — never per-unit daily activity. Unit activity counts events (<b>taps, not visits</b>) until per-unit sessions ship in the Worker.</div>' +
-        '<details class="meth"><summary>How this is computed</summary><div class="body">Per property: <code>Active = units with ≥5 taps</code>, <code>Light = 1–4</code>, <code>None = rooms − units seen</code>. Counts <b>taps, not visits</b>; tiers only (frozen privacy firewall). <b>Measured</b> once live.</div></details></div>' +
-      '<div class="card"><div class="title"><span class="l">Dead-unit list — no activity in 30 days</span>'+cardChips()+'</div>' +
-        '<ul class="pf-dead">'+v6dead+'</ul>' +
-        '<div class="cap">The housekeeping fix: <b>re-place the QR</b> in silent units — lost cards and drawer-stashed stands are the usual culprits, and the cheapest adoption lever in the building.</div>' +
-        '<details class="meth"><summary>How this is computed</summary><div class="body">Units in the <code>None</code> tier — <code>0 taps in 30 days</code>. A sample of IDs is shown for re-placing the QR; tiers only, never per-unit daily activity. <b>Measured</b> once live.</div></details></div>' +
-      '</div></section>';
-
   /* ---- 7 · portfolio tour-interest totals (pooled ONLY) ---- */
   var tourPool = pooledMap(PS,'tours');
   var v7 =
@@ -3194,14 +3152,14 @@ function mount(PS){
     '<section aria-label="Link your properties">' +
       '<div class="sec-h"><h2>This view, for your group</h2><p>Run more than one property? We link them at signing.</p></div>' +
       '<div class="card">' +
-        '<p style="margin:2px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.6;max-width:70ch">Every property, one portfolio dashboard — adoption, demand, promotions and units across the whole group, with per-property drill-down. Each property keeps its own guide and QR; we provision the group when you sign — nothing to configure — and the portfolio view appears in this console.</p>' +
+        '<p style="margin:2px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.6;max-width:70ch">Every property, one portfolio dashboard — adoption, demand and promotions across the whole group, with per-property drill-down. Each property keeps its own guide and QR; we provision the group when you sign — nothing to configure — and the portfolio view appears in this console.</p>' +
         '<div class="lockcard-btns"><a class="pl-btn primary" href="mailto:aloha@oceansafety.app?subject=Link%20my%20properties">Link my properties</a></div>' +
         '<div class="note"><b>$649/mo per property</b> — ask us about multi-property pricing.</div>' +
       '</div></section>';
 
   var root = document.getElementById('view-portfolio');
   if(!root) return;
-  root.innerHTML = head + v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8 + stripSec + linkSec;
+  root.innerHTML = head + v1 + v2 + v3 + v4 + v5 + v7 + v8 + stripSec + linkSec;
   root.hidden = false;
 
   /* occupancy override: recompute the adoption view live */

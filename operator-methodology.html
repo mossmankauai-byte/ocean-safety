@@ -252,12 +252,6 @@
             <td class="n">Zero-tap picks are listed separately; low counts are suppressed.</td>
           </tr>
           <tr>
-            <td class="m">Unit engagement tiers</td>
-            <td class="f">Per property: <code>Active = units with ≥5 taps</code>, <code>Light = 1–4 taps</code>, <code>None = rooms − units seen</code>. Counts <b>taps, not visits</b>.</td>
-            <td class="p"><span class="prov-cell"><span class="chip measured">Measured</span></span></td>
-            <td class="n">Tiers only — never per-unit daily activity (frozen privacy firewall).</td>
-          </tr>
-          <tr>
             <td class="m">Idle-demand floor ($)</td>
             <td class="f"><code>taps × ~$40 check × 2% conversion</code>, occupancy-normalized to 73.9%. Band shown at 1–3% conversion.</td>
             <td class="p"><span class="prov-cell"><span class="chip measured">taps = Measured</span><span class="chip modeled">$40 &amp; 2% = Modeled</span><span class="chip cited">73.9% cited</span><span class="cite">$40: analyst est., low-end casual resort F&amp;B. 2%: modeled passive-tap floor; 8% opted-in-upsell (Oaky/Plusgrade 2024–25) is the ceiling, never applied to taps.</span></span></td>
@@ -273,7 +267,7 @@
     <h2>What we do not claim</h2>
     <ul>
       <li><b>No bookings, no revenue.</b> Every count is a tap of interest. We never report a booking, a reservation, or captured revenue — the dollar figure is a modeled floor on interest, not money earned.</li>
-      <li><b>No per-guest tracking.</b> There is no guest profile, no cross-session identity, and no room-level activity. Unit data is rolled up to Active / Light / None tiers and stops there.</li>
+      <li><b>No per-guest tracking.</b> There is no guest profile, no cross-session identity, and no room-level activity — QR codes identify a property, never a room or a person.</li>
       <li><b>Interest, not outcome.</b> A render is a panel shown; a click, tap, or lead is interest expressed — never proof a guest went somewhere, spent anything, or that a hazard was prevented.</li>
       <li><b>No benchmark dressed up as your result.</b> Modeled and Assumption inputs are tagged as such on every figure that uses them; they are never presented as your property's measured data.</li>
     </ul>
