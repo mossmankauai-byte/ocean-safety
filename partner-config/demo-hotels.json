@@ -1,0 +1,23 @@
+{
+  "_note": "Demo-only hotel directory for the ?demo=freepaid FREE|PAID toggle name picker. Real Kauaʻi properties; logos are fetched client-side by domain (logo.clearbit.com) with a typographic fallback. NOT an endorsement or partnership — the picker shows a 'Preview, not affiliated' tag. Session-only in the demo; never written to a real config.",
+  "hotels": [
+    { "name": "Grand Hyatt Kauaʻi Resort & Spa", "domain": "hyatt.com", "shore": "South Shore" },
+    { "name": "1 Hotel Hanalei Bay", "domain": "1hotels.com", "shore": "North Shore" },
+    { "name": "Koa Kea Hotel & Resort", "domain": "koakea.com", "shore": "South Shore" },
+    { "name": "Sheraton Kauaʻi Resort", "domain": "marriott.com", "shore": "South Shore" },
+    { "name": "Royal Sonesta Kauaʻi Resort Līhuʻe", "domain": "sonesta.com", "shore": "East Side" },
+    { "name": "Timbers Kauaʻi — Ocean Club & Residences", "domain": "timberskauai.com", "shore": "East Side" },
+    { "name": "Kōloa Landing Resort at Poʻipū", "domain": "koloalandingresort.com", "shore": "South Shore" },
+    { "name": "The Cliffs at Princeville", "domain": "cliffsprinceville.com", "shore": "North Shore" },
+    { "name": "Hanalei Colony Resort", "domain": "hcr.com", "shore": "North Shore" },
+    { "name": "OUTRIGGER Kauaʻi Beach Resort & Spa", "domain": "outrigger.com", "shore": "East Side" },
+    { "name": "Hilton Garden Inn Kauaʻi Wailua Bay", "domain": "hilton.com", "shore": "East Side" },
+    { "name": "Kauaʻi Shores Hotel", "domain": "kauaishoreshotel.com", "shore": "East Side" },
+    { "name": "Waimea Plantation Cottages", "domain": "coasthotels.com", "shore": "West Side" },
+    { "name": "Marriott's Kauaʻi Beach Club", "domain": "marriott.com", "shore": "East Side" },
+    { "name": "Sheraton Kauaʻi Coconut Beach Resort", "domain": "marriott.com", "shore": "East Side" },
+    { "name": "Club Wyndham Ka ʻEo Kai", "domain": "wyndhamhotels.com", "shore": "North Shore" },
+    { "name": "Aston Islander on the Beach", "domain": "aquaaston.com", "shore": "East Side" },
+    { "name": "The Lodge at Kukuiʻula", "domain": "kukuiula.com", "shore": "South Shore" }
+  ]
+}

@@ -7820,9 +7820,97 @@ function _demoName(fallback){
   try {
     if(new URLSearchParams(location.search).get('demo') !== 'freepaid') return fallback;
     if(!_planPaid()) return fallback;
-    var n = String(sessionStorage.getItem('os_demo_name') || '').trim().slice(0, 40);
+    var n = String(sessionStorage.getItem('os_demo_name') || '').trim().slice(0, 60);
     return n || fallback;
   } catch(e){ return fallback; }
+}
+// Companion to _demoName: the picked hotel's bare domain (sales-demo logo swap),
+// ONLY on the PAID ?demo=freepaid surface. The name box sets os_demo_domain when
+// a listed hotel was chosen and CLEARS it for a free-typed name, so this returns
+// '' for a free-typed brand (which then shows a text lockup, never a stray logo).
+// Sanitized to a bare host so it can only ever build a logo URL. Session-only.
+function _demoLogo(){
+  try {
+    if(new URLSearchParams(location.search).get('demo') !== 'freepaid') return '';
+    if(!_planPaid()) return '';
+    var d = String(sessionStorage.getItem('os_demo_domain') || '').trim().toLowerCase();
+    return /^[a-z0-9.-]{1,63}\.[a-z]{2,24}$/.test(d) ? d : '';
+  } catch(e){ return ''; }
+}
+// Text lockup fallbacks for the demo brand mark: initials chip so a logo-less
+// (or offline) hotel still reads as co-branded. SVG/text only, no emoji.
+function _demoInitials(name){
+  var s = String(name == null ? '' : name)
+    .replace(/['’ʻ`]/g, '')            // apostrophe / ʻokina: drop, don't split the word ("Bob's Inn" → BI)
+    .replace(/[^A-Za-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  if(!s) return 'H';
+  var w = s.split(' ');
+  return (w.length >= 2 ? (w[0].charAt(0) + w[1].charAt(0)) : s.slice(0, 2)).toUpperCase().slice(0, 2);
+}
+function _demoLockupChip(name){
+  var chip = document.createElement('div');
+  chip.className = 'brand-icon';
+  chip.textContent = _demoInitials(name);            // textContent → escaped
+  chip.setAttribute('role', 'img');
+  chip.setAttribute('aria-label', String(name || 'Property') + ' logo');
+  chip.style.cssText = 'display:flex;align-items:center;justify-content:center;background:#0f4c5c;color:#fff;font-family:"DM Sans",sans-serif;font-weight:800;font-size:15px;letter-spacing:.02em;line-height:1;text-transform:uppercase';
+  return chip;
+}
+// Hotel logo <img> with a fallback chain: clearbit → google favicon → text
+// lockup. domain is pre-validated by _demoLogo(); src is set by property (no HTML
+// string) so a hostile value can never inject. No external DNS in this build env
+// means both remote hops fail and the chip shows — real logos render live only.
+function _demoLogoImg(domain, name){
+  var img = document.createElement('img');
+  img.className = 'brand-icon';
+  img.alt = (String(name || '') || domain) + ' logo';
+  img.setAttribute('referrerpolicy', 'no-referrer');
+  img.style.cssText = 'object-fit:contain;background:#fff';
+  var step = 0;
+  img.onerror = function(){
+    step++;
+    if(step === 1){
+      img.src = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domain) + '&sz=128';
+    } else {
+      img.onerror = null;
+      var chip = _demoLockupChip(name || domain);
+      chip.id = 'demoBrandMark';
+      if(img.parentNode) img.parentNode.replaceChild(chip, img);
+    }
+  };
+  img.src = 'https://logo.clearbit.com/' + encodeURIComponent(domain) + '?size=128';
+  return img;
+}
+// Swap the OceanSafe wave mark in #topbar for the picked hotel's logo/lockup on
+// the PAID demo, and show the honesty tag beside it. Waits on the runtime config
+// (invoked from _partnerCfgReady) so the FREE surface — plan:'free', ?ref=free-demo
+// — is correctly excluded and keeps the generic mark. Demo-param + PAID gated;
+// a plain visitor or a real ?ref never enters here. Session-only, no fetch.
+function _applyDemoBrand(){
+  try {
+    var qp = new URLSearchParams(location.search);
+    if(qp.get('demo') !== 'freepaid' || qp.get('mode') === 'screen') return;
+    if(_activeRefSlug() === 'free-demo') return;       // FREE surface stays generic
+    if(!_planPaid()) return;
+    var name = '';
+    try { name = String(sessionStorage.getItem('os_demo_name') || '').trim().slice(0, 60); } catch(e){}
+    var domain = _demoLogo();
+    if(!name && !domain) return;                        // nothing picked → keep OceanSafe mark
+    var mark = document.querySelector('#topbar .brand-icon');
+    if(!mark || document.getElementById('demoBrandMark')) return;
+    var repl = domain ? _demoLogoImg(domain, name) : _demoLockupChip(name);
+    repl.id = 'demoBrandMark';
+    mark.parentNode.replaceChild(repl, mark);
+    if(!document.getElementById('demoBrandTag')){
+      var tag = document.createElement('div');
+      tag.id = 'demoBrandTag';
+      tag.textContent = 'Preview — not affiliated, for demonstration.';
+      tag.style.cssText = 'font-family:"DM Sans",sans-serif;font-size:9.5px;font-weight:600;color:#8aa0a8;letter-spacing:.01em;line-height:1.3;padding:0 0 6px';
+      var tb1 = document.querySelector('#topbar .tb1');
+      if(tb1 && tb1.insertAdjacentElement){ tb1.insertAdjacentElement('afterend', tag); }
+      else { var tbx = document.getElementById('topbar'); if(tbx) tbx.appendChild(tag); }
+    }
+  } catch(e){}
 }
 // "Pilot preview" pill — configs minted via the worker (unsigned pilots)
 // carry preview:true and get this honest, unobtrusive tag wherever the
@@ -8359,6 +8447,13 @@ window._partnerCfgReady = (function(){
     .catch(() => { if(timer) clearTimeout(timer); return null; });
 })();
 
+// Sales-demo header brand swap — runs once the config resolves so the FREE
+// (plan:'free') surface is correctly excluded. Self-gated (demo=freepaid + PAID);
+// a no-slug / non-demo load resolves null and _applyDemoBrand early-returns.
+if(window._partnerCfgReady && window._partnerCfgReady.then){
+  window._partnerCfgReady.then(function(){ try { _applyDemoBrand(); } catch(e){} });
+} else { try { _applyDemoBrand(); } catch(e){} }
+
 // ── Dynamic per-beach og:image injection ──
 // When the URL has ?beach=<id> for one of the 6 photographed beaches, swap the
 // og:image meta to the beach-specific share preview. Lets a Slack/iMessage
@@ -8601,6 +8696,7 @@ function updateFreshnessIndicator(){
       st.id = 'demoNameCardStyle';
       st.textContent = '#demoNameCard{animation:demoNameIn .3s cubic-bezier(.16,1,.3,1)}'
         + '@keyframes demoNameIn{from{transform:translate(-50%,-8px);opacity:0}to{transform:translate(-50%,0);opacity:1}}'
+        + '#demoNameList li[aria-selected="true"]{background:#eaf3f5}'
         + '@media (prefers-reduced-motion:reduce){#demoNameCard{animation:none!important}}';
       document.head.appendChild(st);
     }
@@ -8616,27 +8712,131 @@ function updateFreshnessIndicator(){
       + '<div style="display:flex;align-items:center;gap:9px;padding-right:26px">' + tagSvg
       +   '<div style="font-weight:800;font-size:14.5px;color:#12333d">See it as your property</div>'
       + '</div>'
-      + '<div style="font-size:11.5px;color:#5c7480;margin-top:5px;line-height:1.4">Type a name and the paid demo shows your co-branding. It stays in this browser only.</div>'
-      + '<input id="demoNameInput" type="text" maxlength="40" autocomplete="off" placeholder="Your hotel&#39;s name" style="width:100%;margin-top:11px;padding:11px 12px;border:1px solid rgba(15,76,92,.28);border-radius:10px;font-size:14px;font-family:inherit;color:#12333d;box-sizing:border-box">'
+      + '<div style="font-size:11.5px;color:#5c7480;margin-top:5px;line-height:1.4">Search your hotel to see its logo and name on the paid demo. Any name works &mdash; it stays in this browser only.</div>'
+      + '<div style="position:relative;margin-top:11px">'
+      +   '<input id="demoNameInput" type="text" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="demoNameList" autocomplete="off" maxlength="60" placeholder="Search Kaua&#699;i hotels &mdash; or type any name" style="width:100%;padding:11px 12px;border:1px solid rgba(15,76,92,.28);border-radius:10px;font-size:14px;font-family:inherit;color:#12333d;box-sizing:border-box">'
+      +   '<ul id="demoNameList" role="listbox" aria-label="Matching hotels" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;list-style:none;margin:0;padding:4px;background:#fff;border:1px solid rgba(15,76,92,.2);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.2);max-height:236px;overflow-y:auto"></ul>'
+      + '</div>'
       + '<div style="display:flex;align-items:center;gap:12px;margin-top:11px">'
       +   '<button type="button" data-demo-go style="flex:1;min-height:44px;border:none;border-radius:10px;background:#0f4c5c;color:#fff;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer">Show me</button>'
       +   '<button type="button" data-demo-skip style="min-height:44px;padding:0 6px;border:none;background:none;color:#5c7480;font-size:12.5px;font-weight:600;font-family:inherit;text-decoration:underline;cursor:pointer">Skip</button>'
       + '</div>';
     document.body.appendChild(card);
     var input = card.querySelector('#demoNameInput');
-    function skip(){
-      try { sessionStorage.setItem('os_demo_card_seen', '1'); } catch(e){}
-      card.remove();
+    var list = card.querySelector('#demoNameList');
+    var HOTELS = [], curMatches = [], activeIndex = -1;
+
+    // Demo-only hotel directory — fetched once, here, while the card builds (this
+    // whole IIFE is ?demo=freepaid gated, so no other load ever touches it).
+    // Failure is non-fatal: HOTELS stays empty and the box works as free text.
+    try {
+      fetch('/partner-config/demo-hotels.json')
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(j){
+          if(j && Array.isArray(j.hotels)){
+            HOTELS = j.hotels.filter(function(h){ return h && typeof h.name === 'string' && h.name.trim(); });
+          }
+        })
+        .catch(function(){});
+    } catch(e){}
+
+    function cleanDomain(d){
+      d = String(d == null ? '' : d).trim().toLowerCase();
+      return /^[a-z0-9.-]{1,63}\.[a-z]{2,24}$/.test(d) ? d : '';
     }
-    function go(){
-      var v = (input && input.value ? String(input.value) : '').trim().slice(0, 40);
-      if(!v){ if(input) input.focus(); return; }
-      try { sessionStorage.setItem('os_demo_name', v); } catch(e){}
+    function closeList(){
+      list.style.display = 'none';
+      list.innerHTML = '';
+      curMatches = []; activeIndex = -1;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+    }
+    function highlight(){
+      Array.prototype.forEach.call(list.children, function(li, i){
+        var on = (i === activeIndex);
+        li.setAttribute('aria-selected', on ? 'true' : 'false');
+        if(on){ input.setAttribute('aria-activedescendant', li.id); if(li.scrollIntoView) li.scrollIntoView({ block: 'nearest' }); }
+      });
+      if(activeIndex < 0) input.removeAttribute('aria-activedescendant');
+    }
+    function renderList(){
+      var q = (input.value || '').trim().toLowerCase();
+      list.innerHTML = ''; curMatches = []; activeIndex = -1;
+      if(q.length < 2 || !HOTELS.length){ closeList(); return; }
+      curMatches = HOTELS.filter(function(h){ return h.name.toLowerCase().indexOf(q) !== -1; }).slice(0, 6);
+      if(!curMatches.length){ closeList(); return; }
+      curMatches.forEach(function(h, i){
+        var li = document.createElement('li');
+        li.id = 'demoOpt' + i;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', 'false');
+        li.style.cssText = 'display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer';
+        var nm = document.createElement('span');
+        nm.textContent = h.name;                     // our data — textContent escapes it anyway
+        nm.style.cssText = 'color:#12333d;font-weight:600;font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        li.appendChild(nm);
+        if(h.shore){
+          var sh = document.createElement('span');
+          sh.textContent = String(h.shore);
+          sh.style.cssText = 'flex-shrink:0;color:#8aa0a8;font-size:11px;font-weight:600';
+          li.appendChild(sh);
+        }
+        li.addEventListener('mousedown', function(e){ e.preventDefault(); select(h); });
+        li.addEventListener('mouseenter', function(){ activeIndex = i; highlight(); });
+        list.appendChild(li);
+      });
+      list.style.display = 'block';
+      input.setAttribute('aria-expanded', 'true');
+    }
+    function select(h){
+      var name = String(h && h.name || '').trim().slice(0, 60);
+      if(!name){ if(input) input.focus(); return; }
+      var dom = cleanDomain(h && h.domain);
+      try {
+        sessionStorage.setItem('os_demo_name', name);
+        if(dom) sessionStorage.setItem('os_demo_domain', dom);
+        else sessionStorage.removeItem('os_demo_domain');
+      } catch(e){}
       location.reload();
     }
+    function skip(){
+      try { sessionStorage.setItem('os_demo_card_seen', '1'); } catch(e){}
+      cleanup(); card.remove();
+    }
+    function go(){
+      // Enter/Show-me on a highlighted row selects it (logo + domain); otherwise
+      // the typed value is accepted as a text-only brand. An exact case-insensitive
+      // match to a listed hotel still gets its logo.
+      if(activeIndex >= 0 && curMatches[activeIndex]){ select(curMatches[activeIndex]); return; }
+      var v = (input && input.value ? String(input.value) : '').trim().slice(0, 60);
+      if(!v){ if(input) input.focus(); return; }
+      var exact = null;
+      for(var i = 0; i < HOTELS.length; i++){ if(HOTELS[i].name.toLowerCase() === v.toLowerCase()){ exact = HOTELS[i]; break; } }
+      if(exact){ select(exact); return; }
+      try { sessionStorage.setItem('os_demo_name', v); sessionStorage.removeItem('os_demo_domain'); } catch(e){}
+      location.reload();
+    }
+    function onDocClick(e){ if(!card.contains(e.target)) closeList(); }
+    function cleanup(){ document.removeEventListener('click', onDocClick); }
     card.querySelectorAll('[data-demo-skip]').forEach(function(b){ b.addEventListener('click', skip); });
     card.querySelector('[data-demo-go]').addEventListener('click', go);
-    if(input) input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); go(); } });
+    input.addEventListener('input', renderList);
+    input.addEventListener('keydown', function(e){
+      var open = list.style.display !== 'none';
+      if(e.key === 'ArrowDown'){
+        e.preventDefault();
+        if(!open){ renderList(); if(list.style.display === 'none') return; }
+        if(curMatches.length){ activeIndex = Math.min(activeIndex + 1, curMatches.length - 1); highlight(); }
+      } else if(e.key === 'ArrowUp'){
+        e.preventDefault();
+        if(open && curMatches.length){ activeIndex = Math.max(activeIndex - 1, 0); highlight(); }
+      } else if(e.key === 'Enter'){
+        e.preventDefault(); go();
+      } else if(e.key === 'Escape'){
+        if(open){ e.preventDefault(); closeList(); }
+      }
+    });
+    document.addEventListener('click', onDocClick);
     try { setTimeout(function(){ if(input) input.focus(); }, 60); } catch(e){}
   })();
 })();

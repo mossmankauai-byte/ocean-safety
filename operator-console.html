@@ -350,6 +350,22 @@
     color:var(--muted);cursor:pointer;text-decoration:underline;padding:2px}
   .osdemo-start .osd-x{position:absolute;top:8px;right:9px;appearance:none;background:none;border:0;color:var(--muted);
     cursor:pointer;padding:3px;line-height:0}
+  /* ---- hotel typeahead dropdown ---- */
+  .osdemo-start .osd-field{position:relative;flex:1;min-width:0}
+  .osdemo-start .osd-field input{width:100%}
+  .osdemo-start .osd-menu{position:absolute;left:0;right:0;bottom:calc(100% + 6px);margin:0;padding:5px;list-style:none;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 -6px 26px rgba(0,0,0,.34);
+    max-height:216px;overflow-y:auto;z-index:2}
+  .osdemo-start .osd-opt{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:8px 10px;
+    border-radius:8px;cursor:pointer;font-size:13px;color:var(--ink);line-height:1.3}
+  .osdemo-start .osd-opt .sh{font-size:10.5px;color:var(--muted);flex:none;white-space:nowrap}
+  .osdemo-start .osd-opt.active,.osdemo-start .osd-opt:hover{background:var(--sea-tint)}
+  /* ---- paid-demo brand-lockup swap (hotel logo / text lockup + honesty tag) ---- */
+  .osd-brandmark{display:inline-flex;align-items:center;flex:none}
+  .osd-brandmark .osd-logo{width:34px;height:34px;border-radius:8px;object-fit:contain;background:#fff}
+  .osd-lockup{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 9px;
+    border-radius:9px;background:#0e4a5c;color:#fff;font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:15px;letter-spacing:.02em}
+  .osd-nafil{font-size:10.5px;color:var(--muted);letter-spacing:.02em;margin:5px 0 0}
 
   /* ============ ITEM MANAGER (amenities) ============ */
   .mg-list{display:flex;flex-direction:column}
@@ -613,6 +629,21 @@
     window.OS_PLAN='paid';
     try{ if(new URLSearchParams(location.search).get('plan')==='free'){ window.OS_PLAN='free'; document.body.classList.add('plan-free'); } }catch(e){}
     </script>
+    <script>
+    /* PORTFOLIO MODE flag (?group=<id>) — early-apply. Without ?group this script is a
+       no-op and the console behaves exactly as before; with it, the portfolio module at
+       the end of the file replaces the view stack. The single-property tour and the
+       FREE|PAID demo chrome don't apply in portfolio mode. */
+    window.OS_GROUP='';
+    (function(){ try{
+      var gq=(new URLSearchParams(location.search).get('group')||'').trim();
+      if(!gq) return;
+      window.OS_GROUP=gq;
+      document.body.classList.add('portfolio-on');
+      var s=((document.querySelector('.property code')||{}).textContent||'operator').trim();
+      try{ localStorage.setItem('os_tour2_done_'+s,'1'); }catch(e){}
+    }catch(e){} })();
+    </script>
 
     <!-- VIEW SWITCHER -->
     <nav class="viewtabs" role="tablist" aria-label="Console view">
@@ -697,8 +728,33 @@
         <div class="pc-tr"><b>Promotions</b><span class="pc-cell pc-dash">&mdash;</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Timed pop-ups + offer chip</span></div>
         <div class="pc-tr"><b>Lobby TV board</b><span class="pc-cell">Generic + QR</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Branded + rotating offers</span></div>
         <div class="pc-tr"><b>Guest analytics</b><span class="pc-cell"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything &mdash; same as free</span></div>
+        <div class="pc-tr"><b>Multi-property portfolio view</b><span class="pc-cell pc-dash">&mdash;</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Available (ask us)</span></div>
         <div class="pc-tr"><b>Price</b><span class="pc-cell pc-strong">Free forever</span><span class="pc-cell pc-paid pc-strong">$649/mo flat</span></div>
         <div class="mg-foot" id="pcFoot"><span class="cap"><b>$649/mo flat</b> &mdash; one paid tier, everything above. The free guide is free forever.</span><span style="flex:1"></span></div>
+      </div>
+    </section>
+
+    <!-- MULTIPLE PROPERTIES — how a group links (part of the paid story, drafted 2026-07-09) -->
+    <section aria-label="Multiple properties" id="multiPropSec">
+      <div class="sec-h"><h2>Multiple properties?</h2><p>We link them at signing &mdash; one portfolio dashboard across the whole group.</p></div>
+      <div class="card">
+        <p style="margin:2px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.6;max-width:70ch">Run more than one property? <b>We link them at signing</b> &mdash; every property, one portfolio dashboard: adoption, demand, promotions and units across the whole group, with per-property drill-down.</p>
+        <div class="pm-featwrap" style="margin-top:12px;border-bottom:0;padding-bottom:0">
+          <div class="pm-feat">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17.5 17.5h3.5V21"/></svg>
+            <span class="tx"><b>1 &middot; Each property gets its own guide + QR</b><span>Its own co-branded guest guide and in-room QR, exactly as normal.</span></span>
+          </div>
+          <div class="pm-feat">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+            <span class="tx"><b>2 &middot; We provision the group when you sign</b><span>Nothing to configure on your side &mdash; we link the properties under your agreement.</span></span>
+          </div>
+          <div class="pm-feat">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15v3M11 11v7M15 13v5M19 8v10"/></svg>
+            <span class="tx"><b>3 &middot; The portfolio view appears in this console</b><span>Adoption per property, pooled demand, promotion and unit engagement &mdash; with drill-down to each property&rsquo;s own dashboard.</span></span>
+          </div>
+        </div>
+        <div class="lockcard-btns"><a class="pl-btn primary" href="mailto:aloha@oceansafety.app?subject=Link%20my%20properties">Link my properties</a></div>
+        <div class="note"><b>$649/mo per property</b> &mdash; ask us about multi-property pricing.</div>
       </div>
     </section>
 
@@ -1081,6 +1137,9 @@
       </section>
     </div><!-- /view-places -->
 
+    <!-- ============ PORTFOLIO MODE (?group=) — rendered by the portfolio module at the end of the file ============ -->
+    <div id="view-portfolio" hidden></div>
+
     <footer id="dataFoot">
       <b>Reading the data views:</b> every tile is tagged Measured / Modeled / Assumption / Sample. In this preview, all figures are <b>Sample</b> — illustrative placeholders, not your guests. Live mode renders only measured telemetry; a period with no data shows an empty state, never a seed number and never a movement figure against an empty prior week.<br><br>
       <b>What makes it real:</b> live telemetry from your property&rsquo;s co-branded guest app — the pilot switches it on, and 60+ days of measured rollups replace every Sample figure. Until then the data views are a layout preview by design.<span class="rep-only" hidden> Internal: (1) build the endpoint-injection step so co-branded variants post to the live Worker (today they ship disabled), (2) deploy the Worker + seed per-slug keys, (3) ship a co-branded variant with the live endpoint, (4) accumulate 60+ days of rollups.</span><br><br>
@@ -1101,13 +1160,55 @@
   var slug = slugEl ? slugEl.textContent.trim() : 'operator';
   // Suppress the tour's native first-login auto-start — the paid-flip counter opens it instead.
   try{ localStorage.setItem('os_tour2_done_' + slug, '1'); }catch(e){}
-  // Apply a stored demo name to the PAID masthead (free surfaces stay generic).
+  // Apply a stored demo name (+ optional hotel logo) to the PAID masthead and brand
+  // lockup (free surfaces stay generic OceanSafe). Demo-param-gated only.
   if(window.OS_PLAN !== 'free'){
-    var nm = ''; try{ nm = (sessionStorage.getItem('os_demo_name') || '').trim().slice(0,40); }catch(e){}
+    var nm = ''; try{ nm = (sessionStorage.getItem('os_demo_name') || '').trim().slice(0,60); }catch(e){}
+    var dom = ''; try{ dom = (sessionStorage.getItem('os_demo_domain') || '').trim().replace(/[^a-z0-9.\-]/gi,''); }catch(e){}
     if(nm){
       var h1 = document.querySelector('.property h1'); if(h1) h1.textContent = nm;
       var kick = document.querySelector('.hm-kicker'); if(kick) kick.textContent = nm + ' · co-branded guest guide';
+      applyBrandLockup(nm, dom);
     }
+  }
+
+  // Replace the yellow OceanSafe wave mark with the picked hotel's logo — a fallback
+  // chain logo.clearbit → google favicons → a text lockup (initials chip) — and hide the
+  // "OceanSafety" wordmark so the header reads as "<hotel> · Operator Console". A free-typed
+  // name (no domain) shows the text lockup directly, no yellow mark. Adds an honesty tag.
+  function applyBrandLockup(name, domain){
+    var brand = document.querySelector('.brandrow .brand'); if(!brand) return;
+    var word = brand.querySelector('div > b'); if(word) word.style.display = 'none';
+    var holder = document.createElement('span'); holder.className = 'osd-brandmark';
+    var chip = document.createElement('span'); chip.className = 'osd-lockup';
+    chip.textContent = brandInitials(name); chip.setAttribute('aria-label', name);
+    if(domain){
+      var img = document.createElement('img'); img.className = 'osd-logo'; img.alt = name;
+      chip.style.display = 'none';
+      img.onerror = function(){
+        img.onerror = function(){ img.style.display = 'none'; chip.style.display = ''; };
+        img.src = 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128';
+      };
+      img.src = 'https://logo.clearbit.com/' + domain + '?size=128';
+      holder.appendChild(img);
+    }
+    holder.appendChild(chip);
+    var oldMark = brand.querySelector('.mark');
+    if(oldMark) oldMark.parentNode.replaceChild(holder, oldMark); else brand.insertBefore(holder, brand.firstChild);
+    var brandrow = document.querySelector('.brandrow');
+    if(brandrow && !document.querySelector('.osd-nafil')){
+      var tag = document.createElement('div'); tag.className = 'osd-nafil';
+      tag.textContent = 'Preview — not affiliated, for demonstration.';
+      brandrow.insertAdjacentElement('afterend', tag);
+    }
+  }
+  function brandInitials(name){
+    var skip = {the:1,at:1,of:1,and:1};
+    var words = name.replace(/[^0-9A-Za-zʻÀ-ɏ\s]/g,' ').split(/\s+/).filter(Boolean);
+    var pick = words.filter(function(w){ return !skip[w.toLowerCase()]; });
+    if(!pick.length) pick = words;
+    var ini = pick.slice(0,2).map(function(w){ return w.charAt(0).toUpperCase(); }).join('');
+    return ini || (name.charAt(0) || '?').toUpperCase();
   }
 })();
 </script>
@@ -1316,7 +1417,9 @@
 (function(){
   try {
     var params = new URLSearchParams(location.search);
-    var slug = (params.get('slug') || '').trim();
+    // Portfolio mode owns ?slug; ignore it here so ?group+?slug never leaks a live single-property
+    // state over the sample portfolio (the Worker 200s any slug). Portfolio has its own live path.
+    var slug = window.OS_GROUP ? '' : (params.get('slug') || '').trim();
     if(!slug){
       // No slug = the DEMO. Dress the sample preview as a confident, live-style dashboard,
       // behind ONE honest "Sample data" ribbon (CSS-revealed by .demo-live). The ?slug live
@@ -2196,9 +2299,28 @@
     ['The Spa',              240,  38]
   ];
   var total = TAPS.reduce(function(s,t){ return s + t[1]; }, 0);           // 2,120
-  var AVG_CHECK = 18, TAKE = 0.10;
-  var est = Math.round(total * AVG_CHECK * TAKE / 100) * 100;              // ≈ $3,800/mo
+  // Idle-demand floor — every input is a cited/modeled market benchmark, NOT the operator's
+  // measured data (MARKET-BENCHMARKS.md, firm-verified 2026-07-09). Occupancy is the one hard
+  // cited number; check + conversion are modeled and stated as such; the figure is an "at least"
+  // floor. A tap is interest, never a booking. The "How we get this" expander must always ship
+  // with the dollar number — it is never a black-box amount.
+  var CHECK = 40;                                                         // [modeled] conservative resort F&B check, low end casual
+  var CONV  = 0.02;                                                       // [modeled] passive-tap conversion floor (band 1–3%)
+  var est   = Math.round(total * CHECK * CONV / 100) * 100;               // ≈ $1,700/mo (at-least floor)
+  var estLo = Math.round(total * CHECK * 0.01 / 10) * 10;                 // ~$850 at 1%
+  var estHi = Math.round(total * CHECK * 0.03 / 10) * 10;                 // ~$2,540 at 3%
   var totalTxt = total.toLocaleString('en-US'), estTxt = '$' + est.toLocaleString('en-US');
+  var estLoTxt = '$' + estLo.toLocaleString('en-US'), estHiTxt = '$' + estHi.toLocaleString('en-US');
+  var methHTML =
+    '<details class="meth"><summary>How we get this</summary><div class="body">' +
+      '<div style="margin-bottom:6px"><b>The one hard number:</b> Hawaii hotels ran <b>73.9% average occupancy</b> in 2025 (Hawaii DBEDT/HTA, full-year 2025) <span class="chip measured">cited</span> — we normalize to that, not to a full house.</div>' +
+      '<b>The floor, step by step:</b>' +
+      '<div style="margin:5px 0 0"><code>' + totalTxt + ' taps</code> <span class="chip build">measured once live</span> — amenity taps your guests made last month.</div>' +
+      '<div style="margin:4px 0 0">&times; <code>~$40 check</code> <span class="chip assumption">modeled</span> — a conservative ~$40 modeled resort dining check (low end of casual resort F&amp;B). An analyst estimate, not a cited authority.</div>' +
+      '<div style="margin:4px 0 0">&times; <code>2% conversion</code> <span class="chip assumption">modeled</span> — a modeled 1&ndash;3% conversion for a passive in-app tap, well below the ~8% that opted-in pre-arrival upsell emails see (Oaky/Plusgrade, 2024&ndash;25). That 8% is the <b>active-upsell ceiling</b>, shown only to frame this floor &mdash; never applied to taps.</div>' +
+      '<div style="margin:5px 0 0">= <b>~' + estTxt + '/mo</b>, an &ldquo;at least&rdquo; floor &mdash; band <b>' + estLoTxt + '&ndash;' + estHiTxt + '</b> at 1&ndash;3%.</div>' +
+      '<div style="margin:6px 0 0;color:var(--muted)">For scale, Hawaii visitors already spend ~$243/person/day on-property (Hawaii DBEDT, 2024). All figures here are modeled market benchmarks &mdash; <b>not your measured data</b>. Your real numbers replace these when your guide goes live.</div>' +
+    '</div></details>';
 
   var promosSec = document.querySelector('#view-promos section');
   if(promosSec){
@@ -2221,10 +2343,11 @@
       '<div class="card" id="pmLockCard" style="margin-bottom:14px">' +
         '<div class="title"><span class="l">' + LOCK + ' Offers that land — locked</span><span><span class="chip sample">Sample</span></span></div>' +
         featHTML +
-        '<div class="v">~' + estTxt + ' <small>/ mo — demand you saw, $0 captured</small></div>' +
+        '<div class="v">~' + estTxt + ' <small>/ mo of guest interest you’re not capturing — at least</small></div>' +
         '<ol class="rank" style="margin-top:12px">' + rank + '</ol>' +
-        '<div class="cap">' + totalTxt + ' amenity taps last month × $' + AVG_CHECK + ' average check × a conservative ' + Math.round(TAKE*100) + '% take ≈ ~' + estTxt + '/mo. A tap is interest — the click, never a booking.</div>' +
-        '<div class="note" id="pmNudge" style="margin-top:12px">Your guests showed ' + totalTxt + ' taps of interest in your amenities last month — and with no offer live you captured $0. At an $' + AVG_CHECK + ' average check, even a ' + Math.round(TAKE*100) + '% take is ~' + estTxt + '/mo. Unlock Promotions to reach them.</div>' +
+        '<div class="cap">' + totalTxt + ' amenity taps last month — a conservative floor on the on-property spend that interest represents. A tap is interest, the click — never a booking.</div>' +
+        methHTML +
+        '<div class="note" id="pmNudge" style="margin-top:12px">Your guests showed ' + totalTxt + ' taps of interest in your amenities last month — with no offer live, $0 captured. A conservative modeled floor puts that at ~' + estTxt + '/mo (see “How we get this”). Unlock Promotions to reach them.</div>' +
         btnsHTML +
       '</div>');
   }
@@ -2301,12 +2424,19 @@
   if(stored) return;    // already set → early-apply handled every surface; no card
   if(skipped) return;   // dismissed this session
 
-  function applyName(nm){
-    var h1 = document.querySelector('.property h1'); if(h1) h1.textContent = nm;
-    var kick = document.querySelector('.hm-kicker'); if(kick) kick.textContent = nm + ' · co-branded guest guide';
-    // Re-render the amenity preview so "Provided by <name>" updates (gpName reads .property h1).
-    var chip = document.querySelector('#gpAmChips .gp-chip[aria-pressed="true"]') || document.querySelector('#gpAmChips .gp-chip');
-    if(chip) chip.click();
+  // Escape rendered names even though the list is our own data.
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  // Store the picked/typed name (+ domain when a listed hotel was chosen), then reload so
+  // every PAID surface (masthead, brand lockup, guest preview) re-renders from first paint.
+  function store(name, domain){
+    name = (name || '').trim().slice(0,60);
+    if(!name) return false;
+    try{
+      sessionStorage.setItem('os_demo_name', name);
+      if(domain) sessionStorage.setItem('os_demo_domain', domain);
+      else sessionStorage.removeItem('os_demo_domain');
+    }catch(e){}
+    return true;
   }
   function showCard(){
     if(document.querySelector('.osdemo-start')) return;
@@ -2317,21 +2447,84 @@
     card.innerHTML =
       '<button type="button" class="osd-x" aria-label="Dismiss">' + XSVG + '</button>' +
       '<h4>See it as your property</h4>' +
-      '<p>Type your property&rsquo;s name &mdash; the paid demo re-skins with it: masthead, guest preview and offers.</p>' +
-      '<div class="osd-row"><input type="text" maxlength="40" placeholder="Your hotel&rsquo;s name" aria-label="Your hotel&rsquo;s name"><button type="button" class="osd-go">Show me</button></div>' +
+      '<p>Search your property &mdash; the paid demo re-skins with its name and logo: masthead, guest preview and offers.</p>' +
+      '<div class="osd-row"><div class="osd-field">' +
+        '<input type="text" maxlength="60" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="osdMenu" placeholder="Search hotels&hellip;" aria-label="Search your property">' +
+        '<ul class="osd-menu" id="osdMenu" role="listbox" hidden></ul>' +
+      '</div><button type="button" class="osd-go">Show me</button></div>' +
       '<button type="button" class="osd-skip">Skip &mdash; keep the demo name</button>';
     document.body.appendChild(card);
     var input = card.querySelector('input');
+    var menu  = card.querySelector('.osd-menu');
+    var HOTELS = [];   // stays empty if the fetch fails → the box works as a free-text input
+    var matches = [];
+    var active = -1;
+
+    // Load the demo hotel directory once when the card builds (demo-gated only).
+    fetch('partner-config/demo-hotels.json')
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){ if(j && j.hotels && j.hotels.length){ HOTELS = j.hotels.filter(function(h){ return h && h.name; }); } })
+      .catch(function(){});
+
+    function closeMenu(){ menu.hidden = true; menu.innerHTML = ''; matches = []; active = -1;
+      input.setAttribute('aria-expanded','false'); input.removeAttribute('aria-activedescendant'); }
+    function openMenu(){
+      var q = (input.value || '').trim().toLowerCase();
+      if(q.length < 2 || !HOTELS.length){ closeMenu(); return; }
+      matches = HOTELS.filter(function(h){ return h.name.toLowerCase().indexOf(q) !== -1; }).slice(0,6);
+      if(!matches.length){ closeMenu(); return; }
+      active = -1;
+      menu.innerHTML = matches.map(function(h,i){
+        return '<li class="osd-opt" role="option" id="osdOpt'+i+'" data-i="'+i+'" aria-selected="false">' +
+               '<span class="nm">'+esc(h.name)+'</span>' +
+               (h.shore ? '<span class="sh">'+esc(h.shore)+'</span>' : '') + '</li>';
+      }).join('');
+      menu.hidden = false;
+      input.setAttribute('aria-expanded','true'); input.removeAttribute('aria-activedescendant');
+    }
+    function setActive(i){
+      var opts = menu.querySelectorAll('.osd-opt'); if(!opts.length) return;
+      if(i < 0) i = opts.length - 1; else if(i >= opts.length) i = 0;
+      active = i;
+      for(var k=0;k<opts.length;k++){
+        var on = k === active;
+        opts[k].classList.toggle('active', on);
+        opts[k].setAttribute('aria-selected', on ? 'true' : 'false');
+      }
+      input.setAttribute('aria-activedescendant', 'osdOpt'+active);
+      opts[active].scrollIntoView({block:'nearest'});
+    }
+    function choose(h){ if(store(h.name, h.domain || '')) location.reload(); }
     function submit(){
-      var v = (input.value || '').trim().slice(0,40);
+      if(active > -1 && matches[active]){ choose(matches[active]); return; }
+      var v = (input.value || '').trim();
       if(!v){ input.focus(); return; }
-      try{ sessionStorage.setItem('os_demo_name', v); }catch(e){}
-      applyName(v);
-      card.remove();
+      // A free-typed name is accepted as a text-only brand — unless it exactly names a listed hotel.
+      var lv = v.toLowerCase(), exact = null;
+      for(var i=0;i<HOTELS.length;i++){ if(HOTELS[i].name.toLowerCase() === lv){ exact = HOTELS[i]; break; } }
+      if(exact){ choose(exact); return; }
+      if(store(v, '')) location.reload();
     }
     function skip(){ try{ sessionStorage.setItem('os_demo_name_skip', '1'); }catch(e){} card.remove(); }
+
+    input.addEventListener('input', openMenu);
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'ArrowDown'){ e.preventDefault(); if(menu.hidden) openMenu(); else setActive(active + 1); }
+      else if(e.key === 'ArrowUp'){ e.preventDefault(); if(!menu.hidden) setActive(active - 1); }
+      else if(e.key === 'Enter'){ e.preventDefault(); submit(); }
+      else if(e.key === 'Escape'){ if(!menu.hidden){ e.preventDefault(); closeMenu(); } }
+    });
+    menu.addEventListener('mousedown', function(e){
+      var li = e.target.closest('.osd-opt'); if(!li) return;
+      e.preventDefault();   // keep focus on the input
+      var h = matches[parseInt(li.getAttribute('data-i'), 10)]; if(h) choose(h);
+    });
+    menu.addEventListener('mousemove', function(e){
+      var li = e.target.closest('.osd-opt'); if(!li) return;
+      setActive(parseInt(li.getAttribute('data-i'), 10));
+    });
+    document.addEventListener('mousedown', function(e){ if(card.isConnected && !card.contains(e.target)) closeMenu(); });
     card.querySelector('.osd-go').addEventListener('click', submit);
-    input.addEventListener('keydown', function(e){ if(e.key === 'Enter') submit(); });
     card.querySelector('.osd-skip').addEventListener('click', skip);
     card.querySelector('.osd-x').addEventListener('click', skip);
     setTimeout(function(){ try{ input.focus(); }catch(e){} }, 250);
@@ -2368,6 +2561,584 @@
     bar.appendChild(seg('PAID', !isFree, '?demo=freepaid'));
     document.body.appendChild(bar);
   } catch(e){}
+})();
+</script>
+<style>
+  /* ============ PORTFOLIO MODE (?group=) — brand-group console (2026-07-09) ============ */
+  /* portfolio replaces the single-property view stack; the demo toggle, tour and name box don't apply */
+  .portfolio-on .viewtabs,.portfolio-on #view-home,.portfolio-on #view-guests,.portfolio-on #view-stayclose,
+  .portfolio-on #view-promos,.portfolio-on #view-places,.portfolio-on #dataFoot,.portfolio-on .freshness,
+  .portfolio-on .period,.portfolio-on .osdemo-start,.portfolio-on #osTour,.portfolio-on #tourBtn{display:none!important}
+  /* the demo-live rule demotes per-card Sample chips — portfolio cards keep theirs (Sample-ribbon honesty) */
+  .stage.demo-live .chip.sample.pf-keep{display:inline-flex}
+  .pf-chip{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--sea);background:var(--sea-tint);border:1px solid #c4dde8;border-radius:999px;padding:6px 13px;white-space:nowrap}
+  #view-portfolio .pf-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:16px}
+  #view-portfolio .pf-stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;box-shadow:var(--shadow)}
+  #view-portfolio .pf-stat b{display:block;font-size:24px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  #view-portfolio .pf-stat b small{font-size:12px;color:var(--muted);font-weight:600}
+  #view-portfolio .pf-stat span{font-size:11.5px;color:var(--muted)}
+  .pf-locked{display:flex;gap:10px;align-items:flex-start;border:1px dashed #d5bd85;border-radius:10px;padding:11px 13px;background:var(--sample-bg);color:#755b28;font-size:12.5px;line-height:1.5;margin-top:14px}
+  .pf-locked svg{flex:none;margin-top:1px}
+  .pfrow{display:grid;grid-template-columns:172px 1fr 66px;gap:10px;align-items:center;font-size:12.5px;padding:5px 0}
+  .pfrow .lab{color:var(--ink-2);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pfrow .val{text-align:right;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pftrack{position:relative;height:18px;background:var(--hair-soft);border-radius:5px}
+  .pftrack .fill{position:absolute;top:0;bottom:0;left:0;border-radius:5px;background:var(--sea)}
+  .pftrack .med{position:absolute;top:-3px;bottom:-3px;width:2.5px;background:var(--gold);border-radius:2px;box-shadow:0 0 0 1px rgba(201,168,76,.28)}
+  .pftrack .pfstack{position:absolute;left:0;top:0;bottom:0}
+  .pfdiv{position:relative;height:18px;background:var(--hair-soft);border-radius:5px}
+  .pfdiv .zero{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--gold);border-radius:2px}
+  .pfdiv .pos{position:absolute;top:0;bottom:0;left:50%;background:var(--sea);border-radius:0 5px 5px 0}
+  .pfdiv .neg{position:absolute;top:0;bottom:0;right:50%;background:#a9bcc4;border-radius:5px 0 0 5px}
+  .pfstack{display:flex;height:18px;border-radius:5px;overflow:hidden}
+  .pfstack i{height:100%;display:block}
+  .pf-leg{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--ink-2)}
+  .pf-leg span{display:inline-flex;align-items:center;gap:6px}
+  .pf-leg i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+  .pf-collect{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#755b28;background:var(--sample-bg);border:1px dashed #d5bd85;border-radius:6px;padding:3px 9px;white-space:nowrap}
+  .pf-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .pf-prop{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+  .pf-prop h3{margin:0;font-size:15.5px;font-family:'Fraunces',Georgia,serif;font-weight:500}
+  .pf-prop .sub{font-size:11.5px;color:var(--muted)}
+  .pf-prop .big{font-size:22px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .pf-prop .big small{font-size:11.5px;color:var(--muted);font-weight:600}
+  .pf-prop a{margin-top:auto;padding-top:4px;font-size:12.5px;font-weight:700;color:var(--sea);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .pf-prop a:hover{text-decoration:underline}
+  .pf-regchips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+  .pf-occ{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:12px;flex-wrap:wrap}
+  .pf-occ input{width:74px;font:inherit;font-size:13px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+  .pf-occ input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  .pf-dead{list-style:none;margin:10px 0 0;padding:0}
+  .pf-dead li{font-size:12.5px;color:var(--ink-2);display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--hair-soft)}
+  .pf-dead li:last-child{border-bottom:0}
+  .pf-dead .ids{color:var(--muted);font-size:11.5px}
+  .pf-picklist{list-style:none;margin:8px 0 0;padding:0}
+  .pf-picklist li{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--hair-soft);font-size:13px}
+  .pf-picklist li:last-child{border-bottom:0}
+  .pf-picklist .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pf-propchip{font-size:10px;font-weight:700;color:var(--muted);background:var(--hair-soft);border-radius:5px;padding:1px 7px;white-space:nowrap;flex:none}
+  .pf-split{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+  .pf-split .sp-h{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .pf-split .sp-r{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:12.5px}
+  .pf-split .sp-r .lab{flex:1;min-width:0;color:var(--ink-2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pf-split .sp-r .val{font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .pfrow.v1r{grid-template-columns:172px 1fr auto}
+  .pfrow .val .raw{color:var(--muted);font-weight:600;font-size:10.5px;margin-left:6px;white-space:nowrap}
+  .pfrow.pf-nd .val{display:flex;justify-content:flex-end}
+  .pfrow.pf-nd .pftrack{background:transparent}
+  .pfrow .lab.pn .short,.pf-split .sp-r .lab.pn .short{display:none}
+  @media(max-width:640px){.pfrow{grid-template-columns:104px 1fr 58px}.pfrow.v1r{grid-template-columns:104px 1fr auto}.pfrow .lab{font-size:11.5px}}
+  @media(max-width:520px){.pfrow .lab.pn .full,.pf-split .sp-r .lab.pn .full{display:none}.pfrow .lab.pn .short,.pf-split .sp-r .lab.pn .short{display:inline}}
+</style>
+<script>
+/* ============ PORTFOLIO MODE (?group=<id>) — brand-group console ============
+   A brand group is a PROVISIONED config — never operator-editable, never an ad-hoc
+   slug list in a URL (competitor-merging is refused by design). Real groups are
+   provisioned by us at contract signing, one entry per contracting entity; only the
+   fictional demo group ships in this file. Statistical floors live in the RENDER
+   layer, not captions: 28-day windows per property; weekly deltas render only at
+   portfolio level AND with 5+ properties pooled; any rate needs BOTH denominators
+   >= 50 events (else "collecting — n of 50"); breakdown cells under 5 print "<5";
+   unit activity renders as 30-day Active/Light/None tiers only — never per-unit
+   daily activity (frozen privacy firewall) — and is labeled taps, not visits. */
+(function(){
+'use strict';
+if(!window.OS_GROUP) return;   // no ?group → the console is exactly as before
+
+/* REAL GROUPS NEVER GO IN THIS PUBLIC FILE — provision them in a password-gated copy
+   (jade-pages encrypt pattern) with the config INSIDE the encrypted payload; per-slug
+   KV keys must be seeded first. Only the fictional demo group ships here. */
+var GROUPS = {
+  'demo-group': {
+    label: 'Your Resort Group',
+    demo: true,   // sample dataset, no fetches — a provisioned live group omits this flag
+    props: [
+      { slug:'demo-poipu',       label:'Your Resort — Poipu',       rooms:300, region:'South Shore' },
+      { slug:'demo-princeville', label:'Your Resort — Princeville', rooms:140, region:'North Shore' },
+      { slug:'demo-wailua',      label:'Your Resort — Wailua',      rooms:60,  region:'East Side'  }
+    ]
+  }
+};
+
+var g = GROUPS[window.OS_GROUP];
+if(!g){ document.body.classList.remove('portfolio-on'); return; }   // unknown group → normal console
+var DEMO = !!g.demo;
+var WINDOW_DAYS = 28;
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function fN(n){ return Math.round(n).toLocaleString('en-US'); }
+function cell(n){ return n < 5 ? '&lt;5' : fN(n); }                    // breakdown-cell suppression
+function pct(v,max){ return Math.max(3, Math.round(v / (max||1) * 100)); }
+function r1(n){ return (Math.round(n*10)/10).toString(); }
+function median(a){ var s=a.slice().sort(function(x,y){return x-y;}); var m=s.length>>1; return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
+function titleCase(id){ return String(id).replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
+var PSHADES = ['#0e6e8c','#4b98b3','#9cc6d6'];   // one teal ramp — gold is reserved for the median
+var KINDS = { beach:'Beaches', food:'Food', hike:'Hikes', truck:'Food trucks', activity:'Activities' };
+
+/* ---------- full-rollup client merge (extends the sumRolls pattern to the whole shape) ---------- */
+function mergeFullRolls(days){
+  var acc = { sessions:0, poi_tap:0, poi_house_pick_tap:0, tab_change:0, concierge_tap:0,
+    stay_close_render:0, stay_close_click:0, promo_tap:0, tour_lead:0, amenity_tap:0,
+    hours:[], tabs:{}, top:{}, triggers:{}, amenities:{}, promos:{}, tour_leads:{},
+    amenity_taps:{}, device:{}, lang:{}, units:{}, any:false };
+  var h; for(h=0;h<24;h++) acc.hours[h]=0;
+  function addMap(dst,src){ if(!src) return; Object.keys(src).forEach(function(k){ dst[k]=(dst[k]||0)+(src[k]||0); }); }
+  (days||[]).forEach(function(d){
+    var r = d && d.roll; if(!r) return;
+    acc.any = true;
+    acc.sessions+=r.sessions||0; acc.poi_tap+=r.poi_tap||0; acc.poi_house_pick_tap+=r.poi_house_pick_tap||0;
+    acc.tab_change+=r.tab_change||0; acc.concierge_tap+=r.concierge_tap||0;
+    acc.stay_close_render+=r.stay_close_render||0; acc.stay_close_click+=r.stay_close_click||0;
+    acc.promo_tap+=r.promo_tap||0; acc.tour_lead+=r.tour_lead||0; acc.amenity_tap+=r.amenity_tap||0;
+    if(r.hours && r.hours.length){ for(h=0;h<24;h++) acc.hours[h]+=r.hours[h]||0; }
+    addMap(acc.tabs,r.tabs); addMap(acc.triggers,r.triggers); addMap(acc.amenities,r.amenities);
+    addMap(acc.promos,r.promos); addMap(acc.tour_leads,r.tour_leads); addMap(acc.amenity_taps,r.amenity_taps);
+    addMap(acc.device,r.device); addMap(acc.lang,r.lang); addMap(acc.units,r.units);
+    var top=r.top||{};
+    Object.keys(top).forEach(function(kind){ var ids=top[kind]||{}; Object.keys(ids).forEach(function(id){
+      var k=kind+'|'+id; acc.top[k]=(acc.top[k]||0)+(ids[id]||0); }); });
+  });
+  return acc;
+}
+
+/* ---------- live path: a merged rollup → the renderer's per-property shape ---------- */
+function liveP(p, roll){
+  var top=[];
+  var units=null;
+  if(roll){
+    Object.keys(roll.top).forEach(function(k){
+      var i=k.indexOf('|');
+      top.push({ kind:k.slice(0,i), name:titleCase(k.slice(i+1)), n:roll.top[k] });
+    });
+    var a=0,l=0,seen=0;
+    Object.keys(roll.units).forEach(function(u){ seen++; if(roll.units[u]>=5) a++; else l++; });
+    units={ active:a, light:l, none:Math.max(0,(p.rooms||0)-seen), dead:[], more:Math.max(0,(p.rooms||0)-seen) };
+  }
+  return { cfg:p, prov:(roll&&roll.any)?'live':'nodata',
+    sessions:roll?roll.sessions:0, poiTap:roll?roll.poi_tap:0, hpt:roll?roll.poi_house_pick_tap:0,
+    triggers:roll?roll.triggers:{}, scr:roll?roll.stay_close_render:0, scc:roll?roll.stay_close_click:0,
+    amenityTap:roll?roll.amenity_tap:0, amenityTaps:roll?roll.amenity_taps:{},
+    promoTap:roll?roll.promo_tap:0, promos:roll?roll.promos:{},
+    tourLead:roll?roll.tour_lead:0, tours:roll?roll.tour_leads:{}, top:top, units:units };
+}
+
+/* ---------- demo dataset: 3 fictional properties, distinct volumes; the flagship's
+   figures mirror the canonical hotel-insights-demo.html sample (180 sessions/day,
+   Poipu 1410, amenity taps 640/480/410/350/240) ---------- */
+function buildDemoPS(){
+  var d = {
+    'demo-poipu': { sessions:5040, poiTap:6040, hpt:1620,
+      triggers:{ 'High surf':46, 'Brown water':58, 'Rain':36, 'Wind':22, 'UV':13 },
+      scr:175, scc:24, amenityTap:2120,
+      amenityTaps:{ 'Beach bar happy hour':640, 'Cabana':480, 'Activity desk':410, 'Luau night':350, 'The Spa':240 },
+      promoTap:282, promos:{ 'Happy hour 4–6':132, 'Sunset dinner on the lawn':96, 'Spa morning':54 },
+      tourLead:85, tours:{ 'Snorkel sail':36, 'Luau':28, 'Zipline':12, 'Kayak':9 },
+      top:[ {kind:'beach',name:'Poʻipū Beach Park',n:1410}, {kind:'beach',name:'Brennecke’s',n:830},
+            {kind:'beach',name:'Shipwreck',n:720}, {kind:'beach',name:'Baby Beach (Poʻipū)',n:610},
+            {kind:'beach',name:'Māhāʻulepū (Gillin’s)',n:540}, {kind:'beach',name:'Lāwaʻi Beach',n:450},
+            {kind:'food',name:'The Beach House',n:210}, {kind:'food',name:'Da Crack',n:160}, {kind:'food',name:'Red Salt',n:120},
+            {kind:'hike',name:'Māhāʻulepū Heritage Trail',n:190}, {kind:'hike',name:'Canyon Trail',n:80} ],
+      units:{ active:96, light:84, none:120, dead:['1104','1212','1318','1402','1523','1610','1717','1804'], more:112 } },
+    'demo-princeville': { sessions:2660, poiTap:2380, hpt:610,
+      triggers:{ 'High surf':88, 'Rain':61, 'Wind':30, 'Brown water':24, 'UV':8 },
+      scr:211, scc:26, amenityTap:680,
+      amenityTaps:{ 'Pool grill':260, 'Cabana row':180, 'Spa & sauna':150, 'Kids club':90 },
+      promoTap:149, promos:{ 'Golf twilight':88, 'Sunset grill':61 },
+      tourLead:49, tours:{ 'Napali boat':26, 'Helicopter':15, 'Kayak':8 },
+      top:[ {kind:'beach',name:'Hanalei Bay',n:760}, {kind:'beach',name:'ʻAnini Beach',n:430},
+            {kind:'beach',name:'Keʻe Beach',n:310}, {kind:'beach',name:'Kalihiwai Bay',n:120},
+            {kind:'food',name:'Bar Acuda',n:140}, {kind:'food',name:'The Spot Hanalei',n:95},
+            {kind:'hike',name:'Kalalau (Hanakāpīʻai)',n:210}, {kind:'hike',name:'ʻŌkolehao Trail',n:60} ],
+      units:{ active:39, light:43, none:58, dead:['A-204','B-112','B-317','C-101','C-208','D-114'], more:52 } },
+    'demo-wailua': { sessions:1120, poiTap:1010, hpt:240,
+      triggers:{ 'Brown water':34, 'Rain':28, 'High surf':18, 'Wind':9, 'UV':4 },
+      scr:93, scc:9, amenityTap:187,
+      amenityTaps:{ 'Pool bar':74, 'Beach gear closet':61, 'BBQ pavilion':52 },
+      promoTap:43, promos:{ 'Kayak + falls combo':43 },   // < 50 events — proves the collecting-state floor
+      tourLead:21, tours:{ 'River kayak':11, 'Luau':6, 'Tubing':4 },   // 4 → renders "<5"
+      top:[ {kind:'beach',name:'Lydgate Beach Park',n:320}, {kind:'beach',name:'Keālia Beach',n:240},
+            {kind:'beach',name:'Kalapakī Beach',n:90},
+            {kind:'food',name:'Hamura Saimin',n:85}, {kind:'food',name:'Pono Market',n:40},
+            {kind:'hike',name:'Sleeping Giant',n:70}, {kind:'hike',name:'Kuilau Ridge',n:35} ],
+      units:{ active:21, light:18, none:21, dead:['3F','7A','9E','12A','14B','18D','21C','22B'], more:13 } }
+  };
+  return g.props.map(function(p){ var r=d[p.slug]||{sessions:0,poiTap:0,hpt:0,triggers:{},scr:0,scc:0,amenityTap:0,amenityTaps:{},promoTap:0,promos:{},tourLead:0,tours:{},top:[],units:null}; r.cfg=p; r.prov='sample'; return r; });
+}
+
+/* demo house-pick report data (group-level; live groups derive from their picks config) */
+var DEMO_PICKS = {
+  taps: [ {n:'Poʻipū Beach Park', p:'Poipu', t:1410}, {n:'Hanalei Bay', p:'Princeville', t:760},
+          {n:'ʻAnini Beach', p:'Princeville', t:430}, {n:'Lydgate Beach Park', p:'Wailua', t:320},
+          {n:'The Beach House', p:'Poipu', t:210} ],
+  none: [ {n:'Allerton Garden', p:'Poipu', t:0}, {n:'Kong Lung Trading Co.', p:'Princeville', t:0},
+          {n:'Kauai Museum', p:'Wailua', t:4} ]
+};
+
+/* ---------- shared render pieces ---------- */
+function provChip(P){
+  if(DEMO || (P && P.prov==='sample')) return '<span class="chip sample pf-keep">Sample</span>';
+  if(P && P.prov==='nodata') return '<span class="chip build">No data yet</span>';
+  return '<span class="chip measured">Measured</span>';
+}
+function cardChips(){ return '<span>'+provChip()+' <span class="chip build">'+WINDOW_DAYS+'-day</span></span>'; }
+function shortName(P){ return String(P.cfg.label).replace(/^.*—\s*/,'') || P.cfg.label; }
+function rate100(P, occ){ var rm=(P.cfg.rooms||0)*(occ||100)/100; return rm ? P.sessions/rm*100 : 0; }
+/* a property counts toward rates/medians only once it is reporting — a not-yet-connected
+   property (prov==='nodata') is never a measured zero that rank-shames or drags a median (H1) */
+function reporting(P){ return !!P && P.prov!=='nodata'; }
+/* property-name label: full name at desktop + short "— X" suffix ≤520px, so the three
+   properties stay distinguishable where the full label would ellipsize identically (H5) */
+function pnLab(P){ return '<span class="lab pn" title="'+esc(P.cfg.label)+'"><span class="full">'+esc(P.cfg.label)+'</span><span class="short">'+esc(shortName(P))+'</span></span>'; }
+/* per-label pooled session denominator: sums sessions of ONLY the properties where each
+   label ran, so a pooled rate measures offer performance, never property size (H3) */
+function labelSessions(PS, field){
+  var m={}; PS.forEach(function(P){ var src=P[field]||{}; Object.keys(src).forEach(function(k){ m[k]=(m[k]||0)+(P.sessions||0); }); });
+  return m;
+}
+
+/* ---------- view builders ---------- */
+function v1rows(PS, occ){
+  var rep = PS.filter(reporting);   // H1: nodata never enters the rate/median
+  var rows = rep.map(function(P){ return {P:P, rate:rate100(P,occ)}; }).sort(function(a,b){ return b.rate-a.rate; });
+  var med = rows.length ? median(rows.map(function(r){ return r.rate; })) : 0;
+  var max = rows[0] ? rows[0].rate : 1;
+  var body = rows.map(function(r){
+    return '<div class="pfrow v1r">'+pnLab(r.P)+
+      '<span class="pftrack"><span class="fill" style="width:'+pct(r.rate,max)+'%"></span><span class="med" style="left:'+pct(med,max)+'%"></span></span>'+
+      '<span class="val">'+fN(r.rate)+'<span class="raw">· '+fN(r.P.sessions)+' sessions</span></span></div>';   // H4: raw window count
+  }).join('');
+  var nd = PS.filter(function(P){ return !reporting(P); }).map(function(P){   // H1: barless "No data yet" row
+    return '<div class="pfrow v1r pf-nd">'+pnLab(P)+
+      '<span class="pftrack"></span>'+
+      '<span class="val"><span class="chip build">No data yet</span></span></div>';
+  }).join('');
+  return body + nd;
+}
+
+function divergeRows(items, unit){   // items: [{label, dev}] or [{P, dev}]
+  var maxAbs = 1; items.forEach(function(it){ maxAbs = Math.max(maxAbs, Math.abs(it.dev)); });
+  return items.map(function(it){
+    var w = Math.abs(it.dev)/maxAbs*46;   // half-track max 46%
+    var seg = it.dev >= 0 ? '<span class="pos" style="width:'+w+'%"></span>' : '<span class="neg" style="width:'+w+'%"></span>';
+    var v = (it.dev>0?'+':'') + r1(it.dev) + unit;
+    if(Math.abs(it.dev) < 0.05) v = 'median';
+    var lab = it.P ? pnLab(it.P) : '<span class="lab" title="'+esc(it.label)+'">'+esc(it.label)+'</span>';
+    return '<div class="pfrow">'+lab+
+      '<span class="pfdiv"><span class="zero"></span>'+seg+'</span>'+
+      '<span class="val">'+v+'</span></div>';
+  }).join('');
+}
+
+function pooledMap(PS, field){
+  var m={}; PS.forEach(function(P){ var src=P[field]||{}; Object.keys(src).forEach(function(k){ m[k]=(m[k]||0)+src[k]; }); });
+  return m;
+}
+function rankRows(map, opts){
+  opts = opts || {};
+  var rows = Object.keys(map).map(function(k){ return {k:k, n:map[k]}; }).sort(function(a,b){ return b.n-a.n; });
+  if(opts.limit) rows = rows.slice(0, opts.limit);
+  var max = rows.length ? rows[0].n : 1;
+  return rows.map(function(r,i){
+    // Rate against ONLY the sessions where this label ran (H3: never portfolio-total, which would
+    // rank by property size), and only once the label clears a 50-event floor (H2: so a printed
+    // rate can never let rate×sessions reconstruct a suppressed <5 count).
+    var d = opts.denom ? opts.denom[r.k] : 0;
+    var sub = (d && r.n>=50) ? '<br><small style="color:var(--muted);font-weight:400">'+r1(r.n/d*100)+' taps / 100 sessions <span style="opacity:.8">(where it ran)</span></small>' : '';
+    return '<li><span class="n">'+(i+1)+'</span><span style="flex:1;min-width:0">'+esc(r.k)+sub+'</span>'+
+      '<span class="bar" style="flex:0 0 90px"><i style="width:'+pct(r.n,max)+'%"></i></span>'+
+      '<span class="ct">'+cell(r.n)+'</span></li>';
+  }).join('');
+}
+
+/* rate floor: BOTH denominators >= 50 events, else the collecting state */
+function splitRows(PS, evField, label){
+  return PS.map(function(P){
+    var ev = P[evField]||0, ses = P.sessions||0;
+    var right = (ev>=50 && ses>=50)
+      ? '<span class="val">'+r1(ev/ses*100)+' / 100 sessions</span>'
+      : '<span class="pf-collect">collecting — '+Math.min(ev,ses)+' of 50 events</span>';
+    return '<div class="sp-r">'+pnLab(P)+right+'</div>';
+  }).join('');
+}
+
+/* ---------- mount ---------- */
+function mount(PS){
+  var totRooms=0, totSessions=0, totPoi=0, liveN=0;
+  PS.forEach(function(P){ totRooms+=P.cfg.rooms||0; totSessions+=P.sessions; totPoi+=P.poiTap; if(P.prov==='live') liveN++; });
+  var perDay = totSessions/WINDOW_DAYS;
+  var repPS = PS.filter(reporting);                          // H1: only reporting properties feed rates/medians
+  var rates = repPS.map(function(P){ return rate100(P,100); });
+  var medRate = rates.length ? median(rates) : 0;
+  var medFoot = 'median of '+repPS.length+' reporting ('+repPS.length+' of '+PS.length+')';   // H1: N of M footnote
+
+  /* ---- chrome: masthead becomes the group ---- */
+  var h1 = document.querySelector('.property h1'); if(h1) h1.textContent = g.label;
+  var meta = document.querySelector('.property .meta');
+  if(meta) meta.textContent = PS.length+' properties · '+fN(totRooms)+' rooms · provisioned portfolio · '+WINDOW_DAYS+'-day window'+(DEMO?' · sample data':'');
+  var ms = document.querySelector('.modeswitch');
+  if(ms && !document.getElementById('pfChip')){
+    var chip = document.createElement('span'); chip.className='pf-chip'; chip.id='pfChip';
+    chip.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><rect x="14" y="14" width="7" height="7" rx="1.4"/></svg>Portfolio';
+    ms.parentNode.insertBefore(chip, ms);
+  }
+  var ribbon = document.getElementById('demoRibbon');
+  if(ribbon && DEMO) ribbon.innerHTML = '<span class="dr-dot" aria-hidden="true"></span>Sample portfolio — demo numbers across 3 fictional properties, not real guests';
+  if(!DEMO){
+    var stg = document.querySelector('.stage'); if(stg){ stg.classList.remove('demo-live'); stg.classList.add('live-on'); }
+    var pb = document.querySelector('.preview-bar .pb span:last-child');
+    if(pb) pb.innerHTML = '<strong>LIVE</strong> — pooled measured telemetry: '+liveN+' of '+PS.length+' properties reporting. Sample never enters a measured total.';
+  }
+  var toggle = document.querySelector('[aria-label="Demo: switch between the free and paid console"]');
+  if(toggle) toggle.remove();   // FREE|PAID demo chrome doesn't apply — portfolio IS the paid+ story
+  var pc = document.getElementById('planChip'); if(pc) pc.remove();   // R2: ?plan=free must not leak a Free-plan chip into the portfolio masthead
+
+  /* ---- header + weekly-delta floor (locked under 5 properties BY CODE) ---- */
+  var LOCKSVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  var weeklyHTML = (PS.length >= 5)
+    ? ''   // 5+ pooled properties: a period-over-period line would render here (portfolio level only)
+    : '<div class="pf-locked">'+LOCKSVG+'<span><b>Weekly change is locked.</b> Weekly deltas render only at portfolio level with 5+ properties pooled — this group reports '+PS.length+'. Everything below uses '+WINDOW_DAYS+'-day windows, where the counts are real.</span></div>';
+
+  var head =
+    '<section aria-label="Portfolio headline">' +
+      '<div class="pf-stats">' +
+        '<div class="pf-stat"><b>'+PS.length+' <small>properties</small></b><span>'+esc(g.label)+'</span></div>' +
+        '<div class="pf-stat"><b>'+fN(totRooms)+' <small>rooms</small></b><span>across the group</span></div>' +
+        '<div class="pf-stat"><b>'+fN(perDay)+' <small>sessions / day</small></b><span>pooled · '+WINDOW_DAYS+'-day window '+provChip()+'</span></div>' +
+        '<div class="pf-stat"><b>'+fN(medRate)+' <small>/ 100 rooms</small></b><span>'+medFoot+' · '+WINDOW_DAYS+'d sessions</span></div>' +
+      '</div>' + weeklyHTML +
+    '</section>';
+
+  /* ---- 1 · adoption table (hero) ---- */
+  var v1 =
+    '<section aria-label="Portfolio adoption">' +
+      '<div class="sec-h"><h2>Portfolio adoption</h2><p>Sessions per 100 rooms, '+WINDOW_DAYS+' days — ranked, gold line = portfolio median.</p></div>' +
+      '<div class="card"><div class="title"><span class="l">Sessions per 100 rooms, ranked</span>'+cardChips()+'</div>' +
+      '<div id="pfV1Rows" style="margin-top:12px">'+v1rows(PS,100)+'</div>' +
+      '<div class="pf-leg"><span><i style="background:var(--sea)"></i>property</span><span><i style="background:var(--gold)"></i>portfolio median</span></div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:6px">Gold line = '+medFoot+'; a property still connecting shows “No data yet” and is left out of the median.</div>' +
+      '<div class="pf-occ"><label for="pfOcc">Occupancy override</label><input id="pfOcc" type="number" min="20" max="100" step="5" value="100" inputmode="numeric"> <span>% — recomputes per <i>occupied</i> rooms</span></div>' +
+      '<div class="cap" id="pfV1Note">Per-100-rooms assumes full occupancy <span class="chip assumption">Assumption</span> — rooms ≠ occupied rooms, so a low-occupancy property can look under-adopted at identical engagement. A conversation prompt, never a verdict.</div>' +
+      '</div></section>';
+
+  /* ---- 2 · within-portfolio benchmark ---- */
+  var devAdopt = PS.filter(reporting).map(function(P){ var r=rate100(P,100); return {P:P, dev: medRate? (r-medRate)/medRate*100 : 0}; });   // H1: nodata excluded; H5: carries P
+  var ctrs = PS.filter(reporting).map(function(P){ return {P:P, ctr: P.scr? P.scc/P.scr*100 : 0}; });
+  var ctrReport = ctrs.filter(function(c){ return c.P.scr>=50; });   // H1: only >=50-event properties define the CTR median
+  var medCtr = ctrReport.length ? median(ctrReport.map(function(c){ return c.ctr; })) : 0;
+  var ctrFoot = 'median of '+ctrReport.length+' reporting ('+ctrReport.length+' of '+PS.length+')';
+  var ctrRows = ctrs.map(function(c){
+    if(c.P.scr < 50) return '<div class="sp-r">'+pnLab(c.P)+'<span class="pf-collect">collecting — '+c.P.scr+' of 50 events</span></div>';
+    var dev = c.ctr - medCtr;
+    return '<div class="sp-r">'+pnLab(c.P)+'<span class="val">'+r1(c.ctr)+'% · '+(Math.abs(dev)<15 ? 'within noise of the median' : (dev>0?'+':'')+r1(dev)+' pts vs median')+'</span></div>';
+  }).join('');
+  var v2 =
+    '<section aria-label="Within-portfolio benchmark">' +
+      '<div class="sec-h"><h2>Within-portfolio benchmark</h2><p>Each property against its own portfolio median — rates only, never raw counts side by side.</p></div>' +
+      '<div class="card"><div class="title"><span class="l">Adoption vs the portfolio median</span>'+cardChips()+'</div>' +
+      '<div style="margin-top:12px">'+divergeRows(devAdopt,'%')+'</div>' +
+      '<div class="pf-leg"><span><i style="background:var(--sea)"></i>above median</span><span><i style="background:#a9bcc4"></i>below median</span><span><i style="background:var(--gold)"></i>median</span></div>' +
+      '<div class="pf-split"><div class="sp-h">Stay-Close click-rate (render → click) · <span style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--muted)">'+ctrFoot+'</span></div>'+ctrRows+'</div>' +
+      '<div class="cap">Rate differences under ~15 points at these volumes aren’t distinguishable — they render as “within noise,” not a ranking. The question this view earns: “why does one property sit under its own portfolio median?”</div>' +
+      '</div></section>';
+
+  /* ---- 3 · hazard-day guest reach (OPS framing) ---- */
+  var trigPool = pooledMap(PS,'triggers');
+  var trigRows = Object.keys(trigPool).map(function(t){ return {t:t, n:trigPool[t]}; }).sort(function(a,b){ return b.n-a.n; });
+  var trigMax = trigRows.length ? trigRows[0].n : 1;
+  var v3rows = trigRows.map(function(r){
+    var segs = PS.map(function(P,i){
+      var v = (P.triggers||{})[r.t]||0;
+      return '<i style="width:'+(r.n? v/r.n*100 : 0)+'%;background:'+PSHADES[i%PSHADES.length]+'"></i>';
+    }).join('');
+    return '<div class="pfrow"><span class="lab">'+esc(r.t)+'</span>'+
+      '<span class="pftrack"><span class="pfstack" style="width:'+pct(r.n,trigMax)+'%">'+segs+'</span></span>'+
+      '<span class="val">'+cell(r.n)+'</span></div>';
+  }).join('');
+  var v3leg = PS.map(function(P,i){ return '<span><i style="background:'+PSHADES[i%PSHADES.length]+'"></i>'+esc(shortName(P))+'</span>'; }).join('');
+  var v3 =
+    '<section aria-label="Hazard-day guest reach">' +
+      '<div class="sec-h"><h2>Hazard-day guest reach</h2><p>Stay-Close renders by trigger — portfolio total, stacked by property.</p></div>' +
+      '<div class="card"><div class="title"><span class="l">Renders on condition-flagged days, by trigger</span>'+cardChips()+'</div>' +
+      '<div style="margin-top:12px">'+v3rows+'</div>' +
+      '<div class="pf-leg">'+v3leg+'</div>' +
+      '<div class="cap">The ops read: staff and stock indoor alternatives — F&amp;B, spa, activities — when surf is up, portfolio-wide on the same forecast. A render is a panel shown, counted; interest and reach, never bookings.</div>' +
+      '</div></section>';
+
+  /* ---- 4 · cross-property demand map ---- */
+  var kindPool = {};   // kind -> {name: n}
+  PS.forEach(function(P){ (P.top||[]).forEach(function(t){ var k=t.kind||'other'; if(!kindPool[k]) kindPool[k]={}; kindPool[k][t.name]=(kindPool[k][t.name]||0)+t.n; }); });
+  var demandMax = 1;
+  Object.keys(kindPool).forEach(function(k){ Object.keys(kindPool[k]).forEach(function(n){ demandMax=Math.max(demandMax,kindPool[k][n]); }); });
+  var kindOrder = ['beach','food','hike'].filter(function(k){ return kindPool[k]; }).concat(Object.keys(kindPool).filter(function(k){ return ['beach','food','hike'].indexOf(k)<0; }));
+  var kindLimits = { beach:5, food:4, hike:3 };
+  var v4body = kindOrder.map(function(k){
+    var rows = Object.keys(kindPool[k]).map(function(n){ return {n:n, v:kindPool[k][n]}; }).sort(function(a,b){ return b.v-a.v; }).slice(0, kindLimits[k]||4);
+    return '<div class="pl-region" style="padding-left:0;background:transparent">'+esc(KINDS[k]||titleCase(k))+'</div>' +
+      rows.map(function(r){
+        return '<div class="pfrow"><span class="lab" title="'+esc(r.n)+'">'+esc(r.n)+'</span>'+
+          '<span class="pftrack"><span class="fill" style="width:'+pct(r.v,demandMax)+'%"></span></span>'+
+          '<span class="val">'+cell(r.v)+'</span></div>';
+      }).join('');
+  }).join('');
+  var regTot = {}; PS.forEach(function(P){ var rg=P.cfg.region||'Other'; regTot[rg]=(regTot[rg]||0)+P.poiTap; });
+  var regChips = Object.keys(regTot).map(function(rg,i){
+    var share = totPoi ? Math.round(regTot[rg]/totPoi*100) : 0;
+    return '<span class="pl-pill"><span class="dot" style="background:'+PSHADES[i%PSHADES.length]+'"></span>'+esc(rg)+' <b>'+share+'%</b></span>';
+  }).join('');
+  var v4 =
+    '<section aria-label="Cross-property demand">' +
+      '<div class="sec-h"><h2>Cross-property demand</h2><p>Pooled place interest across the group — what your portfolio can take to partners as one number.</p></div>' +
+      '<div class="card"><div class="title"><span class="l">Guests who tapped interest, pooled · by kind</span>'+cardChips()+'</div>' +
+      '<div style="margin-top:8px">'+v4body+'</div>' +
+      '<div class="pf-regchips">'+regChips+'</div>' +
+      '<div class="cap">One negotiation instead of three: pooled tap volume is the group’s leverage with tour, food and rental partners, and the concierge’s pre-book list. “Guests who tapped interest in X” — interest, never bookings, and that label travels with any number you quote.</div>' +
+      '</div></section>';
+
+  /* ---- 5 · promo + amenity league (portfolio-pooled) ---- */
+  var promoPool = pooledMap(PS,'promos'), amenPool = pooledMap(PS,'amenityTaps');
+  var v5 =
+    '<section aria-label="Promotions and amenities">' +
+      '<div class="sec-h"><h2>Promotions &amp; amenities</h2><p>Ranked by pooled taps; the rate is per 100 sessions <b>at the properties running each offer</b> — never the portfolio total, so it reads offer performance, not property size. Interest, never bookings.</p></div>' +
+      '<div class="grid g2">' +
+      '<div class="card"><div class="title"><span class="l">Promo taps, pooled</span>'+cardChips()+'</div>' +
+        '<ol class="rank">'+rankRows(promoPool,{limit:6, denom:labelSessions(PS,'promos')})+'</ol>' +
+        '<div class="pf-split"><div class="sp-h">Per-property promo tap-rate — both denominators ≥ 50 events</div>'+splitRows(PS,'promoTap')+'</div>' +
+        '<div class="cap">Which offer runs portfolio-wide and which dies. Ranked by raw taps; the per-100 rate divides by the sessions of the properties that ran it, not the whole group — <b>interest, never bookings</b>, and no rate renders below 50 events.</div></div>' +
+      '<div class="card"><div class="title"><span class="l">Amenity taps, pooled</span>'+cardChips()+'</div>' +
+        '<ol class="rank">'+rankRows(amenPool,{limit:6, denom:labelSessions(PS,'amenityTaps')})+'</ol>' +
+        '<div class="pf-split"><div class="sp-h">Per-property amenity tap-rate — both denominators ≥ 50 events</div>'+splitRows(PS,'amenityTap')+'</div>' +
+        '<div class="cap">Which Stay-Close menu entries keep their real estate across the group. A tap is <b>interest</b> — the click, never a booking or revenue.</div></div>' +
+      '</div></section>';
+
+  /* ---- 6 · unit engagement tiers + dead-unit list (frozen privacy firewall) ---- */
+  var v6rows = PS.filter(function(P){ return P.units; }).map(function(P){
+    var u=P.units, tot=(u.active+u.light+u.none)||1;
+    return '<div class="pfrow">'+pnLab(P)+
+      '<span class="pfstack" style="background:var(--hair-soft)">'+
+        '<i style="width:'+(u.active/tot*100)+'%;background:var(--sea)"></i>'+
+        '<i style="width:'+(u.light/tot*100)+'%;background:#9cc6d6"></i>'+
+        '<i style="width:'+(u.none/tot*100)+'%;background:#e3dcc9"></i></span>'+
+      '<span class="val">'+cell(u.active)+' · '+cell(u.light)+' · '+cell(u.none)+'</span></div>';
+  }).join('');
+  var v6dead = PS.filter(function(P){ return P.units; }).map(function(P){
+    var u=P.units;
+    var ids = (u.dead && u.dead.length) ? '<span class="ids">'+u.dead.map(esc).join(' · ')+(u.more>u.dead.length ? ' · +'+fN(u.more-u.dead.length)+' more' : '')+'</span>' : '<span class="ids">'+cell(u.none)+' units</span>';
+    return '<li><b>'+esc(shortName(P))+'</b><span class="pf-propchip">'+cell(u.none)+' silent</span>'+ids+'</li>';
+  }).join('');
+  var v6 =
+    '<section aria-label="Unit engagement">' +
+      '<div class="sec-h"><h2>Unit engagement</h2><p>30-day tiers per property — <b>taps, not visits</b>.</p></div>' +
+      '<div class="grid g2">' +
+      '<div class="card"><div class="title"><span class="l">Active · Light · None, 30-day tiers</span><span>'+provChip()+' <span class="chip build">taps, not visits</span></span></div>' +
+        '<div style="margin-top:12px">'+v6rows+'</div>' +
+        '<div class="pf-leg"><span><i style="background:var(--sea)"></i>Active (5+ taps)</span><span><i style="background:#9cc6d6"></i>Light (1–4)</span><span><i style="background:#e3dcc9"></i>None (0)</span></div>' +
+        '<div class="cap">Tiers only, by design — never per-unit daily activity. Unit activity counts events (<b>taps, not visits</b>) until per-unit sessions ship in the Worker.</div></div>' +
+      '<div class="card"><div class="title"><span class="l">Dead-unit list — no activity in 30 days</span>'+cardChips()+'</div>' +
+        '<ul class="pf-dead">'+v6dead+'</ul>' +
+        '<div class="cap">The housekeeping fix: <b>re-place the QR</b> in silent units — lost cards and drawer-stashed stands are the usual culprits, and the cheapest adoption lever in the building.</div></div>' +
+      '</div></section>';
+
+  /* ---- 7 · portfolio tour-interest totals (pooled ONLY) ---- */
+  var tourPool = pooledMap(PS,'tours');
+  var v7 =
+    '<section aria-label="Tour interest">' +
+      '<div class="sec-h"><h2>Tour interest</h2><p>Pooled lead taps by label — portfolio totals only.</p></div>' +
+      '<div class="card"><div class="title"><span class="l">Tour-interest taps, pooled</span>'+cardChips()+'</div>' +
+      '<ol class="rank">'+rankRows(tourPool,{limit:8})+'</ol>' +
+      '<div class="cap">Which tour partners to contract, pointed at pooled measured interest. <b>A lead is interest, never a booked tour</b> — per-property per-label splits don’t render at these volumes; the pooled '+WINDOW_DAYS+'-day total is the honest number.</div>' +
+      '</div></section>';
+
+  /* ---- 8 · house-pick report (list form) ---- */
+  var picks = DEMO ? DEMO_PICKS : null;
+  var v8body;
+  if(picks){
+    var pickMax = picks.taps.length ? picks.taps[0].t : 1;
+    var tapsList = picks.taps.map(function(x){
+      return '<li><span class="nm">'+esc(x.n)+'</span><span class="pf-propchip">'+esc(x.p)+'</span>'+
+        '<span class="bar" style="flex:0 0 76px"><i style="width:'+pct(x.t,pickMax)+'%"></i></span><span class="ct" style="width:46px;text-align:right;font-weight:700;font-size:12px;color:var(--ink-2)">'+cell(x.t)+'</span></li>';
+    }).join('');
+    var noneList = picks.none.map(function(x){
+      return '<li><span class="nm">'+esc(x.n)+'</span><span class="pf-propchip">'+esc(x.p)+'</span><span style="font-size:12px;color:var(--muted);font-weight:700">'+(x.t===0?'0 taps':cell(x.t)+' taps')+'</span></li>';
+    }).join('');
+    v8body =
+      '<div class="grid g2">' +
+      '<div class="card"><div class="title"><span class="l">Picks earning taps</span>'+cardChips()+'</div><ul class="pf-picklist">'+tapsList+'</ul>' +
+        '<div class="cap">Curated picks your guests measurably open — the co-brand curation earning its keep.</div></div>' +
+      '<div class="card"><div class="title"><span class="l">Picks earning none</span>'+cardChips()+'</div><ul class="pf-picklist">'+noneList+'</ul>' +
+        '<div class="cap"><b>Swap the quiet ones</b> — a pick slot guests never tap is free real estate. Re-curate from each property’s Places tab.</div></div>' +
+      '</div>';
+  } else {
+    var hptTot = 0; PS.forEach(function(P){ hptTot += P.hpt||0; });
+    v8body = '<div class="card"><div class="title"><span class="l">House-pick taps, pooled</span>'+cardChips()+'</div>' +
+      '<div class="v">'+cell(hptTot)+' <small>house-pick taps · '+WINDOW_DAYS+'d</small></div>' +
+      '<div class="cap">The per-pick list renders from this group’s curated-picks config once it’s provisioned. <b>Swap the quiet ones</b> when it lands.</div></div>';
+  }
+  var v8 =
+    '<section aria-label="House picks">' +
+      '<div class="sec-h"><h2>House picks</h2><p>Picks earning taps vs picks earning none — portfolio-pooled.</p></div>' + v8body +
+    '</section>';
+
+  /* ---- per-property strip (drill-down to the single-property console) ---- */
+  var strip = PS.map(function(P){
+    var href = DEMO ? location.pathname : (location.pathname+'?slug='+encodeURIComponent(P.cfg.slug));
+    var bigHTML = reporting(P)
+      ? '<div class="big">'+fN(rate100(P,100))+' <small>sessions / 100 rooms · '+fN(P.sessions)+' sessions · '+WINDOW_DAYS+'d</small></div>'   // H4: raw window count beside the rate
+      : '<div class="big" style="color:var(--muted)">No data yet <small>property still connecting</small></div>';
+    return '<div class="pf-prop"><h3>'+esc(P.cfg.label)+'</h3>' +
+      '<div class="sub">'+fN(P.cfg.rooms||0)+' rooms · '+esc(P.cfg.region||'')+' · '+provChip(P)+'</div>' +
+      bigHTML +
+      '<a href="'+href+'">Open dashboard <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a></div>';
+  }).join('');
+  var stripSec =
+    '<section aria-label="Properties in this group">' +
+      '<div class="sec-h"><h2>Properties</h2><p>Every slug in this group sits under one contracting entity — drill into any property’s own console.</p></div>' +
+      '<div class="pf-strip">'+strip+'</div>' +
+    '</section>';
+
+  /* ---- "link your properties" draft (the paid+ story, in the portfolio header area) ---- */
+  var linkSec =
+    '<section aria-label="Link your properties">' +
+      '<div class="sec-h"><h2>This view, for your group</h2><p>Run more than one property? We link them at signing.</p></div>' +
+      '<div class="card">' +
+        '<p style="margin:2px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.6;max-width:70ch">Every property, one portfolio dashboard — adoption, demand, promotions and units across the whole group, with per-property drill-down. Each property keeps its own guide and QR; we provision the group when you sign — nothing to configure — and the portfolio view appears in this console.</p>' +
+        '<div class="lockcard-btns"><a class="pl-btn primary" href="mailto:aloha@oceansafety.app?subject=Link%20my%20properties">Link my properties</a></div>' +
+        '<div class="note"><b>$649/mo per property</b> — ask us about multi-property pricing.</div>' +
+      '</div></section>';
+
+  var root = document.getElementById('view-portfolio');
+  if(!root) return;
+  root.innerHTML = head + v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8 + stripSec + linkSec;
+  root.hidden = false;
+
+  /* occupancy override: recompute the adoption view live */
+  var occIn = document.getElementById('pfOcc');
+  if(occIn) occIn.addEventListener('input', function(){
+    var v = parseInt(this.value,10); if(!(v>=20 && v<=100)) v = 100;
+    var rowsEl = document.getElementById('pfV1Rows'); if(rowsEl) rowsEl.innerHTML = v1rows(PS,v);
+    var note = document.getElementById('pfV1Note');
+    if(note) note.innerHTML = (v<100)
+      ? 'Recomputed at '+v+'% occupancy — sessions per 100 <b>occupied</b> rooms. The occupancy figure is yours <span class="chip assumption">Assumption</span>; the session counts don’t change.'
+      : 'Per-100-rooms assumes full occupancy <span class="chip assumption">Assumption</span> — rooms ≠ occupied rooms, so a low-occupancy property can look under-adopted at identical engagement. A conversation prompt, never a verdict.';
+  });
+}
+
+/* ---------- go ---------- */
+if(DEMO){
+  mount(buildDemoPS());
+} else {
+  /* live group: N parallel fetches of the EXISTING per-slug dashboard, merged client-side */
+  var API = 'https://concierge-guide-api.oceansafe-hi.workers.dev';
+  try{ var apiQ = new URLSearchParams(location.search).get('api'); if(apiQ) API = apiQ.replace(/\/+$/,''); }catch(e){}
+  Promise.all(g.props.map(function(p){
+    return fetch(API+'/api/dashboard/'+encodeURIComponent(p.slug)+'?period='+WINDOW_DAYS)
+      .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+      .then(function(d){ return liveP(p, mergeFullRolls(d.days)); })
+      .catch(function(){ return liveP(p, null); });
+  })).then(mount).catch(function(err){
+    if(window.console && console.warn) console.warn('OceanSafety portfolio unavailable:', err);
+  });
+}
 })();
 </script>
 </body>
