@@ -1690,6 +1690,8 @@
   .tor-btn.primary{background:var(--sea);color:var(--on-sea);border-color:var(--sea)}
   .tor-btn.primary:hover{background:var(--sea-2)}
   @media(max-width:560px){.tor-card{width:calc(100vw - 20px)}}
+  /* phone tour: hide bottom-floating demo chrome so it can't sit over the docked card */
+  @media(max-width:640px){body.os-tour-active .osfp-wrap,body.os-tour-active .osdemo-start{display:none!important}}
 </style>
 <script>
 /* ============ FIRST-LOGIN GUIDED TOUR ============ */
@@ -1750,6 +1752,17 @@
     hi.style.top = (r.top-pad)+'px'; hi.style.left = (r.left-pad)+'px';
     hi.style.width = (r.width+pad*2)+'px'; hi.style.height = (r.height+pad*2)+'px';
     var ch = card.offsetHeight, cw = card.offsetWidth, vw = innerWidth, vh = innerHeight;
+    if(vw <= 640){                       // phone: dock the card as a bottom sheet, never over the highlight
+      card.style.left='10px'; card.style.right='10px'; card.style.top='auto';
+      card.style.bottom='calc(12px + env(safe-area-inset-bottom,0px))';
+      card.style.width='auto'; card.style.maxWidth='none'; card.style.maxHeight='46vh'; card.style.overflowY='auto';
+      var cardTop = card.getBoundingClientRect().top;   // clamp the spotlight so it stops just above the card
+      var hiTop = Math.max(8, r.top-pad), hiBot = Math.min(r.bottom+pad, cardTop-8);
+      hi.style.top = hiTop+'px'; hi.style.height = Math.max(0, hiBot-hiTop)+'px';
+      return;
+    }
+    card.style.right='auto'; card.style.bottom='auto'; card.style.width=''; card.style.maxWidth='';
+    card.style.maxHeight=''; card.style.overflowY='';
     var top = (r.bottom+pad+14+ch < vh) ? r.bottom+pad+14 : Math.max(12, r.top-pad-14-ch);
     var left = Math.min(Math.max(12, r.left), vw-cw-12);
     card.style.top = top+'px'; card.style.left = left+'px';
@@ -1765,7 +1778,8 @@
     logoEl.style.display = (s.center && LOGO) ? '' : 'none';
     if(s.center){
       curEl = null; card.classList.add('center'); hi.classList.add('off');
-      card.style.top = ''; card.style.left = '';
+      card.style.top=''; card.style.left=''; card.style.right=''; card.style.bottom='';
+      card.style.width=''; card.style.maxWidth=''; card.style.maxHeight=''; card.style.overflowY='';
       return;
     }
     card.classList.remove('center');
@@ -1774,15 +1788,25 @@
       curEl = document.querySelector(s.sel);
       if(!curEl){ (idx < STEPS.length-1) ? setStep(idx+1) : end(true); return; }
       hi.classList.remove('off');
-      curEl.scrollIntoView({block:'center'});
-      setTimeout(position, 250);
+      if(innerWidth <= 640){
+        position();                                   // dock the card first so we can measure it
+        var cardH = card.offsetHeight || 200, rr = curEl.getBoundingClientRect();
+        var absTop = rr.top + (window.pageYOffset || document.documentElement.scrollTop || 0);
+        var top0 = 70, bandH = innerHeight - top0 - (cardH + 24);
+        var desired = (rr.height >= bandH) ? top0 : top0 + (bandH - rr.height)/2;
+        window.scrollTo(0, Math.max(0, absTop - desired));
+        setTimeout(position, 260);
+      } else {
+        curEl.scrollIntoView({block:'center'});
+        setTimeout(position, 250);
+      }
     }, 80);
   }
   function start(){
-    active = true; root.classList.add('on'); setStep(0);
+    active = true; root.classList.add('on'); document.body.classList.add('os-tour-active'); setStep(0);
   }
   function end(markDone){
-    active = false; root.classList.remove('on'); curEl = null; hi.classList.add('off');
+    active = false; root.classList.remove('on'); document.body.classList.remove('os-tour-active'); curEl = null; hi.classList.add('off');
     try{ document.dispatchEvent(new CustomEvent('ostourend')); }catch(e){}
     if(markDone){ try{ localStorage.setItem(KEY,'1'); }catch(e){} }
     switchView('home'); window.scrollTo(0,0);
