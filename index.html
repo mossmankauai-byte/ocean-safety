@@ -1306,6 +1306,15 @@ a{text-decoration:none;color:inherit}
 @keyframes stbadgePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
 .kidbadge{position:absolute;top:38px;left:10px;background:rgba(15,76,92,.85);color:#fff;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:600;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;gap:4px;z-index:4}
 .lg-badge{position:absolute;bottom:44px;left:14px;background:rgba(255,255,255,.9);color:var(--safe);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px}
+/* House pick — co-branded gold pill that sits in the hero-text, just above the
+   beach name, on a place the hotel marked "★ Featured". Same cream-glass voice
+   as .stbadge, gold accent. States a fact only (the hotel's pick) — never a
+   safety claim and never alters the verdict. Paid + featured only (see
+   _housePickBadge); free / non-featured renders nothing. */
+.housepick-badge{position:absolute;left:14px;bottom:82px;z-index:4;max-width:calc(100% - 28px);display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.01em;line-height:1.15;color:#7c5717;background:rgba(253,242,214,.96);border:1.5px solid #c89132;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 3px 10px rgba(0,0,0,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* no intent chips on this beach -> drop the badge down to where the chips would sit */
+.hero:not(:has(.ibs-hero)) .housepick-badge{bottom:52px}
+.housepick-badge svg{flex-shrink:0}
 .scond{font-size:13px;line-height:1.5;margin-top:10px;padding:12px;background:var(--warm);border-radius:10px;border-left:3px solid var(--ocean)}
 .ibs{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .ib{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:500;background:var(--ocean-lt);color:var(--ocean);border:1px solid rgba(15,76,92,.15)}
@@ -6211,6 +6220,7 @@ function openSheet(id){
       ${lgBadge}
       ${heartButton('beach', b.id)}
       ${_heroCaution}
+      ${_housePickBadge(b.id)}
       ${ibsHero}
       <div class="hero-text">
         <div class="sname">${b.name}</div>
@@ -7881,6 +7891,37 @@ function _demoLogoImg(domain, name){
   img.src = 'https://logo.clearbit.com/' + encodeURIComponent(domain) + '?size=128';
   return img;
 }
+// ── House picks (operator "★ Featured" places) ──
+// The operator console lets a hotel star places as "Featured" and EXPORTS them
+// as config.featured — either a {category:[poiId,...]} map (e.g. {beach:[...]})
+// OR a flat [poiId,...] array. Flatten either shape to a Set of poi ids; a place
+// is a house pick when its id is in that set. No config / no featured list → an
+// empty Set, so a no-config render is byte-identical to today's.
+function _houseFeaturedIds(){
+  var out = new Set();
+  try {
+    var f = window._partnerCfg && window._partnerCfg.featured;
+    if(!f) return out;
+    var add = function(v){ if(typeof v === 'string' && v) out.add(v); };
+    if(Array.isArray(f)) f.forEach(add);
+    else if(typeof f === 'object') Object.keys(f).forEach(function(k){ if(Array.isArray(f[k])) f[k].forEach(add); });
+  } catch(e){}
+  return out;
+}
+// PAID-gated: the co-brand house-pick treatment never renders on the free plan.
+function _isHousePick(id){ return _planPaid() && _houseFeaturedIds().has(id); }
+// The gold "★ <Hotel>'s pick" pill for a featured place's hero. Co-branded with
+// the same name contract as the amenity panel (_demoName(cfg.name||'Your Resort'),
+// escaped via _pesc). Free plan or non-featured place → '' (no badge, ever). The
+// badge states a fact only — it carries no safety claim and changes no verdict.
+function _housePickBadge(id){
+  if(!_isHousePick(id)) return '';
+  var cfg = window._partnerCfg || {};
+  var name = _pesc(_demoName(cfg.name || 'Your Resort'));
+  return '<div class="housepick-badge">'
+    + '<svg width="12" height="12" viewBox="0 0 24 24" fill="#c89132" stroke="none" aria-hidden="true"><path d="M12 2.6l2.86 5.8 6.4.93-4.63 4.51 1.09 6.37L12 17.7l-5.72 3.01 1.09-6.37L2.74 9.83l6.4-.93L12 2.6z"/></svg>'
+    + '<span>' + name + '&#39;s pick</span></div>';
+}
 // Swap the OceanSafe wave mark in #topbar for the picked hotel's logo/lockup on
 // the PAID demo, and show the honesty tag beside it. Waits on the runtime config
 // (invoked from _partnerCfgReady) so the FREE surface — plan:'free', ?ref=free-demo
@@ -8620,16 +8661,39 @@ function updateFreshnessIndicator(){
   } catch(e){ return; }
   var isFree = false;
   try { isFree = (new URLSearchParams(location.search).get('ref') === 'free-demo'); } catch(e){}
+  // Scoped styles for the toggle — bigger tap targets, a strong teal/gold ACTIVE
+  // fill, and a gentle attention glow so it reads as an interactive switch, not a
+  // caption. Reduced-motion turns the glow off entirely.
+  if(!document.getElementById('demoToggleStyle')){
+    var tstyle = document.createElement('style');
+    tstyle.id = 'demoToggleStyle';
+    tstyle.textContent =
+      '#demoToggleBar{animation:demoTogGlow 2.6s ease-in-out infinite}'
+      + '@keyframes demoTogGlow{0%,100%{box-shadow:0 6px 18px rgba(0,0,0,.18),0 0 0 0 rgba(200,145,50,0)}50%{box-shadow:0 8px 22px rgba(0,0,0,.22),0 0 0 5px rgba(200,145,50,.30)}}'
+      + '.demoTogLabel{display:inline-flex;align-items:center;gap:5px;padding:0 11px 0 13px;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#8a6d1f;white-space:nowrap}'
+      + '.demoTogSeg{display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 22px;border-radius:999px;font-size:14px;font-weight:800;letter-spacing:.05em;text-decoration:none;color:#0f4c5c;transition:background .15s,color .15s,box-shadow .15s}'
+      + '.demoTogSeg.on{background:#0f4c5c;color:#fff;box-shadow:0 2px 8px rgba(15,76,92,.35),0 0 0 2px #c89132}'
+      + '.demoTogSeg:not(.on):hover{background:rgba(15,76,92,.09)}'
+      + '.demoTogSeg:not(.on):active{background:rgba(15,76,92,.16)}'
+      + '@media (prefers-reduced-motion:reduce){#demoToggleBar{animation:none!important}}';
+    document.head.appendChild(tstyle);
+  }
   var bar = document.createElement('div');
+  bar.id = 'demoToggleBar';
   bar.setAttribute('role','group');
   bar.setAttribute('aria-label','Demo: switch between the free and paid plan');
-  bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:1200;display:flex;align-items:center;gap:0;background:rgba(253,242,214,.96);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(15,76,92,.2);border-radius:999px;padding:4px;box-shadow:0 6px 18px rgba(0,0,0,.18);font-family:"DM Sans",sans-serif';
+  bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:1200;display:flex;align-items:center;gap:2px;background:rgba(253,242,214,.97);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1.5px solid rgba(200,145,50,.55);border-radius:999px;padding:5px;font-family:"DM Sans",sans-serif';
+  var pvLabel = document.createElement('span');
+  pvLabel.className = 'demoTogLabel';
+  pvLabel.setAttribute('aria-hidden','true');
+  pvLabel.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a6d1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span>Preview</span>';
+  bar.appendChild(pvLabel);
   function seg(label, active, href){
     var a = document.createElement('a');
-    a.textContent = label;
     a.href = href;
-    a.style.cssText = 'display:block;padding:8px 18px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:.04em;' +
-      (active ? 'background:#0f4c5c;color:#fff' : 'color:#0f4c5c');
+    a.className = 'demoTogSeg' + (active ? ' on' : '');
+    a.textContent = label;
+    a.setAttribute('aria-label', label + ' plan preview' + (active ? ' — showing now' : ''));
     if (active) a.setAttribute('aria-current','true');
     return a;
   }

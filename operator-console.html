@@ -653,8 +653,8 @@
       <button role="tab" aria-selected="false" data-view="guests">Guest activity</button>
       <button role="tab" aria-selected="false" data-view="places">Places <span class="vb-badge" id="vbPlaces">—</span></button>
       <button type="button" id="tourBtn" class="tourbtn" title="Replay the console tour">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M14.8 9.2l-1.6 4-4 1.6 1.6-4 4-1.6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        Tour
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M10.3 8.4l5.2 3.6-5.2 3.6V8.4z" fill="currentColor"/></svg>
+        Take the tour
       </button>
     </nav>
 
@@ -1631,10 +1631,20 @@
 
 <style>
   /* ============ FIRST-LOGIN TOUR — Lobby chrome ============ */
-  .tourbtn{appearance:none;font:inherit;font-size:12px;font-weight:700;color:var(--sea);cursor:pointer;
-    margin-left:auto;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;
-    display:inline-flex;align-items:center;gap:6px;transition:border-color .15s,background .15s}
-  .tourbtn:hover{border-color:var(--sea);background:var(--sea-tint)}
+  /* .viewtabs prefix beats the sibling `.viewtabs button` rule so the gold CTA fill wins */
+  .viewtabs .tourbtn{appearance:none;font:inherit;font-size:13px;font-weight:800;letter-spacing:.01em;color:var(--on-gold);cursor:pointer;
+    position:relative;margin-left:auto;background:var(--gold);border:1px solid #bd9a3d;border-radius:999px;padding:9px 18px;
+    display:inline-flex;align-items:center;gap:7px;
+    box-shadow:0 2px 7px rgba(201,168,76,.4),0 1px 2px rgba(58,47,22,.12);
+    transition:transform .15s cubic-bezier(.4,0,.2,1),box-shadow .15s,background .15s}
+  .viewtabs .tourbtn svg{width:15px;height:15px}
+  .viewtabs .tourbtn:hover{background:#d4b657;border-color:#bd9a3d;transform:translateY(-1px);box-shadow:0 6px 15px rgba(201,168,76,.5),0 2px 4px rgba(58,47,22,.14)}
+  .viewtabs .tourbtn:active{transform:translateY(0);box-shadow:0 2px 7px rgba(201,168,76,.4)}
+  /* one-time expanding-ring pulse on load so a GM notices the tour is here */
+  .viewtabs .tourbtn::after{content:"";position:absolute;inset:-2px;border-radius:999px;pointer-events:none;
+    box-shadow:0 0 0 0 rgba(201,168,76,.6);animation:tourPulse 2.3s ease-out 1s 3}
+  @keyframes tourPulse{0%{box-shadow:0 0 0 0 rgba(201,168,76,.6)}70%{box-shadow:0 0 0 11px rgba(201,168,76,0)}100%{box-shadow:0 0 0 0 rgba(201,168,76,0)}}
+  @media(prefers-reduced-motion:reduce){.viewtabs .tourbtn::after{animation:none}}
   #osTour{position:fixed;inset:0;z-index:400;display:none}
   #osTour.on{display:block}
   .tor-block{position:absolute;inset:0;pointer-events:auto}
@@ -2544,22 +2554,55 @@
     var qp = new URLSearchParams(location.search);
     if (qp.get('demo') !== 'freepaid') return;
     var isFree = qp.get('plan') === 'free';
-    var bar = document.createElement('div');
-    bar.setAttribute('role','group');
-    bar.setAttribute('aria-label','Demo: switch between the free and paid console');
-    bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:1200;display:flex;gap:0;background:var(--card,#fffdf8);border:1px solid var(--line,#e3dac7);border-radius:999px;padding:4px;box-shadow:0 6px 18px rgba(38,52,60,.16);font-family:Inter,system-ui,sans-serif';
+
+    var css = document.createElement('style');
+    css.textContent =
+      '.osfp-wrap{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:1200;'+
+        'display:flex;align-items:center;gap:10px;font-family:Inter,system-ui,sans-serif}'+
+      '.osfp-tag{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;'+
+        'letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink,#5f4a12);'+
+        'background:var(--gold-tint,#f5ecd6);border:1px solid #e4d5ae;border-radius:999px;padding:6px 11px;'+
+        'box-shadow:0 3px 10px rgba(38,52,60,.12)}'+
+      '.osfp-tag i{width:6px;height:6px;border-radius:50%;background:var(--gold,#c9a84c);flex:none;'+
+        'box-shadow:0 0 0 3px rgba(201,168,76,.25)}'+
+      '.osfp-pill{display:flex;gap:4px;background:var(--card,#fffdf8);border:1.5px solid #cdbf9c;'+
+        'border-radius:999px;padding:5px;box-shadow:0 8px 22px rgba(38,52,60,.2),0 0 0 4px rgba(15,59,73,.06)}'+
+      '.osfp-seg{position:relative;display:inline-flex;align-items:center;gap:7px;padding:10px 24px;'+
+        'border-radius:999px;font-size:13.5px;font-weight:800;letter-spacing:.06em;text-decoration:none;'+
+        'color:var(--ink-2,#2e5568);cursor:pointer;white-space:nowrap;'+
+        'transition:background .14s,color .14s,box-shadow .14s}'+
+      '.osfp-seg:hover{background:var(--sea-tint,#e7f1f4);color:var(--sea,#0e6e8c)}'+
+      '.osfp-seg[aria-current="true"]{background:var(--sea-deep,#0f3b49);color:#fff;'+
+        'box-shadow:0 2px 8px rgba(15,59,73,.35),inset 0 1px 0 rgba(255,255,255,.08)}'+
+      '.osfp-seg[aria-current="true"]:hover{background:var(--sea-deep,#0f3b49);color:#fff}'+
+      '.osfp-dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.45;flex:none}'+
+      '.osfp-seg[aria-current="true"] .osfp-dot{opacity:1}';
+    document.head.appendChild(css);
+
+    var wrap = document.createElement('div');
+    wrap.className = 'osfp-wrap';
+    wrap.setAttribute('role','group');
+    wrap.setAttribute('aria-label','Demo: switch between the free and paid console');
+
+    var tag = document.createElement('span');
+    tag.className = 'osfp-tag';
+    tag.innerHTML = '<i></i>Demo';
+    wrap.appendChild(tag);
+
+    var pill = document.createElement('div');
+    pill.className = 'osfp-pill';
     function seg(label, active, href){
       var a = document.createElement('a');
-      a.textContent = label;
+      a.className = 'osfp-seg';
       a.href = href;
-      a.style.cssText = 'display:block;padding:8px 18px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;letter-spacing:.04em;' +
-        (active ? 'background:var(--sea-deep,#0f3b49);color:#fff' : 'color:var(--ink,#0f3b49)');
+      a.innerHTML = '<span class="osfp-dot"></span>' + label;
       if (active) a.setAttribute('aria-current','true');
       return a;
     }
-    bar.appendChild(seg('FREE',  isFree,  '?plan=free&demo=freepaid'));
-    bar.appendChild(seg('PAID', !isFree, '?demo=freepaid'));
-    document.body.appendChild(bar);
+    pill.appendChild(seg('FREE',  isFree,  '?plan=free&demo=freepaid'));
+    pill.appendChild(seg('PAID', !isFree, '?demo=freepaid'));
+    wrap.appendChild(pill);
+    document.body.appendChild(wrap);
   } catch(e){}
 })();
 </script>

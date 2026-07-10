@@ -1,56 +1,65 @@
 {
- "_note": "DEMO partner config for the ?ref=demo-resort pilot flow. All values are placeholders: affiliate IDs are valid-shaped but fake (DEMO123 / P00000000 pay nobody), the phone is a 555 number, the email is example.com. Copy this shape for a real hotel; deploying = committing /partner-config/<slug>.json to the live repo.",
- "name": "Your Resort",
- "screenBeaches": [
-  "poipu",
-  "mahaulepu",
-  "shipwreck",
-  "kalapaki",
-  "salt_pond"
- ],
- "affiliates": {
-  "gyg_partner_id": "DEMO123",
-  "viator_pid": "P00000000"
- },
- "promotions": [
-  {
-   "title": "Sunset dinner — guests save 15%",
-   "pdf": "https://ocean-safety.netlify.app/assets/flyers/sunset-dinner.pdf",
-   "expires": "2030-12-31",
-   "window": { "start": "00:00", "end": "23:59" }
+  "_note": "DEMO partner config for the ?ref=demo-resort pilot flow. All values are placeholders: affiliate IDs are valid-shaped but fake (DEMO123 / P00000000 pay nobody), the phone is a 555 number, the email is example.com. Copy this shape for a real hotel; deploying = committing /partner-config/<slug>.json to the live repo.",
+  "name": "Your Resort",
+  "screenBeaches": [
+    "poipu",
+    "mahaulepu",
+    "shipwreck",
+    "kalapaki",
+    "salt_pond"
+  ],
+  "featured": {
+    "beach": [
+      "poipu",
+      "shipwreck"
+    ]
   },
-  {
-   "title": "Spa morning — off-peak pricing before 11am",
-   "expires": "2030-12-31",
-   "pdf": "https://ocean-safety.netlify.app/assets/flyers/spa-morning.pdf"
+  "affiliates": {
+    "gyg_partner_id": "DEMO123",
+    "viator_pid": "P00000000"
   },
-  {
-   "title": "Expired example — must never render",
-   "expires": "2020-01-01"
-  }
- ],
- "tourDesk": {
-  "phone": "+18085550100",
-  "email": "tourdesk@example.com"
- },
- "amenities": [
-  {
-   "name": "Pool bar",
-   "detail": "Swim-up seats and shaded tables, 10a-6p",
-   "price": "",
-   "showWhen": "red_flag"
+  "promotions": [
+    {
+      "title": "Sunset dinner — guests save 15%",
+      "pdf": "https://ocean-safety.netlify.app/assets/flyers/sunset-dinner.pdf",
+      "expires": "2030-12-31",
+      "window": {
+        "start": "00:00",
+        "end": "23:59"
+      }
+    },
+    {
+      "title": "Spa morning — off-peak pricing before 11am",
+      "expires": "2030-12-31",
+      "pdf": "https://ocean-safety.netlify.app/assets/flyers/spa-morning.pdf"
+    },
+    {
+      "title": "Expired example — must never render",
+      "expires": "2020-01-01"
+    }
+  ],
+  "tourDesk": {
+    "phone": "+18085550100",
+    "email": "tourdesk@example.com"
   },
-  {
-   "name": "Spa treatments",
-   "detail": "Lobby level - same-day openings most mornings",
-   "price": "",
-   "showWhen": "rain"
-  },
-  {
-   "name": "Cabana rental",
-   "detail": "Half-day or full-day, towel service included",
-   "price": "$45/half-day",
-   "showWhen": "always"
-  }
- ]
+  "amenities": [
+    {
+      "name": "Pool bar",
+      "detail": "Swim-up seats and shaded tables, 10a-6p",
+      "price": "",
+      "showWhen": "red_flag"
+    },
+    {
+      "name": "Spa treatments",
+      "detail": "Lobby level - same-day openings most mornings",
+      "price": "",
+      "showWhen": "rain"
+    },
+    {
+      "name": "Cabana rental",
+      "detail": "Half-day or full-day, towel service included",
+      "price": "$45/half-day",
+      "showWhen": "always"
+    }
+  ]
 }
