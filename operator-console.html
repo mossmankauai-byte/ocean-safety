@@ -228,7 +228,7 @@
   .dz .dz-ic{color:var(--sea)}
   .pm-err{margin-top:10px;font-size:12.5px;color:var(--risk);background:#f9ece7;border:1px solid #ecd0c4;border-radius:10px;padding:9px 12px}
   .pm-list{display:flex;flex-direction:column;gap:12px;margin-top:14px}
-  .pm-card{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:16px;border:1px solid var(--line);border-radius:12px;padding:14px 44px 14px 14px;background:var(--card)}
+  .pm-card{position:relative;display:grid;grid-template-columns:112px 1.1fr .9fr;gap:16px;border:1px solid var(--line);border-radius:12px;padding:14px 44px 14px 14px;background:var(--card)}
   @media(max-width:680px){.pm-card{grid-template-columns:1fr;padding-right:14px}}
   .pm-f{display:block;margin-bottom:9px}
   .pm-f span{display:block;font-size:11.5px;font-weight:600;color:var(--ink-2);margin-bottom:4px}
@@ -236,6 +236,13 @@
   .pm-f input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
   .pm-fileline{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);margin-top:2px;min-width:0}
   .pm-fileline b{color:var(--ink-2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:24ch}
+  /* optional pop-up window on a promo draft — two time inputs + a one-line explainer
+     (.pm-f-scoped selectors so the generic .pm-f span/input rules don't stack the inputs) */
+  .pm-f .pm-win{display:flex;align-items:center;gap:8px;margin-bottom:0}
+  .pm-f .pm-win input{flex:1;width:auto;min-width:0;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+  .pm-f .pm-win input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  .pm-f .pm-win .pm-wsep{display:inline;flex:none;font-size:11.5px;font-weight:400;color:var(--muted);margin-bottom:0}
+  .pm-winhint{font-size:11px;color:var(--muted);line-height:1.5;margin:5px 0 9px}
   .pm-x{position:absolute;top:10px;right:10px}
   @media(max-width:680px){.pm-x{top:8px;right:8px}}
   .pm-mock-lab{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
@@ -252,6 +259,97 @@
   .pm-empty .pm-guest{max-width:360px;position:relative}
   .pm-empty .chip{position:absolute;top:-9px;right:10px}
   .mg-foot .pm-hint{font-size:11.5px;color:var(--muted)}
+
+  /* ---- PDF page-1 preview thumbnail on each draft (pdf.js; graceful fallback) ---- */
+  .pm-thumb{position:relative;width:112px;height:146px;border-radius:10px;overflow:hidden;border:1px solid var(--line);
+    background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(38,52,60,.02)}
+  .pm-thumb canvas{max-width:100%;max-height:100%;display:block}
+  .pm-thumb .pm-thumb-fb{display:flex;flex-direction:column;align-items:center;gap:7px;color:var(--muted);font-size:9.5px;
+    text-align:center;padding:10px 8px;line-height:1.3}
+  .pm-thumb .pm-thumb-fb b{color:var(--ink-2);font-weight:600;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+  .pm-thumb .pm-thumb-fb svg{color:#b4452f}
+  .pm-thumb .pm-thumb-tag{position:absolute;top:6px;left:6px;font-size:8.5px;font-weight:800;letter-spacing:.06em;
+    background:rgba(15,59,73,.82);color:#fff;border-radius:5px;padding:2px 6px;z-index:2}
+  @media(max-width:680px){.pm-thumb{width:100%;height:190px}}
+
+  /* ---- "What your guests see" — guest-app proof strip (Lobby scheme, photo-led) ---- */
+  .pm-shots{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.pm-shots{grid-template-columns:1fr}}
+  .pm-shot{margin:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:0 2px 12px rgba(38,52,60,.06)}
+  .pm-shot .pm-shot-img{height:300px;background:linear-gradient(180deg,#e7eef2,#d9e5ec);overflow:hidden}
+  .pm-shot .pm-shot-img img{width:100%;height:100%;object-fit:cover;object-position:50% 100%;display:block}
+  .pm-shot figcaption{padding:13px 16px 15px;border-top:1px solid var(--hair-soft)}
+  .pm-shot figcaption b{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink)}
+  .pm-shot figcaption b svg{color:var(--sea);flex:none}
+  .pm-shot figcaption span{display:block;font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45}
+
+  /* ---- tour drag-drop demo animation (Promotions stop) ---- */
+  .osdd{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:12px;z-index:3}
+  .osdd-ghost{position:absolute;left:50%;top:50%;margin:-34px 0 0 -27px;width:54px;height:68px;border-radius:8px;
+    background:#fff;border:1px solid #d9cdae;box-shadow:0 8px 18px rgba(38,52,60,.24);display:flex;align-items:center;
+    justify-content:center;opacity:0;transform:translate(150px,-72px) rotate(6deg);animation:osddGhost 3.1s ease-in-out infinite}
+  .osdd-ghost svg{color:#b4452f}
+  .osdd-cursor{position:absolute;left:50%;top:50%;margin:-4px 0 0 -3px;width:22px;height:22px;opacity:0;
+    transform:translate(170px,-52px);animation:osddCursor 3.1s ease-in-out infinite;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+  .osdd-tick{position:absolute;left:50%;top:50%;width:36px;height:36px;border-radius:50%;background:var(--good,#1f9d6b);
+    display:flex;align-items:center;justify-content:center;opacity:0;transform:translate(-50%,-50%) scale(.3);
+    box-shadow:0 4px 12px rgba(31,157,107,.4);animation:osddTick 3.1s ease-in-out infinite}
+  .osdd-tick svg{color:#fff}
+  @keyframes osddGhost{0%{opacity:0;transform:translate(150px,-72px) rotate(6deg) scale(1)}
+    12%{opacity:1;transform:translate(150px,-72px) rotate(6deg) scale(1)}
+    52%{opacity:1;transform:translate(0,0) rotate(-3deg) scale(.9)}
+    66%{opacity:0;transform:translate(0,0) rotate(-3deg) scale(.72)}
+    100%{opacity:0;transform:translate(0,0) rotate(-3deg) scale(.72)}}
+  @keyframes osddCursor{0%{opacity:0;transform:translate(170px,-52px)}
+    12%{opacity:.92;transform:translate(170px,-52px)}
+    52%{opacity:.92;transform:translate(18px,16px)}
+    66%{opacity:0;transform:translate(18px,16px)}
+    100%{opacity:0;transform:translate(18px,16px)}}
+  @keyframes osddTick{0%,56%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+    70%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+    84%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+  .dz.osdd-zone{animation:osddZone 3.1s ease-in-out infinite}
+  @keyframes osddZone{0%,18%{border-color:#cfc09d;background:var(--bg)}
+    46%,64%{border-color:var(--sea);background:var(--sea-tint)}
+    88%,100%{border-color:#cfc09d;background:var(--bg)}}
+  @media(prefers-reduced-motion:reduce){
+    .osdd-ghost,.osdd-cursor,.osdd-tick{animation:none}
+    .osdd-ghost{opacity:1;transform:translate(0,0) rotate(-2deg)}
+    .osdd-cursor,.osdd-tick{display:none}
+    .dz.osdd-zone{animation:none;border-color:var(--sea);background:var(--sea-tint)}}
+
+  /* ---- Places: "what guests see when you pick this" preview strip ---- */
+  .pl-housepick{display:grid;grid-template-columns:1fr 244px;gap:22px;align-items:center;background:var(--card);
+    border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:0 0 16px;box-shadow:0 2px 12px rgba(38,52,60,.06)}
+  @media(max-width:680px){.pl-housepick{grid-template-columns:1fr;gap:16px}}
+  .pl-housepick .plh-kick{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--sea);
+    display:inline-flex;align-items:center;gap:6px}
+  .pl-housepick .plh-kick svg{color:var(--sea)}
+  .pl-housepick h3{margin:6px 0 7px;font-family:'Fraunces',Georgia,serif;font-weight:500;font-size:19px;color:var(--ink)}
+  .pl-housepick p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.55;max-width:54ch}
+  .plh-shot{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,#e7eef2,#d9e5ec);
+    height:250px;box-shadow:0 4px 16px rgba(38,52,60,.1)}
+  .plh-shot img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block}
+
+  /* ---- demo name-box start card (?demo=freepaid, paid view) ---- */
+  .osdemo-start{position:fixed;left:50%;transform:translateX(-50%);bottom:74px;z-index:1250;
+    width:min(360px,calc(100vw - 28px));background:var(--card);border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 14px 40px rgba(38,52,60,.24);padding:16px 16px 14px;font-family:Inter,system-ui,sans-serif}
+  .osdemo-start h4{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-weight:500;font-size:16px;color:var(--ink)}
+  .osdemo-start p{margin:0 0 10px;font-size:12px;color:var(--muted);line-height:1.5}
+  .osdemo-start .osd-row{display:flex;gap:8px}
+  .osdemo-start input{flex:1;min-width:0;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);
+    border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+  .osdemo-start input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  .osdemo-start .osd-go{appearance:none;border:0;border-radius:9px;background:var(--sea);color:var(--on-sea);
+    font:inherit;font-weight:700;font-size:13px;padding:9px 15px;cursor:pointer;flex:none}
+  .osdemo-start .osd-go:hover{background:var(--sea-2)}
+  .osdemo-start .osd-skip{display:block;margin:9px auto 0;background:none;border:0;font:inherit;font-size:11.5px;
+    color:var(--muted);cursor:pointer;text-decoration:underline;padding:2px}
+  .osdemo-start .osd-x{position:absolute;top:8px;right:9px;appearance:none;background:none;border:0;color:var(--muted);
+    cursor:pointer;padding:3px;line-height:0}
 
   /* ============ ITEM MANAGER (amenities) ============ */
   .mg-list{display:flex;flex-direction:column}
@@ -477,6 +575,45 @@
     </div>
     <script>(function(){try{var p=new URLSearchParams(location.search);if(p.get('rep')==='1'||p.get('jade')==='1'){var b=document.getElementById('repbar');if(b)b.style.display='flex';var reveal=function(){var r=document.querySelectorAll('.rep-only');for(var i=0;i<r.length;i++){r[i].hidden=false;}};if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',reveal);}else{reveal();}var s=p.get('slug');if(s){var l=document.getElementById('repLink');if(l)l.href='jade-live.html?ref='+encodeURIComponent(s);}}}catch(e){}})();</script>
 
+    <style>
+      /* ============ FREE PLAN (?plan=free) — locked-surface chrome ============
+         Default (no ?plan) stays the PAID demo — the sales tool. Analytics and
+         safety are NEVER gated; only the co-brand + promotion surfaces lock. */
+      .plan-chip{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--sample);background:var(--sample-bg);border:1px solid #e0d0a4;border-radius:999px;padding:6px 13px;white-space:nowrap}
+      .plan-lock{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sample);background:var(--sample-bg);border:1px dashed #d5bd85;border-radius:6px;padding:2px 7px;vertical-align:middle}
+      body.plan-free #pmDrop{opacity:.5;pointer-events:none;background:var(--bg-2);border-color:var(--line);color:var(--muted)}
+      body.plan-free #pmDrop .dz-ic{color:var(--muted)}
+      body.plan-free #pmDrop b{color:var(--ink-2)}
+      body.plan-free #pmList,body.plan-free #view-promos .mg-foot,body.plan-free #view-promos .card:not(#pmLockCard) .note{display:none}
+      .mg-row.mg-locked{color:var(--muted);background:var(--bg-2);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;border-bottom:0}
+      .lockcard-btns{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+      .lockcard-btns .pl-btn{text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+      /* ---- Free vs $649 comparison table (Home, BOTH views) ---- */
+      #planCompare .pc-tr{display:grid;grid-template-columns:minmax(82px,.8fr) 1fr 1.35fr;gap:10px;padding:9px 2px;border-bottom:1px solid var(--hair-soft);align-items:start;font-size:12.5px}
+      #planCompare .pc-tr:last-child{border-bottom:0}
+      #planCompare .pc-tr > b{font-weight:600;color:var(--ink)}
+      #planCompare .pc-cell{display:flex;align-items:baseline;gap:7px;color:var(--muted);min-width:0}
+      #planCompare .pc-cell svg{flex:none;align-self:center}
+      #planCompare .pc-paid{color:var(--ink-2)}
+      #planCompare .pc-head{padding:2px 2px 8px;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+      #planCompare .pc-head .pc-paid{color:var(--sea)}
+      #planCompare .pc-dash{color:#c9bfa6}
+      #planCompare .pc-strong{font-weight:700;color:var(--ink)}
+      /* ---- locked-panel feature lead (free view, Promotions tab) ---- */
+      .pm-featwrap{margin:4px 0 10px;padding-bottom:4px;border-bottom:1px solid var(--hair-soft)}
+      .pm-feat{display:flex;align-items:flex-start;gap:12px;padding:9px 2px;border-bottom:1px solid var(--hair-soft)}
+      .pm-feat:last-child{border-bottom:0}
+      .pm-feat svg{flex:none;color:var(--sea);margin-top:2px}
+      .pm-feat .tx b{display:block;font-size:14px;color:var(--ink)}
+      .pm-feat .tx > span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;max-width:58ch}
+    </style>
+    <script>
+    /* FREE-PLAN flag: ?plan=free flips the console to the free-tier view. Anything
+       else (including no param at all) = paid, so every existing link is unchanged. */
+    window.OS_PLAN='paid';
+    try{ if(new URLSearchParams(location.search).get('plan')==='free'){ window.OS_PLAN='free'; document.body.classList.add('plan-free'); } }catch(e){}
+    </script>
+
     <!-- VIEW SWITCHER -->
     <nav class="viewtabs" role="tablist" aria-label="Console view">
       <button role="tab" aria-selected="true" data-view="home">Home</button>
@@ -526,7 +663,7 @@
         <button type="button" class="qa" data-goto="promos">
           <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg></span>
           <b>Drop a promotion</b>
-          <span>A PDF flyer guests can open from the offer chip in your guide.</span>
+          <span>A PDF flyer on the offer chip &mdash; set a window and it pops up on guests&rsquo; phones.</span>
           <span class="go">Open Promotions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
         </button>
         <a class="qa" data-guide-link href="https://oceansafety.app/?ref=your-hotel" target="_blank" rel="noopener">
@@ -547,6 +684,21 @@
           <span>One page &mdash; no card, no subscription, cancel anytime. Telemetry switches on when it&rsquo;s signed.</span>
           <span class="go">Download the PDF <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></span>
         </a>
+      </div>
+    </section>
+
+    <!-- FREE vs $649 — one card, shown in BOTH views (the free view appends its unlock buttons) -->
+    <section aria-label="Free plan versus the $649 plan" id="planCompareSec">
+      <div class="sec-h"><h2>Free vs the $649 plan</h2><p>One flat price &mdash; and safety and guest analytics are never gated, on either tier.</p></div>
+      <div class="card" id="planCompare">
+        <div class="pc-tr pc-head"><span></span><span class="pc-cell">Free</span><span class="pc-cell pc-paid">$649 plan</span></div>
+        <div class="pc-tr"><b>Branding</b><span class="pc-cell">OceanSafe</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your name, logo, colors &amp; photos</span></div>
+        <div class="pc-tr"><b>Amenities</b><span class="pc-cell">1 featured</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Unlimited, with contact info</span></div>
+        <div class="pc-tr"><b>Promotions</b><span class="pc-cell pc-dash">&mdash;</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Timed pop-ups + offer chip</span></div>
+        <div class="pc-tr"><b>Lobby TV board</b><span class="pc-cell">Generic + QR</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Branded + rotating offers</span></div>
+        <div class="pc-tr"><b>Guest analytics</b><span class="pc-cell"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything &mdash; same as free</span></div>
+        <div class="pc-tr"><b>Price</b><span class="pc-cell pc-strong">Free forever</span><span class="pc-cell pc-paid pc-strong">$649/mo flat</span></div>
+        <div class="mg-foot" id="pcFoot"><span class="cap"><b>$649/mo flat</b> &mdash; one paid tier, everything above. The free guide is free forever.</span><span style="flex:1"></span></div>
       </div>
     </section>
 
@@ -837,7 +989,7 @@
     <div id="view-promos" hidden>
     <!-- PROMOTIONS — drag-and-drop flyer drafts -->
     <section>
-      <div class="sec-h"><h2>Promotions</h2><p>Drop a PDF flyer and guests get an offer chip in your guide&rsquo;s Town tab. Drafts save in this browser; Export sends them into your app build.</p></div>
+      <div class="sec-h"><h2>Promotions</h2><p>Drop a PDF flyer and guests get an offer chip in your guide&rsquo;s Town tab &mdash; set a window and the offer pops up on their phones during those hours. Drafts save in this browser; Export sends them into your app build.</p></div>
       <div class="card">
         <div class="dz" id="pmDrop" role="button" tabindex="0" aria-label="Drag a PDF flyer here, or press Enter to choose a file">
           <svg class="dz-ic" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
@@ -854,6 +1006,27 @@
         </div>
         <div class="note">Drafts save in this browser only; <b>Export config</b> downloads the <code id="pmExpName">promotions-your-hotel.json</code> file that gets applied to your co-branded build &mdash; nothing publishes on its own. Want a flyer that looks pro? See the sample: <a href="assets/flyers/sunset-dinner.pdf" target="_blank" rel="noopener">sunset-dinner.pdf</a>.</div>
       </div>
+    </section>
+    <!-- WHAT YOUR GUESTS SEE — guest-app proof strip -->
+    <section aria-label="What your guests see">
+      <div class="sec-h"><h2>What your guests see</h2><p>Every flyer you drop becomes a tappable offer chip in your guide&rsquo;s Town tab &mdash; and, when you set a window, a timed pop-up on guests&rsquo; phones during those hours. Never over a safety report.</p></div>
+      <div class="pm-shots">
+        <figure class="pm-shot">
+          <div class="pm-shot-img"><img src="assets/shot-guest-offerchip.jpg" alt="The guest guide&rsquo;s Town tab showing the offer chip, bottom-left" loading="lazy"></div>
+          <figcaption>
+            <b><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>Offer chip &middot; Town tab</b>
+            <span>Always on. A tap opens your offers; a green dot marks a window that&rsquo;s live right now.</span>
+          </figcaption>
+        </figure>
+        <figure class="pm-shot">
+          <div class="pm-shot-img"><img src="assets/shot-guest-popup.jpg" alt="A timed offer pop-up card on the guest guide" loading="lazy"></div>
+          <figcaption>
+            <b><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7.5 12 12 15 14"/></svg>Timed pop-up</b>
+            <span>Pops once per visit during the window you set &mdash; and sits above the safety tabs, never over them.</span>
+          </figcaption>
+        </figure>
+      </div>
+      <p class="note" style="margin-top:12px">Real screens from the guest guide. Set a pop-up window on any draft above to schedule the timed version.</p>
     </section>
     </div><!-- /view-promos -->
 
@@ -875,6 +1048,18 @@
           <div><b>Safety guardrail.</b> Hazardous spots — beaches with no lifeguard, warning-only beaches, and rip/surge channels —
           can be moved off your <i>recommended</i> lists (<b>⊘ Not recommended</b>), but can't be deleted from a safety app.
           Their hazard warning always stays visible if a guest searches for them. Calm, guarded beaches and all food/shops/trails can be hidden fully.</div>
+        </div>
+
+        <!-- HOUSE-PICK PREVIEW — what a featured place looks like in the guest guide -->
+        <div class="pl-housepick">
+          <div class="plh-copy">
+            <div class="plh-kick"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.95-4.7 4.58 1.11 6.47L12 17.9l-5.81 3.06 1.11-6.47-4.7-4.58 6.5-.95L12 2.5z"/></svg>House picks</div>
+            <h3>What guests see when you pick this</h3>
+            <p>Set a place to <b>&#9733;&nbsp;Featured</b> and it surfaces first in your branded guide. This is the card a guest opens &mdash; live conditions, the hazards you can&rsquo;t hide, and one-tap directions, all built in.</p>
+          </div>
+          <figure class="plh-shot">
+            <img src="assets/shot-guest-housepick.jpg" alt="A featured beach as guests see it in the guide: Po&#699;ip&#363; Beach Park with live conditions, safety notes and directions" loading="lazy">
+          </figure>
         </div>
 
         <div class="pl-bar">
@@ -904,6 +1089,28 @@
   </div>
 </div>
 
+<script>
+/* ============ DEMO EARLY-APPLY (?demo=freepaid) ============
+   Runs before the tour + managers so paid surfaces render with the typed demo
+   name from first paint, and so the paid-flip counter (not first-login) drives
+   the tour. Demo-param-gated only; a real ?slug console is never touched. */
+(function(){
+  var qp; try{ qp = new URLSearchParams(location.search); }catch(e){ return; }
+  if(qp.get('demo') !== 'freepaid') return;
+  var slugEl = document.querySelector('.property code');
+  var slug = slugEl ? slugEl.textContent.trim() : 'operator';
+  // Suppress the tour's native first-login auto-start — the paid-flip counter opens it instead.
+  try{ localStorage.setItem('os_tour2_done_' + slug, '1'); }catch(e){}
+  // Apply a stored demo name to the PAID masthead (free surfaces stay generic).
+  if(window.OS_PLAN !== 'free'){
+    var nm = ''; try{ nm = (sessionStorage.getItem('os_demo_name') || '').trim().slice(0,40); }catch(e){}
+    if(nm){
+      var h1 = document.querySelector('.property h1'); if(h1) h1.textContent = nm;
+      var kick = document.querySelector('.hm-kicker'); if(kick) kick.textContent = nm + ' · co-branded guest guide';
+    }
+  }
+})();
+</script>
 <script>
 /* ============ PLACES CONTROL ============ */
 (function(){
@@ -1379,7 +1586,7 @@
     { view:'stayclose', sel:'#gpAmCard', title:'Watch it as a guest',
       body:'This is the exact panel guests see, built live from your draft menu. Switch the ocean condition with the chips, and tap an amenity to expand its hours and phone — just like a guest.' },
     { view:'promos', sel:'#pmDrop', title:'Drop a promotion',
-      body:'Drag a PDF flyer here and guests get an offer chip in the guide’s Town tab — the preview shows the exact card they’ll tap. Drafts stay in this browser until you export.' },
+      body:'Drag a PDF flyer here and guests get an offer chip in the guide’s Town tab — the preview shows the exact card they’ll tap. Add a timed window and the offer pops up on guests’ phones during those hours, never over safety info. Drafts stay in this browser until you export.' },
     { view:'guests', sel:'#view-guests section', title:'Then — and only then — the data',
       body:'How many guests a day, when they plan, and which beaches and offers they open — the same read your guests give you by using the guide. Everything stays <b>Sample</b> until your telemetry is on; live mode only ever shows measured counts, and a tap is interest — never a booking.' },
     { view:'places', sel:'.pl-safety', title:'Places, with safety pre-set',
@@ -1424,6 +1631,7 @@
     idx = i; var s = STEPS[i];
     stepEl.textContent = 'Step '+(i+1)+' of '+STEPS.length;
     titleEl.innerHTML = s.title; bodyEl.innerHTML = s.body;
+    try{ document.dispatchEvent(new CustomEvent('ostourstep', {detail:{index:i, step:s}})); }catch(e){}
     dotsEl.querySelectorAll('i').forEach(function(d,j){ d.className = j===i ? 'on' : ''; });
     backBtn.style.display = i===0 ? 'none' : '';
     nextBtn.textContent = s.last ? 'Finish' : (i===0 ? 'Start the tour' : 'Next');
@@ -1448,6 +1656,7 @@
   }
   function end(markDone){
     active = false; root.classList.remove('on'); curEl = null; hi.classList.add('off');
+    try{ document.dispatchEvent(new CustomEvent('ostourend')); }catch(e){}
     if(markDone){ try{ localStorage.setItem(KEY,'1'); }catch(e){} }
     switchView('home'); window.scrollTo(0,0);
   }
@@ -1470,6 +1679,10 @@
 /* ============ AMENITY MANAGER ============ */
 (function(){
   var SLUG = ((document.querySelector('.property code')||{}).textContent||'your-hotel').trim();
+  // FREE plan (?plan=free): the guest app renders only the FIRST amenity, with a
+  // neutral un-named header — the manager and phone preview mirror that exactly.
+  var FREE = window.OS_PLAN === 'free';
+  var LOCK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function manager(cfg){
     var LS = 'os_'+cfg.key+'_'+SLUG, items = null;
@@ -1481,22 +1694,39 @@
     function save(){ try{ localStorage.setItem(LS, JSON.stringify(items)); }catch(e){} }
     function render(){
       var el = document.getElementById(cfg.ids.list);
-      el.innerHTML = items.length ? items.map(function(it,i){
+      // Free plan caps the visible list at 1 — the same cap the guest app applies.
+      var vis = FREE ? items.slice(0,1) : items;
+      el.innerHTML = vis.length ? vis.map(function(it,i){
         var extra = (it.b?'<span>'+esc(it.b)+'</span>':'')+(it.hours?'<span>Open '+esc(it.hours)+'</span>':'')+(it.phone?'<span>Call '+esc(it.phone)+'</span>':'');
         return '<div class="mg-row"><div class="mg-nm"><b>'+esc(it.a)+'</b>'+extra+
                '</div><button type="button" class="mg-x" data-i="'+i+'" title="Remove">&times;</button></div>';
       }).join('') : '<div class="mg-empty">Nothing yet — add your first below.</div>';
-      document.getElementById(cfg.ids.count).textContent = items.length;
+      if(FREE && items.length > 1){
+        el.innerHTML += '<div class="mg-row mg-locked" id="amLockedRow">'+LOCK_SVG+
+          '<div class="mg-nm"><b style="color:var(--ink-2)">Unlock unlimited amenities — part of the $649 plan</b>'+
+          '<span>'+(items.length-1)+' more saved in this draft; guests see the first until you unlock.</span></div></div>';
+      }
+      if(FREE){
+        // At the 1-amenity cap the add form tucks away (it returns if the row is removed).
+        var addRow = document.getElementById(cfg.ids.add).closest('.mg-add');
+        var capped = items.length >= 1;
+        if(addRow) addRow.style.display = capped ? 'none' : '';
+        var more = document.getElementById('amMore'), contact = document.getElementById('amContact');
+        if(more) more.style.display = capped ? 'none' : '';
+        if(contact && capped){ contact.hidden = true; if(more) more.setAttribute('aria-expanded','false'); }
+      }
+      document.getElementById(cfg.ids.count).textContent = vis.length;
       var badge = document.getElementById(cfg.ids.badge);
-      if(badge) badge.textContent = items.length || '—';
+      if(badge) badge.textContent = vis.length || '—';
       save();
-      if(cfg.onChange) cfg.onChange(items);
+      if(cfg.onChange) cfg.onChange(vis);
     }
     document.getElementById(cfg.ids.list).addEventListener('click', function(e){
       var x = e.target.closest('.mg-x'); if(!x) return;
       items.splice(+x.dataset.i, 1); render();
     });
     function add(){
+      if(FREE && items.length >= 1) return;   // free tier caps the menu at 1
       var a = document.getElementById(cfg.ids.a), b = document.getElementById(cfg.ids.b);
       var va = a.value.trim(); if(!va) { a.focus(); return; }
       var ph = cfg.ids.phone && document.getElementById(cfg.ids.phone);
@@ -1566,7 +1796,7 @@
     }).join('');
     return '<div class="gp-panel" style="padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">'+
       '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
-        '<div style="font-weight:700;font-size:13px;color:var(--ink)">Provided by '+esc(gpName())+'</div>'+
+        '<div style="font-weight:700;font-size:13px;color:var(--ink)">'+(FREE ? 'On the property' : 'Provided by '+esc(gpName()))+'</div>'+
         '<span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);background:#fff;border:1px solid var(--border);border-radius:999px;padding:2px 7px">Property offer</span>'+
       '</div>'+
       '<div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">'+(GP_CTX[gpCond]||GP_CTX.calm)+' Separate from the safety report above — the ocean call never changes for an offer.</div>'+
@@ -1633,12 +1863,18 @@
     onChange:function(items){ gpItems.amenities = items; gpRender(); } });
 })();
 </script>
+<!-- pdf.js (UMD) for real page-1 flyer previews; async + graceful — if it never loads, the filename cards stand in -->
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+  onload="try{window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}catch(e){} if(window._osRenderPromoThumbs)window._osRenderPromoThumbs();"></script>
 <script>
 /* ============ PROMOTIONS MANAGER (browser draft → export-into-build, same model as amenities) ============ */
 (function(){
   var SLUG = ((document.querySelector('.property code')||{}).textContent||'your-hotel').trim();
   var LS = 'os_promos_' + SLUG;
   var MAX = 4 * 1024 * 1024;   // ~4 MB flyer cap — keeps the browser draft store happy
+  var qp2; try{ qp2 = new URLSearchParams(location.search); }catch(e){ qp2 = null; }
+  var HAS_SLUG = !!(qp2 && (qp2.get('slug')||'').trim());   // a real property — never seeded
+  var SEED_OK  = !HAS_SLUG && window.OS_PLAN !== 'free';     // demo/template console, paid view
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
   var dz = document.getElementById('pmDrop'), fileIn = document.getElementById('pmFile'),
@@ -1651,8 +1887,18 @@
   var items = [];
   try{
     var raw = JSON.parse(localStorage.getItem(LS));
-    if(Array.isArray(raw)) items = raw.filter(function(p){ return p && typeof p === 'object' && p.dataUrl; });
+    if(Array.isArray(raw)) items = raw.filter(function(p){ return p && typeof p === 'object' && (p.dataUrl || p.src); });
   }catch(e){}
+  // Demo/template console (no real ?slug): pre-load two pro sample flyers so the
+  // Promotions tab reads as a showcase — one with a timed pop-up window set. Seeds
+  // are in-memory only (never saved), so they re-appear until the operator drops
+  // their own; a real ?slug console is never seeded.
+  if(!items.length && SEED_OK){
+    items = [
+      { title:'Sunset dinner on the lawn', fileName:'sunset-dinner.pdf', src:'assets/flyers/sunset-dinner.pdf', expires:'2026-08-30', window:{start:'16:00', end:'18:00'}, sample:true, added:'2026-07-08' },
+      { title:'Spa morning — off-peak pricing', fileName:'spa-morning.pdf', src:'assets/flyers/spa-morning.pdf', expires:'', sample:true, added:'2026-07-08' }
+    ];
+  }
 
   function save(){
     try{ localStorage.setItem(LS, JSON.stringify(items)); }
@@ -1690,6 +1936,7 @@
       (tappable ? CHEV_SVG : '') + '</'+tag+'>';
   }
   var PDF_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>';
+  var PDF_SVG_BIG = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>';
 
   function render(){
     if(!items.length){
@@ -1698,11 +1945,18 @@
         guestCardHTML('Sunset dinner on the lawn', '2026-08-30', -1) + '</div></div>';
     } else {
       listEl.innerHTML = items.map(function(p, i){
-        var size = p.dataUrl ? fmtSize(Math.round(p.dataUrl.length * 3 / 4)) : '';
+        var size = p.dataUrl ? fmtSize(Math.round(p.dataUrl.length * 3 / 4)) : (p.sample ? 'sample flyer' : 'PDF flyer');
         return '<div class="pm-card">' +
+          '<div class="pm-thumb" data-i="'+i+'"><span class="pm-thumb-tag">PDF</span><div class="pm-thumb-fb">'+PDF_SVG_BIG+'<b>'+esc(p.fileName)+'</b></div></div>' +
           '<div>' +
             '<label class="pm-f"><span>Title guests see</span><input class="pm-title" data-i="'+i+'" maxlength="80" value="'+esc(p.title)+'"></label>' +
             '<label class="pm-f"><span>Ends (optional — expired offers never show)</span><input class="pm-date" data-i="'+i+'" type="date" value="'+esc(p.expires||'')+'"></label>' +
+            '<div class="pm-f"><span>Pop-up window (optional)</span><span class="pm-win">' +
+              '<input class="pm-win-s" data-i="'+i+'" type="time" value="'+esc((p.window&&p.window.start)||'')+'" aria-label="Pop-up window start">' +
+              '<span class="pm-wsep">to</span>' +
+              '<input class="pm-win-e" data-i="'+i+'" type="time" value="'+esc((p.window&&p.window.end)||'')+'" aria-label="Pop-up window end">' +
+            '</span></div>' +
+            '<div class="pm-winhint">During this window the offer pops up on guests&rsquo; phones — once per visit, never over safety info. Leave blank for a chip-only offer.</div>' +
             '<div class="pm-fileline">'+PDF_SVG+'<b title="'+esc(p.fileName)+'">'+esc(p.fileName)+'</b><span>· '+size+(p.added ? ' · added '+esc(endsLabel(p.added)) : '')+'</span></div>' +
           '</div>' +
           '<div><div class="pm-mock-lab">What your guests see</div><div class="pm-guest">' + guestCardHTML(p.title, p.expires, i) + '</div></div>' +
@@ -1714,7 +1968,49 @@
     var w = document.getElementById('pmCountWord');
     if(w) w.textContent = items.length === 1 ? 'promotion' : 'promotions';
     if(badge) badge.textContent = items.length || '—';
+    renderThumbs();
   }
+
+  // ---- PDF page-1 preview thumbnails (real, via pdf.js; graceful fallback) ----
+  // Works for a dropped data:application/pdf (LIVE) and for the sample flyer URLs
+  // (demo). If pdf.js isn't loaded yet or a render fails, the filename card stays.
+  function drawThumb(container, source){
+    if(!window.pdfjsLib || !source) return;   // fallback card stays
+    var task;
+    try{
+      if(/^data:application\/pdf[;,]/i.test(source)){
+        var b64 = source.split(',')[1], bin = atob(b64), u8 = new Uint8Array(bin.length);
+        for(var k=0;k<bin.length;k++) u8[k] = bin.charCodeAt(k);
+        task = window.pdfjsLib.getDocument({data:u8});
+      } else {
+        task = window.pdfjsLib.getDocument(source);   // same-origin sample flyer or https URL
+      }
+    }catch(e){ return; }
+    task.promise.then(function(pdf){ return pdf.getPage(1); }).then(function(page){
+      var vp0 = page.getViewport({scale:1});
+      var cw = container.clientWidth || 112;
+      var scale = (cw * 2) / vp0.width;   // 2× for a crisp thumbnail
+      var vp = page.getViewport({scale:scale});
+      var canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height; canvas.style.width = '100%';
+      return page.render({canvasContext:canvas.getContext('2d'), viewport:vp}).promise.then(function(){
+        var fb = container.querySelector('.pm-thumb-fb'); if(fb) fb.style.display = 'none';
+        var old = container.querySelector('canvas'); if(old) old.remove();
+        container.appendChild(canvas);
+      });
+    }).catch(function(){ /* leave the filename fallback in place */ });
+  }
+  function renderThumbs(){
+    if(!listEl || !window.pdfjsLib) return;   // lib not here yet — its onload re-runs this
+    listEl.querySelectorAll('.pm-thumb[data-i]').forEach(function(c){
+      if(c.dataset.done) return;
+      var p = items[+c.dataset.i]; if(!p) return;
+      var src = p.dataUrl || p.src; if(!src) return;
+      c.dataset.done = '1';
+      drawThumb(c, src);
+    });
+  }
+  window._osRenderPromoThumbs = renderThumbs;   // pdf.js onload re-runs this once the lib arrives
 
   // Accepting a file — the one path both drop and tap-to-choose go through.
   function addFile(file){
@@ -1771,6 +2067,15 @@
       var i = +t.dataset.i; if(!items[i]) return;
       items[i].expires = t.value; save(); render();
     }
+    if(t.classList.contains('pm-win-s') || t.classList.contains('pm-win-e')){
+      var w = +t.dataset.i; if(!items[w]) return;
+      var card = t.closest('.pm-card');
+      var ws = ((card && card.querySelector('.pm-win-s'))||{}).value || '';
+      var we = ((card && card.querySelector('.pm-win-e'))||{}).value || '';
+      if(ws || we) items[w].window = { start: ws, end: we };
+      else delete items[w].window;
+      save();   // no re-render — keeps the time input focused
+    }
   });
   listEl.addEventListener('click', function(e){
     var x = e.target.closest('[data-x]');
@@ -1778,7 +2083,9 @@
     var open = e.target.closest('[data-pmopen]');
     if(open){
       var p = items[+open.dataset.pmopen];
-      if(!p || !/^data:application\/pdf[;,]/i.test(p.dataUrl)) return;
+      if(!p) return;
+      if(p.src && !p.dataUrl){ window.open(p.src, '_blank', 'noopener'); return; }   // sample / URL flyer
+      if(!/^data:application\/pdf[;,]/i.test(p.dataUrl||'')) return;
       try{
         var b64 = p.dataUrl.split(',')[1], bin = atob(b64), u8 = new Uint8Array(bin.length);
         for(var j=0;j<bin.length;j++) u8[j] = bin.charCodeAt(j);
@@ -1791,8 +2098,10 @@
   document.getElementById('pmExport').addEventListener('click', function(){
     var out = { app:'oceansafety', slug:SLUG, version:1,
       promotions: items.map(function(p){
-        var o = { title:p.title, pdf:p.dataUrl };
+        var o = { title:p.title, pdf:p.dataUrl || p.src };
         if(p.expires) o.expires = p.expires;
+        // timed pop-up window — only a complete window travels (blank = chip-only offer)
+        if(p.window && p.window.start && p.window.end) o.window = { start:p.window.start, end:p.window.end };
         return o;
       }) };
     var blob = new Blob([JSON.stringify(out,null,2)], {type:'application/json'});
@@ -1824,6 +2133,241 @@
       a.href = 'https://oceansafety.app/?ref=' + encodeURIComponent(REF) + '&mode=screen';
     });
   }catch(e){}
+})();
+</script>
+<script>
+/* ============ FREE-TIER VIEW (?plan=free) — the upgrade engine ============
+   Default (no ?plan) is untouched: the PAID demo, Jade's sales tool. ?plan=free
+   renders the free-forever tier honestly — safety and every analytics tile stay
+   fully ungated; the two paid surfaces (co-brand + Promotions) show as locked,
+   with the demo's own Sample numbers doing the persuading. No trial language:
+   the free tier is free forever, paid is a $649/mo unlock. */
+(function(){
+  if(window.OS_PLAN !== 'free') return;
+  var LOCK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  var LOCK_BIG = '<svg class="dz-ic" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+
+  var slug = '';
+  try{ slug = (new URLSearchParams(location.search).get('slug')||'').trim(); }catch(e){}
+  // The minted preview IS the branded-guide renderer — ?ref=<slug> when live, demo-resort in the demo.
+  var previewHref = 'https://oceansafety.app/?ref=' + encodeURIComponent(slug || 'demo-resort');
+  var unlockHref = 'mailto:aloha@oceansafety.app?subject=' + encodeURIComponent('Unlock my OceanSafe guide');
+  var btnsHTML = '<div class="lockcard-btns">' +
+    '<a class="pl-btn" href="' + previewHref + '" target="_blank" rel="noopener">Preview my branded guide</a>' +
+    '<a class="pl-btn primary" href="' + unlockHref + '">Unlock everything — $649/mo</a></div>';
+
+  /* ---- header: subtle plan chip (free view only — paid shows nothing) ---- */
+  var ms = document.querySelector('.modeswitch');
+  if(ms){
+    var chip = document.createElement('span');
+    chip.className = 'plan-chip';
+    chip.id = 'planChip';
+    chip.textContent = 'Free plan';
+    ms.parentNode.insertBefore(chip, ms);
+  }
+
+  /* ---- HOME hero: honest free-tier copy ---- */
+  var kick = document.querySelector('.hm-kicker');
+  if(kick) kick.textContent = 'OceanSafe guest guide · free plan';
+  var heroH = document.querySelector('.hm-copy h2');
+  if(heroH) heroH.textContent = 'Your guests’ beach guide — upgrade to weave your property in.';
+  var heroP = document.querySelector('.hm-copy p');
+  if(heroP) heroP.textContent = 'Every guest who scans the in-room QR gets live surf, lifeguard and hazard calls for the island’s most-visited beaches — free, forever. On the free plan the guide carries OceanSafe branding and your first amenity; the $649 plan weaves your name, your offers and your full amenity menu in.';
+
+  /* ---- HOME quick action: lock badge on “Drop a promotion” ---- */
+  var promoQaTitle = document.querySelector('.qa[data-goto="promos"] b');
+  if(promoQaTitle) promoQaTitle.insertAdjacentHTML('beforeend', ' <span class="plan-lock">' + LOCK + 'Locked</span>');
+
+  /* ---- HOME: the Free-vs-$649 table is static (both views) — the free view adds its buttons ---- */
+  var pcFoot = document.getElementById('pcFoot');
+  if(pcFoot){
+    pcFoot.insertAdjacentHTML('beforeend',
+      '<a class="pl-btn" href="' + previewHref + '" target="_blank" rel="noopener">Preview my branded guide</a>' +
+      '<a class="pl-btn primary" href="' + unlockHref + '">Unlock — $649/mo</a>');
+  }
+
+  /* ---- PROMOTIONS: the locked panel — the conversion engine ---- */
+  // Demo-canonical amenity-tap numbers (same figures as “Offers that land” in Guest activity).
+  var TAPS = [
+    ['Beach bar happy hour', 640, 100],
+    ['Cabana',               480,  75],
+    ['Activity desk',        410,  64],
+    ['Luau night',           350,  55],
+    ['The Spa',              240,  38]
+  ];
+  var total = TAPS.reduce(function(s,t){ return s + t[1]; }, 0);           // 2,120
+  var AVG_CHECK = 18, TAKE = 0.10;
+  var est = Math.round(total * AVG_CHECK * TAKE / 100) * 100;              // ≈ $3,800/mo
+  var totalTxt = total.toLocaleString('en-US'), estTxt = '$' + est.toLocaleString('en-US');
+
+  var promosSec = document.querySelector('#view-promos section');
+  if(promosSec){
+    var headP = promosSec.querySelector('.sec-h p');
+    if(headP) headP.textContent = 'Timed pop-ups and the offer chip in your guide’s Town tab — part of the $649 plan.';
+    // The two headline unlocks — timed pop-up promotions + full co-branding.
+    var CLOCKTAG = '<svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="6.2"/><path d="M9 5.6V9l2.2 1.4"/><g transform="translate(12 12) scale(.62)" stroke-width="2.9"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></g></svg>';
+    var BRAND = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.2"/><circle cx="7.6" cy="8.6" r="1.7"/><path d="M12.2 7.8h5.6"/><path d="M12.2 10.4h3.6"/><path d="M6 15.6h12"/></svg>';
+    var featHTML = '<div class="pm-featwrap">' +
+      '<div class="pm-feat">' + CLOCKTAG + '<span class="tx"><b>Timed pop-up promotions</b><span>Set a window — happy hour pops up on guests’ phones at 4 o’clock, and disappears at 6.</span></span></div>' +
+      '<div class="pm-feat">' + BRAND + '<span class="tx"><b>Full co-branding</b><span>The guide carries your name, colors and photos.</span></span></div>' +
+      '</div>';
+    var rank = TAPS.map(function(t, i){
+      return '<li><span class="n">' + (i+1) + '</span><span style="flex:1">' + t[0] + '</span>' +
+        '<span class="bar" style="flex:0 0 90px"><i style="width:' + t[2] + '%"></i></span>' +
+        '<span class="ct">' + t[1] + '</span></li>';
+    }).join('');
+    var dzCard = promosSec.querySelector('.card');
+    if(dzCard) dzCard.insertAdjacentHTML('beforebegin',
+      '<div class="card" id="pmLockCard" style="margin-bottom:14px">' +
+        '<div class="title"><span class="l">' + LOCK + ' Offers that land — locked</span><span><span class="chip sample">Sample</span></span></div>' +
+        featHTML +
+        '<div class="v">~' + estTxt + ' <small>/ mo — demand you saw, $0 captured</small></div>' +
+        '<ol class="rank" style="margin-top:12px">' + rank + '</ol>' +
+        '<div class="cap">' + totalTxt + ' amenity taps last month × $' + AVG_CHECK + ' average check × a conservative ' + Math.round(TAKE*100) + '% take ≈ ~' + estTxt + '/mo. A tap is interest — the click, never a booking.</div>' +
+        '<div class="note" id="pmNudge" style="margin-top:12px">Your guests showed ' + totalTxt + ' taps of interest in your amenities last month — and with no offer live you captured $0. At an $' + AVG_CHECK + ' average check, even a ' + Math.round(TAKE*100) + '% take is ~' + estTxt + '/mo. Unlock Promotions to reach them.</div>' +
+        btnsHTML +
+      '</div>');
+  }
+
+  /* ---- drop zone: greyed + locked (CSS kills pointer events; this kills keyboard + copy) ---- */
+  var dz = document.getElementById('pmDrop');
+  if(dz){
+    dz.setAttribute('aria-disabled', 'true');
+    dz.tabIndex = -1;
+    dz.innerHTML = LOCK_BIG + '<b>Promotions are part of the $649 plan</b>' +
+      '<span>Drag-and-drop flyers with timed pop-up windows — they switch on the day you unlock.</span>';
+  }
+  var vbP = document.getElementById('vbPromos');
+  if(vbP) vbP.textContent = '—';
+})();
+</script>
+<script>
+/* ============ TOUR DRAG-DROP DEMO ANIMATION (Promotions stop) ============
+   When the guided tour reaches the "Drop a promotion" stop (#pmDrop), a ghost
+   flyer + cursor loop into the zone and a success tick lands — a wordless "this
+   is how it works". prefers-reduced-motion falls back to a static drop state
+   (handled in CSS). Pure CSS/JS, no deps; only during the tour, only on the
+   unlocked paid drop zone. */
+(function(){
+  var dz = document.getElementById('pmDrop');
+  if(!dz) return;
+  var GHOST = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>';
+  var CURS  = '<svg width="22" height="22" viewBox="0 0 24 24" fill="#fffdf8" stroke="#0f3b49" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 15 2.2-6.2L19.5 9.8 5 3z"/></svg>';
+  var TICK  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+  var anim = null;
+  function start(){
+    if(anim) return;
+    if(dz.getAttribute('aria-disabled') === 'true') return;   // locked (free view): no animation
+    dz.style.position = 'relative';
+    dz.classList.add('osdd-zone');
+    anim = document.createElement('div');
+    anim.className = 'osdd';
+    anim.setAttribute('aria-hidden', 'true');
+    anim.innerHTML = '<div class="osdd-ghost">'+GHOST+'</div><div class="osdd-cursor">'+CURS+'</div><div class="osdd-tick">'+TICK+'</div>';
+    dz.appendChild(anim);
+  }
+  function stop(){
+    dz.classList.remove('osdd-zone');
+    if(anim){ anim.remove(); anim = null; }
+  }
+  document.addEventListener('ostourstep', function(e){
+    var s = e.detail && e.detail.step;
+    if(s && s.sel === '#pmDrop') start(); else stop();
+  });
+  document.addEventListener('ostourend', stop);
+})();
+</script>
+<script>
+/* ============ DEMO PAID-FLIP TOUR + NAME BOX (?demo=freepaid) ============
+   Paid view only. (1) The first two PAID-view loads auto-open the tour (counter
+   in localStorage os_demo_paid_tours). (2) A dismissible "See it as your
+   property" card whose typed name overrides every paid surface. Session-only,
+   demo-param-gated; free surfaces and a real ?slug console stay untouched. */
+(function(){
+  var qp; try{ qp = new URLSearchParams(location.search); }catch(e){ return; }
+  if(qp.get('demo') !== 'freepaid') return;
+  if(qp.get('plan') === 'free') return;   // free stays generic — no tour flip, no name box
+
+  // ---- (1) paid-flip tour: open on the 1st and 2nd PAID-view load, then stop ----
+  var n = 0;
+  try{ n = (parseInt(localStorage.getItem('os_demo_paid_tours'), 10) || 0) + 1; localStorage.setItem('os_demo_paid_tours', n); }catch(e){}
+  var tourWillOpen = n <= 2;
+  if(tourWillOpen) setTimeout(function(){ var b = document.getElementById('tourBtn'); if(b) b.click(); }, 750);
+
+  // ---- (2) name box ----
+  var XSVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  var stored = ''; try{ stored = (sessionStorage.getItem('os_demo_name') || '').trim(); }catch(e){}
+  var skipped = false; try{ skipped = sessionStorage.getItem('os_demo_name_skip') === '1'; }catch(e){}
+  if(stored) return;    // already set → early-apply handled every surface; no card
+  if(skipped) return;   // dismissed this session
+
+  function applyName(nm){
+    var h1 = document.querySelector('.property h1'); if(h1) h1.textContent = nm;
+    var kick = document.querySelector('.hm-kicker'); if(kick) kick.textContent = nm + ' · co-branded guest guide';
+    // Re-render the amenity preview so "Provided by <name>" updates (gpName reads .property h1).
+    var chip = document.querySelector('#gpAmChips .gp-chip[aria-pressed="true"]') || document.querySelector('#gpAmChips .gp-chip');
+    if(chip) chip.click();
+  }
+  function showCard(){
+    if(document.querySelector('.osdemo-start')) return;
+    var card = document.createElement('div');
+    card.className = 'osdemo-start';
+    card.setAttribute('role', 'group');
+    card.setAttribute('aria-label', 'See the demo as your property');
+    card.innerHTML =
+      '<button type="button" class="osd-x" aria-label="Dismiss">' + XSVG + '</button>' +
+      '<h4>See it as your property</h4>' +
+      '<p>Type your property&rsquo;s name &mdash; the paid demo re-skins with it: masthead, guest preview and offers.</p>' +
+      '<div class="osd-row"><input type="text" maxlength="40" placeholder="Your hotel&rsquo;s name" aria-label="Your hotel&rsquo;s name"><button type="button" class="osd-go">Show me</button></div>' +
+      '<button type="button" class="osd-skip">Skip &mdash; keep the demo name</button>';
+    document.body.appendChild(card);
+    var input = card.querySelector('input');
+    function submit(){
+      var v = (input.value || '').trim().slice(0,40);
+      if(!v){ input.focus(); return; }
+      try{ sessionStorage.setItem('os_demo_name', v); }catch(e){}
+      applyName(v);
+      card.remove();
+    }
+    function skip(){ try{ sessionStorage.setItem('os_demo_name_skip', '1'); }catch(e){} card.remove(); }
+    card.querySelector('.osd-go').addEventListener('click', submit);
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter') submit(); });
+    card.querySelector('.osd-skip').addEventListener('click', skip);
+    card.querySelector('.osd-x').addEventListener('click', skip);
+    setTimeout(function(){ try{ input.focus(); }catch(e){} }, 250);
+  }
+
+  // Don't crowd the tour: if it's auto-opening, reveal the card once the tour ends.
+  if(tourWillOpen) document.addEventListener('ostourend', function(){ setTimeout(showCard, 350); }, {once:true});
+  else setTimeout(showCard, 500);
+})();
+</script>
+<script>
+/* ── FREE|PAID DEMO TOGGLE (?demo=freepaid) ─────────────────────────────────
+   Sales-demo chrome only: flips this console between the free view (?plan=free)
+   and the paid demo. Never renders without the param. */
+(function(){
+  try {
+    var qp = new URLSearchParams(location.search);
+    if (qp.get('demo') !== 'freepaid') return;
+    var isFree = qp.get('plan') === 'free';
+    var bar = document.createElement('div');
+    bar.setAttribute('role','group');
+    bar.setAttribute('aria-label','Demo: switch between the free and paid console');
+    bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:1200;display:flex;gap:0;background:var(--card,#fffdf8);border:1px solid var(--line,#e3dac7);border-radius:999px;padding:4px;box-shadow:0 6px 18px rgba(38,52,60,.16);font-family:Inter,system-ui,sans-serif';
+    function seg(label, active, href){
+      var a = document.createElement('a');
+      a.textContent = label;
+      a.href = href;
+      a.style.cssText = 'display:block;padding:8px 18px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;letter-spacing:.04em;' +
+        (active ? 'background:var(--sea-deep,#0f3b49);color:#fff' : 'color:var(--ink,#0f3b49)');
+      if (active) a.setAttribute('aria-current','true');
+      return a;
+    }
+    bar.appendChild(seg('FREE',  isFree,  '?plan=free&demo=freepaid'));
+    bar.appendChild(seg('PAID', !isFree, '?demo=freepaid'));
+    document.body.appendChild(bar);
+  } catch(e){}
 })();
 </script>
 </body>

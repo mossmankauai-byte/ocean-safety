@@ -16,7 +16,8 @@
   {
    "title": "Sunset dinner — guests save 15%",
    "pdf": "https://ocean-safety.netlify.app/assets/flyers/sunset-dinner.pdf",
-   "expires": "2030-12-31"
+   "expires": "2030-12-31",
+   "window": { "start": "00:00", "end": "23:59" }
   },
   {
    "title": "Spa morning — off-peak pricing before 11am",

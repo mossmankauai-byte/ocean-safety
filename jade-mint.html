@@ -65,6 +65,14 @@
   .preview-pill{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.07em;
     text-transform:uppercase;color:var(--caution);border:1px solid rgba(239,200,115,.45);border-radius:999px;padding:3px 10px}
 
+  .planpick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:430px){.planpick{grid-template-columns:1fr}}
+  .planpick label{border:1px solid var(--line-2);border-radius:13px;padding:12px 13px;cursor:pointer;display:block}
+  .planpick label.sel{border-color:var(--gold);background:rgba(217,178,106,.08)}
+  .planpick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+  .planpick b{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600}
+  .planpick p{margin:5px 0 0;font-size:12px;color:var(--ink3);line-height:1.5}
+
   #success{display:none}
   #success.on{display:block}
   #mintForm.off{display:none}
@@ -134,6 +142,21 @@
       <div class="fld">
         <label for="viatorId">Viator PID <em>— optional</em></label>
         <input class="inp" id="viatorId" placeholder="P00123456" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="card glass">
+      <h2><svg class="ic" viewBox="0 0 24 24"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>Plan</h2>
+      <p class="sub">Paid preview is the sales tool — the full branded guide. Free mints the free-forever tier: OceanSafe branding, one amenity, no promotions. The safety guide is identical in both.</p>
+      <div class="planpick" role="radiogroup" aria-label="Plan" id="planPick">
+        <label class="sel"><input type="radio" name="planSel" value="paid" checked>
+          <b><svg class="ic" style="width:15px;height:15px" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>Paid preview</b>
+          <p>Their name woven through the guide — the default.</p>
+        </label>
+        <label><input type="radio" name="planSel" value="free">
+          <b><svg class="ic" style="width:15px;height:15px" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Free</b>
+          <p>Generic branding · one amenity · no promotions.</p>
+        </label>
       </div>
     </div>
 
@@ -229,6 +252,21 @@ function _nameChanged(){
   document.getElementById('slug').value = _slugify(document.getElementById('propName').value);
 }
 
+/* ── Plan picker: highlight follows the checked radio. ─────────────────── */
+function _planSync(){
+  var pick = document.getElementById('planPick');
+  if (!pick) return;
+  var labels = pick.querySelectorAll('label');
+  for (var i = 0; i < labels.length; i++){
+    var inp = labels[i].querySelector('input');
+    labels[i].classList.toggle('sel', !!(inp && inp.checked));
+  }
+}
+(function(){
+  var pick = document.getElementById('planPick');
+  if (pick) pick.addEventListener('change', _planSync);
+})();
+
 function _err(msg){
   var box = document.getElementById('errBox');
   box.textContent = msg;
@@ -253,6 +291,9 @@ function _mint(ev){
   document.getElementById('slug').value = slug;
 
   var config = { name: name };
+  // Free tier flags the config; a PAID mint stays exactly as today (no plan key).
+  var planSel = document.querySelector('#planPick input[name="planSel"]:checked');
+  if (planSel && planSel.value === 'free') config.plan = 'free';
   if (phone || email) {
     config.tourDesk = {};
     if (phone) config.tourDesk.phone = phone;
@@ -339,6 +380,9 @@ function _reset(){
   document.getElementById('tdEmail').value = '';
   document.getElementById('gygId').value = '';
   document.getElementById('viatorId').value = '';
+  var paidRadio = document.querySelector('#planPick input[value="paid"]');
+  if (paidRadio) paidRadio.checked = true;
+  _planSync();
   _slugEdited = false;
 }
 

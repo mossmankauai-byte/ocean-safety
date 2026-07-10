@@ -7740,7 +7740,11 @@ function showWelcomeChip(partnerName){
   chip.id = 'welcomeChip';
   chip.setAttribute('role', 'status');
   chip.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 10px;margin:6px 0 0;background:linear-gradient(90deg,#fff8e1,#fdf2cc);border:1px solid #e9d9b0;border-radius:8px;font-size:12px;color:#7a5d0a;font-weight:600';
-  chip.innerHTML = '<span aria-hidden="true">\u2728</span><span>Welcome from <b>' + partnerName + '</b></span><button type="button" aria-label="Dismiss" onclick="dismissWelcomeChip()" style="margin-left:auto;background:transparent;border:none;color:#7a5d0a;cursor:pointer;font-size:16px;line-height:1;padding:2px 6px">&times;</button>';
+  // Demo name box (?demo=freepaid) can override the shown name; escape ONLY the
+  // override (config/slug names are trusted and stay raw for byte-identical output).
+  var nm = _demoName(partnerName);
+  var nmHtml = (nm === partnerName) ? partnerName : _pesc(nm);
+  chip.innerHTML = '<span aria-hidden="true">\u2728</span><span>Welcome from <b>' + nmHtml + '</b></span><button type="button" aria-label="Dismiss" onclick="dismissWelcomeChip()" style="margin-left:auto;background:transparent;border:none;color:#7a5d0a;cursor:pointer;font-size:16px;line-height:1;padding:2px 6px">&times;</button>';
   bar.insertBefore(chip, bar.firstChild);
 }
 function dismissWelcomeChip(){
@@ -7771,6 +7775,17 @@ function withReferrer(url){
 // that JSON to the live repo (the operator console's "Export config" is the
 // source of the shape; there is no instant publish).
 window._partnerCfg = null;
+// ── Plan gate (freemium) ── plan:"free" in a config gates the co-brand
+// surfaces only (partner name in chrome, amenities past the first, the
+// promotions chip/sheet). A missing plan or plan:"paid" renders everything
+// exactly as before, so every existing config keeps working unchanged.
+// preview:true always renders the full paid experience — the minted sales
+// preview IS the "see your branded guide" pitch. Safety data, the tour-desk
+// relay, and the lobby board + QR are never gated in any tier.
+// plan:'free' ALWAYS renders free — even preview mints (a "Free" mint must demo
+// the free tier; the worker stamps preview:true on every mint). Paid previews
+// simply omit the plan key.
+function _planPaid(){ var c = window._partnerCfg; return !c || c.plan !== 'free'; }
 function _activeRefSlug(){
   try {
     const params = new URLSearchParams(location.search);
@@ -7794,6 +7809,21 @@ function _viatorPid(){
 }
 // HTML-escape for config-sourced strings (promo titles etc.).
 function _pesc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+// ── Demo name override (shared name-box contract, ?demo=freepaid only) ──
+// The sales-demo start card (see the ?demo=freepaid IIFE) may stash a prospect's
+// own property name in sessionStorage os_demo_name. When the FREE|PAID demo is
+// running AND the surface is PAID, that typed name overrides the config name on
+// every co-brand surface; otherwise this returns the given fallback unchanged so
+// every non-demo render is byte-identical. Session-only, hard-capped at 40 chars;
+// escape at the use site exactly as the fallback is escaped today.
+function _demoName(fallback){
+  try {
+    if(new URLSearchParams(location.search).get('demo') !== 'freepaid') return fallback;
+    if(!_planPaid()) return fallback;
+    var n = String(sessionStorage.getItem('os_demo_name') || '').trim().slice(0, 40);
+    return n || fallback;
+  } catch(e){ return fallback; }
+}
 // "Pilot preview" pill — configs minted via the worker (unsigned pilots)
 // carry preview:true and get this honest, unobtrusive tag wherever the
 // partner name renders. Committed configs without the flag render exactly
@@ -7863,7 +7893,8 @@ function _smsCapable(){
 function _tourLeadBody(name, cond, dayWord){
   const parts = ['Interested in: ' + String(name || '').slice(0, 60)];
   if(cond) parts.push('conditions ' + cond + ' ' + (dayWord || 'today'));
-  const prop = String((window._partnerCfg && window._partnerCfg.name) || '').slice(0, 30);
+  // Free plan: the relay stays live but un-named — no property name in copy.
+  const prop = _planPaid() ? String((window._partnerCfg && window._partnerCfg.name) || '').slice(0, 30) : '';
   if(prop) parts.push('guest at ' + prop);
   let s = parts.join(' - ') + '. Can you check availability?';
   while(s.length > 140 && parts.length > 1){ parts.pop(); s = parts.join(' - ') + '. Can you check availability?'; }
@@ -7999,7 +8030,10 @@ function _amenityTap(btn, idx, cond){
 // nothing matches today's conditions — the no-config beach sheet is unchanged.
 function _amenityPanel(states){
   const cfg = window._partnerCfg;
-  const list = (cfg && Array.isArray(cfg.amenities)) ? cfg.amenities : [];
+  let list = (cfg && Array.isArray(cfg.amenities)) ? cfg.amenities : [];
+  // Free plan: exactly one amenity — the first list entry. Its showWhen still
+  // applies below, so a conditional first entry can still sit out a calm day.
+  if(!_planPaid()) list = list.slice(0, 1);
   if(!list.length) return '';
   states = Array.isArray(states) ? states : [];
   const primary = states[0] || 'calm';
@@ -8040,7 +8074,7 @@ function _amenityPanel(states){
   }).join('');
   return `<div style="margin:10px 0 4px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">
     <div style="display:flex;align-items:center;gap:8px">
-      <div style="font-weight:700;font-size:13px;color:var(--ink)">Provided by ${_pesc(cfg.name || 'Your Resort')}</div>
+      <div style="font-weight:700;font-size:13px;color:var(--ink)">${_planPaid() ? 'Provided by ' + _pesc(_demoName(cfg.name || 'Your Resort')) : 'On the property'}</div>
       <span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);background:#fff;border:1px solid var(--border);border-radius:999px;padding:2px 7px">Property offer</span>
       ${_previewTag()}
     </div>
@@ -8075,6 +8109,9 @@ function _promoOpen(idx){
   } catch(e){}
 }
 function _renderPartnerPromos(cfg){
+  // Free plan: no promotion surfaces at all — no chip, no sheet, regardless
+  // of what the config carries. (cfg is already window._partnerCfg here.)
+  if(!_planPaid()) return;
   const promos = Array.isArray(cfg && cfg.promotions) ? cfg.promotions : [];
   const now = new Date();
   const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -8090,6 +8127,10 @@ function _renderPartnerPromos(cfg){
   const live = promos.map((p, i) => ({ p, i }))
     .filter(x => x.p && x.p.title && !(x.p.expires && String(x.p.expires).slice(0,10) < todayStr));
   if(!live.length) return;
+  // Timed-window pop-up rides this same vetted `live` list (fires ~7s out; all
+  // suppression rules live in _promoPopSchedule below). Purely additive — the
+  // chip + sheet render exactly as before.
+  try { _promoPopSchedule(live); } catch(e){}
   const subbar = document.getElementById('subtabs');
   if(!subbar || document.getElementById('promoChip')) return;
   window._promoLive = live;
@@ -8107,16 +8148,19 @@ function _renderPartnerPromos(cfg){
       + '#promoChip:hover{box-shadow:0 6px 16px rgba(0,0,0,.18)}'
       + '@keyframes promoChipPop{0%{transform:scale(.8);opacity:0}65%{transform:scale(1.07);opacity:1}100%{transform:scale(1)}}'
       + '@media (prefers-reduced-motion:reduce){#promoChip{animation:none!important}}'
-      + '#promoChipCount{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:var(--ocean,#0f4c5c);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(253,242,214,.94);box-sizing:border-box;line-height:1}';
+      + '#promoChipCount{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:var(--ocean,#0f4c5c);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(253,242,214,.94);box-sizing:border-box;line-height:1}'
+      + '#promoChipNow{position:absolute;top:-4px;left:-4px;width:10px;height:10px;border-radius:50%;background:#16a34a;border:1.5px solid rgba(253,242,214,.94);box-sizing:border-box}';
     document.head.appendChild(st);
   }
   const chip = document.createElement('button');
   chip.id = 'promoChip';
   chip.type = 'button';
-  chip.setAttribute('aria-label', 'Offers from ' + (cfg.name || 'your resort') + ' — ' + live.length + ' available, tap to view');
+  chip.setAttribute('aria-label', 'Offers from ' + _demoName(cfg.name || 'your resort') + ' — ' + live.length + ' available, tap to view');
   chip.setAttribute('onclick', '_promoSheetOpen()');
   chip.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>'
-    + '<span id="promoChipCount" aria-hidden="true">' + live.length + '</span>';
+    + '<span id="promoChipCount" aria-hidden="true">' + live.length + '</span>'
+    // Green "happening now" dot when any live promo's timed window is open.
+    + (live.some(x => x.p && x.p.window && _promoInWindow(x.p.window)) ? '<span id="promoChipNow" aria-hidden="true"></span>' : '');
   subbar.insertAdjacentElement('afterend', chip);
 }
 // Pull-up sheet listing the live offers — rides the app's existing #sheet/#overlay/#drag
@@ -8125,9 +8169,10 @@ function _renderPartnerPromos(cfg){
 // through the EXISTING _promoOpen (promo_tap telemetry + vetted _pdfUrl) — this sheet
 // is only a picker, it never touches p.pdf itself.
 function _promoSheetOpen(){
+  if(!_planPaid()) return; // free plan: no promo sheet, even if a chip somehow exists
   const live = window._promoLive || [];
   if(!live.length) return;
-  const name = (window._partnerCfg && window._partnerCfg.name) || 'your resort';
+  const name = _demoName((window._partnerCfg && window._partnerCfg.name) || 'your resort');
   const tagSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
   const rows = live.map(x => {
     const ends = x.p.expires ? `<span style="display:block;font-size:11px;color:var(--mute);margin-top:2px">Ends ${_pesc(_promoEndsLabel(x.p.expires))}</span>` : '';
@@ -8151,6 +8196,138 @@ function _promoSheetOpen(){
     <div aria-label="Offers from ${_pesc(name)}" style="display:flex;flex-direction:column;gap:8px;margin-top:12px">${rows}</div>`;
   document.getElementById('sheet').classList.add('on');
   document.getElementById('overlay').classList.add('on');
+}
+// ── Timed-window promotion pop-up (paid plans only) ─────────────────────────
+// promotions[] entries may carry window:{start:"HH:MM",end:"HH:MM"} (24h).
+// Times are DEVICE-LOCAL on purpose: Kauaʻi hotels and their on-property
+// guests share HST, so the guest's clock IS the hotel's clock — no timezone
+// math. start > end means the window spans midnight (22:00–02:00 = 10pm–2am).
+// The FIRST in-window promo pops a bottom card ~7s after the config renders,
+// ONCE per session (sessionStorage os_promopop_<slug>_<index>; any key for
+// the slug blocks further pops), never over an open sheet/overlay/modal
+// (defers, then gives up), never in ?mode=screen, never on the free plan,
+// and always ABOVE the bottom tab bar so the safety tabs stay usable.
+// Honesty: the chip shows the REAL window end (never a ticking countdown),
+// and See offer goes through the EXISTING _promoOpen (promo_tap telemetry +
+// vetted flyer URL — this card never touches p.pdf itself).
+function _promoWinParse(w){
+  if(!w || typeof w !== 'object') return null;
+  const m1 = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(w.start || ''));
+  const m2 = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(w.end || ''));
+  if(!m1 || !m2) return null;
+  return { s: (+m1[1]) * 60 + (+m1[2]), e: (+m2[1]) * 60 + (+m2[2]) };
+}
+function _promoInWindow(w, now){
+  const p = _promoWinParse(w);
+  if(!p) return false; // malformed window = never in-window (a typo hides, never shows)
+  const d = now || new Date();
+  const n = d.getHours() * 60 + d.getMinutes();
+  // start <= now < end; wrapped when the window crosses midnight
+  return p.s <= p.e ? (n >= p.s && n < p.e) : (n >= p.s || n < p.e);
+}
+// Truthful window chip from window.end — "Tonight until 8:00 PM" for evening
+// or cross-midnight windows, "Until 2:00 PM today" otherwise. Never a countdown.
+function _promoWinEndLabel(w){
+  const p = _promoWinParse(w);
+  if(!p) return '';
+  const h24 = Math.floor(p.e / 60), mi = p.e % 60;
+  const t = (((h24 + 11) % 12) + 1) + ':' + String(mi).padStart(2, '0') + ' ' + (h24 >= 12 ? 'PM' : 'AM');
+  return (p.s > p.e || h24 >= 18) ? 'Tonight until ' + t : 'Until ' + t + ' today';
+}
+// True while anything the guest is reading sits open — the pop-up NEVER
+// renders over safety content. #sheet/#overlay carry .on while any bottom
+// sheet (beach detail, outlook, offers…) is up; the three modals likewise.
+function _promoPopBlocked(){
+  try {
+    return ['sheet','overlay','privacyModal','installModal','disclaimerModal'].some(function(id){
+      var el = document.getElementById(id);
+      return !!(el && el.classList.contains('on'));
+    });
+  } catch(e){ return true; }
+}
+function _promoPopSchedule(live){
+  if(window._promoPopArmed) return;
+  if(!_planPaid()) return; // free plan: no promotion surfaces, ever
+  try { if(new URLSearchParams(location.search).get('mode') === 'screen') return; } catch(e){} // lobby TV: never
+  var slug = _activeRefSlug();
+  if(!slug) return;
+  // One pop-up per session across ALL promos: any prior key for this slug blocks.
+  try {
+    for(var k = 0; k < sessionStorage.length; k++){
+      if(String(sessionStorage.key(k)).indexOf('os_promopop_' + slug + '_') === 0) return;
+    }
+  } catch(e){}
+  window._promoPopArmed = true;
+  var tries = 0;
+  function attempt(){
+    try {
+      if(document.getElementById('promoPop')) return;
+      var x = null;
+      for(var i = 0; i < live.length; i++){
+        if(live[i] && live[i].p && live[i].p.window && _promoInWindow(live[i].p.window)){ x = live[i]; break; }
+      }
+      if(!x) return; // nothing in-window right now — no pop this load
+      // Sheet/overlay/modal open: defer and retry; give up after ~2 minutes.
+      if(_promoPopBlocked()){ if(++tries <= 8) setTimeout(attempt, 15000); return; }
+      try { sessionStorage.setItem('os_promopop_' + slug + '_' + x.i, '1'); } catch(e){}
+      _promoPopShow(x);
+    } catch(e){}
+  }
+  setTimeout(attempt, 7000);
+}
+function _promoPopShow(x){
+  if(document.getElementById('promoPop')) return;
+  var name = _demoName((window._partnerCfg && window._partnerCfg.name) || 'your resort');
+  var winLbl = _promoWinEndLabel(x.p.window);
+  if(!document.getElementById('promoPopStyle')){
+    var st = document.createElement('style');
+    st.id = 'promoPopStyle';
+    // bottom:72px + safe-area clears the fixed tab bar (z-index 900); 950 sits
+    // above the tabs but BELOW #overlay(1000)/#sheet(1001), so a sheet opened
+    // after the pop covers it — safety content always wins.
+    st.textContent = '#promoPop{position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:950;max-width:430px;margin:0 auto;background:#fff;border:1px solid rgba(15,76,92,.18);border-radius:16px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.2);font-family:\'DM Sans\',sans-serif;animation:promoPopUp .38s cubic-bezier(.16,1,.3,1)}'
+      + '@keyframes promoPopUp{from{transform:translateY(26px);opacity:0}to{transform:translateY(0);opacity:1}}'
+      + '@media (prefers-reduced-motion:reduce){#promoPop{animation:none!important}}';
+    document.head.appendChild(st);
+  }
+  var el = document.createElement('div');
+  el.id = 'promoPop';
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-label', 'Offer from ' + name);
+  // Demo chrome (?demo=freepaid) floats its toggle at bottom:84px — sit above it.
+  try { if(new URLSearchParams(location.search).get('demo') === 'freepaid') el.style.bottom = 'calc(140px + env(safe-area-inset-bottom,0px))'; } catch(e){}
+  var tagSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
+  var clockSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7.5 12 12 15 14"/></svg>';
+  var xSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  el.innerHTML = '<button type="button" onclick="_promoPopClose()" aria-label="Dismiss this offer" style="position:absolute;top:6px;right:6px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--mute);cursor:pointer;padding:0">' + xSvg + '</button>'
+    + '<div style="display:flex;gap:11px;align-items:flex-start;padding-right:30px">'
+    +   tagSvg
+    +   '<div style="flex:1;min-width:0">'
+    +     '<div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)">Offer from ' + _pesc(name) + '</div>'
+    +     '<div style="font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.3;margin-top:2px">' + _pesc(x.p.title) + '</div>'
+    +     (winLbl ? '<span style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;font-weight:700;color:#8a6d1f;background:#fdf6e3;border:1px solid #e9d9b0;border-radius:999px;padding:3px 9px">' + clockSvg + _pesc(winLbl) + '</span>' : '')
+    +     '<div style="font-size:10.5px;color:var(--mute);margin-top:6px;line-height:1.4">Property offer — separate from the safety report.</div>'
+    +   '</div>'
+    + '</div>'
+    + '<button type="button" onclick="_promoPopSee(' + x.i + ')" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:10px;border:none;border-radius:10px;background:var(--ocean,#0f4c5c);color:#fff;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">See offer</button>';
+  document.body.appendChild(el);
+  _promoPopEsc = function(e){ if(e.key === 'Escape') _promoPopClose(); };
+  document.addEventListener('keydown', _promoPopEsc);
+}
+function _promoPopClose(){
+  var el = document.getElementById('promoPop');
+  if(el) el.remove();
+  if(_promoPopEsc){ document.removeEventListener('keydown', _promoPopEsc); _promoPopEsc = null; }
+}
+var _promoPopEsc = null;
+function _promoPopSee(i){
+  try {
+    var promos = (window._partnerCfg && window._partnerCfg.promotions) || [];
+    var p = promos[i];
+    _promoPopClose();
+    _promoOpen(i); // EXISTING path: promo_tap telemetry + vetted _pdfUrl only
+    if(!(p && p._pdfUrl)) _promoSheetOpen(); // no flyer: open the offers sheet so the tap is never dead
+  } catch(e){}
 }
 // Kick off the config fetch at parse time. The tour widgets only initialize
 // when a sheet renders (user tap), so the config almost always resolves
@@ -8221,7 +8398,12 @@ async function boot(){
         localStorage.setItem('referrer', slug);
         localStorage.setItem('referrerFirstSeen', new Date().toISOString());
         const partnerName = PARTNER_NAMES[slug] || slug[0].toUpperCase() + slug.slice(1);
-        showWelcomeChip(partnerName);
+        // Free-plan configs render generic chrome: hold the chip until the
+        // config resolves and skip it on plan:"free". No config / paid /
+        // preview all still show it (both fetches settle fast either way).
+        (window._partnerCfgReady || Promise.resolve()).then(function(){
+          if(_planPaid()) showWelcomeChip(partnerName);
+        }).catch(function(){});
       }
     }
   } catch(e){}
@@ -8331,6 +8513,133 @@ function updateFreshnessIndicator(){
   const timeStr = t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   sub.innerHTML = `<span class="bsub-live">LIVE · ${timeStr}</span>`;
 }
+// ── FREE|PAID DEMO TOGGLE (?demo=freepaid) ──────────────────────────────────
+// Sales-demo chrome only: a floating segmented switch that flips the SAME tab
+// between the free fixture (free-demo) and the paid demo (demo-resort) so a GM
+// feels the plan difference live. Never renders without the param, never in
+// lobby screen mode, and real hotel links never carry it.
+(function(){
+  try {
+    var qp = new URLSearchParams(location.search);
+    if (qp.get('demo') !== 'freepaid' || qp.get('mode') === 'screen') return;
+  } catch(e){ return; }
+  var isFree = false;
+  try { isFree = (new URLSearchParams(location.search).get('ref') === 'free-demo'); } catch(e){}
+  var bar = document.createElement('div');
+  bar.setAttribute('role','group');
+  bar.setAttribute('aria-label','Demo: switch between the free and paid plan');
+  bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:1200;display:flex;align-items:center;gap:0;background:rgba(253,242,214,.96);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(15,76,92,.2);border-radius:999px;padding:4px;box-shadow:0 6px 18px rgba(0,0,0,.18);font-family:"DM Sans",sans-serif';
+  function seg(label, active, href){
+    var a = document.createElement('a');
+    a.textContent = label;
+    a.href = href;
+    a.style.cssText = 'display:block;padding:8px 18px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:.04em;' +
+      (active ? 'background:#0f4c5c;color:#fff' : 'color:#0f4c5c');
+    if (active) a.setAttribute('aria-current','true');
+    return a;
+  }
+  bar.appendChild(seg('FREE',  isFree,  '?ref=free-demo&demo=freepaid'));
+  bar.appendChild(seg('PAID', !isFree, '?ref=demo-resort&demo=freepaid'));
+  // "What's different?" — compact plan-comparison overlay. Demo chrome only
+  // (this whole IIFE is gated on ?demo=freepaid); all copy is static.
+  var diff = document.createElement('button');
+  diff.type = 'button';
+  diff.textContent = 'What’s different?';
+  diff.style.cssText = 'display:block;padding:8px 12px;border-radius:999px;font-size:11.5px;font-weight:700;border:none;background:none;color:#0f4c5c;text-decoration:underline;cursor:pointer;font-family:inherit;letter-spacing:.01em';
+  diff.onclick = function(){
+    var ov = document.getElementById('demoDiffOverlay');
+    if(ov){ ov.style.display = 'flex'; return; }
+    ov = document.createElement('div');
+    ov.id = 'demoDiffOverlay';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-label', 'Free vs paid plan differences');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.55);padding:16px;font-family:"DM Sans",sans-serif';
+    var row = function(label, free, paid){
+      return '<div style="padding:8px 0 2px;font-weight:700;color:#12333d;font-size:12px;border-top:1px solid #eee8d8">' + label + '</div>'
+        + '<div style="padding:8px 0 2px;color:#5c7480;font-size:12px;border-top:1px solid #eee8d8">' + free + '</div>'
+        + '<div style="padding:8px 0 2px;color:#0f4c5c;font-weight:600;font-size:12px;border-top:1px solid #eee8d8">' + paid + '</div>';
+    };
+    var xSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    ov.innerHTML = '<div style="position:relative;background:#fff;border-radius:16px;max-width:360px;width:100%;max-height:85vh;overflow-y:auto;padding:18px;box-shadow:0 16px 44px rgba(0,0,0,.3)">'
+      + '<button type="button" data-diff-close aria-label="Close" style="position:absolute;top:8px;right:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#5c7480;cursor:pointer;padding:0">' + xSvg + '</button>'
+      + '<div style="font-weight:800;font-size:15px;color:#12333d;padding-right:30px">Free vs paid — what changes</div>'
+      + '<div style="display:grid;grid-template-columns:1.05fr 1fr 1.15fr;gap:2px 10px;margin-top:12px">'
+      +   '<div></div><div style="font-size:10px;font-weight:800;letter-spacing:.06em;color:#5c7480;padding-bottom:4px">FREE</div><div style="font-size:10px;font-weight:800;letter-spacing:.06em;color:#0f4c5c;padding-bottom:4px">PAID</div>'
+      +   row('Branding', 'OceanSafe', 'Your property')
+      +   row('Amenities', '1', 'Unlimited')
+      +   row('Promotions', '—', 'Timed pop-ups + offer chip')
+      +   row('Lobby board', 'Generic', 'Branded')
+      +   row('Analytics', 'Full', 'Full')
+      +   row('Price', 'Free forever', '$649/mo flat')
+      + '</div>'
+      + '<div style="font-size:10.5px;color:#5c7480;margin-top:12px;line-height:1.45">Safety data and analytics are complete on both plans — never gated.</div>'
+      + '</div>';
+    ov.addEventListener('click', function(ev){
+      if(ev.target === ov || (ev.target.closest && ev.target.closest('[data-diff-close]'))) ov.style.display = 'none';
+    });
+    document.body.appendChild(ov);
+  };
+  bar.appendChild(diff);
+  var tag = document.createElement('div');
+  tag.textContent = isFree ? 'Free plan — OceanSafe branding, 1 amenity' : 'Paid plan — co-branded, offers live';
+  tag.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:62px;z-index:1200;font-size:10.5px;font-weight:600;color:#5c7480;background:rgba(255,255,255,.92);border-radius:999px;padding:2px 10px;font-family:"DM Sans",sans-serif;pointer-events:none';
+  document.body.appendChild(bar);
+  document.body.appendChild(tag);
+  // ── "See it as your property" start card (shared name-box contract) ──
+  // One-time per session while no demo name is stored: let the prospect type
+  // their own property name. Submitting stashes it in sessionStorage
+  // os_demo_name and reloads so every PAID surface re-renders branded; FREE
+  // stays generic (the typed name is never shown on free). Skip dismisses for
+  // the session. Session-only + demo-param-gated — real configs are untouched.
+  (function demoNameCard(){
+    var stored = '', seen = false;
+    try { stored = String(sessionStorage.getItem('os_demo_name') || '').trim(); } catch(e){}
+    try { seen = sessionStorage.getItem('os_demo_card_seen') === '1'; } catch(e){}
+    if (stored || seen || document.getElementById('demoNameCard')) return;
+    if (!document.getElementById('demoNameCardStyle')){
+      var st = document.createElement('style');
+      st.id = 'demoNameCardStyle';
+      st.textContent = '#demoNameCard{animation:demoNameIn .3s cubic-bezier(.16,1,.3,1)}'
+        + '@keyframes demoNameIn{from{transform:translate(-50%,-8px);opacity:0}to{transform:translate(-50%,0);opacity:1}}'
+        + '@media (prefers-reduced-motion:reduce){#demoNameCard{animation:none!important}}';
+      document.head.appendChild(st);
+    }
+    var card = document.createElement('div');
+    card.id = 'demoNameCard';
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-label', 'See the demo as your property');
+    card.style.cssText = 'position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translateX(-50%);z-index:1300;width:calc(100% - 24px);max-width:360px;background:#fff;border:1px solid rgba(15,76,92,.18);border-radius:16px;padding:15px 15px 14px;box-shadow:0 12px 34px rgba(0,0,0,.22);font-family:"DM Sans",sans-serif';
+    var tagSvg = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0f4c5c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
+    var xSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    card.innerHTML =
+      '<button type="button" data-demo-skip aria-label="Skip" style="position:absolute;top:7px;right:7px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#8aa0a8;cursor:pointer;padding:0">' + xSvg + '</button>'
+      + '<div style="display:flex;align-items:center;gap:9px;padding-right:26px">' + tagSvg
+      +   '<div style="font-weight:800;font-size:14.5px;color:#12333d">See it as your property</div>'
+      + '</div>'
+      + '<div style="font-size:11.5px;color:#5c7480;margin-top:5px;line-height:1.4">Type a name and the paid demo shows your co-branding. It stays in this browser only.</div>'
+      + '<input id="demoNameInput" type="text" maxlength="40" autocomplete="off" placeholder="Your hotel&#39;s name" style="width:100%;margin-top:11px;padding:11px 12px;border:1px solid rgba(15,76,92,.28);border-radius:10px;font-size:14px;font-family:inherit;color:#12333d;box-sizing:border-box">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-top:11px">'
+      +   '<button type="button" data-demo-go style="flex:1;min-height:44px;border:none;border-radius:10px;background:#0f4c5c;color:#fff;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer">Show me</button>'
+      +   '<button type="button" data-demo-skip style="min-height:44px;padding:0 6px;border:none;background:none;color:#5c7480;font-size:12.5px;font-weight:600;font-family:inherit;text-decoration:underline;cursor:pointer">Skip</button>'
+      + '</div>';
+    document.body.appendChild(card);
+    var input = card.querySelector('#demoNameInput');
+    function skip(){
+      try { sessionStorage.setItem('os_demo_card_seen', '1'); } catch(e){}
+      card.remove();
+    }
+    function go(){
+      var v = (input && input.value ? String(input.value) : '').trim().slice(0, 40);
+      if(!v){ if(input) input.focus(); return; }
+      try { sessionStorage.setItem('os_demo_name', v); } catch(e){}
+      location.reload();
+    }
+    card.querySelectorAll('[data-demo-skip]').forEach(function(b){ b.addEventListener('click', skip); });
+    card.querySelector('[data-demo-go]').addEventListener('click', go);
+    if(input) input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); go(); } });
+    try { setTimeout(function(){ if(input) input.focus(); }, 60); } catch(e){}
+  })();
+})();
 // ── LOBBY SCREEN MODE (?ref=<slug>&mode=screen) ─────────────────────────────
 // Full-screen rotating conditions board for a property's lobby TV. Rides the
 // normal app boot underneath (fetchLive/rescore keep running on their 15-min
@@ -8703,10 +9012,12 @@ function updateFreshnessIndicator(){
   // Partner name from the runtime config once it resolves.
   if (window._partnerCfgReady && window._partnerCfgReady.then){
     window._partnerCfgReady.then(function(cfg){
-      if (cfg && cfg.name){
+      // Free plan keeps the generic "OceanSafe · Kauaʻi" masthead — the board
+      // and its QR stay fully live; only the name swap is a paid surface.
+      if (cfg && cfg.name && _planPaid()){
         var el = document.getElementById('oslProp');
         if (el){
-          el.textContent = cfg.name;
+          el.textContent = _demoName(cfg.name);
           // Minted (unsigned) pilot configs are honestly labeled on the TV too.
           if (cfg.preview === true){
             var pv = document.createElement('span');
