@@ -29,7 +29,10 @@
           if(ev.request){ delete ev.request.cookies; delete ev.request.headers; if(ev.request.url) ev.request.url = String(ev.request.url).split('?')[0]; }
           return ev;
         }
-      }); } catch(e){}
+      });
+      // One-time verification: open oceansafety.app/?sentrycheck to send a test event.
+      if(/[?&]sentrycheck\b/.test(location.search)){ try{ window.Sentry.captureMessage('OceanSafe Sentry check OK — ' + new Date().toISOString()); }catch(e){} }
+      } catch(e){}
     };
     var s = document.createElement('script');
     s.src = 'https://js.sentry-cdn.com/' + OS_SENTRY_KEY + '.min.js';  // Sentry lazy loader (queues early errors, loads SDK async)
