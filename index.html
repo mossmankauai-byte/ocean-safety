@@ -18,8 +18,9 @@
   try {
     var DNT = navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1';
     if(!OS_SENTRY_KEY || DNT || !/(^|\.)oceansafety\.app$/i.test(location.hostname)) return;
-    window.sentryOnLoad = function(){   // runs when the loader finishes; loader supplies the DSN
+    window.sentryOnLoad = function(){   // runs when the loader finishes
       try { window.Sentry.init({
+        dsn: 'https://c56e466664fba4321a37f6c54be3b08f@o4511723948146688.ingest.us.sentry.io/4511723958763520',
         sendDefaultPii: false,          // privacy-first: no IP, no cookies, no user
         tracesSampleRate: 0,            // errors only — well under the 5k/mo free tier
         replaysSessionSampleRate: 0,
