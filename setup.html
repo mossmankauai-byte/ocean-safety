@@ -66,7 +66,19 @@ const esc=s=>String(s??"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&am
 const params=new URLSearchParams(location.search);
 const TOKEN=(params.get("t")||"").trim();
 const DEMO=params.get("demo")==="1" || (location.protocol==="file:" && !TOKEN);
-const SUGGEST=["Spa","Restaurant","Pool & pool bar","Cabanas","Beach gear rental","Lūʻau","Activities desk","Coffee shop"];
+const SUGGESTS={
+  hotel:["Spa","Restaurant","Pool & pool bar","Cabanas","Beach gear rental","Lūʻau","Activities desk","Coffee shop"],
+  rental:["Snorkel sets","Boards & bikes","Beach gear","Kayaks & SUPs","Surf lessons","Boat tours","Ziplines & hikes","Luau tickets"],
+  retail:["Reef-safe sunscreen","Beach gear","Cold drinks & snacks","Souvenirs & gifts","Coffee","Apparel","Snorkel gear","Boogie boards"],
+  pm:["In-unit beach gear","Snorkel sets","Beach chairs","Tours & activities","Mid-stay clean","Late checkout"],
+  timeshare:["Spa","Restaurant","Pool & pool bar","Activities desk","Owner events","Tours & activities"]};
+const AMCOPY={
+  hotel:{h:"What can guests do at your property?",why:"On rough-ocean days, OceanSafe nudges your guests toward <b>your</b> spa, dining, and pool instead of leaving — this is how you keep them (and their spend) on-site.",label:"ON-PROPERTY"},
+  rental:{h:"What do you rent or offer?",why:"Your gear and tours show right on your page — and on the days the ocean's calm, the guide points guests at exactly what you offer.",label:"WHAT WE OFFER"},
+  retail:{h:"What do visitors find in your store?",why:"The guide surfaces the right item for the day — reef-safe sunscreen on high-UV mornings, boogie boards on calm days — and points them to your store.",label:"IN THE STORE"},
+  pm:{h:"What comes with your units?",why:"What's in the unit shows on your guest page — and the guide nudges guests toward it on the right days.",label:"IN YOUR UNITS"},
+  timeshare:{h:"What can guests do at your property?",why:"On rough-ocean days the guide nudges owners and guests toward what's on-site.",label:"ON-PROPERTY"}};
+const segOf=()=>S.segment&&SUGGESTS[S.segment]?S.segment:"hotel";
 let S={}, STEP=0;
 
 async function api(body){
@@ -96,7 +108,7 @@ function guestPreview(){ const hex=S.primary_hex||"0f4c5c"; const am=(S.amenitie
   return '<div class="preview"><div class="hd" style="background:#'+esc(hex)+'"><div class="kick">OCEANSAFE · '+esc((S.name||"").toUpperCase())+'</div><div class="ttl">Today at the beach</div></div>'+
   '<div class="bd"><span class="chip">Surf 2–4 ft</span><span class="chip">UV 9</span><span class="chip">Wind 12 mph</span>'+
   (S.short?'<p class="muted" style="margin-top:8px">'+esc(S.short)+'</p>':'')+
-  (am?'<div style="margin-top:10px;font-size:11px;color:#7A8794;font-weight:700">ON-PROPERTY</div>'+am:'')+'</div></div>'; }
+  (am?'<div style="margin-top:10px;font-size:11px;color:#7A8794;font-weight:700">'+AMCOPY[segOf()].label+'</div>'+am:'')+'</div></div>'; }
 
 function progress(){ const pct=Math.round((STEP)/4*100); return '<div class="prog"><span style="width:'+pct+'%"></span></div>'; }
 
@@ -172,10 +184,11 @@ function detailStep(){
 }
 function amenityStep(){
   S.amenities=S.amenities||[];
+  const SUGGEST=SUGGESTS[segOf()], AC=AMCOPY[segOf()];
   const chips=SUGGEST.map(a=>'<button class="chipbtn'+(S.amenities.includes(a)?' on':'')+'" onclick="toggleAm(\''+esc(a).replace(/'/g,"")+'\')">'+esc(a)+'</button>').join("");
   const custom=S.amenities.filter(a=>!SUGGEST.includes(a)).map(a=>'<button class="chipbtn on" onclick="toggleAm(\''+esc(a).replace(/'/g,"")+'\')">'+esc(a)+'</button>').join("");
-  shell("What can guests do at your property?",
-    '<div class="why">On rough-ocean days, OceanSafe nudges your guests toward <b>your</b> spa, dining, and pool instead of leaving — this is how you keep them (and their spend) on-site.</div>'+
+  shell(AC.h,
+    '<div class="why">'+AC.why+'</div>'+
     '<p class="say" style="font-size:14px">Tap the ones you have:</p><div class="chips">'+chips+custom+'</div>'+
     '<div class="addrow"><input type="text" id="amAdd" maxlength="60" placeholder="Add your own…"><button class="btn grey sm" onclick="addAm()">Add</button></div>'+
     '<p class="muted" style="margin-top:10px">'+(S.amenities.length?S.amenities.length+" added":"Add a few — you can always add more later.")+'</p>');
@@ -236,7 +249,7 @@ function go(n){ STEP=n; render(); }
         : (out.error||"We couldn’t find your page. Ask us for a fresh link."))+'</div>'
       +'<p class="muted center" style="margin-top:14px">Need help? <a href="mailto:mossmankauai@gmail.com">Email us</a></p></div>'; return; }
   const p=out.partner;
-  S={name:p.name,slug:p.slug,primary_hex:p.primary_hex,short:p.short||"",region:p.region||"",phone:p.phone||"",website:p.website||"",amenities:Array.isArray(p.amenities)?p.amenities.map(a=>a&&a.name?a.name:a).filter(Boolean):[],plan:p.plan||"free",status:p.status,page_url:p.page_url,dashboard_url:p.dashboard_url};
+  S={name:p.name,slug:p.slug,primary_hex:p.primary_hex,short:p.short||"",region:p.region||"",phone:p.phone||"",website:p.website||"",amenities:Array.isArray(p.amenities)?p.amenities.map(a=>a&&a.name?a.name:a).filter(Boolean):[],plan:p.plan||"free",segment:p.segment||"hotel",status:p.status,page_url:p.page_url,dashboard_url:p.dashboard_url};
   if(S.status==="live"){ STEP=5; renderLive(); return; }
   if(DEMO){ STEP=-1; render(); return; }
   STEP=0; render();

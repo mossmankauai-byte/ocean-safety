@@ -62,12 +62,14 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   const primary="#"+(p.primary_hex||"0a8ba8").replace(/^#/,"");
   const live=SITE+"/p/"+p.slug;
   const seg=p.segment;
-  const isOperator = seg==="hotel"||seg==="pm"||seg==="timeshare";
+  const isOperator = seg==="hotel"||seg==="pm"||seg==="timeshare"||seg==="rental"||seg==="retail";
   const isFree = Number(p.monthly_cents||0)===0;
-  const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : "Shop";
+  const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : seg==="rental"?"Business" : seg==="retail"?"Store" : "Shop";
   const planTerms = isOperator
     ? (isFree
-        ? "OceanSafe for "+(seg==="hotel"?"Hotels":"Operators")+" — Free. The co-branded guide, your QR codes, and your analytics at no cost."
+        ? (seg==="retail" ? "OceanSafe for Retail — Free. $0/mo; OceanSafe takes 3% only on app sales (you keep 97%). Your page, QR codes, and analytics included."
+          : seg==="rental" ? "OceanSafe for Rentals & Tours — Free to join. Tour commissions split 50/50; 12.7% on store sales (you keep 87.3%). Your page, QR codes, and analytics included."
+          : "OceanSafe for "+(seg==="hotel"?"Hotels":"Operators")+" — Free. The co-branded guide, your QR codes, and your analytics at no cost.")
         : "$"+Math.round((p.monthly_cents||0)/100)+"/mo flat — the whole property: all co-branding, promotions, and unlimited amenities. No per-room, no per-booking.")
     : "Storefront — $1,500/yr + 6.7% of in-app sales, per store (Square's card processing ~3.3% + 30 cents is your own cost as merchant of record; OceanSafe doesn't mark it up, so a sale carries about 10% in total)";
   const renews = isOperator && isFree ? null : renewal(p.paid_at);

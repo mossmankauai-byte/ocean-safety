@@ -54,13 +54,18 @@ const slug=(m?m[1]:new URLSearchParams(location.search).get("slug")||"").toLower
   const tag = seg==="hotel"?"Your resort’s beach-safety guide"
             : seg==="timeshare"?"Your club’s beach-safety guide"
             : seg==="pm"?"Your rentals’ beach-safety guide"
+            : seg==="rental"?"Beach safety + gear & tours"
+            : seg==="retail"?"Your beach stop’s safety guide"
             : "Your local OceanSafe safety partner";
   const meta = seg==="hotel"?"Free, updated daily — the guide your guests open before the water. Put its QR at the front desk and in-room."
              : seg==="timeshare"?"Free, updated daily — the guide your owners and guests check before the water."
              : seg==="pm"?"Free, updated daily — the guide in every unit’s welcome book, before your guests hit the water."
+             : seg==="rental"?esc(p.name)+" — check the water, then grab your gear or book the day. Free, updated daily."
+             : seg==="retail"?esc(p.name)+" — check conditions, then grab what the day calls for. Free, updated daily."
              : esc(p.name)+" keeps you safe in the water — stop in and say aloha. Free, updated daily.";
   const ams=(Array.isArray(p.amenities)?p.amenities:[]).map(a=>a&&a.name?a.name:a).filter(Boolean);
-  const onProp = seg==="hotel"?"At the resort" : seg==="timeshare"?"At the club" : "On property";
+  const onProp = seg==="hotel"?"At the resort" : seg==="timeshare"?"At the club"
+    : seg==="rental"?"Gear & tours" : seg==="retail"?"In the store" : "On property";
   card.innerHTML=
     '<h1 style="color:'+esc(primary)+'">'+esc(p.name)+'</h1>'
     +(p.short?'<div class="sub">'+esc(p.short)+'</div>':'')

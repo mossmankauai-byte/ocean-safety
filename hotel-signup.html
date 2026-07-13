@@ -48,8 +48,8 @@
 
   <div class="hero">
     <span class="wm">Ocean<span class="c">Safe</span></span>
-    <h1>Put your hotel on the beach-safety guide your guests already open.</h1>
-    <p class="sub">Set it up yourself in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. Start completely free.</p>
+    <h1 id="heroH1">Put your hotel on the beach-safety guide your guests already open.</h1>
+    <p class="sub" id="heroSub">Set it up yourself in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. Start free.</p>
   </div>
 
   <form id="f">
@@ -58,16 +58,16 @@
       <label class="plan on" id="planFree">
         <input type="radio" name="tier" value="free" checked>
         <b>Free</b>
-        <span class="pr"><b>$0</b> — the co-branded guide, one featured amenity, and your full analytics. Completely free.</span>
+        <span class="pr" id="freePr"><b>$0</b> — the co-branded guide, one featured amenity, and your full analytics. Completely free.</span>
       </label>
       <label class="plan" id="planPaid">
         <input type="radio" name="tier" value="paid">
         <b>Paid</b>
-        <span class="pr"><b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. First month free.</span>
+        <span class="pr" id="paidPr"><b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. First month free.</span>
       </label>
     </div>
 
-    <label>Property name <span class="req">*</span></label>
+    <label id="nameLabel">Property name <span class="req">*</span></label>
     <input type="text" id="name" maxlength="80" autocomplete="organization" required>
 
     <label>Your email <span class="req">*</span></label>
@@ -110,6 +110,31 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY);
 const $=id=>document.getElementById(id);
 const CLAIM_URL=location.origin+"/setup.html";
 
+// ?type=hotel|rental|retail — one form, three businesses (from the start.html landing page)
+const TYPE=(new URLSearchParams(location.search).get("type")||"hotel").toLowerCase();
+const T={
+  hotel:{h1:"Put your hotel on the beach-safety guide your guests already open.",
+    sub:"Set it up yourself in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. Start free.",
+    nameLabel:"Property name", namePh:"Kauaʻi Shores Resort",
+    freePr:"<b>$0</b> — the co-branded guide, one featured amenity, and your full analytics. Completely free.",
+    paidPr:"<b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. First month free.", paidSelfServe:true},
+  rental:{h1:"Put your rentals & tours inside the guide guests already open.",
+    sub:"Your gear, tours, and activities in front of every guest checking the beach — with your own page, QR, and analytics. Free to join.",
+    nameLabel:"Business name", namePh:"Hanalei Beach Rentals",
+    freePr:"<b>$0</b> to join — we split tour commissions 50/50 and take 12.7% on store sales. You keep 87.3%.",
+    paidPr:"<b>$829</b>/mo — keep 100% of every sale, plus promotions and the full data layer. We set this up with you personally.", paidSelfServe:false},
+  retail:{h1:"Put your store on the guide visitors open before the water.",
+    sub:"Your storefront inside the beach-safety app, a QR on every receipt and counter, and demand analytics tied to the weather. Start free.",
+    nameLabel:"Store name", namePh:"Poipu Beach Store",
+    freePr:"<b>$0</b>/mo — we take 3% only on what the app sells for you. You keep 97%.",
+    paidPr:"<b>$500</b>/store/mo — 0% on sales, plus the full data layer. We set this up with you personally.", paidSelfServe:false}
+};
+const TC=T[TYPE]||T.hotel;
+$("heroH1").textContent=TC.h1; $("heroSub").textContent=TC.sub;
+$("nameLabel").innerHTML=TC.nameLabel+' <span class="req">*</span>'; $("name").placeholder=TC.namePh;
+$("freePr").innerHTML=TC.freePr; $("paidPr").innerHTML=TC.paidPr;
+document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":"Get your store on OceanSafe");
+
 const TS_SITEKEY="0x4AAAAAAD1KovJ4T8LFTTxL";
 const tsOn=TS_SITEKEY && !/YOUR/.test(TS_SITEKEY);
 if(tsOn){
@@ -138,10 +163,13 @@ $("f").addEventListener("submit",async e=>{
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr("Please enter a valid email.");
   if(!sig) return showErr("Please type your full name to sign.");
   if(!$("agree").checked) return showErr("Please agree to the terms to continue.");
+  if(tier==="paid" && !TC.paidSelfServe){
+    return showErr("The paid plan for your business is set up personally — email mossmankauai@gmail.com and we'll have you live this week. Or start free now and upgrade later.");
+  }
   let tsToken=null;
   if(tsOn){ tsToken=window.turnstile?turnstile.getResponse(window.__tsid):null;
     if(!tsToken) return showErr("Please complete the verification box above."); }
-  const body={ name, email, tier, hex:$("hexText").value.trim()||null,
+  const body={ name, email, tier, type:TYPE, hex:$("hexText").value.trim()||null,
     website:$("website").value.trim()||null,
     signatureName:sig, agreed:true, turnstileToken:tsToken };
   $("go").disabled=true; $("go").textContent="Setting up…";
