@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OceanSafe — How to send a payment link</title>
+<style>
+  :root{--ocean:#0f4c5c;--teal:#0A8BA8;--ink:#16202A;--mute:#5b6b76;--line:#e3e9ec;--bg:#f4f6f7;--green:#1c7a4a;--green-bg:#e6f4ec;--accent-bg:#e7f3f6;--card:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.5}
+  .wrap{max-width:560px;margin:0 auto;padding:22px 16px 48px}
+  h1{font-size:21px;font-weight:800;margin:4px 2px 4px}
+  .lede{font-size:13px;color:var(--mute);margin:0 2px 18px}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;display:flex;gap:14px;align-items:flex-start}
+  .num{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--accent-bg);color:var(--ocean);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+  .txt{flex:1}
+  .txt h2{font-size:14px;font-weight:800;margin:2px 0 3px}
+  .txt p{font-size:12.5px;color:var(--mute);margin:0}
+  .phone{flex:0 0 auto;width:118px;border:1px solid #cfd8dc;border-radius:20px;padding:5px;background:#f0f3f4}
+  .scr{background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden;min-height:184px;display:flex;flex-direction:column}
+  .shd{padding:7px 9px;border-bottom:1px solid var(--line);font-size:10px;font-weight:700;color:var(--ocean)}
+  .sbd{padding:8px 9px;display:flex;flex-direction:column;gap:6px;flex:1;font-size:9.5px;color:var(--mute)}
+  .r{border:1px solid var(--line);border-radius:8px;padding:5px 7px;display:flex;justify-content:space-between;gap:4px}
+  .r.on{border:1.5px solid var(--teal);background:var(--accent-bg);color:var(--ocean);font-weight:700}
+  .badge{align-self:flex-start;font-size:9.5px;font-weight:800;color:var(--green);background:var(--green-bg);border-radius:6px;padding:2px 7px}
+  .big{font-size:12px;font-weight:800;color:var(--ink)}
+  .btn{margin-top:auto;background:var(--ocean);color:#fff;text-align:center;font-size:10px;font-weight:700;padding:7px;border-radius:8px}
+  .bubble{background:var(--accent-bg);color:var(--ocean);border-radius:10px;padding:7px 8px;font-size:9.5px;line-height:1.45}
+  .field{border:1px solid var(--line);border-radius:7px;padding:6px 7px;font-size:10px;color:var(--ink)}
+  .ok{width:38px;height:38px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;align-self:center}
+  .note{font-size:11.5px;color:var(--mute);background:#fff;border:1px dashed var(--line);border-radius:10px;padding:11px 13px;margin-top:6px}
+  @media(max-width:430px){.step{flex-wrap:wrap}.phone{margin:0 auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>How to send a payment link</h1>
+  <p class="lede">Pick the plan, add their name, send the one link. They enter a card and the subscription starts — billed securely through Square, cancel anytime. Nothing to install, no card of yours.</p>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="txt"><h2>Pick the plan</h2><p>In the <b>Closing</b> tab, tap the plan that fits. The price is built into each link — you don't quote a number.</p></div>
+    <div class="phone"><div class="scr">
+      <div class="shd">Send the subscription link</div>
+      <div class="sbd">
+        <div class="r on">Hotel <span>$649/mo</span></div>
+        <div class="r">Timeshare <span>$2,000/mo</span></div>
+        <div class="r">Shop <span>$829/yr</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="txt"><h2>Add their name &amp; send</h2><p>Type the business name, then tap <b>Copy</b>, <b>Email</b>, or <b>Text</b>. The message writes itself.</p></div>
+    <div class="phone"><div class="scr">
+      <div class="shd">To: GM</div>
+      <div class="sbd">
+        <div class="bubble">Aloha — here's your OceanSafe link for Hanalei Bay Resort — $649/mo, billed through Square: square.link/…</div>
+        <div class="field" style="margin-top:auto;color:var(--mute)">Message ›</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div class="txt"><h2>They open it</h2><p>Square's secure page shows the price up front — no surprises, nothing hidden.</p></div>
+    <div class="phone"><div class="scr">
+      <div class="shd">squareup.com · OceanSafe</div>
+      <div class="sbd">
+        <div class="big">OceanSafe Hotel</div>
+        <div class="big">$649/mo</div>
+        <div>Billed monthly · cancel anytime</div>
+        <div style="border-top:1px solid var(--line);padding-top:5px">Due today <b style="float:right;color:var(--ink)">$649.00</b></div>
+        <div class="btn">Continue</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="step">
+    <div class="num">4</div>
+    <div class="txt"><h2>Card → subscribe</h2><p>They enter a card and subscribe. It's the real thing from day one — no trial to expire, no surprise later.</p></div>
+    <div class="phone"><div class="scr">
+      <div class="shd">Payment</div>
+      <div class="sbd">
+        <div class="field">4242 4242 4242 4242</div>
+        <div style="display:flex;gap:6px"><div class="field" style="flex:1">07/29</div><div class="field" style="flex:1">123</div></div>
+        <div style="font-size:9px">$649 today, then $649/mo</div>
+        <div class="btn">Subscribe</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="step">
+    <div class="num">5</div>
+    <div class="txt"><h2>Confirmed</h2><p>They're subscribed. It renews automatically each month until they cancel — in writing, anytime, no fee.</p></div>
+    <div class="phone"><div class="scr">
+      <div class="shd">Confirmed</div>
+      <div class="sbd" style="align-items:center;text-align:center;justify-content:center">
+        <div class="ok">&#10003;</div>
+        <div class="big">You're all set</div>
+        <div>Active · $649/mo · next charge in a month · cancel anytime</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="step">
+    <div class="num">6</div>
+    <div class="txt"><h2>You see it</h2><p>The subscription shows active in Square, and the payment lands in OceanSafe's account (Tropical Agronomics) — your commission is tracked on the Commissions tab.</p></div>
+    <div class="phone"><div class="scr">
+      <div class="shd">Square · Subscriptions</div>
+      <div class="sbd">
+        <div class="r on" style="flex-direction:column;align-items:stretch;gap:2px">
+          <div style="display:flex;justify-content:space-between">Hanalei Bay Resort <span class="badge">active</span></div>
+          <div style="font-weight:400;color:var(--mute)">$649/mo · renews monthly</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="note"><b>The three plans:</b> Hotel <b>$649/mo</b> · Timeshare <b>$2,000/mo</b> · Shop <b>$829/yr</b>. Pick the one that matches, send it, done. These screens are an accurate mockup — the live Square page may look slightly different.</div>
+</div>
+</body>
+</html>
