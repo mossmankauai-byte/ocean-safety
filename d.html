@@ -71,7 +71,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
           : seg==="rental" ? "OceanSafe for Rentals & Tours — Free to join. Tour commissions split 50/50; 12.7% on store sales (you keep 87.3%). Your page, QR codes, and analytics included."
           : "OceanSafe for "+(seg==="hotel"?"Hotels":"Operators")+" — Free. The co-branded guide, your QR codes, and your analytics at no cost.")
         : "$"+Math.round((p.monthly_cents||0)/100)+"/mo flat — the whole property: all co-branding, promotions, and unlimited amenities. No per-room, no per-booking.")
-    : "Storefront — $1,500/yr + 6.7% of in-app sales, per store (Square's card processing ~3.3% + 30 cents is your own cost as merchant of record; OceanSafe doesn't mark it up, so a sale carries about 10% in total)";
+    : "Storefront — Free: $0/mo + 3% only on in-app sales (you keep 97%) · or $500/store/mo with 0%. Square's card processing (~3.3% + 30¢) is your own cost as merchant of record — we don't mark it up.";
   const renews = isOperator && isFree ? null : renewal(p.paid_at);
   const ams=(Array.isArray(p.amenities)?p.amenities:[]).map(a=>a&&a.name?a.name:a).filter(Boolean);
   const qrCats = seg==="hotel"?[["room","In-room card"],["lobby","Lobby / front desk"],["welcome_email","Welcome email"],["general","Your own signage"]]
