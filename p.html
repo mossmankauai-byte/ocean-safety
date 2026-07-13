@@ -22,6 +22,14 @@
   .cta{display:block;text-align:center;font-weight:700;font-size:16px;text-decoration:none;color:#fff;
     border-radius:11px;padding:15px;margin-top:18px}
   .meta{color:#7A8794;font-size:13.5px;margin-top:14px}
+  .shopwrap{margin-top:22px}
+  .shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px}
+  .prod{border:1px solid #E0E6EB;border-radius:12px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:6px}
+  .prod img{width:100%;height:86px;object-fit:cover;border-radius:8px;background:#F0F4F7}
+  .prod .pt{font-size:13.5px;font-weight:600;line-height:1.3}
+  .prod .pp{font-size:14px;font-weight:800}
+  .prod button{margin-top:auto;font-size:13px;font-weight:700;border:none;border-radius:8px;padding:8px;color:#fff;cursor:pointer}
+  .prod button:disabled{opacity:.6}
   .dim{color:#8A97A3;font-size:14px}
   a{color:#0a8ba8}
 </style></head>
@@ -72,8 +80,35 @@ const slug=(m?m[1]:new URLSearchParams(location.search).get("slug")||"").toLower
     +'<div class="tag">'+esc(tag)+(p.region?' · '+esc(p.region):'')+'</div>'
     +'<a class="cta" style="background:'+esc(primary)+'" href="https://oceansafety.app/?ref='+encodeURIComponent(p.slug)+'">See today’s Kauaʻi beach-safety report →</a>'
     +(ams.length?'<div class="amwrap"><div class="amh">'+esc(onProp)+'</div>'+ams.map(a=>'<span class="amchip">'+esc(a)+'</span>').join('')+'</div>':'')
+    +'<div class="shopwrap" id="shopwrap" style="display:none"><div class="amh" id="shopH">Shop</div><div class="shopgrid" id="shopgrid"></div><div class="dim" id="shopNote" style="margin-top:8px"></div></div>'
     +'<div class="meta">'+meta+'</div>';
   document.title=p.name+" · OceanSafe";
+  // ── storefront items (free & paid partners both list; Buy when their Square is connected) ──
+  try{
+    const {data:items}=await sb.rpc("get_partner_products",{p_slug:slug});
+    if(Array.isArray(items)&&items.length){
+      const wrap=document.getElementById("shopwrap"), grid=document.getElementById("shopgrid");
+      document.getElementById("shopH").textContent = seg==="rental"?"Book & rent":"Shop";
+      grid.innerHTML=items.map(it=>'<div class="prod">'
+        +(it.image_url?'<img src="'+esc(it.image_url)+'" alt="">':'')
+        +'<div class="pt">'+esc(it.title)+'</div><div class="pp">$'+(it.price_cents/100).toFixed(2)+'</div>'
+        +(p.can_buy?'<button style="background:'+esc(primary)+'" data-buy="'+esc(it.id)+'">Buy — pick up in store</button>':'')
+        +'</div>').join("");
+      if(!p.can_buy) document.getElementById("shopNote").textContent="Available in store — stop by and say aloha.";
+      wrap.style.display="";
+      grid.querySelectorAll("[data-buy]").forEach(bn=>bn.addEventListener("click",async()=>{
+        bn.disabled=true; bn.textContent="One sec…";
+        try{
+          const r=await fetch(SB_URL+"/functions/v1/create-square-checkout",{method:"POST",
+            headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"apikey":SB_KEY},
+            body:JSON.stringify({slug:slug,items:[{product_id:bn.dataset.buy,qty:1}]})});
+          const out=await r.json();
+          if(out&&out.url){ location.href=out.url; return; }
+          bn.textContent="Unavailable — ask in store"; 
+        }catch(e){ bn.disabled=false; bn.textContent="Buy — pick up in store"; }
+      }));
+    }
+  }catch(e){}
 })();
 </script>
 </body></html>

@@ -78,6 +78,11 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     : (seg==="pm"||seg==="timeshare")?[["unit","In each unit"],["welcome_email","Welcome email"],["general","Your signage"]]
     : [["counter","Counter card"],["receipt","Receipt"],["general","Your signage"]];
   const qrUrl=cat=>live+"?ref="+encodeURIComponent(p.slug)+"&qr="+cat;
+  const sells = seg==="retail"||seg==="rental"||!isOperator;   // segments that list store items
+  const keepPct = seg==="retail"?"97%":seg==="rental"?"87.3%":"90%";
+  const feePct  = seg==="retail"?"3%":seg==="rental"?"12.7%":"10%";
+  const FN="https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-items";
+  const money2=c=>"$"+(c/100).toFixed(2);
   document.title=p.name+" · OceanSafe dashboard";
   root.style.setProperty("--accent",primary);
   const qrGrid = qrCats.map(([cat,label])=>
@@ -94,6 +99,14 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   +'<div class="card"><h2>Your QR codes</h2>'
     +'<p class="lead">'+(isOperator?'Print each where guests will see it — in the room, at the lobby, in your welcome email. Every code is tracked so you can tell which spot brings the most scans.':'Print these for your counter, receipts, and signage — each one is tracked.')+'</p>'
     +'<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px">'+qrGrid+'</div></div>'
+  +(sells?'<div class="card"><h2>Your items</h2>'
+    +'<p class="lead">List what you sell — items show on your page and sell in the app. '+(isFree?('You keep <b>'+keepPct+'</b>; our '+feePct+' only applies when the app sells for you.'):'You keep <b>100%</b> on your plan.')+'</p>'
+    +'<div id="itemsList" style="margin-top:12px"><span class="dim">Loading items…</span></div>'
+    +'<div class="row" style="margin-top:12px;align-items:stretch">'
+    +'<input id="itTitle" placeholder="Item name (e.g. Reef-safe sunscreen)" maxlength="80" style="flex:2;min-width:170px;font-size:14px;padding:9px 11px;border:1px solid #D5DCE2;border-radius:9px">'
+    +'<input id="itPrice" placeholder="$ price" inputmode="decimal" style="width:90px;font-size:14px;padding:9px 11px;border:1px solid #D5DCE2;border-radius:9px">'
+    +'<button class="btn primary" id="itAdd">Add item</button></div>'
+    +'<div class="hint" id="itMsg">Changes are live on your page the moment you add them.</div></div>':'')
   +(!isOperator?'<div class="card"><h2>Need more cards?</h2><p class="lead">Cards walk out the door — reorder anytime.</p>'
     +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+ml("More cards for "+p.name,"Hi OceanSafe team, "+p.name+" needs 200 more cards ($100). Ship to:")+'">Reorder 200 cards — $100 ↗</a></div></div>':'')
   +'<div class="card"><h2>What’s live</h2><div class="kv">'
@@ -108,14 +121,50 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     +'<div class="row" style="margin-top:10px"><a class="btn ghost" href="'+ml("Update "+p.name+"’s OceanSafe page","Hi OceanSafe team, please update the following for "+p.name+":\n\n- ")+'">Request a change ↗</a></div></div>'
   +'<div class="card"><h2>Your plan</h2><div class="kv"><span class="k">Plan</span><span>'+esc(planTerms)+'</span>'
     +(renews?'<span class="k">Renews</span><span>'+esc(renews)+'</span>':'')+'</div>'
-    +(isOperator&&isFree?'<div class="hint">Free, no card. Upgrade to unlock promotions and unlimited amenities whenever you’re ready.</div>':'<div class="hint">We’ll email you before any renewal, no surprises.</div>')+'</div>'
+    +(isOperator&&isFree?'<div class="hint">Free, no card. Upgrade to unlock the sections below whenever you’re ready.</div>':'<div class="hint">We’ll email you before any renewal, no surprises.</div>')+'</div>'
+  +lockCard("Promotions","Timed, condition-triggered offers on the guide your guests already open — the spa when the surf’s up, the right item on the right day.",isFree)
+  +lockCard("Market intelligence","The full demand board — what the weather drives, when guests plan, trends and forecasts.",isFree)
   +'<div class="card"><h2>Visits &amp; scans</h2>'
     +'<div class="soonrow"><span class="dim">Page visits</span><span class="pill">Coming soon</span></div>'
     +'<div class="soonrow"><span class="dim">QR scans by placement</span><span class="pill">Coming soon</span></div>'
     +'<div class="empty">Your QR codes are already tracked by placement; the counts turn on when analytics goes live — we’ll email you. Nothing to set up.</div></div>'
   +'<div class="card"><h2>Questions?</h2><p class="lead">Email or text us — a real person. <a href="mailto:'+NICK+'">'+NICK+'</a></p>'
     +'<div class="hint">Reply to any email to change anything, or to cancel.</div></div>';
+  function lockCard(title,desc,locked){
+    if(locked) return '<div class="card" style="position:relative;background:#F7F9FA"><h2>'+title+' <span class="pill" style="background:#FDF4DD;color:#a9781f;border-color:#ecdca0">\uD83D\uDD12 Paid</span></h2>'
+      +'<p class="lead" style="color:#64727F">'+desc+'</p>'
+      +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+ml("Upgrade "+p.name+" to Paid","Hi \u2014 "+p.name+" would like to upgrade to the paid plan. ")+'">Unlock with Paid \u2197</a></div></div>';
+    return '<div class="card"><h2>'+title+' <span class="pill" style="background:#E1F5EE;color:#085041;border-color:#BBE3C8">Included</span></h2>'
+      +'<p class="lead">'+desc+'</p><div class="hint">Included in your plan \u2014 rolling out; we\u2019ll email you the week yours switches on.</div></div>';
+  }
   document.getElementById("copylink")?.addEventListener("click",()=>window.copy(live));
+  // ── items CRUD (free AND paid — this is how free monetizes) ──
+  if(sells){
+    const fmtRow=(it)=>'<div class="soonrow" style="align-items:center;gap:10px"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(it.title)+'</span>'
+      +'<b style="white-space:nowrap">'+money2(it.price_cents)+'</b>'
+      +'<button class="btn ghost sm" data-tg="'+it.id+'">'+(it.active?'On':'Off')+'</button>'
+      +'<button class="btn ghost sm" data-rm="'+it.id+'" style="color:#791F1F;border-color:#F09595">\u00d7</button></div>';
+    async function itemsApi(body){ const r=await fetch(FN,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token,...body})}); return r.json(); }
+    function paintItems(out){
+      const el=document.getElementById("itemsList"); if(!el) return;
+      if(!out.ok){ el.innerHTML='<span class="dim">'+esc(out.error||"Couldn\u2019t load items.")+'</span>'; return; }
+      el.innerHTML = out.items.length? out.items.map(fmtRow).join("") : '<span class="dim">No items yet \u2014 add your first below.</span>';
+      el.querySelectorAll("[data-tg]").forEach(bn=>bn.addEventListener("click",async()=>{ const it=out.items.find(x=>x.id===bn.dataset.tg); bn.disabled=true; paintItems(await itemsApi({action:"update",id:bn.dataset.tg,active:!it.active})); }));
+      el.querySelectorAll("[data-rm]").forEach(bn=>bn.addEventListener("click",async()=>{ if(!confirm("Remove this item?"))return; bn.disabled=true; paintItems(await itemsApi({action:"del",id:bn.dataset.rm})); }));
+    }
+    itemsApi({action:"list"}).then(paintItems);
+    document.getElementById("itAdd")?.addEventListener("click",async()=>{
+      const t=document.getElementById("itTitle"), pr=document.getElementById("itPrice"), msg=document.getElementById("itMsg"), btn=document.getElementById("itAdd");
+      const cents=Math.round(parseFloat(String(pr.value).replace(/[^0-9.]/g,""))*100);
+      if(!t.value.trim()){ msg.textContent="Give the item a name."; return; }
+      if(!Number.isFinite(cents)||cents<50){ msg.textContent="Enter a price of $0.50 or more."; return; }
+      btn.disabled=true; btn.textContent="Adding\u2026";
+      const out=await itemsApi({action:"add",title:t.value.trim(),price_cents:cents});
+      btn.disabled=false; btn.textContent="Add item";
+      if(out.ok){ t.value=""; pr.value=""; msg.textContent="Added \u2014 it\u2019s live on your page."; } else { msg.textContent=out.error||"Something went wrong."; }
+      paintItems(out.ok?out:await itemsApi({action:"list"}));
+    });
+  }
   if(window.QRCode){ qrCats.forEach(([cat])=>{ QRCode.toDataURL(qrUrl(cat),{margin:1,width:240},(e,url)=>{ if(!e){ const img=document.getElementById("qr-"+cat); const dl=document.getElementById("qrdl-"+cat); if(img)img.src=url; if(dl)dl.href=url; } }); }); }
 })();
 </script>
