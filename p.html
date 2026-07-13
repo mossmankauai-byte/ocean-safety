@@ -70,7 +70,7 @@ const slug=(m?m[1]:new URLSearchParams(location.search).get("slug")||"").toLower
     '<h1 style="color:'+esc(primary)+'">'+esc(p.name)+'</h1>'
     +(p.short?'<div class="sub">'+esc(p.short)+'</div>':'')
     +'<div class="tag">'+esc(tag)+(p.region?' · '+esc(p.region):'')+'</div>'
-    +'<a class="cta" style="background:'+esc(primary)+'" href="https://oceansafety.app">See today’s Kauaʻi beach-safety report →</a>'
+    +'<a class="cta" style="background:'+esc(primary)+'" href="https://oceansafety.app/?ref='+encodeURIComponent(p.slug)+'">See today’s Kauaʻi beach-safety report →</a>'
     +(ams.length?'<div class="amwrap"><div class="amh">'+esc(onProp)+'</div>'+ams.map(a=>'<span class="amchip">'+esc(a)+'</span>').join('')+'</div>':'')
     +'<div class="meta">'+meta+'</div>';
   document.title=p.name+" · OceanSafe";
