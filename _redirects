@@ -6,3 +6,7 @@
 
 # Store checkout return (create-square-checkout appends ?order=&pickup= to this URL)
 /store/success  /store/success.html  200
+
+# DB-driven partner pages + no-login dashboards (runtime from Supabase)
+/p/*  /p.html  200
+/d/*  /d.html  200

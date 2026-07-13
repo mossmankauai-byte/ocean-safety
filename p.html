@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OceanSafe partner</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#F5F7F9;color:#16202A;padding:28px 18px 60px}
+  .wrap{max-width:620px;margin:0 auto}
+  .bar{height:8px;border-radius:6px;margin-bottom:16px;background:#0a8ba8}
+  .wm{font-weight:800;font-size:18px}.wm .c{color:#0a8ba8}
+  .card{background:#fff;border:1px solid #E2E8ED;border-radius:14px;padding:24px;margin-top:14px}
+  h1{font-size:27px;margin:4px 0}
+  .sub{color:#56636e;font-size:16px}
+  .tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    background:#EAF6EE;border:1px solid #BBE3C8;color:#1B7A43;border-radius:999px;padding:5px 11px;margin-top:14px}
+  .amwrap{margin-top:20px}
+  .amh{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#7A8794;margin-bottom:9px}
+  .amchip{display:inline-block;font-size:13.5px;font-weight:600;color:#16202A;background:#F0F4F7;border:1px solid #E0E6EB;
+    border-radius:999px;padding:6px 13px;margin:0 6px 6px 0}
+  .cta{display:block;text-align:center;font-weight:700;font-size:16px;text-decoration:none;color:#fff;
+    border-radius:11px;padding:15px;margin-top:18px}
+  .meta{color:#7A8794;font-size:13.5px;margin-top:14px}
+  .dim{color:#8A97A3;font-size:14px}
+  a{color:#0a8ba8}
+</style></head>
+<body><div class="wrap">
+  <div class="bar" id="bar"></div>
+  <div class="wm">Ocean<span class="c">Safe</span></div>
+  <div class="card" id="card"><div class="dim">Loading…</div></div>
+</div>
+<script>
+const SB_URL="https://arndnljtmjfsnzcpcuen.supabase.co";
+const SB_KEY="sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um";
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// slug from /p/<slug> (Netlify rewrites /p/* -> /p.html) or ?slug=
+const m=location.pathname.match(/\/p\/([^/?#]+)/);
+const slug=(m?m[1]:new URLSearchParams(location.search).get("slug")||"").toLowerCase();
+(async()=>{
+  const card=document.getElementById("card");
+  if(!slug){card.innerHTML='<div class="dim">No shop specified.</div>';return;}
+  const {data,error}=await sb.rpc("get_partner_page",{p_slug:slug});
+  const p=Array.isArray(data)?data[0]:null;
+  if(error||!p){
+    card.innerHTML='<h1>Not found</h1><div class="sub">This partner page isn’t live yet.</div>'
+      +'<a class="cta" style="background:#0a8ba8" href="https://oceansafety.app">Check Kauaʻi beach safety →</a>';
+    return;
+  }
+  const primary="#"+(p.primary_hex||"0a8ba8").replace(/^#/,"");
+  document.getElementById("bar").style.background=primary;
+  const seg=p.segment;
+  const tag = seg==="hotel"?"Your resort’s beach-safety guide"
+            : seg==="timeshare"?"Your club’s beach-safety guide"
+            : seg==="pm"?"Your rentals’ beach-safety guide"
+            : "Your local OceanSafe safety partner";
+  const meta = seg==="hotel"?"Free, updated daily — the guide your guests open before the water. Put its QR at the front desk and in-room."
+             : seg==="timeshare"?"Free, updated daily — the guide your owners and guests check before the water."
+             : seg==="pm"?"Free, updated daily — the guide in every unit’s welcome book, before your guests hit the water."
+             : esc(p.name)+" keeps you safe in the water — stop in and say aloha. Free, updated daily.";
+  const ams=(Array.isArray(p.amenities)?p.amenities:[]).map(a=>a&&a.name?a.name:a).filter(Boolean);
+  const onProp = seg==="hotel"?"At the resort" : seg==="timeshare"?"At the club" : "On property";
+  card.innerHTML=
+    '<h1 style="color:'+esc(primary)+'">'+esc(p.name)+'</h1>'
+    +(p.short?'<div class="sub">'+esc(p.short)+'</div>':'')
+    +'<div class="tag">'+esc(tag)+(p.region?' · '+esc(p.region):'')+'</div>'
+    +'<a class="cta" style="background:'+esc(primary)+'" href="https://oceansafety.app">See today’s Kauaʻi beach-safety report →</a>'
+    +(ams.length?'<div class="amwrap"><div class="amh">'+esc(onProp)+'</div>'+ams.map(a=>'<span class="amchip">'+esc(a)+'</span>').join('')+'</div>':'')
+    +'<div class="meta">'+meta+'</div>';
+  document.title=p.name+" · OceanSafe";
+})();
+</script>
+</body></html>

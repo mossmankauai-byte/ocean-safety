@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Your OceanSafe dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  :root{--accent:#0a8ba8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#F5F7F9;color:#16202A;padding:26px 18px 60px}
+  .wrap{max-width:680px;margin:0 auto}
+  .topbar{height:6px;border-radius:6px;margin-bottom:16px;background:var(--accent)}
+  .mast{display:flex;align-items:center;gap:9px}
+  .wm{font-weight:800;font-size:19px}.wm .c{color:var(--accent)}
+  .crumb{color:#64727F;font-size:14px}
+  .shop{font-weight:700;font-size:20px;margin-top:2px}
+  .priv{font-size:12.5px;color:#64727F;background:#EEF2F5;border:1px solid #E0E6EB;border-radius:8px;padding:9px 12px;margin:13px 0 18px}
+  .card{background:#fff;border:1px solid #E2E8ED;border-radius:12px;padding:18px;margin-bottom:14px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#64727F;margin-bottom:11px}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;text-decoration:none;border-radius:9px;
+    padding:10px 15px;cursor:pointer;border:1px solid transparent}
+  .btn.primary{background:var(--accent);color:#fff}.btn.ghost{background:#fff;color:#16202A;border-color:#D5DCE2}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .qr{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:14px}
+  .qr img{width:120px;height:120px;border:1px solid #E2E8ED;border-radius:10px}
+  .kv{display:grid;grid-template-columns:130px 1fr;gap:8px 14px;font-size:14.5px}
+  .kv .k{color:#64727F}
+  .hint{font-size:13px;color:#64727F;margin-top:8px}
+  .pill{font-size:11px;font-weight:700;text-transform:uppercase;background:#EEF2F5;color:#7A8794;border:1px solid #E0E6EB;border-radius:999px;padding:3px 9px}
+  .soonrow{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid #EDF1F4}.soonrow:first-of-type{border-top:none}
+  .empty{font-style:italic;color:#64727F;font-size:14px;border-left:3px solid #E0E6EB;padding:4px 0 4px 12px;margin-top:12px}
+  .dim{color:#8A97A3}
+  a{color:var(--accent)} .lead{font-size:14.5px}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16202A;color:#fff;font-size:13px;padding:9px 15px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
+  #toast.show{opacity:1}
+</style></head>
+<body><div class="wrap" id="root"><div class="card"><div class="dim">Loading your dashboard…</div></div></div>
+<div id="toast">Copied</div>
+<script>
+const SB_URL="https://arndnljtmjfsnzcpcuen.supabase.co";
+const SB_KEY="sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um";
+const SITE="https://oceansafety.app";
+const NICK="mossmankauai@gmail.com";
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ml=(s,b)=>"mailto:"+NICK+"?subject="+encodeURIComponent(s)+"&body="+encodeURIComponent(b);
+const m=location.pathname.match(/\/d\/([^/?#]+)/);
+const token=(m?m[1]:new URLSearchParams(location.search).get("t")||"");
+function toast(){const t=document.getElementById("toast");t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1300)}
+window.copy=t=>navigator.clipboard&&navigator.clipboard.writeText(t).then(toast);
+function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return null;d.setFullYear(d.getFullYear()+1);return d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}
+(async()=>{
+  const root=document.getElementById("root");
+  if(!token){root.innerHTML='<div class="card"><div class="dim">Invalid dashboard link.</div></div>';return;}
+  const {data,error}=await sb.rpc("get_partner_dashboard",{p_token:token});
+  const p=Array.isArray(data)?data[0]:null;
+  if(error||!p){root.innerHTML='<div class="card"><h2>Dashboard not found</h2><div class="lead">This link looks wrong. Check the link in your welcome email, or <a href="mailto:'+NICK+'">email us</a>.</div></div>';return;}
+  const primary="#"+(p.primary_hex||"0a8ba8").replace(/^#/,"");
+  const live=SITE+"/p/"+p.slug;
+  const seg=p.segment;
+  const isOperator = seg==="hotel"||seg==="pm"||seg==="timeshare";
+  const isFree = Number(p.monthly_cents||0)===0;
+  const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : "Shop";
+  const planTerms = isOperator
+    ? (isFree
+        ? "OceanSafe for "+(seg==="hotel"?"Hotels":"Operators")+" — Free. The co-branded guide, your QR codes, and your analytics at no cost."
+        : "$"+Math.round((p.monthly_cents||0)/100)+"/mo flat — the whole property: all co-branding, promotions, and unlimited amenities. No per-room, no per-booking.")
+    : "Storefront — $1,500/yr + 6.7% of in-app sales, per store (Square's card processing ~3.3% + 30 cents is your own cost as merchant of record; OceanSafe doesn't mark it up, so a sale carries about 10% in total)";
+  const renews = isOperator && isFree ? null : renewal(p.paid_at);
+  const ams=(Array.isArray(p.amenities)?p.amenities:[]).map(a=>a&&a.name?a.name:a).filter(Boolean);
+  const qrCats = seg==="hotel"?[["room","In-room card"],["lobby","Lobby / front desk"],["welcome_email","Welcome email"],["general","Your own signage"]]
+    : (seg==="pm"||seg==="timeshare")?[["unit","In each unit"],["welcome_email","Welcome email"],["general","Your signage"]]
+    : [["counter","Counter card"],["receipt","Receipt"],["general","Your signage"]];
+  const qrUrl=cat=>live+"?ref="+encodeURIComponent(p.slug)+"&qr="+cat;
+  document.title=p.name+" · OceanSafe dashboard";
+  root.style.setProperty("--accent",primary);
+  const qrGrid = qrCats.map(([cat,label])=>
+    '<div style="text-align:center"><img id="qr-'+cat+'" alt="'+esc(label)+' QR" style="width:118px;height:118px;border:1px solid #E2E8ED;border-radius:10px;background:#fff"><div style="font-weight:600;font-size:13px;margin-top:6px">'+esc(label)+'</div><a class="btn ghost sm" id="qrdl-'+cat+'" download="'+esc(p.slug)+'-'+cat+'-qr.png" style="margin-top:6px">Download</a></div>'
+  ).join('');
+  root.innerHTML=
+  '<div class="topbar"></div>'
+  +'<div class="mast"><span class="wm">Ocean<span class="c">Safe</span></span><span class="crumb">partner dashboard</span></div>'
+  +'<div class="shop">'+esc(p.name)+(p.region?' <span class="crumb">· '+esc(p.region)+'</span>':'')+'</div>'
+  +'<div class="priv">🔒 <b>Private to you.</b> It’s an unguessable link, not a password — don’t post it publicly.</div>'
+  +'<div class="card"><h2>Your page</h2>'
+    +'<div class="row"><a class="btn primary" href="'+esc(live)+'" target="_blank" rel="noopener">View your live page ↗</a>'
+    +'<button class="btn ghost" id="copylink">Copy page link</button></div></div>'
+  +'<div class="card"><h2>Your QR codes</h2>'
+    +'<p class="lead">'+(isOperator?'Print each where guests will see it — in the room, at the lobby, in your welcome email. Every code is tracked so you can tell which spot brings the most scans.':'Print these for your counter, receipts, and signage — each one is tracked.')+'</p>'
+    +'<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px">'+qrGrid+'</div></div>'
+  +(!isOperator?'<div class="card"><h2>Need more cards?</h2><p class="lead">Cards walk out the door — reorder anytime.</p>'
+    +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+ml("More cards for "+p.name,"Hi OceanSafe team, "+p.name+" needs 200 more cards ($100). Ship to:")+'">Reorder 200 cards — $100 ↗</a></div></div>':'')
+  +'<div class="card"><h2>What’s live</h2><div class="kv">'
+    +'<span class="k">'+esc(noun)+'</span><span>'+esc(p.name)+'</span>'
+    +(p.short?'<span class="k">Tagline</span><span>'+esc(p.short)+'</span>':'')
+    +(p.region?'<span class="k">Area</span><span>'+esc(p.region)+'</span>':'')
+    +(p.phone?'<span class="k">Phone</span><span>'+esc(p.phone)+'</span>':'')
+    +(p.website?'<span class="k">Website</span><span><a href="'+esc(p.website)+'" target="_blank" rel="noopener">'+esc(p.website)+'</a></span>':'')
+    +(ams.length?'<span class="k">On property</span><span>'+ams.map(esc).join(', ')+'</span>':'')
+    +'<span class="k">Page</span><span><a href="'+esc(live)+'" target="_blank" rel="noopener">'+esc(live)+'</a></span></div>'
+    +'<div class="hint">To change anything — your logo, colors, amenities, a typo — just ask and we’ll update it:</div>'
+    +'<div class="row" style="margin-top:10px"><a class="btn ghost" href="'+ml("Update "+p.name+"’s OceanSafe page","Hi OceanSafe team, please update the following for "+p.name+":\n\n- ")+'">Request a change ↗</a></div></div>'
+  +'<div class="card"><h2>Your plan</h2><div class="kv"><span class="k">Plan</span><span>'+esc(planTerms)+'</span>'
+    +(renews?'<span class="k">Renews</span><span>'+esc(renews)+'</span>':'')+'</div>'
+    +(isOperator&&isFree?'<div class="hint">Free, no card. Upgrade to unlock promotions and unlimited amenities whenever you’re ready.</div>':'<div class="hint">We’ll email you before any renewal, no surprises.</div>')+'</div>'
+  +'<div class="card"><h2>Visits &amp; scans</h2>'
+    +'<div class="soonrow"><span class="dim">Page visits</span><span class="pill">Coming soon</span></div>'
+    +'<div class="soonrow"><span class="dim">QR scans by placement</span><span class="pill">Coming soon</span></div>'
+    +'<div class="empty">Your QR codes are already tracked by placement; the counts turn on when analytics goes live — we’ll email you. Nothing to set up.</div></div>'
+  +'<div class="card"><h2>Questions?</h2><p class="lead">Email or text us — a real person. <a href="mailto:'+NICK+'">'+NICK+'</a></p>'
+    +'<div class="hint">Reply to any email to change anything, or to cancel.</div></div>';
+  document.getElementById("copylink")?.addEventListener("click",()=>window.copy(live));
+  if(window.QRCode){ qrCats.forEach(([cat])=>{ QRCode.toDataURL(qrUrl(cat),{margin:1,width:240},(e,url)=>{ if(!e){ const img=document.getElementById("qr-"+cat); const dl=document.getElementById("qrdl-"+cat); if(img)img.src=url; if(dl)dl.href=url; } }); }); }
+})();
+</script>
+</body></html>

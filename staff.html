@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OceanSafe Staff</title>
+<style>
+  :root{--accent:#0A8BA8;--deep:#0f4c5c;--ink:#16202A;--line:#E2E8ED;--muted:#56636e}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#EEF2F5;color:var(--ink);line-height:1.55;padding:22px 16px 80px}
+  .wrap{max-width:640px;margin:0 auto}
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .wm{font-weight:800;font-size:22px}.wm .c{color:var(--accent)}
+  .link{margin-left:auto;font-size:14px;color:var(--accent);cursor:pointer;background:none;border:none}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px}
+  h2{font-size:19px;margin-bottom:4px}
+  .say{color:var(--muted);font-size:15px;margin-bottom:16px}
+  label{display:block;font-weight:700;font-size:15px;margin:14px 0 6px}
+  input[type=text],input[type=email]{width:100%;font-size:17px;padding:13px 14px;border:1px solid #CdD5DC;border-radius:11px}
+  input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,139,168,.12)}
+  .btn{width:100%;font-weight:800;font-size:17px;border:none;border-radius:12px;padding:16px;background:var(--accent);color:#fff;cursor:pointer;margin-top:18px}
+  .btn:disabled{opacity:.6}
+  .btn.sm{width:auto;font-size:14px;padding:9px 15px;margin:0}
+  .btn.grey{background:#fff;color:var(--deep);border:1px solid #CdD5DC}
+  .btn.hide{background:#fff;color:#791F1F;border:1px solid #F09595;font-weight:700}
+  .btn.show{background:#fff;color:#085041;border:1px solid #5DCAA5;font-weight:700}
+  .done{background:#E1F5EE;border:1px solid #5DCAA5;border-radius:13px;padding:18px;margin-top:16px;display:none}
+  .done.on{display:block}
+  .done h3{font-size:17px;color:#04342C;margin-bottom:8px}
+  .linkrow{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #CdD5DC;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:14px}
+  .linkrow .u{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--deep);font-weight:600}
+  .err{background:#FCEBEB;border:1px solid #F09595;color:#791F1F;border-radius:11px;padding:12px 14px;font-size:15px;margin-top:14px;display:none}
+  .err.on{display:block}
+  .row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #F0F3F6}
+  .row:last-child{border-bottom:none}
+  .row .nm{font-weight:700;font-size:15px}
+  .row .em{font-size:13px;color:var(--muted)}
+  .tag{display:inline-block;font-size:11px;font-weight:800;border-radius:20px;padding:3px 9px;margin-top:3px}
+  .t-ok{background:#E1F5EE;color:#085041}.t-warn{background:#FAEEDA;color:#633806}.t-none{background:#EEF1F4;color:#56636e}
+  .t-live{background:#E1F5EE;color:#085041}.t-hidden{background:#FCEBEB;color:#791F1F}.t-draft{background:#EEF1F4;color:#56636e}
+  .spacer{flex:1}
+  .help{font-size:13.5px;color:var(--muted)}
+  details summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--accent)}
+  details ul{margin:10px 0 0 18px;font-size:14px;color:var(--muted)}
+  details li{margin-bottom:6px}
+  .center{text-align:center}
+</style></head>
+<body><div class="wrap">
+
+  <div id="signin" style="display:none">
+    <div class="top"><span class="wm">Ocean<span class="c">Safe</span></span></div>
+    <div class="card">
+      <h2>Staff sign-in</h2>
+      <p class="say">Enter the staff code your manager gave you. You only do this once on this computer.</p>
+      <label>Staff code</label>
+      <input type="text" id="code" placeholder="staff code" autocomplete="off">
+      <div class="err" id="signErr"></div>
+      <button class="btn" onclick="signIn()">Sign in</button>
+      <button class="btn grey" style="margin-top:10px" onclick="demoStart()">Just practicing? Try the demo →</button>
+      <p class="help center" style="margin-top:12px">The demo is a safe sandbox — nothing you do there is real.</p>
+    </div>
+  </div>
+
+  <div id="app" style="display:none">
+    <div class="top"><span class="wm">Ocean<span class="c">Safe</span></span>
+      <button class="link" onclick="signOut()">Sign out</button></div>
+
+    <div class="card">
+      <h2>Set up a hotel</h2>
+      <p class="say">A hotel wants to join? Enter their name and email — we’ll build their page. You send them the link, and they review it and publish it themselves.</p>
+      <label>Hotel name</label>
+      <input type="text" id="hName" placeholder="Kaua&#699;i Shores Resort">
+      <label>Their email</label>
+      <input type="email" id="hEmail" placeholder="manager@hotel.com">
+      <label>Their website <span style="font-weight:400;color:#7A8794">(optional)</span></label>
+      <input type="text" id="hSite" placeholder="https://…">
+      <div class="err" id="onErr"></div>
+      <button class="btn" id="onGo" onclick="onboard()">Prepare their page &amp; get a link</button>
+
+      <div class="done" id="onDone"></div>
+
+      <p class="help" style="margin-top:16px">Want the <b>paid plan ($649/mo)</b>? Send them this signup link and they check out themselves:</p>
+      <div class="linkrow"><span class="u" id="paidLink"></span><button class="btn sm grey" onclick="copyEl('paidLink')">Copy</button></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center"><h2>New sign-ups to check</h2>
+        <button class="btn sm grey" style="margin-left:auto" onclick="loadList()">Refresh</button></div>
+      <p class="say">Hotels who signed up on their own show here. If one looks fake — a big brand you don't recognize, or the email doesn't match the website — tap <b>Hide</b>. You can Show it again anytime.</p>
+      <div id="list"><p class="help">Loading…</p></div>
+
+      <details style="margin-top:16px"><summary>How this works</summary>
+        <ul>
+          <li><b>Set up a hotel</b> is for when a hotel contacts us — you make their free page for them, instantly.</li>
+          <li><b>New sign-ups</b> are hotels that signed themselves up online. They're already live; your job is just to glance and Hide anything that looks fake.</li>
+          <li><b>Looks legit ✓</b> means their email matches their website. <b>Double-check ⚠</b> means it doesn't — not always fake, just worth a look.</li>
+          <li>When unsure, tap Hide and tell your manager. Hiding is instant and reversible.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+<script>
+const SB_URL="https://arndnljtmjfsnzcpcuen.supabase.co";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+let CODE=localStorage.getItem("os_staff_code")||"";
+
+const GEN=["gmail.com","yahoo.com","hotmail.com","outlook.com","icloud.com","aol.com"];
+function slug(s){return (s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40)||"hotel";}
+function dmatch(email,website){ if(!website) return "no-site"; let site; try{site=new URL(website).hostname.replace(/^www\./,"").toLowerCase();}catch{return "no-site";} const m=(email.split("@")[1]||"").toLowerCase(); if(GEN.includes(m)) return "mismatch"; return (m===site||m.endsWith("."+site)||site.endsWith("."+m))?"match":"mismatch"; }
+function seedRows(){ return [
+  {id:1,name:"Kauaʻi Shores Resort",email:"manager@kauaishores.com",website:"https://kauaishores.com",slug:"kauai-shores-resort",status:"live",disabled_at:null,plan:"free",self_serve:true,domain:"match"},
+  {id:2,name:"Four Seasons Maui",email:"me@gmail.com",website:null,slug:"four-seasons-maui",status:"live",disabled_at:null,plan:"free",self_serve:true,domain:"no-site"}]; }
+let MOCK=seedRows(), MID=3;
+function mockApi(b){
+  if(b.action==="list") return Promise.resolve({ok:true,rows:MOCK.slice().reverse().map(p=>({...p}))});
+  if(b.action==="onboard"){ const s=slug(b.name); const row={id:MID++,name:b.name,email:b.email,website:b.website,slug:s,status:"live",disabled_at:null,plan:"free",self_serve:false,domain:dmatch(b.email,b.website)}; MOCK.push(row);
+    return Promise.resolve({ok:true,slug:s,page_url:"https://oceansafety.app/p/"+s,dashboard_url:"https://oceansafety.app/d/demo"+row.id}); }
+  if(b.action==="prepare"){ const s=slug(b.name); const row={id:MID++,name:b.name,email:b.email,website:b.website,slug:s,status:"draft",disabled_at:null,plan:"free",self_serve:false,domain:dmatch(b.email,b.website)}; MOCK.push(row);
+    const base=location.origin.startsWith("http")?location.origin:"https://your-site"; return Promise.resolve({ok:true,slug:s,setup_url:base+"/setup.html?demo=1"}); }
+  if(b.action==="disable"){ const p=MOCK.find(x=>x.id==b.id); if(p)p.disabled_at="now"; return Promise.resolve({ok:true}); }
+  if(b.action==="enable"){ const p=MOCK.find(x=>x.id==b.id); if(p)p.disabled_at=null; return Promise.resolve({ok:true}); }
+  return Promise.resolve({ok:false,error:"demo: unknown"});
+}
+async function api(body){
+  if(CODE==="demo") return mockApi(body);
+  const r=await fetch(SB_URL+"/functions/v1/selfserve-admin",{method:"POST",
+    headers:{"Content-Type":"application/json"},body:JSON.stringify({secret:CODE,...body})});
+  return r.json();
+}
+function show(which){ $("signin").style.display=which==="signin"?"block":"none"; $("app").style.display=which==="app"?"block":"none"; }
+function copyEl(id){ navigator.clipboard.writeText($(id).textContent||$(id).value).then(()=>{}); }
+function copyText(t){ navigator.clipboard.writeText(t); }
+
+async function signIn(){
+  CODE=$("code").value.trim(); $("signErr").classList.remove("on");
+  if(!CODE) return;
+  const out=await api({action:"list"});
+  if(!out.ok){ $("signErr").textContent="That code didn't work. Check with your manager."; $("signErr").classList.add("on"); return; }
+  localStorage.setItem("os_staff_code",CODE); start(out);
+}
+function signOut(){ localStorage.removeItem("os_staff_code"); CODE=""; MOCK=[]; show("signin"); }
+function demoStart(){ MOCK=seedRows(); MID=3; CODE="demo"; start(); }
+
+async function onboard(){
+  $("onErr").classList.remove("on"); $("onDone").classList.remove("on");
+  const name=$("hName").value.trim(), email=$("hEmail").value.trim(), website=$("hSite").value.trim()||null;
+  if(!name){ return oerr("Type the hotel name."); }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ return oerr("Type a valid email."); }
+  $("onGo").disabled=true; $("onGo").textContent="Building their page…";
+  const out=await api({action:"prepare",name,email,website});
+  $("onGo").disabled=false; $("onGo").textContent="Prepare their page & get a link";
+  if(!out.ok){ return oerr(out.error||"Something went wrong — try again."); }
+  $("onDone").innerHTML="<h3>Ready — send them this link 📩</h3>"+
+    "<p class='help'>Copy it into your email to <b>"+esc(email)+"</b>. They’ll review their page and publish it themselves.</p>"+
+    "<div class='linkrow'><span class='u'>"+esc(out.setup_url)+"</span><button class='btn sm grey' onclick=\"copyText('"+esc(out.setup_url)+"')\">Copy</button></div>";
+  $("onDone").classList.add("on");
+  $("hName").value=""; $("hEmail").value=""; $("hSite").value="";
+  loadList();
+}
+function oerr(m){ $("onErr").textContent=m; $("onErr").classList.add("on"); }
+
+async function loadList(){
+  const out=await api({action:"list"});
+  if(!out.ok){ $("list").innerHTML="<p class='help'>Couldn't load. Try Refresh.</p>"; return; }
+  const self=out.rows.filter(p=>p.self_serve||p.plan==="paid"||true);
+  if(!out.rows.length){ $("list").innerHTML="<p class='help'>No sign-ups yet.</p>"; return; }
+  $("list").innerHTML=out.rows.map(p=>{
+    const dm=p.domain==="match"?'<span class="tag t-ok">Looks legit ✓</span>':p.domain==="mismatch"?'<span class="tag t-warn">Double-check ⚠</span>':'<span class="tag t-none">No website</span>';
+    const stat=p.disabled_at?'<span class="tag t-hidden">Hidden</span>':p.status==="live"?'<span class="tag t-live">Live</span>':'<span class="tag t-draft">Not live yet</span>';
+    const btn=p.disabled_at?'<button class="btn sm show" onclick="setHidden(\''+p.id+'\',false)">Show</button>':'<button class="btn sm hide" onclick="setHidden(\''+p.id+'\',true,\''+esc(p.name).replace(/'/g,"")+'\')">Hide</button>';
+    return '<div class="row"><div><div class="nm">'+esc(p.name)+'</div><div class="em">'+esc(p.email)+'</div>'+dm+' '+stat+'</div><div class="spacer"></div>'+btn+'</div>';
+  }).join("");
+}
+async function setHidden(id,hide,name){
+  if(hide && !confirm('Hide "'+(name||"this hotel")+'"? Their page goes dark right away. You can Show it again.')) return;
+  const out=await api({action:hide?"disable":"enable",id});
+  if(!out.ok){ alert(out.error||"Didn't work — try again."); return; }
+  loadList();
+}
+
+function start(){ show("app");
+  const base=location.origin.startsWith("http")?location.origin:"https://your-site";
+  $("paidLink").textContent=base+"/hotel-signup.html";
+  loadList(); }
+
+(function(){
+  if(/demo/i.test(location.search+location.hash)){ demoStart(); return; }
+  if(CODE){ api({action:"list"}).then(o=>{ if(o.ok) start(); else { CODE=""; show("signin"); } }); } else show("signin");
+})();
+</script>
+</body></html>

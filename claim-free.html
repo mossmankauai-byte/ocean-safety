@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Publishing your OceanSafe page</title>
+<style>
+  :root{--accent:#0A8BA8;--ink:#16202A}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#F5F7F9;color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:60px 18px}
+  .wrap{max-width:520px;margin:0 auto}
+  .card{background:#fff;border:1px solid #E2E8ED;border-radius:14px;padding:28px;border-top:6px solid var(--accent);text-align:center}
+  .wm{font-weight:800;font-size:21px}.wm .c{color:var(--accent)}
+  h1{font-size:22px;margin:14px 0 8px}
+  p{color:#56636e;font-size:15px}
+  .spin{display:inline-block;width:22px;height:22px;border:3px solid #CdD5DC;border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;margin:10px auto}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .btns{margin-top:18px;display:grid;gap:10px}
+  .btn{font-weight:700;font-size:15px;border:none;border-radius:10px;padding:14px;background:var(--accent);color:#fff;text-decoration:none;display:block}
+  .btn.ghost{background:#fff;color:var(--accent);border:1px solid #CdD5DC}
+  .err{background:#FCEBEB;border:1px solid #F09595;color:#791F1F;border-radius:9px;padding:12px 14px;font-size:14px;margin-top:12px;text-align:left}
+  a{color:var(--accent)}
+</style></head>
+<body><div class="wrap"><div class="card" id="card">
+  <span class="wm">Ocean<span class="c">Safe</span></span>
+  <div id="body"><div class="spin"></div><p>Verifying your email and publishing your page…</p></div>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL="https://arndnljtmjfsnzcpcuen.supabase.co";
+const SB_KEY="sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um";
+const sb=window.supabase.createClient(SB_URL,SB_KEY);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+
+async function publish(token){
+  try{
+    const r=await fetch(SB_URL+"/functions/v1/activate-free-verified",{method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+token,"apikey":SB_KEY},
+      body:"{}"});
+    const out=await r.json();
+    if(!r.ok||!out.ok) throw new Error(out.error||"Publishing was blocked.");
+    $("body").innerHTML="<h1>Your page is live 🎉</h1>"+
+      "<p>Guests can open your co-branded conditions guide now.</p>"+
+      "<div class='btns'>"+
+      "<a class='btn' href='"+esc(out.page_url)+"' target='_blank' rel='noopener'>View your guest page →</a>"+
+      "<a class='btn ghost' href='"+esc(out.dashboard_url)+"' target='_blank' rel='noopener'>Open your dashboard →</a>"+
+      "</div>";
+  }catch(err){
+    $("body").innerHTML="<h1>Almost there</h1><div class='err'>"+esc(err.message)+
+      "</div><p style='margin-top:12px'>Email <a href='mailto:mossmankauai@gmail.com'>mossmankauai@gmail.com</a> and we'll finish it for you.</p>";
+  }
+}
+
+function needLink(){
+  $("body").innerHTML="<h1>Open the link from your email</h1>"+
+    "<p>Use the sign-in link we emailed you to verify and publish your free page. The link may have expired — start again from the signup page if needed.</p>";
+}
+
+(async()=>{
+  const { data:{ session } }=await sb.auth.getSession();
+  if(session?.access_token){ publish(session.access_token); return; }
+  sb.auth.onAuthStateChange((_e,s)=>{ if(s?.access_token) publish(s.access_token); });
+  setTimeout(async()=>{ const { data:{ session:s2 } }=await sb.auth.getSession(); if(!s2) needLink(); },2500);
+})();
+</script>
+</body></html>

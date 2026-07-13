@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up your OceanSafe page</title>
+<style>
+  :root{--accent:#0A8BA8;--deep:#0f4c5c;--ink:#16202A;--line:#E2E8ED;--muted:#56636e;--good:#1D9E75}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#EEF2F5;color:var(--ink);line-height:1.55;padding:22px 16px 80px}
+  .wrap{max-width:560px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+  .wm{font-weight:800;font-size:20px}.wm .c{color:var(--accent)}
+  .demo{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#633806;background:#FAEEDA;border-radius:20px;padding:3px 10px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}
+  h1{font-size:24px;line-height:1.2;margin-bottom:8px}
+  .say{color:var(--muted);font-size:15.5px}
+  .prog{height:7px;background:#dde7ec;border-radius:6px;overflow:hidden;margin-bottom:6px}
+  .prog span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--good));border-radius:6px;transition:width .3s}
+  .stepn{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+  .why{background:#F5F7F9;border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:11px 14px;font-size:13.5px;color:var(--muted);margin:14px 0}
+  .why b{color:var(--deep)}
+  label{display:block;font-weight:700;font-size:14px;margin:14px 0 6px}
+  input[type=text],input[type=tel]{width:100%;font-size:16px;padding:12px 13px;border:1px solid #CdD5DC;border-radius:11px}
+  input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,139,168,.12)}
+  .colorrow{display:flex;gap:10px;align-items:center}
+  .swatch{width:48px;height:46px;padding:3px;border:1px solid #CdD5DC;border-radius:11px;background:#fff;cursor:pointer}
+  .preview{border-radius:16px;overflow:hidden;border:1px solid var(--line);margin:16px 0}
+  .preview .hd{padding:18px;color:#fff}
+  .preview .kick{font-size:11px;opacity:.85;letter-spacing:.09em;font-weight:700}
+  .preview .ttl{font-size:19px;font-weight:800;margin-top:5px}
+  .preview .bd{padding:14px;background:#fff}
+  .chip{display:inline-block;font-size:12px;font-weight:700;background:#eef4f7;color:var(--deep);border-radius:16px;padding:4px 10px;margin:2px 4px 2px 0}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chipbtn{font-size:14px;border:1px solid #CdD5DC;background:#fff;border-radius:22px;padding:9px 14px;cursor:pointer;color:var(--deep)}
+  .chipbtn.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .chipbtn.on:before{content:"✓ "}
+  .addrow{display:flex;gap:8px;margin-top:12px}.addrow input{flex:1}
+  .btn{width:100%;font-weight:800;font-size:17px;border:none;border-radius:13px;padding:15px;background:var(--accent);color:#fff;cursor:pointer}
+  .btn:disabled{opacity:.6}
+  .btn.grey{background:#fff;color:var(--deep);border:1px solid #CdD5DC}
+  .btn.sm{width:auto;font-size:14px;padding:10px 15px}
+  .nav{display:flex;gap:10px;margin-top:22px}
+  .recap{font-size:14px;color:var(--ink)}
+  .recap .rrow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0F3F6}
+  .recap .rk{color:var(--muted)}.recap .rv{font-weight:700;text-align:right}
+  .free{display:inline-block;font-size:12px;font-weight:800;color:#085041;background:#E1F5EE;border-radius:20px;padding:4px 11px;margin-top:10px}
+  .err{background:#FCEBEB;border:1px solid #F09595;color:#791F1F;border-radius:12px;padding:13px 15px;font-size:14.5px;margin-top:14px}
+  .linkrow{display:flex;align-items:center;gap:8px;background:#F5F7F9;border:1px solid #CdD5DC;border-radius:11px;padding:11px 13px;margin-top:8px;font-size:14px}
+  .linkrow .u{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--deep);font-weight:600}
+  .spin{width:26px;height:26px;border:3px solid #CdD5DC;border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;margin:20px auto}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .center{text-align:center}.muted{color:var(--muted);font-size:14px}
+  details summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--accent)}
+</style></head>
+<body><div class="wrap">
+  <div class="brand"><span class="wm">Ocean<span class="c">Safe</span></span><span class="demo" id="demoTag" style="display:none">demo</span></div>
+  <div id="stage"><div class="card"><div class="spin"></div><p class="center muted">Loading your page…</p></div></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL="https://arndnljtmjfsnzcpcuen.supabase.co";
+const SB_KEY="sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um";
+const sb=window.supabase.createClient(SB_URL,SB_KEY);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+const params=new URLSearchParams(location.search);
+const TOKEN=(params.get("t")||"").trim();
+const DEMO=params.get("demo")==="1" || (location.protocol==="file:" && !TOKEN);
+const SUGGEST=["Spa","Restaurant","Pool & pool bar","Cabanas","Beach gear rental","Lūʻau","Activities desk","Coffee shop"];
+let S={}, STEP=0;
+
+async function api(body){
+  if(DEMO) return demoApi(body);
+  if(TOKEN){
+    const r=await fetch(SB_URL+"/functions/v1/client-setup",{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify({token:TOKEN,...body})});
+    return r.json();
+  }
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session||!session.access_token) return {ok:false,error:"__nosession__"};
+  const r=await fetch(SB_URL+"/functions/v1/activate-free-verified",{method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token,"apikey":SB_KEY},
+    body:JSON.stringify(body)});
+  return r.json();
+}
+let DEMO_P={name:"Hanalei Bay Resort",slug:"hanalei-bay-resort",primary_hex:"14524a",short:"North Shore, Kauaʻi",region:"Hanalei",phone:"",website:"https://hanaleibayresort.com",amenities:[],status:"draft",
+  page_url:"https://oceansafety.app/p/hanalei-bay-resort",dashboard_url:"https://oceansafety.app/d/demo"};
+function demoApi(b){
+  if(b.action==="get") return Promise.resolve({ok:true,partner:{...DEMO_P}});
+  if(b.action==="publish"){ Object.assign(DEMO_P,{primary_hex:(b.hex||"").replace(/^#/,"")||DEMO_P.primary_hex,short:b.short,region:b.region,phone:b.phone,website:b.website,amenities:b.amenities,status:"live"});
+    return Promise.resolve({ok:true,page_url:DEMO_P.page_url,dashboard_url:DEMO_P.dashboard_url}); }
+  return Promise.resolve({ok:false,error:"demo"});
+}
+function copyText(t){ navigator.clipboard.writeText(t); }
+function guestPreview(){ const hex=S.primary_hex||"0f4c5c"; const am=(S.amenities||[]).slice(0,3).map(a=>'<span class="chip">'+esc(a)+'</span>').join("");
+  return '<div class="preview"><div class="hd" style="background:#'+esc(hex)+'"><div class="kick">OCEANSAFE · '+esc((S.name||"").toUpperCase())+'</div><div class="ttl">Today at the beach</div></div>'+
+  '<div class="bd"><span class="chip">Surf 2–4 ft</span><span class="chip">UV 9</span><span class="chip">Wind 12 mph</span>'+
+  (S.short?'<p class="muted" style="margin-top:8px">'+esc(S.short)+'</p>':'')+
+  (am?'<div style="margin-top:10px;font-size:11px;color:#7A8794;font-weight:700">ON-PROPERTY</div>'+am:'')+'</div></div>'; }
+
+function progress(){ const pct=Math.round((STEP)/4*100); return '<div class="prog"><span style="width:'+pct+'%"></span></div>'; }
+
+/* ── steps ───────────────────────────────────────────────────────────────── */
+function render(){
+  if(STEP===-1) return chooser();
+  if(STEP===0) return welcome();
+  if(STEP===1) return lookStep();
+  if(STEP===2) return detailStep();
+  if(STEP===3) return amenityStep();
+  if(STEP===4) return publishStep();
+}
+function nav(back,next,nextLabel){ return '<div class="nav">'+
+  (back?'<button class="btn grey" onclick="go('+(STEP-1)+')">Back</button>':'')+
+  '<button class="btn" onclick="'+next+'">'+ (nextLabel||"Next →") +'</button></div>'; }
+
+function welcome(){
+  const paid=S.plan==='paid';
+  $("stage").innerHTML='<div class="card"><h1>Welcome, '+esc(S.name)+' 👋</h1>'+
+    '<p class="say">We built your OceanSafe page. Let’s make it yours — 4 quick steps, about 2 minutes'+(paid?', then a quick checkout':'')+'.</p>'+
+    '<span class="free"'+(paid?' style="background:#E6F1FB;color:#0C447C"':'')+'>'+(paid?'$649/mo · first month free':'Free · no card, no fees')+'</span>'+guestPreview()+
+    '<button class="btn" onclick="go(1)">Let’s set it up →</button>'+
+    '<p class="muted center" style="margin-top:10px">You can change anything later from your dashboard.</p></div>';
+}
+function chooser(){
+  $("stage").innerHTML='<div class="card"><h1>Preview the hotel onboarding</h1>'+
+    '<p class="say">This is exactly what a hotel walks through after they start. Pick a plan to preview it.</p>'+
+    '<button class="btn" style="margin-top:18px" onclick="pick(\'free\')">Free plan — preview →</button>'+
+    '<button class="btn grey" style="margin-top:10px" onclick="pick(\'paid\')">Paid plan · $649/mo — preview →</button>'+
+    '<p class="muted center" style="margin-top:12px">Demo — nothing here is real.</p></div>';
+}
+function pick(plan){ S.plan=plan; S.monthly_cents=plan==='paid'?64900:0; STEP=0; render(); }
+function checkout(){
+  $("stage").innerHTML='<div class="card">'+progress()+'<div class="stepn">Checkout</div>'+
+    '<h1>Secure checkout</h1>'+
+    '<div class="why">First month free, then <b>$649/mo</b> — one flat price for the whole property. Card handled by Square; cancel anytime.</div>'+
+    '<div class="recap"><div class="rrow"><span class="rk">OceanSafe Hotel</span><span class="rv">$649/mo</span></div>'+
+    '<div class="rrow"><span class="rk">First month</span><span class="rv">Free</span></div>'+
+    '<div class="rrow"><span class="rk">Due today</span><span class="rv">$0.00</span></div></div>'+
+    '<p class="muted" style="margin-top:10px">In the live version this is a Square checkout page.</p>'+
+    '<div class="nav"><button class="btn grey" onclick="go(4)">Back</button><button class="btn" onclick="publishPaid()">Start free month →</button></div></div>';
+}
+async function publishPaid(){
+  const out=await api({action:"publish",hex:S.primary_hex,short:S.short,region:S.region,phone:S.phone,website:S.website,amenities:S.amenities});
+  if(!out.ok){ alert(out.error||"Something went wrong."); return; }
+  S.page_url=out.page_url; S.dashboard_url=out.dashboard_url; STEP=5; renderLive();
+}
+function shell(title,inner,nextFn,nextLabel){
+  $("stage").innerHTML='<div class="card">'+progress()+'<div class="stepn">Step '+STEP+' of 4</div>'+
+    '<h1>'+title+'</h1>'+inner+nav(true,nextFn||'go('+(STEP+1)+')',nextLabel)+'</div>';
+}
+function lookStep(){
+  shell("Make it look like you",
+    '<div class="why">This is what your guests see with your name on it. Your color sets the header.</div>'+
+    '<div id="prev"></div>'+
+    '<label>Brand color</label><div class="colorrow"><input type="color" id="hex" class="swatch" value="#'+esc(S.primary_hex||"0f4c5c")+'"><input type="text" id="hexText" value="#'+esc(S.primary_hex||"0f4c5c")+'" maxlength="7" style="max-width:130px"></div>'+
+    '<label>Short tagline <span style="font-weight:400;color:#7A8794">(optional)</span></label><input type="text" id="short" maxlength="120" value="'+esc(S.short||"")+'" placeholder="e.g. North Shore, Kauaʻi">');
+  drawPrev();
+  $("hex").addEventListener("input",()=>{$("hexText").value=$("hex").value;S.primary_hex=$("hex").value.replace(/^#/,"");drawPrev();});
+  $("hexText").addEventListener("input",()=>{const v=$("hexText").value.trim();if(/^#?[0-9a-fA-F]{6}$/.test(v)){$("hex").value=v[0]==="#"?v:"#"+v;S.primary_hex=v.replace(/^#/,"");drawPrev();}});
+  $("short").addEventListener("input",()=>{S.short=$("short").value.trim();drawPrev();});
+}
+function drawPrev(){ if($("prev")) $("prev").innerHTML=guestPreview(); }
+function detailStep(){
+  shell("Your property details",
+    '<div class="why">This points guests to <b>your</b> beach and lets us surface the right conditions. It also shows on your page.</div>'+
+    '<label>Town or area</label><input type="text" id="region" maxlength="60" value="'+esc(S.region||"")+'" placeholder="Hanalei, Poʻipū, Kāʻanapali…">'+
+    '<label>Phone <span style="font-weight:400;color:#7A8794">(optional)</span></label><input type="tel" id="phone" maxlength="40" value="'+esc(S.phone||"")+'" placeholder="(808) 555-1234">'+
+    '<label>Website <span style="font-weight:400;color:#7A8794">(optional)</span></label><input type="text" id="website" maxlength="200" value="'+esc(S.website||"")+'" placeholder="https://…">');
+  $("region").addEventListener("input",()=>S.region=$("region").value.trim());
+  $("phone").addEventListener("input",()=>S.phone=$("phone").value.trim());
+  $("website").addEventListener("input",()=>S.website=$("website").value.trim());
+}
+function amenityStep(){
+  S.amenities=S.amenities||[];
+  const chips=SUGGEST.map(a=>'<button class="chipbtn'+(S.amenities.includes(a)?' on':'')+'" onclick="toggleAm(\''+esc(a).replace(/'/g,"")+'\')">'+esc(a)+'</button>').join("");
+  const custom=S.amenities.filter(a=>!SUGGEST.includes(a)).map(a=>'<button class="chipbtn on" onclick="toggleAm(\''+esc(a).replace(/'/g,"")+'\')">'+esc(a)+'</button>').join("");
+  shell("What can guests do at your property?",
+    '<div class="why">On rough-ocean days, OceanSafe nudges your guests toward <b>your</b> spa, dining, and pool instead of leaving — this is how you keep them (and their spend) on-site.</div>'+
+    '<p class="say" style="font-size:14px">Tap the ones you have:</p><div class="chips">'+chips+custom+'</div>'+
+    '<div class="addrow"><input type="text" id="amAdd" maxlength="60" placeholder="Add your own…"><button class="btn grey sm" onclick="addAm()">Add</button></div>'+
+    '<p class="muted" style="margin-top:10px">'+(S.amenities.length?S.amenities.length+" added":"Add a few — you can always add more later.")+'</p>');
+  $("amAdd").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addAm();}});
+}
+function toggleAm(a){ S.amenities=S.amenities||[]; const i=S.amenities.indexOf(a); if(i>=0)S.amenities.splice(i,1); else S.amenities.push(a); amenityStep(); }
+function addAm(){ const v=$("amAdd").value.trim(); if(v && !(S.amenities||[]).includes(v)){ (S.amenities=S.amenities||[]).push(v); } amenityStep(); }
+function publishStep(){
+  const am=(S.amenities||[]).length?S.amenities.join(", "):"—";
+  const paid=S.plan==='paid';
+  shell(paid?"Review, then check out":"Ready to go live?",
+    '<div class="why">'+(paid?'Next you’ll check out — first month free, then $649/mo, one flat price for the whole property. ':'Publishing makes your page live for guests right away. ')+'You can edit anything later.</div>'+
+    guestPreview()+
+    '<div class="recap"><div class="rrow"><span class="rk">Name</span><span class="rv">'+esc(S.name)+'</span></div>'+
+    '<div class="rrow"><span class="rk">Area</span><span class="rv">'+esc(S.region||"—")+'</span></div>'+
+    '<div class="rrow"><span class="rk">Amenities</span><span class="rv">'+esc(am)+'</span></div>'+
+    '<div class="rrow"><span class="rk">Plan</span><span class="rv">'+(paid?'$649/mo · first month free':'Free')+'</span></div></div>'+
+    '<div id="pubErr"></div>',
+    paid?'checkout()':'publish()', paid?'Continue to checkout →':'Publish my page — go live');
+}
+async function publish(){
+  const btns=document.querySelectorAll('.nav .btn'); btns.forEach(b=>b.disabled=true);
+  const last=btns[btns.length-1]; const t=last.textContent; last.textContent="Publishing…";
+  const out=await api({action:"publish",hex:S.primary_hex,short:S.short,region:S.region,phone:S.phone,website:S.website,amenities:S.amenities});
+  if(!out.ok){ btns.forEach(b=>b.disabled=false); last.textContent=t;
+    $("pubErr").innerHTML='<div class="err">'+esc(out.error||"Something went wrong.")+'</div>'; return; }
+  S.page_url=out.page_url; S.dashboard_url=out.dashboard_url; STEP=5; renderLive();
+}
+function renderLive(){
+  $("stage").innerHTML='<div class="card center"><h1>You’re live 🎉</h1>'+
+    '<p class="say">Your guests can open your beach-safety guide now.</p>'+(S.plan==='paid'?'<span class="free" style="background:#E6F1FB;color:#0C447C">$649/mo · first month free · active</span>':'')+guestPreview()+
+    '<div style="text-align:left"><p class="muted" style="margin-top:4px">Your guest page:</p>'+
+    '<div class="linkrow"><span class="u">'+esc(S.page_url)+'</span><button class="btn grey sm" onclick="copyText(\''+esc(S.page_url)+'\')">Copy</button></div>'+
+    '<p class="muted" style="margin-top:12px">Your dashboard — where you manage everything:</p>'+
+    '<div class="linkrow"><span class="u">'+esc(S.dashboard_url)+'</span><button class="btn grey sm" onclick="copyText(\''+esc(S.dashboard_url)+'\')">Copy</button></div></div>'+
+    '<a class="btn" href="'+esc(S.dashboard_url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;margin-top:18px">Go to my dashboard →</a>'+
+    '<details style="text-align:left;margin-top:18px"><summary>What happens next?</summary>'+
+    '<p class="muted" style="margin-top:8px"><b>1. Your QR codes.</b> Your dashboard has a QR for each spot — in-room, lobby, welcome email — ready to print. Each one is tracked so you’ll see which placement works.<br><br>'+
+    '<b>2. Your dashboard.</b> See your live page, your QR codes, and (soon) scans by placement.<br><br>'+
+    '<b>3. Changes.</b> Want to tweak your colors, text, or amenities? Ask us right from your dashboard and we’ll update it.</p></details></div>';
+}
+function go(n){ STEP=n; render(); }
+
+(async()=>{
+  if(DEMO) $("demoTag").style.display="inline-block";
+  // self-serve free path: the magic link establishes a session — wait for it to settle
+  if(!DEMO && !TOKEN){
+    await new Promise(res=>{ let done=false; const fin=()=>{if(!done){done=true;res();}};
+      sb.auth.getSession().then(({data})=>{ if(data.session) fin(); });
+      sb.auth.onAuthStateChange((_e,s)=>{ if(s) fin(); });
+      setTimeout(fin,2600); });
+  }
+  const out=await api({action:"get"});
+  if(!out.ok){
+    const needLink = out.error==="__nosession__" || (!TOKEN && !DEMO);
+    $("stage").innerHTML='<div class="card"><div class="err">'+esc(needLink
+        ? "Open the link we emailed you to set up your page. If it expired, start again from the signup page."
+        : (out.error||"We couldn’t find your page. Ask us for a fresh link."))+'</div>'
+      +'<p class="muted center" style="margin-top:14px">Need help? <a href="mailto:mossmankauai@gmail.com">Email us</a></p></div>'; return; }
+  const p=out.partner;
+  S={name:p.name,slug:p.slug,primary_hex:p.primary_hex,short:p.short||"",region:p.region||"",phone:p.phone||"",website:p.website||"",amenities:Array.isArray(p.amenities)?p.amenities.map(a=>a&&a.name?a.name:a).filter(Boolean):[],plan:p.plan||"free",status:p.status,page_url:p.page_url,dashboard_url:p.dashboard_url};
+  if(S.status==="live"){ STEP=5; renderLive(); return; }
+  if(DEMO){ STEP=-1; render(); return; }
+  STEP=0; render();
+})();
+</script>
+</body></html>
