@@ -1763,8 +1763,18 @@
     }
     card.style.right='auto'; card.style.bottom='auto'; card.style.width=''; card.style.maxWidth='';
     card.style.maxHeight=''; card.style.overflowY='';
-    var top = (r.bottom+pad+14+ch < vh) ? r.bottom+pad+14 : Math.max(12, r.top-pad-14-ch);
-    var left = Math.min(Math.max(12, r.left), vw-cw-12);
+    var left = Math.min(Math.max(12, r.left), vw-cw-12), top;
+    if(r.bottom+pad+14+ch < vh) top = r.bottom+pad+14;                    // below
+    else if(r.top-pad-14-ch > 12) top = r.top-pad-14-ch;                  // above
+    else if(r.right+pad+14+cw < vw){                                      // beside, right
+      left = r.right+pad+14; top = Math.min(Math.max(12, r.top), vh-ch-12);
+    } else if(r.left-pad-14-cw > 12){                                     // beside, left
+      left = r.left-pad-14-cw; top = Math.min(Math.max(12, r.top), vh-ch-12);
+    } else {                                                              // corner-dock + clamp spotlight above the card
+      left = vw-cw-16; top = vh-ch-16;
+      var ht = Math.max(8, r.top-pad), hb = Math.min(r.bottom+pad, top-8);
+      hi.style.top = ht+'px'; hi.style.height = Math.max(0, hb-ht)+'px';
+    }
     card.style.top = top+'px'; card.style.left = left+'px';
   }
   function setStep(i){
