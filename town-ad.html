@@ -216,7 +216,7 @@
     <p class="audience">Built for the restaurants, shops, activities, and services on the Town tab. Hotels get OceanSafe free, so this tier is for local businesses that want to be seen.</p>
   </div>
   <div class="hero-phone">
-    <img src="/assets/shot-app.jpg" width="780" height="1520" alt="The OceanSafe app: today’s conditions and every beach scored for swimming, snorkeling and surf.">
+    <img id="heroPhone" src="/assets/shot-app-kauai.jpg" width="546" height="1000" alt="The OceanSafe app: today’s conditions and every beach scored for swimming, snorkeling and surf.">
   </div>
   <svg class="wave" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0,30 C240,72 480,72 720,44 C960,16 1200,16 1440,44 L1440,70 L0,70 Z"/></svg>
 </header>
@@ -230,7 +230,7 @@
 
     <div class="grid">
       <div class="card">
-        <div class="pic"><img src="/assets/shot-app.jpg" alt="The OceanSafe app open to the beach map visitors browse." loading="lazy"></div>
+        <div class="pic"><img id="townPic" src="/assets/shot-app-kauai.jpg" alt="The OceanSafe app open to the beach map visitors browse." loading="lazy"></div>
         
         <h3>A spot in the Town tab</h3>
         <p>Your business shows up in the OceanSafe app that visitors open before they head to the water.</p>
@@ -395,6 +395,9 @@
   var i=ISL[q]||null;
   var bg=document.getElementById("heroBg");
   if(bg) bg.style.backgroundImage="url('"+((i&&i.hero)||"/assets/stock/kauai-beach.jpg")+"')";
+  var app=(i?("/assets/shot-app-"+q+".jpg"):"/assets/shot-app-kauai.jpg");
+  var hp=document.getElementById("heroPhone"); if(hp) hp.src=app;
+  var tp=document.getElementById("townPic");  if(tp) tp.src=app;
   var bandImg=document.getElementById("bandImg");
   if(bandImg) bandImg.src=(i&&i.band)||"/assets/stock/snorkeling.jpg";
   if(!i) return;                       // no island given -> stay island-neutral
