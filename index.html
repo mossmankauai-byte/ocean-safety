@@ -3587,8 +3587,17 @@ async function fetchLive(){
     const slat=(+lat).toFixed(2), slon=(+lon).toFixed(2);
     const _px = await fetch(`/api/wx?k=live&lat=${slat}&lon=${slon}&island=${ACTIVE.slug}`, {signal: ctrl.signal}).then(r=>r.json()).catch(()=>null);
     clearTimeout(timeoutId);
-    if(!_px || !_px.w) throw new Error('conditions proxy unavailable');
-    const w=_px.w, s=_px.s||null, td=_px.td||null;
+    let _pxData = _px;
+    if(!_pxData || !_pxData.w){
+      // Fallback: no /api/wx proxy (static/local hosting) -> fetch Open-Meteo directly so the 7-day forecast still loads.
+      var _TZ='Pacific%2FHonolulu';
+      var _fU='https://api.open-meteo.com/v1/forecast?latitude='+slat+'&longitude='+slon+'&current=temperature_2m,relative_humidity_2m,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,uv_index&hourly=precipitation,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,uv_index_max,cloud_cover_mean,weather_code,sunrise,sunset&wind_speed_unit=mph&temperature_unit=fahrenheit&timezone='+_TZ;
+      var _sU='https://marine-api.open-meteo.com/v1/marine?latitude='+slat+'&longitude='+slon+'&current=wave_height,wave_direction,wave_period&daily=wave_height_max,wave_direction_dominant,wave_period_max&models=best_match&length_unit=imperial&timezone='+_TZ;
+      var _pair=await Promise.all([ fetch(_fU).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}), fetch(_sU).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}) ]);
+      if(_pair[0]) _pxData={ w:_pair[0], s:_pair[1], td:null };
+    }
+    if(!_pxData || !_pxData.w) throw new Error('conditions unavailable');
+    const w=_pxData.w, s=_pxData.s||null, td=_pxData.td||null;
     const c = w.current||{};
     // MARINE FAIL-SAFE (Open-Meteo GH#1364 + network faults): a valid surf reading is a
     // finite wave height. null / NaN / missing = FETCH FAILURE — never coerce to 0 ft or the
@@ -7252,7 +7261,7 @@ if('serviceWorker' in navigator){
           'letter-spacing:.02em;cursor:pointer;white-space:nowrap;transition:background .18s,color .18s,border-color .18s;-webkit-tap-highlight-color:transparent}'+
         '.hdr-side:active{transform:scale(.97)}'+
         '.hdr-side.on{background:var(--ocean,#0f4c5c);border-color:var(--ocean,#0f4c5c);color:#fff}'+
-        '#hdrLangRow{display:flex;justify-content:flex-end;margin:4px 14px 0}'+
+        '#hdrLangRow{display:flex;align-items:center;flex-shrink:0;margin-left:6px}'+
         '#hdrLangSel{font-weight:600;font-size:11px;color:#0f4c5c;background:#fff;border:1px solid rgba(15,76,92,.28);border-radius:8px;padding:3px 6px;cursor:pointer}';
       document.head.appendChild(st);
     }
@@ -7281,7 +7290,7 @@ if('serviceWorker' in navigator){
         });
         lsel.addEventListener('change',function(){ window.switchLang(lsel.value); });
         lrow.appendChild(lsel);
-        if(row && row.parentNode) row.parentNode.insertBefore(lrow, row);
+        var _wx=document.getElementById('hdrWx'); if(_wx) _wx.appendChild(lrow); else if(row && row.parentNode) row.parentNode.insertBefore(lrow, row);
       }
       try{ var _bn=document.querySelector('.bname'); if(_bn && window.ACTIVE) _bn.textContent=ACTIVE.name; }catch(_e){}
       try{ if(window.ACTIVE) document.title=ACTIVE.name+' Beach Guide — Free Ocean Safety App'; }catch(_e){}
