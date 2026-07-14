@@ -1584,9 +1584,9 @@ a{text-decoration:none;color:inherit}
 #rainToggle:hover{transform:scale(1.05)}
 #rainToggle svg{width:22px;height:22px}
 #rainToggle.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
-#fcBar{position:absolute;top:212px;left:50%;transform:translateX(-50%);z-index:700;display:none;align-items:center;gap:8px;background:rgba(8,40,50,.9);color:#eaf6f8;padding:6px 11px;border-radius:999px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 120px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#fcBar{position:absolute;top:212px;left:50%;transform:translateX(-50%);z-index:700;display:none;flex-direction:column;align-items:center;gap:5px;background:rgba(8,40,50,.9);color:#eaf6f8;padding:6px 11px 7px;border-radius:16px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 120px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.fcBar-row{display:flex;align-items:center;gap:8px}.fc-legend{display:flex;align-items:center;gap:6px;line-height:1}.fc-lg-lbl{font-size:9px;font-weight:700;letter-spacing:.03em;opacity:.9;text-transform:uppercase}.fc-lg-end{font-weight:600;opacity:.6}.fc-lg-grad{width:90px;height:7px;border-radius:4px;background:linear-gradient(90deg,#a0e77b,#34c759,#ffcc00,#ff9500,#ff3b30);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}.fc-lg-drop{color:#eaf6f8;opacity:.92;flex-shrink:0;margin-right:1px}
 #fcBar #fcTime{font-weight:600;min-width:56px;white-space:nowrap;flex-shrink:0}
-#fcBar input[type=range]{width:140px;min-width:64px;max-width:42vw;accent-color:#c026d3;cursor:pointer}
+#fcBar input[type=range]{width:140px;min-width:64px;max-width:42vw;accent-color:#ff9500;cursor:pointer}
 #fcBar .fc-cap{opacity:.8;font-size:10.5px;white-space:nowrap;flex-shrink:0}
 #fcBar #fcPlay{flex-shrink:0;width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#eaf6f8;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 
@@ -1941,7 +1941,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 </div>
 <button id="satToggle" onclick="toggleSat()" aria-label="Toggle satellite view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
 <button id="rainToggle" onclick="toggleRain()" aria-label="Toggle 12-hour rain forecast" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 0 1-.5-7.97 5.5 5.5 0 0 1 10.7-1.3A4.5 4.5 0 0 1 17 16"/><line x1="8" y1="18.5" x2="7.2" y2="21"/><line x1="12" y1="18.5" x2="11.2" y2="22"/><line x1="16" y1="18.5" x2="15.2" y2="21"/></svg></button>
-<div id="fcBar" role="group" aria-label="Rain forecast time"><button id="fcPlay" onclick="fcPlayToggle()" aria-label="Pause forecast animation"></button><span id="fcTime">Now</span><input id="fcSlider" type="range" min="0" max="12" step="1" value="0" oninput="fcSlide(this.value)" aria-label="Forecast hours ahead"><span class="fc-cap">12&#8209;hr rain</span></div>
+<div id="fcBar" role="group" aria-label="Rain forecast time"><div class="fcBar-row"><button id="fcPlay" onclick="fcPlayToggle()" aria-label="Pause forecast animation"></button><span id="fcTime">Now</span><input id="fcSlider" type="range" min="0" max="12" step="1" value="0" oninput="fcSlide(this.value)" aria-label="Forecast hours ahead"><span class="fc-cap">12&#8209;hr rain</span></div><div class="fc-legend"><svg class="fc-lg-drop" viewBox="0 0 24 24" width="9" height="11" aria-hidden="true"><path d="M12 3s6.5 7.2 6.5 11.5a6.5 6.5 0 0 1-13 0C5.5 10.2 12 3 12 3z" fill="currentColor"/></svg><span class="fc-lg-lbl">Rain</span><span class="fc-lg-lbl fc-lg-end">Light</span><span class="fc-lg-grad"></span><span class="fc-lg-lbl fc-lg-end">Heavy</span></div></div>
 <button id="savedChip" class="saved-chip" onclick="openSavedSheet()" aria-label="View saved">
   <svg viewBox="0 0 24 24" fill="#c9a84c" stroke="#c9a84c" stroke-width="1.5" stroke-linejoin="round" width="14" height="14"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
   <span class="saved-chip-count" id="savedCount">0</span>
@@ -6327,7 +6327,7 @@ function toggleSat(){
 // Not service-worker-cached (forecast). Toggle button sits with the satellite + waves controls.
 window._fcOn=false; window._fcData=null; window._fcCircles=null; window._fcTimes=null; window._fcBase=0; window._fcHour=0; window._fcTimer=null;
 const _FC_GRID=(function(){ var g=[],LA=[21.90,21.99,22.08,22.17],LO=[-159.76,-159.64,-159.52,-159.40,-159.28]; for(var a=0;a<LA.length;a++)for(var o=0;o<LO.length;o++)g.push([LA[a],LO[o]]); return g; })();
-function _fcColor(mm){ return mm<0.1?null : mm<0.4?'#d96bb0' : mm<1?'#bd2f80' : mm<2.5?'#971ba6' : mm<6?'#671fa8' : '#46197f'; }   // palette: magenta -> violet, darkened for contrast on the basemap
+function _fcColor(mm){ return mm<0.1?null : mm<0.4?'#a0e77b' : mm<1?'#34c759' : mm<2.5?'#ffcc00' : mm<6?'#ff9500' : '#ff3b30'; }   // palette: green -> yellow -> orange -> red (standard weather-radar scale)
 async function _fcFetch(){
   var la=_FC_GRID.map(function(p){return p[0].toFixed(2);}).join(','), lo=_FC_GRID.map(function(p){return p[1].toFixed(2);}).join(',');
   var url='https://api.open-meteo.com/v1/forecast?latitude='+la+'&longitude='+lo+'&hourly=precipitation&forecast_days=2&timezone=Pacific%2FHonolulu&cell_selection=nearest';
