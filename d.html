@@ -7,35 +7,55 @@
 <title>Your OceanSafe dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--accent:#0a8ba8}
+  :root{
+    --deep:oklch(0.34 0.055 218);--deep2:oklch(0.27 0.05 224);
+    --teal:oklch(0.60 0.088 213);--teal-ink:oklch(0.44 0.08 214);
+    --gold:oklch(0.80 0.12 84);--gold-d:oklch(0.72 0.13 74);
+    --ink:oklch(0.27 0.02 232);--mute:oklch(0.52 0.02 232);
+    --sand:oklch(0.975 0.009 84);--card:oklch(0.995 0.003 84);
+    --line:oklch(0.91 0.012 220);--field:oklch(0.985 0.006 220);
+    --accent:var(--teal);
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#F5F7F9;color:#16202A;padding:26px 18px 60px}
-  .wrap{max-width:680px;margin:0 auto}
-  .topbar{height:6px;border-radius:6px;margin-bottom:16px;background:var(--accent)}
-  .mast{display:flex;align-items:center;gap:9px}
-  .wm{font-weight:800;font-size:19px}.wm .c{color:var(--accent)}
-  .crumb{color:#64727F;font-size:14px}
-  .shop{font-weight:700;font-size:20px;margin-top:2px}
-  .priv{font-size:12.5px;color:#64727F;background:#EEF2F5;border:1px solid #E0E6EB;border-radius:8px;padding:9px 12px;margin:13px 0 18px}
-  .card{background:#fff;border:1px solid #E2E8ED;border-radius:12px;padding:18px;margin-bottom:14px}
-  h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#64727F;margin-bottom:11px}
-  .btn{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;text-decoration:none;border-radius:9px;
-    padding:10px 15px;cursor:pointer;border:1px solid transparent}
-  .btn.primary{background:var(--accent);color:#fff}.btn.ghost{background:#fff;color:#16202A;border-color:#D5DCE2}
-  .btn.sm{padding:7px 12px;font-size:13px}
+  body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:var(--sand);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.55;padding:0 0 64px}
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px}
+  /* deep-teal header band (ties to the signup hero) */
+  .dhead{margin:0 -16px 0;padding:22px 24px 30px;color:oklch(0.96 0.012 210);background:radial-gradient(130% 120% at 88% -25%,var(--teal) 0%,var(--deep) 52%,var(--deep2) 100%)}
+  .mast{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;opacity:.95}
+  .mast svg{width:20px;height:20px;flex:none}.mast .c{color:oklch(0.86 0.13 88)}
+  .crumb{opacity:.62;font-weight:400}
+  .shop{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:27px;letter-spacing:-.4px;margin-top:12px;line-height:1.08}
+  .shopmeta{opacity:.78;font-size:14px;margin-top:4px}
+  .privband{margin-top:16px;font-size:12.5px;color:oklch(0.9 0.02 205);opacity:.85;display:flex;gap:6px;align-items:center}
+  .privband svg{width:13px;height:13px;flex:none;opacity:.8}
+  .card{background:var(--card);border-radius:16px;padding:20px 20px 22px;margin-top:14px;box-shadow:0 1px 2px oklch(0.3 0.04 220 / .05), 0 14px 34px -22px oklch(0.34 0.05 220 / .3)}
+  .card.lift{margin-top:-16px;position:relative;z-index:2}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);font-weight:700;margin-bottom:12px}
+  h2 .t{font-size:16px;text-transform:none;letter-spacing:normal;color:var(--ink);font-weight:700}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-weight:600;font-size:14px;text-decoration:none;border-radius:11px;padding:11px 16px;cursor:pointer;border:1px solid transparent;transition:transform .15s,box-shadow .15s,filter .15s}
+  .btn.primary{background:linear-gradient(180deg,var(--teal),var(--teal-ink));color:#fff;box-shadow:0 8px 18px -12px oklch(0.44 0.08 214 / .9)}
+  .btn.primary:hover{transform:translateY(-1px);filter:brightness(1.04)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),var(--gold-d));color:oklch(0.26 0.06 68);box-shadow:0 8px 18px -12px oklch(0.72 0.13 74 / .8)}
+  .btn.ghost{background:var(--card);color:var(--ink);border-color:var(--line)}.btn.ghost:hover{border-color:oklch(0.8 0.03 214)}
+  .btn.sm{padding:8px 13px;font-size:13px;border-radius:9px}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .qr{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:14px}
-  .qr img{width:120px;height:120px;border:1px solid #E2E8ED;border-radius:10px}
-  .kv{display:grid;grid-template-columns:130px 1fr;gap:8px 14px;font-size:14.5px}
-  .kv .k{color:#64727F}
-  .hint{font-size:13px;color:#64727F;margin-top:8px}
-  .pill{font-size:11px;font-weight:700;text-transform:uppercase;background:#EEF2F5;color:#7A8794;border:1px solid #E0E6EB;border-radius:999px;padding:3px 9px}
-  .soonrow{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid #EDF1F4}.soonrow:first-of-type{border-top:none}
-  .empty{font-style:italic;color:#64727F;font-size:14px;border-left:3px solid #E0E6EB;padding:4px 0 4px 12px;margin-top:12px}
-  .dim{color:#8A97A3}
-  a{color:var(--accent)} .lead{font-size:14.5px}
-  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16202A;color:#fff;font-size:13px;padding:9px 15px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
+  .qr img{width:118px;height:118px;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .kv{display:grid;grid-template-columns:128px 1fr;gap:9px 14px;font-size:14.5px}
+  .kv .k{color:var(--mute)}
+  .lead{font-size:14.5px;color:var(--ink);line-height:1.55}
+  .hint{font-size:13px;color:var(--mute);margin-top:9px;line-height:1.5}
+  .pill{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:oklch(0.955 0.01 84);color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+  .pill.on{background:oklch(0.95 0.04 168);color:oklch(0.4 0.09 168);border-color:oklch(0.82 0.07 168)}
+  .pill.gold{background:oklch(0.95 0.06 90);color:oklch(0.5 0.11 78);border-color:oklch(0.86 0.1 84)}
+  .soonrow{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid var(--line)}.soonrow:first-of-type{border-top:none}
+  .empty{color:var(--mute);font-size:14px;background:oklch(0.965 0.008 84);border-radius:10px;padding:12px 14px;margin-top:12px}
+  .dim{color:oklch(0.62 0.015 232)}
+  a{color:var(--teal-ink);font-weight:500}
+  input{font-family:inherit}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--deep);color:#fff;font-size:13px;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 10px 30px -12px oklch(0.3 0.05 220 / .5)}
   #toast.show{opacity:1}
 </style></head>
 <body><div class="wrap" id="root"><div class="card"><div class="dim">Loading your dashboard…</div></div></div>
@@ -62,10 +82,13 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   const primary="#"+(p.primary_hex||"0a8ba8").replace(/^#/,"");
   const live=SITE+"/p/"+p.slug;
   const seg=p.segment;
+  const isTownAd = seg==="town_ad";
   const isOperator = seg==="hotel"||seg==="pm"||seg==="timeshare"||seg==="rental"||seg==="retail";
   const isFree = Number(p.monthly_cents||0)===0;
-  const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : seg==="rental"?"Business" : seg==="retail"?"Store" : "Shop";
-  const planTerms = isOperator
+  const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : seg==="rental"?"Business" : seg==="retail"?"Store" : isTownAd?"Business" : "Shop";
+  const planTerms = isTownAd
+    ? "Town Ad, $30/mo flat. Your listing, a printable QR, a timed promotion, and this dashboard. Billed monthly through Square, cancel anytime. No cut of your sales."
+    : isOperator
     ? (isFree
         ? (seg==="retail" ? "OceanSafe for Retail — Free. $0/mo; OceanSafe takes 3% only on app sales (you keep 97%). Your page, QR codes, and analytics included."
           : seg==="rental" ? "OceanSafe for Rentals & Tours — Free to join. Tour commissions split 50/50; 12.7% on store sales (you keep 87.3%). Your page, QR codes, and analytics included."
@@ -76,9 +99,10 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   const ams=(Array.isArray(p.amenities)?p.amenities:[]).map(a=>a&&a.name?a.name:a).filter(Boolean);
   const qrCats = seg==="hotel"?[["room","In-room card"],["lobby","Lobby / front desk"],["welcome_email","Welcome email"],["general","Your own signage"]]
     : (seg==="pm"||seg==="timeshare")?[["unit","In each unit"],["welcome_email","Welcome email"],["general","Your signage"]]
+    : isTownAd?[["receipt","Counter & receipt QR"]]
     : [["counter","Counter card"],["receipt","Receipt"],["general","Your signage"]];
   const qrUrl=cat=>live+"?ref="+encodeURIComponent(p.slug)+"&qr="+cat;
-  const sells = seg==="retail"||seg==="rental"||!isOperator;   // segments that list store items
+  const sells = seg==="retail"||seg==="rental"||(!isOperator && !isTownAd);   // segments that list store items
   const keepPct = seg==="retail"?"97%":seg==="rental"?"87.3%":"90%";
   const feePct  = seg==="retail"?"3%":seg==="rental"?"12.7%":"10%";
   const FN="https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-items";
@@ -89,15 +113,16 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     '<div style="text-align:center"><img id="qr-'+cat+'" alt="'+esc(label)+' QR" style="width:118px;height:118px;border:1px solid #E2E8ED;border-radius:10px;background:#fff"><div style="font-weight:600;font-size:13px;margin-top:6px">'+esc(label)+'</div><a class="btn ghost sm" id="qrdl-'+cat+'" download="'+esc(p.slug)+'-'+cat+'-qr.png" style="margin-top:6px">Download</a></div>'
   ).join('');
   root.innerHTML=
-  '<div class="topbar"></div>'
-  +'<div class="mast"><span class="wm">Ocean<span class="c">Safe</span></span><span class="crumb">partner dashboard</span></div>'
-  +'<div class="shop">'+esc(p.name)+(p.region?' <span class="crumb">· '+esc(p.region)+'</span>':'')+'</div>'
-  +'<div class="priv">🔒 <b>Private to you.</b> It’s an unguessable link, not a password — don’t post it publicly.</div>'
-  +'<div class="card"><h2>Your page</h2>'
+  '<div class="dhead"><div class="mast"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" stroke="oklch(0.86 0.13 88)" stroke-width="2.1" stroke-linecap="round"/><path d="M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" opacity=".6"/></svg><span>Ocean<span class="c">Safe</span></span><span class="crumb">· partner dashboard</span></div>'
+    +'<div class="shop">'+esc(p.name)+'</div>'
+    +(p.region?'<div class="shopmeta">'+esc(p.region)+'</div>':'')
+    +'<div class="privband"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Private to you — an unguessable link, not a password. Don’t post it publicly.</span></div>'
+  +'</div>'
+  +'<div class="card lift"><h2>Your page</h2>'
     +'<div class="row"><a class="btn primary" href="'+esc(live)+'" target="_blank" rel="noopener">View your live page ↗</a>'
     +'<button class="btn ghost" id="copylink">Copy page link</button></div></div>'
   +'<div class="card"><h2>Your QR codes</h2>'
-    +'<p class="lead">'+(isOperator?'Print each where guests will see it — in the room, at the lobby, in your welcome email. Every code is tracked so you can tell which spot brings the most scans.':'Print these for your counter, receipts, and signage — each one is tracked.')+'</p>'
+    +'<p class="lead">'+(isOperator?'Print each where guests will see it — in the room, at the lobby, in your welcome email. Every code is tracked so you can tell which spot brings the most scans.':isTownAd?'Your QR is a digital asset — download it once and use it anywhere. Print it for your counter, add it to your receipts, drop it on a flyer or menu. Reprint as often as you like, at no cost.':'Print these for your counter, receipts, and signage — each one is tracked.')+'</p>'
     +'<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px">'+qrGrid+'</div></div>'
   +(sells?'<div class="card"><h2>Your items</h2>'
     +'<p class="lead">List what you sell — items show on your page and sell in the app. '+(isFree?('You keep <b>'+keepPct+'</b>; our '+feePct+' only applies when the app sells for you.'):'You keep <b>100%</b> on your plan.')+'</p>'
@@ -107,7 +132,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     +'<input id="itPrice" placeholder="$ price" inputmode="decimal" style="width:90px;font-size:14px;padding:9px 11px;border:1px solid #D5DCE2;border-radius:9px">'
     +'<button class="btn primary" id="itAdd">Add item</button></div>'
     +'<div class="hint" id="itMsg">Changes are live on your page the moment you add them.</div></div>':'')
-  +(!isOperator?'<div class="card"><h2>Need more cards?</h2><p class="lead">Cards walk out the door — reorder anytime.</p>'
+  +(!isOperator && !isTownAd?'<div class="card"><h2>Need more cards?</h2><p class="lead">Cards walk out the door — reorder anytime.</p>'
     +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+ml("More cards for "+p.name,"Hi OceanSafe team, "+p.name+" needs 200 more cards ($100). Ship to:")+'">Reorder 200 cards — $100 ↗</a></div></div>':'')
   +'<div class="card"><h2>What’s live</h2><div class="kv">'
     +'<span class="k">'+esc(noun)+'</span><span>'+esc(p.name)+'</span>'
@@ -122,8 +147,9 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   +'<div class="card"><h2>Your plan</h2><div class="kv"><span class="k">Plan</span><span>'+esc(planTerms)+'</span>'
     +(renews?'<span class="k">Renews</span><span>'+esc(renews)+'</span>':'')+'</div>'
     +(isOperator&&isFree?'<div class="hint">Free, no card. Upgrade to unlock the sections below whenever you’re ready.</div>':'<div class="hint">We’ll email you before any renewal, no surprises.</div>')+'</div>'
-  +lockCard("Promotions","Timed, condition-triggered offers on the guide your guests already open — the spa when the surf’s up, the right item on the right day.",isFree)
-  +lockCard("Market intelligence","The full demand board — what the weather drives, when guests plan, trends and forecasts.",isFree)
+  +(isTownAd ? promoCard()
+    : lockCard("Promotions","Timed, condition-triggered offers on the guide your guests already open — the spa when the surf’s up, the right item on the right day.",isFree)
+      +lockCard("Market intelligence","The full demand board — what the weather drives, when guests plan, trends and forecasts.",isFree))
   +'<div class="card"><h2>Visits &amp; scans</h2>'
     +'<div class="soonrow"><span class="dim">Page visits</span><span class="pill">Coming soon</span></div>'
     +'<div class="soonrow"><span class="dim">QR scans by placement</span><span class="pill">Coming soon</span></div>'
@@ -136,6 +162,30 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+ml("Upgrade "+p.name+" to Paid","Hi \u2014 "+p.name+" would like to upgrade to the paid plan. ")+'">Unlock with Paid \u2197</a></div></div>';
     return '<div class="card"><h2>'+title+' <span class="pill" style="background:#E1F5EE;color:#085041;border-color:#BBE3C8">Included</span></h2>'
       +'<p class="lead">'+desc+'</p><div class="hint">Included in your plan \u2014 rolling out; we\u2019ll email you the week yours switches on.</div></div>';
+  }
+  function phonePreview(){
+    return '<div style="flex:none;width:148px;height:296px;border-radius:26px;background:linear-gradient(155deg,oklch(0.52 0.07 214),oklch(0.32 0.055 220));padding:8px;box-shadow:0 24px 44px -24px oklch(0.34 0.05 220 / .7)">'
+      +'<div style="height:100%;border-radius:19px;background:oklch(0.965 0.012 205);overflow:hidden;position:relative">'
+        +'<div style="height:100%;background:radial-gradient(130% 80% at 72% 8%,oklch(0.74 0.07 205),oklch(0.5 0.07 216) 70%)"></div>'
+        +'<div style="position:absolute;left:11px;right:11px;bottom:13px;background:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 14px 30px -14px oklch(0.3 0.05 220 / .55)">'
+          +'<div style="font-size:8.5px;font-weight:700;letter-spacing:.05em;color:'+esc(primary)+';text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.name)+'</div>'
+          +'<div style="font-family:Fraunces,serif;font-weight:600;font-size:14px;color:#1b2530;margin-top:3px;line-height:1.14">Happy hour, 3&ndash;5pm</div>'
+          +'<div style="font-size:10px;color:#5b6b76;margin-top:3px;line-height:1.35">Show this screen for $8 house pours</div>'
+          +'<div style="margin-top:9px;background:linear-gradient(180deg,var(--gold),var(--gold-d));color:oklch(0.26 0.06 68);font-size:10px;font-weight:700;text-align:center;padding:6px;border-radius:9px">See offer</div>'
+        +'</div>'
+      +'</div></div>';
+  }
+  function promoCard(){
+    const mailto=ml("My OceanSafe promotion \u2014 "+p.name,"Hi OceanSafe team,\n\nHere\u2019s the promotion I\u2019d like to run for "+p.name+":\n\n\u2022 Offer (e.g. Happy hour 3\u20135pm, 20% off):\n\u2022 When it should show (days / hours):\n\u2022 I\u2019ve attached my image or PDF.\n\nMahalo!");
+    return '<div class="card"><h2><span class="t">Your promotion</span></h2>'
+      +'<p class="lead">A timed offer that pops up on the phone of every guest who scans your QR, during the hours you choose. Here\u2019s how it looks to them:</p>'
+      +'<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin:16px 0 2px">'+phonePreview()
+        +'<div style="flex:1;min-width:190px">'
+          +'<p class="lead">Send us your promo image or PDF and the hours it should run. We\u2019ll have it live on the guide within <b>one business day</b>.</p>'
+          +'<div class="row" style="margin-top:13px"><a class="btn gold" href="'+mailto+'">Send my promotion \u2197</a></div>'
+          +'<div class="hint">Swap it anytime \u2014 seasonal specials, rainy-day deals, happy hour. Just send the new one.</div>'
+        +'</div>'
+      +'</div></div>';
   }
   document.getElementById("copylink")?.addEventListener("click",()=>window.copy(live));
   // ── items CRUD (free AND paid — this is how free monetizes) ──
