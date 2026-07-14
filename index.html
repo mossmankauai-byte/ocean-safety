@@ -1981,7 +1981,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 const ISLANDS = {
   kauai: {
     slug:'kauai', name:'Kauaʻi', live:true, defaultSide:'east', sideKey:'os_side',
-    map:{ center:[22.05,-159.50], zoom:10, minZoom:10, maxBounds:null },
+    map:{ center:[22.05,-159.50], zoom:10, minZoom:9, maxBounds:null },
     seaLevel:{ lat:21.9788, lon:-159.3672 },
     geoBox:{ latMin:21.85, latMax:22.25, lonMin:-159.85, lonMax:-159.25 },
     clamp:{ latMin:21.7, latMax:22.4, lonMin:-160.1, lonMax:-159.2 },
@@ -1996,7 +1996,7 @@ const ISLANDS = {
   },
   maui: {
     slug:'maui', name:'Maui', live:true, defaultSide:'west', sideKey:'os_side_maui',
-    map:{ center:[20.80,-156.33], zoom:10, minZoom:10, maxBounds:[[20.45,-156.75],[21.10,-155.95]] },
+    map:{ center:[20.80,-156.33], zoom:10, minZoom:9, maxBounds:[[20.10,-157.03],[21.45,-155.65]] },
     seaLevel:{ lat:20.89, lon:-156.47 },
     geoBox:{ latMin:20.55, latMax:21.0, lonMin:-156.68, lonMax:-156.0 },
     clamp:{ latMin:20.5, latMax:21.05, lonMin:-156.7, lonMax:-155.98 },
@@ -2011,7 +2011,7 @@ const ISLANDS = {
   },
   oahu: {
     slug:'oahu', name:'Oʻahu', live:true, defaultSide:'south', sideKey:'os_side_oahu',
-    map:{ center:[21.47,-157.97], zoom:10, minZoom:10, maxBounds:[[21.20,-158.32],[21.75,-157.55]] },
+    map:{ center:[21.47,-157.97], zoom:10, minZoom:9, maxBounds:[[20.75,-158.67],[22.20,-157.20]] },
     seaLevel:{ lat:21.28, lon:-157.83 },
     geoBox:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
     clamp:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
@@ -2026,7 +2026,7 @@ const ISLANDS = {
   },
   hawaii: {
     slug:'hawaii', name:'Hawaiʻi Island', live:true, defaultSide:'kona', sideKey:'os_side_hawaii',
-    map:{ center:[19.60,-155.50], zoom:9, minZoom:9, maxBounds:[[18.85,-156.15],[20.30,-154.75]] },
+    map:{ center:[19.60,-155.50], zoom:9, minZoom:8, maxBounds:[[18.40,-156.50],[20.75,-154.40]] },
     seaLevel:{ lat:19.64, lon:-155.99 },
     geoBox:{ latMin:18.85, latMax:20.30, lonMin:-156.15, lonMax:-154.75 },
     clamp:{ latMin:18.85, latMax:20.30, lonMin:-156.15, lonMax:-154.75 },
@@ -3774,11 +3774,23 @@ async function getCond(b){
 // MAP
 let map,mkrs={},ints=['snorkel','swim'],scored={};
 function initMap(){
-  map=L.map('map',{center:ACTIVE.map.center,zoom:ACTIVE.map.zoom,minZoom:ACTIVE.map.minZoom,zoomControl:false,attributionControl:false});
+  map=L.map('map',{center:ACTIVE.map.center,zoom:ACTIVE.map.zoom,minZoom:ACTIVE.map.minZoom,zoomSnap:0.5,zoomControl:false,attributionControl:false});
   if(ACTIVE.map.maxBounds) map.setMaxBounds(ACTIVE.map.maxBounds);
   window._streetTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'©OpenStreetMap ©CartoDB',subdomains:'abcd'}).addTo(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri'});
   window._isSat = false;
+
+  // Frame the whole ACTIVE island within the visible map area (chrome-aware padding)
+  // instead of a hand-picked center/zoom — every island lands centered + fully in view.
+  window.frameIsland = function(animate){
+    try{
+      if(typeof map==='undefined' || !map) return;
+      var g = ACTIVE && ACTIVE.geoBox; if(!g) return;
+      map.fitBounds([[g.latMin,g.lonMin],[g.latMax,g.lonMax]],
+        { paddingTopLeft:[22,58], paddingBottomRight:[22,50], animate:!!animate });
+    }catch(e){}
+  };
+  frameIsland(false);
 
   // ── Debug pin-coordinate audit feature ──
   // Activate by adding ?debug=1 to the URL (e.g. oceansafety.app/?debug=1).
@@ -6215,7 +6227,7 @@ function wireTabs(){
         el.classList.add('active');
         const sb=document.getElementById('subtabs'); if(sb){ sb.innerHTML=''; sb.classList.remove('on'); }
         if(typeof closeSubtabMenu === 'function') closeSubtabMenu();
-        if(typeof map !== 'undefined' && map) map.setView(ACTIVE.map.center, ACTIVE.map.zoom, {animate:true});
+        if(typeof map !== 'undefined' && map && typeof frameIsland==='function') frameIsland(true);
         closeSheet();   // clear any stale ?item route + document.title from a previously open detail sheet
         var _aff=(window.PARTNER_MODE==='affiliate');
         if(window.OSA) OSA.tab(_aff?'tours':'activities');
@@ -6232,7 +6244,7 @@ function wireTabs(){
       closeSheet();
       // Reset map to the default island view whenever the user switches main tabs,
       // so a previous zoom into one POI doesn't carry over to the new tab's content.
-      if(typeof map !== 'undefined' && map) map.setView(ACTIVE.map.center, ACTIVE.map.zoom, {animate:true});
+      if(typeof map !== 'undefined' && map && typeof frameIsland==='function') frameIsland(true);
       renderMap();
       renderHikes();
       renderActs();
