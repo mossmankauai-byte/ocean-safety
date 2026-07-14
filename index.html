@@ -2016,6 +2016,8 @@ const ISLANDS = {
     geoBox:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
     clamp:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
     tideStation:'1612340',
+    zones:[{ key:'waikiki', name:'Waikīkī', hint:'Tap to zoom in',
+      poly:[[21.2985,-157.8492],[21.2930,-157.8280],[21.2895,-157.8118],[21.2585,-157.8035],[21.2560,-157.8232],[21.2662,-157.8422],[21.2772,-157.8560]] }],
     regions:[
       {key:'north',    label:'North', r:'North Shore', centroid:{lat:21.65,lon:-158.06}},
       {key:'windward', label:'East',    r:'Windward',    centroid:{lat:21.40,lon:-157.73}},
@@ -3789,9 +3791,10 @@ function initMap(){
   window.frameIsland = function(animate){
     try{
       if(typeof map==='undefined' || !map) return;
+      window._zoomedZone=null;
       var g = ACTIVE && ACTIVE.geoBox; if(!g) return;
       map.fitBounds([[g.latMin,g.lonMin],[g.latMax,g.lonMax]],
-        { paddingTopLeft:[22,58], paddingBottomRight:[22,50], animate:!!animate });
+        { paddingTopLeft:[22,58], paddingBottomRight:[22,50], animate:false });
     }catch(e){}
   };
   frameIsland(false);
@@ -5118,6 +5121,55 @@ function renderChannelHeatmap(ch, strength){
 /* Per-island coastline outlines for the swell-drift ocean clip mask. kauai = the live app's
    exact 62-pt outline; maui/oahu/hawaii simplified (Douglas-Peucker) from public island geojson. */
 const ISLAND_OUTLINES={kauai:[[22.0286,-159.788],[21.9587,-159.6909],[21.9415,-159.6539],[21.9281,-159.6449],[21.9177,-159.637],[21.9001,-159.6087],[21.9032,-159.596],[21.8996,-159.5874],[21.8962,-159.5812],[21.8933,-159.5726],[21.8896,-159.5585],[21.888,-159.544],[21.8862,-159.5311],[21.8829,-159.5269],[21.8866,-159.5051],[21.8844,-159.4992],[21.8845,-159.4938],[21.8846,-159.4872],[21.8818,-159.4825],[21.8813,-159.4759],[21.8783,-159.4711],[21.8755,-159.4627],[21.8714,-159.4497],[21.8685,-159.4434],[21.8759,-159.432],[21.8893,-159.4128],[21.8967,-159.4039],[21.9138,-159.3844],[21.9437,-159.349],[21.9499,-159.358],[21.9584,-159.3424],[21.9915,-159.3299],[21.9994,-159.3326],[22.0219,-159.3386],[22.0438,-159.3358],[22.0606,-159.3186],[22.076,-159.3164],[22.0804,-159.3128],[22.0899,-159.3051],[22.1027,-159.2987],[22.1327,-159.2939],[22.1442,-159.2942],[22.1724,-159.3139],[22.2013,-159.3329],[22.2143,-159.3545],[22.223,-159.3826],[22.2244,-159.3903],[22.2298,-159.399],[22.2284,-159.4048],[22.2254,-159.4534],[22.227,-159.4884],[22.2036,-159.5097],[22.2157,-159.5347],[22.2181,-159.5426],[22.2191,-159.5867],[22.2061,-159.605],[22.1971,-159.6227],[22.1865,-159.6369],[22.167,-159.6707],[22.1566,-159.708],[22.0526,-159.7844]],maui:[[21.0248,-156.612],[21.0344,-156.6062],[21.0329,-156.5923],[21.0202,-156.5804],[21.0051,-156.5463],[20.9678,-156.5282],[20.8945,-156.4748],[20.9196,-156.386],[20.9327,-156.3707],[20.9502,-156.3246],[20.9427,-156.3072],[20.9477,-156.2863],[20.9374,-156.2751],[20.9409,-156.2631],[20.9319,-156.2302],[20.9179,-156.2301],[20.9166,-156.218],[20.907,-156.2163],[20.8656,-156.1667],[20.8614,-156.1327],[20.8273,-156.1157],[20.8319,-156.0903],[20.8105,-156.0598],[20.7955,-156.0035],[20.7675,-155.9846],[20.7137,-155.9915],[20.6543,-156.0534],[20.6544,-156.0815],[20.6236,-156.1427],[20.6291,-156.1481],[20.6241,-156.1734],[20.6318,-156.1929],[20.6285,-156.2103],[20.5862,-156.3027],[20.587,-156.3517],[20.5784,-156.3776],[20.5861,-156.4153],[20.5987,-156.4178],[20.5981,-156.4319],[20.6079,-156.4442],[20.6422,-156.4507],[20.656,-156.4437],[20.7047,-156.4487],[20.7817,-156.464],[20.7999,-156.5017],[20.7784,-156.5378],[20.8212,-156.6318],[20.8887,-156.689],[20.9063,-156.6881],[20.9206,-156.6999],[20.9803,-156.6809],[21.0071,-156.6655],[21.0144,-156.646],[21.0276,-156.6428],[21.0248,-156.612]],oahu:[[21.306,-158.0445],[21.3019,-158.1127],[21.3224,-158.1225],[21.3266,-158.1119],[21.3303,-158.1255],[21.3738,-158.1403],[21.4043,-158.1792],[21.448,-158.1924],[21.4876,-158.233],[21.5401,-158.2343],[21.5758,-158.2795],[21.5867,-158.1256],[21.5966,-158.1067],[21.6075,-158.1082],[21.7,-158.0181],[21.7127,-157.9686],[21.6512,-157.9246],[21.6293,-157.9238],[21.5753,-157.8774],[21.5602,-157.8786],[21.5607,-157.8561],[21.5299,-157.8369],[21.5121,-157.8374],[21.5,-157.8526],[21.4595,-157.841],[21.4502,-157.8163],[21.4156,-157.7865],[21.4214,-157.7745],[21.4577,-157.7722],[21.4559,-157.7318],[21.4043,-157.7386],[21.403,-157.7225],[21.3833,-157.7089],[21.3534,-157.7088],[21.3329,-157.6938],[21.3139,-157.6518],[21.302,-157.6537],[21.264,-157.7001],[21.2638,-157.7139],[21.2814,-157.7122],[21.2869,-157.7213],[21.2789,-157.765],[21.2577,-157.8096],[21.29,-157.8457],[21.3065,-157.89],[21.3292,-157.9048],[21.3186,-157.9189],[21.3058,-157.9109],[21.3065,-157.9523],[21.3187,-157.9519],[21.328,-157.968],[21.306,-158.0445]],hawaii:[[20.2457,-155.7782],[20.1245,-155.598],[20.1316,-155.5589],[20.0953,-155.444],[20.022,-155.2826],[19.9694,-155.2045],[19.8554,-155.0863],[19.728,-155.0871],[19.7393,-155.0064],[19.6907,-154.9811],[19.6416,-154.9838],[19.6265,-154.9504],[19.6049,-154.9471],[19.5706,-154.9035],[19.5224,-154.8096],[19.4636,-154.8385],[19.3493,-154.9809],[19.2684,-155.1596],[19.2663,-155.2968],[19.2089,-155.3606],[19.1879,-155.4174],[19.152,-155.4535],[19.1325,-155.5147],[19.0821,-155.5578],[19.0466,-155.5574],[18.9988,-155.596],[18.9716,-155.6019],[18.9175,-155.672],[18.9694,-155.726],[19.014,-155.8061],[19.0366,-155.8816],[19.0811,-155.9084],[19.1212,-155.9214],[19.348,-155.8887],[19.4388,-155.9243],[19.4786,-155.9226],[19.4888,-155.9529],[19.6082,-155.9782],[19.6428,-155.9977],[19.6539,-156.0329],[19.6789,-156.0293],[19.7308,-156.0644],[19.7805,-156.0497],[19.8505,-155.9767],[19.8589,-155.9258],[19.9322,-155.8925],[19.9828,-155.8319],[20.0354,-155.8282],[20.0787,-155.8669],[20.1457,-155.8991],[20.2052,-155.906],[20.2552,-155.8907],[20.2715,-155.8533],[20.2457,-155.7782]]};
+// ── Clickable island sub-region (e.g. Waikīkī on Oʻahu) ─────────────────────
+// A translucent, outlined, tappable zone on the island map. Tapping it zooms
+// into the zone ("its own place"); a back chip returns to the whole-island view.
+var _zoneLayers=[]; window._zoomedZone=null;
+function _zoneGateOK(){
+  var at=window._activeTab, sub=window._activeSub;
+  return (at==='beaches') || (at==='acts' && (sub==='beaches'||sub==='hazards'));
+}
+function clearZones(){ _zoneLayers.forEach(function(l){ try{ l.remove(); }catch(e){} }); _zoneLayers=[]; }
+function zoomToZone(z){
+  if(typeof map==='undefined'||!map) return;
+  window._zoomedZone=z.key;
+  try{ map.fitBounds(L.latLngBounds(z.poly),{paddingTopLeft:[24,64],paddingBottomRight:[24,54],maxZoom:15,animate:false}); }catch(e){ try{ map.setView(L.latLngBounds(z.poly).getCenter(),14,{animate:false}); }catch(_){} }
+  renderZones();
+}
+function renderZones(){
+  try{
+  if(typeof map==='undefined'||!map) return;
+  clearZones();
+  if(!document.getElementById('os-zone-css')){
+    var st=document.createElement('style'); st.id='os-zone-css';
+    st.textContent='.os-zone-poly{cursor:pointer;transition:fill-opacity .18s}'
+      +'.os-zone-poly:hover{fill-opacity:.4}'
+      +'.os-zone-lbl{transform:translate(-50%,-50%);display:inline-flex;flex-direction:column;align-items:center;line-height:1.12;background:rgba(15,76,92,.93);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 12px;font:700 12.5px "DM Sans",sans-serif;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer;animation:oszlbl 2.4s ease-in-out infinite}'
+      +'.os-zone-lbl small{font-weight:600;font-size:9.5px;opacity:.86;letter-spacing:.02em;margin-top:1px}'
+      +'#os-zone-back{position:absolute;left:12px;top:62px;z-index:701;background:rgba(8,40,50,.92);color:#eaf6f8;border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:7px 14px 7px 11px;font:700 12.5px "DM Sans",sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none}';
+    document.head.appendChild(st);
+  }
+  var back=document.getElementById('os-zone-back');
+  if(!back){ back=document.createElement('div'); back.id='os-zone-back';
+    (document.getElementById('map')||document.body).appendChild(back);
+    back.addEventListener('click',function(){ window._zoomedZone=null; if(typeof frameIsland==='function') frameIsland(true); renderZones(); });
+  }
+  var zones=(window.ACTIVE&&ACTIVE.zones)||null;
+  if(!zones||!zones.length||!_zoneGateOK()){ back.style.display='none'; return; }
+  if(!map.getPane('zones')){ map.createPane('zones'); map.getPane('zones').style.zIndex='640'; }
+  if(window._zoomedZone){ back.textContent='‹ '+((ACTIVE&&ACTIVE.name)||'Island'); back.style.display='block'; return; }
+  back.style.display='none';
+  zones.forEach(function(z){
+    var poly=L.polygon(z.poly,{pane:'zones',className:'os-zone-poly',color:'#b9791b',weight:3,opacity:1,dashArray:'6 5',fillColor:'#f5c65a',fillOpacity:.42,bubblingMouseEvents:false});
+    poly.on('click',function(e){ if(L.DomEvent) L.DomEvent.stop(e); zoomToZone(z); });
+    poly.addTo(map); _zoneLayers.push(poly);
+    var c=poly.getBounds().getCenter();
+    var lbl=L.marker(c,{pane:'zones',interactive:true,keyboard:false,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="os-zone-lbl">'+z.name+(z.hint?('<small>'+z.hint+'</small>'):'')+'</div>'})});
+    lbl.on('click',function(e){ if(L.DomEvent) L.DomEvent.stop(e); zoomToZone(z); });
+    lbl.addTo(map); _zoneLayers.push(lbl);
+  });
+  }catch(e){}
+}
 function renderSwellLayer(){
   try{
   if(typeof map==='undefined' || !map) return;
@@ -6202,6 +6254,7 @@ function buildSubtabs(tabName){
         renderMarkets();
       }
       if(typeof renderSwellLayer==='function') renderSwellLayer();
+      if(typeof renderZones==='function') renderZones();
     });
   });
 }
@@ -6271,6 +6324,7 @@ function wireTabs(){
       // After buildSubtabs sets the default ints for beaches, run rescore so the map paints with that filter.
       if(window._activeTab === 'beaches') rescore();
       else if(typeof renderSwellLayer==='function') renderSwellLayer();
+      if(typeof renderZones==='function') renderZones();
     });
   });
   // Initialize with Family subtabs since boot opens on the Family tab
@@ -6568,6 +6622,7 @@ async function rescore(){
   renderMap();
   renderChannels();
   renderSwellLayer();
+  renderZones();
   renderHikes();
   renderActs();
   renderMarkets();
