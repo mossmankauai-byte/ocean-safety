@@ -38,6 +38,10 @@
   .hero{position:relative;overflow:hidden;color:#eef9fb;
     background:linear-gradient(158deg,var(--deep) 0%,var(--deep2) 100%);
     padding:26px 0 92px}
+  .hero .bg{position:absolute;inset:0;background:center/cover no-repeat;opacity:.5}
+  .hero .scrim{position:absolute;inset:0;
+    background:linear-gradient(158deg,rgba(12,74,88,.90) 0%,rgba(12,74,88,.74) 45%,rgba(10,122,148,.66) 100%)}
+  .hero .wrap{position:relative;z-index:2}
   .hero .sun{position:absolute;top:-70px;right:-40px;width:230px;height:230px;border-radius:50%;
     background:radial-gradient(circle,rgba(255,198,75,.30),rgba(255,198,75,0) 70%);pointer-events:none}
   .hero .wm{color:#fff;font-size:22px}
@@ -130,6 +134,10 @@
     border:1px solid var(--line);background:var(--card);
     box-shadow:0 2px 6px rgba(10,50,60,.08),0 28px 60px -24px rgba(10,50,60,.42)}
   .shot img{display:block;width:100%;height:auto}
+  .band{position:relative;height:210px;margin:0;overflow:hidden;background:#0c4a58}
+  .band img{width:100%;height:100%;object-fit:cover;opacity:.72}
+  .band .cap{position:absolute;left:0;right:0;bottom:0;padding:14px 20px;color:#eaf6f9;font-size:14px;
+    background:linear-gradient(to top,rgba(8,45,55,.88),rgba(8,45,55,0))}
   .caption{margin:22px auto 0;font-size:13.5px;color:var(--muted2);max-width:38ch}
 
   /* price recap */
@@ -176,12 +184,14 @@
 
 <!-- ================= HERO ================= -->
 <header class="hero">
+  <div class="bg" id="heroBg" aria-hidden="true"></div>
+  <div class="scrim" aria-hidden="true"></div>
   <div class="sun" aria-hidden="true"></div>
   <div class="wrap">
     <span class="wm">Ocean<i>Safe</i></span>
-    <span class="eyebrow">Hawaiʻi Town Ad</span>
+    <span class="eyebrow" id="eyebrow">Hawaiʻi Town Ad</span>
     <h1>Get in front of visitors before they hit the beach.</h1>
-    <p class="lede">List your business in the app visitors open before the water, hand them a QR that opens the free beach-safety guide with you in it, and run a promo to the guests who scan it.</p>
+    <p class="lede">List your business in the app <span data-isl>Hawaiʻi</span> visitors open before the water, hand them a QR that opens the free beach-safety guide with you in it, and run a promo to the guests who scan it.</p>
 
     <div class="priceline">
       <span class="amt">$30</span>
@@ -255,6 +265,13 @@
     </div>
   </div>
 </section>
+
+
+<!-- photo band (island-specific, swapped by the island script) -->
+<div class="band">
+  <img id="bandImg" src="/assets/stock/snorkeling.jpg" alt="" loading="lazy">
+  <div class="cap">Visitors check the water before they go. That’s the moment your offer shows up.</div>
+</div>
 
 <!-- ================= HOW IT WORKS ================= -->
 <section class="how">
@@ -343,4 +360,31 @@
   </div>
 </footer>
 
+
+<script>
+// ?island=maui|oahu|kauai — swaps the island name and the photography to that island.
+// Photos are real, CC-licensed shots OF that island (see assets/stock/SOURCES.md):
+// Maui = Kaanapali, Oahu = Waikiki Beach, Kauai = Kealia. Never another island's beach.
+(function(){
+  var ISL={
+    maui:{name:"Maui",       hero:"/assets/stock/maui-beach.jpg",   band:"/assets/stock/snorkeling.jpg",
+          bandCap:"Visitors check the water before they go. That is the moment your offer shows up."},
+    oahu:{name:"O\u02BBahu",hero:"/assets/stock/family-beach.jpg", band:"/assets/stock/big-waves.jpg",
+          bandCap:"Visitors check the water before they go. That is the moment your offer shows up."},
+    kauai:{name:"Kaua\u02BBi",hero:"/assets/stock/kauai-beach.jpg",band:"/assets/stock/poipu-sunset.jpg",
+          bandCap:"Visitors check the water before they go. That is the moment your offer shows up."}
+  };
+  var q=(new URLSearchParams(location.search).get("island")||"").toLowerCase();
+  var i=ISL[q]||null;
+  var bg=document.getElementById("heroBg");
+  if(bg) bg.style.backgroundImage="url('"+((i&&i.hero)||"/assets/stock/kauai-beach.jpg")+"')";
+  var bandImg=document.getElementById("bandImg");
+  if(bandImg) bandImg.src=(i&&i.band)||"/assets/stock/snorkeling.jpg";
+  if(!i) return;                       // no island given -> stay island-neutral
+  var eb=document.getElementById("eyebrow"); if(eb) eb.textContent=i.name+" Town Ad";
+  document.title="OceanSafe Town Ad ("+i.name+") \u2014 $30/mo";
+  // name the island in the body copy wherever we left a slot
+  document.querySelectorAll("[data-isl]").forEach(function(el){ el.textContent=i.name; });
+})();
+</script>
 </body></html>
