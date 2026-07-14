@@ -1871,13 +1871,13 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
       <p class="dis-lead">Please read before using this app. It shows general ocean and weather conditions to help you plan. It does not determine whether any beach, activity, or moment is safe, and favorable-looking data is never a guarantee of safety.</p>
 
       <h4>Conditions change rapidly</h4>
-      <p>Wave, wind, tide, and current conditions on Kauaʻi can change within minutes. The data comes from third-party public services, including the National Weather Service (NOAA) and Open-Meteo, and may be delayed, incomplete, or inaccurate. We do not warrant the accuracy, completeness, or suitability of any information shown, including data from those services. <b>Always observe actual conditions before entering the water.</b></p>
+      <p>Wave, wind, tide, and current conditions on <span id="disIsland">Kauaʻi</span> can change within minutes. The data comes from third-party public services, including the National Weather Service (NOAA) and Open-Meteo, and may be delayed, incomplete, or inaccurate. We do not warrant the accuracy, completeness, or suitability of any information shown, including data from those services. <b>Always observe actual conditions before entering the water.</b></p>
 
       <h4>Use your own judgment</h4>
-      <p>This app does not replace lifeguards, posted warning flags and signs, or official advisories from the County of Kauaʻi and the National Weather Service — those always override what is shown here. When in doubt, stay on shore. <b>If a beach has no lifeguard, the safest thing is often not to swim.</b> You alone are responsible for your decisions and your safety.</p>
+      <p>This app does not replace lifeguards, posted warning flags and signs, or official advisories from the <span id="disCounty">County of Kauaʻi</span> and the National Weather Service — those always override what is shown here. When in doubt, stay on shore. <b>If a beach has no lifeguard, the safest thing is often not to swim.</b> You alone are responsible for your decisions and your safety.</p>
 
       <h4>Emergencies — call 911</h4>
-      <p>In any emergency, call <b>911</b> immediately. The Kauaʻi Ocean Safety Bureau and Kauaʻi Fire Department respond to ocean emergencies.</p>
+      <p>In any emergency, call <b>911</b> immediately. The <span id="disAgency">Kauaʻi Ocean Safety Bureau and Kauaʻi Fire Department</span> respond to ocean emergencies.</p>
 
       <h4>No liability</h4>
       <p>Swimming, snorkeling, surfing, and other ocean activities carry inherent risks of serious injury and death, including from waves, shorebreak, and currents that are natural and not always visible. To the fullest extent permitted by law, the creators and distributors of this app are not responsible for any injury, illness, death, or property damage arising from use of this app or its information, whether based on contract, negligence, or any other theory. <b>You assume all risk</b> when entering the ocean or visiting any location shown.</p>
@@ -6300,7 +6300,7 @@ function openSheet(id){
         <a href="${dirUrl(_bw.name, _bw.lat, _bw.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Directions</a>
         <a href="tel:911" class="poi-cta-dir" style="background:#fef3c7;border-color:#d97706;color:#7c2d12;display:flex;align-items:center;gap:6px" aria-label="Call 911 in an emergency"><span aria-hidden="true">⚠</span>911</a>
       </div>
-      <div style="font-size:11px;color:var(--mute);margin-top:10px;line-height:1.4;text-align:center"><b>Emergency:</b> dial 911 · <b>Kauaʻi Ocean Safety Bureau:</b> (808) 241-4984</div>`;
+      <div style="font-size:11px;color:var(--mute);margin-top:10px;line-height:1.4;text-align:center"><b>Emergency:</b> dial 911${safetyFooterSuffix()}</div>`;
     document.getElementById('sheet').classList.add('on');
     document.getElementById('overlay').classList.add('on');
     pushItemRoute('beach', _bw.id, _bw.name);
