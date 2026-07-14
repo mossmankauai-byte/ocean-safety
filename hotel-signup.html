@@ -63,7 +63,7 @@
       <label class="plan" id="planPaid">
         <input type="radio" name="tier" value="paid">
         <b>Paid</b>
-        <span class="pr" id="paidPr"><b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. First month free.</span>
+        <span class="pr" id="paidPr"><b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. Billed monthly, cancel anytime.</span>
       </label>
     </div>
 
@@ -117,7 +117,7 @@ const T={
     sub:"Set it up yourself in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. Start free.",
     nameLabel:"Property name", namePh:"Kauaʻi Shores Resort",
     freePr:"<b>$0</b> — the co-branded guide, one featured amenity, and your full analytics. Completely free.",
-    paidPr:"<b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. First month free.", paidSelfServe:true},
+    paidPr:"<b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. Billed monthly, cancel anytime.", paidSelfServe:true},
   rental:{h1:"Put your rentals & tours inside the guide guests already open.",
     sub:"Your gear, tours, and activities in front of every guest checking the beach — with your own page, QR, and analytics. Free to join.",
     nameLabel:"Business name", namePh:"Hanalei Beach Rentals",
@@ -127,13 +127,29 @@ const T={
     sub:"Your storefront inside the beach-safety app, a QR on every receipt and counter, and demand analytics tied to the weather. Start free.",
     nameLabel:"Store name", namePh:"Poipu Beach Store",
     freePr:"<b>$0</b>/mo — we take 3% only on what the app sells for you. You keep 97%.",
-    paidPr:"<b>$500</b>/store/mo — 0% on sales, plus the full data layer. We set this up with you personally.", paidSelfServe:false}
+    paidPr:"<b>$500</b>/store/mo — 0% on sales, plus the full data layer. We set this up with you personally.", paidSelfServe:false},
+  townad:{h1:"Get your business in front of every visitor checking the beach.",
+    sub:"A printable QR that opens the free Kauaʻi beach-safety guide with your business in it, a timed promotion that pops on guests' phones, and a simple dashboard — $30/mo, set up in two minutes.",
+    nameLabel:"Business name", namePh:"Poʻipū Beach Grill",
+    freePr:"", paidPr:"<b>$30</b>/mo — your listing, a printable QR, a timed promotion slot, and your own dashboard. Billed monthly, cancel anytime.", paidSelfServe:true}
 };
 const TC=T[TYPE]||T.hotel;
 $("heroH1").textContent=TC.h1; $("heroSub").textContent=TC.sub;
 $("nameLabel").innerHTML=TC.nameLabel+' <span class="req">*</span>'; $("name").placeholder=TC.namePh;
 $("freePr").innerHTML=TC.freePr; $("paidPr").innerHTML=TC.paidPr;
-document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":"Get your store on OceanSafe");
+document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":TYPE==="townad"?"Get your business on OceanSafe — $30/mo":"Get your store on OceanSafe");
+
+// Town Ad is a single $30/mo paid tier — no free option. Hide the plan chooser and lock to paid.
+if(TYPE==="townad"){
+  const pf=$("planFree"); if(pf) pf.style.display="none";
+  const chooseLbl=document.querySelector("form#f label.first"); if(chooseLbl) chooseLbl.style.display="none";
+  const paidInput=$("planPaid").querySelector("input"); paidInput.checked=true;
+  $("planFree").querySelector("input").checked=false;
+  $("planPaid").classList.add("on"); $("planFree").classList.remove("on");
+  $("planPaid").style.gridColumn="1 / -1";
+  $("go").textContent="Continue to secure payment →";
+  const talk=document.querySelector("form#f .hint a[href^='mailto']"); if(talk&&talk.parentNode) talk.parentNode.style.display="none";
+}
 
 const TS_SITEKEY="0x4AAAAAAD1KovJ4T8LFTTxL";
 const tsOn=TS_SITEKEY && !/YOUR/.test(TS_SITEKEY);
