@@ -2019,22 +2019,22 @@ const ISLANDS = {
     zones:[{ key:'waikiki', name:'Waikīkī',
       outline:[[21.2960,-157.8480],[21.2905,-157.8250],[21.2870,-157.8090],[21.2600,-157.8055],[21.2580,-157.8255],[21.2685,-157.8430],[21.2810,-157.8540]],
       sections:[
-        { name:'Ala Moana', bounds:[[21.2955,-157.8500],[21.2830,-157.8395]], pois:[
+        { name:'Ala Moana', outline:[[21.2965,-157.8500],[21.2940,-157.8388],[21.2878,-157.8388],[21.2832,-157.8428],[21.2848,-157.8495],[21.2915,-157.8520]], pois:[
           {n:'Ala Moana Center',cat:'shop',lat:21.2911,lon:-157.8431,tip:'The largest open-air mall in the world — 350+ shops.'},
           {n:'Ala Moana Beach Park',cat:'beach',lat:21.2896,lon:-157.8470,tip:'Calm, reef-protected swimming and a huge local park.'},
           {n:'Magic Island',cat:'beach',lat:21.2872,lon:-157.8455,tip:'A sheltered lagoon at the Diamond Head end of Ala Moana.'},
           {n:'Ala Wai Harbor',cat:'sight',lat:21.2840,lon:-157.8415,tip:"Honolulu's main small-boat harbor."} ]},
-        { name:'Kalākaua & beachfront', bounds:[[21.2820,-157.8330],[21.2748,-157.8250]], pois:[
+        { name:'Kalākaua & beachfront', outline:[[21.2808,-157.8320],[21.2795,-157.8258],[21.2755,-157.8250],[21.2745,-157.8288],[21.2762,-157.8322]], pois:[
           {n:'Royal Hawaiian Center',cat:'shop',lat:21.2792,lon:-157.8296,tip:'Four levels of shops and dining on Kalākaua Ave.'},
           {n:'International Market Place',cat:'shop',lat:21.2800,lon:-157.8283,tip:'Open-air shopping around the historic banyan tree.'},
           {n:"Duke's Waikīkī",cat:'food',lat:21.2770,lon:-157.8290,tip:'Beachfront bar and grill at the Outrigger.'},
           {n:'The Royal Hawaiian',cat:'sight',lat:21.2765,lon:-157.8301,tip:'The 1927 "Pink Palace of the Pacific."'},
           {n:'Waikīkī Beach',cat:'beach',lat:21.2762,lon:-157.8267,tip:'The famous strand — gentle, reef-protected sections.'} ]},
-        { name:'Kūhiō Ave', bounds:[[21.2832,-157.8305],[21.2775,-157.8238]], pois:[
+        { name:'Kūhiō Ave', outline:[[21.2838,-157.8300],[21.2826,-157.8240],[21.2784,-157.8245],[21.2788,-157.8302],[21.2816,-157.8318]], pois:[
           {n:'Marukame Udon',cat:'food',lat:21.2810,lon:-157.8270,tip:'Fresh hand-cut udon; famous lines, worth it.'},
           {n:'Waikīkī Yokocho',cat:'food',lat:21.2818,lon:-157.8286,tip:'An underground Japanese food alley.'},
           {n:'Kūhiō Beach',cat:'beach',lat:21.2758,lon:-157.8252,tip:'Calm, wall-protected pools; hula mound nearby.'} ]},
-        { name:'Diamond Head end', bounds:[[21.2725,-157.8250],[21.2635,-157.8150]], pois:[
+        { name:'Diamond Head end', outline:[[21.2732,-157.8240],[21.2705,-157.8150],[21.2625,-157.8148],[21.2598,-157.8240],[21.2665,-157.8275],[21.2715,-157.8265]], pois:[
           {n:'Honolulu Zoo',cat:'sight',lat:21.2712,lon:-157.8235,tip:'A 42-acre zoo at the edge of Kapiʻolani Park.'},
           {n:'Waikīkī Aquarium',cat:'sight',lat:21.2662,lon:-157.8216,tip:'Reef and Hawaiian marine life, right on the water.'},
           {n:'Kapiʻolani Park',cat:'sight',lat:21.2695,lon:-157.8205,tip:"Honolulu's big open park below Diamond Head."},
@@ -5158,9 +5158,8 @@ function zoomToZone(z){ window._zoomedZone=z.key; _zoneFit(z.outline||z.bounds,1
 function _zoneEnsureCss(){
   if(document.getElementById('os-zone-css')) return;
   var st=document.createElement('style'); st.id='os-zone-css';
-  st.textContent='.os-zone-poly{cursor:pointer;animation:oszfill 2.8s ease-in-out infinite}'
-    +'@keyframes oszfill{0%,100%{fill-opacity:.14}50%{fill-opacity:.24}}'
-    +'.os-zone-poly:hover{fill-opacity:.3}'
+  st.textContent='.os-zone-poly{cursor:pointer;filter:drop-shadow(0 0 1px rgba(255,255,255,.85))}'
+    +'.os-zone-poly:hover{fill-opacity:.16}'
     +'.os-zone-badge{transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap}'
     +'.os-zone-badge .zb{width:34px;height:34px;border-radius:50%;background:#0f4c5c;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto;animation:oszbob 1.9s ease-in-out infinite}'
     +'.os-zone-badge .zb svg{width:19px;height:19px;display:block}'
@@ -5192,9 +5191,9 @@ function renderZones(){
     back.textContent='‹ '+((ACTIVE&&ACTIVE.name)||'Island'); back.style.display='block';
     var showPois = zoom >= _ZONE_POI_ZOOM;
     zones.forEach(function(z){ (z.sections||[]).forEach(function(sec){
-      var b=L.latLngBounds(sec.bounds);
-      var rect=L.rectangle(sec.bounds,{pane:'zones',className:showPois?'':'os-zone-poly',color:'#c9871f',weight:1.5,opacity:.55,fillColor:'#f2c14e',fillOpacity:showPois?.06:.14,interactive:!showPois});
-      if(!showPois) rect.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); _zoneFit(sec.bounds); });
+      var b=L.latLngBounds(sec.outline);
+      var rect=L.polygon(sec.outline,{pane:'zones',className:showPois?'':'os-zone-poly',color:'#1f6fdd',weight:showPois?2:2.5,opacity:.9,fillColor:'#1f6fdd',fillOpacity:showPois?.05:.12,interactive:!showPois});
+      if(!showPois) rect.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); _zoneFit(sec.outline); });
       rect.addTo(map); _zoneLayers.push(rect);
       if(showPois){
         var sl=L.marker(L.latLng(b.getNorth(),b.getCenter().lng),{interactive:false,keyboard:false,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="os-wsec-lbl">'+sec.name+'</div>'})});
@@ -5207,7 +5206,7 @@ function renderZones(){
         });
       } else {
         var sb=L.marker(b.getCenter(),{interactive:true,keyboard:false,zIndexOffset:2000,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="os-zone-badge sec"><span class="zb">'+_ZMAG+'</span><span class="zn">'+sec.name+'</span></div>'})});
-        sb.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); _zoneFit(sec.bounds); });
+        sb.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); _zoneFit(sec.outline); });
         sb.addTo(map); _zoneLayers.push(sb);
       }
     }); });
@@ -5215,7 +5214,7 @@ function renderZones(){
   }
   window._zoomedZone=null; back.style.display='none';
   zones.forEach(function(z){
-    var poly=L.polygon(z.outline,{pane:'zones',className:'os-zone-poly',color:'#c9871f',weight:2.5,opacity:.95,fillColor:'#f2c14e',fillOpacity:.18,bubblingMouseEvents:false});
+    var poly=L.polygon(z.outline,{pane:'zones',className:'os-zone-poly',color:'#1f6fdd',weight:3,opacity:.95,fillColor:'#1f6fdd',fillOpacity:.07,bubblingMouseEvents:false});
     poly.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); zoomToZone(z); });
     poly.addTo(map); _zoneLayers.push(poly);
     var bb=poly.getBounds(), badgePt=L.latLng(bb.getNorth(), bb.getCenter().lng);
