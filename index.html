@@ -2019,22 +2019,22 @@ const ISLANDS = {
     zones:[{ key:'waikiki', name:'Waikīkī',
       outline:[[21.2960,-157.8480],[21.2905,-157.8250],[21.2870,-157.8090],[21.2600,-157.8055],[21.2580,-157.8255],[21.2685,-157.8430],[21.2810,-157.8540]],
       sections:[
-        { name:'Ala Moana', outline:[[21.2965,-157.8500],[21.2940,-157.8388],[21.2878,-157.8388],[21.2832,-157.8428],[21.2848,-157.8495],[21.2915,-157.8520]], pois:[
+        { name:'Ala Moana', outline:[[21.2948,-157.8520],[21.2942,-157.8398],[21.2905,-157.8378],[21.2858,-157.8382],[21.2832,-157.8418],[21.2840,-157.8482],[21.2884,-157.8522]], pois:[
           {n:'Ala Moana Center',cat:'shop',lat:21.2911,lon:-157.8431,tip:'The largest open-air mall in the world — 350+ shops.'},
           {n:'Ala Moana Beach Park',cat:'beach',lat:21.2896,lon:-157.8470,tip:'Calm, reef-protected swimming and a huge local park.'},
           {n:'Magic Island',cat:'beach',lat:21.2872,lon:-157.8455,tip:'A sheltered lagoon at the Diamond Head end of Ala Moana.'},
           {n:'Ala Wai Harbor',cat:'sight',lat:21.2840,lon:-157.8415,tip:"Honolulu's main small-boat harbor."} ]},
-        { name:'Kalākaua & beachfront', outline:[[21.2808,-157.8320],[21.2795,-157.8258],[21.2755,-157.8250],[21.2745,-157.8288],[21.2762,-157.8322]], pois:[
+        { name:'Kalākaua & beachfront', outline:[[21.2814,-157.8352],[21.2800,-157.8262],[21.2778,-157.8238],[21.2758,-157.8236],[21.2748,-157.8288],[21.2770,-157.8352]], pois:[
           {n:'Royal Hawaiian Center',cat:'shop',lat:21.2792,lon:-157.8296,tip:'Four levels of shops and dining on Kalākaua Ave.'},
           {n:'International Market Place',cat:'shop',lat:21.2800,lon:-157.8283,tip:'Open-air shopping around the historic banyan tree.'},
           {n:"Duke's Waikīkī",cat:'food',lat:21.2770,lon:-157.8290,tip:'Beachfront bar and grill at the Outrigger.'},
           {n:'The Royal Hawaiian',cat:'sight',lat:21.2765,lon:-157.8301,tip:'The 1927 "Pink Palace of the Pacific."'},
           {n:'Waikīkī Beach',cat:'beach',lat:21.2762,lon:-157.8267,tip:'The famous strand — gentle, reef-protected sections.'} ]},
-        { name:'Kūhiō Ave', outline:[[21.2838,-157.8300],[21.2826,-157.8240],[21.2784,-157.8245],[21.2788,-157.8302],[21.2816,-157.8318]], pois:[
+        { name:'Kūhiō Ave', outline:[[21.2846,-157.8322],[21.2830,-157.8232],[21.2792,-157.8236],[21.2786,-157.8288],[21.2800,-157.8320]], pois:[
           {n:'Marukame Udon',cat:'food',lat:21.2810,lon:-157.8270,tip:'Fresh hand-cut udon; famous lines, worth it.'},
           {n:'Waikīkī Yokocho',cat:'food',lat:21.2818,lon:-157.8286,tip:'An underground Japanese food alley.'},
           {n:'Kūhiō Beach',cat:'beach',lat:21.2758,lon:-157.8252,tip:'Calm, wall-protected pools; hula mound nearby.'} ]},
-        { name:'Diamond Head end', outline:[[21.2732,-157.8240],[21.2705,-157.8150],[21.2625,-157.8148],[21.2598,-157.8240],[21.2665,-157.8275],[21.2715,-157.8265]], pois:[
+        { name:'Diamond Head end', outline:[[21.2736,-157.8238],[21.2716,-157.8150],[21.2648,-157.8138],[21.2604,-157.8190],[21.2598,-157.8250],[21.2666,-157.8280],[21.2720,-157.8266]], pois:[
           {n:'Honolulu Zoo',cat:'sight',lat:21.2712,lon:-157.8235,tip:'A 42-acre zoo at the edge of Kapiʻolani Park.'},
           {n:'Waikīkī Aquarium',cat:'sight',lat:21.2662,lon:-157.8216,tip:'Reef and Hawaiian marine life, right on the water.'},
           {n:'Kapiʻolani Park',cat:'sight',lat:21.2695,lon:-157.8205,tip:"Honolulu's big open park below Diamond Head."},
@@ -5175,6 +5175,32 @@ function _zoneEnsureCss(){
     +'#os-zone-back{position:absolute;left:12px;top:62px;z-index:701;background:rgba(8,40,50,.92);color:#eaf6f8;border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:7px 14px 7px 11px;font:700 12.5px "DM Sans",sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none}';
   document.head.appendChild(st);
 }
+function _waikikiBB(){ var z=(window.ACTIVE&&ACTIVE.zones&&ACTIVE.zones[0]); try{ return z?L.latLngBounds(z.outline):null; }catch(e){ return null; } }
+function toggleWaikikiExistingPois(){
+  // Hide the island-wide Town/Family pins that fall inside Waikīkī while the zone
+  // is active + zoomed in, so only the curated section POIs show there.
+  try{
+    if(typeof map==='undefined'||!map) return;
+    var bb=_waikikiBB(); if(!bb) return;
+    var hide = _zoneGateOK() && map.getZoom() >= _ZONE_DISTRICT_ZOOM;
+    var regs=[];
+    try{ if(typeof foodMkrs!=='undefined') regs.push(foodMkrs); }catch(e){}
+    try{ if(typeof groceryMkrs!=='undefined') regs.push(groceryMkrs); }catch(e){}
+    try{ if(typeof gasMkrs!=='undefined') regs.push(gasMkrs); }catch(e){}
+    try{ if(typeof craftMkrs!=='undefined') regs.push(craftMkrs); }catch(e){}
+    try{ if(typeof coffeeMkrs!=='undefined') regs.push(coffeeMkrs); }catch(e){}
+    try{ if(typeof drinkMkrs!=='undefined') regs.push(drinkMkrs); }catch(e){}
+    try{ if(typeof marketMkrs!=='undefined') regs.push(marketMkrs); }catch(e){}
+    try{ if(typeof stayMkrs!=='undefined') regs.push(stayMkrs); }catch(e){}
+    try{ if(typeof actMkrs!=='undefined') regs.push(actMkrs); }catch(e){}
+    regs.forEach(function(reg){ Object.keys(reg).forEach(function(k){ var mk=reg[k];
+      if(!mk||!mk.getLatLng) return;
+      if(!bb.contains(mk.getLatLng())) return;
+      if(hide){ if(map.hasLayer(mk)) map.removeLayer(mk); }
+      else { if(!map.hasLayer(mk)) mk.addTo(map); }
+    }); });
+  }catch(e){}
+}
 function renderZones(){
   try{
   if(typeof map==='undefined'||!map) return;
@@ -5186,6 +5212,7 @@ function renderZones(){
   if(!zones||!zones.length||!_zoneGateOK()){ back.style.display='none'; return; }
   if(!map.getPane('zones')){ map.createPane('zones'); map.getPane('zones').style.zIndex='590'; }
   if(!_zoneWired){ map.on('zoomend',function(){ if(typeof renderZones==='function') renderZones(); }); _zoneWired=true; }
+  toggleWaikikiExistingPois();
   var zoom=map.getZoom();
   if(zoom >= _ZONE_DISTRICT_ZOOM){
     back.textContent='‹ '+((ACTIVE&&ACTIVE.name)||'Island'); back.style.display='block';
