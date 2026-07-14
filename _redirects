@@ -10,3 +10,14 @@
 # DB-driven partner pages + no-login dashboards (runtime from Supabase)
 /p/*  /p.html  200
 /d/*  /d.html  200
+
+# Clean per-island app launch URLs (QR codes, business cards, mass email).
+# 200 rewrite keeps the pretty /go/<island> in the address bar; index.html boots that island.
+/go/kauai     /index.html   200
+/go/kauai/    /index.html   200
+/go/maui      /index.html   200
+/go/maui/     /index.html   200
+/go/oahu      /index.html   200
+/go/oahu/     /index.html   200
+/go/hawaii    /index.html   200
+/go/hawaii/   /index.html   200

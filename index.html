@@ -45,13 +45,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Kauai Beaches">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="shortcut icon" href="icons/favicon.ico">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <meta property="og:title" content="Kauaʻi Beach Guide">
 <meta property="og:description" content="Free ocean safety app for Kauai visitors. Real-time conditions, hazard warnings, family-friendly options.">
 <meta property="og:type" content="website">
@@ -1977,10 +1977,10 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
       <button class="pill pill-danger" onclick="tog('danger',this)" aria-label="Show dangerous beaches"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L22 20 H2 Z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17.2" r=".7" fill="currentColor" stroke="none"/></svg>Hazards</button>
 </div>
 <div id="map"></div>
-<button id="shore-north" class="shore-chip shore-n" onclick="window._outlookRegion='north';openOutlookSheet('surf')" aria-label="North Shore conditions"><span class="shore-dot"></span><span class="shore-l">North</span><span class="shore-v">—</span><svg class="shore-drop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7c3.4 4.2 6.3 7.9 6.3 11.4a6.3 6.3 0 1 1-12.6 0C5.7 10.6 8.6 6.9 12 2.7z"/></svg></button>
-<button id="shore-east" class="shore-chip shore-e" onclick="window._outlookRegion='east';openOutlookSheet('surf')" aria-label="East Side conditions"><span class="shore-dot"></span><span class="shore-l">East</span><span class="shore-v">—</span><svg class="shore-drop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7c3.4 4.2 6.3 7.9 6.3 11.4a6.3 6.3 0 1 1-12.6 0C5.7 10.6 8.6 6.9 12 2.7z"/></svg></button>
-<button id="shore-south" class="shore-chip shore-s" onclick="window._outlookRegion='south';openOutlookSheet('surf')" aria-label="South Shore conditions"><span class="shore-dot"></span><span class="shore-l">South</span><span class="shore-v">—</span><svg class="shore-drop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7c3.4 4.2 6.3 7.9 6.3 11.4a6.3 6.3 0 1 1-12.6 0C5.7 10.6 8.6 6.9 12 2.7z"/></svg></button>
-<button id="shore-west" class="shore-chip shore-w" onclick="window._outlookRegion='west';openOutlookSheet('surf')" aria-label="West Side conditions"><span class="shore-dot"></span><span class="shore-l">West</span><span class="shore-v">—</span><svg class="shore-drop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7c3.4 4.2 6.3 7.9 6.3 11.4a6.3 6.3 0 1 1-12.6 0C5.7 10.6 8.6 6.9 12 2.7z"/></svg></button>
+<!-- Layer 13 (F1 fix): shore-outlook chips are built dynamically from ACTIVE.regions by
+     buildShoreChips() so every island paints its own coasts. Absolute-positioned children of
+     this static wrapper resolve to the same map-relative containing block as before. -->
+<div id="shoreChips"></div>
 </div>
 
 <div id="nores">No beaches match — try different filters</div>
@@ -2068,7 +2068,267 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 //# sourceMappingURL=leaflet.js.map</script>
 <script>
 // BEACHES
-const B=[
+// ===== MULTI-ISLAND MACHINERY (ported from maui branch — Layer 1) =====
+/* ===== MULTI-ISLAND CONFIG (Maui expansion — see ~/Desktop/OceanSafe/MULTI-ISLAND-PLAN.md) =====
+   Step 0: PURE ADDITIVE. Nothing references ISLANDS yet, so Kauaʻi behavior is byte-identical.
+   kauai values mirror the existing literals exactly (map init L3640, fetchLive gate L3450-54,
+   SIDE_PTS L7000-04, tide station in wx.mjs). INVARIANT: B[] holds exactly ONE island at a
+   time — NEVER concatenate two islands' beaches (the 'North Shore'/'South Shore' strings are
+   reused by Maui, so region filters are only safe while B is single-island). */
+const ISLANDS = {
+  kauai: {
+    slug:'kauai', name:'Kauaʻi', live:true, defaultSide:'east', sideKey:'os_side',
+    map:{ center:[22.05,-159.50], zoom:10, minZoom:9, maxBounds:null },
+    seaLevel:{ lat:21.9788, lon:-159.3672 },
+    geoBox:{ latMin:21.85, latMax:22.25, lonMin:-159.85, lonMax:-159.25 },
+    clamp:{ latMin:21.7, latMax:22.4, lonMin:-160.1, lonMax:-159.2 },
+    tideStation:'1611400',
+    regions:[
+      {key:'north', label:'North', r:'North Shore', centroid:{lat:22.205,lon:-159.503}},
+      {key:'east',  label:'East',  r:'East Side',   centroid:{lat:22.005,lon:-159.337}},
+      {key:'south', label:'South', r:'South Shore', centroid:{lat:21.880,lon:-159.460}},
+      {key:'west',  label:'West',  r:'West Side',   centroid:{lat:21.970,lon:-159.700}}
+    ],
+    data:null   // wired to B at step 1
+  },
+  maui: {
+    slug:'maui', name:'Maui', live:true, defaultSide:'west', sideKey:'os_side_maui',
+    map:{ center:[20.80,-156.33], zoom:10, minZoom:9, maxBounds:[[20.10,-157.03],[21.45,-155.65]] },
+    seaLevel:{ lat:20.89, lon:-156.47 },
+    geoBox:{ latMin:20.55, latMax:21.0, lonMin:-156.68, lonMax:-156.0 },
+    clamp:{ latMin:20.5, latMax:21.05, lonMin:-156.7, lonMax:-155.98 },
+    tideStation:'1615680',
+    regions:[
+      {key:'west',  label:'West',  r:'West Maui',  centroid:{lat:20.92,lon:-156.69}},
+      {key:'south', label:'South', r:'South Maui', centroid:{lat:20.71,lon:-156.45}},
+      {key:'north', label:'North',r:'North Shore',centroid:{lat:20.93,lon:-156.36}},
+      {key:'east',  label:'East',  r:'East/Hāna',  centroid:{lat:20.76,lon:-155.99}}
+    ],
+    data:null   // lazy-loaded from /data/maui.js at step 6
+  },
+  oahu: {
+    slug:'oahu', name:'Oʻahu', live:true, defaultSide:'south', sideKey:'os_side_oahu',
+    map:{ center:[21.47,-157.97], zoom:10, minZoom:9, maxBounds:[[20.75,-158.67],[22.20,-157.20]] },
+    seaLevel:{ lat:21.28, lon:-157.83 },
+    geoBox:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
+    clamp:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
+    tideStation:'1612340',
+    zones:[{ key:'waikiki', name:'Waikīkī',
+      outline:[[21.2952,-157.8525],[21.2918,-157.8395],[21.28749,-157.84115],[21.28871,-157.83338],[21.27487,-157.81748],[21.279,-157.811],[21.264,-157.8135],[21.25985,-157.81982],[21.26125,-157.82138],[21.26399,-157.82214],[21.26394,-157.82251],[21.2649,-157.82275],[21.2651,-157.82211],[21.27125,-157.82331],[21.27114,-157.82383],[21.27152,-157.8232],[21.27445,-157.82474],[21.27628,-157.82762],[21.2765,-157.82974],[21.27785,-157.83374],[21.27758,-157.834],[21.27804,-157.83397],[21.28112,-157.83796],[21.2845,-157.84421],[21.2813,-157.84508],[21.28152,-157.8461],[21.28224,-157.84715],[21.28206,-157.84626],[21.28311,-157.84649],[21.28392,-157.84765],[21.28383,-157.84806],[21.28339,-157.84805],[21.28431,-157.84838],[21.28598,-157.84729],[21.28647,-157.84653],[21.28745,-157.84649],[21.28789,-157.84684],[21.29023,-157.85332]],
+      sections:[
+        { name:'Ala Moana', lblAt:[21.2898,-157.8465], outline:[[21.2952,-157.8525],[21.2918,-157.8395],[21.28749,-157.84115],[21.2845,-157.84421],[21.2813,-157.84508],[21.28152,-157.8461],[21.28185,-157.8462],[21.28224,-157.84715],[21.28206,-157.84626],[21.28265,-157.84621],[21.28311,-157.84649],[21.28392,-157.84765],[21.28383,-157.84806],[21.28339,-157.84791],[21.28339,-157.84805],[21.28431,-157.84838],[21.28464,-157.8483],[21.28598,-157.84729],[21.28595,-157.84696],[21.28647,-157.84653],[21.28745,-157.84649],[21.28789,-157.84684],[21.28862,-157.84825],[21.29023,-157.85332]], pois:[
+          {n:'Ala Moana Center',cat:'sight',lat:21.29122,lon:-157.8434,tip:'Open-air mall with 350+ stores, a food court, and free Center Stage hula shows; Hawaii\'s largest.'},
+          {n:'Island Vintage Coffee',cat:'food',lat:21.29158,lon:-157.8434,tip:'Local chain for 100% Kona coffee, acai bowls, and poke; long peak lines, so order on the app.'},
+          {n:'Nordstrom Ala Moana',cat:'shop',lat:21.2917,lon:-157.8449,tip:'Full-line Nordstrom anchoring the Ewa wing; two floors of apparel, shoes, and a marketplace cafe.'},
+          {n:'Macy\'s Ala Moana',cat:'shop',lat:21.2909,lon:-157.8418,tip:'Multi-floor Macy\'s anchoring the Diamond Head end; the mall\'s longest-standing department store.'},
+          {n:'Apple Ala Moana',cat:'shop',lat:21.2913,lon:-157.844,tip:'Apple\'s flagship Hawaii store on Center Stage; sales, repairs, and Today at Apple sessions.'},
+          {n:'Foodland Farms Ala Moana',cat:'shop',lat:21.2906,lon:-157.845,tip:'Flagship Foodland supermarket with a large poke counter, hot prepared foods, and a wine bar.'},
+          {n:'Target Ala Moana',cat:'shop',lat:21.2913,lon:-157.8451,tip:'Two-level Target in the Ewa wing with groceries, essentials, and beach gear; open until 10pm.'},
+          {n:'Mai Tai\'s',cat:'food',lat:21.2917,lon:-157.843,tip:'Open-air 4th-floor cocktail bar with nightly live Hawaiian music; popular pau hana spot.'},
+          {n:'The Lanai Food Court',cat:'food',lat:21.2913,lon:-157.8422,tip:'Level-2 food hall of local vendors (plate lunch, ramen, poke) with seating for about 450.'},
+          {n:'Ala Moana Beach Park',cat:'beach',lat:21.2897,lon:-157.8468,tip:'Long calm swimming beach with lifeguards 9-5:30; gentler and less crowded than Waikiki.'},
+          {n:'Magic Island (Aina Moana)',cat:'beach',lat:21.2867,lon:-157.8448,tip:'Walled man-made lagoon at the park\'s tip; sheltered calm water good for kids and new swimmers.'} ], family:[
+          {n:'Ala Moana Beach Park',cat:'beach',lat:21.2905,lon:-157.8467,tip:'Wide sandy beach with calm, lifeguarded water and a shallow shelf, so little kids can swim safely.'},
+          {n:'Magic Island Lagoon',cat:'beach',lat:21.2868,lon:-157.8422,tip:'Man-made walled lagoon stays nearly waveless, letting toddlers wade and swim in protected calm water.'},
+          {n:'Ala Moana Regional Park Playground',cat:'play',lat:21.2895,lon:-157.8452,tip:'Shaded playground and big grassy lawns by the beach give kids room to run between swims and picnics.'},
+          {n:'Ala Moana Center',cat:'sight',lat:21.29092,lon:-157.8434,tip:'Open-air mall with toy shops, kids\' stores and stroller-easy walkways; a comfortable rainy-day stop.'},
+          {n:'Häagen-Dazs (Ala Moana Center)',cat:'food',lat:21.29128,lon:-157.8434,tip:'Classic ice cream scoop shop inside the mall, an easy cool-down treat after beach or shopping.'},
+          {n:'Luckey Climbers Play Area (Ala Moana Center, Level 3)',cat:'play',lat:21.2915,lon:-157.8423,tip:'Free 40-ft wave-shaped climbing structure near Target, netted and safe for kids ages 3 to 12.'},
+          {n:'Makai Market Food Court (Ala Moana Center)',cat:'food',lat:21.2907,lon:-157.8442,tip:'Big food court of local and Asian casual eats, so picky kids and parents each find something.'} ]},
+        { name:'Kūhiō Ave', lblAt:[21.2828,-157.8228], outline:[[21.28845,-157.83296],[21.27487,-157.81748],[21.27403,-157.8163],[21.27335,-157.8167],[21.27281,-157.81773],[21.27192,-157.82013],[21.2715,-157.82276],[21.27512,-157.8247],[21.27987,-157.82964],[21.28666,-157.83352]], pois:[
+          {n:'International Market Place',cat:'shop',lat:21.281,lon:-157.827,tip:'Open-air mall around a historic banyan; Target anchor, a downstairs food hall, and free live Hawaiian music.'},
+          {n:'Luxury Row',cat:'shop',lat:21.2812,lon:-157.8297,tip:'Compact block of flagship designer stores: Chanel, Dior, Gucci, Bottega Veneta, Tiffany at 2100 Kalakaua.'},
+          {n:'Duke Kahanamoku Statue',cat:'sight',lat:21.2761,lon:-157.8249,tip:'Bronze statue of the surfing legend, usually draped in lei; the standard Waikiki photo stop on Kalakaua.'},
+          {n:'Marugame Udon',cat:'food',lat:21.2823,lon:-157.8262,tip:'Self-serve udon made fresh to order with pick-your-own tempura; cheap, fast, and lines move quickly.'},
+          {n:'Kona Coffee Purveyors',cat:'food',lat:21.2819,lon:-157.8267,tip:'100% Kona coffee and b. patisserie kouign-amann at the Kūhiō-side entrance of International Market Place.'},
+          {n:'Musubi Cafe Iyasume',cat:'food',lat:21.2806,lon:-157.8247,tip:'Grab-and-go Spam musubi and rice balls in many varieties; cheap, quick beach food right on Kūhiō.'},
+          {n:'STIX ASIA',cat:'food',lat:21.2813,lon:-157.8285,tip:'Basement Asian food hall (the former Waikīkī Yokocho) with ~15 stalls: ramen, sushi, dumplings, boba.'},
+          {n:'Heavenly Island Lifestyle',cat:'food',lat:21.281,lon:-157.8283,tip:'Sit-down local-ingredient breakfast and brunch (loco moco, acai bowls); opens 7am, on Seaside Ave.'},
+          {n:'Wang Chung\'s Karaoke Bar',cat:'food',lat:21.2799,lon:-157.8253,tip:'Small LGBTQ-friendly karaoke bar open nightly till 2am; stiff drinks and a sing-along crowd.'},
+          {n:'Waikīkī Market',cat:'shop',lat:21.2811,lon:-157.8255,tip:'Full grocery with hot deli, poke and musubi; the go-to Kūhiō market after Food Pantry closed.'},
+          {n:'ABC Stores',cat:'shop',lat:21.2809,lon:-157.825,tip:'Hawaii convenience chain for sunscreen, snacks, water and cheap souvenirs; open late, on Kūhiō.'},
+          {n:'Ross Dress for Less',cat:'shop',lat:21.2816,lon:-157.8281,tip:'Multi-floor discount department store for clothes and beach gear; busy, open till late night.'} ], family:[
+          {n:'Kūhiō Beach Park (the Ponds)',cat:'beach',lat:21.2762,lon:-157.825,tip:'Wall breakwater forms two calm, shallow lagoons; safest Waikīkī swim for young kids, lifeguards on duty.'},
+          {n:'Duke Kahanamoku Statue',cat:'sight',lat:21.2766,lon:-157.8256,tip:'Free, iconic lei-draped bronze right on the beachfront; classic quick family photo stop.'},
+          {n:'Kūhiō Beach Hula Mound',cat:'sight',lat:21.276,lon:-157.8247,tip:'Free hula show on the grass near Duke\'s statue, Saturdays 6:30pm; kids can sit up close.'},
+          {n:'Kapahulu Groin (The Wall)',cat:'sight',lat:21.2751,lon:-157.8235,tip:'Walk the little pier and watch bodyboarders launch off the wall; a fun, free spectacle for kids.'},
+          {n:'Marugame Udon',cat:'food',lat:21.2806,lon:-157.8281,tip:'Watch fresh udon noodles made; bowls from about $6 and a fast line keep hungry kids happy.'},
+          {n:'Musubi Cafe Iyasume',cat:'food',lat:21.2797,lon:-157.8265,tip:'Grab-and-go Spam musubi and rice balls, cheap and handheld, easy fuel for a family beach day.'},
+          {n:'Kuhio Avenue Food Hall (International Market Place)',cat:'food',lat:21.2817,lon:-157.8272,tip:'Ten food stalls under one roof so picky kids and parents each pick their own; validated parking.'},
+          {n:'ABC Store (Kūhiō & Liliʻuokalani)',cat:'food',lat:21.2794,lon:-157.8257,tip:'Corner shop stocks beach toys, sunscreen, snacks and cheap musubi, one-stop for a beach day.'},
+          {n:'Heavenly Island Lifestyle',cat:'food',lat:21.2801,lon:-157.8285,tip:'Relaxed local breakfast with acai bowls, pancakes and French toast kids love; opens 7am daily.'},
+          {n:'Liliha Bakery (International Market Place)',cat:'food',lat:21.2816,lon:-157.8269,tip:'Family diner famous for Coco Puffs, plus all-day pancakes, a fun sit-down treat for kids.'} ]},
+        { name:'Kalākaua & beachfront', label:'Beachfront', lblAt:[21.2782,-157.833], outline:[[21.28749,-157.84115],[21.2889,-157.83462],[21.28887,-157.83386],[21.28845,-157.83296],[21.28666,-157.83352],[21.27987,-157.82964],[21.27512,-157.8247],[21.2715,-157.82276],[21.27152,-157.8232],[21.27196,-157.82331],[21.27321,-157.82423],[21.27327,-157.82414],[21.27428,-157.82457],[21.27465,-157.82503],[21.27457,-157.82533],[21.27489,-157.82523],[21.27554,-157.82605],[21.27628,-157.82762],[21.2765,-157.82974],[21.27661,-157.82973],[21.27676,-157.8302],[21.27693,-157.83125],[21.27725,-157.83178],[21.27754,-157.83278],[21.27746,-157.83292],[21.27785,-157.83374],[21.27758,-157.834],[21.27787,-157.83386],[21.27804,-157.83397],[21.27874,-157.83526],[21.27982,-157.83634],[21.28136,-157.83842]], pois:[
+          {n:'Ala Wai Boat Harbor',cat:'sight',lat:21.2872,lon:-157.8397,tip:'Hawaii\'s largest small-boat harbor and a departure point for many charters, cruises, and tours.'},
+          {n:'Royal Hawaiian Center',cat:'shop',lat:21.277,lon:-157.8281,tip:'Three-block open-air mall on Kalakaua with 90+ shops, a food court, and free lei-making and hula classes.'},
+          {n:'Duke\'s Waikiki',cat:'food',lat:21.276,lon:-157.8265,tip:'Beachfront bar-restaurant at the Outrigger; huge portions, Barefoot Bar on the sand, live music, gets packed.'},
+          {n:'House Without a Key',cat:'food',lat:21.2785,lon:-157.8317,tip:'Halekulani\'s open-air oceanfront lounge; nightly hula and Hawaiian music under an old kiawe tree at sunset.'},
+          {n:'Mai Tai Bar (Royal Hawaiian)',cat:'food',lat:21.2762,lon:-157.8283,tip:'Beachfront bar at the pink Royal Hawaiian; signature mai tais, live music nightly, direct sunset ocean view.'},
+          {n:'Beachhouse at the Moana',cat:'food',lat:21.2759,lon:-157.826,tip:'Oceanfront steak-and-seafood restaurant at the historic Moana Surfrider, beside its old banyan courtyard.'},
+          {n:'Waikīkī Beach (central)',cat:'beach',lat:21.2754,lon:-157.8272,tip:'The main Waikiki sand fronting the Royal Hawaiian and Moana; gentle waves, beginner surf breaks, heavy crowds.'},
+          {n:'Kūhiō Beach Park',cat:'beach',lat:21.2749,lon:-157.8248,tip:'Wall-protected swimming ponds at the Diamond Head end; calm water good for kids, mind the slippery wall.'},
+          {n:'Moana Surfrider (First Lady of Waikīkī)',cat:'sight',lat:21.2765,lon:-157.8262,tip:'The \'First Lady of Waikiki,\' a 1901 colonial hotel with a landmark banyan courtyard open to the public.'},
+          {n:'The Royal Hawaiian (Pink Palace)',cat:'sight',lat:21.2769,lon:-157.8285,tip:'The 1927 \'Pink Palace of the Pacific,\' Waikiki\'s most photographed hotel; walk the gardens and beachfront.'} ], family:[
+          {n:'Central Waikīkī Beach (Royal Hawaiian Beach)',cat:'beach',lat:21.277,lon:-157.8274,tip:'Wide soft-sand stretch with gentle shorebreak; room for sandcastles and easy splashing near lifeguards.'},
+          {n:'Royal Grove at Royal Hawaiian Center',cat:'sight',lat:21.27702,lon:-157.828,tip:'Free weekday lei-making, ukulele and hula classes including keiki sessions; no reservation needed.'},
+          {n:'Island Vintage Shave Ice',cat:'food',lat:21.27738,lon:-157.828,tip:'Real-fruit shave ice, smoothies and ice cream; big bowls kids can share while strolling the strip.'} ]},
+        { name:'Diamond Head end', label:'Diamond Head', lblAt:[21.2678,-157.8185], outline:[[21.27487,-157.81748],[21.279,-157.811],[21.264,-157.8135],[21.25985,-157.81982],[21.26059,-157.82038],[21.26125,-157.82138],[21.26222,-157.82178],[21.26241,-157.82159],[21.26399,-157.82214],[21.26394,-157.82251],[21.2649,-157.82275],[21.2651,-157.82211],[21.26832,-157.82294],[21.27025,-157.82308],[21.27125,-157.82331],[21.27114,-157.82383],[21.27133,-157.82322],[21.27152,-157.8232],[21.2715,-157.82276],[21.27192,-157.82013],[21.27281,-157.81773],[21.27335,-157.8167],[21.27403,-157.8163]], pois:[
+          {n:'Kapiʻolani Regional Park',cat:'sight',lat:21.2673,lon:-157.8205,tip:'300-acre park at Diamond Head\'s foot: big lawns, banyans, tennis courts, jogging paths, weekend events.'},
+          {n:'Kaimana Beach (Sans Souci)',cat:'beach',lat:21.2643,lon:-157.8215,tip:'Calm locals\' swim beach past the aquarium; protected water, good for laps and easy family swims.'},
+          {n:'Queen\'s Surf Beach',cat:'beach',lat:21.266,lon:-157.8228,tip:'Wide beach fronting Kapiʻolani Park; swimming, snorkeling near the wall, longtime LGBTQ gathering spot.'},
+          {n:'Honolulu Zoo',cat:'sight',lat:21.2711,lon:-157.821,tip:'42-acre zoo at the park\'s edge, open daily; strong for kids, African savanna and Komodo dragon exhibits.'},
+          {n:'Waikīkī Aquarium',cat:'sight',lat:21.2657,lon:-157.8222,tip:'Small UH-run aquarium on Kalākaua; Hawaiian reef fish, jellies and a monk-seal exhibit, open daily.'},
+          {n:'Waikīkī War Memorial Natatorium',cat:'sight',lat:21.2649,lon:-157.8228,tip:'1927 saltwater war memorial with landmark arch; pool closed since 1979, view-only, restoration pending.'},
+          {n:'Waikīkī Shell',cat:'sight',lat:21.2695,lon:-157.8188,tip:'Outdoor amphitheater in the park; lawn-and-seat concerts, best on event evenings, check the show calendar.'},
+          {n:'Hau Tree',cat:'food',lat:21.264,lon:-157.8213,tip:'Open-air oceanfront restaurant at Kaimana Beach Hotel; beachside brunch and dinner, reservations smart.'},
+          {n:'Barefoot Beach Cafe',cat:'food',lat:21.2668,lon:-157.8232,tip:'Casual order-at-counter beach cafe on Queen\'s Surf; breakfast plates, plate lunch, nightly live music.'},
+          {n:'Diamond Head Market & Grill',cat:'food',lat:21.2687,lon:-157.8156,tip:'Takeout grill plus bakery on Monsarrat; grilled plates and the well-known scones and lemon-crunch cake.'},
+          {n:'Michel\'s at the Colony Surf',cat:'food',lat:21.2635,lon:-157.8211,tip:'Oceanfront French fine dining since 1962; dinner only, dressy, book a sunset table on the water.'},
+          {n:'ABC Store (near the Zoo)',cat:'shop',lat:21.2696,lon:-157.8241,tip:'Hawaii convenience chain by the zoo corner; snacks, sunscreen, beach gear and cheap grab-and-go basics.'} ], family:[
+          {n:'Honolulu Zoo',cat:'sight',lat:21.2712,lon:-157.8225,tip:'42-acre zoo with elephants, giraffes plus a keiki petting zoo and shaded playground kids love.'},
+          {n:'Waikiki Aquarium',cat:'sight',lat:21.2657,lon:-157.8213,tip:'Small, easy-to-walk aquarium with Hawaiian monk seals, sharks and colorful reef tanks kids love.'},
+          {n:'Kapiolani Regional Park',cat:'play',lat:21.2685,lon:-157.8188,tip:'Huge shaded lawns, picnic tables, tennis and open space where kids can run free for free.'},
+          {n:'Pākī Community Park Playground',cat:'play',lat:21.2683,lon:-157.8168,tip:'Free shaded jungle-gym, swings and slides under big trees; stroller-friendly, quiet weekday mornings.'},
+          {n:'Kaimana Beach (Sans Souci)',cat:'beach',lat:21.2649,lon:-157.8223,tip:'Calm, shallow, lifeguarded locals\' beach; old natatorium wall makes it ideal for young swimmers.'},
+          {n:'Queen\'s Surf Beach',cat:'beach',lat:21.2665,lon:-157.8236,tip:'Lifeguarded, usually gentle water with restrooms, showers and grassy shade right behind the sand.'},
+          {n:'Waikiki Shell',cat:'sight',lat:21.2697,lon:-157.8212,tip:'Open-air amphitheater in the park hosting family concerts and festivals; free lawn seating on the grass.'},
+          {n:'Barefoot Beach Cafe',cat:'food',lat:21.2672,lon:-157.8227,tip:'Casual on-the-sand cafe with plate lunch, hot dogs, acai bowls and Dole Whip for hungry kids.'} ]}
+      
+      ] }],
+    regions:[
+      {key:'north',    label:'North', r:'North Shore', centroid:{lat:21.65,lon:-158.06}},
+      {key:'windward', label:'East',    r:'Windward',    centroid:{lat:21.40,lon:-157.73}},
+      {key:'south',    label:'South',       r:'South Shore', centroid:{lat:21.275,lon:-157.82}},
+      {key:'leeward',  label:'West',     r:'Leeward',     centroid:{lat:21.40,lon:-158.15}}
+    ],
+    data:null   // lazy-loaded from /data/oahu.js
+  },
+  hawaii: {
+    slug:'hawaii', name:'Hawaiʻi Island', live:true, defaultSide:'kona', sideKey:'os_side_hawaii',
+    map:{ center:[19.60,-155.50], zoom:9, minZoom:8, maxBounds:[[18.40,-156.50],[20.75,-154.40]] },
+    seaLevel:{ lat:19.64, lon:-155.99 },
+    geoBox:{ latMin:18.85, latMax:20.30, lonMin:-156.15, lonMax:-154.75 },
+    clamp:{ latMin:18.85, latMax:20.30, lonMin:-156.15, lonMax:-154.75 },
+    tideStation:'1617433',
+    regions:[
+      {key:'kona',   label:'Kona',      r:'Kona',      centroid:{lat:19.60,lon:-155.99}},
+      {key:'kohala', label:'Kohala',    r:'Kohala',    centroid:{lat:20.00,lon:-155.82}},
+      {key:'hilo',   label:'Hilo/Puna', r:'Hilo/Puna', centroid:{lat:19.70,lon:-155.05}},
+      {key:'kau',    label:'Kaʻū',      r:'Kaʻū',      centroid:{lat:19.13,lon:-155.50}}
+    ],
+    data:null   // lazy-loaded from /data/hawaii.js
+  }
+};
+
+// Wire Kauaʻi's inlined beach array as island #1's dataset; set the active island.
+// ACTIVE/ISLANDS are top-level lexical bindings (classic scripts) → reachable from later inline scripts.
+// Resolve the active island from ?island= / localStorage / default. Only live islands are
+// selectable. (Each island's full dataset is attached after all data arrays are defined.)
+function resolveIsland(){
+  // Explicit ?island= wins first — the in-app switcher navigates to <path>?island=slug and KEEPS
+  // the path, so on a /go/<slug> entry the query must beat the path or switching would no-op.
+  try { var p = new URLSearchParams(location.search).get('island'); if(p && ISLANDS[p] && ISLANDS[p].live) return p; } catch(e){}
+  // Clean launch URL /go/<slug> (QR codes, cards, email) — beats a stale localStorage island.
+  try { var m = location.pathname.match(/^\/go\/([a-z]+)\/?$/); if(m && ISLANDS[m[1]] && ISLANDS[m[1]].live) return m[1]; } catch(e){}
+  try { var s = localStorage.getItem('os_island'); if(s && ISLANDS[s] && ISLANDS[s].live) return s; } catch(e){}
+  return 'kauai';
+}
+let ACTIVE = ISLANDS[resolveIsland()] || ISLANDS.kauai;
+try { window.ACTIVE = ACTIVE; window.ISLANDS = ISLANDS; } catch(e){}
+// Per-island safety contacts for the disclaimer + emergency footer (carbon-copy parity).
+// Verified 2026-07-13 from official county sites; Hawaiʻi Island leads with 911 (no dept line yet).
+const SAFETY_INFO={
+  kauai:{island:'Kauaʻi',county:'County of Kauaʻi',agency:'Kauaʻi Ocean Safety Bureau and Kauaʻi Fire Department',agencyShort:'Kauaʻi Ocean Safety Bureau',phone:'(808) 241-4984'},
+  oahu:{island:'Oʻahu',county:'City &amp; County of Honolulu',agency:'Honolulu Ocean Safety and the Honolulu Fire Department',agencyShort:'Honolulu Ocean Safety',phone:'(808) 723-7863'},
+  maui:{island:'Maui',county:'County of Maui',agency:'Maui Ocean Safety and the Maui Fire Department',agencyShort:'Maui Ocean Safety',phone:'(808) 270-7561'},
+  hawaii:{island:'Hawaiʻi Island',county:'County of Hawaiʻi',agency:'the Hawaiʻi Fire Department (Ocean Safety)',agencyShort:'Hawaiʻi Fire Department',phone:''}
+};
+function _si(){ return SAFETY_INFO[(ACTIVE&&ACTIVE.slug)||'kauai']||SAFETY_INFO.kauai; }
+function safetyFooterSuffix(){ var s=_si(); return s.phone?(' · <b>'+s.agencyShort+':</b> '+s.phone):''; }
+function localizeSafety(){ var s=_si(), set=function(id,html){var e=document.getElementById(id); if(e) e.innerHTML=html;};
+  set('disIsland',s.island); set('disCounty',s.county); set('disAgency',s.agency); }
+if(document.readyState!=='loading') localizeSafety(); else document.addEventListener('DOMContentLoaded',localizeSafety);
+
+// Lazy-load an island's dataset on demand. Kauaʻi is inlined (data already set), so
+// ensureIsland('kauai') resolves immediately and Kauaʻi never pays a fetch. Other islands
+// load /data/<slug>.js (which sets ISLANDS[slug].data); the service worker SWR-caches it.
+window.ensureIsland = function(slug){
+  return new Promise(function(resolve, reject){
+    var isl = ISLANDS[slug];
+    if(!isl){ reject(new Error('unknown island: '+slug)); return; }
+    if(isl.data){ resolve(isl); return; }
+    var s = document.createElement('script');
+    s.src = '/data/' + slug + '.js'; s.async = true;
+    s.onload  = function(){ isl.data ? resolve(isl) : reject(new Error('island data missing after load: '+slug)); };
+    s.onerror = function(){ reject(new Error('failed to load island data: '+slug)); };
+    document.head.appendChild(s);
+  });
+};
+
+// Switch islands via a clean reload (?island=slug). resolveIsland() picks it up and the whole
+// app initialises for that island from the start — no in-place teardown. Reliable + simple.
+window.switchIsland = function(slug){
+  if(!ISLANDS[slug] || !ISLANDS[slug].live) return;
+  if(ACTIVE && slug === ACTIVE.slug) return;
+  try { localStorage.setItem('os_island', slug); } catch(e){}
+  try { var u = new URL(location.href); u.searchParams.set('island', slug); location.href = u.toString(); }
+  catch(e){ location.href = location.pathname + '?island=' + slug; }
+};
+
+// ===== i18n: active UI language (en default). Additive — the English path is byte-identical. =====
+function resolveLang(){
+  try { var p=new URLSearchParams(location.search).get('lang'); if(p&&['en','ja','hi'].indexOf(p)>=0) return p; } catch(e){}
+  try { var s=localStorage.getItem('os_lang'); if(s&&['en','ja','hi'].indexOf(s)>=0) return s; } catch(e){}
+  return 'en';
+}
+var ACTIVE_LANG = resolveLang();
+try { window.ACTIVE_LANG = ACTIVE_LANG; document.documentElement.lang = ACTIVE_LANG; } catch(e){}
+window.switchLang = function(code){
+  if(['en','ja','hi'].indexOf(code)<0) return;
+  try { localStorage.setItem('os_lang', code); } catch(e){}
+  try { var u=new URL(location.href); if(code==='en') u.searchParams.delete('lang'); else u.searchParams.set('lang',code); location.href=u.toString(); }
+  catch(e){ location.href = location.pathname + (code==='en'?'':'?lang='+code); }
+};
+// DOM translation layer — runs ONLY for non-English; never touches the English source.
+(function(){
+  if(ACTIVE_LANG==='en') return;
+  var DICT=null, queued=false;
+  function norm(s){ return s.replace(/\s+/g,' ').trim(); }
+  function tnode(node){
+    var raw=node.nodeValue; if(!raw) return; var key=norm(raw); if(!key) return;
+    var t=DICT[key]; if(t!=null && t!==key){ var lead=(raw.match(/^\s*/)||[''])[0], trail=(raw.match(/\s*$/)||[''])[0]; node.nodeValue=lead+t+trail; }
+  }
+  function sweep(root){
+    if(!DICT||!root) return;
+    try{
+      if(root.nodeType===3){ tnode(root); return; }
+      var w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), nodes=[], n;
+      while((n=w.nextNode())) nodes.push(n);
+      nodes.forEach(tnode);
+      var els=root.querySelectorAll?root.querySelectorAll('[placeholder],[aria-label],[title]'):[];
+      Array.prototype.forEach.call(els,function(el){ ['placeholder','aria-label','title'].forEach(function(a){ var v=el.getAttribute(a); if(!v) return; var t=DICT[norm(v)]; if(t!=null&&t!==norm(v)) el.setAttribute(a,t); }); });
+    }catch(e){}
+  }
+  window._i18nSweep=sweep;
+  function start(){
+    try{
+      var obs=new MutationObserver(function(muts){
+        if(queued) return; queued=true;
+        (window.requestAnimationFrame||window.setTimeout)(function(){ queued=false;
+          muts.forEach(function(m){ for(var i=0;i<m.addedNodes.length;i++){ var nd=m.addedNodes[i]; if(nd.nodeType===1) sweep(nd); else if(nd.nodeType===3) tnode(nd); } });
+        });
+      });
+      obs.observe(document.body,{childList:true,subtree:true});
+    }catch(e){}
+    sweep(document.body);
+  }
+  var sc=document.createElement('script'); sc.src='/data/i18n-'+ACTIVE_LANG+'.js'; sc.async=false;
+  sc.onload=function(){ DICT=(window.I18N&&window.I18N[ACTIVE_LANG])||{}; if(document.body) start(); else document.addEventListener('DOMContentLoaded',start); };
+  sc.onerror=function(){};
+  (document.head||document.documentElement).appendChild(sc);
+})();
+
+let B=[
   {id:'anini',name:'ʻAnini Beach',n:'Anini',r:'North Shore',lat:22.2255,lon:-159.5012,
    caution:"Calm inside Kauaʻi's biggest reef in summer, but the channel and outer water turn dangerous in winter swell, and there have been drownings here. Stay inside the reef and check today's surf.",
    facing:0,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'seasonal_active',lg_hours:'9am–5:30pm seasonal',sq:8,scenic:9,len:2200,
@@ -2404,7 +2664,7 @@ const P={
 // CHANNELS — Kauai reef channels, rip zones, surge passages
 // dir_deg = direction water EXITS (flows toward)
 // severity = base 0-1 before tide/swell modulation
-const CHANNELS=[
+let CHANNELS=[
   {id:'kee_exit',name:"Ke'e Reef Exit",beach_id:'kee',
    lat:22.2218,lon:-159.5824,dir_deg:350,severity:.70,
    type:'reef_exit',
@@ -2444,7 +2704,7 @@ const CHANNELS=[
 ];
 
 // HIKES — top Kauai trails
-const HIKES=[
+let HIKES=[
   {id:'kalalau_2mi',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Kalalau-trail.JPG?width=800',name:'Kalalau Trail (Hanakāpīʻai)',n:'Kalalau 2mi',r:'Napali Coast',lat:22.2186,lon:-159.5832,
    difficulty:'strenuous',length_mi:4,elevation_ft:800,duration_hr:'4-5',
    tip:'Permit-free first 2 miles to Hanakāpīʻai Beach. DO NOT swim — 80+ drownings recorded. Continue 2 more miles inland to Hanakāpīʻai Falls.',
@@ -2488,7 +2748,7 @@ const HIKES=[
 ];
 
 // FAMILY ACTIVITIES — free or low-cost
-const ACTS=[
+let ACTS=[
   {id:'anaina_hou',name:'Anaina Hou Playground',n:'Anaina Hou',r:'North Shore',lat:22.2110,lon:-159.4090,
    type:'playground',price:'Free',hours:'9am–7pm daily',duration_min:60,
    tip:'17,000 sqft of play space partly built from recycled milk jugs. Hawaiian-themed structures, skateboard ramp, restrooms.',
@@ -2626,7 +2886,7 @@ const ACTS=[
 // STAYS — themed VRBO vacation rentals curated for the app's audience.
 // Each booking_url should carry your VRBO affiliate parameter (?adid=YOUR_AFFILIATE_ID).
 // Replace these placeholder VRBO IDs with real listings researched on vrbo.com.
-const STAYS = [
+let STAYS = [
 
   // HOTELS — Booking.com affiliate (sign up at partner.booking.com, append ?aid=MISSING_YOUR_AFF_ID_BOOKING).
   {id:'grand_hyatt_kauai', name:'Grand Hyatt Kauaʻi Resort & Spa', n:'Grand Hyatt', r:'South Shore',
@@ -2722,7 +2982,7 @@ function openStaySheet(id){
 
 
 // FARMERS MARKETS — only display during active hours
-const FMARKETS=[
+let FMARKETS=[
   // SUNSHINE MARKETS (Kauai County) — open 1.5 hrs from start
   {id:'fm_kilauea_thu',name:'Kīlauea Sunshine Market',n:'Kīlauea Mkt',r:'North Shore',
    lat:22.2153,lon:-159.4082,
@@ -2866,7 +3126,7 @@ const FMARKETS=[
 // OpenTable affiliate. Replace OPENTABLE_REF with your real OpenTable Affiliate ID once approved at opentable.com/affiliate.
 // Restaurants without restRid get a search-style link as fallback.
 const OPENTABLE_REF = 'MISSING_YOUR_OPENTABLE_REF'; // TODO: replace once OpenTable Affiliate account is approved. // TODO: replace with real ref code from OpenTable affiliate dashboard
-const FOODS=[
+let FOODS=[
   {id:'hamura_saimin',phone:'(808) 245-3271',name:'Hamura Saimin',n:'Hamura',r:'East Side',lat:21.971631,lon:-159.365925,
    type:'saimin / local',price:'$',hours:"Mon-Thu 10am-10:30pm, Fri-Sat 10am-12am, Sun 10am-9:30pm",
    tip:"Legendary 70+ year-old saimin shop. Order the Special Saimin and the lilikoi chiffon pie. Cash only, expect a wait, sit at the U-shaped counter for the full experience.",
@@ -2959,7 +3219,7 @@ const FOODS=[
 // drift. Treat tip text as a "usually" not a "guaranteed". When CLAUDE.md gets
 // updated to reflect this layer, also mention that subtab wiring needs an
 // item in SUBTABS or a dedicated tab.
-const FOOD_TRUCKS=[
+let FOOD_TRUCKS=[
   {id:'ft_porkys',phone:"(808) 631-3071",name:"Porky's Kauai",n:"Porky's",r:"South Shore",lat:21.903,lon:-159.461,
    type:'food truck',price:'$$',hours:"11am–7:30pm Mon–Sat",
    tip:'Pulled-pork sandwiches and loco moco, often parked at the Hanalei Center pad. Cash + cards.',
@@ -3010,7 +3270,7 @@ const FOOD_TRUCKS=[
    tags:['food truck','pizza','dinner','family']}
 ];
 
-const GAS_STATIONS=[
+let GAS_STATIONS=[
   
   {id:'chevron_kapaa',name:"Texaco Kapaʻa",n:'Chevron Kapaʻa',r:'East Side',lat:22.065994,lon:-159.319066,
    hours:'24/7',brand:'Chevron',
@@ -3035,7 +3295,7 @@ const GAS_STATIONS=[
    tip:'Last gas station on the west side. Top off before driving up Waimea Canyon Drive or out to Polihale Beach.'}
 ];
 
-const LOCAL_CRAFTS=[
+let LOCAL_CRAFTS=[
   {id:'kong_lung',phone:'(808) 828-1822',website:'https://konglung.com',name:'Kong Lung Trading Co.',n:'Kong Lung',r:'North Shore',lat:22.211961,lon:-159.4069,
    type:'gifts & home',hours:'10am–6pm daily',
    tip:'Upscale gift shop in historic Kīlauea building — Hawaiian art, books, kitchenware, jewelry. Anchor of the Kīlauea town center for over 30 years.',
@@ -3058,7 +3318,7 @@ const LOCAL_CRAFTS=[
    tags:['crafts','jewelry','wood','train','lihue']}
 ];
 
-const GROCERIES=[
+let GROCERIES=[
   {id:'foodland_princeville',phone:'(808) 826-9880',website:'https://foodland.com',name:'Foodland Princeville',n:'Foodland Pville',r:'North Shore',lat:22.213897,lon:-159.47462,
    type:'full grocery',price:'$$',hours:"6am–9pm daily",
    tip:'Best north shore grocery. Has a poke counter, hot food, full deli. Pricier than Lihue but most convenient if you\'re staying in Princeville or Hanalei.',
@@ -3096,7 +3356,7 @@ const GROCERIES=[
 // DRINKS — Shopping > Drinks subtab. Independently-researched juice/açaí bars, local
 // coffee roasters, and a few bars/breweries. Coordinates are geocoded to each spot;
 // directions resolve by name (see dirUrl), so a town-level pin still routes correctly.
-const DRINKS=[
+let DRINKS=[
   {id:'kauai_juice_co',website:'https://www.kauaijuiceco.com/',name:'Kauai Juice Co.',n:'Kauai Juice',r:'East Side',lat:22.0876,lon:-159.3375,
    type:'cold-pressed juice & kombucha',price:'$$',hours:'Open daily',
    tip:'Organic cold-pressed juice and kombucha on tap with exotic local-fruit flavors. Locations in Kapaʻa, Kīlauea, and Kōloa.',
@@ -3710,17 +3970,22 @@ let LIVE=null;
 let FORECAST=null; // 7-day daily forecast, populated from Open-Meteo daily endpoints. Each entry: {date, label, dayName, es, wind, cloud, precip, uv, tempMax, tempMin, weatherCode, brown}
 async function fetchLive(){
   try{
-    // Weather is fetched at the user's geolocation only if they're actually on Kauaʻi —
-    // otherwise (mainland visitor planning a trip) the chips would show their home weather.
-    // Kauaʻi bounding box: lat 21.85–22.25, lon -159.85–-159.25.
-    // Default is Līhuʻe (sea-level, central). Earlier default of 22.05/-159.5 fell on the
-    // Kokeʻe highlands (~1,180 ft elevation) and returned cold mountain temperatures.
+    // Weather is fetched at the user's geolocation only if they're actually ON THIS ISLAND —
+    // otherwise (a mainland visitor planning a trip) the chips would show their home weather.
+    // The per-island bounding box + sea-level default come from ACTIVE.geoBox / ACTIVE.seaLevel
+    // (see Layer 3 below) — never a hardcoded box. Each island's seaLevel is a central sea-level
+    // point so the default never lands on high terrain (Kauaʻi's old 22.05/-159.5 fell on the
+    // Kokeʻe highlands, ~1,180 ft, and returned cold mountain temperatures).
     const userLoc = window._userLocation;
-    const inKauai = userLoc
-      && userLoc.lat >= 21.85 && userLoc.lat <= 22.25
-      && userLoc.lon >= -159.85 && userLoc.lon <= -159.25;
-    const lat = inKauai ? userLoc.lat : 21.9788;
-    const lon = inKauai ? userLoc.lon : -159.3672;
+    // Multi-island (Layer 3): gate geolocation against THIS island's geoBox, and default to
+    // THIS island's sea-level point — never a hardcoded Kauaʻi box/coord. Kauaʻi's geoBox +
+    // seaLevel mirror the former literals exactly, so Kauaʻi behavior is byte-identical.
+    const _gb = ACTIVE.geoBox;
+    const onIsland = userLoc
+      && userLoc.lat >= _gb.latMin && userLoc.lat <= _gb.latMax
+      && userLoc.lon >= _gb.lonMin && userLoc.lon <= _gb.lonMax;
+    const lat = onIsland ? userLoc.lat : ACTIVE.seaLevel.lat;
+    const lon = onIsland ? userLoc.lon : ACTIVE.seaLevel.lon;
     // Added `precipitation` to hourly params (alongside precipitation_probability) so we can
     // compute "rain until 3pm" / "rain at 2pm" style messages — Hawaii's rain pattern is on/off
     // throughout the day, and "is it raining now?" is less useful than "when will it stop?"
@@ -3732,7 +3997,7 @@ async function fetchLive(){
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), 8000);
     const slat=(+lat).toFixed(2), slon=(+lon).toFixed(2);
-    const _px = await fetch(`/api/wx?k=live&lat=${slat}&lon=${slon}`, {signal: ctrl.signal}).then(r=>r.json()).catch(()=>null);
+    const _px = await fetch(`/api/wx?k=live&lat=${slat}&lon=${slon}&island=${ACTIVE.slug}`, {signal: ctrl.signal}).then(r=>r.json()).catch(()=>null);
     clearTimeout(timeoutId);
     if(!_px || !_px.w) throw new Error('conditions proxy unavailable');
     const w=_px.w, s=_px.s||null, td=_px.td||null;
@@ -3959,7 +4224,11 @@ async function getCond(b){
 // MAP
 let map,mkrs={},ints=['snorkel','swim'],scored={};
 function initMap(){
-  map=L.map('map',{center:[22.05,-159.50],zoom:9.5,minZoom:9,zoomSnap:0.5,zoomControl:false,attributionControl:false});
+  // Layer 4: map init framing comes from the ACTIVE island's config (center/zoom/minZoom +
+  // optional maxBounds); frameIsland() below fits the island exactly. Kauaʻi's config mirrors
+  // the former literals (center identical, minZoom 9), so Kauaʻi is unchanged after the fit.
+  map=L.map('map',{center:ACTIVE.map.center,zoom:ACTIVE.map.zoom,minZoom:ACTIVE.map.minZoom,zoomSnap:0.5,zoomControl:false,attributionControl:false});
+  if(ACTIVE.map.maxBounds) map.setMaxBounds(ACTIVE.map.maxBounds);
   // OFFLINE FALLBACK: map tiles are an external CDN the service worker can't cache, so with no
   // connection every tile 404s. errorTileUrl swaps each failed tile for a transparent 1px PNG, so
   // the .leaflet-container ocean-blue background shows through (a flat sea + the beach pins) instead
@@ -3968,6 +4237,19 @@ function initMap(){
   window._streetTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'©OpenStreetMap ©CartoDB',subdomains:'abcd',errorTileUrl:_blankTile}).addTo(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri',errorTileUrl:_blankTile});
   window._isSat = false;
+
+  // Frame the whole ACTIVE island within the visible map area (chrome-aware padding) instead of
+  // a hand-picked center/zoom — every island lands centered + fully in view. (Layer 4, ported.)
+  window.frameIsland = function(animate){
+    try{
+      if(typeof map==='undefined' || !map) return;
+      window._zoomedZone=null;
+      var g = ACTIVE && ACTIVE.geoBox; if(!g) return;
+      map.fitBounds([[g.latMin,g.lonMin],[g.latMax,g.lonMax]],
+        { paddingTopLeft:[22,58], paddingBottomRight:[22,50], animate:!!animate });
+    }catch(e){}
+  };
+  frameIsland(false);
 
   // ── Debug pin-coordinate audit feature ──
   // Activate by adding ?debug=1 to the URL (e.g. oceansafety.app/?debug=1).
@@ -4422,7 +4704,7 @@ function matchTour(t, c){
   return (t && t.default) ? t.default : { level:'yes', reason:'Conditions look fine' };
 }
 
-const TOURS_LIBRARY = [
+let TOURS_LIBRARY = [
   {
     id: '951413', category: 'water',
     title: 'Na Pali Coast Snorkel Tour',
@@ -4685,7 +4967,7 @@ function layoutOutlookChip(){
     base = Math.max(base, bar.getBoundingClientRect().bottom);
   }
   chip.style.top = Math.round(base - hostTop + 8) + 'px';
-  var n = document.getElementById('shore-north');
+  var n = document.querySelector('.shore-chip.shore-n');
   if(n) n.style.top = Math.round(chip.getBoundingClientRect().bottom - hostTop + 8) + 'px';
 }
 addEventListener('resize', function(){ requestAnimationFrame(layoutOutlookChip); });
@@ -6326,7 +6608,20 @@ function toggleSat(){
 // below the swell waves + POI markers). A time slider scrubs Now → +12h. Refreshes every 30 min.
 // Not service-worker-cached (forecast). Toggle button sits with the satellite + waves controls.
 window._fcOn=false; window._fcData=null; window._fcCircles=null; window._fcTimes=null; window._fcBase=0; window._fcHour=0; window._fcTimer=null;
-const _FC_GRID=(function(){ var g=[],LA=[21.90,21.99,22.08,22.17],LO=[-159.76,-159.64,-159.52,-159.40,-159.28]; for(var a=0;a<LA.length;a++)for(var o=0;o<LO.length;o++)g.push([LA[a],LO[o]]); return g; })();
+// Layer 6 (memory-flagged fix): the rain-overlay grid is derived from the ACTIVE island's
+// geoBox so blobs sit over THIS island — never the old Kauaʻi-hardcoded grid. Kauaʻi keeps its
+// exact literal grid via the slug branch (byte-identical); every other island derives a 4×5
+// grid from geoBox at a 12% inset. Overlay fetches Open-Meteo directly, so it depends only on
+// _FC_GRID + ACTIVE.
+const _FC_GRID=(function(){ var LA,LO;
+  if(!window.ACTIVE || ACTIVE.slug==='kauai'){ LA=[21.90,21.99,22.08,22.17]; LO=[-159.76,-159.64,-159.52,-159.40,-159.28]; }
+  else{ // derive a 4x5 grid from this island's own geoBox (12% inset) so the rain overlay shows THIS island's rain
+    var bx=ACTIVE.geoBox, mLa=(bx.latMax-bx.latMin)*0.12, mLo=(bx.lonMax-bx.lonMin)*0.12;
+    var la0=bx.latMin+mLa, la1=bx.latMax-mLa, lo0=bx.lonMin+mLo, lo1=bx.lonMax-mLo;
+    LA=[0,1,2,3].map(function(i){ return +(la0+(la1-la0)*i/3).toFixed(2); });
+    LO=[0,1,2,3,4].map(function(i){ return +(lo0+(lo1-lo0)*i/4).toFixed(2); });
+  }
+  var g=[]; for(var a=0;a<LA.length;a++)for(var o=0;o<LO.length;o++)g.push([LA[a],LO[o]]); return g; })();
 function _fcColor(mm){ return mm<0.1?null : mm<0.4?'#a0e77b' : mm<1?'#34c759' : mm<2.5?'#ffcc00' : mm<6?'#ff9500' : '#ff3b30'; }   // palette: green -> yellow -> orange -> red (standard weather-radar scale)
 async function _fcFetch(){
   var la=_FC_GRID.map(function(p){return p[0].toFixed(2);}).join(','), lo=_FC_GRID.map(function(p){return p[1].toFixed(2);}).join(',');
@@ -6737,11 +7032,17 @@ function buildSubtabs(tabName){
         renderDrinks();
         renderMarkets();
       }
-      if(typeof renderSwellLayer==='function') renderSwellLayer();  // gate waves per subtab
+      if(typeof renderSwellLayer==='function') renderSwellLayer();  if(typeof renderZones==='function') renderZones();  // gate waves per subtab (Layer 8: + Waikīkī zones)
     });
   });
 }
 
+// C-3 (client mirror, UX-only): which islands may sell. The AUTHORITATIVE payment gate lives
+// server-side in the Supabase functions (operator-signup-public / square-webhook /
+// activate-free-verified, reading partners.island) — assume this client check is always
+// defeated; it only hides buy surfaces for honest users. Kauaʻi is the only sellable island.
+const SELLABLE_ISLANDS = ['kauai'];
+function _islandSellable(){ return SELLABLE_ISLANDS.indexOf((window.ACTIVE&&ACTIVE.slug)||'kauai')>=0; }
 window.PARTNER_MODE = window.PARTNER_MODE || 'shop';  // Shop tab on by default (Plan retired 2026-07-13); ?mode=affiliate still hides it
 try{ var _qm=new URLSearchParams(location.search).get('mode'); if(_qm==='shop'||_qm==='affiliate') window.PARTNER_MODE=_qm; }catch(e){}
 // ?safety=1 deep-link: open the disclaimer on load (Jade's dashboard card lands here to show a GM the safety notice)
@@ -6749,7 +7050,9 @@ try{ if(new URLSearchParams(location.search).get('safety')==='1'){ window.addEve
 var SHOP_ICO='data:image/png;base64,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';
 var RETAIL_ICO='data:image/png;base64,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';
 function applyPartnerMode(){
-  var aff=window.PARTNER_MODE==='affiliate';
+  // C-3: a non-sellable island never surfaces Shop/buy (guide-only). UX-only; the server gate
+  // is authoritative. Kauaʻi stays sellable → unchanged.
+  var aff=window.PARTNER_MODE==='affiliate' || !_islandSellable();
   // Plan tab off for now (2026-07-13); Shop takes its slot. Star icon by default,
   // the Town bag icon when the active partner is a RETAIL store (window._partnerSeg).
   var plan=document.querySelector('#tabs .tab[data-tab="activities"]');
@@ -6779,7 +7082,7 @@ function wireTabs(){
         el.classList.add('active');
         const sb=document.getElementById('subtabs'); if(sb){ sb.innerHTML=''; sb.classList.remove('on'); }
         if(typeof closeSubtabMenu === 'function') closeSubtabMenu();
-        if(typeof map !== 'undefined' && map) map.setView([22.05, -159.50], 10, {animate:true});
+        if(typeof frameIsland === 'function') frameIsland(true);  // Layer 9: reframe the ACTIVE island, not a Kauaʻi-hardcoded center
         closeSheet();   // clear any stale ?item route + document.title from a previously open detail sheet
         if(window.OSA) OSA.tab('activities');
         if(typeof openPlanSheet==='function'){ openPlanSheet(); }
@@ -6790,7 +7093,7 @@ function wireTabs(){
         el.classList.add('active');
         var sbs=document.getElementById('subtabs'); if(sbs){ sbs.innerHTML=''; sbs.classList.remove('on'); }
         if(typeof closeSubtabMenu === 'function') closeSubtabMenu();
-        if(typeof map !== 'undefined' && map) map.setView([22.05, -159.50], 10, {animate:true});
+        if(typeof frameIsland === 'function') frameIsland(true);  // Layer 9: reframe the ACTIVE island, not a Kauaʻi-hardcoded center
         closeSheet();
         if(window.OSA) OSA.tab('activities');
         if(typeof openStoreSheet==='function'){ openStoreSheet(); }
@@ -6807,7 +7110,7 @@ function wireTabs(){
       closeSheet();
       // Reset map to the default island view whenever the user switches main tabs,
       // so a previous zoom into one POI doesn't carry over to the new tab's content.
-      if(typeof map !== 'undefined' && map) map.setView([22.05, -159.50], 10, {animate:true});
+      if(typeof frameIsland === 'function') frameIsland(true);  // Layer 9: reframe the ACTIVE island, not a Kauaʻi-hardcoded center
       renderMap();
       renderHikes();
       renderActs();
@@ -6830,6 +7133,7 @@ function wireTabs(){
       // After buildSubtabs sets the default ints for beaches, run rescore so the map paints with that filter.
       if(window._activeTab === 'beaches') rescore();
       else if(typeof renderSwellLayer==='function') renderSwellLayer();
+      if(typeof renderZones==='function') renderZones();
     });
   });
   // Initialize with Family subtabs since boot opens on the Family tab
@@ -6901,7 +7205,9 @@ const ACTIVITY_OUTLOOKS = [
 ];
 
 // Per-region outlook view. Region key → display label and beach-data region string.
-const OUTLOOK_REGIONS = [
+// F6 (Layer 11): this Kauaʻi literal MUST stay in sync with ISLANDS.kauai.regions. For every
+// non-Kauaʻi island, repointIslandGlobals() rebuilds OUTLOOK_REGIONS from ACTIVE.regions at boot.
+let OUTLOOK_REGIONS = [
   {key:'all',   label:'All',   r:null},
   {key:'north', label:'North', r:'North Shore'},
   {key:'south', label:'South', r:'South Shore'},
@@ -7155,6 +7461,9 @@ function renderOutlookSheet(){
 // Simplified Kauaʻi coastline (OSM, 61 pts, [lat,lon]) — clips the swell drift to OCEAN only.
 // Kauaʻi-specific; a multi-island build needs the matching outline per island.
 const KAUAI_OUTLINE=[[22.0286,-159.788],[21.9587,-159.6909],[21.9415,-159.6539],[21.9281,-159.6449],[21.9177,-159.637],[21.9001,-159.6087],[21.9032,-159.596],[21.8996,-159.5874],[21.8962,-159.5812],[21.8933,-159.5726],[21.8896,-159.5585],[21.888,-159.544],[21.8862,-159.5311],[21.8829,-159.5269],[21.8866,-159.5051],[21.8844,-159.4992],[21.8845,-159.4938],[21.8846,-159.4872],[21.8818,-159.4825],[21.8813,-159.4759],[21.8783,-159.4711],[21.8755,-159.4627],[21.8714,-159.4497],[21.8685,-159.4434],[21.8759,-159.432],[21.8893,-159.4128],[21.8967,-159.4039],[21.9138,-159.3844],[21.9437,-159.349],[21.9499,-159.358],[21.9584,-159.3424],[21.9915,-159.3299],[21.9994,-159.3326],[22.0219,-159.3386],[22.0438,-159.3358],[22.0606,-159.3186],[22.076,-159.3164],[22.0804,-159.3128],[22.0899,-159.3051],[22.1027,-159.2987],[22.1327,-159.2939],[22.1442,-159.2942],[22.1724,-159.3139],[22.2013,-159.3329],[22.2143,-159.3545],[22.223,-159.3826],[22.2244,-159.3903],[22.2298,-159.399],[22.2284,-159.4048],[22.2254,-159.4534],[22.227,-159.4884],[22.2036,-159.5097],[22.2157,-159.5347],[22.2181,-159.5426],[22.2191,-159.5867],[22.2061,-159.605],[22.1971,-159.6227],[22.1865,-159.6369],[22.167,-159.6707],[22.1566,-159.708],[22.0526,-159.7844]];
+// Layer 7: per-island silhouettes for the swell clip-mask. kauai reuses KAUAI_OUTLINE
+// (byte-identical); maui/oahu/hawaii ported from the maui branch.
+const ISLAND_OUTLINES={kauai:KAUAI_OUTLINE,maui:[[21.0248,-156.612],[21.0344,-156.6062],[21.0329,-156.5923],[21.0202,-156.5804],[21.0051,-156.5463],[20.9678,-156.5282],[20.8945,-156.4748],[20.9196,-156.386],[20.9327,-156.3707],[20.9502,-156.3246],[20.9427,-156.3072],[20.9477,-156.2863],[20.9374,-156.2751],[20.9409,-156.2631],[20.9319,-156.2302],[20.9179,-156.2301],[20.9166,-156.218],[20.907,-156.2163],[20.8656,-156.1667],[20.8614,-156.1327],[20.8273,-156.1157],[20.8319,-156.0903],[20.8105,-156.0598],[20.7955,-156.0035],[20.7675,-155.9846],[20.7137,-155.9915],[20.6543,-156.0534],[20.6544,-156.0815],[20.6236,-156.1427],[20.6291,-156.1481],[20.6241,-156.1734],[20.6318,-156.1929],[20.6285,-156.2103],[20.5862,-156.3027],[20.587,-156.3517],[20.5784,-156.3776],[20.5861,-156.4153],[20.5987,-156.4178],[20.5981,-156.4319],[20.6079,-156.4442],[20.6422,-156.4507],[20.656,-156.4437],[20.7047,-156.4487],[20.7817,-156.464],[20.7999,-156.5017],[20.7784,-156.5378],[20.8212,-156.6318],[20.8887,-156.689],[20.9063,-156.6881],[20.9206,-156.6999],[20.9803,-156.6809],[21.0071,-156.6655],[21.0144,-156.646],[21.0276,-156.6428],[21.0248,-156.612]],oahu:[[21.306,-158.0445],[21.3019,-158.1127],[21.3224,-158.1225],[21.3266,-158.1119],[21.3303,-158.1255],[21.3738,-158.1403],[21.4043,-158.1792],[21.448,-158.1924],[21.4876,-158.233],[21.5401,-158.2343],[21.5758,-158.2795],[21.5867,-158.1256],[21.5966,-158.1067],[21.6075,-158.1082],[21.7,-158.0181],[21.7127,-157.9686],[21.6512,-157.9246],[21.6293,-157.9238],[21.5753,-157.8774],[21.5602,-157.8786],[21.5607,-157.8561],[21.5299,-157.8369],[21.5121,-157.8374],[21.5,-157.8526],[21.4595,-157.841],[21.4502,-157.8163],[21.4156,-157.7865],[21.4214,-157.7745],[21.4577,-157.7722],[21.4559,-157.7318],[21.4043,-157.7386],[21.403,-157.7225],[21.3833,-157.7089],[21.3534,-157.7088],[21.3329,-157.6938],[21.3139,-157.6518],[21.302,-157.6537],[21.264,-157.7001],[21.2638,-157.7139],[21.2814,-157.7122],[21.2869,-157.7213],[21.2789,-157.765],[21.2577,-157.8096],[21.29,-157.8457],[21.3065,-157.89],[21.3292,-157.9048],[21.3186,-157.9189],[21.3058,-157.9109],[21.3065,-157.9523],[21.3187,-157.9519],[21.328,-157.968],[21.306,-158.0445]],hawaii:[[20.2457,-155.7782],[20.1245,-155.598],[20.1316,-155.5589],[20.0953,-155.444],[20.022,-155.2826],[19.9694,-155.2045],[19.8554,-155.0863],[19.728,-155.0871],[19.7393,-155.0064],[19.6907,-154.9811],[19.6416,-154.9838],[19.6265,-154.9504],[19.6049,-154.9471],[19.5706,-154.9035],[19.5224,-154.8096],[19.4636,-154.8385],[19.3493,-154.9809],[19.2684,-155.1596],[19.2663,-155.2968],[19.2089,-155.3606],[19.1879,-155.4174],[19.152,-155.4535],[19.1325,-155.5147],[19.0821,-155.5578],[19.0466,-155.5574],[18.9988,-155.596],[18.9716,-155.6019],[18.9175,-155.672],[18.9694,-155.726],[19.014,-155.8061],[19.0366,-155.8816],[19.0811,-155.9084],[19.1212,-155.9214],[19.348,-155.8887],[19.4388,-155.9243],[19.4786,-155.9226],[19.4888,-155.9529],[19.6082,-155.9782],[19.6428,-155.9977],[19.6539,-156.0329],[19.6789,-156.0293],[19.7308,-156.0644],[19.7805,-156.0497],[19.8505,-155.9767],[19.8589,-155.9258],[19.9322,-155.8925],[19.9828,-155.8319],[20.0354,-155.8282],[20.0787,-155.8669],[20.1457,-155.8991],[20.2052,-155.906],[20.2552,-155.8907],[20.2715,-155.8533],[20.2457,-155.7782]]};
 // SWELL DIRECTION map layer — ambient, stylized wave fronts drifting FROM today's forecast
 // swell bearing (LIVE.swell_dir), uniform across the island (deep-water swell direction is ~uniform
 // at this scale), drawn in a Leaflet pane BELOW the markers so the safety pins stay on top. It shows
@@ -7162,6 +7471,120 @@ const KAUAI_OUTLINE=[[22.0286,-159.788],[21.9587,-159.6909],[21.9415,-159.6539],
 // reduced-motion-safe, auto-paused off-tab. Tap the badge to hide (persisted). rotate(swell_dir) makes
 // horizontal wave-front lines drifting toward shore — a CSS repeating-linear-gradient (the proven
 // render path), clipped to ocean, in a Leaflet pane below the markers. Reduced-motion + off-tab safe.
+// ===== Waikīkī zone engine (Oʻahu-only; ported from maui branch — Layer 8) =====
+// Level 0 (zoomed out): a magnifier "zoom" badge. Level 1 (zoom in): Waikīkī
+// splits into tappable SECTION badges — still no POIs. Level 2 (tap a section /
+// zoom further): that section's POIs appear, spread out. A back chip returns.
+var _zoneLayers=[]; window._zoomedZone=null; var _zoneWired=false;
+var _ZONE_DISTRICT_ZOOM=12.6, _ZONE_POI_ZOOM=14.4;
+var _WS_CAT={shop:{c:'#c9871f'},food:{c:'#d85a30'},beach:{c:'#1d9e75'},sight:{c:'#534ab7'},play:{c:'#f08c00'}};
+var _ZMAG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"></circle><line x1="15.5" y1="15.5" x2="21" y2="21"></line><line x1="10.5" y1="7.8" x2="10.5" y2="13.2"></line><line x1="7.8" y1="10.5" x2="13.2" y2="10.5"></line></svg>';
+function _zoneGateOK(){ return window._activeTab === 'shopping' || window._activeTab === 'acts'; }
+function clearZones(){ _zoneLayers.forEach(function(l){ try{ l.remove(); }catch(e){} }); _zoneLayers=[]; }
+function _zoneFit(bb,mz){ if(typeof map==='undefined'||!map) return; try{ map.fitBounds(L.latLngBounds(bb),{paddingTopLeft:[24,64],paddingBottomRight:[24,54],maxZoom:(mz||16),animate:false}); }catch(e){} renderZones(); }
+function zoomToZone(z){ window._zoomedZone=z.key; _zoneFit(z.outline||z.bounds,15); }
+function _zoneEnsureCss(){
+  if(document.getElementById('os-zone-css')) return;
+  var st=document.createElement('style'); st.id='os-zone-css';
+  st.textContent='.os-zone-poly{cursor:pointer;filter:drop-shadow(0 0 1px rgba(255,255,255,.85))}'
+    +'.os-zone-poly:hover{fill-opacity:.16}'
+    +'.os-zone-badge{transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap}'
+    +'.os-zone-badge .zb{width:34px;height:34px;border-radius:50%;background:#0f4c5c;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto;animation:oszbob 1.9s ease-in-out infinite}'
+    +'.os-zone-badge .zb svg{width:19px;height:19px;display:block}'
+    +'.os-zone-badge .zn{font:800 14px "DM Sans",sans-serif;color:#0f4c5c;text-shadow:0 0 3px #fff,0 0 3px #fff,0 1px 2px rgba(255,255,255,.9);letter-spacing:.01em}'
+    +'.os-zone-badge.sec .zb{width:30px;height:30px}.os-zone-badge.sec .zb svg{width:17px;height:17px}.os-zone-badge.sec .zn{font-size:12.5px}'
+    +'@keyframes oszbob{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}'
+    +'.os-wsec-lbl{transform:translate(-50%,-50%);font:800 10.5px "DM Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#0f4c5c;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff}'
+    +'.ws-poi{transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap}'
+    +'.ws-poi .pdot{width:13px;height:13px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);flex:0 0 auto}'
+    +'.ws-poi .pnm{font:700 11px "DM Sans",sans-serif;color:#12303a;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff}'
+    +'.ws-pop b{display:block;font:800 13px "DM Sans",sans-serif;color:#0f4c5c;margin-bottom:2px}'
+    +'.ws-pop span{font:500 12px "DM Sans",sans-serif;color:#33454d;line-height:1.4}'
+    +'#os-zone-back{position:absolute;left:12px;top:62px;z-index:701;background:rgba(8,40,50,.92);color:#eaf6f8;border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:7px 14px 7px 11px;font:700 12.5px "DM Sans",sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none}';
+  document.head.appendChild(st);
+}
+function _waikikiBB(){ var z=(window.ACTIVE&&ACTIVE.zones&&ACTIVE.zones[0]); try{ return z?L.latLngBounds(z.outline):null; }catch(e){ return null; } }
+function toggleWaikikiExistingPois(){
+  // Hide the island-wide Town/Family pins that fall inside Waikīkī while the zone
+  // is active + zoomed in, so only the curated section POIs show there.
+  try{
+    if(typeof map==='undefined'||!map) return;
+    var bb=_waikikiBB(); if(!bb) return;
+    var hide = _zoneGateOK() && map.getZoom() >= _ZONE_DISTRICT_ZOOM;
+    var regs=[];
+    try{ if(typeof foodMkrs!=='undefined') regs.push(foodMkrs); }catch(e){}
+    try{ if(typeof groceryMkrs!=='undefined') regs.push(groceryMkrs); }catch(e){}
+    try{ if(typeof gasMkrs!=='undefined') regs.push(gasMkrs); }catch(e){}
+    try{ if(typeof craftMkrs!=='undefined') regs.push(craftMkrs); }catch(e){}
+    try{ if(typeof coffeeMkrs!=='undefined') regs.push(coffeeMkrs); }catch(e){}
+    try{ if(typeof drinkMkrs!=='undefined') regs.push(drinkMkrs); }catch(e){}
+    try{ if(typeof marketMkrs!=='undefined') regs.push(marketMkrs); }catch(e){}
+    try{ if(typeof stayMkrs!=='undefined') regs.push(stayMkrs); }catch(e){}
+    try{ if(typeof actMkrs!=='undefined') regs.push(actMkrs); }catch(e){}
+    regs.forEach(function(reg){ Object.keys(reg).forEach(function(k){ var mk=reg[k];
+      if(!mk||!mk.getLatLng) return;
+      if(!bb.contains(mk.getLatLng())) return;
+      if(hide){ if(map.hasLayer(mk)) map.removeLayer(mk); }
+      else { if(!map.hasLayer(mk)) mk.addTo(map); }
+    }); });
+  }catch(e){}
+}
+function renderZones(){
+  try{
+  if(typeof map==='undefined'||!map) return;
+  clearZones(); _zoneEnsureCss();
+  var back=document.getElementById('os-zone-back');
+  if(!back){ back=document.createElement('div'); back.id='os-zone-back'; (document.getElementById('map')||document.body).appendChild(back);
+    back.addEventListener('click',function(){
+      var z=(window.ACTIVE&&ACTIVE.zones&&ACTIVE.zones[0]);
+      if(z && map.getZoom() >= _ZONE_POI_ZOOM){ _zoneFit(z.outline); }  // from a section -> back to the Waikīkī sub-map
+      else { window._zoomedZone=null; if(typeof frameIsland==='function') frameIsland(true); renderZones(); }  // from the sub-map -> back to the island
+    }); }
+  var zones=(window.ACTIVE&&ACTIVE.zones)||null;
+  if(!zones||!zones.length||!_zoneGateOK()){ back.style.display='none'; return; }
+  if(!map.getPane('zones')){ map.createPane('zones'); map.getPane('zones').style.zIndex='590'; }
+  if(!_zoneWired){ map.on('zoomend',function(){ if(typeof renderZones==='function') renderZones(); }); _zoneWired=true; }
+  toggleWaikikiExistingPois();
+  var zoom=map.getZoom();
+  if(zoom >= _ZONE_DISTRICT_ZOOM){
+    var showPois = zoom >= _ZONE_POI_ZOOM;
+    back.textContent = showPois ? '‹ Waikīkī' : ('‹ '+((ACTIVE&&ACTIVE.name)||'Island')); back.style.display='block';
+    zones.forEach(function(z){ (z.sections||[]).forEach(function(sec){
+      var b=L.latLngBounds(sec.outline);
+      var rect=L.polygon(sec.outline,{pane:'zones',className:showPois?'':'os-zone-poly',color:'#1f6fdd',weight:2,opacity:.92,fillColor:'#1f6fdd',fillOpacity:showPois?.04:.10,lineJoin:'round',lineCap:'round',interactive:!showPois});
+      if(!showPois) rect.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); _zoneFit(sec.outline); });
+      rect.addTo(map); _zoneLayers.push(rect);
+      if(showPois){
+        var sl=L.marker(sec.lblAt?L.latLng(sec.lblAt[0],sec.lblAt[1]):L.latLng(b.getNorth(),b.getCenter().lng),{interactive:false,keyboard:false,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="os-wsec-lbl">'+(sec.label||sec.name)+'</div>'})});
+        sl.addTo(map); _zoneLayers.push(sl);
+        var _poiSet = (window._activeTab==='acts') ? ((sec.family&&sec.family.length)?sec.family:(sec.pois||[])) : (sec.pois||[]);
+        _poiSet.forEach(function(p){
+          var col=(_WS_CAT[p.cat]||{}).c||'#0f4c5c';
+          var mk=L.marker([p.lat,p.lon],{zIndexOffset:1500,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="ws-poi"><span class="pdot" style="background:'+col+'"></span><span class="pnm">'+p.n+'</span></div>'})});
+          mk.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); L.popup({closeButton:true,className:'ws-pop',autoPan:true}).setLatLng([p.lat,p.lon]).setContent('<div class="ws-pop"><b>'+p.n+'</b><span>'+(p.tip||'')+'</span></div>').openOn(map); });
+          mk.addTo(map); _zoneLayers.push(mk);
+        });
+      } else {
+        var sb=L.marker(sec.lblAt?L.latLng(sec.lblAt[0],sec.lblAt[1]):b.getCenter(),{interactive:true,keyboard:false,zIndexOffset:2000,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="os-zone-badge sec"><span class="zb">'+_ZMAG+'</span><span class="zn">'+(sec.label||sec.name)+'</span></div>'})});
+        sb.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); _zoneFit(sec.outline); });
+        sb.addTo(map); _zoneLayers.push(sb);
+      }
+    }); });
+    return;
+  }
+  window._zoomedZone=null; back.style.display='none';
+  zones.forEach(function(z){
+    var poly=L.polygon(z.outline,{pane:'zones',className:'os-zone-poly',color:'#1f6fdd',weight:2.5,opacity:.95,fillColor:'#1f6fdd',fillOpacity:.06,lineJoin:'round',lineCap:'round',bubblingMouseEvents:false});
+    poly.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); zoomToZone(z); });
+    poly.addTo(map); _zoneLayers.push(poly);
+    var bb=poly.getBounds(), badgePt=L.latLng(bb.getNorth(), bb.getCenter().lng);
+    var lbl=L.marker(badgePt,{interactive:true,keyboard:false,zIndexOffset:2000,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="os-zone-badge"><span class="zb">'+_ZMAG+'</span><span class="zn">'+z.name+'</span></div>'})});
+    lbl.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); zoomToZone(z); });
+    lbl.addTo(map); _zoneLayers.push(lbl);
+  });
+  }catch(e){}
+}
+
 function renderSwellLayer(){
   try{
   if(typeof map==='undefined' || !map) return;
@@ -7189,7 +7612,7 @@ function renderSwellLayer(){
     const p=document.getElementById('os-ocean-path'); if(!p||typeof map==='undefined'||!map) return;
     const sz=map.getSize();
     const rect='M0 0 H'+sz.x+' V'+sz.y+' H0 Z';
-    const pts=KAUAI_OUTLINE.map(pt=>map.latLngToContainerPoint(pt));
+    const pts=(ISLAND_OUTLINES[ACTIVE&&ACTIVE.slug]||ISLAND_OUTLINES.kauai).map(pt=>map.latLngToContainerPoint(pt));
     const isl=pts.map((c,i)=>(i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1)).join(' ')+' Z';
     p.setAttribute('d', rect+' '+isl);
     // Curved swell crests: sine-curve <path> covering the rotated layer (rot inset:-70% ≈ 2.4× viewport).
@@ -7265,6 +7688,7 @@ async function rescore(){
   renderMap();
   renderChannels();
   renderSwellLayer();
+  if(typeof renderZones==='function') renderZones();
   renderHikes();
   renderActs();
   renderMarkets();
@@ -7727,7 +8151,7 @@ function clearItemRoute(){
     if(changed){
       const qs = params.toString();
       history.replaceState({}, '', qs ? '?' + qs : location.pathname);
-      document.title = 'Kauaʻi Beach Guide — Free Ocean Safety App';
+      document.title = ((window.ACTIVE&&ACTIVE.name)||'Kauaʻi') + ' Beach Guide — Free Ocean Safety App';  // Layer 15: island-aware title reset
       // Analytics: POI sheet closed — log its read-time, resume timing the tab
       if(window.OSA) OSA.tab(window._activeTab || 'acts');
     }
@@ -8537,6 +8961,18 @@ window._partnerSeg = null;
     .catch(function(){});
 }catch(e){} })();
 
+// C-3 fail-closed co-brand island binding: an explicitly-bound partner config must match the
+// ACTIVE island; a legacy config with NO island field is honored ONLY on Kauaʻi (the sole
+// populated island today) and dropped on every other island. This prevents a Kauaʻi hotel's
+// co-brand + affiliate IDs from rendering on a Maui/Oʻahu/Hawaiʻi session. Nulling _partnerCfg
+// is the single chokepoint every downstream surface (promos, amenities, tour desk, _gygPid/
+// _viatorPid affiliates) already reads. Server binding stays authoritative.
+function _cobrandIslandOK(cfg){
+  var a=(window.ACTIVE&&ACTIVE.slug)||'kauai';
+  var isl=cfg&&cfg.island;
+  if(isl) return isl===a;   // explicit binding → must match (fail closed on mismatch)
+  return a==='kauai';       // legacy fieldless cfg → honored only on Kauaʻi
+}
 window._partnerCfgReady = (function(){
   const slug = _activeRefSlug();
   if(!slug || !window.fetch) return Promise.resolve(null);
@@ -8555,8 +8991,12 @@ window._partnerCfgReady = (function(){
     .then(cfg => {
       if(timer) clearTimeout(timer);
       if(cfg && typeof cfg === 'object' && !Array.isArray(cfg)){
-        window._partnerCfg = cfg;
-        try { _renderPartnerPromos(cfg); } catch(e){}
+        if(_cobrandIslandOK(cfg)){
+          window._partnerCfg = cfg;
+          try { _renderPartnerPromos(cfg); } catch(e){}
+        } else {
+          try { console.warn('[co-brand] dropped partner cfg (island mismatch): cfg.island=', cfg.island, 'ACTIVE=', (window.ACTIVE&&ACTIVE.slug)); } catch(_){}
+        }
       }
       return window._partnerCfg;
     })
@@ -8594,7 +9034,68 @@ if(window._partnerCfgReady && window._partnerCfgReady.then){
 })();
 
 // BOOT
+// Attach Kauaʻi's inlined arrays as island #1's full dataset (now that every array exists).
+// (Layer 2 — ported from maui branch.)
+ISLANDS.kauai.data = { beaches:B, channels:CHANNELS, hikes:HIKES, acts:ACTS, stays:STAYS, fmarkets:FMARKETS, foods:FOODS, food_trucks:FOOD_TRUCKS, gas_stations:GAS_STATIONS, local_crafts:LOCAL_CRAFTS, groceries:GROCERIES, drinks:DRINKS, tours:TOURS_LIBRARY };
+
+// Re-point the global arrays at a NON-Kauaʻi island's dataset. Never called for Kauaʻi
+// (the boot gate below skips it), so Kauaʻi's bindings are never reassigned.
+// ATOMIC + FAIL-CLOSED (red-team C-1 / partial-load finding): validate the FULL incoming
+// dataset and pre-compute every replacement value BEFORE assigning any global. A half-repointed
+// screen (ACTIVE=maui but B still Kauaʻi, or vice-versa) is a mixed-island hazard view — worse
+// than either clean island. On ANY validation failure we THROW so boot()'s catch renders the
+// hard blocking error and never paints wrong-island data. NEVER silently substitute an island.
+function repointIslandGlobals(d){
+  if(!d || typeof d!=='object') throw new Error('island dataset missing');
+  if(!Array.isArray(d.beaches) || d.beaches.length===0) throw new Error('island beaches missing or empty');
+  // Pre-compute all replacements (pure, cannot throw) — commit only once all are known-good.
+  var _B=d.beaches, _CH=d.channels||[], _HI=d.hikes||[], _AC=d.acts||[], _ST=d.stays||[],
+      _FM=d.fmarkets||[], _FO=d.foods||[], _FT=d.food_trucks||[], _GS=d.gas_stations||[],
+      _LC=d.local_crafts||[], _GR=d.groceries||[], _DR=d.drinks||[], _TO=d.tours||[];
+  var _OL=[{key:'all',label:'All',r:null}].concat((ACTIVE.regions||[]).map(function(rg){ return {key:rg.key,label:rg.label,r:rg.r}; }));
+  // Commit — synchronous, no awaits between assignments, so it cannot be interrupted partway.
+  B=_B; CHANNELS=_CH; HIKES=_HI; ACTS=_AC; STAYS=_ST; FMARKETS=_FM; FOODS=_FO;
+  FOOD_TRUCKS=_FT; GAS_STATIONS=_GS; LOCAL_CRAFTS=_LC; GROCERIES=_GR; DRINKS=_DR; TOURS_LIBRARY=_TO;
+  OUTLOOK_REGIONS=_OL;
+}
+
+// Hard blocking full-screen error (red-team C-1). Rendered when a requested non-Kauaʻi island's
+// safety data fails to load/repoint. Uses ONLY island CONFIG (name) — never island data — so it
+// is safe even when no dataset loaded. It suppresses all beach/hazard/rain/wx rendering.
+function showIslandLoadError(isl){
+  var name=(isl&&isl.name)||'this island';
+  try{
+    var ov=document.createElement('div');
+    ov.id='islandLoadError';
+    ov.setAttribute('role','alert');
+    ov.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#0b2a33;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5';
+    ov.innerHTML='<div style="font-size:44px;margin-bottom:12px" aria-hidden="true">&#9888;&#65039;</div>'
+      +'<div style="font-size:20px;font-weight:800;max-width:22em;margin-bottom:10px">Couldn’t load '+name+' safety data</div>'
+      +'<div style="font-size:15px;max-width:26em;opacity:.92;margin-bottom:8px">Do not rely on this screen for ocean conditions — the beach, hazard, surf, and weather data for '+name+' did not load.</div>'
+      +'<div style="font-size:15px;max-width:26em;opacity:.95;margin-bottom:22px"><b>In an emergency, dial 911.</b></div>'
+      +'<button type="button" onclick="location.reload()" style="background:#f5c518;color:#0b2a33;border:0;border-radius:999px;padding:12px 26px;font-size:15px;font-weight:800;cursor:pointer">Retry</button>';
+    (document.body||document.documentElement).appendChild(ov);
+    var ld=document.getElementById('loader'); if(ld){ ld.classList.add('hide'); ld.style.display='none'; }
+  }catch(_){ try{ document.body.innerHTML='<div style="padding:40px;font-family:sans-serif;text-align:center"><h2>Couldn’t load '+name+' safety data</h2><p>Do not rely on this screen. In an emergency, dial 911.</p><p><a href="javascript:location.reload()">Retry</a></p></div>'; }catch(__){} }
+}
+
 async function boot(){
+  // ── Multi-island loader (Layer 2; red-team C-1 — NO silent Kauaʻi fallback) ──
+  // Load + activate a requested non-Kauaʻi island's dataset BEFORE anything paints. Kauaʻi is
+  // inlined (data already bound above) → this whole block is skipped → zero regression.
+  // CATASTROPHE GUARD: if the requested island fails to load or repoint, render a hard blocking
+  // error and STOP. NEVER fall back to Kauaʻi data under a URL that names another island — that
+  // would show Kauaʻi beaches/rips/weather as if they were Maui/Oʻahu/Hawaiʻi.
+  if (ACTIVE.slug !== 'kauai') {
+    try {
+      await ensureIsland(ACTIVE.slug);
+      repointIslandGlobals(ACTIVE.data);
+    } catch(e){
+      try { console.error('[island] failed to load ' + ACTIVE.slug + ' — refusing to fall back to Kauaʻi', e); } catch(_){}
+      showIslandLoadError(ACTIVE);
+      return;   // hard stop: do not paint ANY beach / hazard / rain / wx data
+    }
+  }
   // ── Partner referral capture (QR codes, partner links) ──
   // ?ref=marriott / ?utm_source=hyatt → persist to localStorage so subsequent
   // affiliate clicks can be tagged for partner-revenue attribution (read by
@@ -8658,6 +9159,7 @@ async function boot(){
   // Hide pills (beach intent filters) since we open on Family, not Beaches
   const pills = document.getElementById('pills');
   if(pills) pills.style.display = 'none';
+  if(typeof buildShoreChips === 'function') buildShoreChips();
   initMap();
   await wireTabs();(async()=>{await fetchLive();rescore();})();
   setTimeout(()=>map.invalidateSize(),100);
@@ -8683,12 +9185,21 @@ window._liveFetchedAt = null;
 // regionStatus() the outlook sheet uses. Unknown or stale surf renders an em dash with
 // the slate no-data dot (never the 99 sentinel, never a stale number presented as live).
 // Brown droplet = some beach on that shore trips the brown-water trigger today.
-const SHORE_CHIP_REGIONS = [
-  {key:'north', label:'North', r:'North Shore'},
-  {key:'east',  label:'East',  r:'East Side'},
-  {key:'south', label:'South', r:'South Shore'},
-  {key:'west',  label:'West',  r:'West Side'}
-];
+// Layer 11/13 (F1 fix): derive shore chips from the ACTIVE island's regions so Oʻahu
+// (windward/leeward) and Hawaiʻi (kona/kohala/hilo/kau) paint the correct chips + open the
+// correct outlook region. Kauaʻi's regions are north/east/south/west → byte-identical output.
+const SHORE_CHIP_REGIONS = (ACTIVE.regions||[]).map(rg => ({key:rg.key, label:rg.label, r:rg.r}));
+// Build the shore-outlook chips dynamically into #shoreChips. Positional CSS class is assigned
+// by region index (0→top-center, 1→right, 2→bottom-center, 3→left) matching the existing
+// .shore-n/.shore-e/.shore-s/.shore-w slots, while the id + click region come from config.
+function buildShoreChips(){
+  var wrap=document.getElementById('shoreChips'); if(!wrap) return;
+  var pos=['shore-n','shore-e','shore-s','shore-w'];
+  var drop='<svg class="shore-drop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7c3.4 4.2 6.3 7.9 6.3 11.4a6.3 6.3 0 1 1-12.6 0C5.7 10.6 8.6 6.9 12 2.7z"/></svg>';
+  wrap.innerHTML=(ACTIVE.regions||[]).map(function(rg,i){
+    return '<button id="shore-'+rg.key+'" class="shore-chip '+(pos[i]||'')+'" onclick="window._outlookRegion=\''+rg.key+'\';openOutlookSheet(\'surf\')" aria-label="'+rg.r+' conditions"><span class="shore-dot"></span><span class="shore-l">'+rg.label+'</span><span class="shore-v">—</span>'+drop+'</button>';
+  }).join('');
+}
 function updateShoreChips(){
   SHORE_CHIP_REGIONS.forEach(rg => {
     const el = document.getElementById('shore-' + rg.key);
@@ -9584,7 +10095,7 @@ boot().catch(e=>{console.error(e);document.getElementById('loader').classList.ad
 // the user isn't surprised by a silent map reset / scroll jump mid-session.
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if(refreshing) return;
@@ -9608,20 +10119,17 @@ if('serviceWorker' in navigator){
   /* Header weather-by-shore. Kauaʻi's coasts have very different microclimates, so the
      header reads the picked shore's own weather. One Open-Meteo call covers all four
      representative points. Falls back to the island reading until it loads or if it fails. */
-  var SIDE_PTS = {
-    north:{lat:22.205,lon:-159.503,label:'North'},
-    east: {lat:22.005,lon:-159.337,label:'East'},
-    south:{lat:21.880,lon:-159.460,label:'South'},
-    west: {lat:21.970,lon:-159.700,label:'West'}
-  };
-  var ORDER=['north','east','south','west'];
+  // Layer 11: header side-row derived from the ACTIVE island's regions (key/centroid/label),
+  // not a Kauaʻi-hardcoded map. Kauaʻi's regions reproduce the former literals exactly.
+  var SIDE_PTS = {}, ORDER = [];
+  (ACTIVE.regions||[]).forEach(function(rg){ ORDER.push(rg.key); SIDE_PTS[rg.key]={lat:rg.centroid.lat,lon:rg.centroid.lon,label:rg.label}; });
   function repaint(){ try{ if(typeof rescore==='function') rescore(); }catch(e){} }
 
   window.fetchSideWeather=async function(){
     try{
       var lats=ORDER.map(function(k){return SIDE_PTS[k].lat;}).join(',');
       var lons=ORDER.map(function(k){return SIDE_PTS[k].lon;}).join(',');
-      var url='/api/wx?k=side&lats='+lats+'&lons='+lons;
+      var url='/api/wx?k=side&lats='+lats+'&lons='+lons+'&island='+(window.ACTIVE?ACTIVE.slug:'kauai');
       var r=await fetch(url); if(!r.ok) return;
       var data=await r.json(); var arr=Array.isArray(data)?data:[data]; var sides={};
       ORDER.forEach(function(k,i){
@@ -9636,7 +10144,7 @@ if('serviceWorker' in navigator){
 
   window.selectSide=function(side){
     window._activeSide=side;
-    try{ localStorage.setItem('os_side',side); }catch(e){}
+    try{ localStorage.setItem((window.ACTIVE&&ACTIVE.sideKey)||'os_side',side); }catch(e){}
     var els=document.querySelectorAll('.hdr-side');
     for(var i=0;i<els.length;i++) els[i].classList.toggle('on',els[i].getAttribute('data-side')===side);
     repaint();
@@ -9645,8 +10153,9 @@ if('serviceWorker' in navigator){
   function build(){
     var host=document.getElementById('hdrWx');
     if(!host||document.getElementById('hdrSideRow')) return;
-    var saved=null; try{ saved=localStorage.getItem('os_side'); }catch(e){}
-    window._activeSide=(saved&&SIDE_PTS[saved])?saved:'east';
+    var _sk=(window.ACTIVE&&ACTIVE.sideKey)||'os_side';
+    var saved=null; try{ saved=localStorage.getItem(_sk); }catch(e){}
+    window._activeSide=(saved&&SIDE_PTS[saved])?saved:((window.ACTIVE&&ACTIVE.defaultSide)||'east');
     if(!document.getElementById('hdrSideStyle')){
       var st=document.createElement('style'); st.id='hdrSideStyle';
       st.textContent='#hdrSurf{display:none!important}'+
@@ -9656,7 +10165,9 @@ if('serviceWorker' in navigator){
           "background:var(--warm,#f5ecd7);color:var(--mute,#6b7280);font:600 11.5px/1 'DM Sans',sans-serif;"+
           'letter-spacing:.02em;cursor:pointer;white-space:nowrap;transition:background .18s,color .18s,border-color .18s;-webkit-tap-highlight-color:transparent}'+
         '.hdr-side:active{transform:scale(.97)}'+
-        '.hdr-side.on{background:var(--ocean,#0f4c5c);border-color:var(--ocean,#0f4c5c);color:#fff}';
+        '.hdr-side.on{background:var(--ocean,#0f4c5c);border-color:var(--ocean,#0f4c5c);color:#fff}'+
+        '#hdrLangRow{display:flex;align-items:center;flex-shrink:0;margin-left:6px}'+
+        '#hdrLangSel{font-weight:600;font-size:11px;color:#0f4c5c;background:#fff;border:1px solid rgba(15,76,92,.28);border-radius:8px;padding:3px 6px;cursor:pointer}';
       document.head.appendChild(st);
     }
     var row=document.createElement('div'); row.id='hdrSideRow'; row.className='hdr-side-row';
@@ -9671,6 +10182,27 @@ if('serviceWorker' in navigator){
     var tb1=host.closest?host.closest('.tb1'):host.parentNode;
     if(tb1&&tb1.parentNode) tb1.parentNode.insertBefore(row,tb1.nextSibling);
     else host.parentNode.insertBefore(row,host.nextSibling);
+    // Layer 16: language switcher (EN / 日本語 / हिन्दी). Language is orthogonal to island;
+    // switchLang reloads with ?lang= and the head DOM-translation layer does the rest. (maui's
+    // competing openForecastPanel dropdown is intentionally NOT ported — main's 7-day strip stays.)
+    try {
+      if(!document.getElementById('hdrLangRow')){
+        var lrow=document.createElement('div'); lrow.id='hdrLangRow'; lrow.setAttribute('aria-label','Language');
+        var lsel=document.createElement('select'); lsel.id='hdrLangSel'; lsel.setAttribute('aria-label','Language');
+        [['en','EN'],['ja','日本語'],['hi','हिन्दी']].forEach(function(LG){
+          var op=document.createElement('option'); op.value=LG[0]; op.textContent=LG[1];
+          if(((window.ACTIVE_LANG)||'en')===LG[0]) op.selected=true;
+          lsel.appendChild(op);
+        });
+        lsel.addEventListener('change',function(){ if(window.switchLang) window.switchLang(lsel.value); });
+        lrow.appendChild(lsel);
+        if(host) host.appendChild(lrow); else if(row && row.parentNode) row.parentNode.insertBefore(lrow, row);
+      }
+    } catch(e){}
+    // Layer 12/15: reflect the ACTIVE island's name in the header brand + document title.
+    // Kauaʻi's .bname is already "Kauaʻi" and title already "Kauaʻi Beach Guide…" → unchanged.
+    try{ var _bn=document.querySelector('.bname'); if(_bn && window.ACTIVE) _bn.textContent=ACTIVE.name; }catch(_e){}
+    try{ if(window.ACTIVE) document.title=ACTIVE.name+' Beach Guide — Free Ocean Safety App'; }catch(_e){}
   }
 
   function init(){ build(); window.fetchSideWeather(); }
@@ -9813,13 +10345,14 @@ if('serviceWorker' in navigator){
   function storeToast(msg){ var t=document.getElementById('osStoreToast'); if(!t){ t=document.createElement('div'); t.id='osStoreToast'; t.className='os-store-toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){ t.classList.remove('show'); },2600); }
   function storeBuy(slug,pid){
     if(!slug||!pid){ storeToast("Sorry — that item can't be checked out right now."); return; }
+    if(typeof _islandSellable==='function' && !_islandSellable()){ storeToast("Online checkout isn't available on this island yet."); return; }  // C-3 client mirror; server gate is authoritative
     if(!STORE_CFG.FUNCTIONS_BASE){ storeToast("Preview only — checkout works once your live shop is set up."); return; }
     storeToast("One moment — setting up checkout…");
     // Square rail: prices are looked up server-side; the fn 409s in plain English
     // ("this shop isn't open for orders right now") when a shop can't take orders.
     // v1 is pickup-only — the catalog carries no fulfillment mode for the shop, and
     // the server enforces the shop's real mode (partners.fulfillment_mode) anyway.
-    fetch(STORE_CFG.FUNCTIONS_BASE+"/create-square-checkout",{ method:"POST", headers:{ "Content-Type":"application/json","Authorization":"Bearer "+STORE_CFG.PUBLISHABLE_KEY }, body:JSON.stringify({ slug:slug, items:[{ product_id:pid, qty:1 }], fulfillment:"pickup" }) })
+    fetch(STORE_CFG.FUNCTIONS_BASE+"/create-square-checkout",{ method:"POST", headers:{ "Content-Type":"application/json","Authorization":"Bearer "+STORE_CFG.PUBLISHABLE_KEY }, body:JSON.stringify({ slug:slug, items:[{ product_id:pid, qty:1 }], fulfillment:"pickup", island:(window.ACTIVE?ACTIVE.slug:'kauai') }) })
       .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(o){ return { ok:r.ok, o:o }; }); })
       .then(function(x){ var dest=_su(x.o&&x.o.checkout_url); if(!x.ok||!dest){ throw new Error((x.o&&typeof x.o.error==="string"&&x.o.error)?x.o.error:"Checkout didn't go through — please try again in a minute."); } location.href=dest; })
       .catch(function(e){ storeToast(String((e&&e.message)||"Checkout didn't go through — please try again in a minute.")); });
