@@ -1,3 +1,5 @@
 .claude/
 _review.html
 _stress-test.json
+
+.DS_Store
