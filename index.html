@@ -10,13 +10,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Kauai Beaches">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="shortcut icon" href="icons/favicon.ico">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="shortcut icon" href="/icons/favicon.ico">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <meta property="og:title" content="Kauaʻi Beach Guide">
 <meta property="og:description" content="Free ocean safety app for Kauai visitors. Real-time conditions, hazard warnings, family-friendly options.">
 <meta property="og:type" content="website">
@@ -2206,7 +2206,11 @@ let B=[
 // Resolve the active island from ?island= / localStorage / default. Only live islands are
 // selectable. (Each island's full dataset is attached after all data arrays are defined.)
 function resolveIsland(){
+  // Explicit ?island= wins first — the in-app switcher navigates to <path>?island=slug and KEEPS
+  // the path, so on a /go/<slug> entry the query must beat the path or switching would no-op.
   try { var p = new URLSearchParams(location.search).get('island'); if(p && ISLANDS[p] && ISLANDS[p].live) return p; } catch(e){}
+  // Clean launch URL /go/<slug> (QR codes, cards, email) — beats a stale localStorage island.
+  try { var m = location.pathname.match(/^\/go\/([a-z]+)\/?$/); if(m && ISLANDS[m[1]] && ISLANDS[m[1]].live) return m[1]; } catch(e){}
   try { var s = localStorage.getItem('os_island'); if(s && ISLANDS[s] && ISLANDS[s].live) return s; } catch(e){}
   return 'kauai';
 }
@@ -7309,7 +7313,7 @@ boot().catch(e=>{console.error(e);document.getElementById('loader').classList.ad
 // the user isn't surprised by a silent map reset / scroll jump mid-session.
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if(refreshing) return;
@@ -7362,6 +7366,40 @@ if('serviceWorker' in navigator){
     repaint();
   };
 
+  // 7-day outlook panel, opened from the header "7-day" button (next to the language select).
+  // Read-only: shows the FORECAST array; does NOT change the map scoring (map stays on live/today).
+  window.openForecastPanel=function(btn){
+    var panel=document.getElementById('hdrFcPanel');
+    if(!panel){
+      panel=document.createElement('div'); panel.id='hdrFcPanel'; document.body.appendChild(panel);
+      document.addEventListener('click',function(e){
+        if(panel.style.display==='block' && !panel.contains(e.target) && e.target!==btn && !(btn.contains&&btn.contains(e.target))) panel.style.display='none';
+      });
+      window.addEventListener('resize',function(){ panel.style.display='none'; });
+    }
+    if(panel.style.display==='block'){ panel.style.display='none'; return; }
+    var rows='';
+    if(Array.isArray(window.FORECAST) && FORECAST.length){
+      rows=FORECAST.map(function(f){
+        var surf=f.surf_unknown?'—':(f.es+' ft');
+        return '<div class="fc-row"><span class="fc-d">'+f.label+' <i>'+f.shortDate+'</i></span>'
+          +'<span class="fc-t">'+f.tempMax+'°/'+f.tempMin+'°</span>'
+          +'<span class="fc-w">'+f.wind+' mph</span>'
+          +'<span class="fc-r">'+f.precip_chance+'%</span>'
+          +'<span class="fc-s">'+surf+'</span></div>';
+      }).join('');
+    } else {
+      rows='<div class="fc-empty">Loading forecast…</div>';
+    }
+    panel.innerHTML='<div class="fc-hd">7-Day Forecast · '+((window.ACTIVE&&ACTIVE.name)||'')+'</div>'
+      +'<div class="fc-row fc-head"><span class="fc-d">Day</span><span class="fc-t">Hi/Lo</span><span class="fc-w">Wind</span><span class="fc-r">Rain</span><span class="fc-s">Surf</span></div>'
+      +rows
+      +'<div class="fc-note">Open-Meteo forecast — conditions change fast; always check on-site before you get in.</div>';
+    panel.style.display='block';
+    var r=btn.getBoundingClientRect(); var pw=panel.offsetWidth||292;
+    var left=Math.max(8, Math.min(r.right-pw, window.innerWidth-pw-8));
+    panel.style.top=(r.bottom+6)+'px'; panel.style.left=left+'px';
+  };
   function build(){
     var host=document.getElementById('hdrWx');
     if(!host||document.getElementById('hdrSideRow')) return;
@@ -7378,7 +7416,7 @@ if('serviceWorker' in navigator){
         '.hdr-side:active{transform:scale(.97)}'+
         '.hdr-side.on{background:var(--ocean,#0f4c5c);border-color:var(--ocean,#0f4c5c);color:#fff}'+
         '#hdrLangRow{display:flex;align-items:center;flex-shrink:0;margin-left:6px}'+
-        '#hdrLangSel{font-weight:600;font-size:11px;color:#0f4c5c;background:#fff;border:1px solid rgba(15,76,92,.28);border-radius:8px;padding:3px 6px;cursor:pointer}';
+        '#hdrLangSel{font-weight:600;font-size:11px;color:#0f4c5c;background:#fff;border:1px solid rgba(15,76,92,.28);border-radius:8px;padding:3px 6px;cursor:pointer}'+'#hdrFcBtn{font:600 11px "DM Sans",sans-serif;color:#0f4c5c;background:#fff;border:1px solid rgba(15,76,92,.28);border-radius:8px;padding:3px 8px;cursor:pointer;margin-right:6px;white-space:nowrap}'+'#hdrFcBtn:active{transform:scale(.97)}'+'#hdrFcPanel{position:fixed;z-index:1300;display:none;background:#fff;border:1px solid rgba(15,76,92,.18);border-radius:12px;box-shadow:0 10px 30px -8px rgba(15,76,92,.35);padding:10px 12px;width:292px;max-width:92vw;font-family:"DM Sans",sans-serif}'+'#hdrFcPanel .fc-hd{font-weight:700;font-size:12px;color:#0f4c5c;margin-bottom:4px}'+'#hdrFcPanel .fc-row{display:grid;grid-template-columns:1.5fr 1fr .95fr .7fr .8fr;gap:4px;align-items:center;padding:4px 0;font-size:11.5px;color:#1c1c1c;border-top:1px solid #f0efe9}'+'#hdrFcPanel .fc-head{font-weight:700;font-size:9.5px;letter-spacing:.03em;text-transform:uppercase;color:#6b7280;border-top:none}'+'#hdrFcPanel .fc-d i{font-style:normal;color:#9ca3af;font-size:10px;margin-left:3px}'+'#hdrFcPanel .fc-t,#hdrFcPanel .fc-w,#hdrFcPanel .fc-r,#hdrFcPanel .fc-s{text-align:right}'+'#hdrFcPanel .fc-note{font-size:9.5px;color:#9ca3af;margin-top:8px;line-height:1.35}'+'#hdrFcPanel .fc-empty{font-size:11.5px;color:#6b7280;padding:10px 0;text-align:center}';
       document.head.appendChild(st);
     }
     var row=document.createElement('div'); row.id='hdrSideRow'; row.className='hdr-side-row';
@@ -7398,6 +7436,10 @@ if('serviceWorker' in navigator){
       if(!document.getElementById('hdrLangRow')){
         var lrow=document.createElement('div'); lrow.id='hdrLangRow';
         lrow.setAttribute('aria-label','Language');
+        var fcBtn=document.createElement('button'); fcBtn.id='hdrFcBtn'; fcBtn.type='button';
+        fcBtn.setAttribute('aria-label','7-day forecast'); fcBtn.innerHTML='7-day <span aria-hidden="true">▾</span>';
+        fcBtn.addEventListener('click',function(e){ e.stopPropagation(); window.openForecastPanel(fcBtn); });
+        lrow.appendChild(fcBtn);
         var lsel=document.createElement('select'); lsel.id='hdrLangSel'; lsel.setAttribute('aria-label','Language');
         [['en','EN'],['ja','日本語'],['hi','हिन्दी']].forEach(function(LG){
           var op=document.createElement('option'); op.value=LG[0]; op.textContent=LG[1];
