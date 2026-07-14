@@ -1327,7 +1327,7 @@ a{text-decoration:none;color:inherit}
 .sname{font-size:22px;font-weight:700;color:#fff;line-height:1.1;text-shadow:0 1px 6px rgba(0,0,0,.5)}
 .sreg{font-size:11px;color:rgba(255,255,255,.8);margin-top:2px;letter-spacing:.03em}
 /* Status badges live on the LEFT side of the hero so they don't collide with the heart
-   button on the right. stbadge (Good Today / Use Caution) sits at the top, kidbadge
+   button on the right. stbadge (Calmer today / Use caution) sits at the top, kidbadge
    (Family Friendly) stacks directly below it. Both are pill-shaped, backdrop-blurred
    so they read clearly against any photo or generative bg behind them. */
 /* Premium status badge — was a saturated green/orange oval. Now: cream glass pill
@@ -5069,14 +5069,14 @@ function renderToursSheetContent(){
     .sort((a,b) => scoreOf(b.m.level) - scoreOf(a.m.level))
     .map(({t, m}) => {
       const badge = m.level === 'yes'
-        ? {color:'#16a34a', bg:'#dcfce7', text:'Great today'}
+        ? {color:'#16a34a', bg:'#dcfce7', text:'Calmer today'}
         : m.level === 'maybe'
-        ? {color:'#ca8a04', bg:'#fef9c3', text:'OK today'}
-        : {color:'#9ca3af', bg:'#f3f4f6', text:'Better another day'};
+        ? {color:'#ca8a04', bg:'#fef9c3', text:'Use caution'}
+        : {color:'#9ca3af', bg:'#f3f4f6', text:'Not recommended'};
       // Adjust badge text for non-today selections
       if(useForecast && _selectedDayIdx > 0){
-        if(m.level === 'yes') badge.text = `Great ${FORECAST[_selectedDayIdx].dayName}`;
-        else if(m.level === 'maybe') badge.text = `OK ${FORECAST[_selectedDayIdx].dayName}`;
+        if(m.level === 'yes') badge.text = `Calmer ${FORECAST[_selectedDayIdx].dayName}`;
+        else if(m.level === 'maybe') badge.text = `Caution ${FORECAST[_selectedDayIdx].dayName}`;
       }
       return `
         <div style="margin-top:14px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">
@@ -6028,7 +6028,7 @@ function openSheet(id){
   const b=B.find(x=>x.id===id),r=scored[id];if(!b||!r)return;
   const c=r._c;
   const bg=b.photo?`url("${b.photo}"),${generativeBg(b)}`:generativeBg(b);
-  const stlbl={green:'Calm conditions today',yellow:'Use Caution'}[r.status]||'';
+  const stlbl={green:'Calm conditions today',yellow:'Use caution'}[r.status]||'';
   const kid=r.kid?`<div class="kidbadge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="5" cy="2.5" r="1.5"/><path d="M2 9 Q5 6.5 8 9"/></svg>Family Friendly</div>`:'';
   const _lgCfg=b.lg==='full_time'?{c:'green',t:'Lifeguarded'}:b.lg==='seasonal_active'?{c:'amber',t:'Seasonal guard'}:{c:'red',t:'No lifeguard'};
   const _lgHrs=(b.lg!=='none'&&b.lg_hours)?' · '+b.lg_hours.replace(/\s*(daily|seasonal)\s*$/i,'').trim():'';
@@ -7046,10 +7046,10 @@ function renderOutlookSheet(){
   rows.sort((a,b) => order[a.level] - order[b.level]);
 
   const badgeFor = lvl => lvl==='good'
-    ? '<span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Great today</span>'
+    ? '<span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Calmer today</span>'
     : lvl==='ok'
-    ? '<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">OK today</span>'
-    : '<span style="background:#fee2e2;color:#b91c1c;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Skip today</span>';
+    ? '<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Use caution</span>'
+    : '<span style="background:#fee2e2;color:#b91c1c;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Not recommended</span>';
   const colorFor = lvl => lvl==='good' ? '#15803d' : lvl==='ok' ? '#92400e' : '#b91c1c';
 
   const condChips = outlookChipsHtml(c);
@@ -7094,7 +7094,7 @@ function renderOutlookSheet(){
       const beachPicks = (typeof bestBeachesForRegion === 'function') ? bestBeachesForRegion(region.r) : [];
       if(!beachPicks.length) return '';
       const stColor = {green:'#16a34a', yellow:'#d97706', red:'#b91c1c', warning:'#b91c1c'};
-      const stLbl = {green:'Great today', yellow:'Use caution', red:'Skip today', warning:'Warning'};
+      const stLbl = {green:'Calmer today', yellow:'Use caution', red:'Not recommended', warning:'Warning'};
       // Per beach, surface the top intents (snorkel / photo / tidepool / walk / swim / sunset)
       // as small chips. Matches the hero strip on the detail sheet so the same vocabulary
       // is reinforced across surfaces. Falls back to the beach's static intents list if the
@@ -7623,6 +7623,14 @@ function getSavedCards(){
 function savedVerdict(c){
   if(c.kind !== 'beach' || typeof scored === 'undefined' || !scored[c.id]) return null;
   const b = c.item, sc = scored[c.id], cc = sc._c;
+  // Known-dangerous beaches stay flagged no matter how fresh the feed is.
+  if(b.warning_only) return {status:'warning', color: OS_VERDICT_COL.warning, reason: 'Dangerous conditions'};
+  // FAIL SAFE — reuse the app's own freshness budget (surfDataStale / MAX_DATA_AGE_MS,
+  // 90 min). Its rule: "stale never yields a calm 'go'." Old or never-fetched data must
+  // never present a green here, so degrade to unknown rather than reassure.
+  if(typeof surfDataStale === 'function' && surfDataStale()){
+    return {status:'unknown', color:'#94a3b8', reason:'Conditions not current'};
+  }
   let status = sc.status;
   if((status === 'hidden' || !OS_VERDICT_COL[status]) && cc && typeof score === 'function'){
     try { status = score(b, cc, (b.intents && b.intents.length) ? b.intents : ['swim','walk']).status; } catch(e){}
@@ -7698,9 +7706,10 @@ function renderNowBody(allCards){
   const good = withV.filter(x => x.v && x.v.status === 'green').map(x => x.c);
   const caution = withV.filter(x => x.v && x.v.status === 'yellow').map(x => x.c);
   const notRec = withV.filter(x => x.v && (x.v.status === 'red' || x.v.status === 'warning')).map(x => x.c);
+  const unknown = withV.filter(x => x.v && x.v.status === 'unknown').map(x => x.c);
   const others = withV.filter(x => !x.v).map(x => x.c);
   const byNear = (a, b) => { const ma = savedMiles(a), mb = savedMiles(b); if(ma != null && mb != null) return ma - mb; return b.savedAt - a.savedAt; };
-  pinned.sort(byNear); good.sort(byNear); caution.sort(byNear); notRec.sort(byNear); others.sort((a, b) => b.savedAt - a.savedAt);
+  pinned.sort(byNear); good.sort(byNear); caution.sort(byNear); notRec.sort(byNear); unknown.sort(byNear); others.sort((a, b) => b.savedAt - a.savedAt);
   const sec = (title, color, arr, sub) => arr.length
     ? `<div style="margin:15px 2px 6px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:${color}">${title}</div>${sub ? `<div style="font-size:10px;color:var(--mute);margin-top:2px;line-height:1.35">${sub}</div>` : ''}</div><div style="display:flex;flex-direction:column;gap:6px">${arr.map(savedCard).join('')}</div>`
     : '';
@@ -7709,6 +7718,7 @@ function renderNowBody(allCards){
   html += sec('Calmer today', '#15803d', good, 'Lowest measured hazard of your saved spots &mdash; still check the water yourself before going in.');
   html += sec('Use caution', '#92400e', caution, 'Rip currents and shorebreak may not show up in these numbers.');
   html += sec('Not recommended', '#b91c1c', notRec, 'Warnings or dangerous conditions &mdash; treat as do-not-enter.');
+  html += sec('Conditions unknown', '#64748b', unknown, 'Live data isn&rsquo;t current, so these aren&rsquo;t rated &mdash; check conditions on site before you go.');
   html += sec('More saved', 'var(--mute)', others);
   html += `<button onclick="if(confirm('Clear all ${allCards.length} saved place${allCards.length === 1 ? '' : 's'}? This cannot be undone.')){ localStorage.removeItem(KBG_SAVES_KEY); updateSavedBadge(); renderSavedSheetBody(); }" style="width:100%;margin-top:16px;padding:8px;background:none;color:var(--mute);border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">Clear all saved</button>`;
   return html;
@@ -9503,7 +9513,7 @@ function updateFreshnessIndicator(){
     var unknown = !!c.surf_unknown || !Number.isFinite(c.es) || c.es >= SURF_UNAVAILABLE;
     var word, cls;
     if (unknown){ word = 'Conditions unavailable'; cls = 'na'; }
-    else if (r.status === 'green'){ word = 'Great today'; cls = 'ok'; }
+    else if (r.status === 'green'){ word = 'Calmer today'; cls = 'ok'; }
     else if (r.status === 'yellow'){ word = 'Use caution'; cls = 'warn'; }
     else if (r.reason){ word = r.reason; cls = 'bad'; }
     else { word = 'Calmer water elsewhere today'; cls = 'warn'; }
