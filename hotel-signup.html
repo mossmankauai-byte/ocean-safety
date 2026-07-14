@@ -181,16 +181,21 @@ const T={
   townad:{h1:"Get your business in front of every visitor checking the beach.",
     sub:"A printable QR that opens the free beach-safety guide with your business in it, a timed promotion that pops on guests' phones, and a simple dashboard — $30/mo, set up in two minutes.",
     nameLabel:"Business name", namePh:"Your Beach Grill",
-    freePr:"", paidPr:"<b>$30</b>/mo — your listing, a printable QR, a timed promotion slot, and your own dashboard. Billed monthly, cancel anytime.", paidSelfServe:true}
+    freePr:"", paidPr:"<b>$30</b>/mo — your listing, a printable QR, a timed promotion slot, and your own dashboard. Billed monthly, cancel anytime.", paidSelfServe:true},
+  onlineshop:{h1:"Sell your products to visitors before they hit the beach.",
+    sub:"Everything in a Town Ad — your listing, a printable QR, a timed promotion — plus your products selling right inside the app. We take 0% of your sales.",
+    nameLabel:"Shop name", namePh:"Your Surf & Gift Co.",
+    freePr:"", paidPr:"<b>$100</b>/mo — your storefront in the app, plus the listing, QR and timed promotion. We take <b>0%</b> of your sales. Billed monthly, cancel anytime.", paidSelfServe:true}
 };
 const TC=T[TYPE]||T.hotel;
 $("heroH1").textContent=TC.h1; $("heroSub").textContent=TC.sub;
 $("nameLabel").innerHTML=TC.nameLabel+' <span class="req">*</span>'; $("name").placeholder=TC.namePh;
 $("freePr").innerHTML=TC.freePr; $("paidPr").innerHTML=TC.paidPr;
-document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":TYPE==="townad"?"Get your business on OceanSafe — $30/mo":"Get your store on OceanSafe");
+document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":TYPE==="townad"?"Get your business on OceanSafe — $30/mo":TYPE==="onlineshop"?"Sell your products on OceanSafe — $100/mo":"Get your store on OceanSafe");
 
-// Town Ad is a single $30/mo paid tier — no free option. Hide the plan chooser and lock to paid.
-if(TYPE==="townad"){
+// Town Ad ($30/mo) and Online Shop ($100/mo) are single paid tiers — no free option.
+// Hide the plan chooser and lock to paid.
+if(TYPE==="townad"||TYPE==="onlineshop"){
   const pf=$("planFree"); if(pf) pf.style.display="none";
   const chooseLbl=document.querySelector("form#f label.first"); if(chooseLbl) chooseLbl.style.display="none";
   const paidInput=$("planPaid").querySelector("input"); paidInput.checked=true;
@@ -200,14 +205,24 @@ if(TYPE==="townad"){
   $("go").textContent="Continue to secure payment →";
   const talk=$("talkLine"); if(talk) talk.style.display="none";
   const webLbl=[...document.querySelectorAll("form#f label")].find(l=>/Property website/i.test(l.textContent)); if(webLbl) webLbl.textContent="Website";
-  // what's included — reinforce the offer under the price
+  // what's included — reinforce the offer under the price (per tier)
+  const INCL={
+    townad:[
+      "Your business listed in the guide visitors open before the beach",
+      "A printable QR for your counter and receipts, opening the free guide",
+      "A timed promotion that pops for guests who scan your QR",
+      "A simple dashboard to upload your promo, with a phone preview"
+    ],
+    onlineshop:[
+      "Your products selling right inside the app",
+      "Payments go straight into your own Square account — we take 0%",
+      "Everything in a Town Ad: your listing, a printable QR, a timed promotion",
+      "A dashboard to add products and upload your promo"
+    ]
+  };
   const incl=document.createElement("ul"); incl.className="incl";
-  incl.innerHTML=[
-    "Your business listed in the guide visitors open before the beach",
-    "A printable QR for your counter and receipts, opening the free guide",
-    "A timed promotion that pops for guests who scan your QR",
-    "A simple dashboard to upload your promo, with a phone preview"
-  ].map(t=>'<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>'+t+'</span></li>').join("");
+  incl.innerHTML=(INCL[TYPE]||INCL.townad)
+    .map(t=>'<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>'+t+'</span></li>').join("");
   document.querySelector("form#f .plans").after(incl);
 }
 
