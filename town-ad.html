@@ -125,6 +125,11 @@
     display:flex;align-items:center;justify-content:center;color:var(--accent)}
   .promo .qr svg{width:28px;height:28px}
   .promo .note{font-size:11.5px;color:#66727a;line-height:1.4}
+  /* real app screenshot — centered, framed */
+  .shot{width:min(300px,78vw);margin:32px auto 0;border-radius:20px;overflow:hidden;
+    border:1px solid var(--line);background:var(--card);
+    box-shadow:0 2px 6px rgba(10,50,60,.08),0 28px 60px -24px rgba(10,50,60,.42)}
+  .shot img{display:block;width:100%;height:auto}
   .caption{margin:22px auto 0;font-size:13.5px;color:var(--muted2);max-width:38ch}
 
   /* price recap */
@@ -283,32 +288,11 @@
     <span class="kicker">What a guest sees</span>
     <h2>Your promo, on their phone.</h2>
 
-    <div class="phone" role="img" aria-label="A phone showing the OceanSafe app with a sample promotion popping up: Your Beach Grill, happy hour 3 to 5pm.">
-      <div class="notch" aria-hidden="true"></div>
-      <div class="screen">
-        <div class="app-top">
-          <div class="aw">Ocean<i>Safe</i></div>
-          <div class="loc">Today's conditions</div>
-        </div>
-        <div class="cond" aria-hidden="true">
-          <div class="b">Nearby beach</div>
-          <div class="row"><span class="dotc" style="background:#f0a400"></span><span class="lbl">Surf</span><span class="val">Moderate</span></div>
-          <div class="row"><span class="dotc" style="background:#12b34a"></span><span class="lbl">Wind</span><span class="val">Light</span></div>
-          <div class="row"><span class="dotc" style="background:#12b34a"></span><span class="lbl">Water clarity</span><span class="val">Good</span></div>
-        </div>
-        <div class="promo">
-          <div class="grip" aria-hidden="true"></div>
-          <span class="live"><span class="pd" aria-hidden="true"></span>Running now</span>
-          <h4>Your Beach Grill</h4>
-          <div class="deal">Happy hour 3–5pm. Show this at the counter.</div>
-          <div class="foot">
-            <div class="qr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><path d="M14 14h3v3M20.5 14v.02M14 20.5v.02M20.5 20.5v.02M17.2 17.2v.02"/></svg></div>
-            <div class="note">Scanned your QR down the street a few minutes ago.</div>
-          </div>
-        </div>
-      </div>
+    <div class="shot">
+      <img src="/assets/promo-shot.png" width="546" height="900" loading="lazy"
+        alt="Screenshot of the OceanSafe app: today’s conditions and the beach map, with an offer sliding up — Offer from Your Beach Grill, happy hour 3 to 5pm, $8 house pours, running tonight until 11:59 PM, with a See offer button.">
     </div>
-    <p class="caption">A sample promo. It only shows to guests who scanned that business's QR, during the hours it is set to run.</p>
+    <p class="caption">An actual screenshot of the app, not a drawing. The business shown is made up — your offer only appears to guests who scanned <i>your</i> QR, during the hours you set.</p>
   </div>
 </section>
 

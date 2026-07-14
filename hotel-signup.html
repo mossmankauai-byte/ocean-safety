@@ -145,12 +145,12 @@
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Set up in 2 minutes</span>
     </div>
     <div class="hint" id="talkLine" style="text-align:center;margin-top:14px">Timeshare or property manager?
-      <a href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20operator">talk to us</a>.</div>
+      <a href="mailto:nick@oceansafety.app?subject=OceanSafe%20operator">talk to us</a>.</div>
   </form>
 
   <div class="ok" id="ok"></div>
 
-  <div class="foot">Questions first? <a href="mailto:mossmankauai@gmail.com">mossmankauai@gmail.com</a> · oceansafety.app</div>
+  <div class="foot">Questions first? <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a> · oceansafety.app</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -179,8 +179,8 @@ const T={
     freePr:"<b>$0</b>/mo — we take 3% only on what the app sells for you. You keep 97%.",
     paidPr:"<b>$500</b>/store/mo — 0% on sales, plus the full data layer. We set this up with you personally.", paidSelfServe:false},
   townad:{h1:"Get your business in front of every visitor checking the beach.",
-    sub:"A printable QR that opens the free Kauaʻi beach-safety guide with your business in it, a timed promotion that pops on guests' phones, and a simple dashboard — $30/mo, set up in two minutes.",
-    nameLabel:"Business name", namePh:"Poʻipū Beach Grill",
+    sub:"A printable QR that opens the free beach-safety guide with your business in it, a timed promotion that pops on guests' phones, and a simple dashboard — $30/mo, set up in two minutes.",
+    nameLabel:"Business name", namePh:"Your Beach Grill",
     freePr:"", paidPr:"<b>$30</b>/mo — your listing, a printable QR, a timed promotion slot, and your own dashboard. Billed monthly, cancel anytime.", paidSelfServe:true}
 };
 const TC=T[TYPE]||T.hotel;
@@ -240,7 +240,7 @@ $("f").addEventListener("submit",async e=>{
   if(!sig) return showErr("Please type your full name to sign.");
   if(!$("agree").checked) return showErr("Please agree to the terms to continue.");
   if(tier==="paid" && !TC.paidSelfServe){
-    return showErr("The paid plan for your business is set up personally — email mossmankauai@gmail.com and we'll have you live this week. Or start free now and upgrade later.");
+    return showErr("The paid plan for your business is set up personally — email nick@oceansafety.app and we'll have you live this week. Or start free now and upgrade later.");
   }
   let tsToken=null;
   if(tsOn){ tsToken=window.turnstile?turnstile.getResponse(window.__tsid):null;

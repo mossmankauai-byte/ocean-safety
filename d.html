@@ -6,7 +6,7 @@
 <meta name="referrer" content="no-referrer">
 <title>Your OceanSafe dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="/assets/vendor/qrcode.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -43,6 +43,20 @@
   .btn.sm{padding:8px 13px;font-size:13px;border-radius:9px}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .qr img{width:118px;height:118px;border:1px solid var(--line);border-radius:12px;background:#fff}
+  /* town-ad printable assets — each carries the partner's own QR */
+  .assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:16px;margin-top:16px}
+  .asset{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .asset .thumb{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+    background:oklch(0.955 0.01 84);border:1px solid var(--line);border-radius:12px;padding:9px;overflow:hidden}
+  .asset .thumb img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;
+    border-radius:4px;box-shadow:0 4px 12px -6px oklch(0.3 0.05 220 / .35)}
+  .asset .nm{font-weight:600;font-size:13px;margin-top:9px;line-height:1.25}
+  .asset .sz{font-size:11.5px;color:var(--mute);margin-top:2px}
+  .asset .btn{margin-top:8px}
+  /* real app screenshot in the promotion card */
+  .shot{flex:none;width:152px;border-radius:16px;overflow:hidden;border:1px solid var(--line);
+    box-shadow:0 2px 5px oklch(0.3 0.04 220 / .07), 0 22px 44px -22px oklch(0.34 0.05 220 / .5)}
+  .shot img{display:block;width:100%;height:auto}
   .kv{display:grid;grid-template-columns:128px 1fr;gap:9px 14px;font-size:14.5px}
   .kv .k{color:var(--mute)}
   .lead{font-size:14.5px;color:var(--ink);line-height:1.55}
@@ -64,7 +78,7 @@
 const SB_URL="https://arndnljtmjfsnzcpcuen.supabase.co";
 const SB_KEY="sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um";
 const SITE="https://oceansafety.app";
-const NICK="mossmankauai@gmail.com";
+const NICK="nick@oceansafety.app";
 const sb=supabase.createClient(SB_URL,SB_KEY);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ml=(s,b)=>"mailto:"+NICK+"?subject="+encodeURIComponent(s)+"&body="+encodeURIComponent(b);
@@ -121,9 +135,14 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   +'<div class="card lift"><h2>Your page</h2>'
     +'<div class="row"><a class="btn primary" href="'+esc(live)+'" target="_blank" rel="noopener">View your live page ↗</a>'
     +'<button class="btn ghost" id="copylink">Copy page link</button></div></div>'
-  +'<div class="card"><h2>Your QR codes</h2>'
-    +'<p class="lead">'+(isOperator?'Print each where guests will see it — in the room, at the lobby, in your welcome email. Every code is tracked so you can tell which spot brings the most scans.':isTownAd?'Your QR is a digital asset — download it once and use it anywhere. Print it for your counter, add it to your receipts, drop it on a flyer or menu. Reprint as often as you like, at no cost.':'Print these for your counter, receipts, and signage — each one is tracked.')+'</p>'
-    +'<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px">'+qrGrid+'</div></div>'
+  +(isTownAd
+    ? '<div class="card"><h2><span class="t">Your assets</span></h2>'
+      +'<p class="lead">Every asset here already has <b>your</b> QR code built into it. Pick the ones you want, download, and print as many as you like — they’re digital, so reprinting costs you nothing.</p>'
+      +'<div class="assets" id="assetGrid"><span class="dim">Building your assets…</span></div>'
+      +'<div class="hint">Scanning any of them opens the free Kauaʻi beach guide with your business inside — and your promotion on their screen.</div></div>'
+    : '<div class="card"><h2>Your QR codes</h2>'
+      +'<p class="lead">'+(isOperator?'Print each where guests will see it — in the room, at the lobby, in your welcome email. Every code is tracked so you can tell which spot brings the most scans.':'Print these for your counter, receipts, and signage — each one is tracked.')+'</p>'
+      +'<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px">'+qrGrid+'</div></div>')
   +(sells?'<div class="card"><h2>Your items</h2>'
     +'<p class="lead">List what you sell — items show on your page and sell in the app. '+(isFree?('You keep <b>'+keepPct+'</b>; our '+feePct+' only applies when the app sells for you.'):'You keep <b>100%</b> on your plan.')+'</p>'
     +'<div id="itemsList" style="margin-top:12px"><span class="dim">Loading items…</span></div>'
@@ -163,17 +182,11 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     return '<div class="card"><h2>'+title+' <span class="pill" style="background:#E1F5EE;color:#085041;border-color:#BBE3C8">Included</span></h2>'
       +'<p class="lead">'+desc+'</p><div class="hint">Included in your plan \u2014 rolling out; we\u2019ll email you the week yours switches on.</div></div>';
   }
+  // Real screenshot of the app with an offer sliding up (captured from the live guide,
+  // generic sample business). Beats a drawn mock-up — it's exactly what a guest sees.
   function phonePreview(){
-    return '<div style="flex:none;width:148px;height:296px;border-radius:26px;background:linear-gradient(155deg,oklch(0.52 0.07 214),oklch(0.32 0.055 220));padding:8px;box-shadow:0 24px 44px -24px oklch(0.34 0.05 220 / .7)">'
-      +'<div style="height:100%;border-radius:19px;background:oklch(0.965 0.012 205);overflow:hidden;position:relative">'
-        +'<div style="height:100%;background:radial-gradient(130% 80% at 72% 8%,oklch(0.74 0.07 205),oklch(0.5 0.07 216) 70%)"></div>'
-        +'<div style="position:absolute;left:11px;right:11px;bottom:13px;background:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 14px 30px -14px oklch(0.3 0.05 220 / .55)">'
-          +'<div style="font-size:8.5px;font-weight:700;letter-spacing:.05em;color:'+esc(primary)+';text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.name)+'</div>'
-          +'<div style="font-family:Fraunces,serif;font-weight:600;font-size:14px;color:#1b2530;margin-top:3px;line-height:1.14">Happy hour, 3&ndash;5pm</div>'
-          +'<div style="font-size:10px;color:#5b6b76;margin-top:3px;line-height:1.35">Show this screen for $8 house pours</div>'
-          +'<div style="margin-top:9px;background:linear-gradient(180deg,var(--gold),var(--gold-d));color:oklch(0.26 0.06 68);font-size:10px;font-weight:700;text-align:center;padding:6px;border-radius:9px">See offer</div>'
-        +'</div>'
-      +'</div></div>';
+    return '<div class="shot"><img src="/assets/promo-shot.png" width="546" height="900" loading="lazy"'
+      +' alt="Screenshot of the OceanSafe app: today’s conditions and the beach map, with an offer sliding up — happy hour 3 to 5pm, with a See offer button."></div>';
   }
   function promoCard(){
     const mailto=ml("My OceanSafe promotion \u2014 "+p.name,"Hi OceanSafe team,\n\nHere\u2019s the promotion I\u2019d like to run for "+p.name+":\n\n\u2022 Offer (e.g. Happy hour 3\u20135pm, 20% off):\n\u2022 When it should show (days / hours):\n\u2022 I\u2019ve attached my image or PDF.\n\nMahalo!");
@@ -216,6 +229,90 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     });
   }
   if(window.QRCode){ qrCats.forEach(([cat])=>{ QRCode.toDataURL(qrUrl(cat),{margin:1,width:240},(e,url)=>{ if(!e){ const img=document.getElementById("qr-"+cat); const dl=document.getElementById("qrdl-"+cat); if(img)img.src=url; if(dl)dl.href=url; } }); }); }
+
+  // ── Town Ad printable assets — every asset is rendered with THIS partner's own QR ──
+  // The QR encodes live?ref=<their slug>, so a scan opens the guide in their co-brand and
+  // fires their promo. Rendered client-side to canvas at print resolution, downloaded as PNG.
+  if(isTownAd){
+    const ASSETS=[
+      {key:"counter", label:"Counter card",       w:1200,h:1800, sz:"4 × 6 in",        layout:"tall"},
+      {key:"tent",    label:"Table tent",         w:1200,h:1800, sz:"4 × 6 in · folds", layout:"tent"},
+      {key:"sticker", label:"Window sticker",     w:900, h:900,  sz:"3 × 3 in",        layout:"square"},
+      {key:"receipt", label:"Receipt footer",     w:750, h:450,  sz:"2.25 in wide",    layout:"strip"},
+      {key:"flyer",   label:"Flyer / menu insert",w:1650,h:2550, sz:"5.5 × 8.5 in",    layout:"tall"}
+    ];
+    const SAND="#FBF8F2", DEEP="#0F3D49", TEAL="#0A8BA8", INK="#16202A", MUTE="#5B6B76", GOLD="#F0B429";
+    const brand="#"+(p.primary_hex||"0a8ba8").replace(/^#/,"");
+    const F=(w,s)=>w+" "+Math.round(s)+"px Inter,-apple-system,Segoe UI,system-ui,sans-serif";
+    function wave(x,cx,cy,w,col){ x.strokeStyle=col; x.lineWidth=w*0.075; x.lineCap="round"; x.beginPath();
+      for(let i=0;i<=w;i+=1){ const yy=cy+Math.sin((i/w)*Math.PI*3)*(w*0.055); i?x.lineTo(cx+i-w/2,yy):x.moveTo(cx+i-w/2,yy); } x.stroke(); }
+    function drawAsset(spec,qrImg){
+      const c=document.createElement("canvas"); c.width=spec.w; c.height=spec.h;
+      const x=c.getContext("2d"), W=spec.w, H=spec.h;
+      x.fillStyle=SAND; x.fillRect(0,0,W,H); x.textBaseline="top";
+      if(spec.layout==="strip"){                    // receipt: QR left, copy right
+        const pad=H*0.11, q=H-pad*2; x.drawImage(qrImg,pad,pad,q,q);
+        const tx=pad*1.6+q;
+        x.fillStyle=INK; x.font=F(700,H*0.125); x.fillText("Free Kauaʻi beach guide",tx,pad+H*0.02);
+        x.fillStyle=MUTE; x.font=F(400,H*0.093);
+        x.fillText("Scan: today’s surf, wind, and",tx,pad+H*0.24);
+        x.fillText("which beaches are calm.",tx,pad+H*0.37);
+        x.fillStyle=brand; x.font=F(700,H*0.10); x.fillText(p.name.slice(0,26),tx,pad+H*0.58);
+        return c;
+      }
+      if(spec.layout==="square"){                   // window sticker
+        x.fillStyle=DEEP; x.fillRect(0,0,W,H*0.26);
+        x.fillStyle="#fff"; x.font=F(800,W*0.075); x.textAlign="center";
+        x.fillText("OceanSafe",W/2,H*0.055); wave(x,W/2,H*0.19,W*0.28,GOLD);
+        const q=W*0.52; x.fillStyle="#fff"; x.fillRect(W/2-q/2-W*0.02,H*0.33,q+W*0.04,q+W*0.04);
+        x.drawImage(qrImg,W/2-q/2,H*0.34,q,q);
+        x.fillStyle=INK; x.font=F(700,W*0.062); x.fillText("Free beach guide",W/2,H*0.885);
+        x.fillStyle=brand; x.font=F(600,W*0.042); x.fillText(p.name.slice(0,30),W/2,H*0.945);
+        x.textAlign="left"; return c;
+      }
+      // tall + tent
+      const band=H*0.145; x.fillStyle=DEEP; x.fillRect(0,0,W,band);
+      x.textAlign="center"; x.fillStyle="#fff"; x.font=F(800,W*0.062); x.fillText("OceanSafe",W/2,band*0.28);
+      wave(x,W/2,band*0.78,W*0.20,GOLD);
+      x.fillStyle=INK; x.font=F(800,W*0.075); x.fillText("Free Kauaʻi",W/2,band+H*0.045);
+      x.fillText("beach guide",W/2,band+H*0.088);
+      x.fillStyle=MUTE; x.font=F(400,W*0.038);
+      x.fillText("Today’s surf, wind, and which",W/2,band+H*0.142);
+      x.fillText("beaches are calm right now.",W/2,band+H*0.172);
+      const q=W*0.56, qy=band+H*0.225;
+      x.fillStyle="#fff"; x.shadowColor="rgba(15,61,73,.18)"; x.shadowBlur=W*0.03; x.shadowOffsetY=W*0.012;
+      x.fillRect(W/2-q/2-W*0.028,qy-W*0.028,q+W*0.056,q+W*0.056); x.shadowColor="transparent";
+      x.drawImage(qrImg,W/2-q/2,qy,q,q);
+      x.fillStyle=TEAL; x.font=F(700,W*0.040); x.fillText("Scan with your phone camera",W/2,qy+q+W*0.055);
+      const fy=qy+q+W*0.115;
+      x.fillStyle=brand; x.font=F(800,W*0.052); x.fillText(p.name.slice(0,28),W/2,fy);
+      x.fillStyle=MUTE; x.font=F(400,W*0.032); x.fillText("oceansafety.app",W/2,fy+W*0.068);
+      if(spec.layout==="tent"){                     // fold guide
+        x.strokeStyle="#C9D4DA"; x.lineWidth=2; x.setLineDash([12,10]);
+        x.beginPath(); x.moveTo(0,H*0.5); x.lineTo(W,H*0.5); x.stroke(); x.setLineDash([]);
+        x.fillStyle="#9AA9B2"; x.font=F(400,W*0.026); x.fillText("fold here",W/2,H*0.5+W*0.012);
+      }
+      x.textAlign="left"; return c;
+    }
+    QRCode.toDataURL(qrUrl("receipt"),{margin:1,width:900},(e,url)=>{
+      const grid=document.getElementById("assetGrid"); if(!grid) return;
+      if(e){ grid.innerHTML='<span class="dim">Couldn’t build your assets — email us and we’ll send them over.</span>'; return; }
+      const qrImg=new Image();
+      qrImg.onload=()=>{
+        grid.innerHTML="";
+        ASSETS.forEach(spec=>{
+          let png; try{ png=drawAsset(spec,qrImg).toDataURL("image/png"); }catch(_){ return; }
+          const d=document.createElement("div"); d.className="asset";
+          d.innerHTML='<div class="thumb"><img alt="'+esc(spec.label)+' with your QR code" src="'+png+'"></div>'
+            +'<div class="nm">'+esc(spec.label)+'</div><div class="sz">'+esc(spec.sz)+'</div>'
+            +'<a class="btn ghost sm" download="'+esc(p.slug)+'-'+spec.key+'.png" href="'+png+'">Download</a>';
+          grid.appendChild(d);
+        });
+      };
+      qrImg.onerror=()=>{ grid.innerHTML='<span class="dim">Couldn’t build your assets — email us and we’ll send them over.</span>'; };
+      qrImg.src=url;
+    });
+  }
 })();
 </script>
 </body></html>

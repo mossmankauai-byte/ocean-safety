@@ -1,0 +1,15 @@
+{
+  "_note": "DEMO config used to capture the real promo screenshot on town-ad.html + the partner dashboard. GENERIC business name on purpose (no-branded-demos rule) — not a real business.",
+  "name": "Your Beach Grill",
+  "promotions": [
+    {
+      "title": "Happy hour, 3–5pm — $8 house pours",
+      "pdf": "https://oceansafety.app/assets/promotions-default.pdf",
+      "expires": "2030-12-31",
+      "window": {
+        "start": "00:00",
+        "end": "23:59"
+      }
+    }
+  ]
+}
