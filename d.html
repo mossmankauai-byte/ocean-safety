@@ -384,7 +384,13 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   // The QR encodes live?ref=<their slug>, so a scan opens the guide in their co-brand and
   // fires their promo. Rendered client-side to canvas at print resolution, downloaded as PNG.
   if(isTownAd){
+    // "bare" is first on purpose: it's the one most partners actually reach for. A POS (Square,
+    // Toast, Clover) takes an image for a receipt or an order screen and wants the code alone;
+    // so does a sign shop laying out its own artwork. 1200px square prints clean at any size —
+    // 4 in at 300dpi, 12 in at 100dpi for a window decal — because a QR is pure black-and-white
+    // geometry with no photo to go soft.
     const ASSETS=[
+      {key:"bare",    label:"Just the QR code",   w:1200,h:1200, sz:"any size · for your POS", layout:"bare"},
       {key:"counter", label:"Counter card",       w:1200,h:1800, sz:"4 × 6 in",        layout:"tall"},
       {key:"tent",    label:"Table tent",         w:1200,h:1800, sz:"4 × 6 in · folds", layout:"tent"},
       {key:"sticker", label:"Window sticker",     w:900, h:900,  sz:"3 × 3 in",        layout:"square"},
@@ -400,6 +406,19 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       const c=document.createElement("canvas"); c.width=spec.w; c.height=spec.h;
       const x=c.getContext("2d"), W=spec.w, H=spec.h;
       x.fillStyle=SAND; x.fillRect(0,0,W,H); x.textBaseline="top";
+      // Bare QR — nothing but the code. This is the one a POS wants: Square/Toast/Clover let you
+      // drop an image onto a receipt or an order screen, and they want the code alone, not a
+      // designed card. Also what a sign shop asks for when they're laying out their own artwork.
+      // WHITE background, not SAND: thermal receipt printers threshold to pure black/white, and
+      // a tinted quiet zone can dither into speckle that costs you the scan. The quiet zone is
+      // ~8% a side — the QR spec's minimum is 4 modules, and below that scanners lose the finder
+      // pattern against whatever it's printed beside.
+      if(spec.layout==="bare"){
+        x.fillStyle="#fff"; x.fillRect(0,0,W,H);
+        const pad=Math.round(W*0.08), q=W-pad*2;
+        x.drawImage(qrImg,pad,pad,q,q);
+        return c;
+      }
       if(spec.layout==="strip"){                    // receipt: QR left, copy right
         const pad=H*0.11, q=H-pad*2; x.drawImage(qrImg,pad,pad,q,q);
         const tx=pad*1.6+q;
