@@ -132,10 +132,19 @@
     loadPayouts();
     loadSales();
 
-    // First-open setup tour (engine in app.js). Auto-runs once per browser;
-    // the Tour link in the nav replays it. Stops with hidden targets skip.
+    // First-open setup tour (engine in app.js). The Tour link in the nav always replays it;
+    // stops with hidden targets skip.
+    //
+    // AUTO-RUN ONLY ONCE THEY CAN GET PAID. The tour opens a CENTERED card over a blocking
+    // overlay — which sat directly on top of "Connect your Square" and swallowed clicks on
+    // it. A shop that just paid us lands here, taps the one button that lets them take
+    // money, nothing happens, and they conclude the product is broken (this cost us a real
+    // debugging session). Unconnected shops get the big Connect card with no modal over it;
+    // the tour auto-runs on a later visit once Square/Stripe is linked and there is
+    // something worth touring.
+    const _canGetPaid = !!(partner.square_merchant_id || partner.payout_provider === "stripe");
     osPortalTour({
-      key: "os_portal_tour_v1", auto: true, delay: 900, button: el("tourLink"),
+      key: "os_portal_tour_v1", auto: _canGetPaid, delay: 900, button: el("tourLink"),
       steps: [
         { center: true, title: "Your store's control room",
           body: "Two minutes, start to finish — then it's yours. You can replay this anytime with the <b>Tour</b> link up top." },
