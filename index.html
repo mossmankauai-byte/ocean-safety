@@ -2241,6 +2241,12 @@ function resolveIsland(){
 }
 let ACTIVE = ISLANDS[resolveIsland()] || ISLANDS.kauai;
 try { window.ACTIVE = ACTIVE; window.ISLANDS = ISLANDS; } catch(e){}
+// The boot splash (#loader) is static markup that reads "Kauaʻi" — it is the first thing painted
+// and it stays up until conditions load, so a Maui guest was greeted by the wrong island's name.
+// Set it here, synchronously, the moment ACTIVE resolves: this runs before first paint and long
+// before DOMContentLoaded (deferring it to DOMContentLoaded would leave the wrong name painted on
+// the very splash being corrected). Kauaʻi writes "Kauaʻi" over "Kauaʻi" → unchanged.
+try { var _ld=document.querySelector('.ldname'); if(_ld) _ld.textContent=ACTIVE.name; }catch(e){}
 // Per-island safety contacts for the disclaimer + emergency footer (carbon-copy parity).
 // Verified 2026-07-13 from official county sites; Hawaiʻi Island leads with 911 (no dept line yet).
 const SAFETY_INFO={
@@ -4251,8 +4257,19 @@ function initMap(){
       if(typeof map==='undefined' || !map) return;
       window._zoomedZone=null;
       var g = ACTIVE && ACTIVE.geoBox; if(!g) return;
+      // zoomSnap:0.5 rounds the computed fit DOWN, which threw away ~40% of the island's
+      // on-screen size: Maui's true fit is z9.52 but snapped to z9, leaving it at 66% of the
+      // viewport width and 72% dead ocean. Use fractional zoom for the fit only, then restore
+      // the snap so pinch/scroll granularity is unchanged. Side padding 22->10 (the island is
+      // wider than it is tall on a phone, so horizontal padding is what binds); the vertical
+      // padding still clears the header chrome and the bottom chip.
+      // Measured on a 375x812 phone: Maui 66%->95% of width, zero beaches pushed off-screen.
+      // Kauaʻi's fit already landed on z9.5, so live Kauaʻi framing is unchanged.
+      var _snap = map.options.zoomSnap;
+      map.options.zoomSnap = 0;
       map.fitBounds([[g.latMin,g.lonMin],[g.latMax,g.lonMax]],
-        { paddingTopLeft:[22,58], paddingBottomRight:[22,50], animate:!!animate });
+        { paddingTopLeft:[10,58], paddingBottomRight:[10,50], animate:!!animate });
+      map.options.zoomSnap = _snap;
     }catch(e){}
   };
   frameIsland(false);
