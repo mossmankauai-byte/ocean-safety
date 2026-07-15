@@ -1772,6 +1772,14 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .pc-tap{font-size:9px;color:var(--mute);margin-top:7px;text-align:right}
 
 /* POI DETAIL SHEET */
+/* Placement disclosure. Sits above the sheet hero — the first thing read, before anything
+   persuasive. Colour pairs are WCAG-AA at this size: #78530A on #FEF3C7 ≈ 8.6:1,
+   #0c4a58 on #E8F4F7 ≈ 9.7:1. Do not soften these to "fit the palette" — an ad label that
+   blends in is not a disclosure. */
+.pl-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.07em;
+  text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:9px}
+.pl-paid{background:#FEF3C7;color:#78530A;border:1px solid #E9D9B0}
+.pl-pick{background:#E8F4F7;color:#0c4a58;border:1px solid #C5E3EB}
 .poi-hero{height:72px;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:12px;margin-bottom:12px;position:relative}
 .poi-hero-icon{font-size:28px;flex-shrink:0}
 .poi-hero-name{font-size:18px;font-weight:700;color:var(--ocean);line-height:1.1}
@@ -4538,7 +4546,7 @@ function openMarketSheet(id){
   const now=new Date();
   const isOpen = now.getDay()===m.day && (now.getHours()*60+now.getMinutes()) >= m.start_min && (now.getHours()*60+now.getMinutes()) <= m.end_min;
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(m.photo, 'linear-gradient(135deg,#16a34a,#84cc16)')};color:#fff">
+    ${_placementBadge(m)}<div class="poi-hero" style="background:${heroBg(m.photo, 'linear-gradient(135deg,#16a34a,#84cc16)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">🧺</div>${heartButton('market', m.id)}
       <div><div class="poi-hero-name" style="color:#fff">${m.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${m.r} • Farmers market</div></div>
     </div>
@@ -5412,8 +5420,8 @@ function openActSheet(id){
       <div><div class="poi-hero-name" style="color:#fff">${a.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${a.r} • ${a.type}</div></div>
     </div>
     <div class="poi-grid">
-      <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${a.price}</div></div>
-      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${a.hours}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${a.price||'—'}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${a.hours||'—'}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Duration</div><div class="poi-cell-v">~${a.duration_min} min</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Best for</div><div class="poi-cell-v" style="font-size:11px;text-transform:capitalize">${ages}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Access</div><div class="poi-cell-v" style="font-size:11px">${accStr}</div></div>
@@ -5557,12 +5565,12 @@ function openCraftSheet(id){
   const c = LOCAL_CRAFTS.find(x=>x.id===id); if(!c) return;
   const tagPills = (c.tags||[]).map(t=>`<span style="background:#f5e6f5;color:#581c87;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(c.photo, 'linear-gradient(135deg,#7e22ce,#a855f7)')};color:#fff">
+    ${_placementBadge(c)}<div class="poi-hero" style="background:${heroBg(c.photo, 'linear-gradient(135deg,#7e22ce,#a855f7)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">◆</div>${heartButton('craft', c.id)}
       <div><div class="poi-hero-name" style="color:#fff">${c.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${c.r} • ${c.type}</div></div>
     </div>
     <div class="poi-grid">
-      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${c.hours}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${c.hours||'—'}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Type</div><div class="poi-cell-v" style="font-size:11px">${c.type}</div></div>
     </div>
     <div class="poi-local-tip" style="margin-top:14px"><span style="font-size:14px;flex-shrink:0">◈</span><span>${c.tip}</span></div>
@@ -5578,12 +5586,12 @@ function openDrinkSheet(id){
   const d = DRINKS.find(x=>x.id===id); if(!d) return;
   const tagPills = (d.tags||[]).map(t=>`<span style="background:#eef0fe;color:#3730a3;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(d.photo, 'linear-gradient(135deg,#4f46e5,#6366f1)')};color:#fff">
+    ${_placementBadge(d)}<div class="poi-hero" style="background:${heroBg(d.photo, 'linear-gradient(135deg,#4f46e5,#6366f1)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10l-1.15 13.07a1 1 0 0 1-1 .93H9.15a1 1 0 0 1-1-.93L7 7z"/><line x1="5.5" y1="7" x2="18.5" y2="7"/><line x1="14.5" y1="3" x2="13.4" y2="7"/></svg></div>${heartButton('drink', d.id)}
       <div><div class="poi-hero-name" style="color:#fff">${d.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${d.r} • ${d.type}</div></div>
     </div>
     <div class="poi-grid">
-      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${d.hours}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${d.hours||'—'}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${d.price||'—'}</div></div>
     </div>
     <div class="poi-local-tip" style="margin-top:14px"><span style="font-size:14px;flex-shrink:0">◈</span><span>${d.tip}</span></div>
@@ -5598,12 +5606,12 @@ function openDrinkSheet(id){
 function openGasSheet(id){
   const s = GAS_STATIONS.find(x=>x.id===id); if(!s) return;
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(s.photo, 'linear-gradient(135deg,#b45309,#d97706)')};color:#fff">
+    ${_placementBadge(s)}<div class="poi-hero" style="background:${heroBg(s.photo, 'linear-gradient(135deg,#b45309,#d97706)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">⛽</div>${heartButton('gas', s.id)}
       <div><div class="poi-hero-name" style="color:#fff">${s.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${s.r} • ${s.brand}</div></div>
     </div>
     <div class="poi-grid">
-      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${s.hours}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${s.hours||'—'}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Brand</div><div class="poi-cell-v">${s.brand}</div></div>
     </div>
     <div class="poi-local-tip" style="margin-top:14px"><span style="font-size:14px;flex-shrink:0">◈</span><span>${s.tip}</span></div>
@@ -5692,13 +5700,13 @@ function openFoodSheet(id){
   }
 
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(f.photo, 'linear-gradient(135deg,#e07856,#c9a84c)')};color:#fff">
+    ${_placementBadge(f)}<div class="poi-hero" style="background:${heroBg(f.photo, 'linear-gradient(135deg,#e07856,#c9a84c)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">🍽</div>${heartButton('food', f.id)}
       <div><div class="poi-hero-name" style="color:#fff">${f.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${f.r} • ${f.type}</div></div>
     </div>
     <div class="poi-grid">
-      <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${f.price}</div></div>
-      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${f.hours}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${f.price||'—'}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${f.hours||'—'}</div></div>
     </div>
     <div class="poi-local-tip" style="margin-top:14px"><span style="font-size:14px;flex-shrink:0">◈</span><span>${f.tip}</span></div>
     ${contactRow(f)}
@@ -5716,13 +5724,13 @@ function openGrocerySheet(id){
   const g = GROCERIES.find(x=>x.id===id); if(!g) return;
   const tagPills = (g.tags||[]).map(t=>`<span style="background:#e0f2f7;color:#0f4c5c;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(g.photo, 'linear-gradient(135deg,#0f4c5c,#1a7a8a)')};color:#fff">
+    ${_placementBadge(g)}<div class="poi-hero" style="background:${heroBg(g.photo, 'linear-gradient(135deg,#0f4c5c,#1a7a8a)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">🛒</div>${heartButton('grocery', g.id)}
       <div><div class="poi-hero-name" style="color:#fff">${g.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${g.r} • ${g.type}</div></div>
     </div>
     <div class="poi-grid">
-      <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${g.price}</div></div>
-      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${g.hours}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${g.price||'—'}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${g.hours||'—'}</div></div>
     </div>
     <div class="poi-local-tip" style="margin-top:14px"><span style="font-size:14px;flex-shrink:0">◈</span><span>${g.tip}</span></div>
     ${contactRow(g)}
@@ -6213,7 +6221,7 @@ function openPoiSheet(pid){
     </div>
     <div style="font-size:13px;color:var(--mute);line-height:1.5;margin-bottom:10px">${p.desc}</div>
     <div class="poi-grid">
-      ${p.hours?`<div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v">${p.hours}</div></div>`:''}
+      ${p.hours?`<div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v">${p.hours||'—'}</div></div>`:''}
       ${p.price_from?`<div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${p.price_from}</div></div>`:''}
       ${p.distance?`<div class="poi-cell"><div class="poi-cell-l">Location</div><div class="poi-cell-v">${p.distance}</div></div>`:''}
       ${p.phone?`<div class="poi-cell"><div class="poi-cell-l">Phone</div><div class="poi-cell-v"><a href="tel:${p.phone}" style="color:var(--ocean)">${p.phone}</a></div></div>`:''}
@@ -9189,6 +9197,133 @@ ISLANDS.kauai.data = { beaches:B, channels:CHANNELS, hikes:HIKES, acts:ACTS, sta
 // screen (ACTIVE=maui but B still Kauaʻi, or vice-versa) is a mixed-island hazard view — worse
 // than either clean island. On ANY validation failure we THROW so boot()'s catch renders the
 // hard blocking error and never paints wrong-island data. NEVER silently substitute an island.
+// ══ TOWN PARTNER PINS ═══════════════════════════════════════════════════════════════════
+// Partners with a Town listing appear as PINS ON THE MAP. They are injected into the same
+// arrays the editorial POIs live in, so they render through the existing renderFoods /
+// renderDrinks / renderCrafts / … path — no new marker code, and no way for a partner pin to
+// bypass a tab's own logic.
+//
+// DISCLOSURE (FTC + the firm's three-lane design). `placement` is DERIVED SERVER-SIDE in
+// get_town_listings from what the partner actually pays (monthly_cents > 0 → 'paid'). A caller
+// cannot set it, and it is not in any config a partner can write. 'paid' → a persistent
+// "Sponsored" badge on the sheet. A free co-brand → "<Name> pick". A paid pin rendering as
+// plain editorial is precisely the failure this exists to prevent.
+//
+// SAFETY. The injection targets are COMMERCE-ONLY arrays. Beaches live in `B`, rendered by a
+// different tab entirely — so a partner pin STRUCTURALLY cannot land on a beach or touch a
+// safety verdict. That is stronger than a runtime check, because there is nothing to forget.
+// The safety answer is sovereign and is not for sale.
+//
+// ORDERING. Runs after repointIslandGlobals() so a non-Kauaʻi island's arrays are already in
+// place; re-running is safe (see _townPurge — every injected id is prefixed and purged first),
+// so an island switch or a double boot cannot duplicate a pin.
+const TOWN_PIN_PREFIX = 'tp_';
+window._townListings = [];
+
+// The disclosure. Renders at the TOP of a partner's sheet, before anything persuasive.
+//   'paid'         → "Sponsored"        (money changed hands — the FTC line)
+//   'partner_pick' → "<Name> pick"      (a free co-brand's own pin — additive, not bought)
+//   editorial POI  → nothing            (there is nothing to disclose)
+// _placement is set ONLY by _townToPoi from the server's derived value, so an editorial POI can
+// never acquire one and a paid pin can never lose one. If a future edit lets a config write
+// _placement, this guarantee dies — don't.
+function _placementBadge(it){
+  if(!it || !it._placement) return '';
+  if(it._placement === 'paid')
+    return '<div class="pl-badge pl-paid" role="note">Sponsored</div>';
+  if(it._placement === 'partner_pick')
+    return '<div class="pl-badge pl-pick" role="note">' + _pesc(it._partnerName || 'Partner') + ' pick</div>';
+  return '';
+}
+
+// category → the array whose tab renders it. Mirrors SUBTABS.shopping. 'coffee' is a TAG in
+// this app, not an array: coffee spots live in FOODS carrying tags:['coffee'], and renderCoffee
+// filters on the tag. So a coffee partner goes into FOODS and gets the tag — which correctly
+// shows them under BOTH Food and Coffee, exactly like the editorial coffee spots.
+function _townTargetArray(cat){
+  switch(cat){
+    case 'food':
+    case 'coffee':  return (typeof FOODS        !== 'undefined') ? FOODS        : null;
+    case 'drinks':  return (typeof DRINKS       !== 'undefined') ? DRINKS       : null;
+    case 'farmers': return (typeof FMARKETS     !== 'undefined') ? FMARKETS     : null;
+    case 'crafts':  return (typeof LOCAL_CRAFTS !== 'undefined') ? LOCAL_CRAFTS : null;
+    case 'gas':     return (typeof GAS_STATIONS !== 'undefined') ? GAS_STATIONS : null;
+    case 'grocery': return (typeof GROCERIES    !== 'undefined') ? GROCERIES    : null;
+  }
+  return null;
+}
+
+// Remove every previously-injected partner pin, in place. In place matters: the arrays are
+// `let` bindings the island switcher reassigns, and other code holds references — splicing
+// keeps identity, reassigning would silently orphan them.
+function _townPurge(){
+  [typeof FOODS!=='undefined'?FOODS:null, typeof DRINKS!=='undefined'?DRINKS:null,
+   typeof FMARKETS!=='undefined'?FMARKETS:null, typeof LOCAL_CRAFTS!=='undefined'?LOCAL_CRAFTS:null,
+   typeof GAS_STATIONS!=='undefined'?GAS_STATIONS:null, typeof GROCERIES!=='undefined'?GROCERIES:null]
+    .forEach(function(arr){
+      if(!Array.isArray(arr)) return;
+      for(var i=arr.length-1;i>=0;i--) if(arr[i] && typeof arr[i].id==='string' && arr[i].id.indexOf(TOWN_PIN_PREFIX)===0) arr.splice(i,1);
+    });
+}
+
+// Shape a server row into the POI shape the sheets + markers already expect. Anything the row
+// doesn't carry is simply absent — every sheet renders only the fields that are present.
+function _townToPoi(row){
+  var cat = String(row.category||'');
+  var tags = ['partner'];
+  if(cat==='coffee') tags.push('coffee');          // load-bearing: renderCoffee filters on it
+  return {
+    id: TOWN_PIN_PREFIX + row.slug,
+    name: row.name, n: row.short || row.name,
+    r: row.region || '',
+    lat: +row.lat, lon: +row.lon,
+    type: cat, tags: tags,
+    tip: row.short || '',
+    phone: row.phone || undefined,
+    website: row.website || undefined,
+    address: row.address || undefined,
+    _placement: row.placement === 'paid' ? 'paid' : 'partner_pick',
+    _partnerName: row.name,
+    _partnerSlug: row.slug
+  };
+}
+
+function _townInject(rows){
+  _townPurge();
+  window._townListings = Array.isArray(rows) ? rows : [];
+  var n = 0;
+  window._townListings.forEach(function(row){
+    // Fail closed on anything unpinnable. The RPC already filters, but a pin at 0,0 or with no
+    // home array is worse than no pin — it sends a visitor to the wrong place.
+    if(!row || !row.slug || !row.name) return;
+    var lat=+row.lat, lon=+row.lon;
+    if(!isFinite(lat) || !isFinite(lon) || (lat===0 && lon===0)) return;
+    var arr = _townTargetArray(row.category);
+    if(!arr) return;
+    arr.push(_townToPoi(row)); n++;
+  });
+  try { if(typeof renderAll==='function') renderAll(); else if(typeof renderFoods==='function') renderFoods(); } catch(e){}
+  return n;
+}
+
+// Fetch this island's listings. Public RPC, publishable key — same call shape the retail
+// segment lookup above already uses. Failure is silent and total: no listings, editorial guide
+// renders exactly as before. A partner pin is never worth breaking the guide for.
+function _townFetch(){
+  try {
+    if(!window.fetch || !window.ACTIVE) return Promise.resolve(0);
+    return fetch('https://arndnljtmjfsnzcpcuen.supabase.co/rest/v1/rpc/get_town_listings', {
+      method:'POST',
+      headers:{'Content-Type':'application/json',
+               'apikey':'sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um',
+               'Authorization':'Bearer sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um'},
+      body: JSON.stringify({p_island: ACTIVE.slug})
+    }).then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(rows){ return _townInject(rows); })
+      .catch(function(){ return 0; });
+  } catch(e){ return Promise.resolve(0); }
+}
+
 function repointIslandGlobals(d){
   if(!d || typeof d!=='object') throw new Error('island dataset missing');
   if(!Array.isArray(d.beaches) || d.beaches.length===0) throw new Error('island beaches missing or empty');
@@ -9240,6 +9375,11 @@ async function boot(){
       return;   // hard stop: do not paint ANY beach / hazard / rain / wx data
     }
   }
+  // Town partner pins for THIS island. Deliberately NOT awaited: a partner listing is
+  // commercial garnish and must never delay — let alone block — the safety guide painting.
+  // It injects and re-renders when it lands; if it never lands, the guide is exactly what it
+  // was. Placed after the repoint so a non-Kauaʻi island's arrays already exist.
+  try { _townFetch(); } catch(e){}
   // ── Partner referral capture (QR codes, partner links) ──
   // ?ref=marriott / ?utm_source=hyatt → persist to localStorage so subsequent
   // affiliate clicks can be tagged for partner-revenue attribution (read by

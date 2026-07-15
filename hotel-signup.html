@@ -210,6 +210,30 @@ if(TYPE==="townad"||TYPE==="onlineshop"){
   $("go").textContent="Continue to secure payment →";
   const talk=$("talkLine"); if(talk) talk.style.display="none";
   const webLbl=[...document.querySelectorAll("form#f label")].find(l=>/Property website/i.test(l.textContent)); if(webLbl) webLbl.textContent="Website";
+
+  // ── Town Ad only: the two fields a MAP PIN needs ──
+  // Without a category we don't know which Town filter they belong in; without an address we
+  // can't place them. Miss either and they pay and appear nowhere — which is exactly what was
+  // happening before this existed. Injected here rather than in the static HTML so hotel /
+  // rental / retail / onlineshop signups are untouched.
+  // The category list mirrors SUBTABS.shopping in index.html AND partners_category_chk in
+  // migration 0028. All three must agree — add a filter in one, add it in all three.
+  if(TYPE==="townad"){
+    const CATS=[["food","Restaurant / food"],["drinks","Bar / drinks"],["coffee","Coffee"],
+                ["farmers","Farmers market"],["crafts","Shop / crafts / gifts"],
+                ["grocery","Grocery / market"],["gas","Gas / convenience"]];
+    const anchor=webLbl||null;
+    const wrap=document.createElement("div");
+    wrap.innerHTML=
+       '<label for="bizCat">What kind of business?</label>'
+      +'<select id="bizCat">'+CATS.map(c=>'<option value="'+c[0]+'">'+c[1]+'</option>').join('')+'</select>'
+      +'<div class="hint">Picks which Town filter your pin shows under.</div>'
+      +'<label for="bizAddr">Street address</label>'
+      +'<input type="text" id="bizAddr" maxlength="200" placeholder="2250 Kalākaua Ave, Honolulu">'
+      +'<div class="hint">This is where your pin goes on the map — use the address guests walk to.</div>';
+    if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(wrap, anchor);
+    else document.querySelector("form#f")?.appendChild(wrap);
+  }
   // what's included — reinforce the offer under the price (per tier)
   const INCL={
     townad:[
@@ -267,6 +291,11 @@ $("f").addEventListener("submit",async e=>{
     if(!tsToken) return showErr("Please complete the verification box above."); }
   const body={ name, email, tier, type:TYPE, island:ISLAND, hex:$("hexText").value.trim()||null,
     website:$("website").value.trim()||null,
+    // Town Ad map pin. Absent for every other type — the server ignores them unless townad.
+    // The server re-validates the category against its own allowlist and geocodes the address
+    // itself; nothing here is trusted.
+    category:$("bizCat")?.value||null,
+    address:$("bizAddr")?.value.trim()||null,
     signatureName:sig, agreed:true, turnstileToken:tsToken };
   $("go").disabled=true; $("go").textContent="Setting up…";
   try{

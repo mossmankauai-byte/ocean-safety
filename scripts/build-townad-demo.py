@@ -29,11 +29,17 @@ s = sub_once(s,
    the genuine code paths a paying partner gets. Sample data — not a real business. */
 const _P=new URLSearchParams(location.search);
 const _REGION={oahu:"Waikīkī",kauai:"Poʻipū",maui:"Kīhei"};
+const _ADDR={oahu:"2250 Kalākaua Ave, Honolulu",kauai:"2360 Hoonani Rd, Koloa",maui:"1279 S Kīhei Rd, Kīhei"};
+const _PIN={oahu:[21.2793,-157.8285],kauai:[21.8738,-159.4553],maui:[20.7501,-156.4551]};
 const _ISL=(_P.get("isl")||"oahu").toLowerCase();
 const sb={rpc:async()=>({data:[{
   slug:"townad-demo-"+_ISL, name:"Your Beach Grill", segment:"town_ad",
   island:_ISL, region:_REGION[_ISL]||"Waikīkī", primary_hex:"0f4c5c",
-  monthly_cents:3000, live:true, paid_at:new Date().toISOString()
+  monthly_cents:3000, live:true, paid_at:new Date().toISOString(),
+  // the map pin the sample shows off — real coords per island so "Your pin" renders its
+  // placed state rather than the "we couldn't find you" fallback
+  category:"food", address:_ADDR[_ISL]||_ADDR.oahu,
+  lat:_PIN[_ISL] ? _PIN[_ISL][0] : _PIN.oahu[0], lon:_PIN[_ISL] ? _PIN[_ISL][1] : _PIN.oahu[1]
 }],error:null})};''',
     "the supabase client init")
 
