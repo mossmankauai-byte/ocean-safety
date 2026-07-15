@@ -2304,15 +2304,26 @@ window.switchIsland = function(slug){
 };
 
 // ===== i18n: active UI language (en default). Additive — the English path is byte-identical. =====
+// LANGS_LIVE is the allowlist of languages the app will actually serve — the same shape as
+// SELLABLE_ISLANDS, and for the same reason. ja and hi are BUILT and complete (895 strings each,
+// 179 of them safety-critical: "Never stand on the ocean-facing lava ledge", "Show dangerous
+// beaches", rip-current and drowning warnings) but they are MACHINE-TRANSLATED and have never
+// been read by a native speaker. Mistranslated safety instructions are their own liability, and
+// that gate is SEPARATE from the beach-data sign-off — clearing Oʻahu's lifeguard claims says
+// nothing about whether the Japanese reads correctly.
+// Add a code here ONLY after a native speaker has signed off on that language's safety strings.
+// Everything else (the dictionaries, the DOM translation layer, the switcher) stays built and
+// working, so opening a language is a one-line change.
+var LANGS_LIVE = ['en'];
 function resolveLang(){
-  try { var p=new URLSearchParams(location.search).get('lang'); if(p&&['en','ja','hi'].indexOf(p)>=0) return p; } catch(e){}
-  try { var s=localStorage.getItem('os_lang'); if(s&&['en','ja','hi'].indexOf(s)>=0) return s; } catch(e){}
+  try { var p=new URLSearchParams(location.search).get('lang'); if(p&&LANGS_LIVE.indexOf(p)>=0) return p; } catch(e){}
+  try { var s=localStorage.getItem('os_lang'); if(s&&LANGS_LIVE.indexOf(s)>=0) return s; } catch(e){}
   return 'en';
 }
 var ACTIVE_LANG = resolveLang();
 try { window.ACTIVE_LANG = ACTIVE_LANG; document.documentElement.lang = ACTIVE_LANG; } catch(e){}
 window.switchLang = function(code){
-  if(['en','ja','hi'].indexOf(code)<0) return;
+  if(LANGS_LIVE.indexOf(code)<0) return;   // withheld language -> no-op (see LANGS_LIVE above)
   try { localStorage.setItem('os_lang', code); } catch(e){}
   try { var u=new URL(location.href); if(code==='en') u.searchParams.delete('lang'); else u.searchParams.set('lang',code); location.href=u.toString(); }
   catch(e){ location.href = location.pathname + (code==='en'?'':'?lang='+code); }
@@ -10391,10 +10402,14 @@ if('serviceWorker' in navigator){
     // switchLang reloads with ?lang= and the head DOM-translation layer does the rest. (maui's
     // competing openForecastPanel dropdown is intentionally NOT ported — main's 7-day strip stays.)
     try {
-      if(!document.getElementById('hdrLangRow')){
+      var _LL = (typeof LANGS_LIVE !== 'undefined') ? LANGS_LIVE : ['en'];
+      // Only render the switcher when there is something to switch TO. With ja/hi withheld
+      // pending native-speaker sign-off (see LANGS_LIVE), a lone "EN" dropdown is chrome that
+      // does nothing — and worse, it advertises languages we won't serve.
+      if(_LL.length > 1 && !document.getElementById('hdrLangRow')){
         var lrow=document.createElement('div'); lrow.id='hdrLangRow'; lrow.setAttribute('aria-label','Language');
         var lsel=document.createElement('select'); lsel.id='hdrLangSel'; lsel.setAttribute('aria-label','Language');
-        [['en','EN'],['ja','日本語'],['hi','हिन्दी']].forEach(function(LG){
+        [['en','EN'],['ja','日本語'],['hi','हिन्दी']].filter(function(LG){ return _LL.indexOf(LG[0])>=0; }).forEach(function(LG){
           var op=document.createElement('option'); op.value=LG[0]; op.textContent=LG[1];
           if(((window.ACTIVE_LANG)||'en')===LG[0]) op.selected=true;
           lsel.appendChild(op);
