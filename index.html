@@ -2376,7 +2376,7 @@ let B=[
    intents:['snorkel','swim','walk','photography','tidepools'],
    tip:"Kauaʻi's largest reef creates a protected lagoon. Best snorkel at mid-to-high tide.",
    photo:'https://live.staticflickr.com/8093/8549882237_62a1dd11ca_b.jpg',
-   pois:['sbkapaa','sunscreen']},
+   pois:['sunscreen']},
   {id:'poipu',name:"Poʻipū Beach Park",n:'Poipu',r:'South Shore',lat:21.8726,lon:-159.4598,
    facing:180,reef:true,morph:'reef_shielded',sb:3,sandy:true,lg:'full_time',lg_hours:'9am–5:30pm daily',sq:7,scenic:8,len:1000,
    depth:7,stream:false,rain_mm:45,tidal:false,west:false,kid:true,black:false,water_temp:78,
@@ -2384,7 +2384,7 @@ let B=[
    intents:['snorkel','swim','walk'],
    tip:'Lifeguarded, sandy entry, reef protection. Hawaiian monk seals haul out here — give them 50ft of space.',
    photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Aerial-Poipu-Beach-Park-Kauai.jpg/1280px-Aerial-Poipu-Beach-Park-Kauai.jpg',
-   pois:['sbkoloa','holoholo','captandys']},
+   pois:['holoholo','captandys']},
   {id:'salt_pond',name:'Salt Pond Beach',n:'Salt Pond',r:'West Side',lat:21.9077,lon:-159.5985,
    facing:200,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'seasonal_active',lg_hours:'10am–5pm seasonal',sq:6,scenic:7,len:800,
    depth:4,stream:false,rain_mm:50,tidal:false,west:true,kid:true,black:false,water_temp:77,
@@ -2410,7 +2410,7 @@ let B=[
    intents:['snorkel','swim','walk','tidepools'],
    tip:'Stone breakwater creates the most protected lagoon on the east side. Perfect for first-time snorkelers.',
    photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg/1280px-Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg',
-   pois:['sbkapaa','sunscreen']},
+   pois:['sunscreen']},
   {id:'kee',name:"Keʻe Beach",n:"Ke'e",r:'North Shore End',lat:22.2244,lon:-159.5827,
    facing:330,reef:true,morph:'reef_shielded',sb:2,sandy:true,lg:'seasonal_active',lg_hours:'9am–5pm seasonal',sq:9,scenic:10,len:400,
    depth:6,stream:false,rain_mm:20,tidal:false,west:false,kid:false,black:false,water_temp:77,
@@ -2418,7 +2418,7 @@ let B=[
    intents:['snorkel','photography','walk','tidepools'],
    tip:"End of the road. Raised reef lagoon, excellent visibility. Summer only — if surf breaks over the reef, don't enter. Parking permit required.",
    photo:'https://live.staticflickr.com/1497/23865814933_f7eef4cb36_b.jpg',
-   pois:['sbkapaa','napali']},
+   pois:['napali']},
   {id:'queens_bath',name:"Queen's Bath",n:"Queen's Bath",r:'Princeville',lat:22.2272,lon:-159.4808,
    facing:0,reef:false,morph:'channel_reef',sb:9,sandy:false,lg:'none',lg_hours:null,sq:7,scenic:9,len:0,
    depth:6,stream:false,rain_mm:5,tidal:true,west:false,kid:false,black:true,water_temp:77,
@@ -2476,7 +2476,7 @@ let B=[
    access_level:'moderate',parking:'Limited roadside spots on Kuhio Hwy. Walk in via Haena State Park lot.',
    intents:['snorkel','swim','photography','tidepools'],
    tip:'Best snorkel on the north shore in summer. Dangerous in winter — channels become exit rips.',
-   photo:'https://live.staticflickr.com/5604/15774647476_747ac74f98_b.jpg',pois:['sbkapaa']},
+   photo:'https://live.staticflickr.com/5604/15774647476_747ac74f98_b.jpg',pois:[]},
   {id:'kealia',name:'Keālia Beach',n:'Kealia',r:'East Side',lat:22.0936,lon:-159.3033,
    caution:"A heavy shorebreak drops straight onto the sand here and has caused serious injury. Best near the lifeguard tower on calm days; otherwise a beach to enjoy from the sand.",
    facing:90,reef:false,morph:'open',sb:6,sandy:true,lg:'full_time',lg_hours:'9am–5pm daily',sq:7,scenic:8,len:1500,
@@ -2484,7 +2484,7 @@ let B=[
    access_level:'easy',parking:'Large paved lot off Kuhio Hwy. Restrooms.',
    intents:['walk','photography','sunset'],
    tip:'Long sandy stretch good for walking. Strong shorebreak — body surfers only.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/9/9a/Kealia_Beach_Kauai_Hawaii_%2845554020174%29.jpg',pois:['sbkapaa']},
+   photo:'https://upload.wikimedia.org/wikipedia/commons/9/9a/Kealia_Beach_Kauai_Hawaii_%2845554020174%29.jpg',pois:[]},
   {id:'kalapaki',name:'Kalapakī Beach',n:'Kalapaki',r:'East Side',lat:21.9540,lon:-159.3530,
    facing:135,reef:false,morph:'bay',sb:2,sandy:true,lg:'full_time',lg_hours:'9am–5pm daily',sq:7,scenic:7,len:600,
    depth:4,stream:false,rain_mm:35,tidal:false,west:false,kid:true,black:false,water_temp:78,ada:true,
@@ -2537,46 +2537,6 @@ let B=[
 
 // POIS — full detail data, each card taps to detail sheet
 const P={
-  sbkapaa:{
-    name:"Snorkel Bob's Kapaa",type:'Gear Rental',
-    icon:'🤿',
-    hero_col:'#e0f2f7',
-    desc:'Full-service snorkel rentals on the north corridor',
-    address:'4-734 Kuhio Hwy, Kapaa',
-    hours:'Mon–Sat 8am–5pm, Sun 8am–3pm',
-    price_from:'$9/day mask+snorkel',
-    phone:'(808) 823-9433',
-    distance:'30 min from north shore beaches',
-    includes:[
-      'Mask, snorkel, fins sets — full week packages available',
-      'Rash guards and wetsuits for rent',
-      'Beach chairs, umbrellas, boogie boards',
-      'Prescription mask lenses available',
-      'Free gear swap if anything fits poorly'
-    ],
-    tip:"Ask for the optical mask if you wear glasses — they stock a full range. Week rental is better value than daily if you're here more than 3 days.",
-    cta:'View rentals',url:'https://snorkelbob.com',code:'HONU10',cl:'10% off any rental'
-  },
-  sbkoloa:{
-    name:"Snorkel Bob's Koloa",type:'Gear Rental',
-    icon:'🤿',
-    hero_col:'#e0f2f7',
-    desc:'South shore location — closest to Poipu beaches',
-    address:'3236 Poipu Rd, Koloa',
-    hours:'Mon–Sat 8am–5pm, Sun 8am–3pm',
-    price_from:'$9/day mask+snorkel',
-    phone:'(808) 742-2206',
-    distance:'0.8 mi from Poipu Beach',
-    includes:[
-      'Full snorkel sets — daily and weekly rates',
-      'Wetsuits and rash guards',
-      'Boogie boards and beach accessories',
-      'Inter-island gear return (rent here, return on Maui)',
-      'Staff snorkel condition briefing on request'
-    ],
-    tip:"They'll tell you current conditions at Poipu and Anini when you pick up gear. Ask — it's local knowledge you won't get online.",
-    cta:'View rentals',url:'https://snorkelbob.com',code:'HONU10',cl:'10% off any rental'
-  },
   sunscreen:{
     name:'Longs Drugs — Koloa',type:'Reef-Safe Sunscreen',
     icon:'☀️',
@@ -2922,43 +2882,12 @@ let ACTS=[
 //    `corrid`. Until then sit-down reservations earn $0 commission.
 // Once all three are populated, delete this comment block.
 // ────────────────────────────────────────────────────────────────────────
-// STAYS — themed VRBO vacation rentals curated for the app's audience.
-// Each booking_url should carry your VRBO affiliate parameter (?adid=YOUR_AFFILIATE_ID).
-// Replace these placeholder VRBO IDs with real listings researched on vrbo.com.
-let STAYS = [
-
-  // HOTELS — Booking.com affiliate (sign up at partner.booking.com, append ?aid=MISSING_YOUR_AFF_ID_BOOKING).
-  {id:'grand_hyatt_kauai', name:'Grand Hyatt Kauaʻi Resort & Spa', n:'Grand Hyatt', r:'South Shore',
-   lat:21.8775, lon:-159.4495, theme:'hotel', sleeps:4, beds:1, baths:1,
-   price_low:475, price_high:950, photo:'',
-   tip:'Saltwater lagoon pool, lazy river, kid-friendly without being theme-park. Walking distance to Shipwrecks Beach.',
-   near_beach_id:'shipwrecks',
-   booking_url:'https://www.booking.com/hotel/us/grand-hyatt-kauai-resort-and-spa.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'},
-  {id:'1_hotel_hanalei', name:'1 Hotel Hanalei Bay', n:'1 Hotel Hanalei', r:'North Shore',
-   lat:22.2030, lon:-159.4870, theme:'hotel', sleeps:4, beds:1, baths:1,
-   price_low:895, price_high:1850, photo:'',
-   tip:'Eco-luxury rebrand of the old St. Regis Princeville. The view of Hanalei Bay is the whole show.',
-   near_beach_id:'hanalei',
-   booking_url:'https://www.booking.com/hotel/us/1-hotel-hanalei-bay.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'},
-  {id:'koa_kea_poipu', name:'Koa Kea Hotel & Resort', n:'Koa Kea', r:'South Shore',
-   lat:21.8725, lon:-159.4540, theme:'hotel', sleeps:4, beds:1, baths:1,
-   price_low:525, price_high:1100, photo:'',
-   tip:'Smaller boutique on Poʻipū Beach. Adults-leaning, oceanfront rooms get direct beach access.',
-   near_beach_id:'poipu',
-   booking_url:'https://www.booking.com/hotel/us/koa-kea-resort.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'},
-  {id:'kauai_shores_kapaa', name:'Kauaʻi Shores Hotel', n:'Kauaʻi Shores', r:'East Side',
-   lat:22.0772, lon:-159.3320, theme:'hotel', sleeps:3, beds:1, baths:1,
-   price_low:215, price_high:410, photo:'',
-   tip:'Mid-budget oceanfront in Kapaʻa. Walkable to coastal path, food trucks, and the Kapaʻa town strip.',
-   near_beach_id:'kealia',
-   booking_url:'https://www.booking.com/hotel/us/kauai-shores.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'},
-  {id:'sheraton_kauai', name:'Sheraton Kauaʻi Coconut Beach', n:'Sheraton Kauaʻi', r:'East Side',
-   lat:22.0980, lon:-159.3315, theme:'hotel', sleeps:5, beds:2, baths:1,
-   price_low:325, price_high:625, photo:'',
-   tip:'Family-friendly Marriott Bonvoy spot. Two pools, oceanfront fire pit, easy Wailua Bay access.',
-   near_beach_id:'wailua',
-   booking_url:'https://www.booking.com/hotel/us/sheraton-kauai-coconut-beach.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'}
-];
+// STAYS — RETIRED 2026-07-15 (Nick: "dont use stays i have no plans to ever use that").
+// Archived to legacy/STAYS-archived-2026-07-15.js — 10 entries incl. 6 booking.com affiliate links
+// to COMPETING Kauai hotels. Never render those on a page co-branded to a hotel.
+// MUST stay `let`, not `const`: the multi-island switcher reassigns it (STAYS=_ST, ~line 9268).
+// Emptied rather than ripped out so renderStays/openStaySheet/mkStayIcon stay intact.
+let STAYS = [];
 
 let stayMkrs = {};
 
@@ -3663,6 +3592,13 @@ function northWinter(b,c){const f=b.facing;return (f<=45||f>=315)&&(c.mo>=10||c.
 //      in winter, when distant-swell channel/exit currents run under a calm nearshore number.
 // Full-time-guarded beaches (Lydgate's walled lagoon, Poʻipū, Kalapakī) are exempt from (2)
 // and, lacking b.lg==='none', from (1) — genuinely-safe guarded/summer use is preserved.
+// A beach is unguarded iff b.lg says so. NEVER use b.lg_hours as the proxy: it is a DISPLAY
+// string, and 8 records set it to the non-empty text "No lifeguard" (or "No lifeguard —
+// closest at Haena"), which is TRUTHY. So !!b.lg_hours reported those beaches as GUARDED and
+// silently suppressed every no-lifeguard warning below — big-surf hazard, the amber danger
+// state, the "no lifeguard" reason — on exactly the unguarded beaches that need them.
+// Missing lg counts as unguarded: the less reassuring default is the safe one.
+function noLifeguard(b){ return !b.lg || b.lg === 'none'; }
 function kidHazardFloor(b,c){
   if(b.drown&&b.lg==='none')return true;
   if(b.drown&&b.lg!=='full_time'&&northWinter(b,c))return true;
@@ -4349,7 +4285,7 @@ function isDangerCondition(b, r, c){
   if(c.brown) return true;
   // 3. Big surf without supervision
   const surfFt = (typeof c.es === 'number') ? c.es : SURF_UNAVAILABLE; // missing → 99 sentinel (caution), never calm 0
-  if(surfFt >= 6 && !b.lg_hours) return true;
+  if(surfFt >= 6 && noLifeguard(b)) return true;
   // 4. Strong nearby current channel on a falling tide
   try {
     if(typeof CHANNELS !== 'undefined' && Array.isArray(CHANNELS)){
@@ -4421,7 +4357,7 @@ function mkIcon(b,r){
   // BIG SURF HAZARD: surf >= 5 ft AND no lifeguard. Lifeguarded beaches stay normal color.
   const surfFt = (r._c && typeof r._c.es === 'number') ? r._c.es : SURF_UNAVAILABLE; // missing → 99 sentinel (caution), never calm 0
   const bigSurf = surfFt >= 5;
-  const hasLifeguard = !!b.lg_hours;
+  const hasLifeguard = !noLifeguard(b);
   const surfHazard = bigSurf && !hasLifeguard && r.status !== 'warning';
 
   // NIGHT: same sunrise/sunset clock the header chips use. Pulled from the globals fetchLive
@@ -6453,7 +6389,7 @@ function openSheet(id){
   // not just the badge. Tappable "Why?" link opens the existing conditions explainer.
   const _surfFt2 = (c && typeof c.es === 'number') ? c.es : 0;
   const _isWarn = b.warning_only;
-  const _isAmberDanger = (r.status === 'yellow') || (_surfFt2 >= 4 && !b.lg_hours);
+  const _isAmberDanger = (r.status === 'yellow') || (_surfFt2 >= 4 && noLifeguard(b));
   let _heroCaution = '';
   if(_isWarn){
     _heroCaution = `<div class="hero-caution-band red" title="${(b.danger||'No safe entry.').replace(/"/g,'&quot;')}">
@@ -6466,14 +6402,14 @@ function openSheet(id){
     if(_surfFt2 >= 4) topReason = c.surf_unknown ? 'surf data unavailable' : `surf ${_surfFt2.toFixed(1)}ft`;
     else if(c && c.wind >= 18) topReason = `wind ${c.wind}mph`;
     else if(c && c.tt === 'falling') topReason = 'falling tide';
-    else if(!b.lg_hours) topReason = 'no lifeguard';
+    else if(noLifeguard(b)) topReason = 'no lifeguard';
     else topReason = 'conditions';
     // Full reason list shows on hover via the title attribute
     const fullReasons = [];
     if(_surfFt2 >= 4) fullReasons.push(c.surf_unknown ? 'surf data unavailable' : `surf ${_surfFt2.toFixed(1)}ft`);
     if(c && c.wind >= 18) fullReasons.push(`wind ${c.wind}mph`);
     if(c && c.tt === 'falling') fullReasons.push('falling tide');
-    if(!b.lg_hours) fullReasons.push('no lifeguard');
+    if(noLifeguard(b)) fullReasons.push('no lifeguard');
     const fullStr = fullReasons.length ? `Use caution today — ${fullReasons.join(', ')}` : 'Use caution today';
     _heroCaution = `<div class="hero-caution-band" title="${fullStr.replace(/"/g,'&quot;')}">
       <svg viewBox="0 0 24 24" fill="none" stroke="#fdf2d6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="17" r=".8" fill="#fdf2d6" stroke="none"/></svg>
@@ -6485,7 +6421,7 @@ function openSheet(id){
   // the sheet body so the user knows WHY the pin is orange and what to expect.
   // Lifeguarded beaches don't show this — the lg-badge already signals "safer here".
   const _surfFt = (c && typeof c.es === 'number') ? c.es : 0;
-  const _bigSurfNotice = (_surfFt >= 5 && !b.lg_hours && r.status !== 'warning')
+  const _bigSurfNotice = (_surfFt >= 5 && noLifeguard(b) && r.status !== 'warning')
     ? `<div style="margin:10px 0 4px;padding:10px 12px;background:#fef3c7;border-left:3px solid #d97706;border-radius:8px;color:#78530a;font-size:13px;line-height:1.45;display:flex;align-items:flex-start;gap:8px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M2 17 Q6 12 11 15 T20 14 T26 12"/><path d="M3 22 Q7 18 13 20 T22 20"/></svg>
         <span>${c.surf_unknown ? '<b>Surf data unavailable</b> · no lifeguard on duty. Treat conditions as unknown and use extra caution.' : '<b>Big surf today</b> · ' + _surfFt.toFixed(1) + ' ft and no lifeguard on duty. Strong currents likely; experienced surfers/swimmers only.'}</span>
@@ -8406,7 +8342,6 @@ const PARTNER_NAMES = {
   pedalnpaddle: 'Pedal N Paddle',
   alohaexchange: 'Aloha Exchange Kīlauea',
   // ── Beach-gear & snorkel rental partners (co-brand QR program) ──
-  snorkelbobs: "Snorkel Bob's",
   bossfrog: "Boss Frog's",
   hokuwater: 'Hoku Water Sports',
   kauaibound: 'Kauai Bound',
