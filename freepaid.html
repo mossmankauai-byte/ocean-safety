@@ -89,6 +89,11 @@ h1{font-size:22px;font-weight:700;letter-spacing:-.01em;text-align:center}
 .stage.paid .popup{transform:translateY(0);opacity:1}
 .newdot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);border:2px solid #fff;opacity:0;transition:.4s}
 .stage.paid .newdot{opacity:1}
+.cta{display:inline-flex;align-items:center;gap:9px;margin-top:22px;padding:13px 24px;border-radius:999px;background:var(--gold);color:#06222c;font-weight:700;font-size:15px;text-decoration:none;transition:transform .15s,filter .15s}
+.cta:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.cta .ar{transition:transform .15s}
+.cta:hover .ar{transform:translateX(3px)}
+.ctasub{margin-top:9px;color:#7f9aa6;font-size:12px;text-align:center}
 .foot{margin-top:26px;color:#7f9aa6;font-size:12px;text-align:center;max-width:44ch;line-height:1.5}
 .valchips{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;justify-content:center}
 .vc{display:inline-flex;align-items:center;gap:7px;background:#0e2933;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:9px 15px;font-size:13px;font-weight:700;color:#7f9aa6;transition:.4s}
@@ -168,6 +173,8 @@ body.paid .vc svg{opacity:1;color:var(--gold)}
 </div>
 <div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Tap Free / Paid to switch</div>
 <p class="foot">The safety guide is identical either way. <b style="color:#e8b53a">Paid</b> just makes it <b style="color:#e8b53a">yours</b> — your name, your offers, and promo pop-ups you control, in every guest’s pocket.</p>
+<a class="cta" href="/hotel-signup.html?type=hotel">Put your hotel on it — free<span class="ar" aria-hidden="true">→</span></a>
+<p class="ctasub">Free forever. Nothing to install.</p>
 
 <script>
 var stage=document.getElementById("stage"),cap=document.getElementById("cap"),btns=document.querySelectorAll("#tg button");
@@ -180,5 +187,21 @@ function setMode(m){
 }
 var auto=setTimeout(function(){setMode("paid");},1700);
 btns.forEach(function(b){b.addEventListener("click",function(){clearTimeout(auto);setMode(b.dataset.m);});});
+</script>
+<script>
+// Carry the island into the signup CTA and the demo's brand label. Without this the form posts
+// the default (kauai) for every hotel — an Oʻahu property would be minted with Kauaʻi-labelled
+// assets. The server re-validates against SELLABLE_ISLANDS and is the only authority; this just
+// tells it the truth. hawaii is included deliberately: it is NOT sellable, so carrying it earns
+// an honest 403 rather than silently minting a Kauaʻi partner. No/unknown param -> stay neutral.
+(function(){
+  var q=(new URLSearchParams(location.search).get("island")||"").trim().toLowerCase();
+  var NAMES={kauai:"Kaua\u02bbi",maui:"Maui",oahu:"O\u02bbahu",hawaii:"Hawai\u02bbi Island"};
+  if(!NAMES[q]) return;
+  document.querySelectorAll('a[href*="hotel-signup.html"]').forEach(function(a){
+    a.href=a.getAttribute("href")+"&island="+q;
+  });
+  var bn=document.querySelector(".bname.bfree"); if(bn) bn.textContent=NAMES[q];
+})();
 </script>
 </body></html>

@@ -88,6 +88,11 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.01em;text-align:center;max-wi
 .vc svg{width:15px;height:15px;opacity:.4;transition:.4s}
 body.paid .vc{color:#f4e3b8;border-color:rgba(234,166,74,.5);background:#231d0d}
 body.paid .vc svg{opacity:1;color:var(--gold)}
+.cta{display:inline-flex;align-items:center;gap:9px;margin-top:22px;padding:13px 24px;border-radius:999px;background:var(--gold);color:#06222c;font-weight:700;font-size:15px;text-decoration:none;transition:transform .15s,filter .15s}
+.cta:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.cta .ar{transition:transform .15s}
+.cta:hover .ar{transform:translateX(3px)}
+.ctasub{margin-top:9px;color:#7f9aa6;font-size:12px;text-align:center}
 .foot{margin-top:22px;color:#7f9aa6;font-size:12.5px;text-align:center;max-width:52ch;line-height:1.55}
 .foot b{color:var(--gold)}
 @media(max-width:520px){h1{font-size:19px}}
@@ -154,6 +159,8 @@ body.paid .vc svg{opacity:1;color:var(--gold)}
 </div>
 
 <p class="foot">The analytics are yours free — you always see the demand. <b>Paid</b> turns the dashboard from a report into a revenue tool: promote to idle guests, co-brand the guide, and surface unlimited offers.</p>
+<a class="cta" href="/hotel-signup.html?type=hotel">Put your hotel on it — free<span class="ar" aria-hidden="true">→</span></a>
+<p class="ctasub">Free forever. Nothing to install.</p>
 
 <script>
 var stage=document.getElementById('stage'),cap=document.getElementById('cap'),plan=document.getElementById('planbadge'),btns=document.querySelectorAll('#tg button');
@@ -167,5 +174,19 @@ function setMode(m){
 }
 var auto=setTimeout(function(){setMode('paid');},1800);
 btns.forEach(function(b){b.addEventListener('click',function(){clearTimeout(auto);setMode(b.dataset.m);});});
+</script>
+<script>
+// Carry the island into the signup CTA. Without this the form posts the default (kauai) for every
+// hotel — an Oʻahu property would be minted with Kauaʻi-labelled assets. The server re-validates
+// against SELLABLE_ISLANDS and is the only authority; this just tells it the truth. hawaii is
+// included deliberately: it is NOT sellable, so carrying it earns an honest 403 rather than
+// silently minting a Kauaʻi partner. No/unknown param -> stay island-neutral.
+(function(){
+  var q=(new URLSearchParams(location.search).get("island")||"").trim().toLowerCase();
+  if(["kauai","maui","oahu","hawaii"].indexOf(q)<0) return;
+  document.querySelectorAll('a[href*="hotel-signup.html"]').forEach(function(a){
+    a.href=a.getAttribute("href")+"&island="+q;
+  });
+})();
 </script>
 </body></html>
