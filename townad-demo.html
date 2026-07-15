@@ -95,11 +95,17 @@ const NICK="nick@oceansafety.app";
    the genuine code paths a paying partner gets. Sample data — not a real business. */
 const _P=new URLSearchParams(location.search);
 const _REGION={oahu:"Waikīkī",kauai:"Poʻipū",maui:"Kīhei"};
+const _ADDR={oahu:"2250 Kalākaua Ave, Honolulu",kauai:"2360 Hoonani Rd, Koloa",maui:"1279 S Kīhei Rd, Kīhei"};
+const _PIN={oahu:[21.2793,-157.8285],kauai:[21.8738,-159.4553],maui:[20.7501,-156.4551]};
 const _ISL=(_P.get("isl")||"oahu").toLowerCase();
 const sb={rpc:async()=>({data:[{
   slug:"townad-demo-"+_ISL, name:"Your Beach Grill", segment:"town_ad",
   island:_ISL, region:_REGION[_ISL]||"Waikīkī", primary_hex:"0f4c5c",
-  monthly_cents:3000, live:true, paid_at:new Date().toISOString()
+  monthly_cents:3000, live:true, paid_at:new Date().toISOString(),
+  // the map pin the sample shows off — real coords per island so "Your pin" renders its
+  // placed state rather than the "we couldn't find you" fallback
+  category:"food", address:_ADDR[_ISL]||_ADDR.oahu,
+  lat:_PIN[_ISL] ? _PIN[_ISL][0] : _PIN.oahu[0], lon:_PIN[_ISL] ? _PIN[_ISL][1] : _PIN.oahu[1]
 }],error:null})};
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ml=(s,b)=>"mailto:"+NICK+"?subject="+encodeURIComponent(s)+"&body="+encodeURIComponent(b);
@@ -128,6 +134,14 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   // phonePreview(), and `const` is not hoisted — declaring it next to phonePreview put it in the
   // temporal dead zone at call time and threw ReferenceError, killing the whole town_ad dashboard.
   const PROMO_SHOT_ISLANDS = { kauai:1, maui:1, oahu:1 };
+  // Town-filter labels for the "Your pin" card. Up HERE with the other island constants for the
+  // same reason PROMO_SHOT_ISLANDS is: the root.innerHTML build calls pinCard() long before this
+  // point in the file, and `const` is not hoisted — declaring it next to pinCard() puts it in the
+  // temporal dead zone at call time and kills the whole dashboard. That exact bug already shipped
+  // once (6615bb8). Keys mirror partners_category_chk (0028) and SUBTABS.shopping.
+  const CAT_LABEL = { food:"Restaurant / food", drinks:"Bar / drinks", coffee:"Coffee",
+                      farmers:"Farmers market", crafts:"Shop / crafts / gifts",
+                      grocery:"Grocery / market", gas:"Gas / convenience" };
   const isTownAd = seg==="town_ad";
   const isOperator = seg==="hotel"||seg==="pm"||seg==="timeshare"||seg==="rental"||seg==="retail";
   const isFree = Number(p.monthly_cents||0)===0;
@@ -198,7 +212,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   +'<div class="card"><h2>Your plan</h2><div class="kv"><span class="k">Plan</span><span>'+esc(planTerms)+'</span>'
     +(renews?'<span class="k">Renews</span><span>'+esc(renews)+'</span>':'')+'</div>'
     +(isOperator&&isFree?'<div class="hint">Free, no card. Upgrade to unlock the sections below whenever you’re ready.</div>':'<div class="hint">We’ll email you before any renewal, no surprises.</div>')+'</div>'
-  +(isTownAd ? promoCard()
+  +(isTownAd ? pinCard()+promoCard()
     : lockCard("Promotions","Timed, condition-triggered offers on the guide your guests already open — the spa when the surf’s up, the right item on the right day.",isFree)
       +lockCard("Market intelligence","The full demand board — what the weather drives, when guests plan, trends and forecasts.",isFree))
   +'<div class="card"><h2>Visits &amp; scans</h2>'
@@ -222,6 +236,32 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   function phonePreview(){
     return '<div class="shot"><img src="/assets/shot-promo-'+(PROMO_SHOT_ISLANDS[p.island]?p.island:"kauai")+'.png" width="546" height="900" loading="lazy"'
       +' alt="Screenshot of the OceanSafe app: today’s conditions and the beach map, with an offer sliding up — happy hour 3 to 5pm, with a See offer button."></div>';
+  }
+  // "Your pin" — tells a Town Ad partner whether they're actually ON the map.
+  // This card exists because the failure is SILENT: geocoding an address can legitimately fail
+  // (OSM hasn't indexed it, a typo, a PO box) and the signup still succeeds by design. Without
+  // this they'd pay, get their QR and promo, and never learn the listing they bought isn't
+  // there. If the pin is missing we say so plainly and give them a one-tap way to fix it.
+  function pinCard(){
+    const hasPin = !!(p.category && p.lat != null && p.lon != null);
+    const live = SITE+"/go/"+(PROMO_SHOT_ISLANDS[p.island]?p.island:"kauai")+"?ref="+encodeURIComponent(p.slug);
+    if(hasPin){
+      return '<div class="card"><h2><span class="t">Your pin</span></h2>'
+        +'<p class="lead">You’re on the map in <b>'+esc(islandName)+'</b>, under <b>'+esc(CAT_LABEL[p.category]||p.category)+'</b>. '
+        +'Guests browsing the Town tab see you there.</p>'
+        +'<div class="kv" style="margin-top:12px">'
+          +'<span class="k">Shows under</span><span>'+esc(CAT_LABEL[p.category]||p.category)+'</span>'
+          +(p.address?'<span class="k">Address</span><span>'+esc(p.address)+'</span>':'')
+          +'<span class="k">Pin</span><span>'+(+p.lat).toFixed(4)+', '+(+p.lon).toFixed(4)+'</span>'
+        +'</div>'
+        +'<div class="row" style="margin-top:13px"><a class="btn ghost sm" href="'+esc(live)+'" target="_blank" rel="noopener">See your pin ↗</a></div>'
+        +'<div class="hint">Wrong spot, or want a different category? Email us — we’ll move it.</div></div>';
+    }
+    const ml2=ml("My OceanSafe pin — "+p.name,"Hi OceanSafe team,\n\nMy pin isn’t on the map yet. Here’s my street address:\n\n\nAnd my category (restaurant / bar / coffee / market / shop / grocery / gas):\n\n\nMahalo!");
+    return '<div class="card"><h2><span class="t">Your pin</span></h2>'
+      +'<p class="lead"><b>You’re not on the map yet.</b> We couldn’t place your address automatically — that happens with new or unusual addresses. Send it to us and we’ll pin you the same day.</p>'
+      +'<div class="row" style="margin-top:13px"><a class="btn gold" href="'+ml2+'">Send my address ↗</a></div>'
+      +'<div class="hint">Everything else — your QR, your assets, your promotion — is already working.</div></div>';
   }
   function promoCard(){
     // Self-serve upload \u2014 replaces the old mailto-Nick flow. Publishes instantly behind the
