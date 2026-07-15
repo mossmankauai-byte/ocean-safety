@@ -657,7 +657,7 @@
       "sunset",
       "photography"
     ],
-    "tip": "A wide offshore reef and a dredged channel make this the calmest, most kid-friendly swim on the south shore; the bottom drops off fast into the old 20–30ft boat channel where a 14-year-old drowned in 2022. Keep weak swimmers and small kids on the shallow reef flat and away from the deep channel at the ʻewa end.",
+    "tip": "A wide offshore reef and a dredged channel make this the calmest, most kid-friendly swim on the south shore; the bottom drops off fast into the old 20–30ft boat channel where a swimmer drowned in 2022. Keep weak swimmers and small kids on the shallow reef flat and away from the deep channel at the ʻewa end.",
     "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Ala_Moana_Beach_Park.jpg/1280px-Ala_Moana_Beach_Park.jpg",
     "pois": [],
     "source_notes": "lg CONFIRMED: oceansafety.hawaii.gov lists 'Ala Moana Beach' Mon-Sun 8am-6:30pm. facing ~S (180) toward Mamala Bay matches coast; fringing reef. Deep dredged channel (former boat channel, 20-30ft deep) is a documented sudden-drop-off hazard per Wikipedia/hawaii-guide; tip strengthened. Coordinates plausible. NEEDS-HUMAN-VERIFY"
@@ -1054,7 +1054,7 @@
     "lat": 21.5481,
     "lon": -158.2436,
     "warning_only": true,
-    "danger": "Remote beach with a steep, dumping shorebreak, strong currents, and a rocky bottom. There is a lifeguard tower (Tower 50) at the very end of the road, but it is frequently understaffed or unstaffed and you must not count on a guard being present. Multiple deaths have occurred in this area, including two 17-year-old fishermen swept off the rocks near here in October 2025. Enter only on a flat, calm summer day, near a staffed tower; in any swell, stay on the sand. Treat surrounding rocky points as no-go in any surf.",
+    "danger": "Remote beach with a steep, dumping shorebreak, strong currents, and a rocky bottom. There is a lifeguard tower (Tower 50) at the very end of the road, but it is frequently understaffed or unstaffed and you must not count on a guard being present. Multiple deaths have occurred in this area, including two fishermen swept off the rocks near here in October 2025. Enter only on a flat, calm summer day, near a staffed tower; in any swell, stay on the sand. Treat surrounding rocky points as no-go in any surf.",
     "access_level": "moderate",
     "facing": 260,
     "reef": false,

@@ -703,7 +703,7 @@
     "lat": 20.6839,
     "lon": -156.4422,
     "warning_only": true,
-    "danger": "No lifeguard on a beach with a serious recent drowning history. In May 2025 two visitors (a father and son) died in rip-current conditions off Wailea Beach; bystanders, not lifeguards, attempted the rescue. A snorkeler also died here in 2022, and rip-current rescues have recurred over the years. The water looks calm and resort-tame but rip currents form, especially toward the south point and on south swells. Swim or snorkel only when genuinely calm, stay close to shore, never go alone, and if caught in a current don't fight it — float and signal for help.",
+    "danger": "No lifeguard on a beach with a serious recent drowning history. In May 2025 two visitors died in rip-current conditions off Wailea Beach; bystanders, not lifeguards, attempted the rescue. A snorkeler also died here in 2022, and rip-current rescues have recurred over the years. The water looks calm and resort-tame but rip currents form, especially toward the south point and on south swells. Swim or snorkel only when genuinely calm, stay close to shore, never go alone, and if caught in a current don't fight it — float and signal for help.",
     "access_level": "easy",
     "facing": 245,
     "reef": true,
