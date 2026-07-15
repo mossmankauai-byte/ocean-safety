@@ -402,7 +402,23 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     const F=(w,s)=>w+" "+Math.round(s)+"px Inter,-apple-system,Segoe UI,system-ui,sans-serif";
     function wave(x,cx,cy,w,col){ x.strokeStyle=col; x.lineWidth=w*0.075; x.lineCap="round"; x.beginPath();
       for(let i=0;i<=w;i+=1){ const yy=cy+Math.sin((i/w)*Math.PI*3)*(w*0.055); i?x.lineTo(cx+i-w/2,yy):x.moveTo(cx+i-w/2,yy); } x.stroke(); }
-    function drawAsset(spec,qrImg){
+    // Header lockup: the REAL OceanSafe icon beside the wordmark, centred as a group. Replaces
+    // the drawn gold squiggle that sat under the text — the squiggle was a stand-in for the
+    // wave, and the favicon IS the wave, so carrying both was redundant.
+    // markImg may be null (the icon failed to load) → fall back to the drawn wave rather than
+    // ship a header with a hole in it. A partner's assets must never depend on one PNG.
+    function lockup(x,W,cy,iconSize,fontPx,markImg,waveFallbackW){
+      if(!markImg){ wave(x,W/2,cy+iconSize*0.34,waveFallbackW,GOLD); return; }
+      x.font=F(800,fontPx);
+      const t="OceanSafe", tw=x.measureText(t).width, gap=iconSize*0.30;
+      const sx=(W-(iconSize+gap+tw))/2;
+      const _ta=x.textAlign, _tb=x.textBaseline;
+      x.drawImage(markImg,sx,cy-iconSize/2,iconSize,iconSize);
+      x.textAlign="left"; x.textBaseline="middle"; x.fillStyle="#fff";
+      x.fillText(t,sx+iconSize+gap,cy);
+      x.textAlign=_ta; x.textBaseline=_tb;
+    }
+    function drawAsset(spec,qrImg,markImg){
       const c=document.createElement("canvas"); c.width=spec.w; c.height=spec.h;
       const x=c.getContext("2d"), W=spec.w, H=spec.h;
       x.fillStyle=SAND; x.fillRect(0,0,W,H); x.textBaseline="top";
@@ -442,8 +458,8 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       }
       if(spec.layout==="square"){                   // window sticker
         x.fillStyle=DEEP; x.fillRect(0,0,W,H*0.26);
-        x.fillStyle="#fff"; x.font=F(800,W*0.075); x.textAlign="center";
-        x.fillText("OceanSafe",W/2,H*0.055); wave(x,W/2,H*0.19,W*0.28,GOLD);
+        x.textAlign="center";
+        lockup(x,W,H*0.13,W*0.115,W*0.075,markImg,W*0.28);
         const q=W*0.52; x.fillStyle="#fff"; x.fillRect(W/2-q/2-W*0.02,H*0.33,q+W*0.04,q+W*0.04);
         x.drawImage(qrImg,W/2-q/2,H*0.34,q,q);
         x.fillStyle=INK; x.font=F(700,W*0.062); x.fillText("Free beach guide",W/2,H*0.885);
@@ -452,8 +468,8 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       }
       // tall + tent
       const band=H*0.145; x.fillStyle=DEEP; x.fillRect(0,0,W,band);
-      x.textAlign="center"; x.fillStyle="#fff"; x.font=F(800,W*0.062); x.fillText("OceanSafe",W/2,band*0.28);
-      wave(x,W/2,band*0.78,W*0.20,GOLD);
+      x.textAlign="center";
+      lockup(x,W,band*0.5,W*0.085,W*0.062,markImg,W*0.20);
       x.fillStyle=INK; x.font=F(800,W*0.075); x.fillText("Free "+islandShort,W/2,band+H*0.045);
       x.fillText("beach guide",W/2,band+H*0.088);
       x.fillStyle=MUTE; x.font=F(400,W*0.038);
@@ -474,13 +490,19 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       }
       x.textAlign="left"; return c;
     }
-    qrWithLogo(qrUrl("receipt"),900).then(url=>{
+    // The header lockup needs the real mark as a loaded image. Resolve it alongside the QR and
+    // NEVER let it block: if the icon 404s we resolve null and drawAsset falls back to the drawn
+    // wave. A missing logo must not cost the partner their printable assets.
+    const markReady = new Promise(resolve=>{
+      const m=new Image(); m.onload=()=>resolve(m); m.onerror=()=>resolve(null); m.src=OS_MARK;
+    });
+    Promise.all([qrWithLogo(qrUrl("receipt"),900), markReady]).then(([url,markImg])=>{
       const grid=document.getElementById("assetGrid"); if(!grid) return;
       const qrImg=new Image();
       qrImg.onload=()=>{
         grid.innerHTML="";
         ASSETS.forEach(spec=>{
-          let png; try{ png=drawAsset(spec,qrImg).toDataURL("image/png"); }catch(_){ return; }
+          let png; try{ png=drawAsset(spec,qrImg,markImg).toDataURL("image/png"); }catch(_){ return; }
           const d=document.createElement("div"); d.className="asset";
           d.innerHTML='<div class="thumb"><img alt="'+esc(spec.label)+' with your QR code" src="'+png+'"></div>'
             +'<div class="nm">'+esc(spec.label)+'</div><div class="sz">'+esc(spec.sz)+'</div>'
