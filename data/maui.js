@@ -1033,6 +1033,7 @@
     "west": false,
     "kid": true,
     "black": false,
+    "danger": "A reef-protected keiki lagoon that is calm and shallow most days, but it has NO lifeguard and is fully open to north-shore swell. On a north or NE swell — most common October through April — waves can break over the outer reef and surge into the pool with little warning, and the 4-year record shows frequent rough winter days. Skip it on any north/NE-swell or big-surf day, check the surf before letting keiki in, watch children at all times, and beware sharp exposed reef and rock at low tide.",
     "water_temp": 78,
     "parking": "Limited residential street parking off Pāʻia town. Walk-in access between houses — be respectful of the neighborhood.",
     "intents": [
