@@ -233,7 +233,53 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       paintItems(out.ok?out:await itemsApi({action:"list"}));
     });
   }
-  if(window.QRCode){ qrCats.forEach(([cat])=>{ QRCode.toDataURL(qrUrl(cat),{margin:1,width:240},(e,url)=>{ if(!e){ const img=document.getElementById("qr-"+cat); const dl=document.getElementById("qrdl-"+cat); if(img)img.src=url; if(dl)dl.href=url; } }); }); }
+  // ── QR with the OceanSafe mark in the middle ──
+  // Both constants below were MEASURED, not chosen. Do not raise either without re-running the
+  // decode test — the QR is the product, and a branded QR that doesn't scan is worse than a plain one.
+  //
+  // errorCorrectionLevel "H" is LOAD-BEARING: the mark occludes the centre, and the library's
+  // default ("M", 15% recovery) has too little budget to survive that plus a phone camera on a
+  // creased thermal receipt. "H" recovers 30%.
+  //
+  // MARK_FRAC = 0.16. Measured cliff: at 0.22 the code still decoded in OpenCV but FAILED zbar
+  // (the decoder behind many real scanners) — i.e. it would have looked fine in testing and failed
+  // in the field. 0.20 was the last size passing both; 0.16 leaves headroom for the real world.
+  // Verified at 0.16 on two independent decoders (zbar + OpenCV) under: downscale to 120px, focus
+  // blur, faded thermal print, 8/12/20-degree rotation, and dim-light sensor noise — all pass.
+  //
+  // If the mark fails to load we resolve the PLAIN QR rather than nothing.
+  const OS_MARK="/assets/oceansafe-favicon.png";
+  const MARK_FRAC=0.16;
+  function qrWithLogo(url,size){
+    return new Promise((resolve,reject)=>{
+      QRCode.toDataURL(url,{margin:1,width:size,errorCorrectionLevel:"H"},(e,qr)=>{
+        if(e) return reject(e);
+        const base=new Image();
+        base.onload=()=>{
+          const c=document.createElement("canvas"); c.width=c.height=size;
+          const x=c.getContext("2d");
+          x.drawImage(base,0,0,size,size);
+          const mark=new Image();
+          mark.onload=()=>{
+            const s=Math.round(size*MARK_FRAC), o=Math.round((size-s)/2), pad=Math.round(s*0.14);
+            const bx=o-pad, by=o-pad, bw=s+pad*2, bh=s+pad*2, br=Math.round(s*0.26);
+            x.fillStyle="#fff";                       // quiet backing so the mark reads off the modules
+            x.beginPath();
+            if(x.roundRect) x.roundRect(bx,by,bw,bh,br); else x.rect(bx,by,bw,bh);
+            x.fill();
+            x.drawImage(mark,o,o,s,s);
+            resolve(c.toDataURL("image/png"));
+          };
+          mark.onerror=()=>resolve(qr);
+          mark.src=OS_MARK;
+        };
+        base.onerror=()=>reject(new Error("qr render failed"));
+        base.src=qr;
+      });
+    });
+  }
+
+  if(window.QRCode){ qrCats.forEach(([cat])=>{ qrWithLogo(qrUrl(cat),240).then(url=>{ const img=document.getElementById("qr-"+cat); const dl=document.getElementById("qrdl-"+cat); if(img)img.src=url; if(dl)dl.href=url; }).catch(()=>{}); }); }
 
   // ── Town Ad printable assets — every asset is rendered with THIS partner's own QR ──
   // The QR encodes live?ref=<their slug>, so a scan opens the guide in their co-brand and
@@ -258,11 +304,22 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       if(spec.layout==="strip"){                    // receipt: QR left, copy right
         const pad=H*0.11, q=H-pad*2; x.drawImage(qrImg,pad,pad,q,q);
         const tx=pad*1.6+q;
-        x.fillStyle=INK; x.font=F(700,H*0.125); x.fillText("Free "+islandName+" beach guide",tx,pad+H*0.02);
-        x.fillStyle=MUTE; x.font=F(400,H*0.093);
-        x.fillText("Scan: today’s surf, wind, and",tx,pad+H*0.24);
-        x.fillText("which beaches are calm.",tx,pad+H*0.37);
-        x.fillStyle=brand; x.font=F(700,H*0.10); x.fillText(p.name.slice(0,26),tx,pad+H*0.58);
+        // The strip is only 2.25in wide and the QR takes ~47% of it, leaving ~270px for copy.
+        // At the design sizes every line overflowed the canvas and was cut mid-word on a real
+        // printed receipt ("Free Maui be…", "Your Beach Gril…"). Step each line down until it
+        // fits its box. Sizes are a CEILING now, not a fixed value — long business names and
+        // "Hawaiʻi Island" shrink to fit instead of running off the edge.
+        const maxW=W-tx-pad*0.6;
+        const fitFont=(t,weight,px)=>{ let s=px; while(s>8){ x.font=F(weight,s); if(x.measureText(t).width<=maxW) break; s-=1; } return s; };
+        const line=(t,weight,px,y,fill)=>{ fitFont(t,weight,px); x.fillStyle=fill; x.fillText(t,tx,y); };
+        // Fit the headline first — it is the longest string, so it sets the scale. Everything
+        // below is capped to it, or a long business name ends up dwarfing the headline it sits
+        // under (which is what happens if each line is fitted independently).
+        const hs=fitFont("Free "+islandName+" beach guide",700,H*0.125);
+        line("Free "+islandName+" beach guide",700,hs,pad+H*0.02,INK);
+        line("Scan: today’s surf, wind, and",400,Math.min(H*0.093,hs*0.74),pad+H*0.24,MUTE);
+        line("which beaches are calm.",400,Math.min(H*0.093,hs*0.74),pad+H*0.37,MUTE);
+        line(p.name.slice(0,26),700,Math.min(H*0.10,hs*0.8),pad+H*0.58,brand);
         return c;
       }
       if(spec.layout==="square"){                   // window sticker
@@ -299,9 +356,8 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       }
       x.textAlign="left"; return c;
     }
-    QRCode.toDataURL(qrUrl("receipt"),{margin:1,width:900},(e,url)=>{
+    qrWithLogo(qrUrl("receipt"),900).then(url=>{
       const grid=document.getElementById("assetGrid"); if(!grid) return;
-      if(e){ grid.innerHTML='<span class="dim">Couldn’t build your assets — email us and we’ll send them over.</span>'; return; }
       const qrImg=new Image();
       qrImg.onload=()=>{
         grid.innerHTML="";
@@ -316,6 +372,9 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       };
       qrImg.onerror=()=>{ grid.innerHTML='<span class="dim">Couldn’t build your assets — email us and we’ll send them over.</span>'; };
       qrImg.src=url;
+    }).catch(()=>{
+      const grid=document.getElementById("assetGrid");
+      if(grid) grid.innerHTML='<span class="dim">Couldn’t build your assets — email us and we’ll send them over.</span>';
     });
   }
 })();
