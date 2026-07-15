@@ -8652,6 +8652,13 @@ function _applyDemoBrand(){
 // as before; no config renders nothing.
 function _previewTag(){
   const cfg = window._partnerCfg;
+  // signed BEATS preview. The worker stamps preview:true on EVERY mint (worker.js ~380) because
+  // minted configs are Jade's unsigned pilot previews — but a paid self-serve Town Ad partner
+  // signed at signup, and partner-promo sets signed:true only when a signature is genuinely on
+  // file. This tag's own contract is "a preview UNTIL the agreement is signed", so once signed it
+  // must stop showing. Without this, a paying advertiser's guests see "Pilot preview" next to
+  // their business name. Unsigned mints are unaffected — they never carry signed.
+  if(cfg && cfg.signed === true) return '';
   if(!(cfg && cfg.preview === true)) return '';
   return '<span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#8a6d1f;background:#fdf6e3;border:1px solid #e9d9b0;border-radius:999px;padding:2px 7px;flex-shrink:0">Pilot preview</span>';
 }
@@ -10198,7 +10205,9 @@ function updateFreshnessIndicator(){
         if (el){
           el.textContent = _demoName(cfg.name);
           // Minted (unsigned) pilot configs are honestly labeled on the TV too.
-          if (cfg.preview === true){
+          // signed beats preview here for the same reason as _previewTag: the worker stamps
+          // preview on every mint, and a paid, signed partner is not a pilot preview.
+          if (cfg.preview === true && cfg.signed !== true){
             var pv = document.createElement('span');
             pv.textContent = 'Pilot preview';
             pv.style.cssText = 'font-size:.34em;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.75;margin-left:.8em;vertical-align:middle;border:1px solid currentColor;border-radius:999px;padding:.15em .7em';

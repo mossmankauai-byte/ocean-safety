@@ -69,6 +69,12 @@
   .dim{color:oklch(0.62 0.015 232)}
   a{color:var(--teal-ink);font-weight:500}
   input{font-family:inherit}
+  /* self-serve promo form — mirrors the inline styling the items row already uses */
+  .lbl{display:block;font-size:12.5px;font-weight:600;color:var(--mute);margin-bottom:4px}
+  #promoTitle,#promoStart,#promoEnd,#promoExp,#promoFile{width:100%;font-size:14px;padding:9px 11px;border:1px solid #D5DCE2;border-radius:9px;background:#fff;color:inherit}
+  #promoFile{padding:8px;background:oklch(0.975 0.006 84)}
+  #promoMsg.err{color:oklch(0.52 0.17 27)}
+  #promoMsg.ok{color:oklch(0.45 0.1 168)}
   #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--deep);color:#fff;font-size:13px;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 10px 30px -12px oklch(0.3 0.05 220 / .5)}
   #toast.show{opacity:1}
 </style></head>
@@ -203,18 +209,102 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       +' alt="Screenshot of the OceanSafe app: today’s conditions and the beach map, with an offer sliding up — happy hour 3 to 5pm, with a See offer button."></div>';
   }
   function promoCard(){
-    const mailto=ml("My OceanSafe promotion \u2014 "+p.name,"Hi OceanSafe team,\n\nHere\u2019s the promotion I\u2019d like to run for "+p.name+":\n\n\u2022 Offer (e.g. Happy hour 3\u20135pm, 20% off):\n\u2022 When it should show (days / hours):\n\u2022 I\u2019ve attached my image or PDF.\n\nMahalo!");
+    // Self-serve upload \u2014 replaces the old mailto-Nick flow. Publishes instantly behind the
+    // server's automated checks. partner-promo re-validates EVERYTHING sent from here and is
+    // the only authority; nothing in this form is trusted (the file's claimed type included).
     return '<div class="card"><h2><span class="t">Your promotion</span></h2>'
       +'<p class="lead">A timed offer that pops up on the phone of every guest who scans your QR, during the hours you choose. Here\u2019s how it looks to them:</p>'
-      +'<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin:16px 0 2px">'+phonePreview()
-        +'<div style="flex:1;min-width:190px">'
-          +'<p class="lead">Send us your promo image or PDF and the hours it should run. We\u2019ll have it live on the guide within <b>one business day</b>.</p>'
-          +'<div class="row" style="margin-top:13px"><a class="btn gold" href="'+mailto+'">Send my promotion \u2197</a></div>'
-          +'<div class="hint">Swap it anytime \u2014 seasonal specials, rainy-day deals, happy hour. Just send the new one.</div>'
+      +'<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin:16px 0 2px">'+phonePreview()
+        +'<div style="flex:1;min-width:240px">'
+          +'<div id="promoCur" class="hint" style="margin-bottom:10px"></div>'
+          +'<label class="lbl" for="promoTitle">Your offer</label>'
+          +'<input id="promoTitle" type="text" maxlength="80" placeholder="Happy hour, 3\u20135pm \u2014 $8 house pours">'
+          +'<div class="row" style="gap:10px;margin-top:10px">'
+            +'<div style="flex:1;min-width:96px"><label class="lbl" for="promoStart">Runs from</label><input id="promoStart" type="time" value="15:00"></div>'
+            +'<div style="flex:1;min-width:96px"><label class="lbl" for="promoEnd">until</label><input id="promoEnd" type="time" value="17:00"></div>'
+          +'</div>'
+          +'<label class="lbl" for="promoExp" style="margin-top:10px">Stop showing after <span class="dim">(optional)</span></label>'
+          +'<input id="promoExp" type="date">'
+          +'<label class="lbl" for="promoFile" style="margin-top:10px">Your image or PDF</label>'
+          +'<input id="promoFile" type="file" accept="image/jpeg,image/png,application/pdf">'
+          +'<div class="hint" style="margin-top:4px">JPG, PNG or PDF, up to 4 MB.</div>'
+          +'<div class="row" style="margin-top:13px;gap:10px">'
+            +'<button class="btn gold" id="promoSave" type="button">Put it live</button>'
+            +'<button class="btn ghost sm" id="promoClear" type="button" style="display:none">Take it down</button>'
+          +'</div>'
+          +'<div id="promoMsg" class="hint" style="margin-top:8px"></div>'
+          +'<div class="hint">Swap it anytime \u2014 seasonal specials, rainy-day deals, happy hour. Your new one replaces the old.</div>'
         +'</div>'
       +'</div></div>';
   }
   document.getElementById("copylink")?.addEventListener("click",()=>window.copy(live));
+
+  // ── self-serve promotion (town_ad) ──
+  // The partner uploads their own image/PDF and picks the hours; partner-promo validates and
+  // publishes it to the guide. This form is convenience only — every rule is enforced again
+  // server-side, so a hand-crafted request gains nothing.
+  if(isTownAd){
+    const PROMO_FN="https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-promo";
+    const $p=id=>document.getElementById(id);
+    const msg=(t,cls)=>{ const m=$p("promoMsg"); if(!m) return; m.textContent=t||""; m.className="hint"+(cls?" "+cls:""); };
+    async function promoApi(body){
+      const r=await fetch(PROMO_FN,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token,...body})});
+      let out={}; try{ out=await r.json(); }catch(_){}
+      if(!r.ok) throw new Error(out.error||"Something went wrong — try again.");
+      return out;
+    }
+    function paintPromo(pr){
+      const cur=$p("promoCur"), clr=$p("promoClear");
+      if(!cur) return;
+      if(pr){
+        cur.innerHTML='<b>Live now:</b> '+esc(pr.title)+' &middot; '+esc((pr.window&&pr.window.start)||"")+'–'+esc((pr.window&&pr.window.end)||"");
+        if(clr) clr.style.display="";
+        if($p("promoTitle")&&!$p("promoTitle").value) $p("promoTitle").value=pr.title||"";
+        if(pr.window&&$p("promoStart")) $p("promoStart").value=pr.window.start||"";
+        if(pr.window&&$p("promoEnd"))   $p("promoEnd").value=pr.window.end||"";
+      } else {
+        cur.textContent="Nothing running right now.";
+        if(clr) clr.style.display="none";
+      }
+    }
+    // Read the file in the browser and send it as a data: URL. The server re-checks the bytes
+    // against magic numbers — the browser's reported type is not evidence.
+    function readFile(f){
+      return new Promise((res,rej)=>{
+        if(!f) return res(null);
+        if(f.size>4*1024*1024) return rej(new Error("That file is "+(f.size/1048576).toFixed(1)+" MB. Please keep it under 4 MB."));
+        const fr=new FileReader();
+        fr.onload=()=>res(String(fr.result||""));
+        fr.onerror=()=>rej(new Error("Couldn’t read that file — try again."));
+        fr.readAsDataURL(f);
+      });
+    }
+    promoApi({action:"get"}).then(o=>paintPromo(o.promotion)).catch(()=>paintPromo(null));
+
+    $p("promoSave")?.addEventListener("click",async()=>{
+      const btn=$p("promoSave"); const f=$p("promoFile")?.files?.[0];
+      msg("");
+      if(!f) return msg("Pick your image or PDF first.","err");
+      btn.disabled=true; btn.textContent="Putting it live…";
+      try{
+        const file=await readFile(f);
+        const out=await promoApi({action:"set",title:$p("promoTitle").value,start:$p("promoStart").value,
+                                  end:$p("promoEnd").value,expires:$p("promoExp").value||null,file});
+        paintPromo(out.promotion);
+        msg("It’s live on the guide now — scan your QR to see it.","ok");
+        $p("promoFile").value="";
+      }catch(e){ msg(e.message||"Something went wrong — try again.","err"); }
+      btn.disabled=false; btn.textContent="Put it live";
+    });
+
+    $p("promoClear")?.addEventListener("click",async()=>{
+      if(!confirm("Take your promotion down? Guests will stop seeing it right away.")) return;
+      const btn=$p("promoClear"); btn.disabled=true;
+      try{ await promoApi({action:"clear"}); paintPromo(null); msg("Taken down.","ok"); $p("promoTitle").value=""; }
+      catch(e){ msg(e.message||"Couldn’t take it down — try again.","err"); }
+      btn.disabled=false;
+    });
+  }
   // ── items CRUD (free AND paid — this is how free monetizes) ──
   if(sells){
     const fmtRow=(it)=>'<div class="soonrow" style="align-items:center;gap:10px"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(it.title)+'</span>'
