@@ -3663,6 +3663,13 @@ function northWinter(b,c){const f=b.facing;return (f<=45||f>=315)&&(c.mo>=10||c.
 //      in winter, when distant-swell channel/exit currents run under a calm nearshore number.
 // Full-time-guarded beaches (Lydgate's walled lagoon, Poʻipū, Kalapakī) are exempt from (2)
 // and, lacking b.lg==='none', from (1) — genuinely-safe guarded/summer use is preserved.
+// A beach is unguarded iff b.lg says so. NEVER use b.lg_hours as the proxy: it is a DISPLAY
+// string, and 8 records set it to the non-empty text "No lifeguard" (or "No lifeguard —
+// closest at Haena"), which is TRUTHY. So !!b.lg_hours reported those beaches as GUARDED and
+// silently suppressed every no-lifeguard warning below — big-surf hazard, the amber danger
+// state, the "no lifeguard" reason — on exactly the unguarded beaches that need them.
+// Missing lg counts as unguarded: the less reassuring default is the safe one.
+function noLifeguard(b){ return !b.lg || b.lg === 'none'; }
 function kidHazardFloor(b,c){
   if(b.drown&&b.lg==='none')return true;
   if(b.drown&&b.lg!=='full_time'&&northWinter(b,c))return true;
@@ -4349,7 +4356,7 @@ function isDangerCondition(b, r, c){
   if(c.brown) return true;
   // 3. Big surf without supervision
   const surfFt = (typeof c.es === 'number') ? c.es : SURF_UNAVAILABLE; // missing → 99 sentinel (caution), never calm 0
-  if(surfFt >= 6 && !b.lg_hours) return true;
+  if(surfFt >= 6 && noLifeguard(b)) return true;
   // 4. Strong nearby current channel on a falling tide
   try {
     if(typeof CHANNELS !== 'undefined' && Array.isArray(CHANNELS)){
@@ -4421,7 +4428,7 @@ function mkIcon(b,r){
   // BIG SURF HAZARD: surf >= 5 ft AND no lifeguard. Lifeguarded beaches stay normal color.
   const surfFt = (r._c && typeof r._c.es === 'number') ? r._c.es : SURF_UNAVAILABLE; // missing → 99 sentinel (caution), never calm 0
   const bigSurf = surfFt >= 5;
-  const hasLifeguard = !!b.lg_hours;
+  const hasLifeguard = !noLifeguard(b);
   const surfHazard = bigSurf && !hasLifeguard && r.status !== 'warning';
 
   // NIGHT: same sunrise/sunset clock the header chips use. Pulled from the globals fetchLive
@@ -6453,7 +6460,7 @@ function openSheet(id){
   // not just the badge. Tappable "Why?" link opens the existing conditions explainer.
   const _surfFt2 = (c && typeof c.es === 'number') ? c.es : 0;
   const _isWarn = b.warning_only;
-  const _isAmberDanger = (r.status === 'yellow') || (_surfFt2 >= 4 && !b.lg_hours);
+  const _isAmberDanger = (r.status === 'yellow') || (_surfFt2 >= 4 && noLifeguard(b));
   let _heroCaution = '';
   if(_isWarn){
     _heroCaution = `<div class="hero-caution-band red" title="${(b.danger||'No safe entry.').replace(/"/g,'&quot;')}">
@@ -6466,14 +6473,14 @@ function openSheet(id){
     if(_surfFt2 >= 4) topReason = c.surf_unknown ? 'surf data unavailable' : `surf ${_surfFt2.toFixed(1)}ft`;
     else if(c && c.wind >= 18) topReason = `wind ${c.wind}mph`;
     else if(c && c.tt === 'falling') topReason = 'falling tide';
-    else if(!b.lg_hours) topReason = 'no lifeguard';
+    else if(noLifeguard(b)) topReason = 'no lifeguard';
     else topReason = 'conditions';
     // Full reason list shows on hover via the title attribute
     const fullReasons = [];
     if(_surfFt2 >= 4) fullReasons.push(c.surf_unknown ? 'surf data unavailable' : `surf ${_surfFt2.toFixed(1)}ft`);
     if(c && c.wind >= 18) fullReasons.push(`wind ${c.wind}mph`);
     if(c && c.tt === 'falling') fullReasons.push('falling tide');
-    if(!b.lg_hours) fullReasons.push('no lifeguard');
+    if(noLifeguard(b)) fullReasons.push('no lifeguard');
     const fullStr = fullReasons.length ? `Use caution today — ${fullReasons.join(', ')}` : 'Use caution today';
     _heroCaution = `<div class="hero-caution-band" title="${fullStr.replace(/"/g,'&quot;')}">
       <svg viewBox="0 0 24 24" fill="none" stroke="#fdf2d6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="17" r=".8" fill="#fdf2d6" stroke="none"/></svg>
@@ -6485,7 +6492,7 @@ function openSheet(id){
   // the sheet body so the user knows WHY the pin is orange and what to expect.
   // Lifeguarded beaches don't show this — the lg-badge already signals "safer here".
   const _surfFt = (c && typeof c.es === 'number') ? c.es : 0;
-  const _bigSurfNotice = (_surfFt >= 5 && !b.lg_hours && r.status !== 'warning')
+  const _bigSurfNotice = (_surfFt >= 5 && noLifeguard(b) && r.status !== 'warning')
     ? `<div style="margin:10px 0 4px;padding:10px 12px;background:#fef3c7;border-left:3px solid #d97706;border-radius:8px;color:#78530a;font-size:13px;line-height:1.45;display:flex;align-items:flex-start;gap:8px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M2 17 Q6 12 11 15 T20 14 T26 12"/><path d="M3 22 Q7 18 13 20 T22 20"/></svg>
         <span>${c.surf_unknown ? '<b>Surf data unavailable</b> · no lifeguard on duty. Treat conditions as unknown and use extra caution.' : '<b>Big surf today</b> · ' + _surfFt.toFixed(1) + ' ft and no lifeguard on duty. Strong currents likely; experienced surfers/swimmers only.'}</span>
