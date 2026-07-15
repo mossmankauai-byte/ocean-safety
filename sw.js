@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v125-2026-07-14';
+const CACHE_VERSION = 'v126-2026-07-14-oahu';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -160,6 +160,22 @@ if (workbox) {
       cacheName: "jade-pages",
       networkTimeoutSeconds: 4,
       plugins: [ new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }) ]
+    })
+  );
+
+  // ---- Per-island data (/data/<slug>.js) — runtime SWR, NOT precached ----
+  // Deliberately kept out of the precache list so Kauaʻi-only visitors never download other
+  // islands. Registered BEFORE the app-shell route (whose 'script' matcher would otherwise
+  // catch these). STABLE cache name (no -vNN-date suffix) so the activate-time LEGACY_CACHE
+  // purge does not delete it every deploy.
+  workbox.routing.registerRoute(
+    ({ url }) => url.origin === self.location.origin && /^\/data\/[a-z0-9_-]+\.js$/.test(url.pathname),
+    new workbox.strategies.StaleWhileRevalidate({
+      cacheName: 'island-data',
+      plugins: [
+        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
+        new workbox.expiration.ExpirationPlugin({ maxEntries: 8, maxAgeSeconds: 30 * 24 * 60 * 60 })
+      ]
     })
   );
 

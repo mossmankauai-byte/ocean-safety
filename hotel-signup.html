@@ -162,6 +162,11 @@ const CLAIM_URL=location.origin+"/setup.html";
 
 // ?type=hotel|rental|retail — one form, three businesses (from the start.html landing page)
 const TYPE=(new URLSearchParams(location.search).get("type")||"hotel").toLowerCase();
+// Island the signup is for. Carried in from the island-aware brochure (town-ad.html?island=maui
+// links here with the same param). The SERVER re-validates against SELLABLE_ISLANDS and is the
+// only authority — this just stops every signup silently defaulting to kauai, which would let a
+// Maui business through the island gate and mint Kauaʻi-labelled assets for them.
+const ISLAND=(new URLSearchParams(location.search).get("island")||"kauai").toLowerCase();
 const T={
   hotel:{h1:"Put your hotel on the beach-safety guide your guests already open.",
     sub:"Set it up yourself in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. Start free.",
@@ -260,7 +265,7 @@ $("f").addEventListener("submit",async e=>{
   let tsToken=null;
   if(tsOn){ tsToken=window.turnstile?turnstile.getResponse(window.__tsid):null;
     if(!tsToken) return showErr("Please complete the verification box above."); }
-  const body={ name, email, tier, type:TYPE, hex:$("hexText").value.trim()||null,
+  const body={ name, email, tier, type:TYPE, island:ISLAND, hex:$("hexText").value.trim()||null,
     website:$("website").value.trim()||null,
     signatureName:sig, agreed:true, turnstileToken:tsToken };
   $("go").disabled=true; $("go").textContent="Setting up…";
