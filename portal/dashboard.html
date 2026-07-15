@@ -20,23 +20,16 @@
   </nav></div>
 
 <div class="wrap">
-  <!-- header band — visual warmth only (brand mark = icons/brand-mark-v2.svg,
-       inlined so it renders everywhere). #hi keeps its id: the script below
-       still writes the shop name into it. -->
+  <!-- header band. Brand mark = the real OceanSafe icon (yellow squircle + blue wave),
+       same asset as the favicon/nav — not a drawn stand-in. #hi keeps its id: the script
+       below still writes the shop name into it. -->
   <div class="dash-hero">
     <svg class="dh-waves" viewBox="0 0 600 56" preserveAspectRatio="none" aria-hidden="true">
       <path d="M0 34 Q75 22 150 34 T300 34 T450 34 T600 34" fill="none" stroke="#f5ecd7" stroke-width="2.5" stroke-linecap="round" opacity=".28"/>
       <path d="M0 44 Q75 34 150 44 T300 44 T450 44 T600 44" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" opacity=".45"/>
     </svg>
     <div class="dh-inner">
-      <svg class="dh-mark" viewBox="0 0 64 64" aria-hidden="true">
-        <defs><linearGradient id="dhGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0b485b"/><stop offset="100%" stop-color="#1b6d83"/></linearGradient></defs>
-        <circle cx="32" cy="32" r="30" fill="url(#dhGrad)"/>
-        <circle cx="46" cy="20" r="5" fill="#e07856"/>
-        <path d="M5 38 Q15 32 25 38 T45 38 T62 38" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        <path d="M5 46 Q15 40 25 46 T45 46 T62 46" stroke="#94becc" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.85"/>
-        <path d="M5 53 Q15 48 25 53 T45 53 T62 53" stroke="#c9a84c" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.75"/>
-      </svg>
+      <img class="dh-mark" src="oceansafe-favicon.png" alt="OceanSafe" style="border-radius:12px;object-fit:cover">
       <div>
         <div class="dh-kicker">Partner dashboard</div>
         <h1 id="hi">Dashboard</h1>
