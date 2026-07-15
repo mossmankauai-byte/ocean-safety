@@ -401,6 +401,12 @@
   var bandImg=document.getElementById("bandImg");
   if(bandImg) bandImg.src=(i&&i.band)||"/assets/stock/snorkeling.jpg";
   if(!i) return;                       // no island given -> stay island-neutral
+  // Carry the island into the signup CTA. Without this the form posts the default (kauai) for
+  // every advertiser, which both mislabels their printable assets and slips them past the
+  // server's SELLABLE_ISLANDS gate. The server still re-validates — this only tells it the truth.
+  document.querySelectorAll('a[href*="hotel-signup.html"]').forEach(function(a){
+    a.href = a.getAttribute("href") + "&island=" + q;
+  });
   var eb=document.getElementById("eyebrow"); if(eb) eb.textContent=i.name+" Town Ad";
   document.title="OceanSafe Town Ad ("+i.name+") \u2014 $30/mo";
   // name the island in the body copy wherever we left a slot

@@ -6560,7 +6560,7 @@ function openSheet(id){
       ${ibsHero}
       <div class="hero-text">
         <div class="sname">${b.name}</div>
-        <div class="sreg">${b.r} · Kauaʻi</div>
+        <div class="sreg">${b.r} · ${(window.ACTIVE&&ACTIVE.name)||'Kauaʻi'}</div>
       </div>
     </div>
     <div class="dir-pill-row"><a class="dir-pill" href="${murl}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Get Directions</a></div>

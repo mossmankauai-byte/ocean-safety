@@ -96,6 +96,11 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   const primary="#"+(p.primary_hex||"0a8ba8").replace(/^#/,"");
   const live=SITE+"/p/"+p.slug;
   const seg=p.segment;
+  // Island label for the printable assets. get_partner_dashboard projects partners.island
+  // (migration 0024); older rows default to kauai. islandShort keeps the canvas headline
+  // from overflowing — "Hawaiʻi Island" is too long for the tent/flyer band.
+  const ISLAND_LABEL={kauai:["Kauaʻi","Kauaʻi"],maui:["Maui","Maui"],oahu:["Oʻahu","Oʻahu"],hawaii:["Hawaiʻi Island","Hawaiʻi"]};
+  const [islandName,islandShort]=ISLAND_LABEL[p.island]||ISLAND_LABEL.kauai;
   const isTownAd = seg==="town_ad";
   const isOperator = seg==="hotel"||seg==="pm"||seg==="timeshare"||seg==="rental"||seg==="retail";
   const isFree = Number(p.monthly_cents||0)===0;
@@ -139,7 +144,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     ? '<div class="card"><h2><span class="t">Your assets</span></h2>'
       +'<p class="lead">Every asset here already has <b>your</b> QR code built into it. Pick the ones you want, download, and print as many as you like — they’re digital, so reprinting costs you nothing.</p>'
       +'<div class="assets" id="assetGrid"><span class="dim">Building your assets…</span></div>'
-      +'<div class="hint">Scanning any of them opens the free Kauaʻi beach guide with your business inside — and your promotion on their screen.</div></div>'
+      +'<div class="hint">Scanning any of them opens the free '+islandName+' beach guide with your business inside — and your promotion on their screen.</div></div>'
     : '<div class="card"><h2>Your QR codes</h2>'
       +'<p class="lead">'+(isOperator?'Print each where guests will see it — in the room, at the lobby, in your welcome email. Every code is tracked so you can tell which spot brings the most scans.':'Print these for your counter, receipts, and signage — each one is tracked.')+'</p>'
       +'<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px">'+qrGrid+'</div></div>')
@@ -253,7 +258,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       if(spec.layout==="strip"){                    // receipt: QR left, copy right
         const pad=H*0.11, q=H-pad*2; x.drawImage(qrImg,pad,pad,q,q);
         const tx=pad*1.6+q;
-        x.fillStyle=INK; x.font=F(700,H*0.125); x.fillText("Free Kauaʻi beach guide",tx,pad+H*0.02);
+        x.fillStyle=INK; x.font=F(700,H*0.125); x.fillText("Free "+islandName+" beach guide",tx,pad+H*0.02);
         x.fillStyle=MUTE; x.font=F(400,H*0.093);
         x.fillText("Scan: today’s surf, wind, and",tx,pad+H*0.24);
         x.fillText("which beaches are calm.",tx,pad+H*0.37);
@@ -274,7 +279,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       const band=H*0.145; x.fillStyle=DEEP; x.fillRect(0,0,W,band);
       x.textAlign="center"; x.fillStyle="#fff"; x.font=F(800,W*0.062); x.fillText("OceanSafe",W/2,band*0.28);
       wave(x,W/2,band*0.78,W*0.20,GOLD);
-      x.fillStyle=INK; x.font=F(800,W*0.075); x.fillText("Free Kauaʻi",W/2,band+H*0.045);
+      x.fillStyle=INK; x.font=F(800,W*0.075); x.fillText("Free "+islandShort,W/2,band+H*0.045);
       x.fillText("beach guide",W/2,band+H*0.088);
       x.fillStyle=MUTE; x.font=F(400,W*0.038);
       x.fillText("Today’s surf, wind, and which",W/2,band+H*0.142);
