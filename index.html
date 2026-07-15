@@ -2092,14 +2092,12 @@ const ISLANDS = {
     data:null   // wired to B at step 1
   },
   maui: {
-    // live:false — Maui is BUILT and its 9 lifeguard claims were reviewed 2026-07-14, but Nick
-    // shipped Oʻahu FIRST and deliberately kept Maui gated. Its 37 records are still
-    // NEEDS-HUMAN-VERIFY for danger calls, kid flags and facing bearings. resolveIsland() only
-    // returns a slug whose live flag is true, so ?island=maui falls back to Kauaʻi.
-    // Flip to true ONLY when Maui is signed off — and add 'maui' to SELLABLE_ISLANDS in
-    // oceansafe-store/supabase/functions/_shared/islands.ts at the same time, or the app will
-    // serve an island its signup rail still 403s.
-    slug:'maui', name:'Maui', live:false, defaultSide:'west', sideKey:'os_side_maui',
+    // live:true — Maui SIGNED OFF by Nick 2026-07-15. The Jul-14 doc's "warnings are
+    // invisible" verdict was STALE: the dgr advisory (see openSheet) renders b.danger for
+    // non-warning beaches, verified in-browser on all 9 flagged Maui beaches. baby_beach_paia's
+    // missing danger field was ported from maui-build the same day. SELLABLE_ISLANDS still
+    // excludes maui — guide-only, no Shop. Add it there + islands.ts only when selling opens.
+    slug:'maui', name:'Maui', live:true, defaultSide:'west', sideKey:'os_side_maui',
     map:{ center:[20.80,-156.33], zoom:10, minZoom:9, maxBounds:[[20.10,-157.03],[21.45,-155.65]] },
     seaLevel:{ lat:20.89, lon:-156.47 },
     // geoBox MUST contain every beach in data/maui.js. The previous box (lat 20.55..21.0,
@@ -2656,7 +2654,7 @@ const P={
       'Sunset views from the water — best on the west side'
     ],
     tip:"Port Allen faces west, which means the sunset is directly in front of you on the return trip. Book the summer window (May–Sept) for clear horizon sunsets. The 4pm departure puts you offshore for the golden hour and back at dock by dark.",
-    cta:'Book tour',url:'https://kauaiseatours.com',code:'Tour10',cl:'10% off'
+    cta:'Book tour',url:'https://kauaiseatours.com',code:'',cl:''
   }
 };
 
