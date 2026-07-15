@@ -11,3 +11,4 @@ All photos free-license (Wikimedia Commons / Flickr via Openverse), used with at
 - **poipu-sunset.jpg** — Poipu Beach sunset Kauai Hawaii (46227660402) · 6088x4059 original · CC BY 2.0 · credit: dronepicr · source: https://commons.wikimedia.org/w/index.php?curid=75620165
 - **resort-pool.jpg** — resort-pool · 7908x5931 original · CC BY 2.0 · credit: Tony Webster · source: https://commons.wikimedia.org/wiki/File:Marriott%27s_Kaua%27i_Beach_Club_Pool_-_Hawaii_Resort_and_Hotel.jpg
 - **snorkeling.jpg** — File:Hanauma Bay (15551370811).jpg · 4752x3168 original · CC BY 2.0 · credit: Prayitno / Thank you for (12 millions +) · source: https://commons.wikimedia.org/wiki/File:Hanauma_Bay_(15551370811).jpg
+- **maui-beach.jpg** — Kaanapali Beach Maui, Hawaii (45740283561) · 6240x4160 original · CC BY 2.0 · credit: dronepicr · source: https://commons.wikimedia.org/wiki/File:Kaanapali_Beach_Maui,_Hawaii_(45740283561).jpg

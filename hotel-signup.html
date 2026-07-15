@@ -3,51 +3,96 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Get your hotel on OceanSafe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--accent:#0A8BA8;--ink:#16202A}
+  :root{
+    --deep:oklch(0.34 0.055 218);      /* deep ocean */
+    --deep2:oklch(0.27 0.05 224);      /* darker trough */
+    --teal:oklch(0.60 0.088 213);      /* accent */
+    --teal-ink:oklch(0.44 0.08 214);
+    --gold:oklch(0.80 0.12 84);        /* sunlit CTA */
+    --gold-d:oklch(0.72 0.13 74);
+    --ink:oklch(0.27 0.02 232);
+    --mute:oklch(0.52 0.02 232);
+    --sand:oklch(0.975 0.009 84);      /* warm page */
+    --card:oklch(0.995 0.003 84);
+    --line:oklch(0.90 0.012 220);
+    --field:oklch(0.985 0.006 220);
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#F5F7F9;color:var(--ink);
-    -webkit-font-smoothing:antialiased;line-height:1.55;padding:30px 18px 70px}
-  .wrap{max-width:560px;margin:0 auto}
-  .hero{background:#fff;border:1px solid #E2E8ED;border-radius:14px;padding:24px;border-top:6px solid var(--accent);margin-bottom:16px}
-  .wm{font-weight:800;font-size:21px}.wm .c{color:var(--accent)}
-  h1{font-size:24px;line-height:1.2;margin:10px 0 6px}
-  .sub{color:#56636e;font-size:15px}
-  form{background:#fff;border:1px solid #E2E8ED;border-radius:14px;padding:22px}
-  label{display:block;font-weight:600;font-size:14px;margin:14px 0 5px}
-  label.first{margin-top:0}
-  .req{color:#C0392B}
-  input[type=text],input[type=email]{width:100%;font-size:16px;padding:11px 12px;
-    border:1px solid #CdD5DC;border-radius:9px;background:#fff;color:var(--ink)}
-  input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,139,168,.12)}
-  .plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:5px}
-  .plan{border:1px solid #CdD5DC;border-radius:10px;padding:14px;cursor:pointer;position:relative}
-  .plan.on{border-color:var(--accent);box-shadow:0 0 0 3px rgba(10,139,168,.12)}
-  .plan input{position:absolute;opacity:0}
-  .plan b{display:block;font-size:15px}
-  .plan .pr{font-size:13px;color:#56636e;margin-top:4px;line-height:1.4}
-  .plan .pr b{display:inline;color:var(--accent);font-size:13px}
+  body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:var(--sand);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:0 0 64px}
+  .wrap{max-width:540px;margin:0 auto;padding:0 16px}
+
+  /* ── ocean hero ── */
+  .hero{position:relative;margin:0 -16px 0;padding:26px 30px 60px;color:oklch(0.97 0.01 210);
+    background:radial-gradient(120% 90% at 85% -10%,var(--teal) 0%,var(--deep) 42%,var(--deep2) 100%);overflow:hidden}
+  .hero::after{content:"";position:absolute;left:-2%;right:-2%;bottom:-1px;height:34px;
+    background:var(--sand);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 34' preserveAspectRatio='none'%3E%3Cpath d='M0 34V16C180 2 320 2 600 16s420 14 600 0v18Z' fill='%23000'/%3E%3C/svg%3E") bottom/100% 100% no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 34' preserveAspectRatio='none'%3E%3Cpath d='M0 34V16C180 2 320 2 600 16s420 14 600 0v18Z' fill='%23000'/%3E%3C/svg%3E") bottom/100% 100% no-repeat}
+  .wm{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:16px;letter-spacing:.2px;opacity:.96}
+  .wm svg{width:22px;height:22px;flex:none}
+  .wm .c{color:oklch(0.86 0.13 88)}
+  h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:30px;line-height:1.08;letter-spacing:-.4px;margin:16px 0 8px;max-width:15ch}
+  .sub{color:oklch(0.90 0.02 210);font-size:15.5px;max-width:42ch;line-height:1.5}
+
+  /* ── form card lifts over the wave ── */
+  form{position:relative;z-index:2;background:var(--card);border-radius:18px;padding:24px 22px 26px;margin-top:-30px;
+    box-shadow:0 1px 0 oklch(1 0 0 / .6) inset, 0 18px 44px -20px oklch(0.34 0.05 220 / .38), 0 4px 14px -8px oklch(0.34 0.05 220 / .3)}
+  label{display:block;font-weight:600;font-size:13px;letter-spacing:.1px;color:var(--ink);margin:18px 0 6px}
+  label.first{margin-top:2px}
+  .req{color:oklch(0.58 0.16 25)}
+  input[type=text],input[type=email]{width:100%;font-family:inherit;font-size:16px;padding:12px 13px;
+    border:1px solid var(--line);border-radius:11px;background:var(--field);color:var(--ink);transition:border-color .15s,box-shadow .15s,background .15s}
+  input[type=text]:focus,input[type=email]:focus{outline:none;border-color:var(--teal);background:var(--card);box-shadow:0 0 0 4px oklch(0.60 0.088 213 / .14)}
+  input::placeholder{color:oklch(0.66 0.015 230)}
+
+  /* ── plan cards ── */
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:6px}
+  .plan{border:1.5px solid var(--line);border-radius:14px;padding:15px 15px 16px;cursor:pointer;position:relative;background:var(--card);transition:border-color .18s,box-shadow .18s,transform .18s,background .18s}
+  .plan:hover{border-color:oklch(0.78 0.03 214)}
+  .plan.on{border-color:var(--teal);background:linear-gradient(180deg,oklch(0.60 0.088 213 / .07),oklch(0.60 0.088 213 / .02));box-shadow:0 0 0 4px oklch(0.60 0.088 213 / .12)}
+  .plan.on::after{content:"✓";position:absolute;top:11px;right:12px;width:20px;height:20px;border-radius:50%;background:var(--teal);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+  .plan input{position:absolute;opacity:0;pointer-events:none}
+  .plan b{display:block;font-size:15px;font-weight:700}
+  .plan .pr{font-size:13px;color:var(--mute);margin-top:5px;line-height:1.45}
+  .plan .pr b{display:inline;color:var(--teal-ink);font-size:15px}
+
+  /* included checklist (town ad) */
+  .incl{list-style:none;margin:16px 0 4px;display:grid;gap:9px}
+  .incl li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink);line-height:1.4}
+  .incl svg{flex:none;width:19px;height:19px;margin-top:1px;color:var(--teal)}
+  .incl b{font-weight:600}
+
   .row2{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
-  .hint{font-size:12.5px;color:#7A8794;margin-top:5px}
-  .sign{font-family:"Snell Roundhand","Segoe Script",cursive;font-size:19px}
-  .agree{display:flex;gap:9px;align-items:flex-start;margin-top:16px;font-size:13.5px;color:#56636e}
-  .agree input{margin-top:3px}
-  .swatch{width:46px;height:44px;padding:3px;border:1px solid #CdD5DC;border-radius:9px;background:#fff;cursor:pointer}
-  .btn{width:100%;margin-top:20px;font-weight:700;font-size:16px;border:none;border-radius:10px;
-    padding:15px;background:var(--accent);color:#fff;cursor:pointer}
-  .btn:disabled{opacity:.6;cursor:default}
-  .err{background:#FCEBEB;border:1px solid #F09595;color:#791F1F;border-radius:9px;padding:11px 13px;font-size:14px;margin-top:14px;display:none}
+  .hint{font-size:12.5px;color:oklch(0.58 0.015 232);margin-top:6px}
+  .sign{font-family:"Snell Roundhand","Segoe Script",cursive;font-size:20px}
+  .agree{display:flex;gap:10px;align-items:flex-start;margin-top:18px;font-size:13px;color:var(--mute);line-height:1.5}
+  .agree input{margin-top:3px;accent-color:var(--teal);width:16px;height:16px;flex:none}
+  .swatch{width:46px;height:46px;padding:3px;border:1px solid var(--line);border-radius:11px;background:var(--card);cursor:pointer}
+  .btn{width:100%;margin-top:22px;font-family:inherit;font-weight:700;font-size:16.5px;border:none;border-radius:13px;
+    padding:16px;background:linear-gradient(180deg,var(--gold),var(--gold-d));color:oklch(0.26 0.06 68);cursor:pointer;
+    box-shadow:0 10px 22px -12px oklch(0.72 0.13 74 / .8);transition:transform .16s cubic-bezier(.2,.7,.3,1),box-shadow .16s,filter .16s}
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.03)}
+  .btn:active{transform:translateY(0)}
+  .btn:disabled{opacity:.65;cursor:default;transform:none;box-shadow:none}
+  .trust{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;margin-top:15px;font-size:12.5px;color:var(--mute)}
+  .trust span{display:inline-flex;align-items:center;gap:5px}
+  .trust svg{width:14px;height:14px;color:var(--teal)}
+  .err{background:oklch(0.96 0.03 25);border:1px solid oklch(0.82 0.09 25);color:oklch(0.45 0.15 25);border-radius:11px;padding:12px 14px;font-size:14px;margin-top:15px;display:none}
   .err.show{display:block}
-  .ok{background:#E1F5EE;border:1px solid #5DCAA5;color:#085041;border-radius:12px;padding:20px;font-size:15px;margin-top:14px;display:none}
+  .ok{background:oklch(0.95 0.04 168);border:1px solid oklch(0.78 0.09 168);color:oklch(0.36 0.09 168);border-radius:14px;padding:22px;font-size:15px;margin-top:15px;display:none}
   .ok.show{display:block}
-  .ok h2{font-size:18px;margin-bottom:6px;color:#04342C}
-  .foot{font-size:13px;color:#8A97A3;text-align:center;margin-top:18px}
-  a{color:var(--accent)}
+  .ok h2{font-family:Fraunces,serif;font-size:19px;margin-bottom:6px;color:oklch(0.30 0.07 168)}
+  .foot{font-size:12.5px;color:oklch(0.6 0.012 232);text-align:center;margin-top:22px}
+  a{color:var(--teal-ink);font-weight:500}
 </style></head>
 <body><div class="wrap">
 
   <div class="hero">
-    <span class="wm">Ocean<span class="c">Safe</span></span>
+    <span class="wm"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" stroke="oklch(0.86 0.13 88)" stroke-width="2.1" stroke-linecap="round"/><path d="M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" opacity=".65"/></svg>Ocean<span class="c">Safe</span></span>
     <h1 id="heroH1">Put your hotel on the beach-safety guide your guests already open.</h1>
     <p class="sub" id="heroSub">Set it up yourself in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. Start free.</p>
   </div>
@@ -63,7 +108,7 @@
       <label class="plan" id="planPaid">
         <input type="radio" name="tier" value="paid">
         <b>Paid</b>
-        <span class="pr" id="paidPr"><b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. First month free.</span>
+        <span class="pr" id="paidPr"><b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. Billed monthly, cancel anytime.</span>
       </label>
     </div>
 
@@ -94,13 +139,18 @@
 
     <div class="err" id="err"></div>
     <button class="btn" id="go" type="submit">Start free →</button>
-    <div class="hint" style="text-align:center;margin-top:10px">Timeshare or property manager?
-      <a href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20operator">talk to us</a>.</div>
+    <div class="trust">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Secure payment by Square</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Cancel anytime</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Set up in 2 minutes</span>
+    </div>
+    <div class="hint" id="talkLine" style="text-align:center;margin-top:14px">Timeshare or property manager?
+      <a href="mailto:nick@oceansafety.app?subject=OceanSafe%20operator">talk to us</a>.</div>
   </form>
 
   <div class="ok" id="ok"></div>
 
-  <div class="foot">Questions first? <a href="mailto:mossmankauai@gmail.com">mossmankauai@gmail.com</a> · oceansafety.app</div>
+  <div class="foot">Questions first? <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a> · oceansafety.app</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -117,7 +167,7 @@ const T={
     sub:"Set it up yourself in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. Start free.",
     nameLabel:"Property name", namePh:"Kauaʻi Shores Resort",
     freePr:"<b>$0</b> — the co-branded guide, one featured amenity, and your full analytics. Completely free.",
-    paidPr:"<b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. First month free.", paidSelfServe:true},
+    paidPr:"<b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. Billed monthly, cancel anytime.", paidSelfServe:true},
   rental:{h1:"Put your rentals & tours inside the guide guests already open.",
     sub:"Your gear, tours, and activities in front of every guest checking the beach — with your own page, QR, and analytics. Free to join.",
     nameLabel:"Business name", namePh:"Hanalei Beach Rentals",
@@ -127,13 +177,54 @@ const T={
     sub:"Your storefront inside the beach-safety app, a QR on every receipt and counter, and demand analytics tied to the weather. Start free.",
     nameLabel:"Store name", namePh:"Poipu Beach Store",
     freePr:"<b>$0</b>/mo — we take 3% only on what the app sells for you. You keep 97%.",
-    paidPr:"<b>$500</b>/store/mo — 0% on sales, plus the full data layer. We set this up with you personally.", paidSelfServe:false}
+    paidPr:"<b>$500</b>/store/mo — 0% on sales, plus the full data layer. We set this up with you personally.", paidSelfServe:false},
+  townad:{h1:"Get your business in front of every visitor checking the beach.",
+    sub:"A printable QR that opens the free beach-safety guide with your business in it, a timed promotion that pops on guests' phones, and a simple dashboard — $30/mo, set up in two minutes.",
+    nameLabel:"Business name", namePh:"Your Beach Grill",
+    freePr:"", paidPr:"<b>$30</b>/mo — your listing, a printable QR, a timed promotion slot, and your own dashboard. Billed monthly, cancel anytime.", paidSelfServe:true},
+  onlineshop:{h1:"Sell your products to visitors before they hit the beach.",
+    sub:"Everything in a Town Ad — your listing, a printable QR, a timed promotion — plus your products selling right inside the app. We take 0% of your sales.",
+    nameLabel:"Shop name", namePh:"Your Surf & Gift Co.",
+    freePr:"", paidPr:"<b>$100</b>/mo — your storefront in the app, plus the listing, QR and timed promotion. We take <b>0%</b> of your sales. Billed monthly, cancel anytime.", paidSelfServe:true}
 };
 const TC=T[TYPE]||T.hotel;
 $("heroH1").textContent=TC.h1; $("heroSub").textContent=TC.sub;
 $("nameLabel").innerHTML=TC.nameLabel+' <span class="req">*</span>'; $("name").placeholder=TC.namePh;
 $("freePr").innerHTML=TC.freePr; $("paidPr").innerHTML=TC.paidPr;
-document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":"Get your store on OceanSafe");
+document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":TYPE==="townad"?"Get your business on OceanSafe — $30/mo":TYPE==="onlineshop"?"Sell your products on OceanSafe — $100/mo":"Get your store on OceanSafe");
+
+// Town Ad ($30/mo) and Online Shop ($100/mo) are single paid tiers — no free option.
+// Hide the plan chooser and lock to paid.
+if(TYPE==="townad"||TYPE==="onlineshop"){
+  const pf=$("planFree"); if(pf) pf.style.display="none";
+  const chooseLbl=document.querySelector("form#f label.first"); if(chooseLbl) chooseLbl.style.display="none";
+  const paidInput=$("planPaid").querySelector("input"); paidInput.checked=true;
+  $("planFree").querySelector("input").checked=false;
+  $("planPaid").classList.add("on"); $("planFree").classList.remove("on");
+  $("planPaid").style.gridColumn="1 / -1";
+  $("go").textContent="Continue to secure payment →";
+  const talk=$("talkLine"); if(talk) talk.style.display="none";
+  const webLbl=[...document.querySelectorAll("form#f label")].find(l=>/Property website/i.test(l.textContent)); if(webLbl) webLbl.textContent="Website";
+  // what's included — reinforce the offer under the price (per tier)
+  const INCL={
+    townad:[
+      "Your business listed in the guide visitors open before the beach",
+      "A printable QR for your counter and receipts, opening the free guide",
+      "A timed promotion that pops for guests who scan your QR",
+      "A simple dashboard to upload your promo, with a phone preview"
+    ],
+    onlineshop:[
+      "Your products selling right inside the app",
+      "Payments go straight into your own Square account — we take 0%",
+      "Everything in a Town Ad: your listing, a printable QR, a timed promotion",
+      "A dashboard to add products and upload your promo"
+    ]
+  };
+  const incl=document.createElement("ul"); incl.className="incl";
+  incl.innerHTML=(INCL[TYPE]||INCL.townad)
+    .map(t=>'<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>'+t+'</span></li>').join("");
+  document.querySelector("form#f .plans").after(incl);
+}
 
 const TS_SITEKEY="0x4AAAAAAD1KovJ4T8LFTTxL";
 const tsOn=TS_SITEKEY && !/YOUR/.test(TS_SITEKEY);
@@ -164,7 +255,7 @@ $("f").addEventListener("submit",async e=>{
   if(!sig) return showErr("Please type your full name to sign.");
   if(!$("agree").checked) return showErr("Please agree to the terms to continue.");
   if(tier==="paid" && !TC.paidSelfServe){
-    return showErr("The paid plan for your business is set up personally — email mossmankauai@gmail.com and we'll have you live this week. Or start free now and upgrade later.");
+    return showErr("The paid plan for your business is set up personally — email nick@oceansafety.app and we'll have you live this week. Or start free now and upgrade later.");
   }
   let tsToken=null;
   if(tsOn){ tsToken=window.turnstile?turnstile.getResponse(window.__tsid):null;

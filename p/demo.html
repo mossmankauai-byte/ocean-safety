@@ -1278,7 +1278,7 @@ a{text-decoration:none;color:inherit}
 .sname{font-size:22px;font-weight:700;color:#fff;line-height:1.1;text-shadow:0 1px 6px rgba(0,0,0,.5)}
 .sreg{font-size:11px;color:rgba(255,255,255,.8);margin-top:2px;letter-spacing:.03em}
 /* Status badges live on the LEFT side of the hero so they don't collide with the heart
-   button on the right. stbadge (Good Today / Use Caution) sits at the top, kidbadge
+   button on the right. stbadge (Calmer today / Use caution) sits at the top, kidbadge
    (Family Friendly) stacks directly below it. Both are pill-shaped, backdrop-blurred
    so they read clearly against any photo or generative bg behind them. */
 /* Premium status badge — was a saturated green/orange oval. Now: cream glass pill
@@ -4346,14 +4346,14 @@ function renderToursSheetContent(){
     .sort((a,b) => scoreOf(b.m.level) - scoreOf(a.m.level))
     .map(({t, m}) => {
       const badge = m.level === 'yes'
-        ? {color:'#16a34a', bg:'#dcfce7', text:'Great today'}
+        ? {color:'#16a34a', bg:'#dcfce7', text:'Calmer today'}
         : m.level === 'maybe'
-        ? {color:'#ca8a04', bg:'#fef9c3', text:'OK today'}
-        : {color:'#9ca3af', bg:'#f3f4f6', text:'Better another day'};
+        ? {color:'#ca8a04', bg:'#fef9c3', text:'Use caution'}
+        : {color:'#9ca3af', bg:'#f3f4f6', text:'Not recommended'};
       // Adjust badge text for non-today selections
       if(useForecast && _selectedDayIdx > 0){
-        if(m.level === 'yes') badge.text = `Great ${FORECAST[_selectedDayIdx].dayName}`;
-        else if(m.level === 'maybe') badge.text = `OK ${FORECAST[_selectedDayIdx].dayName}`;
+        if(m.level === 'yes') badge.text = `Calmer ${FORECAST[_selectedDayIdx].dayName}`;
+        else if(m.level === 'maybe') badge.text = `Caution ${FORECAST[_selectedDayIdx].dayName}`;
       }
       return `
         <div style="margin-top:14px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">
@@ -5294,7 +5294,7 @@ function openSheet(id){
   const b=B.find(x=>x.id===id),r=scored[id];if(!b||!r)return;
   const c=r._c;
   const bg=b.photo?`url("${b.photo}"),${generativeBg(b)}`:generativeBg(b);
-  const stlbl={green:'Good Today',yellow:'Use Caution'}[r.status]||'';
+  const stlbl={green:'Calmer today',yellow:'Use caution'}[r.status]||'';
   const kid=r.kid?`<div class="kidbadge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="5" cy="2.5" r="1.5"/><path d="M2 9 Q5 6.5 8 9"/></svg>Family Friendly</div>`:'';
   const lgBadge=b.lg_hours?`<div class="lg-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="5" cy="5" r="4"/><path d="M5 3 L5 5.5 L7 7" stroke-linecap="round"/></svg>${b.lg_hours}</div>`:'';
   const ibs=r.top.map(i=>`<div class="ib">${itlbl[i]||i}</div>`).join('');
@@ -6172,10 +6172,10 @@ function renderOutlookSheet(){
   rows.sort((a,b) => order[a.level] - order[b.level]);
 
   const badgeFor = lvl => lvl==='good'
-    ? '<span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Great today</span>'
+    ? '<span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Calmer today</span>'
     : lvl==='ok'
-    ? '<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">OK today</span>'
-    : '<span style="background:#fee2e2;color:#b91c1c;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Skip today</span>';
+    ? '<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Use caution</span>'
+    : '<span style="background:#fee2e2;color:#b91c1c;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em">Not recommended</span>';
   const colorFor = lvl => lvl==='good' ? '#15803d' : lvl==='ok' ? '#92400e' : '#b91c1c';
 
   const condChips = outlookChipsHtml(c);
@@ -6219,7 +6219,7 @@ function renderOutlookSheet(){
       const beachPicks = (typeof bestBeachesForRegion === 'function') ? bestBeachesForRegion(region.r) : [];
       if(!beachPicks.length) return '';
       const stColor = {green:'#16a34a', yellow:'#d97706', red:'#b91c1c', warning:'#b91c1c'};
-      const stLbl = {green:'Great today', yellow:'Use caution', red:'Skip today', warning:'Warning'};
+      const stLbl = {green:'Calmer today', yellow:'Use caution', red:'Not recommended', warning:'Warning'};
       // Per beach, surface the top intents (snorkel / photo / tidepool / walk / swim / sunset)
       // as small chips. Matches the hero strip on the detail sheet so the same vocabulary
       // is reinforced across surfaces. Falls back to the beach's static intents list if the
@@ -6597,93 +6597,241 @@ function cardHeartButton(kind, id){
   const saved = isSaved(kind, id);
   return `<button class="card-heart${saved ? ' saved' : ''}" data-heart="${kind}:${id}" type="button" aria-label="${saved ? 'Remove from saved' : 'Save'}" onclick="event.stopPropagation();toggleSaved('${kind}','${id}',this);"><span class="h-default">${HEART_SVG_DEFAULT}</span><span class="h-saved">${HEART_SVG_SAVED}</span></button>`;
 }
-function openSavedSheet(){
-  // Defensive clean before render — even if boot's cleanup ran, this catches the case
-  // where a data array was edited mid-session (e.g. an ID rename) and the saved entry
-  // would otherwise show as a broken card.
+// ── Saved sheet — two tabs: "Now" (condition-ranked list + filters) and
+// "Plan" (day-by-day). Saved beaches rank by live conditions into Calmer today
+// / Use caution / Not recommended (never an all-clear); other kinds under "More
+// saved". Filter chips narrow by type. Plan groups the same saves into days.
+// All device-local (localStorage, no account).
+const KBG_PLAN_KEY = 'os_plan_v1';
+const OS_PREF_KEY = 'os_saved_prefs_v1';
+window._savedTab = window._savedTab || 'now';
+window._savedFilter = window._savedFilter || 'all';
+
+function getSavedPrefs(){
+  try { const p = JSON.parse(localStorage.getItem(OS_PREF_KEY) || '{}') || {}; if(!p.pins) p.pins = {}; if(!p.notes) p.notes = {}; return p; }
+  catch(e){ return {pins:{}, notes:{}}; }
+}
+function persistSavedPrefs(p){ try { localStorage.setItem(OS_PREF_KEY, JSON.stringify(p)); } catch(e){} }
+function toggleSavedPin(key){ const p = getSavedPrefs(); if(p.pins[key]) delete p.pins[key]; else p.pins[key] = true; persistSavedPrefs(p); renderSavedSheetBody(); }
+function editSavedNote(key){
+  const p = getSavedPrefs(); const cur = p.notes[key] || '';
+  const v = prompt('Note for this spot (parking, tides, current…):', cur);
+  if(v === null) return;
+  if(v.trim()) p.notes[key] = v.trim().slice(0, 140); else delete p.notes[key];
+  persistSavedPrefs(p); renderSavedSheetBody();
+}
+// Plan state (day-by-day). Separate from saves + prefs.
+function getPlan(){
+  try { const p = JSON.parse(localStorage.getItem(KBG_PLAN_KEY) || '{}') || {}; if(!(p.days >= 1)) p.days = 1; if(!p.items || typeof p.items !== 'object') p.items = {}; return p; }
+  catch(e){ return {days:1, items:{}}; }
+}
+function persistPlan(p){ try { localStorage.setItem(KBG_PLAN_KEY, JSON.stringify(p)); } catch(e){} }
+function planAddDay(){ const p = getPlan(); p.days = Math.min(14, p.days + 1); persistPlan(p); renderSavedSheetBody(); }
+function planSetDay(key, day){ const p = getPlan(); p.items[key] = Object.assign({}, p.items[key], {day: parseInt(day,10) || 0}); persistPlan(p); renderSavedSheetBody(); }
+function planToggleDone(key){ const p = getPlan(); const cur = p.items[key] || {}; p.items[key] = Object.assign({}, cur, {done: !cur.done}); persistPlan(p); renderSavedSheetBody(); }
+
+function switchSavedTab(tab){ window._savedTab = tab; renderSavedSheetBody(); }
+function setSavedFilter(k){ window._savedFilter = k; renderSavedSheetBody(); }
+
+// Row action icons — one consistent thin-line set (note / pin / remove).
+const OS_IC = p => `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:block">${p}</svg>`;
+const IC_PENCIL = OS_IC('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>');
+const IC_PIN = OS_IC('<path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>');
+const IC_TRASH = OS_IC('<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>');
+
+const OS_VERDICT_COL = {green:'#16a34a', yellow:'#d97706', red:'#b91c1c', warning:'#b91c1c'};
+const KIND_LABEL = {beach:'Beaches', hike:'Trails', act:'Family', food:'Food', grocery:'Grocery', gas:'Gas', craft:'Crafts', market:'Markets', drink:'Drinks'};
+
+function getSavedCards(){
   cleanOrphanedSaves();
   const saved = getSavedSet();
-  const kindMeta = KBG_SAVED_KIND_META;   // shared with cleanOrphanedSaves — single source of truth
+  return Object.keys(saved).map(k => {
+    const idx = k.indexOf(':'); const kind = k.slice(0, idx); const id = k.slice(idx + 1);
+    const meta = KBG_SAVED_KIND_META[kind];
+    if(!meta || !Array.isArray(meta.arr)) return null;
+    const item = meta.arr.find(x => x.id === id);
+    if(!item) return null;
+    return {kind, id, item, meta, savedAt: saved[k], key: k};
+  }).filter(Boolean);
+}
 
-  // Build cards from every saved entry, ordered most-recently-saved first.
-  // Track ones we couldn't resolve so we can show a diagnostic line.
-  const missing = [];
-  const cards = Object.keys(saved)
-    .map(k => {
-      const idx = k.indexOf(':');
-      const kind = k.slice(0, idx);
-      const id = k.slice(idx + 1);
-      return {kind, id, savedAt: saved[k], rawKey: k};
-    })
-    .sort((a, b) => b.savedAt - a.savedAt)
-    .map(e => {
-      const meta = kindMeta[e.kind];
-      if(!meta){
-        console.warn('[savedSheet] unknown kind:', e.kind, 'key=' + e.rawKey);
-        missing.push(e.rawKey + ' (unknown kind)');
-        return null;
-      }
-      const arr = meta.arr;
-      if(!Array.isArray(arr)){
-        console.warn('[savedSheet] arr not an array for kind:', e.kind);
-        missing.push(e.rawKey + ' (data missing)');
-        return null;
-      }
-      const item = arr.find(x => x.id === e.id);
-      if(!item){
-        console.warn('[savedSheet] item not found:', e.kind, e.id, '- array has', arr.length, 'entries');
-        missing.push(e.rawKey + ' (id not in data)');
-        return null;
-      }
-      return Object.assign({}, e, {item, meta});
-    })
-    .filter(Boolean);
-  if(window._debugMode) console.log('[savedSheet] saved keys:', Object.keys(saved));
-  if(window._debugMode) console.log('[savedSheet] rendered cards:', cards.length, '— missing:', missing.length);
-
-  let body;
-  if(cards.length === 0){
-    body = `<div style="padding:24px 16px;text-align:center;color:var(--mute);font-size:13px;line-height:1.5">
-      <div style="font-size:28px;margin-bottom:10px">♡</div>
-      <div style="font-weight:600;color:var(--ink);margin-bottom:4px">${missing.length ? 'Saved items could not be loaded' : 'Nothing saved yet'}</div>
-      <div>${missing.length ? 'Open browser console for diagnostic — saved keys: ' + missing.join(', ') : 'Tap the heart on any beach, trail, or POI to save it for later.'}</div>
-    </div>`;
-  } else {
-    body = `<div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">${cards.map(c => {
-      const region = c.item.r || '';
-      return `<div class="kbg-saved-card" onclick="closeSheet();setTimeout(()=>${c.meta.open}('${c.item.id}'),320)" style="display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border:1px solid var(--border);border-left:4px solid ${c.meta.color};border-radius:10px;cursor:pointer">
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:700;color:var(--ink);font-size:14px;line-height:1.25">${c.item.name}</div>
-          <div style="font-size:11px;color:var(--mute);margin-top:2px">${c.meta.label}${region ? ' · ' + region : ''}</div>
-        </div>
-        ${cardHeartButton(c.kind, c.item.id)}
-      </div>`;
-    }).join('')}</div>`;
+// Live verdict for a saved beach: {status, color, reason}. Non-beach -> null.
+function savedVerdict(c){
+  if(c.kind !== 'beach' || typeof scored === 'undefined' || !scored[c.id]) return null;
+  const b = c.item, sc = scored[c.id], cc = sc._c;
+  // Known-dangerous beaches stay flagged no matter how fresh the feed is.
+  if(b.warning_only) return {status:'warning', color: OS_VERDICT_COL.warning, reason: 'Dangerous conditions'};
+  // FAIL SAFE — reuse the app's own freshness budget (surfDataStale / MAX_DATA_AGE_MS,
+  // 90 min). Its rule: "stale never yields a calm 'go'." Old or never-fetched data must
+  // never present a green here, so degrade to unknown rather than reassure.
+  if(typeof surfDataStale === 'function' && surfDataStale()){
+    return {status:'unknown', color:'#94a3b8', reason:'Conditions not current'};
   }
+  let status = sc.status;
+  if((status === 'hidden' || !OS_VERDICT_COL[status]) && cc && typeof score === 'function'){
+    try { status = score(b, cc, (b.intents && b.intents.length) ? b.intents : ['swim','walk']).status; } catch(e){}
+  }
+  if(status === 'hidden') status = 'yellow';
+  if(!OS_VERDICT_COL[status]) return null;
+  let reason = '';
+  if(cc){
+    if(cc.brown) reason = 'Brown water advisory';
+    else { const s = (cc.es != null) ? cc.es.toFixed(1) + 'ft surf' : ''; const w = (cc.wind != null) ? Math.round(cc.wind) + 'mph wind' : ''; reason = [s, w].filter(Boolean).join(' · '); }
+  }
+  return {status, color: OS_VERDICT_COL[status], reason};
+}
+function savedMiles(c){
+  if(!window._userLocation || c.item.lat == null || c.item.lon == null) return null;
+  const R = 3958.8, toR = x => x * Math.PI / 180;
+  const dLat = toR(c.item.lat - window._userLocation.lat), dLon = toR(c.item.lon - window._userLocation.lon);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toR(window._userLocation.lat)) * Math.cos(toR(c.item.lat)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+function savedDot(c){ const v = savedVerdict(c); return `<span style="width:11px;height:11px;border-radius:50%;background:${v ? v.color : '#cbd5e1'};flex:none"></span>`; }
 
-  // Clear-all sits in the hero when there's anything to clear. Confirms before wiping
-  // localStorage so a mis-tap doesn't lose a long list. Reopens the sheet on the empty state.
-  const clearAllBtn = cards.length > 0 ? `
-    <button onclick="if(confirm('Clear all ${cards.length} saved place${cards.length === 1 ? '' : 's'}? This cannot be undone.')){ localStorage.removeItem(KBG_SAVES_KEY); updateSavedBadge(); openSavedSheet(); }"
-      style="margin-left:auto;padding:6px 11px;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;font-size:11px;font-weight:600;cursor:pointer">
-      Clear all
-    </button>` : '';
+function savedCard(c){
+  const p = getSavedPrefs(); const pinned = !!p.pins[c.key]; const note = p.notes[c.key] || '';
+  const v = savedVerdict(c);
+  const mi = savedMiles(c);
+  const miChip = (mi != null) ? `<span style="font-size:10px;color:var(--mute);white-space:nowrap">${mi < 10 ? mi.toFixed(1) : Math.round(mi)} mi</span>` : '';
+  const sub = (v && v.reason) ? v.reason : (c.meta.label + (c.item.r ? ' · ' + c.item.r : ''));
+  const noteRow = note ? `<div style="font-size:10.5px;color:var(--ocean);margin-top:3px">&ldquo;${note}&rdquo;</div>` : '';
+  return `<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 11px">
+    ${savedDot(c)}
+    <div style="flex:1;min-width:0" onclick="closeSheet();setTimeout(()=>${c.meta.open}('${c.item.id}'),320)">
+      <div style="font-weight:700;color:var(--ink);font-size:14px;line-height:1.2">${c.item.name}</div>
+      <div style="font-size:10.5px;color:var(--mute);margin-top:1px">${sub}</div>
+      ${noteRow}
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none">
+      ${miChip}
+      <div style="display:flex;gap:13px;align-items:center">
+        <span onclick="event.stopPropagation();editSavedNote('${c.key}')" title="Add note" aria-label="Add note" style="cursor:pointer;color:var(--mute)">${IC_PENCIL}</span>
+        <span onclick="event.stopPropagation();toggleSavedPin('${c.key}')" title="Pin to top" aria-label="Pin to top" style="cursor:pointer;color:${pinned ? 'var(--gold)' : 'var(--mute)'}">${IC_PIN}</span>
+        <span onclick="event.stopPropagation();toggleSaved('${c.kind}','${c.item.id}');renderSavedSheetBody()" title="Remove from saved" aria-label="Remove from saved" style="cursor:pointer;color:var(--mute)">${IC_TRASH}</span>
+      </div>
+    </div>
+  </div>`;
+}
 
+function renderSavedTabs(){
+  const seg = (tab, label) => { const on = window._savedTab === tab; return `<button onclick="switchSavedTab('${tab}')" style="flex:1;text-align:center;font-size:12.5px;font-weight:600;padding:7px 0;border-radius:999px;cursor:pointer;border:none;background:${on ? 'var(--ocean)' : 'transparent'};color:${on ? '#fff' : 'var(--mute)'}">${label}</button>`; };
+  return `<div style="display:flex;background:var(--warm);border:1px solid var(--border);border-radius:999px;padding:3px;margin:10px 0 2px">${seg('now', 'Now')}${seg('plan', 'Plan')}</div>`;
+}
+
+const OS_DISCLAIMER = `<div style="font-size:10.5px;color:var(--mute);line-height:1.45;background:var(--warm);border:1px solid var(--border);border-radius:9px;padding:8px 10px;margin:8px 2px 2px">Modeled from Open-Meteo + NOAA &middot; no lifeguard data. Conditions change fast, especially after rain. Not a substitute for on-site lifeguards, posted flags, and your own judgment. <b>When in doubt, don&rsquo;t go out.</b></div>`;
+
+function renderNowFilters(cards){
+  const kinds = [...new Set(cards.map(c => c.kind))];
+  if(kinds.length < 2) return '';
+  const chip = (val, label, on) => `<button onclick="setSavedFilter('${val}')" style="flex:0 0 auto;font-size:11px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid ${on ? 'var(--ocean)' : 'var(--border)'};background:${on ? 'var(--ocean)' : '#fff'};color:${on ? '#fff' : 'var(--mute)'};cursor:pointer">${label}</button>`;
+  let html = `<div style="display:flex;gap:6px;overflow-x:auto;padding:9px 2px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch"><style>.os-filt::-webkit-scrollbar{display:none}</style>`;
+  html += chip('all', 'All', window._savedFilter === 'all');
+  kinds.forEach(k => { html += chip(k, KIND_LABEL[k] || k, window._savedFilter === k); });
+  return html + `</div>`;
+}
+
+function renderNowBody(allCards){
+  const flt = window._savedFilter;
+  const cards = (flt && flt !== 'all') ? allCards.filter(c => c.kind === flt) : allCards;
+  if(!cards.length) return `<div style="padding:18px 2px;color:var(--mute);font-size:12px">Nothing saved in this filter.</div>`;
+  const prefs = getSavedPrefs();
+  const pinned = cards.filter(c => prefs.pins[c.key]);
+  const rest = cards.filter(c => !prefs.pins[c.key]);
+  const withV = rest.map(c => ({c, v: savedVerdict(c)}));
+  const good = withV.filter(x => x.v && x.v.status === 'green').map(x => x.c);
+  const caution = withV.filter(x => x.v && x.v.status === 'yellow').map(x => x.c);
+  const notRec = withV.filter(x => x.v && (x.v.status === 'red' || x.v.status === 'warning')).map(x => x.c);
+  const unknown = withV.filter(x => x.v && x.v.status === 'unknown').map(x => x.c);
+  const others = withV.filter(x => !x.v).map(x => x.c);
+  const byNear = (a, b) => { const ma = savedMiles(a), mb = savedMiles(b); if(ma != null && mb != null) return ma - mb; return b.savedAt - a.savedAt; };
+  pinned.sort(byNear); good.sort(byNear); caution.sort(byNear); notRec.sort(byNear); unknown.sort(byNear); others.sort((a, b) => b.savedAt - a.savedAt);
+  const sec = (title, color, arr, sub) => arr.length
+    ? `<div style="margin:15px 2px 6px"><div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:${color}">${title}</div>${sub ? `<div style="font-size:10px;color:var(--mute);margin-top:2px;line-height:1.35">${sub}</div>` : ''}</div><div style="display:flex;flex-direction:column;gap:6px">${arr.map(savedCard).join('')}</div>`
+    : '';
+  let html = '';
+  html += sec('Pinned', 'var(--mute)', pinned);
+  html += sec('Calmer today', '#15803d', good, 'Lowest measured hazard of your saved spots &mdash; still check the water yourself before going in.');
+  html += sec('Use caution', '#92400e', caution, 'Rip currents and shorebreak may not show up in these numbers.');
+  html += sec('Not recommended', '#b91c1c', notRec, 'Warnings or dangerous conditions &mdash; treat as do-not-enter.');
+  html += sec('Conditions unknown', '#64748b', unknown, 'Live data isn&rsquo;t current, so these aren&rsquo;t rated &mdash; check conditions on site before you go.');
+  html += sec('More saved', 'var(--mute)', others);
+  html += `<button onclick="if(confirm('Clear all ${allCards.length} saved place${allCards.length === 1 ? '' : 's'}? This cannot be undone.')){ localStorage.removeItem(KBG_SAVES_KEY); updateSavedBadge(); renderSavedSheetBody(); }" style="width:100%;margin-top:16px;padding:8px;background:none;color:var(--mute);border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">Clear all saved</button>`;
+  return html;
+}
+
+function renderPlanBody(cards){
+  if(!cards.length) return `<div style="padding:22px 16px;text-align:center;color:var(--mute);font-size:13px;line-height:1.5"><div style="font-size:24px;margin-bottom:8px">&#128197;</div><div style="font-weight:600;color:var(--ink);margin-bottom:4px">Build a day-by-day plan</div><div>Heart the spots you like, then group them into days here.</div></div>`;
+  const p = getPlan();
+  const dayOf = c => { const it = p.items[c.key]; return (it && it.day >= 1) ? it.day : 0; };
+  const doneOf = c => { const it = p.items[c.key]; return !!(it && it.done); };
+  const daySelect = c => {
+    let o = `<option value="0"${dayOf(c) === 0 ? ' selected' : ''}>Not scheduled</option>`;
+    for(let d = 1; d <= p.days; d++) o += `<option value="${d}"${dayOf(c) === d ? ' selected' : ''}>Day ${d}</option>`;
+    return `<select onchange="planSetDay('${c.key}',this.value)" onclick="event.stopPropagation()" style="font-size:11px;border:1px solid var(--border);border-radius:7px;padding:4px 5px;background:#fff;color:var(--mute);max-width:104px;flex:none">${o}</select>`;
+  };
+  const row = c => {
+    const done = doneOf(c);
+    return `<div style="display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 11px">
+      <span onclick="planToggleDone('${c.key}')" style="cursor:pointer;font-size:18px;color:${done ? '#0f6e56' : '#cbd5e1'};flex:none;line-height:1" aria-label="Toggle done">${done ? '&#9745;' : '&#9744;'}</span>
+      ${savedDot(c)}
+      <div style="flex:1;min-width:0" onclick="closeSheet();setTimeout(()=>${c.meta.open}('${c.item.id}'),320)">
+        <div style="font-size:13.5px;font-weight:600;color:${done ? 'var(--mute)' : 'var(--ink)'};line-height:1.25;${done ? 'text-decoration:line-through' : ''}">${c.item.name}</div>
+        <div style="font-size:10.5px;color:var(--mute)">${c.meta.label}${c.item.r ? ' &middot; ' + c.item.r : ''}</div>
+      </div>
+      ${daySelect(c)}
+    </div>`;
+  };
+  let html = '';
+  for(let d = 1; d <= p.days; d++){
+    const inDay = cards.filter(c => dayOf(c) === d);
+    html += `<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);margin:13px 2px 6px">Day ${d}</div>`;
+    html += inDay.length ? `<div style="display:flex;flex-direction:column;gap:6px">${inDay.map(row).join('')}</div>` : `<div style="font-size:11px;color:var(--mute);padding:4px 2px 2px">Nothing here yet &mdash; set a spot&rsquo;s day below.</div>`;
+  }
+  const un = cards.filter(c => dayOf(c) === 0);
+  if(un.length){ html += `<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);margin:15px 2px 6px">Not scheduled</div><div style="display:flex;flex-direction:column;gap:6px">${un.map(row).join('')}</div>`; }
+  html += `<button onclick="planAddDay()" style="width:100%;margin-top:12px;padding:10px;background:none;color:var(--ocean);border:1px dashed var(--border);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">+ Add a day</button>`;
+  return html;
+}
+
+function renderSavedSheetBody(){
+  const el = document.getElementById('savedBody');
+  if(!el) return;
+  const cards = getSavedCards();
+  const cnt = document.getElementById('savedCount2'); if(cnt) cnt.textContent = cards.length + ' saved';
+  const stamp = document.getElementById('savedStamp'); if(stamp){ const d = new Date(); stamp.textContent = 'as of ' + d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}); }
+  const tabsEl = document.getElementById('savedTabs'); if(tabsEl) tabsEl.innerHTML = cards.length ? renderSavedTabs() : '';
+  if(!cards.length){
+    el.innerHTML = `<div style="padding:24px 16px;text-align:center;color:var(--mute);font-size:13px;line-height:1.5"><div style="font-size:28px;margin-bottom:10px">&#9825;</div><div style="font-weight:600;color:var(--ink);margin-bottom:4px">Nothing saved yet</div><div>Tap the heart on any beach or spot to save it. Your beaches then sort here by today&rsquo;s conditions &mdash; calmest first.</div></div>`;
+    return;
+  }
+  if(window._savedTab === 'plan'){
+    el.innerHTML = OS_DISCLAIMER + renderPlanBody(cards);
+  } else {
+    el.innerHTML = OS_DISCLAIMER + renderNowFilters(cards) + renderNowBody(cards);
+  }
+}
+
+function openSavedSheet(){
+  const cards = getSavedCards();
   document.getElementById('sc').innerHTML = `
     <div class="poi-hero" style="background:linear-gradient(135deg,var(--ocean),#1a7a8a);color:#fff;align-items:center">
-      <div class="poi-hero-icon" style="color:#fff;font-size:24px">♥</div>
+      <div class="poi-hero-icon" style="color:#fff;font-size:24px">&#9829;</div>
       <div>
-        <div class="poi-hero-name" style="color:#fff">Saved</div>
-        <div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${cards.length} ${cards.length === 1 ? 'place' : 'places'}</div>
+        <div class="poi-hero-name" style="color:#fff">Your beaches</div>
+        <div class="poi-hero-type" style="color:rgba(255,255,255,.85)"><span id="savedCount2">${cards.length} saved</span> &middot; <span id="savedStamp"></span></div>
       </div>
-      ${clearAllBtn}
     </div>
-    ${body}`;
+    ${cards.length ? `<div style="font-size:11px;color:var(--mute);margin:9px 2px 0;line-height:1.45">Sorted by today&rsquo;s live conditions &mdash; calmest first. <b>A general guide, not a safety guarantee.</b></div>` : ''}
+    <div id="savedTabs"></div>
+    <div id="savedBody"></div>`;
+  renderSavedSheetBody();
   document.getElementById('sc').style.display = '';
   document.getElementById('sheet').classList.add('on');
   document.getElementById('overlay').classList.add('on');
 }
-function locateMe(){
+
+  function locateMe(){
   const btn = document.getElementById('locateBtn');
   if(_userMarker){
     map.removeLayer(_userMarker);
