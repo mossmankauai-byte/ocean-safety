@@ -2095,8 +2095,17 @@ const ISLANDS = {
     slug:'maui', name:'Maui', live:true, defaultSide:'west', sideKey:'os_side_maui',
     map:{ center:[20.80,-156.33], zoom:10, minZoom:9, maxBounds:[[20.10,-157.03],[21.45,-155.65]] },
     seaLevel:{ lat:20.89, lon:-156.47 },
-    geoBox:{ latMin:20.55, latMax:21.0, lonMin:-156.68, lonMax:-156.0 },
-    clamp:{ latMin:20.5, latMax:21.05, lonMin:-156.7, lonMax:-155.98 },
+    // geoBox MUST contain every beach in data/maui.js. The previous box (lat 20.55..21.0,
+    // lon -156.68..-156.0) excluded 13 of the island's 37 beaches — Kāʻanapali, Black Rock,
+    // Kahekili, Kapalua, Nāpili, Fleming, Honokōwai, Honolua, Mokuleʻia, and all four Hāna
+    // beaches — because Maui's real extent is lon -156.696..-155.982 / lat 20.633..21.012.
+    // That is not cosmetic: geoBox is (1) the frameIsland fit, so those beaches were clipped
+    // off the initial view, (2) the "is the user ON this island?" gate in fetchLive — a visitor
+    // standing on Kāʻanapali failed it and was given the island's default sea-level weather
+    // instead of their own position — and (3) the rain-overlay grid. Verified: 0/37 outside.
+    // (Kauaʻi, Oʻahu and Hawaiʻi were already correct — 0 outside — which is why this hid.)
+    geoBox:{ latMin:20.55, latMax:21.05, lonMin:-156.73, lonMax:-155.95 },
+    clamp:{ latMin:20.5, latMax:21.05, lonMin:-156.7, lonMax:-155.98 },   // NOTE: ACTIVE.clamp has no readers anywhere in this file
     tideStation:'1615680',
     regions:[
       {key:'west',  label:'West',  r:'West Maui',  centroid:{lat:20.92,lon:-156.69}},
@@ -9290,8 +9299,20 @@ async function boot(){
         // Free-plan configs render generic chrome: hold the chip until the
         // config resolves and skip it on plan:"free". No config / paid /
         // preview all still show it (both fetches settle fast either way).
-        (window._partnerCfgReady || Promise.resolve()).then(function(){
-          if(_planPaid()) showWelcomeChip(partnerName);
+        (window._partnerCfgReady || Promise.resolve()).then(function(cfg){
+          // Name precedence: curated map → the partner's OWN config name → titleised slug.
+          // PARTNER_NAMES stays first so every hand-listed partner is byte-identical.
+          // The cfg.name step matters for Town Ad: those partners are auto-provisioned and can
+          // never be in a hand-maintained map, so they fell through to the titleised slug and
+          // were greeted with "Welcome from Kihei-caffe" instead of their own name.
+          // _pesc IS REQUIRED here: showWelcomeChip writes this straight into innerHTML, and it
+          // was only safe to do so because both old inputs were trusted (a hardcoded map, or a
+          // slug already sanitised to [a-z0-9-]). cfg.name is neither — configs are writable via
+          // the worker's POST /cfg, so an unescaped name would be stored XSS. Cap the length so
+          // a long name can't blow out the topbar (mirrors the 40-char demo-name cap).
+          var cfgNm = cfg && typeof cfg.name === 'string' ? cfg.name.trim().slice(0, 48) : '';
+          var nm = PARTNER_NAMES[slug] || (cfgNm ? _pesc(cfgNm) : '') || partnerName;
+          if(_planPaid()) showWelcomeChip(nm);
         }).catch(function(){});
       }
     }

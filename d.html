@@ -189,8 +189,13 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   }
   // Real screenshot of the app with an offer sliding up (captured from the live guide,
   // generic sample business). Beats a drawn mock-up — it's exactly what a guest sees.
+  // Island-specific: this is the partner's "here's how your promo looks" preview, so a Maui
+  // advertiser must not be shown the Kauaʻi guide. Gated on the captures that actually exist —
+  // Hawaiʻi has no shot yet (the island isn't live), and a missing src renders a broken image,
+  // which is worse than showing the Kauaʻi one. Add "hawaii" here the moment its capture lands.
+  const PROMO_SHOT_ISLANDS = { kauai:1, maui:1, oahu:1 };
   function phonePreview(){
-    return '<div class="shot"><img src="/assets/promo-shot.png" width="546" height="900" loading="lazy"'
+    return '<div class="shot"><img src="/assets/shot-promo-'+(PROMO_SHOT_ISLANDS[p.island]?p.island:"kauai")+'.png" width="546" height="900" loading="lazy"'
       +' alt="Screenshot of the OceanSafe app: today’s conditions and the beach map, with an offer sliding up — happy hour 3 to 5pm, with a See offer button."></div>';
   }
   function promoCard(){

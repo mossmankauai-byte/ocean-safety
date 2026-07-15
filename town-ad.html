@@ -237,21 +237,21 @@
       </div>
 
       <div class="card">
-        <div class="pic"><img src="/assets/shot-assets.jpg" alt="Printable counter card, table tent, window sticker, receipt footer and flyer — each with your own QR." loading="lazy"></div>
+        <div class="pic"><img id="picAssets" src="/assets/shot-assets-kauai.jpg" alt="Printable counter card, table tent, window sticker, receipt footer and flyer — each with your own QR." loading="lazy"></div>
         
         <h3>A QR code that's yours</h3>
         <p>A digital asset you download once and use anywhere: print it for the counter, add it to receipts, drop it on a menu or flyer. A scan opens the free beach-safety guide with your business inside.</p>
       </div>
 
       <div class="card">
-        <div class="pic"><img src="/assets/promo-shot.png" alt="A promotion sliding up on a guest’s phone inside the guide." loading="lazy"></div>
+        <div class="pic"><img id="picPromo" src="/assets/shot-promo-kauai.png" alt="A promotion sliding up on a guest’s phone inside the guide." loading="lazy"></div>
         
         <h3>A timed promotion</h3>
         <p>Set an image or PDF to pop up for the guests who scan your QR, only during the hours and days you choose.</p>
       </div>
 
       <div class="card">
-        <div class="pic"><img src="/assets/shot-dashboard.jpg" alt="The partner dashboard showing your page and your printable assets." loading="lazy"></div>
+        <div class="pic"><img id="picDash" src="/assets/shot-dashboard-kauai.jpg" alt="The partner dashboard showing your page and your printable assets." loading="lazy"></div>
         
         <h3>A simple dashboard</h3>
         <p>Upload your promo yourself and see a full-phone-screen preview of exactly how it looks before it runs.</p>
@@ -323,7 +323,7 @@
     <h2>Your promo, on their phone.</h2>
 
     <div class="shot">
-      <img src="/assets/promo-shot.png" width="546" height="900" loading="lazy"
+      <img id="shotPromo" src="/assets/shot-promo-kauai.png" width="546" height="900" loading="lazy"
         alt="Screenshot of the OceanSafe app: today’s conditions and the beach map, with an offer sliding up — Offer from Your Beach Grill, happy hour 3 to 5pm, $8 house pours, running tonight until 11:59 PM, with a See offer button.">
     </div>
     <p class="caption">An actual screenshot of the app, not a drawing. The business shown is made up — your offer only appears to guests who scanned <i>your</i> QR, during the hours you set.</p>
@@ -398,6 +398,16 @@
   var app=(i?("/assets/shot-app-"+q+".jpg"):"/assets/shot-app-kauai.jpg");
   var hp=document.getElementById("heroPhone"); if(hp) hp.src=app;
   var tp=document.getElementById("townPic");  if(tp) tp.src=app;
+  // Every "what you get" screenshot is island-specific too — these are real captures of the app
+  // and the real dashboard on THAT island, so a Maui advertiser is never shown Kauaʻi. Falls back
+  // to the kauai capture when no island is given (the island-neutral brochure).
+  var isl=(i?q:"kauai");
+  [["picAssets","/assets/shot-assets-"+isl+".jpg"],
+   ["picPromo", "/assets/shot-promo-"+isl+".png"],
+   ["picDash",  "/assets/shot-dashboard-"+isl+".jpg"],
+   ["shotPromo","/assets/shot-promo-"+isl+".png"]].forEach(function(pair){
+    var el=document.getElementById(pair[0]); if(el) el.src=pair[1];
+  });
   var bandImg=document.getElementById("bandImg");
   if(bandImg) bandImg.src=(i&&i.band)||"/assets/stock/snorkeling.jpg";
   if(!i) return;                       // no island given -> stay island-neutral

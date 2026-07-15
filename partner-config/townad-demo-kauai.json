@@ -1,0 +1,16 @@
+{
+  "_note": "DEMO config for capturing the Town Ad brochure's promo screenshot on this island. Generic business name on purpose (no-branded-demos rule) — not a real business. The `island` field is REQUIRED: _cobrandIslandOK() fails closed and drops any config whose island doesn't match the ACTIVE island (a fieldless config is honoured only on Kauaʻi).",
+  "island": "kauai",
+  "name": "Your Beach Grill",
+  "promotions": [
+    {
+      "title": "Happy hour, 3–5pm — $8 house pours",
+      "pdf": "https://oceansafety.app/assets/promotions-default.pdf",
+      "expires": "2030-12-31",
+      "window": {
+        "start": "00:00",
+        "end": "23:59"
+      }
+    }
+  ]
+}
