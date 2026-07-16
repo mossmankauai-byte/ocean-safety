@@ -2325,7 +2325,7 @@ var LANGS_LIVE = ['en','ja'];
 function resolveLang(){
   try { var p=new URLSearchParams(location.search).get('lang'); if(p&&LANGS_LIVE.indexOf(p)>=0) return p; } catch(e){}
   try { var s=localStorage.getItem('os_lang'); if(s&&LANGS_LIVE.indexOf(s)>=0) return s; } catch(e){}
-  return 'en';
+  return 'ja';/* /jp: default Japanese */
 }
 var ACTIVE_LANG = resolveLang();
 try { window.ACTIVE_LANG = ACTIVE_LANG; document.documentElement.lang = ACTIVE_LANG; } catch(e){}
