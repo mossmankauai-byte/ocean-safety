@@ -5303,7 +5303,7 @@ function _zoneEnsureCss(){
   var st=document.createElement('style'); st.id='os-zone-css';
   st.textContent='.os-zone-poly{cursor:pointer;filter:drop-shadow(0 0 1px rgba(255,255,255,.85))}'
     +'.os-zone-poly:hover{fill-opacity:.16}'
-    +'.os-zone-badge{transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap}'
+    +'.os-zone-badge{transform:translate(-50%,-95%);display:inline-flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap}'
     // _zoneVisualCenter hands us the most-INTERIOR point of the district, then translate(-50%,-50%)
     // centred the whole 130px lockup (circle+label) on it — parking the magnifier ~48px LEFT of the
     // anchor and, in a narrow district like Diamond Head, clean outside its own polygon. Anchor the
@@ -5311,10 +5311,10 @@ function _zoneEnsureCss(){
     // labels near the right edge grow inward instead of off the map.
     +'.os-zone-badge.sec{transform:translate(-17px,-50%)}'
     +'.os-zone-badge.sec.flip{flex-direction:row-reverse;transform:translate(calc(-100% + 17px),-50%)}'
-    +'.os-zone-badge .zb{width:34px;height:34px;border-radius:50%;background:#0f4c5c;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto;animation:oszbob 1.9s ease-in-out infinite}'
-    +'.os-zone-badge .zb svg{width:19px;height:19px;display:block}'
+    +'.os-zone-badge .zb{width:52px;height:52px;border-radius:50%;background:#0f4c5c;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto;animation:oszbob 1.9s ease-in-out infinite}'
+    +'.os-zone-badge .zb svg{width:28px;height:28px;display:block}'
     +'.os-zone-badge .zn{font:800 14px "DM Sans",sans-serif;color:#0f4c5c;text-shadow:0 0 3px #fff,0 0 3px #fff,0 1px 2px rgba(255,255,255,.9);letter-spacing:.01em}'
-    +'.os-zone-badge.sec .zb{width:30px;height:30px}.os-zone-badge.sec .zb svg{width:17px;height:17px}.os-zone-badge.sec .zn{font-size:12.5px}'
+    +'.os-zone-badge.sec .zb{width:44px;height:44px}.os-zone-badge.sec .zb svg{width:17px;height:17px}.os-zone-badge.sec .zn{font-size:12.5px}'
     +'@keyframes oszbob{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}'
     +'.os-wsec-lbl{transform:translate(-50%,-50%);font:800 10.5px "DM Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#0f4c5c;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff}'
     +'.ws-poi{transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap}'
