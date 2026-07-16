@@ -2367,7 +2367,7 @@ window.ensureIsland = function(slug){
     if(!isl){ reject(new Error('unknown island: '+slug)); return; }
     if(isl.data){ resolve(isl); return; }
     var s = document.createElement('script');
-    s.src = '/data/' + slug + '.js'; s.async = true;
+    s.src = '/jpdata/' + slug + '.js'; s.async = true;
     s.onload  = function(){ isl.data ? resolve(isl) : reject(new Error('island data missing after load: '+slug)); };
     s.onerror = function(){ reject(new Error('failed to load island data: '+slug)); };
     document.head.appendChild(s);
