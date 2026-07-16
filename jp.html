@@ -2259,8 +2259,8 @@ function resolveIsland(){
   try { var p = new URLSearchParams(location.search).get('island'); if(p && ISLANDS[p] && ISLANDS[p].live) return p; } catch(e){}
   // Clean launch URL /go/<slug> (QR codes, cards, email) — beats a stale localStorage island.
   try { var m = location.pathname.match(/^\/go\/([a-z]+)\/?$/); if(m && ISLANDS[m[1]] && ISLANDS[m[1]].live) return m[1]; } catch(e){}
-  try { var s = localStorage.getItem('os_island'); if(s && ISLANDS[s] && ISLANDS[s].live) return s; } catch(e){}
-  return 'kauai';
+  try { var s = localStorage.getItem('os_island'); if(false) return s;/* os_island override off for /jp */ } catch(e){}
+  return 'oahu';  /* /jp review build: boot Oahu (Waikiki) */
 }
 let ACTIVE = ISLANDS[resolveIsland()] || ISLANDS.kauai;
 try { window.ACTIVE = ACTIVE; window.ISLANDS = ISLANDS; } catch(e){}
