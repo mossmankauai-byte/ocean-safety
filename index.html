@@ -1894,7 +1894,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
       <p>Some recommendations include affiliate or partner relationships. This does not affect safety information or beach ratings.</p>
 
       <h4>Privacy</h4>
-      <p>We do not collect personal information, accounts, or location data. We do not track you.</p>
+      <p>No accounts and no signup — we never learn your name. We use privacy-respecting analytics and, on partner links, a visit counter; both turn off if your browser sends Do&nbsp;Not&nbsp;Track. If you tap Locate&nbsp;Me, a ~1&nbsp;km-rounded position goes to our server to fetch your local forecast. Full detail: <a href="/privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">oceansafety.app/privacy</a>.</p>
     </div>
     <div class="dis-footer">
       <button class="dis-accept" onclick="acceptDisclaimer()">I Understand — Continue</button>
@@ -2033,28 +2033,14 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
       <div class="dis-title">Privacy Policy</div>
     </div>
     <div class="dis-body">
-      <p class="dis-lead">Effective Date: May 2026</p>
-      <h4>What we collect</h4>
-      <p><b>No personal information.</b> No accounts, names, emails, phone numbers, or precise location. There is no signup, no login, and no profile.</p>
-      <p>We do use privacy-respecting product analytics (PostHog) to understand how the app is found and which features are used — for example, which sections visitors open and how long they spend — so we can keep improving it. This is <b>anonymous usage data only</b>. We do not use tracking cookies (analytics state stays in your browser's local storage), and if your browser sends a "Do Not Track" signal, we turn analytics off entirely.</p>
-      <h4>What we do not do</h4>
-      <p>We do not sell or share your data with advertisers. We do not build advertising profiles, and we do not track you across other websites. We do not collect anything that personally identifies you.</p>
-      <h4>Weather data</h4>
-      <p>The app fetches public weather and ocean data from Open-Meteo (open-meteo.com). Your IP address may be visible to Open-Meteo when these requests are made — this is standard for any website. We have no contract with them and receive no data back about you.</p>
-      <h4>If you tap "Locate Me"</h4>
-      <p>Your browser will ask permission to share your location with this app. If you allow it, your position is shown on your screen only — it never leaves your device. We do not see, store, or transmit it.</p>
-      <h4>Offline cache</h4>
-      <p>If you install this app to your home screen, your browser caches recent map tiles, weather data, and beach photos so the app works without signal. That data lives on your device and is never transmitted to us. You can clear it any time from your browser settings.</p>
-      <h4>Affiliate links</h4>
-      <p>Some external links (gear rental, tours) may include affiliate codes. If you make a purchase, the merchant may pay this app a small commission. The merchant — not us — receives your purchase information directly from you.</p>
-      <h4>Photo credits</h4>
-      <p>Beach photos are licensed under Creative Commons. Wikimedia Commons contributors provided the photos for Hanalei, Keʻe area, Secret Beach, Kalihiwai, Poʻipū, Shipwreck, Māhāʻulepū, Lydgate, Kalapaki, Wailua, Polihale, and Kekaha. Flickr CC-licensed contributors: Gord Webster (ʻAnini), Peter Burka (Keʻe), Garden State Hiker / elchode (Tunnels), Nicki Dugan Pogue / TheNickster (Brennecke sunset), Gabriel Millos / gamillos (Donkey Beach). Full license info is in our public source tree.</p>
-      <h4>Children</h4>
-      <p>This app does not knowingly collect any data from anyone, including children under 13. It is safe for the whole family.</p>
-      <h4>Changes</h4>
-      <p>If this policy changes, we will update the date above and re-prompt acceptance for material changes.</p>
-      <h4>Contact</h4>
-      <p>Questions? Email the developer at <b>mossmankauai@gmail.com</b>.</p>
+      <p class="dis-lead">Effective 16 July 2026 · Version 2.0</p>
+      <p>No accounts, no signup, no login — we never learn your name. This is the short version; the full, code-audited policy lives at <a href="/privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">oceansafety.app/privacy</a>.</p>
+      <h4>What leaves your phone</h4>
+      <p>If you tap <b>Locate Me</b>, a position rounded to about 1&nbsp;km is sent to our server to fetch your local forecast — your exact position stays on your device. We count visits with privacy-respecting analytics (PostHog), watch for crashes (Sentry), and, on partner links, count opens. All of it rides a random id, never your name.</p>
+      <h4>What we don't do</h4>
+      <p>We don't sell your data, run ads, build ad profiles, or set tracking cookies. If your browser sends <b>Do&nbsp;Not&nbsp;Track</b>, we turn all counting off.</p>
+      <h4>Your call</h4>
+      <p>Clear site data in your browser to wipe everything held on your device. Questions or deletion: <a href="mailto:privacy@oceansafety.app" style="color:#0f4c5c;text-decoration:underline">privacy@oceansafety.app</a>. Full detail — including every third party that sees your visit — is at <a href="/privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">oceansafety.app/privacy</a>.</p>
     </div>
     <div class="dis-footer">
       <button class="dis-accept" onclick="closePrivacy()">Close</button>
@@ -8632,6 +8618,7 @@ function _activeUnitId(){
 // with its same privacy rule: the worker emit happens only when THIS page
 // load carries ?ref=<slug>; organic visitors emit nothing. Fail-silent.
 function _partnerTrack(type, label){
+  if(navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1') return;
   label = String(label || '').slice(0, 64);
   try { if(window.OSA && typeof OSA.track === 'function') OSA.track(type, { label: label }); } catch(e){}
   try {
@@ -10753,6 +10740,7 @@ if('serviceWorker' in navigator){
    opaque random session id, whitelisted event types, batched, fail-silent. */
 (function(){
   try{
+    if(navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1') return;
     var slug = (new URLSearchParams(location.search).get('ref') || '').trim().toLowerCase();
     if(!slug || !/^[a-z0-9-]{2,64}$/.test(slug)) return;
     var API = 'https://concierge-guide-api.oceansafe-hi.workers.dev/e';
