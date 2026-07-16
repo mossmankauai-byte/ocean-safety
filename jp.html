@@ -2328,7 +2328,7 @@ let B=[
 // ACTIVE/ISLANDS are top-level lexical bindings (classic scripts) → reachable from later inline scripts.
 // Resolve the active island from ?island= / localStorage / default. Only live islands are
 // selectable. (Each island's full dataset is attached after all data arrays are defined.)
-function resolveIsland(){
+function resolveIsland(){ return 'oahu'; /* /jp LOCKED to Oahu */
   // Explicit ?island= wins first — the in-app switcher navigates to <path>?island=slug and KEEPS
   // the path, so on a /go/<slug> entry the query must beat the path or switching would no-op.
   try { var p = new URLSearchParams(location.search).get('island'); if(p && ISLANDS[p] && ISLANDS[p].live) return p; } catch(e){}
