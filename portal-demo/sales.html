@@ -22,6 +22,7 @@
     <a href="dashboard.html">Dashboard</a>
     <a class="on" href="sales.html">Sales</a>
     <a href="products.html">Products</a>
+    <a href="inventory.html">Inventory</a>
     <a href="promotions.html">Promotions</a>
     <a href="#" id="out">Sign out</a>
   </nav></div>
@@ -32,7 +33,7 @@
   <!-- stat cards -->
   <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:12px">
     <div class="card"><div class="lbl">Sales this month</div><div class="big" id="mSales">—</div><div class="muted small" id="mCount">0 orders</div></div>
-    <div class="card"><div class="lbl">Your payout</div><div class="big" id="mPayout" style="color:var(--green)">—</div><div class="muted small">after card processing (via your Square, at cost)</div></div>
+    <div class="card"><div class="lbl">Your payout (87.3%)</div><div class="big" id="mPayout" style="color:var(--green)">—</div><div class="muted small">after OceanSafe's 12.7% (card processing via your Square, at cost)</div></div>
     <div class="card"><div class="lbl">Avg order</div><div class="big" id="mAvg">—</div><div class="muted small">per paid order</div></div>
     <div class="card"><div class="lbl">All-time orders</div><div class="big" id="mAll">—</div><div class="muted small">paid, lifetime</div></div>
   </div>
@@ -86,7 +87,7 @@
     const cents = paidMonth.reduce((s, o) => s + (o.total_cents || 0), 0);
     el("mSales").textContent = money(cents);
     el("mCount").textContent = `${paidMonth.length} order${paidMonth.length === 1 ? "" : "s"}`;
-    el("mPayout").textContent = money(Math.round(cents * 0.933));
+    el("mPayout").textContent = money(Math.round(cents * 0.873));
     el("mAvg").textContent = paidMonth.length ? money(Math.round(cents / paidMonth.length)) : "—";
     el("mAll").textContent = paid.length;
 

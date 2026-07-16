@@ -80,9 +80,17 @@ async function getMyPartner(userId) {
   if (DEMO) return { ...DEMO_PARTNER };
   // Adopt any unowned partner row(s) matching the verified email before reading.
   try { await sb.rpc("claim_my_partner"); } catch (_) { /* swallow softly */ }
-  const { data, error } = await sb.from("partners").select("*").eq("owner", userId).maybeSingle();
+  // An owner can legitimately hold MORE THAN ONE partner row — claim_my_partner adopts
+  // EVERY unowned row matching the verified email (a free draft plus a later paid signup,
+  // a re-submitted form, two locations). maybeSingle() THROWS on >1 row (PGRST116), which
+  // blanked the portal for exactly the people who had paid — they could never reach the
+  // Connect Square button. Read all rows and pick: a live one first, newest first.
+  const { data, error } = await sb.from("partners").select("*")
+    .eq("owner", userId)
+    .order("created_at", { ascending: false });
   if (error) throw error;
-  return data;
+  const rows = data || [];
+  return rows.find((r) => r.status === "live") || rows[0] || null;
 }
 
 // Call an Edge Function with the user's JWT (so it can verify ownership).
