@@ -2259,8 +2259,8 @@ function resolveIsland(){
   try { var p = new URLSearchParams(location.search).get('island'); if(p && ISLANDS[p] && ISLANDS[p].live) return p; } catch(e){}
   // Clean launch URL /go/<slug> (QR codes, cards, email) — beats a stale localStorage island.
   try { var m = location.pathname.match(/^\/go\/([a-z]+)\/?$/); if(m && ISLANDS[m[1]] && ISLANDS[m[1]].live) return m[1]; } catch(e){}
-  try { var s = localStorage.getItem('os_island'); if(false) return s;/* os_island override off for /jp */ } catch(e){}
-  return 'oahu';  /* /jp review build: boot Oahu (Waikiki) */
+  try { var s = localStorage.getItem('os_island'); if(false) return s;/* os_island off for /jp */ } catch(e){}
+  return 'oahu';  /* /jp: boot Oahu */
 }
 let ACTIVE = ISLANDS[resolveIsland()] || ISLANDS.kauai;
 try { window.ACTIVE = ACTIVE; window.ISLANDS = ISLANDS; } catch(e){}
@@ -7056,9 +7056,9 @@ function applyPartnerMode(){
   // Plan tab off for now (2026-07-13); Shop takes its slot. Star icon by default,
   // the Town bag icon when the active partner is a RETAIL store (window._partnerSeg).
   var plan=document.querySelector('#tabs .tab[data-tab="activities"]');
-  if(plan) plan.style.display='none';
+  if(plan) plan.style.display='';/* /jp: Plan ON */
   var shopTab=document.querySelector('#tabs .tab[data-tab="shop"]');
-  if(shopTab){ shopTab.style.display = aff ? 'none' : '';
+  if(shopTab){ shopTab.style.display = 'none';/* /jp: Shop OFF */
     var si=shopTab.querySelector('.tab-ico');
     if(si){ var star=document.querySelector('#tabs .tab[data-tab="activities"] .tab-ico');
       var src=(window._partnerSeg==='retail')?RETAIL_ICO:((star&&star.src)||SHOP_ICO);
@@ -7488,9 +7488,9 @@ function _zoneEnsureCss(){
   var st=document.createElement('style'); st.id='os-zone-css';
   st.textContent='.os-zone-poly{cursor:pointer;filter:drop-shadow(0 0 1px rgba(255,255,255,.85))}'
     +'.os-zone-poly:hover{fill-opacity:.16}'
-    +'.os-zone-badge{transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap}'
-    +'.os-zone-badge .zb{width:34px;height:34px;border-radius:50%;background:#0f4c5c;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto;animation:oszbob 1.9s ease-in-out infinite}'
-    +'.os-zone-badge .zb svg{width:19px;height:19px;display:block}'
+    +'.os-zone-badge{transform:translate(-50%,-92%);display:inline-flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap}'
+    +'.os-zone-badge .zb{width:48px;height:48px;border-radius:50%;background:#0f4c5c;border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto;animation:oszbob 1.9s ease-in-out infinite}'
+    +'.os-zone-badge .zb svg{width:26px;height:26px;display:block}'
     +'.os-zone-badge .zn{font:800 14px "DM Sans",sans-serif;color:#0f4c5c;text-shadow:0 0 3px #fff,0 0 3px #fff,0 1px 2px rgba(255,255,255,.9);letter-spacing:.01em}'
     +'.os-zone-badge.sec .zb{width:30px;height:30px}.os-zone-badge.sec .zb svg{width:17px;height:17px}.os-zone-badge.sec .zn{font-size:12.5px}'
     +'@keyframes oszbob{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}'
@@ -10392,7 +10392,7 @@ boot().catch(e=>{console.error(e);document.getElementById('loader').classList.ad
 // Register the Workbox service worker for offline support and PWA install.
 // On a new SW activation we show a small "Updated — tap to reload" toast so
 // the user isn't surprised by a silent map reset / scroll jump mid-session.
-if(false /* SW disabled: /jp review build */ && 'serviceWorker' in navigator){
+if(false /* SW off: /jp */ && 'serviceWorker' in navigator){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
       let refreshing = false;
