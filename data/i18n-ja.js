@@ -11,7 +11,7 @@ window.I18N.ja=Object.assign(window.I18N.ja||{},{"Waikīkī":"ワイキキ"});  
 // Verified with `node --check`. Does NOT touch the English rendering.
 window.I18N.ja=Object.assign(window.I18N.ja||{},{
   // --- Bottom nav tab labels ---
-  "Beaches":"ビーチ",
+  "Plan":"プラン","Beaches":"ビーチ",
   "Trails":"トレイル",
   "Family":"ファミリー",
   "Tours":"ツアー",
