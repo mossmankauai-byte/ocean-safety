@@ -10,3 +10,7 @@
 # DB-driven partner pages + no-login dashboards (runtime from Supabase)
 /p/*  /p.html  200
 /d/*  /d.html  200
+
+# Clean island launch URLs for QR codes, cards, email — rewrite (not redirect) so the
+# path survives and index.html's resolveIsland() can read the /go/<slug>
+/go/*  /index.html  200
