@@ -41,6 +41,11 @@
   .hero{position:relative;overflow:hidden;color:#eef9fb;
     background:linear-gradient(158deg,var(--deep) 0%,var(--deep2) 100%);
     padding:26px 0 92px}
+  .hero .bg{position:absolute;inset:0;background:center/cover no-repeat;opacity:.5}
+  .hero .scrim{position:absolute;inset:0;
+    background:linear-gradient(158deg,rgba(12,74,88,.92) 0%,rgba(12,74,88,.76) 45%,rgba(10,122,148,.66) 100%)}
+  .wm-row{display:flex;align-items:center;gap:10px}
+  .wm-ico{width:34px;height:34px;border-radius:9px;box-shadow:0 2px 8px rgba(3,26,32,.35)}
   .hero .sun{position:absolute;top:-70px;right:-40px;width:230px;height:230px;border-radius:50%;
     background:radial-gradient(circle,rgba(255,198,75,.30),rgba(255,198,75,0) 70%);pointer-events:none}
   .hero .wrap{position:relative;z-index:2}
@@ -64,13 +69,19 @@
   .reassure{margin-top:12px;font-size:13.5px;color:#a9dce7}
   .audience{margin-top:20px;font-size:13.5px;color:#bfe0e8;border-top:1px solid rgba(255,255,255,.14);
     padding-top:16px;max-width:42ch}
-  .hero-phone{position:relative;z-index:2;width:min(232px,58vw);margin:30px auto -34px;
-    border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.28);
-    box-shadow:0 3px 8px rgba(3,26,32,.28),0 30px 60px -18px rgba(3,26,32,.6)}
-  .hero-phone img{display:block;width:100%;height:auto}
+  .hero-phone{position:relative;z-index:2;width:min(290px,72vw);margin:34px auto -46px;
+    border-radius:30px;overflow:hidden;border:5px solid #0b1418;background:#0b1418;
+    box-shadow:0 3px 10px rgba(3,26,32,.32),0 34px 70px -20px rgba(3,26,32,.65)}
+  .hero-phone img{display:block;width:100%;height:auto;border-radius:25px}
   @media(min-width:700px){.hero{padding-bottom:110px}}
   .wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:70px;display:block}
   .wave path{fill:var(--bg)}
+
+  /* photo band */
+  .band{position:relative;height:220px;overflow:hidden;background:var(--deep)}
+  .band img{width:100%;height:100%;object-fit:cover;opacity:.74}
+  .band .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 20px;color:#eaf6f9;font-size:14.5px;
+    background:linear-gradient(to top,rgba(8,45,55,.9),rgba(8,45,55,0))}
 
   /* ---------- SECTIONS ---------- */
   section{padding:52px 0}
@@ -223,9 +234,11 @@
 
 <!-- ================= HERO ================= -->
 <header class="hero np">
+  <div class="bg" id="heroBg" style="background-image:url('/assets/stock/kauai-beach.jpg')" aria-hidden="true"></div>
+  <div class="scrim" aria-hidden="true"></div>
   <div class="sun" aria-hidden="true"></div>
   <div class="wrap">
-    <span class="wm">Ocean<i>Safe</i></span>
+    <span class="wm wm-row"><img class="wm-ico" src="/icons/pwa-192.png" alt="">Ocean<i>Safe</i></span>
     <span class="eyebrow">Hawaiʻi Creator Program</span>
     <h1>Turn your beach content into tour commission.</h1>
     <p class="lede">OceanSafe is the free app visitors open to check if the water's safe. Share it with your own link — and when your followers book a tour inside it, you earn half the commission.</p>
@@ -244,7 +257,7 @@
     <p class="audience">For Hawaiʻi-based creators on Kauaʻi, Oʻahu, and Maui — beach, surf, family, food, hiking, photography. Nano and micro accounts welcome; local trust beats follower count here.</p>
   </div>
   <div class="hero-phone">
-    <img src="/assets/shot-app-kauai.jpg" width="546" height="1182" alt="The OceanSafe app: today's conditions and every beach scored for swimming, snorkeling and surf.">
+    <img id="heroShot" src="/assets/shot-app-kauai.jpg" width="546" height="1182" alt="The OceanSafe app: today's conditions and every beach scored for swimming, snorkeling and surf.">
   </div>
   <svg class="wave" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0,30 C240,72 480,72 720,44 C960,16 1200,16 1440,44 L1440,70 L0,70 Z"/></svg>
 </header>
@@ -332,6 +345,12 @@
     </div>
   </div>
 </section>
+
+<!-- photo band (island-aware, real licensed shots — see assets/stock/SOURCES.md) -->
+<div class="band np">
+  <img id="bandImg" src="/assets/stock/snorkeling.jpg" alt="" loading="lazy">
+  <div class="cap">Your followers check the water before they go. Your link is what they open.</div>
+</div>
 
 <!-- ================= CLAIM ================= -->
 <section id="claim" class="np">
@@ -502,10 +521,20 @@
     $('kit').classList.add('on');
   }
 
-  // Outreach links carry ?island= — pre-select the prospect's home island in the form.
+  // Outreach links carry ?island= — pre-select the prospect's home island and dress the
+  // page in that island's photography (same rule as town-ad: never another island's beach).
   try {
     var qIsl = new URLSearchParams(location.search).get('island');
     if(qIsl && document.querySelector('#cf-island option[value="'+qIsl+'"]')) $('cf-island').value = qIsl;
+    var ISLE = { kauai:{hero:'/assets/stock/kauai-beach.jpg', band:'/assets/stock/poipu-sunset.jpg'},
+                 maui:{hero:'/assets/stock/maui-beach.jpg', band:'/assets/stock/snorkeling.jpg'},
+                 oahu:{hero:'/assets/stock/family-beach.jpg', band:'/assets/stock/big-waves.jpg'} };
+    var isl = ISLE[qIsl];
+    if(isl){
+      var hb=document.getElementById('heroBg'); if(hb) hb.style.backgroundImage = "url('"+isl.hero+"')";
+      var bi=document.getElementById('bandImg'); if(bi) bi.src = isl.band;
+      var hs=document.getElementById('heroShot'); if(hs) hs.src = '/assets/shot-app-'+qIsl+'.jpg';
+    }
   } catch(e){}
 
   // Returning creator: kit straight away
