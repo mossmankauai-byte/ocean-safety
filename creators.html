@@ -502,6 +502,12 @@
     $('kit').classList.add('on');
   }
 
+  // Outreach links carry ?island= — pre-select the prospect's home island in the form.
+  try {
+    var qIsl = new URLSearchParams(location.search).get('island');
+    if(qIsl && document.querySelector('#cf-island option[value="'+qIsl+'"]')) $('cf-island').value = qIsl;
+  } catch(e){}
+
   // Returning creator: kit straight away
   var saved = null;
   try { saved = JSON.parse(localStorage.getItem('osc_kit') || 'null'); } catch(e){}
