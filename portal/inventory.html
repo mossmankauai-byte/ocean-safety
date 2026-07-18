@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="oceansafe-favicon.png">
+<link rel="stylesheet" href="portal.css">
+<title>OceanSafe Partners — Inventory</title>
+<style>
+  /* inventory grid — compact editable inputs, mobile-safe (min 44px targets) */
+  .inv-t { width:100%; border-collapse:collapse }
+  .inv-t th, .inv-t td { padding:10px 8px; border-bottom:1px solid var(--line,#e6e9ee); vertical-align:middle }
+  .inv-t th { text-align:left; font-size:12px; letter-spacing:.03em; text-transform:uppercase; color:var(--muted,#667) }
+  .inv-t td.num, .inv-t th.num { text-align:right }
+  .inv-in { width:84px; min-height:40px; padding:6px 8px; border:1px solid var(--line,#cfd6de); border-radius:8px; font:inherit; text-align:right }
+  .inv-in.sku { width:120px; text-align:left; font-family:ui-monospace,monospace }
+  .inv-save { min-height:40px; padding:6px 12px }
+  .inv-t .muted.small { font-family:ui-monospace,monospace }
+</style>
+</head>
+<body>
+<div class="bar"><img src="oceansafe-favicon.png" alt=""><b>OceanSafe</b><span class="crumb" id="shopName">·</span>
+  <span class="sp"></span>
+  <nav class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="sales.html">Sales</a>
+    <a href="products.html">Products</a>
+    <a class="on" href="inventory.html">Inventory</a>
+    <a href="promotions.html">Promotions</a>
+    <a href="#" id="tourLink">Tour</a>
+    <a href="#" id="out">Sign out</a>
+  </nav></div>
+
+<div class="wrap">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <h1 style="flex:1">Inventory</h1>
+    <a class="btn primary" id="addBtn" href="products.html">+ Add a product</a>
+  </div>
+  <p class="muted small" style="margin:4px 2px 0">Set what's on your shelves and the point where you want a low-stock heads-up. In-app sales count these down automatically; the Dashboard shows the rolling view.</p>
+
+  <!-- sync from Square -->
+  <div class="card" id="syncCard" style="margin-top:14px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px">
+        <b>Keep counts in sync with your register</b>
+        <div class="muted small" style="margin-top:3px" id="syncSub">Pulls your Square location's live on-hand counts by SKU. Items Square doesn't stock-track are left exactly as you set them.</div>
+      </div>
+      <button class="btn primary" id="invSyncBtn" style="min-height:44px">Sync stock from Square</button>
+    </div>
+    <div id="syncMsg" class="msg hide"></div>
+  </div>
+
+  <!-- the editable grid -->
+  <div class="card" style="margin-top:14px">
+    <div id="inv"><span class="muted small">Loading…</span></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  let session, partner, products = [];
+  function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  (async () => {
+    session = await requireAuth();
+    partner = await getMyPartner(session.user.id);
+    if (!partner) return location.replace("get-started.html");
+    el("shopName").textContent = "· " + partner.name;
+    el("out").addEventListener("click", (e) => { e.preventDefault(); signOut(); });
+
+    // Sync is only useful with a connected Square — otherwise counts are all by hand.
+    const canSync = window.OCEANSAFE_DEMO || (partner.square_merchant_id && !partner.square_revoked_at);
+    if (canSync) {
+      el("invSyncBtn").addEventListener("click", () => syncInventory(el("invSyncBtn")));
+    } else {
+      el("invSyncBtn").disabled = true;
+      el("syncSub").innerHTML = 'Connect your Square on the <a href="dashboard.html">Dashboard</a> and your register counts can sync here automatically.';
+    }
+
+    await load();
+
+    // First-visit tour (engine in app.js); the Tour link replays it. Auto-runs
+    // once — it points at the first row's inputs, so it only fires with items to
+    // touch (empty shops just get the page).
+    osPortalTour({
+      key: "os_inv_tour_v1", auto: true, delay: 700, button: el("tourLink"),
+      steps: [
+        { center: true, title: "Your inventory desk",
+          body: "Set your counts, get low-stock alerts, and keep everything in sync with your register — all right here." },
+        { sel: "#invSyncBtn", title: "Pull real counts from Square",
+          body: "One tap loads your register's live on-hand numbers by SKU. Items Square doesn't track stay exactly as you set them." },
+        { sel: '#invBody tr:first-child input[data-field="stock"]', title: "Type what's on the shelf",
+          body: "Enter how many you have. In-app sales count it down from here, and 0 marks the item <b>Sold out</b>. Leave it blank for made-to-order items that never run out." },
+        { sel: '#invBody tr:first-child input[data-field="reorder_at"]', title: "Set a reorder alert",
+          body: "The number where you want a heads-up. Hit it and the item flags <b>Reorder</b> here and on your Dashboard. Leave blank for no alert." },
+        { sel: '#invBody tr:first-child .inv-save', title: "Save the row",
+          body: "Changing any field lights up <b>Save</b> — one tap stores it. That's all there is to it." },
+        { sel: "#addBtn", title: "Adding a new item",
+          body: "A brand-new product starts on the Products page — give it a name, price, and photo. It shows up here right away to count and set a reorder alert." },
+        { center: true, title: "That's your inventory",
+          body: "Counts here, the rolling view on your Dashboard. Replay this anytime with the <b>Tour</b> link." },
+      ],
+    });
+  })();
+
+  // ── load + render the grid ──────────────────────────────────────────────────
+  async function load() {
+    if (window.OCEANSAFE_DEMO) {
+      products = demoRows();
+    } else {
+      const { data, error } = await sb.from("products")
+        .select("id,title,sku,stock,reorder_at,stock_synced_at,mode,active")
+        .eq("partner_id", partner.id).order("sort", { ascending: true }).order("created_at", { ascending: false });
+      if (error) { el("inv").innerHTML = `<span class="msg err">${esc(error.message)}</span>`; return; }
+      products = (data || []).filter((p) => p.mode !== "affiliate"); // affiliate items have no stock
+    }
+    render();
+  }
+
+  // status from stock + reorder_at (mirrors the dashboard glance).
+  function statusBadge(p) {
+    if (p.stock == null) return '<span class="badge b-grey">Unlimited</span>';
+    if (p.stock === 0) return '<span class="badge b-red">Sold out</span>';
+    if (p.reorder_at != null && p.stock <= p.reorder_at) return '<span class="badge b-amber">Reorder</span>';
+    return '<span class="badge b-green">OK</span>';
+  }
+
+  function render() {
+    if (!products.length) {
+      el("inv").innerHTML = `<span class="muted small">No stockable products yet. <a href="products.html">Add one</a>${partner.square_merchant_id && !partner.square_revoked_at ? ", or import from Square on the Products page" : ""} and it'll appear here to count.</span>`;
+      return;
+    }
+    const synced = products.map((p) => p.stock_synced_at).filter(Boolean).sort().pop();
+    const asOf = synced ? `<p class="muted small" style="margin:0 0 12px">Square counts last synced ${new Date(synced).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}.</p>` : "";
+    el("inv").innerHTML = asOf + `<table class="inv-t"><thead><tr>
+        <th>Item</th><th class="num">On hand</th><th class="num">Reorder at</th><th>SKU</th><th>Status</th><th></th>
+      </tr></thead><tbody id="invBody">${products.map(rowHtml).join("")}</tbody></table>`;
+    $$("#invBody tr").forEach((tr) => {
+      const id = tr.dataset.id;
+      $$("input", tr).forEach((inp) => inp.addEventListener("input", () => markDirty(id)));
+      $(".inv-save", tr).addEventListener("click", () => saveRow(id));
+    });
+  }
+
+  function rowHtml(p) {
+    return `<tr data-id="${p.id}">
+      <td><b>${esc(p.title)}</b>${p.active ? "" : ' <span class="muted small">· hidden</span>'}</td>
+      <td class="num"><input class="inv-in" type="number" min="0" step="1" data-field="stock" value="${p.stock ?? ""}" placeholder="∞"></td>
+      <td class="num"><input class="inv-in" type="number" min="0" step="1" data-field="reorder_at" value="${p.reorder_at ?? ""}" placeholder="—"></td>
+      <td><input class="inv-in sku" type="text" data-field="sku" value="${esc(p.sku ?? "")}" placeholder="—"></td>
+      <td data-status>${statusBadge(p)}</td>
+      <td class="num"><button class="btn ghost inv-save" type="button" disabled>Saved</button></td>
+    </tr>`;
+  }
+
+  function markDirty(id) {
+    const tr = $(`#invBody tr[data-id="${id}"]`);
+    const btn = $(".inv-save", tr);
+    btn.disabled = false; btn.className = "btn primary inv-save"; btn.textContent = "Save";
+  }
+
+  // Validate + persist one row's stock / reorder_at / sku. Blank number = NULL
+  // (unlimited / no alert), matching the products.stock convention (0007/0030).
+  async function saveRow(id) {
+    const tr = $(`#invBody tr[data-id="${id}"]`);
+    const btn = $(".inv-save", tr);
+    const parseIntOrNull = (v) => {
+      const s = String(v).trim();
+      if (s === "") return { ok: true, val: null };
+      const n = parseInt(s, 10);
+      if (!Number.isFinite(n) || n < 0) return { ok: false };
+      return { ok: true, val: n };
+    };
+    const stockR = parseIntOrNull($('input[data-field="stock"]', tr).value);
+    const reorderR = parseIntOrNull($('input[data-field="reorder_at"]', tr).value);
+    if (!stockR.ok) return flash(btn, "err", "On hand must be a whole number (0+) or blank.");
+    if (!reorderR.ok) return flash(btn, "err", "Reorder at must be a whole number (0+) or blank.");
+    const sku = $('input[data-field="sku"]', tr).value.trim().slice(0, 60) || null;
+    const patch = { stock: stockR.val, reorder_at: reorderR.val, sku };
+
+    btn.disabled = true; const was = btn.textContent; btn.innerHTML = '<span class="spin"></span>';
+    try {
+      if (!window.OCEANSAFE_DEMO) {
+        const { error } = await sb.from("products").update(patch).eq("id", id);
+        if (error) throw error;
+      }
+      const p = products.find((x) => x.id === id);
+      Object.assign(p, patch);
+      $("[data-status]", tr).innerHTML = statusBadge(p);
+      btn.className = "btn ghost inv-save"; btn.disabled = true; btn.textContent = "Saved ✓";
+    } catch (e) {
+      btn.disabled = false; btn.className = "btn primary inv-save"; btn.textContent = was || "Save";
+      flash(btn, "err", (e && e.message) || String(e));
+    }
+  }
+
+  function flash(btn, kind, text) {
+    let m = btn.closest("tr").querySelector(".rowmsg");
+    if (!m) { m = document.createElement("div"); m.className = "rowmsg muted small"; btn.closest("td").appendChild(m); }
+    m.style.color = kind === "err" ? "var(--red,#b42318)" : "";
+    m.textContent = text;
+    setTimeout(() => { if (m) m.textContent = ""; }, 4000);
+  }
+
+  // ── sync from Square (same inventory-sync Edge Function as the dashboard) ────
+  async function syncInventory(btn) {
+    el("syncMsg").className = "msg hide";
+    btn.disabled = true; const was = btn.textContent; btn.innerHTML = '<span class="spin"></span>';
+    try {
+      if (window.OCEANSAFE_DEMO) { await new Promise((r) => setTimeout(r, 600)); toast(el("syncMsg"), "ok", "Stock refreshed from Square. (demo)"); await load(); return; }
+      const r = await fn("inventory-sync", { partner_id: partner.id });
+      if (r && r.needs_reconnect) {
+        el("syncMsg").className = "msg err";
+        el("syncMsg").innerHTML = `Your Square connection predates stock sync — reconnect once to allow it. <button class="btn ghost" type="button" id="invReconn" style="margin-left:8px;min-height:36px;padding:6px 12px">Reconnect Square →</button>`;
+        el("invReconn").addEventListener("click", async () => {
+          const s = await fn("square-connect-start", { partner_id: partner.id });
+          if (s && s.url) location.href = s.url;
+        });
+        return;
+      }
+      toast(el("syncMsg"), "ok", `Updated ${r.updated} item${r.updated === 1 ? "" : "s"} from Square${r.untracked ? ` · ${r.untracked} not stock-tracked in Square (left as-is)` : ""}.`);
+      await load();
+    } catch (e) {
+      toast(el("syncMsg"), "err", (e && e.message) || String(e));
+    } finally { btn.disabled = false; btn.textContent = was; }
+  }
+
+  // demo rows — mirror the dashboard's demo inventory so the tour has items.
+  function demoRows() {
+    return [
+      { id: "d1", title: "Reef-safe SPF 50", sku: "SPF50-8OZ", stock: 4, reorder_at: 6, active: true, mode: "storefront", stock_synced_at: new Date().toISOString() },
+      { id: "d2", title: "Snorkel set — day rental", sku: "SNK-SET", stock: 9, reorder_at: 3, active: true, mode: "storefront" },
+      { id: "d3", title: "UPF 50+ rash guard", sku: "RG-UPF50-M", stock: 0, reorder_at: 5, active: true, mode: "storefront" },
+      { id: "d4", title: "Water shoes", sku: "WS-10", stock: 22, reorder_at: null, active: true, mode: "storefront" },
+    ];
+  }
+</script>
+</body>
+</html>

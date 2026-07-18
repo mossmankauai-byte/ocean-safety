@@ -34,7 +34,11 @@ export default async (req) => {
       // text/plain avoids a CORS preflight at the worker and dodges bot-fight UA heuristics;
       // identify ourselves the same way the geocoder does.
       headers: { 'Content-Type': 'text/plain', 'User-Agent': 'OceanSafe-Netlify/1.0 (nick@oceansafety.app)' },
-      body: JSON.stringify({ handle: clean, island: String(body.island || 'kauai').toLowerCase() }),
+      body: JSON.stringify({
+        handle: clean, island: String(body.island || 'kauai').toLowerCase(),
+        name: String(body.name || '').slice(0, 80), email: String(body.email || '').slice(0, 120),
+        platform: String(body.platform || '').slice(0, 24),
+      }),
     });
     const out = await r.json().catch(() => null);
     if (!out) return json({ ok: false, reason: 'worker_bad_response' }, 502);
