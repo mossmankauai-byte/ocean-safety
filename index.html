@@ -1781,6 +1781,13 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .pl-paid{background:#FEF3C7;color:#78530A;border:1px solid #E9D9B0}
 .pl-pick{background:#E8F4F7;color:#0c4a58;border:1px solid #C5E3EB}
 .poi-hero{height:72px;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:12px;margin-bottom:12px;position:relative}
+.poi-photo-credit{font:500 9.5px 'DM Sans',sans-serif;color:var(--mute);margin:-8px 0 12px;text-align:right}
+.town-row{display:flex;align-items:center;gap:10px;padding:11px 12px;background:#fff;border:1px solid var(--border);border-radius:11px;margin-bottom:7px;cursor:pointer;transition:border-color .15s}
+.town-row:hover{border-color:var(--ocean)}
+.town-row:active{transform:scale(.995)}
+.town-row-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.town-row-t b{font-size:13.5px;color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.town-row-t span{font-size:11px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .poi-hero-icon{font-size:28px;flex-shrink:0}
 .poi-hero-name{font-size:18px;font-weight:700;color:var(--ocean);line-height:1.1}
 .poi-hero-type{font-size:10px;color:var(--mute);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
@@ -1956,7 +1963,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 </button>
 <div id="tabs" role="tablist" aria-label="Main sections"><button type="button" class="tab" role="tab" data-tab="beaches"><img src="data:image/png;base64,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" alt="" class="tab-ico">Beaches</button><button type="button" class="tab" role="tab" data-tab="hikes"><img src="data:image/png;base64,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" alt="" class="tab-ico">Trails</button><div class="tab active" data-tab="acts"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAADAFBMVEUFTGcAAADR1soSVGz+/eNJeoguZ3r99NuOp6jp59S1w7xylZunubRZhI9kjJT++/HDzML/8tn+89v+89v+893/89yasa7+9uEhXnS8yMD88t09cYL/9eA3boD9+tysizYAPFve4tJ8nKDMmC0AQV/y7Nn/9uCFfUKAnqEoWV3/3d0A//+bhTw9YVZQaFAXUV66kTSAgP/57tyNgEB3eEj/6OgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADaACc7AAABAHRSTlP+AP7+/v3++P7+/f7+/v4L/tGPsU9w/in+/i7+UP4O///+/v//Enj///8HAf//////Aiz//wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8V5HFQAABDpJREFUeNqll+eW4ygQhekig0DJkpzadofpMDtp0/u/2oICiu2WZ/nhY8viU4VbqArd/c+FPv4rrjZFUWRFcazimwFxVeSck3Zxnr/sTzcAqpeUE5mU2lC3jBaJJDwtqpWAfeZ2lxSjwcJUOEZWrQDEbntiRrtbhlEOEX8G2KQEKPpg0YSkm6uAOCNSoytLS178+THglJOEoauLJST/8hFgn5ISo08WLkkeLwPc/je0Yj2OCD0gTolGq5Ym+dc54GtOBFq5BMnmgIxEaPWKyGYK2HDA6wEYeDUGxCln6IZ1CIFEnQOP6KYlOicaQHWTA7UTMo0HgJyYgXnWLLtjNB3mctMD9hz6ggFQCtQcgRVEEA3i2JiAmgjY8BTpbcHiYSZqu3Mfg0ptTfCAL1ziwG3uYHg3kdWzBpVE0Lu65XkH2PQa1I2NQmI2CSuF0lC7g22vJh63gIwEw5S5+HujSCAYhYHJ5h6RBK4hxwZwSoMHKLFGJKCdK7oBvH9vyb7QjHv8LlQc41kD2PMQWyslRPWByCSv/fr21MbGXbQ8wRejglV1HpAPgQ4hNMHzyDoT/jl/ez2/uksuIqyEgwBDkwAoeQMo+hAkogeULl6vZ4T+PvtfEsAn1uykDCnXvqKQj2EIF1Oy+w51Qs/f38/YH8da4ZmR1CvBAXK+HRRJm1FTaxM//To/vXsPRNR5We66e+9JUQMGSXDygNpCKmsQ/vET/fD/Wki6dPYqZw3gjxHAPUxpGz2Y7pVG8Uii5UCgdR5nACScjKJWLgaSBJqTgtZK0kN9toCRC1TBQ3S5aAk7025ioNsyUxEMlBxcuMt7gAC9xeBuvMcGBErMBSvTVAWm0loBh4EFXRD7NDZCx1r7C9g6v10JNqK2AFLjCJJBQXdpDEJiIwNr9UTUaYMrZxpF9wlE2HkyE1KQshCTsxvsc80F28Su/jiEMi1lI+WqKyZlJmfQg2gqTCs7uFy+TYopTtvcOPQheEiZfzZtPka+dfUYyrmLInaA3otI18lXSuqLywOmnbJcqrsDZROOtLcFgPWq4MJKeGSAuiq+hwDoj7R/U1gCPJsH47JXOnG5XbspYFt70B3rdMmCOgLeOyUDgAWAJvsAqLhaADDoT+Q5YPRiaUyYAg5JX6FzgK3P5A6w58lngEkQJy/X+uWG3VGhw1teGBYOa7ZDh6g79BD1XwXfTxoMufVKxaHYMO6/1/+Er/46C11S1+LsibqlO4D0NG2yivVNmtfQrMm6i/O1baKXQLHUaObErt2fLba6a21w++PlZvu0qlkVo/2Tdj9b0e7z4trEUnCurzV8VvLN9ZHnr/z6yDOeNhaHLjc1LQ9dVM0npsWxL35xY5+YjH2ut3CT42nl4Bkfcz94CksPjN1TK5R0w+sxvmV2ro55Ws++3E++abY5/cbwHVdHN35vjvv496b3deP/fxiPOGgEFljGAAAAAElFTkSuQmCC" alt="" class="tab-ico">Family</div><button type="button" class="tab" role="tab" data-tab="activities"><img src="data:image/png;base64,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" alt="" class="tab-ico"><span class="tab-lab">Plan</span></button><button type="button" class="tab" role="tab" data-tab="shop" style="display:none"><img src="" alt="" class="tab-ico"><span class="tab-lab">Shop</span></button><button type="button" class="tab" role="tab" data-tab="shopping"><img src="data:image/png;base64,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" alt="" class="tab-ico">Town</button><button type="button" class="tab" role="tab" data-tab="stays" style="display:none"><img src="data:image/png;base64,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" alt="" class="tab-ico">Stays</button></div>
 <div id="subtabs"></div>
-<button id="liveNow" class="live-now-chip" onclick="openOutlookSheet('temp')" aria-label="Today's outlook — tap to open">
+<button id="liveNow" class="live-now-chip" onclick="liveNowTap()" aria-label="Tap to open the list">
   <svg class="live-now-listic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="3.5" cy="6" r=".9" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r=".9" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r=".9" fill="currentColor" stroke="none"/></svg>
   <span class="live-now-label" id="liveNowLabel" style="display:none"></span>
   <span class="live-now-val" id="liveNowVal" style="display:none"></span>
@@ -2373,7 +2380,7 @@ let B=[
    parking:'Small lot off Anini Rd. Fills fast on weekends — arrive before 8am.',
    intents:['snorkel','swim','walk','photography','tidepools'],
    tip:"Kauaʻi's largest reef creates a protected lagoon. Best snorkel at mid-to-high tide.",
-   photo:'https://live.staticflickr.com/8093/8549882237_62a1dd11ca_b.jpg',
+   photo:'https://live.staticflickr.com/8093/8549882237_62a1dd11ca_b.jpg',photo_credit:'Gord Webster / CC BY-SA 2.0',
    pois:['sunscreen']},
   {id:'poipu',name:"Poʻipū Beach Park",n:'Poipu',r:'South Shore',lat:21.8726,lon:-159.4598,
    facing:180,reef:true,morph:'reef_shielded',sb:3,sandy:true,lg:'full_time',lg_hours:'9am–5:30pm daily',sq:7,scenic:8,len:1000,
@@ -2381,7 +2388,7 @@ let B=[
    parking:'Free parking lot adjacent to beach. Busy weekends — arrive early.',
    intents:['snorkel','swim','walk'],
    tip:'Lifeguarded, sandy entry, reef protection. Hawaiian monk seals haul out here — give them 50ft of space.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Aerial-Poipu-Beach-Park-Kauai.jpg/1280px-Aerial-Poipu-Beach-Park-Kauai.jpg',
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Aerial-Poipu-Beach-Park-Kauai.jpg/1280px-Aerial-Poipu-Beach-Park-Kauai.jpg',photo_credit:'Polihale / CC BY-SA 3.0',
    pois:['holoholo','captandys']},
   {id:'salt_pond',name:'Salt Pond Beach',n:'Salt Pond',r:'West Side',lat:21.9077,lon:-159.5985,
    facing:200,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'seasonal_active',lg_hours:'10am–5pm seasonal',sq:6,scenic:7,len:800,
@@ -2389,7 +2396,7 @@ let B=[
    parking:'Large county park lot — rarely full. Restrooms and showers on site.',
    intents:['snorkel','swim','sunset','walk'],
    tip:"Kauaʻi's best-kept secret. Two protected coves, very calm water. Best sunset on the west side.",
-   photo:'https://upload.wikimedia.org/wikipedia/commons/3/3d/Beach_at_Salt_Pond_Park%2C_Kauai%2C_Hawaii_%2841862317925%29.jpg',
+   photo:'https://upload.wikimedia.org/wikipedia/commons/3/3d/Beach_at_Salt_Pond_Park%2C_Kauai%2C_Hawaii_%2841862317925%29.jpg',photo_credit:'Christoph Strässler / CC BY-SA 2.0',
    pois:['sunscreen','kauaisea']},
   {id:'hanalei',name:'Hanalei Bay',n:'Hanalei',r:'North Shore',lat:22.2097,lon:-159.5033,
    caution:"A summer swim bay that closes to swimming roughly November through March, when big north swell and a strong river-mouth current take over. There have been drownings here. Swim near the lifeguard when flags allow.",
@@ -2398,7 +2405,7 @@ let B=[
    parking:'Black Pot Beach lot fills by 8am on weekends. Overflow parking on Weke Rd.',
    intents:['walk','sunset','photography'],
    tip:'2-mile crescent backed by Nā Pali mountains. Closes for swimming Nov–Mar. River mouth = brown water after rain.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Hanalei_Bay_2_-_Kauai.jpg/1280px-Hanalei_Bay_2_-_Kauai.jpg',
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Hanalei_Bay_2_-_Kauai.jpg/1280px-Hanalei_Bay_2_-_Kauai.jpg',photo_credit:'Ralf Beier / CC BY 3.0',
    pois:['napali','kayakwailua']},
   {id:'lydgate',name:'Lydgate Beach Park',n:'Lydgate',r:'East Side',lat:22.0388,lon:-159.3406,
    caution:"The walled lagoon is calm and guarded, good for young kids. The open beach outside the breakwater has strong surf and current, and a drowning has happened there. Keep little ones inside the lagoon.",
@@ -2407,7 +2414,7 @@ let B=[
    parking:'Large free lot — easiest beach access on the east side.',
    intents:['snorkel','swim','walk','tidepools'],
    tip:'Stone breakwater creates the most protected lagoon on the east side. Perfect for first-time snorkelers.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg/1280px-Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg',
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg/1280px-Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg',photo_credit:'Grace808 / CC BY-SA 3.0',
    pois:['sunscreen']},
   {id:'kee',name:"Keʻe Beach",n:"Ke'e",r:'North Shore End',lat:22.2244,lon:-159.5827,
    facing:330,reef:true,morph:'reef_shielded',sb:2,sandy:true,lg:'seasonal_active',lg_hours:'9am–5pm seasonal',sq:9,scenic:10,len:400,
@@ -2415,7 +2422,7 @@ let B=[
    parking:'Permit required — book via gostateparks.hawaii.gov. No permit, no entry. Book weeks in advance.',
    intents:['snorkel','photography','walk','tidepools'],
    tip:"End of the road. Raised reef lagoon, excellent visibility. Summer only — if surf breaks over the reef, don't enter. Parking permit required.",
-   photo:'https://live.staticflickr.com/1497/23865814933_f7eef4cb36_b.jpg',
+   photo:'https://live.staticflickr.com/1497/23865814933_f7eef4cb36_b.jpg',photo_credit:'Peter Burka / CC BY-SA 2.0',
    pois:['napali']},
   {id:'queens_bath',name:"Queen's Bath",n:"Queen's Bath",r:'Princeville',lat:22.2272,lon:-159.4808,
    facing:0,reef:false,morph:'channel_reef',sb:9,sandy:false,lg:'none',lg_hours:null,sq:7,scenic:9,len:0,
@@ -2423,7 +2430,7 @@ let B=[
    parking:'Roadside parking on Punahele Rd. 15-min walk to ledge.',
    intents:['tidepools','photography'],
    tip:'Lava ledge — not a beach. Waves sweep the shelf year-round. Multiple fatalities. Summer flat conditions only.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/2/28/Queen%27s_Bath_Kauai_Hawaii.JPG',
+   photo:'https://upload.wikimedia.org/wikipedia/commons/2/28/Queen%27s_Bath_Kauai_Hawaii.JPG',photo_credit:'Operacook / Public domain',
    pois:[]},
   {id:'brennecke',name:'Brennecke Beach',n:'Brennecke',r:'South Shore',lat:21.8719,lon:-159.4583,
    facing:180,reef:false,morph:'open_beach',sb:8,sandy:true,lg:'none',lg_hours:null,sq:2,scenic:6,len:300,
@@ -2431,7 +2438,7 @@ let B=[
    parking:'Shared lot with Poipu Beach Park.',
    intents:['photography'],
    tip:'Famous for body surfing — but the shorebreak that draws skilled riders has injured many visitors. The break dumps directly onto sand at a steep angle. Watch from shore; swim at Poʻipū next door instead.',
-   photo:'https://live.staticflickr.com/2656/4129537817_600dc13284_b.jpg',pois:[],
+   photo:'https://live.staticflickr.com/2656/4129537817_600dc13284_b.jpg',photo_credit:'Nicki Dugan Pogue / CC BY-SA 2.0',pois:[],
    warning_only:true, access_level:'easy',
    danger:'Steep, dumping shorebreak directly onto hard sand. Severe neck and back injuries reported regularly. Bodyboard/surf only if you have local-equivalent experience; otherwise watch from shore.'},
   // === WARNING-ONLY BEACHES (popular but dangerous) ===
@@ -2440,31 +2447,31 @@ let B=[
    facing:0,reef:false,morph:'open',sb:6,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:9,scenic:10,len:2000,
    depth:7,stream:true,rain_mm:80,tidal:false,west:false,kid:false,black:false,water_temp:77,
    access_level:'moderate',parking:'Roadside pullouts on Kūhiō Hwy.',
-   intents:[],tip:'Stunning to photograph from shore. Do not swim here, ever.',photo:'https://upload.wikimedia.org/wikipedia/commons/5/5e/Lumahai_Beach.jpg',pois:[]},
+   intents:[],tip:'Stunning to photograph from shore. Do not swim here, ever.',photo:'https://upload.wikimedia.org/wikipedia/commons/5/5e/Lumahai_Beach.jpg',photo_credit:'Syced / CC0',pois:[]},
   {id:'secret',name:'Secret Beach (Kauapea)',n:'Secret',r:'North Shore',lat:22.2197,lon:-159.4076,
    warning_only:true,danger:'No lifeguard, strong currents, 2 deaths. Unguarded waterfall area dangerous.',
    facing:0,reef:false,morph:'open',sb:5,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:9,scenic:10,len:1800,
    depth:6,stream:false,rain_mm:50,tidal:false,west:false,kid:false,black:false,water_temp:77,
    access_level:'difficult',parking:'10-min steep trail from end of Kalihiwai Rd.',
-   intents:[],tip:'Spectacular views but enter water only on calmest summer days.',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Secret_Beach_Kauapea_Kauai_Hawaii_%2832405822358%29.jpg/1280px-Secret_Beach_Kauapea_Kauai_Hawaii_%2832405822358%29.jpg',pois:[]},
+   intents:[],tip:'Spectacular views but enter water only on calmest summer days.',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Secret_Beach_Kauapea_Kauai_Hawaii_%2832405822358%29.jpg/1280px-Secret_Beach_Kauapea_Kauai_Hawaii_%2832405822358%29.jpg',photo_credit:'dronepicr / CC BY 2.0',pois:[]},
   {id:'kalihiwai',name:'Kalihiwai Bay',n:'Kalihiwai',r:'North Shore',lat:22.2185,lon:-159.4302,
    warning_only:true,danger:'Stream mouth has strong currents. Surf can pick up suddenly. No lifeguard.',
    facing:0,reef:false,morph:'bay',sb:4,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:7,scenic:9,len:800,
    depth:6,stream:true,rain_mm:55,tidal:false,west:false,kid:false,black:false,water_temp:77,
    access_level:'easy',parking:'Small lot at end of Kalihiwai Rd.',
-   intents:[],tip:'Locals only spot. Watch the stream mouth carefully if entering.',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/2021-10-08_10_46_09_View_east_from_Kalihikai_Beach_in_Kalihiwai%2C_Kauai%2C_Hawaii.jpg/1280px-2021-10-08_10_46_09_View_east_from_Kalihikai_Beach_in_Kalihiwai%2C_Kauai%2C_Hawaii.jpg',pois:[]},
+   intents:[],tip:'Locals only spot. Watch the stream mouth carefully if entering.',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/2021-10-08_10_46_09_View_east_from_Kalihikai_Beach_in_Kalihiwai%2C_Kauai%2C_Hawaii.jpg/1280px-2021-10-08_10_46_09_View_east_from_Kalihikai_Beach_in_Kalihiwai%2C_Kauai%2C_Hawaii.jpg',photo_credit:'Famartin / CC BY-SA 4.0',pois:[]},
   {id:'polihale',name:'Polihale State Park',n:'Polihale',r:'West Side',lat:22.0810,lon:-159.7625,
    warning_only:true,danger:'Brutal shorebreak, no lifeguard, 5+ deaths. Treacherous all year.',
    facing:270,reef:false,morph:'open',sb:9,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:9,scenic:10,len:11000,
    depth:9,stream:false,rain_mm:5,tidal:false,west:true,kid:false,black:false,water_temp:78,
    access_level:'difficult',parking:'5-mile dirt road, 4WD only. No facilities.',
-   intents:[],tip:'Spectacular sunset and stargazing — but stay out of the water entirely.',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/PolihaleStatePark.jpg/1280px-PolihaleStatePark.jpg',pois:[]},
+   intents:[],tip:'Spectacular sunset and stargazing — but stay out of the water entirely.',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/PolihaleStatePark.jpg/1280px-PolihaleStatePark.jpg',photo_credit:'YuriVict / CC BY 3.0',pois:[]},
   {id:'koloa_landing',name:'Kōloa Landing',n:'Koloa Landing',r:'South Shore',lat:21.8775,lon:-159.4748,
    warning_only:true,danger:'Popular shore dive but ROPE deaths in 2023-2024. Calm water can mask danger.',
    facing:180,reef:true,morph:'rocky',sb:1,sandy:false,lg:'none',lg_hours:'No lifeguard',sq:5,scenic:6,len:300,
    depth:9,stream:false,rain_mm:20,tidal:false,west:false,kid:false,black:true,water_temp:78,
    access_level:'easy',parking:'Public lot at end of Hoonani Rd.',
-   intents:[],tip:'Snorkel/dive site — watch for sudden swimmer-induced pulmonary edema. Buddy required.',photo:'https://live.staticflickr.com/4630/28306804339_bc20c6e051_b.jpg',pois:[]},
+   intents:[],tip:'Snorkel/dive site — watch for sudden swimmer-induced pulmonary edema. Buddy required.',photo:'https://live.staticflickr.com/4630/28306804339_bc20c6e051_b.jpg',photo_credit:'Jeremy Bradford / CC BY 2.0',pois:[]},
 
   // === SCOREABLE BEACHES (new additions with full data) ===
   {id:'tunnels',name:'Tunnels (Mākua)',n:'Tunnels',r:'North Shore',lat:22.2247,lon:-159.5675,
@@ -2474,7 +2481,7 @@ let B=[
    access_level:'moderate',parking:'Limited roadside spots on Kuhio Hwy. Walk in via Haena State Park lot.',
    intents:['snorkel','swim','photography','tidepools'],
    tip:'Best snorkel on the north shore in summer. Dangerous in winter — channels become exit rips.',
-   photo:'https://live.staticflickr.com/5604/15774647476_747ac74f98_b.jpg',pois:[]},
+   photo:'https://live.staticflickr.com/5604/15774647476_747ac74f98_b.jpg',photo_credit:'Garden State Hiker / CC BY 2.0',pois:[]},
   {id:'kealia',name:'Keālia Beach',n:'Kealia',r:'East Side',lat:22.0936,lon:-159.3033,
    caution:"A heavy shorebreak drops straight onto the sand here and has caused serious injury. Best near the lifeguard tower on calm days; otherwise a beach to enjoy from the sand.",
    facing:90,reef:false,morph:'open',sb:6,sandy:true,lg:'full_time',lg_hours:'9am–5pm daily',sq:7,scenic:8,len:1500,
@@ -2482,21 +2489,21 @@ let B=[
    access_level:'easy',parking:'Large paved lot off Kuhio Hwy. Restrooms.',
    intents:['walk','photography','sunset'],
    tip:'Long sandy stretch good for walking. Strong shorebreak — body surfers only.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/9/9a/Kealia_Beach_Kauai_Hawaii_%2845554020174%29.jpg',pois:[]},
+   photo:'https://upload.wikimedia.org/wikipedia/commons/9/9a/Kealia_Beach_Kauai_Hawaii_%2845554020174%29.jpg',photo_credit:'dronepicr / CC BY 2.0',pois:[]},
   {id:'kalapaki',name:'Kalapakī Beach',n:'Kalapaki',r:'East Side',lat:21.9540,lon:-159.3530,
    facing:135,reef:false,morph:'bay',sb:2,sandy:true,lg:'full_time',lg_hours:'9am–5pm daily',sq:7,scenic:7,len:600,
    depth:4,stream:false,rain_mm:35,tidal:false,west:false,kid:true,black:false,water_temp:78,ada:true,
    access_level:'easy',parking:'Marriott resort lot — beach is public. Paved path to sand.',
    intents:['swim','snorkel','walk'],
    tip:'Wheelchair-accessible beach. Calm protected bay great for kids and beginners.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Kalapaki_Beach_Sunset_-_Kauai_-_Hawaii_%2854032044730%29.jpg/1280px-Kalapaki_Beach_Sunset_-_Kauai_-_Hawaii_%2854032044730%29.jpg',pois:[]},
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Kalapaki_Beach_Sunset_-_Kauai_-_Hawaii_%2854032044730%29.jpg/1280px-Kalapaki_Beach_Sunset_-_Kauai_-_Hawaii_%2854032044730%29.jpg',photo_credit:'Tony Webster / CC BY-SA 2.0',pois:[]},
   {id:'mahaulepu',name:'Māhāʻulepū Beach',n:'Mahaulepu',r:'South Shore',lat:21.8731,lon:-159.4150,
    facing:180,reef:false,morph:'open',sb:5,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:8,scenic:10,len:2500,
    depth:6,stream:false,rain_mm:25,tidal:false,west:false,kid:false,black:false,water_temp:78,
    access_level:'moderate',parking:'Dirt road past Grand Hyatt. 4WD helpful but not required in dry weather.',
    intents:['walk','photography','sunset','tidepools'],
    tip:'Wild and undeveloped — walk the heritage trail along the cliffs. Watch for monk seals.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Mahaulepu.jpg/1280px-Mahaulepu.jpg',pois:[]},
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Mahaulepu.jpg/1280px-Mahaulepu.jpg',photo_credit:'DarTar / CC BY 3.0',pois:[]},
   {id:'wailua',name:'Wailua Beach',n:'Wailua',r:'East Side',lat:22.0445,lon:-159.3360,
    caution:"No lifeguard. The river mouth and shorebreak create strong currents whenever there's east swell, and a drowning has happened here. Wade only, and stay out when surf is up.",
    facing:90,reef:false,morph:'open',sb:6,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:6,scenic:7,len:900,
@@ -2504,33 +2511,33 @@ let B=[
    access_level:'easy',parking:'Roadside on Kuhio Hwy.',
    intents:['walk','photography'],
    tip:'River meets ocean here — currents at the mouth. Good for picnics on the sand.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Wailua_Beach%2C_Kapaa_-_panoramio.jpg/1280px-Wailua_Beach%2C_Kapaa_-_panoramio.jpg',pois:[]},
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Wailua_Beach%2C_Kapaa_-_panoramio.jpg/1280px-Wailua_Beach%2C_Kapaa_-_panoramio.jpg',photo_credit:'Bob Linsdell / CC BY 3.0',pois:[]},
   // ─── ADDED 2026-05-18 — geographic balance (west + south + east) ───
   {id:'kekaha',name:'Kekaha Beach Park',n:'Kekaha',r:'West Side',lat:21.9711,lon:-159.7106,
    facing:225,reef:false,morph:'open_beach',sb:6,sandy:true,lg:'seasonal_active',lg_hours:'9a-4:30p',sq:5,scenic:7,len:5000,
    depth:6,stream:false,rain_mm:35,tidal:false,west:true,kid:false,black:false,water_temp:78,
    intents:['walk','sunset','photography'],
    tip:'Long sandy stretch on the west side. Strong currents most of the year — swim only when calm and lifeguards confirm. Sunsets here are exceptional.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Kekaha_Beach_Park_Kauai_Hawaii_%2845554285104%29.jpg/1280px-Kekaha_Beach_Park_Kauai_Hawaii_%2845554285104%29.jpg',pois:[]},
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Kekaha_Beach_Park_Kauai_Hawaii_%2845554285104%29.jpg/1280px-Kekaha_Beach_Park_Kauai_Hawaii_%2845554285104%29.jpg',photo_credit:'dronepicr / CC BY 2.0',pois:[]},
   {id:'pakala',name:'Pakala (Infinities)',n:'Pakala',r:'West Side',lat:21.9305,lon:-159.6028,
    facing:200,reef:true,morph:'channel_reef',sb:4,sandy:false,lg:'none',lg_hours:null,sq:9,scenic:7,len:400,
    depth:5,stream:false,rain_mm:30,tidal:false,west:true,kid:false,black:false,water_temp:78,
    intents:['surf','photography'],
    tip:'Famous left point break for experienced surfers. Long walk in from Hwy 50. Not a swim beach — rocky, currents, no lifeguard.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/a/a9/Aerial-makaweli-kauai.jpg',pois:[]},
+   photo:'https://upload.wikimedia.org/wikipedia/commons/a/a9/Aerial-makaweli-kauai.jpg',photo_credit:'Christopher P. Becker / CC BY-SA 3.0',pois:[]},
   {id:'shipwreck',name:'Shipwreck Beach (Keoneloa)',n:'Shipwreck',r:'South Shore',lat:21.8651,lon:-159.4357,
    facing:160,reef:false,morph:'open_beach',sb:7,sandy:true,lg:'none',lg_hours:null,sq:6,scenic:8,len:600,
    depth:7,stream:false,rain_mm:40,tidal:false,west:false,kid:false,black:false,water_temp:78,
    intents:['walk','sunset','photography'],
    tip:'Iconic Grand Hyatt-adjacent beach with the dramatic cliff (Makawehi) at the east end. Strong shorebreak — bodyboarders only, watch from shore otherwise. Sunrise walk to the lithified dunes is the move.',
-   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Keoniloa_Bay_and_Shipwreck_Beach%2C_Koloa_-_panoramio.jpg/1280px-Keoniloa_Bay_and_Shipwreck_Beach%2C_Koloa_-_panoramio.jpg',pois:[]},
+   photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Keoniloa_Bay_and_Shipwreck_Beach%2C_Koloa_-_panoramio.jpg/1280px-Keoniloa_Bay_and_Shipwreck_Beach%2C_Koloa_-_panoramio.jpg',photo_credit:'Bob Linsdell / CC BY 3.0',pois:[]},
   {id:'donkey',name:"Donkey Beach (Paliku)",n:'Donkey',r:'East Side',lat:22.1119,lon:-159.3092,
    caution:"Remote and unguarded, fully open to east swell, with currents that have swept swimmers out before. Watch from the sand or wade only; not a place to swim when surf is running.",
    facing:90,reef:false,morph:'open_beach',sb:6,sandy:true,lg:'none',lg_hours:null,sq:4,scenic:7,len:500,
    depth:6,stream:false,rain_mm:35,tidal:false,west:false,kid:false,black:false,water_temp:78,
    intents:['walk','photography','sunrise'],
    tip:'10-minute walk down from the highway pullout north of Kapaʻa. Often empty. Strong currents, occasional clothing-optional users. Worth it for solitude and the cliffside trail.',
-   photo:'https://live.staticflickr.com/5084/5358975080_a76fd012eb_b.jpg',pois:[]}
+   photo:'https://live.staticflickr.com/5084/5358975080_a76fd012eb_b.jpg',photo_credit:'Gabriel Millos / CC BY-SA 2.0',pois:[]}
 ];
 
 // POIS — full detail data, each card taps to detail sheet
@@ -2702,7 +2709,7 @@ let CHANNELS=[
 
 // HIKES — top Kauai trails
 let HIKES=[
-  {id:'kalalau_2mi',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Kalalau-trail.JPG?width=800',name:'Kalalau Trail (Hanakāpīʻai)',n:'Kalalau 2mi',r:'Napali Coast',lat:22.2186,lon:-159.5832,
+  {id:'kalalau_2mi',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Hanakapiai_Beach%2C_Kalalau_Trail%2C_Napali_Coast%2C_Kapaa_-_panoramio.jpg?width=1600',photo_credit:'Bob Linsdell / CC BY 3.0',name:'Kalalau Trail (Hanakāpīʻai)',n:'Kalalau 2mi',r:'Napali Coast',lat:22.2186,lon:-159.5832,
    difficulty:'strenuous',length_mi:4,elevation_ft:800,duration_hr:'4-5',
    tip:'Permit-free first 2 miles to Hanakāpīʻai Beach. DO NOT swim — 80+ drownings recorded. Continue 2 more miles inland to Hanakāpīʻai Falls.',
    warning:'Slippery when wet, flash flood risk in stream crossings. Strong currents at beach.',
@@ -2712,32 +2719,32 @@ let HIKES=[
    tip:'Spectacular Napali Coast views from cliff overlook. Trail descends 1600ft — coming back up is the workout.',
    warning:'Sheer cliffs at the end — no railings. Bring 2L water minimum.',
    parking:'Trailhead off Kokee Rd, mile 17.'},
-  {id:'canyon',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Red_sand_Waimea_Canyon_Park_Kauai,_Hawaii_(45365032885).jpg?width=800',name:'Canyon Trail',n:'Canyon',r:'Waimea Canyon',lat:22.0817,lon:-159.6606,
+  {id:'canyon',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Red_sand_Waimea_Canyon_Park_Kauai,_Hawaii_(45365032885).jpg?width=1600',photo_credit:'dronepicr / CC BY 2.0',name:'Canyon Trail',n:'Canyon',r:'Waimea Canyon',lat:22.0817,lon:-159.6606,
    difficulty:'moderate',length_mi:3.4,elevation_ft:800,duration_hr:'2-3',
    tip:'Best Waimea Canyon viewpoint. Waipoo Falls midway makes a swim hole stop.',
    warning:'Exposed sun, no shade. Slippery red dirt when wet.',
    parking:'Cliff Trail/Pu\'u Hinahina Lookout, Kokee Rd.'},
-  {id:'sleeping_giant',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/The_Sleeping_Giant.JPG?width=800',name:'Sleeping Giant (Nounou East)',n:'Sleeping Giant',r:'East Side',lat:22.0633,lon:-159.3788,
+  {id:'sleeping_giant',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/The_Sleeping_Giant.JPG?width=1600',photo_credit:'Nadine.teacher / CC BY-SA 3.0',name:'Sleeping Giant (Nounou East)',n:'Sleeping Giant',r:'East Side',lat:22.0633,lon:-159.3788,
    difficulty:'moderate',length_mi:3.5,elevation_ft:1000,duration_hr:'2-3',
    tip:'Family-friendly hike with summit picnic area. Switchbacks well-graded.',
    warning:'Final scramble to "chest" of giant is exposed and steep — turn back at the picnic table if uncomfortable.',
    parking:'Haleilio Rd trailhead, free.'},
-  {id:'pihea',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Kalalau_Valley_Lookout.jpg?width=800',name:'Pihea Trail to Alakaʻi',n:'Pihea',r:'Kokee',lat:22.1486,lon:-159.6275,
+  {id:'pihea',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Kalalau_Valley_viewed_from_the_Na_Pali_Kona_Forest_Reserve_Pihea_Trail.jpg?width=1600',photo_credit:'Gh5046 / public domain',name:'Pihea Trail to Alakaʻi',n:'Pihea',r:'Kokee',lat:22.1486,lon:-159.6275,
    difficulty:'moderate',length_mi:3.7,elevation_ft:500,duration_hr:'2-3',
    tip:'Boardwalk through highest swamp on earth. Native birds and rare plants.',
    warning:'Boardwalk slippery when wet — and it rains constantly here. Wear grip shoes.',
    parking:'Puu O Kila Lookout at end of Kokee Rd.'},
-  {id:'kuilau',name:'Kuilau Ridge Trail',n:'Kuilau',r:'East Side',lat:22.0608,lon:-159.4050,
+  {id:'kuilau',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Makaleha_Mountains_as_seen_from_Moalepe_Trail.jpg?width=1000',photo_credit:'Frank Schulenburg / CC BY-SA 4.0',name:'Kuilau Ridge Trail',n:'Kuilau',r:'East Side',lat:22.0608,lon:-159.4050,
    difficulty:'easy',length_mi:4.4,elevation_ft:600,duration_hr:'2',
    tip:'Best easy hike on Kauai — wide grass path, jungle views, picnic area. Stroller-friendly start.',
    warning:'Can be muddy after rain. Mosquitoes in summer.',
    parking:'Keahua Arboretum at end of Kuamoo Rd.'},
-  {id:'mahaulepu_trail',name:'Māhāʻulepū Heritage Trail',n:'Mahaulepu Trail',r:'South Shore',lat:21.8731,lon:-159.4220,
+  {id:'mahaulepu_trail',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Maha%27ulepu_Heritage_Trail%2C_Koloa_%28503154%29_%2816940059470%29.jpg?width=1600',photo_credit:'Robert Linsdell / CC BY 2.0',name:'Māhāʻulepū Heritage Trail',n:'Mahaulepu Trail',r:'South Shore',lat:21.8731,lon:-159.4220,
    difficulty:'easy',length_mi:2,elevation_ft:100,duration_hr:'1',
    tip:'Coastal cliff walk from Shipwreck Beach. Stroller-friendly, dramatic views, blowhole.',
    warning:'Cliff edges have no railings. Keep kids back from edge.',
    parking:'Grand Hyatt parking lot or Shipwreck Beach lot.'},
-  {id:'okolehao',name:'ʻŌkolehao Trail',n:'Okolehao',r:'North Shore',lat:22.2050,lon:-159.4783,
+  {id:'okolehao',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Down_to_Hanalei_Bay_%288730090977%29.jpg?width=1600',photo_credit:'cogdogblog / CC BY 2.0',name:'ʻŌkolehao Trail',n:'Okolehao',r:'North Shore',lat:22.2050,lon:-159.4783,
    difficulty:'moderate',length_mi:4,elevation_ft:1200,duration_hr:'2-3',
    tip:'Hanalei Bay views from the top. Less crowded than tourist hikes.',
    warning:'Slippery rope sections near summit. Closed when very wet.',
@@ -2750,7 +2757,7 @@ let ACTS=[
    type:'playground',price:'Free',hours:'9am–7pm daily',duration_min:60,
    tip:'17,000 sqft of play space partly built from recycled milk jugs. Hawaiian-themed structures, skateboard ramp, restrooms.',
    tags:['playground','free','ada','stroller','restrooms','shaded','toddler','little_kid']},
-  {id:'kilauea_lighthouse',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/KilaueaLighthouse,_Kauai,_Hawaii.jpg?width=800',name:'Kīlauea Point Lighthouse',n:'Kilauea Lighthouse',r:'North Shore',lat:22.2317,lon:-159.4019,
+  {id:'kilauea_lighthouse',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/KilaueaLighthouse,_Kauai,_Hawaii.jpg?width=1600',photo_credit:'Cofgrindr8 / CC BY-SA 4.0',name:'Kīlauea Point Lighthouse',n:'Kilauea Lighthouse',r:'North Shore',lat:22.2317,lon:-159.4019,
    type:'wildlife',price:'$10 adults / kids free',hours:"10am–4pm Wed-Sat (reservations required; gate closes at 3:30pm; closed most major federal holidays)",duration_min:60,
    tip:'Wildlife refuge with seabirds, dolphins, whales (winter). Stroller path to viewing platforms.',
    tags:['wildlife','ada','stroller','restrooms','little_kid','school_age']},
@@ -2758,15 +2765,15 @@ let ACTS=[
    type:'playground',price:'Free',hours:'Sunrise to sunset',duration_min:90,
    tip:'Massive wooden castle playground next to safe lifeguarded swim lagoon. Best combo on island.',
    tags:['playground','beach','free','lifeguard','calm','restrooms','toddler','little_kid']},
-  {id:'spouting_horn',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Spouting_horn_blowhole_Kauai_Hawaii.jpg?width=800',name:'Spouting Horn Blowhole',n:'Spouting Horn',r:'South Shore',lat:21.8800,lon:-159.4886,
+  {id:'spouting_horn',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Spouting_horn_blowhole_Kauai_Hawaii.jpg?width=1600',photo_credit:'Ron Clausen / CC BY-SA 4.0',name:'Spouting Horn Blowhole',n:'Spouting Horn',r:'South Shore',lat:21.8800,lon:-159.4886,
    type:'scenic',price:'Free',hours:'Always open',duration_min:30,
    tip:'Lava tube shoots seawater 50ft into the air. Loudest at high tide with south swell.',
    tags:['scenic','free','ada','stroller','parking_easy','toddler','little_kid','school_age']},
-  {id:'hanapepe_swing',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/The_Hanapepe_Swinging_Bridge,_Kauai,_Hawaii.jpg?width=800',name:'Hanapepe Swinging Bridge',n:'Hanapepe Bridge',r:'West Side',lat:21.9114,lon:-159.5917,
+  {id:'hanapepe_swing',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/The_Hanapepe_Swinging_Bridge,_Kauai,_Hawaii.jpg?width=1600',photo_credit:'Richard N Horne / CC BY-SA 4.0',name:'Hanapepe Swinging Bridge',n:'Hanapepe Bridge',r:'West Side',lat:21.9114,lon:-159.5917,
    type:'town',price:'Free',hours:'Always open',duration_min:30,
    tip:'Bouncy footbridge across Hanapepe River — great for kid thrills. Combine with Friday Night Art Walk.',
    tags:['town','free','little_kid','school_age']},
-  {id:'limahuli',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Limahuli_Garden_and_Preserve,_Kauai,_Hawaii_-_general_view.JPG?width=800',name:'Limahuli Garden',n:'Limahuli Garden',r:'North Shore',lat:22.2208,lon:-159.5708,
+  {id:'limahuli',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Limahuli_Garden_and_Preserve,_Kauai,_Hawaii_-_general_view.JPG?width=1600',photo_credit:'Daderot / CC BY-SA 3.0',name:'Limahuli Garden',n:'Limahuli Garden',r:'North Shore',lat:22.2208,lon:-159.5708,
    type:'cultural',price:'$30 adults',hours:"8:00am–4:00pm Tue–Thu & Sat; 8:30am–4:00pm Fri (last entry 2:15pm)",duration_min:90,
    tip:'Native Hawaiian botanical garden in a stunning valley. Self-guided trail is gentle.',
    tags:['cultural','wildlife','school_age','teen']},
@@ -2812,33 +2819,33 @@ let ACTS=[
    tags:['cultural','wildlife','free','school_age','teen']},
 
   // SCENIC
-  {id:'wailua_falls',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Wailua_Falls,_Kauai.JPG?width=800',name:'Wailua Falls',n:'Wailua Falls',r:'East Side',lat:22.0395,lon:-159.3786,
+  {id:'wailua_falls',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Wailua_Falls,_Kauai.JPG?width=1600',photo_credit:'Caracas1830 / CC BY-SA 2.5',name:'Wailua Falls',n:'Wailua Falls',r:'East Side',lat:22.0395,lon:-159.3786,
    type:'scenic',price:'Free',hours:"Daily 7:00am–7:45pm (non-resident fee: $5/person + $10/vehicle; Hawaii residents free)",duration_min:20,
    tip:'80-ft twin waterfall featured in the Fantasy Island opening. Roadside viewpoint — no hiking needed. Best light in the morning.',
    tags:['scenic','free','ada','stroller','parking_easy','toddler','little_kid','school_age','teen']},
-  {id:'opaekaa_falls',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Opaekaa_Falls,_Kauai,_Hawaii.jpeg?width=800',name:'ʻOpaekaʻa Falls Lookout',n:'ʻOpaekaʻa Falls',r:'East Side',lat:22.0533,lon:-159.3837,
+  {id:'opaekaa_falls',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Opaekaa_Falls,_Kauai,_Hawaii.jpeg?width=1600',photo_credit:'Grace808 / CC BY-SA 3.0',name:'ʻOpaekaʻa Falls Lookout',n:'ʻOpaekaʻa Falls',r:'East Side',lat:22.0533,lon:-159.3837,
    type:'scenic',price:'Free',hours:"Daily 7:00am–7:45pm (non-resident fee: $5/person + $10/vehicle, same ticket covers Wailua Falls; Hawaii residents free)",duration_min:15,
    tip:'151-ft waterfall viewable from a roadside lookout above the Wailua River. Cross the road for the river-valley view. Quick stop on the Kuamoʻo Road tour.',
    tags:['scenic','free','ada','stroller','parking_easy','toddler','little_kid']},
-  {id:'kalalau_lookout',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Kalalau_Valley_Lookout.jpg?width=800',name:'Kalalau Lookout',n:'Kalalau Lookout',r:'West Side',lat:22.1505,lon:-159.6451,
+  {id:'kalalau_lookout',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/NaPali_overlook_Kalalau_Valley.jpg?width=1600',photo_credit:'Dcrjsr / CC BY 3.0',name:'Kalalau Lookout',n:'Kalalau Lookout',r:'West Side',lat:22.1505,lon:-159.6451,
    type:'scenic',price:'Park entry $5/car',hours:'7am–6pm',duration_min:30,
    tip:'4,000-ft view down into Kalalau Valley on the Nā Pali Coast. The most photographed view on the island. Often clouded by mid-afternoon — go early.',
    tags:['scenic','restrooms','parking_easy','school_age','teen','little_kid']},
-  {id:'hanalei_lookout',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Hanalei_Valley_from_the_Hanalei_Lookout_in_Hanalei,_Hawaii.jpg?width=800',name:'Hanalei Valley Lookout',n:'Hanalei Lookout',r:'North Shore',lat:22.2122,lon:-159.4805,
+  {id:'hanalei_lookout',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Hanalei_Valley_from_the_Hanalei_Lookout_in_Hanalei,_Hawaii.jpg?width=1600',photo_credit:'Gh5046 / public domain',name:'Hanalei Valley Lookout',n:'Hanalei Lookout',r:'North Shore',lat:22.2122,lon:-159.4805,
    type:'scenic',price:'Free',hours:'Always open',duration_min:15,
    tip:'Roadside pull-off above Hanalei revealing the patchwork of taro fields and the river winding to the bay. Best at golden hour.',
    tags:['scenic','free','ada','parking_easy','toddler','little_kid','school_age','teen']},
-  {id:'puu_o_kila',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Kalalau_Valley_Lookout.jpg?width=800',name:'Puʻu o Kila Lookout',n:'Puʻu o Kila',r:'West Side',lat:22.1493,lon:-159.6447,
+  {id:'puu_o_kila',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/2021-10-07_13_05_05_Panoramic_view_north-northwest_from_the_Pu%E2%80%99u_O_Kila_Lookout_within_N%C4%81_Pali_Coast_State_Park_in_Kauai%2C_Hawaii.jpg?width=1600',photo_credit:'Famartin / CC BY-SA 4.0',name:'Puʻu o Kila Lookout',n:'Puʻu o Kila',r:'West Side',lat:22.1493,lon:-159.6447,
    type:'scenic',price:'Park entry $5/car',hours:'7am–6pm',duration_min:30,
    tip:'End-of-the-road lookout in Kōkeʻe State Park. Different angle on Kalalau Valley — fewer crowds than the main lookout.',
    tags:['scenic','parking_easy','school_age','teen']},
 
   // TOWN
-  {id:'old_koloa',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Koloa,_Kauai.JPG?width=800',name:'Old Kōloa Town',n:'Old Kōloa',r:'South Shore',lat:21.9081,lon:-159.4683,
+  {id:'old_koloa',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Koloa,_Kauai.JPG?width=1600',photo_credit:'Caracas1830 / CC BY-SA 2.5',name:'Old Kōloa Town',n:'Old Kōloa',r:'South Shore',lat:21.9081,lon:-159.4683,
    type:'town',price:'Free',hours:'Most shops 10am–6pm',duration_min:60,
    tip:'Kauaʻi\'s first sugar plantation town, restored. Walkable Main Street with ice cream, locally-made souvenirs, the original Kōloa Mill ruins, and Kōloa Mango shave ice.',
    tags:['town','free','shaded','restrooms','little_kid','school_age','teen','rain_ok']},
-  {id:'hanalei_town',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Hanalei,_Kauai_HI.JPG?width=800',name:'Hanalei Town',n:'Hanalei Town',r:'North Shore',lat:22.2127,lon:-159.4990,
+  {id:'hanalei_town',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Hanalei,_Kauai_HI.JPG?width=1600',photo_credit:'Caracas1830 / CC BY-SA 2.5',name:'Hanalei Town',n:'Hanalei Town',r:'North Shore',lat:22.2127,lon:-159.4990,
    type:'town',price:'Free',hours:'Most shops 10am–6pm',duration_min:90,
    tip:'One block of historic plantation-era buildings turned shave ice, surf shops, art galleries, and local food trucks. Walkable from Hanalei Bay.',
    tags:['town','free','restrooms','little_kid','school_age','teen']},
@@ -2848,7 +2855,7 @@ let ACTS=[
    tags:['town','free','restrooms','little_kid','school_age','teen','parking_easy']},
 
   // CULTURAL
-  {id:'allerton_garden',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Allerton_Garden,_Kauai,_Hawaii_-_view_into_valley.JPG?width=800',name:'Allerton Garden',n:'Allerton Garden',r:'South Shore',lat:21.8757,lon:-159.5050,
+  {id:'allerton_garden',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Allerton_Garden,_Kauai,_Hawaii_-_view_into_valley.JPG?width=1600',photo_credit:'Daderot / CC BY-SA 3.0',name:'Allerton Garden',n:'Allerton Garden',r:'South Shore',lat:21.8757,lon:-159.5050,
    type:'cultural',price:'$50 adults',hours:"Tours Tue–Sat, select times 9am–4:30pm (advance reservation required)",duration_min:150,
    tip:'2.5-hour guided walk through movie-set valley (the giant Jurassic Park fig trees) and historic estate gardens. Reserve in advance — tours sell out.',
    tags:['cultural','garden','reservations','school_age','teen']},
@@ -2910,20 +2917,22 @@ function renderStays(){
 function openStaySheet(id){
   const s = STAYS.find(x=>x.id===id); if(!s) return;
   const themeColor = {family:'#16a34a', oceanfront:'#0ea5e9', surf:'#7c3aed', 'kid-safe':'#10b981', budget:'#d97706', luxury:'#a16207'}[s.theme] || '#0f4c5c';
-  const heroBg = s.photo
-    ? `url("${s.photo}") center/cover, linear-gradient(135deg,var(--ocean),#1a7a8a)`
-    : `linear-gradient(135deg,${themeColor},var(--ocean))`;
+  // Route through the shared heroBg()/heroPhoto() helpers: this both applies the NO CREDIT -> NO
+  // PHOTO gate and fixes the latent quote bug the local version had (url("...") inside a
+  // double-quoted style attribute shreds it). Stays carry no photos today, so this is defensive.
+  const _stayHeroBg = heroBg(heroPhoto(s), `linear-gradient(135deg,${themeColor},var(--ocean))`);
   const nearBeach = (typeof B !== 'undefined') ? B.find(b => b.id === s.near_beach_id) : null;
   const _sc = document.getElementById('sc');
   _sc.style.display = '';
   _sc.innerHTML = `
-    <div class="poi-hero" style="background:${heroBg};color:#fff;min-height:140px;position:relative;overflow:hidden">
+    <div class="poi-hero" style="background:${_stayHeroBg};color:#fff;min-height:140px;position:relative;overflow:hidden">
       <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%, rgba(0,0,0,.55) 100%);pointer-events:none"></div>
       <div style="position:relative;display:flex;flex-direction:column;justify-content:flex-end;flex:1;padding:14px;z-index:1">
         <div class="poi-hero-name" style="color:#fff">${s.name}</div>
         <div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${s.r} · sleeps ${s.sleeps}</div>
       </div>
     </div>
+    ${photoCreditLine(s)}
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
       <span style="background:${themeColor}22;color:${themeColor};padding:4px 10px;border-radius:14px;font-size:11.5px;font-weight:600;text-transform:capitalize">${s.theme.replace('-',' ')}</span>
       <span style="background:var(--warm);color:var(--ink);padding:4px 10px;border-radius:14px;font-size:11.5px;font-weight:600">${s.beds} bed · ${s.baths} bath</span>
@@ -3721,7 +3730,32 @@ function heartButton(kind, id){
 // Per user rule: only set `photo` on entries where the image crops well to the 72px hero strip.
 // Items without `photo` (the common case for lesser-known POIs) just use the gradient as before.
 function heroBg(photo, gradient){
-  return photo ? `url("${photo}") center/cover no-repeat, ${gradient}` : gradient;
+  // url() MUST use single quotes: the result is interpolated into a double-quoted
+  // style="..." attribute, so a double quote here closes the attribute early and the
+  // parser shreds the rest into junk attributes (photo, gradient and color all lost).
+  // Photo URLs are percent-encoded, so they can never contain a raw single quote.
+  // A real photo can be any brightness, but the hero's name/type are always white. Without a
+  // scrim the title washes out on a bright sky/sand shot, so darken toward the text side.
+  const scrim = 'linear-gradient(90deg, rgba(8,40,50,.68) 0%, rgba(8,40,50,.42) 52%, rgba(8,40,50,.16) 100%)';
+  return photo ? `${scrim}, url('${photo}') center/cover no-repeat, ${gradient}` : gradient;
+}
+
+// NO CREDIT -> NO PHOTO. Most of these are Wikimedia CC-BY / CC-BY-SA, where attribution is
+// a licence condition, not a courtesy — so an uncredited photo must not render at all. The
+// quote bug in heroBg was hiding every hero, which accidentally kept us compliant; fixing it
+// would otherwise have lit up ~13 uncredited images at once. Gate them here instead: an item
+// earns its photo by carrying photo_credit. Uncredited ones fall back to the gradient and
+// light up the moment a credit is added.
+function heroPhoto(item){
+  return (item && item.photo && item.photo_credit) ? item.photo : null;
+}
+
+// Renders the attribution next to the photo it belongs to. Silent when there's no credit —
+// better to show nothing than to guess at an author we never recorded.
+function photoCreditLine(item){
+  if(!item || !item.photo || !item.photo_credit) return '';
+  const safe = String(item.photo_credit).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return `<div class="poi-photo-credit">Photo: ${safe}</div>`;
 }
 
 // Single source of truth for which kinds are savable and how to resolve their IDs.
@@ -4235,6 +4269,10 @@ function initMap(){
   };
   frameIsland(false);
 
+  // Re-run the beach-pin declutter whenever the view changes, so hidden pins reappear as the
+  // user zooms in (they separate) and re-cluster on zoom-out. No-op on tabs where mkrs is empty.
+  map.on('zoomend moveend', function(){ try{ if(typeof declutterMarks==='function') declutterMarks(); }catch(e){} });
+
   // ── Debug pin-coordinate audit feature ──
   // Activate by adding ?debug=1 to the URL (e.g. oceansafety.app/?debug=1).
   // Long-press anywhere on the map to copy the lat/lon to clipboard and show a toast.
@@ -4538,7 +4576,7 @@ function openMarketSheet(id){
   const now=new Date();
   const isOpen = now.getDay()===m.day && (now.getHours()*60+now.getMinutes()) >= m.start_min && (now.getHours()*60+now.getMinutes()) <= m.end_min;
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    ${_placementBadge(m)}<div class="poi-hero" style="background:${heroBg(m.photo, 'linear-gradient(135deg,#16a34a,#84cc16)')};color:#fff">
+    ${_placementBadge(m)}<div class="poi-hero" style="background:${heroBg(heroPhoto(m), 'linear-gradient(135deg,#16a34a,#84cc16)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">🧺</div>${heartButton('market', m.id)}
       <div><div class="poi-hero-name" style="color:#fff">${m.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${m.r} • Farmers market</div></div>
     </div>
@@ -4641,10 +4679,11 @@ function openHikeSheet(id){
   const bestTime = hk.id==='kalalau_2mi'||hk.id==='canyon'||hk.id==='awaawapuhi'?'Early morning':hk.id==='pihea'?'Mid-morning':'Anytime';
   const family = hk.difficulty==='easy'?'✓ Family-friendly':hk.difficulty==='moderate'?'Older kids 8+':'Adults / teens';
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(hk.photo, heroCol)};color:#fff">
+    <div class="poi-hero" style="background:${heroBg(heroPhoto(hk), heroCol)};color:#fff">
       <div class="poi-hero-icon" style="color:#fff">⛰</div>${heartButton('hike', hk.id)}
       <div><div class="poi-hero-name" style="color:#fff">${hk.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${hk.r} • Trail</div></div>
     </div>
+    ${photoCreditLine(hk)}
     <div style="display:inline-block;background:${diffCol};color:#fff;padding:5px 12px;border-radius:12px;font-size:12px;font-weight:600;text-transform:capitalize;margin-bottom:10px">${hk.difficulty}</div>
     <div class="poi-grid">
       <div class="poi-cell"><div class="poi-cell-l">Distance</div><div class="poi-cell-v">${hk.length_mi} mi</div></div>
@@ -5408,10 +5447,11 @@ function openActSheet(id){
   if(a.tags.includes('sheltered')) weather.push('Sheltered');
   const weatherStr = weather.length ? weather.join(' • ') : 'Outdoor';
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(a.photo, 'linear-gradient(135deg,#c9a84c,#e07856)')};color:#fff">
+    <div class="poi-hero" style="background:${heroBg(heroPhoto(a), 'linear-gradient(135deg,#c9a84c,#e07856)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff">★</div>${heartButton('act', a.id)}
       <div><div class="poi-hero-name" style="color:#fff">${a.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${a.r} • ${a.type}</div></div>
     </div>
+    ${photoCreditLine(a)}
     <div class="poi-grid">
       <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${a.price||'—'}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${a.hours||'—'}</div></div>
@@ -5558,7 +5598,7 @@ function openCraftSheet(id){
   const c = LOCAL_CRAFTS.find(x=>x.id===id); if(!c) return;
   const tagPills = (c.tags||[]).map(t=>`<span style="background:#f5e6f5;color:#581c87;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    ${_placementBadge(c)}<div class="poi-hero" style="background:${heroBg(c.photo, 'linear-gradient(135deg,#7e22ce,#a855f7)')};color:#fff">
+    ${_placementBadge(c)}<div class="poi-hero" style="background:${heroBg(heroPhoto(c), 'linear-gradient(135deg,#7e22ce,#a855f7)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">◆</div>${heartButton('craft', c.id)}
       <div><div class="poi-hero-name" style="color:#fff">${c.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${c.r} • ${c.type}</div></div>
     </div>
@@ -5579,7 +5619,7 @@ function openDrinkSheet(id){
   const d = DRINKS.find(x=>x.id===id); if(!d) return;
   const tagPills = (d.tags||[]).map(t=>`<span style="background:#eef0fe;color:#3730a3;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    ${_placementBadge(d)}<div class="poi-hero" style="background:${heroBg(d.photo, 'linear-gradient(135deg,#4f46e5,#6366f1)')};color:#fff">
+    ${_placementBadge(d)}<div class="poi-hero" style="background:${heroBg(heroPhoto(d), 'linear-gradient(135deg,#4f46e5,#6366f1)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10l-1.15 13.07a1 1 0 0 1-1 .93H9.15a1 1 0 0 1-1-.93L7 7z"/><line x1="5.5" y1="7" x2="18.5" y2="7"/><line x1="14.5" y1="3" x2="13.4" y2="7"/></svg></div>${heartButton('drink', d.id)}
       <div><div class="poi-hero-name" style="color:#fff">${d.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${d.r} • ${d.type}</div></div>
     </div>
@@ -5599,7 +5639,7 @@ function openDrinkSheet(id){
 function openGasSheet(id){
   const s = GAS_STATIONS.find(x=>x.id===id); if(!s) return;
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    ${_placementBadge(s)}<div class="poi-hero" style="background:${heroBg(s.photo, 'linear-gradient(135deg,#b45309,#d97706)')};color:#fff">
+    ${_placementBadge(s)}<div class="poi-hero" style="background:${heroBg(heroPhoto(s), 'linear-gradient(135deg,#b45309,#d97706)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">⛽</div>${heartButton('gas', s.id)}
       <div><div class="poi-hero-name" style="color:#fff">${s.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${s.r} • ${s.brand}</div></div>
     </div>
@@ -5693,7 +5733,7 @@ function openFoodSheet(id){
   }
 
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    ${_placementBadge(f)}<div class="poi-hero" style="background:${heroBg(f.photo, 'linear-gradient(135deg,#e07856,#c9a84c)')};color:#fff">
+    ${_placementBadge(f)}<div class="poi-hero" style="background:${heroBg(heroPhoto(f), 'linear-gradient(135deg,#e07856,#c9a84c)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">🍽</div>${heartButton('food', f.id)}
       <div><div class="poi-hero-name" style="color:#fff">${f.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${f.r} • ${f.type}</div></div>
     </div>
@@ -5717,7 +5757,7 @@ function openGrocerySheet(id){
   const g = GROCERIES.find(x=>x.id===id); if(!g) return;
   const tagPills = (g.tags||[]).map(t=>`<span style="background:#e0f2f7;color:#0f4c5c;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    ${_placementBadge(g)}<div class="poi-hero" style="background:${heroBg(g.photo, 'linear-gradient(135deg,#0f4c5c,#1a7a8a)')};color:#fff">
+    ${_placementBadge(g)}<div class="poi-hero" style="background:${heroBg(heroPhoto(g), 'linear-gradient(135deg,#0f4c5c,#1a7a8a)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">🛒</div>${heartButton('grocery', g.id)}
       <div><div class="poi-hero-name" style="color:#fff">${g.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${g.r} • ${g.type}</div></div>
     </div>
@@ -5768,13 +5808,77 @@ function renderMap(){
       setTimeout(()=>{if(mk._icon)mk._icon.classList.add('mk-enter')},delay);
     }
     mk.on('click',()=>openSheet(b.id));
+    mk._b=b;
     mkrs[b.id]=mk;
   });
   }
   window._mapPainted = true;
   // Re-render channels so they stay in sync and visible
   if(typeof renderChannels === 'function') renderChannels();
+  try{ declutterMarks(); }catch(e){}
   document.getElementById('nores').style.display=vis?'none':'block';
+}
+
+// ── MAP DECLUTTER ───────────────────────────────────────────────────────────
+// At the island-overview zoom, dense coastlines (Maui's West + South, Oʻahu's south) drop ~20
+// beach pins within a few pixels of each other and they pile into an unreadable clump. This
+// collision pass keeps the highest-priority pin in each cluster, tags it with a "+N" count, and
+// hides the overlapped ones — every one reappears as you zoom in (the pins separate) and all of
+// them stay reachable in the list view. Deterministic order (no flicker) and fail-open: any
+// error leaves every pin visible. The hazards subtab is never thinned — every warning shows.
+function ensureDeclutterCSS(){
+  if(document.getElementById('os-dc-css')) return;
+  const st=document.createElement('style'); st.id='os-dc-css';
+  st.textContent='.mk-nolbl .mklbl{display:none}'
+    +'.mk-more{position:absolute;top:-5px;left:-3px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;'
+    +'background:#0f4c5c;color:#fff;font:700 9.5px/15px "DM Sans",sans-serif;text-align:center;box-sizing:border-box;'
+    +'box-shadow:0 1px 3px rgba(0,0,0,.35);pointer-events:none;z-index:3}';
+  document.head.appendChild(st);
+}
+function declutterMarks(){
+  try{
+    if(typeof map==='undefined'||!map) return;
+    ensureDeclutterCSS();
+    const ids=Object.keys(mkrs), items=[];
+    // Reset every pin to its natural state first — this is also the fail-open baseline.
+    for(let i=0;i<ids.length;i++){
+      const mk=mkrs[ids[i]]; if(!mk||!mk._icon) continue;
+      mk._icon.style.display=''; mk._icon.classList.remove('mk-nolbl');
+      const old=mk._icon.querySelector('.mk-more'); if(old) old.remove();
+      const r=scored[ids[i]]||{};
+      // Keep the most cautionary pin when a cluster collides: warning > big-surf caution > green > default.
+      const prio=(r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3;
+      items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio,name:(mk._b&&mk._b.n)||''});
+    }
+    if(window._activeSub==='hazards') return;   // never hide a hazard pin
+    // Priority first, then top→bottom, left→right so the survivor set is stable across renders.
+    items.sort((a,b)=>a.prio-b.prio || a.p.y-b.p.y || a.p.x-b.p.x);
+    const R=32, R2=R*R, kept=[];
+    for(let k=0;k<items.length;k++){
+      const it=items[k]; let hit=null;
+      for(let j=0;j<kept.length;j++){
+        const dx=it.p.x-kept[j].p.x, dy=it.p.y-kept[j].p.y;
+        if(dx*dx+dy*dy<R2){ hit=kept[j]; break; }
+      }
+      if(hit){ it.mk._icon.style.display='none'; hit.more=(hit.more||0)+1; }
+      else { it.more=0; kept.push(it); }
+    }
+    // "+N" badges on cluster leaders, then a greedy label pass so name pills never overlap.
+    const lblRects=[];
+    for(let m=0;m<kept.length;m++){
+      const e=kept[m];
+      if(e.more){
+        const wrap=e.mk._icon.querySelector('.mkw'), host=wrap&&wrap.firstElementChild;
+        if(host){ const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more; host.appendChild(s); }
+      }
+      const w=Math.max(30,e.name.length*6.4+18), x0=e.p.x-w/2, x1=e.p.x+w/2, y0=e.p.y-2, y1=e.p.y+20;
+      let clash=false;
+      for(let q=0;q<lblRects.length;q++){ const rr=lblRects[q];
+        if(x0<rr[2]&&x1>rr[0]&&y0<rr[3]&&y1>rr[1]){ clash=true; break; } }
+      if(clash) e.mk._icon.classList.add('mk-nolbl');
+      else lblRects.push([x0,y0,x1,y1]);
+    }
+  }catch(e){}
 }
 
 // CHANNEL STRENGTH — modulated by live conditions
@@ -6208,7 +6312,7 @@ function openPoiSheet(pid){
   const codeHTML=p.code?`<div class="pcode" style="margin-top:12px"><span class="pcodelbl">CODE&nbsp;</span><span class="pcodev">${p.code}</span><span class="pcodelbl">&nbsp;—&nbsp;${p.cl}</span></div>`:'';
   const dirURL=`https://maps.google.com/?q=${encodeURIComponent(p.address+', Kauai')}`;
   document.getElementById('sc').innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(p.photo, p.hero_col||'var(--ocean-lt)')}">
+    <div class="poi-hero" style="background:${heroBg(heroPhoto(p), p.hero_col||'var(--ocean-lt)')}">
       <div class="poi-hero-icon">${p.icon||'📍'}</div>
       <div><div class="poi-hero-name">${p.name}</div><div class="poi-hero-type">${p.type}</div></div>
     </div>
@@ -6526,9 +6630,14 @@ function openSheet(id){
   const rope=r.top.includes('snorkel')?`<div class="tip"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#5a4217" stroke-width="1.3" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><polyline points="5,7 7,9 10,5.5"/></svg><span>Snorkel close to shore where you can stand. Rest often — ocean exertion is more tiring than it feels.</span></div>`:'';
   const parkRow=b.parking?`<div class="parking-row"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--mute)" stroke-width="1.3" stroke-linecap="round" flex-shrink="0"><rect x="1.5" y="2" width="11" height="10" rx="2"/><path d="M5 5 H7.5 Q9 5 9 6.5 Q9 8 7.5 8 H5 V10"/></svg><span>${b.parking}</span></div>`:'';
   const murl=dirUrl(b.name, b.lat, b.lon);
+  // NO CREDIT -> NO PHOTO: beaches must obey the same licence gate as every other hero.
+  // heroPhoto() returns the URL only when a photo_credit exists; otherwise the beach falls
+  // back to its generative gradient. Most beach photos are Wikimedia/Flickr CC-BY(-SA),
+  // where attribution is a licence condition, not a courtesy.
+  const _bphoto=heroPhoto(b);
   document.getElementById('sc').innerHTML=`
     <div class="hero">
-      <img src="${b.photo}" onerror="this.style.display='none'" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 55%;display:${b.photo?'block':'none'}"><div style="position:absolute;inset:0;background:${generativeBg(b)};z-index:-1"></div>
+      <img src="${_bphoto||''}" onerror="this.style.display='none'" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 55%;display:${_bphoto?'block':'none'}"><div style="position:absolute;inset:0;background:${generativeBg(b)};z-index:-1"></div>
       <div class="hero-grad"></div>
       <div class="stbadge ${r.status}">${stlbl}</div>
       ${kid}
@@ -6542,6 +6651,7 @@ function openSheet(id){
         <div class="sreg">${b.r} · ${(window.ACTIVE&&ACTIVE.name)||'Kauaʻi'}</div>
       </div>
     </div>
+    ${photoCreditLine(b)}
     <div class="dir-pill-row"><a class="dir-pill" href="${murl}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Get Directions</a></div>
     ${weatherBar(c)}
     ${_bigSurfNotice}
@@ -7216,6 +7326,71 @@ function openOutlookSheet(focus){
   document.getElementById('overlay').classList.add('on');
 }
 
+// ── Town tab: the map pin list ────────────────────────────────────────────────
+// Every Town subtab drops a dozen-plus labelled pins onto one small island, so the labels
+// collide and reading them off the map is guesswork. The liveNow chip already looks like a
+// list control (list glyph + chevron), so on Town it opens the list of exactly what the map
+// is filtered to. Sources mirror the render* functions below so the list can never disagree
+// with the pins — including coffee, which is tag-driven across three arrays.
+const _townTagged = (arr, tag) => (typeof arr === 'undefined' ? [] : arr.filter(i => Array.isArray(i.tags) && i.tags.includes(tag)));
+const TOWN_SUB_SRC = {
+  food:    () => (typeof FOODS !== 'undefined' ? FOODS : []).map(x => ({x, open:'openFoodSheet'})),
+  drinks:  () => (typeof DRINKS !== 'undefined' ? DRINKS : []).map(x => ({x, open:'openDrinkSheet'})),
+  farmers: () => (typeof FMARKETS !== 'undefined' ? FMARKETS : []).map(x => ({x, open:'openMarketSheet'})),
+  crafts:  () => (typeof LOCAL_CRAFTS !== 'undefined' ? LOCAL_CRAFTS : []).map(x => ({x, open:'openCraftSheet'})),
+  gas:     () => (typeof GAS_STATIONS !== 'undefined' ? GAS_STATIONS : []).map(x => ({x, open:'openGasSheet'})),
+  grocery: () => (typeof GROCERIES !== 'undefined' ? GROCERIES : []).map(x => ({x, open:'openGrocerySheet'})),
+  coffee:  () => [
+    ..._townTagged(typeof FOODS !== 'undefined' ? FOODS : [], 'coffee').map(x => ({x, open:'openFoodSheet'})),
+    ..._townTagged(typeof DRINKS !== 'undefined' ? DRINKS : [], 'coffee').map(x => ({x, open:'openDrinkSheet'})),
+    ..._townTagged(typeof LOCAL_CRAFTS !== 'undefined' ? LOCAL_CRAFTS : [], 'coffee').map(x => ({x, open:'openCraftSheet'}))
+  ]
+};
+
+// One-line "what is this place" under the name. Each Town array carries different fields,
+// so fall back through the ones that actually say something rather than printing 'undefined'.
+function _townRowSub(x){
+  const bits = [x.r];
+  if(x.day) bits.push(x.day);                       // farmers markets
+  else if(x.brand) bits.push(x.brand);              // gas
+  else if(x.type) bits.push(String(x.type).replace(/_/g,' '));
+  if(x.price) bits.push(x.price);
+  return bits.filter(Boolean).join(' · ');
+}
+
+function openTownList(){
+  const sub = window._activeSub || 'food';
+  const src = TOWN_SUB_SRC[sub];
+  if(!src) return openOutlookSheet('temp');         // unknown sub — fall back, never dead-end
+  const rows = src();
+  const cfg = (SUBTABS.shopping.items.find(i => i.sub === sub) || {label:'Town'});
+  const _sc = document.getElementById('sc');
+  _sc.style.display = '';
+  _sc.innerHTML = `
+    <div class="poi-hero" style="background:linear-gradient(135deg,var(--ocean),#1a7a8a)">
+      <div class="poi-hero-icon" style="display:flex;align-items:center;justify-content:center"><img src="icons/favicon-32.png" alt="" style="width:26px;height:26px;display:block;border-radius:7px"></div>
+      <div>
+        <div class="poi-hero-name" style="color:#fff">${cfg.label}</div>
+        <div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${rows.length} ${rows.length === 1 ? 'place' : 'places'} on the map</div>
+      </div>
+    </div>
+    ${rows.length ? rows.map(({x, open}) => `
+      <div class="town-row" onclick="closeSheet();setTimeout(()=>${open}('${x.id}'),320)">
+        <span class="town-row-t"><b>${x.name}</b><span>${_townRowSub(x)}</span></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="color:var(--mute);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`).join('')
+      : `<div style="padding:18px 2px;color:var(--mute);font-size:12px">Nothing on the map for this filter.</div>`}
+    ${OS_DISCLAIMER}`;
+  document.getElementById('sheet').classList.add('on');
+  document.getElementById('overlay').classList.add('on');
+}
+
+// The chip is shared chrome, so route it per tab rather than rebinding it on every tab switch.
+function liveNowTap(){
+  if(window._activeTab === 'shopping') return openTownList();
+  return openOutlookSheet('temp');
+}
+
 function selectOutlookRegion(key){
   window._outlookRegion = key;
   renderOutlookSheet();
@@ -7456,6 +7631,14 @@ const KAUAI_OUTLINE=[[22.0286,-159.788],[21.9587,-159.6909],[21.9415,-159.6539],
 // Layer 7: per-island silhouettes for the swell clip-mask. kauai reuses KAUAI_OUTLINE
 // (byte-identical); maui/oahu/hawaii ported from the maui branch.
 const ISLAND_OUTLINES={kauai:KAUAI_OUTLINE,maui:[[21.0248,-156.612],[21.0344,-156.6062],[21.0329,-156.5923],[21.0202,-156.5804],[21.0051,-156.5463],[20.9678,-156.5282],[20.8945,-156.4748],[20.9196,-156.386],[20.9327,-156.3707],[20.9502,-156.3246],[20.9427,-156.3072],[20.9477,-156.2863],[20.9374,-156.2751],[20.9409,-156.2631],[20.9319,-156.2302],[20.9179,-156.2301],[20.9166,-156.218],[20.907,-156.2163],[20.8656,-156.1667],[20.8614,-156.1327],[20.8273,-156.1157],[20.8319,-156.0903],[20.8105,-156.0598],[20.7955,-156.0035],[20.7675,-155.9846],[20.7137,-155.9915],[20.6543,-156.0534],[20.6544,-156.0815],[20.6236,-156.1427],[20.6291,-156.1481],[20.6241,-156.1734],[20.6318,-156.1929],[20.6285,-156.2103],[20.5862,-156.3027],[20.587,-156.3517],[20.5784,-156.3776],[20.5861,-156.4153],[20.5987,-156.4178],[20.5981,-156.4319],[20.6079,-156.4442],[20.6422,-156.4507],[20.656,-156.4437],[20.7047,-156.4487],[20.7817,-156.464],[20.7999,-156.5017],[20.7784,-156.5378],[20.8212,-156.6318],[20.8887,-156.689],[20.9063,-156.6881],[20.9206,-156.6999],[20.9803,-156.6809],[21.0071,-156.6655],[21.0144,-156.646],[21.0276,-156.6428],[21.0248,-156.612]],oahu:[[21.306,-158.0445],[21.3019,-158.1127],[21.3224,-158.1225],[21.3266,-158.1119],[21.3303,-158.1255],[21.3738,-158.1403],[21.4043,-158.1792],[21.448,-158.1924],[21.4876,-158.233],[21.5401,-158.2343],[21.5758,-158.2795],[21.5867,-158.1256],[21.5966,-158.1067],[21.6075,-158.1082],[21.7,-158.0181],[21.7127,-157.9686],[21.6512,-157.9246],[21.6293,-157.9238],[21.5753,-157.8774],[21.5602,-157.8786],[21.5607,-157.8561],[21.5299,-157.8369],[21.5121,-157.8374],[21.5,-157.8526],[21.4595,-157.841],[21.4502,-157.8163],[21.4156,-157.7865],[21.4214,-157.7745],[21.4577,-157.7722],[21.4559,-157.7318],[21.4043,-157.7386],[21.403,-157.7225],[21.3833,-157.7089],[21.3534,-157.7088],[21.3329,-157.6938],[21.3139,-157.6518],[21.302,-157.6537],[21.264,-157.7001],[21.2638,-157.7139],[21.2814,-157.7122],[21.2869,-157.7213],[21.2789,-157.765],[21.2577,-157.8096],[21.29,-157.8457],[21.3065,-157.89],[21.3292,-157.9048],[21.3186,-157.9189],[21.3058,-157.9109],[21.3065,-157.9523],[21.3187,-157.9519],[21.328,-157.968],[21.306,-158.0445]],hawaii:[[20.2457,-155.7782],[20.1245,-155.598],[20.1316,-155.5589],[20.0953,-155.444],[20.022,-155.2826],[19.9694,-155.2045],[19.8554,-155.0863],[19.728,-155.0871],[19.7393,-155.0064],[19.6907,-154.9811],[19.6416,-154.9838],[19.6265,-154.9504],[19.6049,-154.9471],[19.5706,-154.9035],[19.5224,-154.8096],[19.4636,-154.8385],[19.3493,-154.9809],[19.2684,-155.1596],[19.2663,-155.2968],[19.2089,-155.3606],[19.1879,-155.4174],[19.152,-155.4535],[19.1325,-155.5147],[19.0821,-155.5578],[19.0466,-155.5574],[18.9988,-155.596],[18.9716,-155.6019],[18.9175,-155.672],[18.9694,-155.726],[19.014,-155.8061],[19.0366,-155.8816],[19.0811,-155.9084],[19.1212,-155.9214],[19.348,-155.8887],[19.4388,-155.9243],[19.4786,-155.9226],[19.4888,-155.9529],[19.6082,-155.9782],[19.6428,-155.9977],[19.6539,-156.0329],[19.6789,-156.0293],[19.7308,-156.0644],[19.7805,-156.0497],[19.8505,-155.9767],[19.8589,-155.9258],[19.9322,-155.8925],[19.9828,-155.8319],[20.0354,-155.8282],[20.0787,-155.8669],[20.1457,-155.8991],[20.2052,-155.906],[20.2552,-155.8907],[20.2715,-155.8533],[20.2457,-155.7782]]};
+// NEIGHBOR ISLETS — the little islands that share the active island's map view. Each is punched
+// out of the swell clip (same even-odd hole trick as the main ISLAND_OUTLINES) so the drifting
+// wave crests stop painting over their land. Maui's channel view shows all four of these.
+const KAHOOLAWE_OUTLINE=[[20.575,-156.705],[20.607,-156.665],[20.615,-156.615],[20.600,-156.560],[20.560,-156.538],[20.520,-156.545],[20.499,-156.578],[20.497,-156.618],[20.515,-156.665],[20.545,-156.695]];
+const LANAI_OUTLINE=[[20.928,-156.918],[20.905,-156.845],[20.860,-156.808],[20.808,-156.798],[20.762,-156.828],[20.738,-156.882],[20.745,-156.955],[20.792,-157.028],[20.855,-157.070],[20.902,-157.012]];
+const MOLOKAI_OUTLINE=[[21.155,-157.290],[21.180,-157.190],[21.198,-157.080],[21.211,-156.992],[21.190,-156.945],[21.172,-156.860],[21.166,-156.760],[21.162,-156.702],[21.122,-156.708],[21.088,-156.795],[21.072,-156.945],[21.058,-157.085],[21.070,-157.210],[21.095,-157.300],[21.128,-157.325]];
+const MOLOKINI_OUTLINE=[[20.6330,-156.4970],[20.6328,-156.4945],[20.6305,-156.4945],[20.6300,-156.4968],[20.6315,-156.4980]];
+const ISLAND_ISLETS={maui:[KAHOOLAWE_OUTLINE,LANAI_OUTLINE,MOLOKAI_OUTLINE,MOLOKINI_OUTLINE]};
 // SWELL DIRECTION map layer — ambient, stylized wave fronts drifting FROM today's forecast
 // swell bearing (LIVE.swell_dir), uniform across the island (deep-water swell direction is ~uniform
 // at this scale), drawn in a Leaflet pane BELOW the markers so the safety pins stay on top. It shows
@@ -7805,8 +7988,12 @@ function renderSwellLayer(){
     const p=document.getElementById('os-ocean-path'); if(!p||typeof map==='undefined'||!map) return;
     const sz=map.getSize();
     const rect='M0 0 H'+sz.x+' V'+sz.y+' H0 Z';
-    const pts=(ISLAND_OUTLINES[ACTIVE&&ACTIVE.slug]||ISLAND_OUTLINES.kauai).map(pt=>map.latLngToContainerPoint(pt));
-    const isl=pts.map((c,i)=>(i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1)).join(' ')+' Z';
+    const _slug=ACTIVE&&ACTIVE.slug;
+    // One subpath per landmass: the main island outline + any neighbor islets in view (Maui:
+    // Kahoʻolawe / Lānaʻi / Molokaʻi / Molokini). Each closed ring is an even-odd hole, so the
+    // drift-wave layer is clipped off every island's land, not just the main one.
+    const _ring=r=>r.map(pt=>map.latLngToContainerPoint(pt)).map((c,i)=>(i?'L':'M')+c.x.toFixed(1)+' '+c.y.toFixed(1)).join(' ')+' Z';
+    const isl=[(ISLAND_OUTLINES[_slug]||ISLAND_OUTLINES.kauai)].concat(ISLAND_ISLETS[_slug]||[]).map(_ring).join(' ');
     p.setAttribute('d', rect+' '+isl);
     // Curved swell crests: sine-curve <path> covering the rotated layer (rot inset:-70% ≈ 2.4× viewport).
     // SVG <path> + viewBox set here = the proven render path; rebuilt only when viewport size changes.
@@ -8144,7 +8331,8 @@ function closeLocHelp(){
 
 // Live Now chip — compact floating conditions readout on the map.
 // Adapts the label and value per active tab so the same chip serves Beaches/Trails/Family.
-// Tap routes to the full Today's Outlook sheet (the expanded "popup" view).
+// Tap routes to Today's Outlook, except on Town where it lists the filtered pins instead
+// (see liveNowTap) — surf and UV don't help you pick a lunch spot.
 function updateLiveNow(){
   const labelEl = document.getElementById('liveNowLabel');
   const valEl = document.getElementById('liveNowVal');
@@ -8158,7 +8346,13 @@ function updateLiveNow(){
   const advisory = (c && c.brown) ? 'Brown water advisory' : '';
   valEl.textContent = advisory;
   valEl.style.display = advisory ? '' : 'none';
-  if(chip) chip.classList.toggle('has-advisory', !!advisory);
+  if(chip){
+    chip.classList.toggle('has-advisory', !!advisory);
+    // The chip does two different jobs — say which one, so it isn't just "button" to a screen reader.
+    chip.setAttribute('aria-label', window._activeTab === 'shopping'
+      ? 'Show these places as a list'
+      : "Today's outlook — tap to open");
+  }
 }
 
 function updateSavedBadge(){
@@ -8573,6 +8767,11 @@ function dismissWelcomeChip(){
   document.getElementById('welcomeChip')?.remove();
 }
 
+// Creator co-brand banner (?ref=cr-<handle>). A full-width image strip at the top of the app on a
+// creator's link. SAFETY: shows the creator's OWN uploaded image ONLY when a human has approved it
+// (cfg.banner_ok===true) — until then it shows the default OceanSafe island photo, so a self-serve
+// upload never renders un-reviewed on the live safety app. No creator config → never runs (organic
+// loads are byte-identical). Mounts into #topbar, the same proven spot as the welcome chip.
 var _OS_BANNER = { kauai:'/assets/stock/kauai-beach.jpg', maui:'/assets/stock/maui-beach.jpg', oahu:'/assets/stock/family-beach.jpg' };
 function _creatorBanner(cfg, name){
   try {
@@ -8602,6 +8801,10 @@ function dismissCreatorBanner(){
   document.getElementById('creatorBanner')?.remove();
 }
 
+// Creator tour button — a floating "Tours" icon on a creator's ?ref=cr-<handle> link that opens the
+// island's tour sheet (openToursSheet). Shows on every island the creator's link lands on, so their
+// followers can book a tour (the creator's commission) from anywhere in the app. Creator links only;
+// organic loads never see it. Idempotent.
 function _creatorTourFab(){
   try {
     if(document.getElementById('creatorTourFab')) return;
@@ -8676,6 +8879,10 @@ function _viatorPid(){
   const a = window._partnerCfg && window._partnerCfg.affiliates;
   return _affSafe(a && a.viator_pid, 'P00299666');
 }
+// Creator-program campaign tag: when this session arrived on a creators link
+// (?ref=creators&u=<slug>), stamp GYG widgets with data-gyg-cmp="cr-<slug>" so
+// bookings attribute to that creator in GYG partner reporting. Organic and
+// hotel/co-brand sessions return '' and render byte-identical to today.
 function _gygCmp(){
   try {
     const ref = _activeRefSlug();
@@ -8794,7 +9001,7 @@ function _houseFeaturedIds(){
   } catch(e){}
   return out;
 }
-// PAID-gated: the co-brand house-pick treatment never renders on the free plan.
+// PAID-gated for hotels; creator co-brand configs (cfg.creator) also earn the pick treatment.
 function _isHousePick(id){ return (_planPaid() || !!(window._partnerCfg && window._partnerCfg.creator)) && _houseFeaturedIds().has(id); }
 // The gold "★ <Hotel>'s pick" pill for a featured place's hero. Co-branded with
 // the same name contract as the amenity panel (_demoName(cfg.name||'Your Resort'),
@@ -9655,7 +9862,7 @@ async function boot(){
       if(slug){
         localStorage.setItem('referrer', slug);
         localStorage.setItem('referrerFirstSeen', new Date().toISOString());
-        if(slug.indexOf('cr-') === 0) _creatorTourFab();
+        if(slug.indexOf('cr-') === 0) _creatorTourFab();   // creator link → floating Tours button (all islands)
         const partnerName = PARTNER_NAMES[slug] || slug[0].toUpperCase() + slug.slice(1);
         // Free-plan configs render generic chrome: hold the chip until the
         // config resolves and skip it on plan:"free". No config / paid /

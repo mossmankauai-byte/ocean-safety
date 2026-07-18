@@ -14,6 +14,7 @@
     <a href="dashboard.html">Dashboard</a>
     <a href="sales.html">Sales</a>
     <a class="on" href="products.html">Products</a>
+    <a href="inventory.html">Inventory</a>
     <a href="promotions.html">Promotions</a>
     <a href="#" id="out">Sign out</a>
   </nav></div>
@@ -74,6 +75,15 @@
     <label class="f" for="stock" style="margin-top:14px">How many do you have?</label>
     <input id="stock" type="number" min="0" step="1" placeholder="">
     <div class="hint">Leave blank = always available (made to order). At 0 it auto-marks sold out.</div>
+
+    <!-- SKU + reorder trigger (products.sku / products.reorder_at, 0030) -->
+    <div class="row2" style="margin-top:14px">
+      <div><label class="f" for="sku">SKU / item code</label>
+        <input id="sku" placeholder="e.g. SPF50-8OZ"></div>
+      <div><label class="f" for="reorderAt">Reorder alert at</label>
+        <input id="reorderAt" type="number" min="0" step="1" placeholder=""></div>
+    </div>
+    <div class="hint">SKU fills in automatically when you import from Square. Reorder alert: when stock falls to this number the item is flagged on your dashboard — leave blank to turn it off.</div>
 
     <label class="f" style="margin-top:14px">Show this product when conditions are…</label>
     <div class="checks" id="tags"></div>
@@ -245,7 +255,7 @@
     return `<table><tr><th></th><th>Product</th><th>Type</th><th style="text-align:right">Price</th><th></th></tr>${
       rows.map((p) => `<tr>
         <td><img class="thumb" src="${esc(safeUrl(p.image_url))}" alt="" onerror="this.style.visibility='hidden'"></td>
-        <td><b>${esc(p.title)}</b>${p.square_variation_id ? ' <span class="badge b-grey" style="margin-left:4px">from Square</span>' : ""}<div class="muted small">${esc(p.category || "")}${p.active ? "" : " · hidden"}${stockLabel(p)}${p.square_variation_id && !p.image_url ? ' · <b style="color:#92600a">no photo yet — tap Edit to add one</b>' : ""}${p.square_variation_id ? ' · name &amp; price come from Square (re-import refreshes them)' : ""}</div></td>
+        <td><b>${esc(p.title)}</b>${p.square_variation_id ? ' <span class="badge b-grey" style="margin-left:4px">from Square</span>' : ""}<div class="muted small">${p.sku ? `<span style="font-family:ui-monospace,monospace">${esc(p.sku)}</span> · ` : ""}${esc(p.category || "")}${p.active ? "" : " · hidden"}${stockLabel(p)}${p.square_variation_id && !p.image_url ? ' · <b style="color:#92600a">no photo yet — tap Edit to add one</b>' : ""}${p.square_variation_id ? ' · name &amp; price come from Square (re-import refreshes them)' : ""}</div></td>
         <td><span class="badge ${p.mode === "storefront" ? "b-blue" : "b-grey"}">${p.mode}</span></td>
         <td style="text-align:right">${p.mode === "storefront" ? money(p.price_cents) : "—"}</td>
         <td style="text-align:right">${demo ? '<span class="muted small">demo</span>' : `<button class="btn ghost small" data-edit="${p.id}">Edit</button>`}</td>
@@ -267,6 +277,8 @@
     el("category").value = p?.category || "";
     el("price").value = p?.price_cents != null ? (p.price_cents / 100).toFixed(2) : "";
     el("stock").value = p?.stock != null ? p.stock : "";
+    el("sku").value = p?.sku || "";
+    el("reorderAt").value = p?.reorder_at != null ? p.reorder_at : "";
     el("photo").value = "";
     el("active").checked = p ? !!p.active : true;
     el("activeChk").classList.toggle("on", el("active").checked);
@@ -301,6 +313,14 @@
       stock = s;
     }
 
+    let reorder_at = null;
+    const reorderRaw = el("reorderAt").value.trim();
+    if (reorderRaw !== "") {
+      const r = parseInt(reorderRaw, 10);
+      if (!Number.isFinite(r) || r < 0) return toast(el("msg"), "err", "Reorder alert needs a whole number (0 or more), or leave blank.");
+      reorder_at = r;
+    }
+
     el("save").disabled = true; el("save").innerHTML = '<span class="spin"></span>';
     try {
       let image_url = editingId ? (products.find((x) => x.id === editingId)?.image_url || null) : null;
@@ -312,6 +332,7 @@
         partner_id: partner.id, title, mode,
         category: el("category").value.trim() || null,
         price_cents, image_url, stock,
+        sku: el("sku").value.trim() || null, reorder_at,
         asin, source: asin ? "amazon" : "manual",
         affiliate_url: mode === "affiliate" ? (affiliateLink(asin, partner.amazon_tag) || null) : null,
         show_when, active: el("active").checked,
@@ -338,7 +359,9 @@
   function stockLabel(p) {
     if (p.stock == null) return "";
     if (p.stock === 0 || (!p.active && p.stock <= 0)) return ' · <b>Sold out</b>';
-    return ` · ${p.stock} left`;
+    // reorder trigger (products.reorder_at, 0030): flag when stock is at/below it
+    const flag = p.reorder_at != null && p.stock <= p.reorder_at ? ' · <b style="color:#92600a">Reorder</b>' : "";
+    return ` · ${p.stock} left${flag}`;
   }
   function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
   function safeUrl(u) { const s = String(u ?? "").trim(); return /^https?:\/\//i.test(s) ? s : ""; }
