@@ -300,7 +300,7 @@ $("f").addEventListener("submit",async e=>{
   $("go").disabled=true; $("go").textContent="Setting up…";
   try{
     const r=await fetch(SB_URL+"/functions/v1/operator-signup-public",{method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"apikey":SB_KEY},
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY},
       body:JSON.stringify(body)});
     const out=await r.json();
     if(!r.ok) throw new Error(out.error||"Something went wrong.");
