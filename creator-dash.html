@@ -82,9 +82,17 @@
     border:1px solid var(--line);border-radius:11px;padding:11px 13px}
   .ed-lbl{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700;margin-bottom:8px}
   .ed-count{font-weight:600;color:var(--muted2);font-size:12px}
-  .beachlist{display:grid;grid-template-columns:1fr;gap:7px;max-height:260px;overflow-y:auto;
-    border:1px solid var(--line);border-radius:11px;padding:10px}
-  @media(min-width:520px){.beachlist{grid-template-columns:1fr 1fr}}
+  .poiwrap{max-height:360px;overflow-y:auto;border:1px solid var(--line);border-radius:11px;padding:2px 12px}
+  .poiwrap details{border-bottom:1px solid var(--line)}
+  .poiwrap details:last-of-type{border-bottom:none}
+  .poiwrap summary{cursor:pointer;font-size:14px;font-weight:800;padding:11px 2px;list-style:none;
+    display:flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}
+  .poiwrap summary::-webkit-details-marker{display:none}
+  .poiwrap summary::before{content:'\25B8';font-size:11px;color:var(--muted2);transition:transform .15s}
+  .poiwrap details[open] summary::before{transform:rotate(90deg)}
+  .ccount{font-size:11.5px;font-weight:700;color:var(--accent);margin-left:auto}
+  .catlist{display:grid;grid-template-columns:1fr;gap:7px;padding:2px 0 12px}
+  @media(min-width:520px){.catlist{grid-template-columns:1fr 1fr}}
   .beachrow{display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer;padding:4px 2px}
   .beachrow input{width:17px;height:17px;accent-color:var(--accent);flex:0 0 auto}
   .beachrow .rg{color:var(--muted2);font-size:11.5px;margin-left:auto}
@@ -175,7 +183,7 @@
 
     <div class="card" id="editCard" style="display:none">
       <h2>Customize your link</h2>
-      <p class="hint">Pick the islands you cover, star your favorite beaches, and add your own photo. Followers who open your link see this.</p>
+      <p class="hint">Pick the islands you cover, then star the beaches, trails, family spots, food and shops that make your ideal trip. Followers who open your link see your picks flagged in the guide.</p>
 
       <div class="isltabs" id="islTabs" role="tablist">
         <button type="button" class="isltab on" data-isl="kauai">Kauaʻi</button>
@@ -189,8 +197,8 @@
       </div>
 
       <div class="ed-field">
-        <div class="ed-lbl"><span>Your featured beaches on <b id="edIslName">Kauaʻi</b></span><span class="ed-count" id="edCount">0 picked</span></div>
-        <div class="beachlist" id="beachList"></div>
+        <div class="ed-lbl"><span>Curate the ideal trip on <b id="edIslName">Kauaʻi</b></span><span class="ed-count" id="edCount">0 picked</span></div>
+        <div id="beachList" class="poiwrap"></div>
       </div>
 
       <div class="ed-field">
@@ -329,19 +337,29 @@
   // ── Customize editor (creator mode only — needs the access key to save) ──
   if(mode === 'creator' && key){
     var ISL_NAME = { kauai:'Kauaʻi', oahu:'Oʻahu', maui:'Maui' };
-    var BEACHES = {}, picks = { kauai:new Set(), oahu:new Set(), maui:new Set() };
+    var CATS = [['beaches','Beaches'],['hikes','Trails'],['acts','Family'],['foods','Food & drinks'],['crafts','Shops']];
+    var PICK_CAP = 25;
+    var POIS = {}, picks = { kauai:new Set(), oahu:new Set(), maui:new Set() };
     var curIsl = 'kauai', bannerDataUrl = null;
     $('editCard').style.display = 'block';
 
     function renderBeaches(){
-      var list = BEACHES[curIsl] || [];
+      var cats = POIS[curIsl] || {};
       $('edIslName').textContent = ISL_NAME[curIsl];
-      var html = list.map(function(b){
-        var on = picks[curIsl].has(b.id) ? ' checked' : '';
-        return '<label class="beachrow"><input type="checkbox" data-id="'+b.id+'"'+on+'>'
-          + '<span>'+b.name+'</span><span class="rg">'+(b.region||'')+'</span></label>';
+      var html = CATS.map(function(c, ci){
+        var list = cats[c[0]] || [];
+        if(!list.length) return '';
+        var starred = 0;
+        var rows = list.map(function(b){
+          var on = picks[curIsl].has(b.id); if(on) starred++;
+          return '<label class="beachrow"><input type="checkbox" data-id="'+b.id+'"'+(on?' checked':'')+'>'
+            + '<span>'+b.name+'</span><span class="rg">'+(b.region||'')+'</span></label>';
+        }).join('');
+        return '<details'+(ci===0?' open':'')+'><summary>'+c[1]
+          + '<span class="ccount">'+(starred? starred+' \u2605':'')+'</span></summary>'
+          + '<div class="catlist">'+rows+'</div></details>';
       }).join('');
-      $('beachList').innerHTML = html || '<p class="hint" style="padding:6px">Beach list unavailable — try reloading.</p>';
+      $('beachList').innerHTML = html || '<p class="hint" style="padding:6px">POI list unavailable — try reloading.</p>';
       updateCount();
     }
     function updateCount(){ $('edCount').textContent = picks[curIsl].size + ' picked'; }
@@ -351,11 +369,20 @@
       });
     }
 
-    // Beach checkbox toggles (delegated)
+    // POI checkbox toggles (delegated across category groups)
     $('beachList').addEventListener('change', function(e){
       var cb = e.target.closest('input[type=checkbox]'); if(!cb) return;
       var id = cb.getAttribute('data-id');
+      if(cb.checked && picks[curIsl].size >= PICK_CAP){
+        cb.checked = false;
+        var st = $('edStatus'); st.className='ed-status err';
+        st.textContent = 'That\u2019s '+PICK_CAP+' picks on this island \u2014 an ideal trip is a shortlist. Unstar something first.';
+        return;
+      }
       if(cb.checked) picks[curIsl].add(id); else picks[curIsl].delete(id);
+      var det = cb.closest('details');
+      if(det){ var n = det.querySelectorAll('input:checked').length;
+        det.querySelector('.ccount').textContent = n ? n+' \u2605' : ''; }
       updateCount(); markCovered();
     });
     // Island tabs
@@ -414,8 +441,8 @@
           status.className='ed-status err'; status.textContent='Save didn’t go through — check your connection and retry.'; });
     });
 
-    // Load beach lists + any existing config
-    fetch('/creator-beaches.json').then(function(r){ return r.json(); }).then(function(d){ BEACHES = d || {}; renderBeaches(); markCovered(); })
+    // Load POI lists (all categories) + any existing config
+    fetch('/creator-pois.json').then(function(r){ return r.json(); }).then(function(d){ POIS = d || {}; renderBeaches(); markCovered(); })
       .catch(function(){ renderBeaches(); });
     fetch(API + '/cfg/' + cParam).then(function(r){ return r.ok ? r.json() : null; }).then(function(cfg){
       if(!cfg) return;

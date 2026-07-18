@@ -1353,6 +1353,11 @@ a{text-decoration:none;color:inherit}
 /* no intent chips on this beach -> drop the badge down to where the chips would sit */
 .hero:not(:has(.ibs-hero)) .housepick-badge{bottom:52px}
 .housepick-badge svg{flex-shrink:0}
+/* Non-beach POI heroes (hike/family/food/shop sheets): pin the pick badge bottom-right —
+   the only corner these heroes leave free (title+subtitle top-left, heart top-right). The
+   beach hero keeps its chip-aware bottom-left placement above. */
+.poi-hero:has(.housepick-badge){position:relative}
+.poi-hero .housepick-badge{bottom:10px;right:12px;left:auto}
 .scond{font-size:13px;line-height:1.5;margin-top:10px;padding:12px;background:var(--warm);border-radius:10px;border-left:3px solid var(--ocean)}
 .ibs{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .ib{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:500;background:var(--ocean-lt);color:var(--ocean);border:1px solid rgba(15,76,92,.15)}
@@ -4679,7 +4684,7 @@ function openHikeSheet(id){
   const bestTime = hk.id==='kalalau_2mi'||hk.id==='canyon'||hk.id==='awaawapuhi'?'Early morning':hk.id==='pihea'?'Mid-morning':'Anytime';
   const family = hk.difficulty==='easy'?'✓ Family-friendly':hk.difficulty==='moderate'?'Older kids 8+':'Adults / teens';
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(heroPhoto(hk), heroCol)};color:#fff">
+    <div class="poi-hero" style="background:${heroBg(heroPhoto(hk), heroCol)};color:#fff">${_housePickBadge(hk.id)}
       <div class="poi-hero-icon" style="color:#fff">⛰</div>${heartButton('hike', hk.id)}
       <div><div class="poi-hero-name" style="color:#fff">${hk.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${hk.r} • Trail</div></div>
     </div>
@@ -5447,7 +5452,7 @@ function openActSheet(id){
   if(a.tags.includes('sheltered')) weather.push('Sheltered');
   const weatherStr = weather.length ? weather.join(' • ') : 'Outdoor';
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    <div class="poi-hero" style="background:${heroBg(heroPhoto(a), 'linear-gradient(135deg,#c9a84c,#e07856)')};color:#fff">
+    <div class="poi-hero" style="background:${heroBg(heroPhoto(a), 'linear-gradient(135deg,#c9a84c,#e07856)')};color:#fff">${_housePickBadge(a.id)}
       <div class="poi-hero-icon" style="color:#fff">★</div>${heartButton('act', a.id)}
       <div><div class="poi-hero-name" style="color:#fff">${a.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${a.r} • ${a.type}</div></div>
     </div>
@@ -5598,7 +5603,7 @@ function openCraftSheet(id){
   const c = LOCAL_CRAFTS.find(x=>x.id===id); if(!c) return;
   const tagPills = (c.tags||[]).map(t=>`<span style="background:#f5e6f5;color:#581c87;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    ${_placementBadge(c)}<div class="poi-hero" style="background:${heroBg(heroPhoto(c), 'linear-gradient(135deg,#7e22ce,#a855f7)')};color:#fff">
+    ${_placementBadge(c)}<div class="poi-hero" style="background:${heroBg(heroPhoto(c), 'linear-gradient(135deg,#7e22ce,#a855f7)')};color:#fff">${_housePickBadge(c.id)}
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">◆</div>${heartButton('craft', c.id)}
       <div><div class="poi-hero-name" style="color:#fff">${c.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${c.r} • ${c.type}</div></div>
     </div>
@@ -5733,7 +5738,7 @@ function openFoodSheet(id){
   }
 
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
-    ${_placementBadge(f)}<div class="poi-hero" style="background:${heroBg(heroPhoto(f), 'linear-gradient(135deg,#e07856,#c9a84c)')};color:#fff">
+    ${_placementBadge(f)}<div class="poi-hero" style="background:${heroBg(heroPhoto(f), 'linear-gradient(135deg,#e07856,#c9a84c)')};color:#fff">${_housePickBadge(f.id)}
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">🍽</div>${heartButton('food', f.id)}
       <div><div class="poi-hero-name" style="color:#fff">${f.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${f.r} • ${f.type}</div></div>
     </div>
