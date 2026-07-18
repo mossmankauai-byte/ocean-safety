@@ -36,7 +36,7 @@ const esc=s=>String(s??"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&am
 async function publish(token){
   try{
     const r=await fetch(SB_URL+"/functions/v1/activate-free-verified",{method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+token,"apikey":SB_KEY},
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
       body:"{}"});
     const out=await r.json();
     if(!r.ok||!out.ok) throw new Error(out.error||"Publishing was blocked.");
