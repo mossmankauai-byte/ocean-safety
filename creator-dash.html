@@ -441,10 +441,16 @@
           status.className='ed-status err'; status.textContent='Save didn’t go through — check your connection and retry.'; });
     });
 
-    // Load POI lists (all categories) + any existing config
+    // Load POI lists (all categories) + any existing config. Save stays disabled until the
+    // existing config has merged into the picker — saving before that would serialize a
+    // picks-set missing prior saves and silently clobber them on the worker.
+    var saveGate = $('saveBtn'); saveGate.disabled = true;
+    var saveGateT = saveGate.textContent; saveGate.textContent = 'Loading your picks\u2026';
+    function openSaveGate(){ saveGate.disabled = false; saveGate.textContent = saveGateT; }
     fetch('/creator-pois.json').then(function(r){ return r.json(); }).then(function(d){ POIS = d || {}; renderBeaches(); markCovered(); })
       .catch(function(){ renderBeaches(); });
     fetch(API + '/cfg/' + cParam).then(function(r){ return r.ok ? r.json() : null; }).then(function(cfg){
+      openSaveGate();
       if(!cfg) return;
       if(cfg.name) $('edName').value = cfg.name;
       if(cfg.islands) Object.keys(cfg.islands).forEach(function(i){
@@ -453,7 +459,7 @@
       if(cfg.banner){ $('bannerImg').src = cfg.banner; $('bannerPrev').style.display='block';
         $('bannerPending').style.display = cfg.banner_ok ? 'none' : 'block'; }
       renderBeaches(); markCovered();
-    }).catch(function(){});
+    }).catch(function(){ openSaveGate(); });
   }
 })();
 </script>
