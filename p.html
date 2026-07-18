@@ -100,7 +100,7 @@ const slug=(m?m[1]:new URLSearchParams(location.search).get("slug")||"").toLower
         bn.disabled=true; bn.textContent="One sec…";
         try{
           const r=await fetch(SB_URL+"/functions/v1/create-square-checkout",{method:"POST",
-            headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"apikey":SB_KEY},
+            headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY},
             body:JSON.stringify({slug:slug,items:[{product_id:bn.dataset.buy,qty:1}]})});
           const out=await r.json();
           if(out&&out.url){ location.href=out.url; return; }
