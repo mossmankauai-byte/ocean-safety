@@ -7153,7 +7153,7 @@ function buildSubtabs(tabName){
 // defeated; it only hides buy surfaces for honest users. Kauaʻi is the only sellable island.
 const SELLABLE_ISLANDS = ['kauai'];
 function _islandSellable(){ return SELLABLE_ISLANDS.indexOf((window.ACTIVE&&ACTIVE.slug)||'kauai')>=0; }
-window.PARTNER_MODE = window.PARTNER_MODE || 'shop';  // Shop tab on by default (Plan retired 2026-07-13); ?mode=affiliate still hides it
+window.PARTNER_MODE = window.PARTNER_MODE || 'shop';  // mode default (Plan retired 2026-07-13); Shop TAB visibility is gated in applyPartnerMode (retail ref / ?mode=shop only, 2026-07-18)
 try{ var _qm=new URLSearchParams(location.search).get('mode'); if(_qm==='shop'||_qm==='affiliate') window.PARTNER_MODE=_qm; }catch(e){}
 // ?safety=1 deep-link: open the disclaimer on load (Jade's dashboard card lands here to show a GM the safety notice)
 try{ if(new URLSearchParams(location.search).get('safety')==='1'){ window.addEventListener('load', function(){ try{ openDisclaimer(); }catch(e){} }); } }catch(e){}
@@ -7169,9 +7169,11 @@ function applyPartnerMode(){
   if(plan) plan.style.display='none';
   var shopTab=document.querySelector('#tabs .tab[data-tab="shop"]');
   // Creator links drop the Shop tab entirely — creator traffic funnels to Tours (their commission),
-  // not the Amazon shop. Organic loads keep Shop; its icon is the cart now that Tours owns the star.
+  // not the Amazon shop. Organic loads DROP Shop too (2026-07-18): Tours owns the organic commerce
+  // slot. Shop shows only for a RETAIL partner ref (its whole value) or an explicit ?mode=shop preview.
   var isCreator=false; try{ isCreator=(typeof _activeRefSlug==='function' && String(_activeRefSlug()||'').indexOf('cr-')===0); }catch(e){}
-  if(shopTab){ shopTab.style.display = (aff || isCreator) ? 'none' : '';
+  var wantShop=(window._partnerSeg==='retail'); try{ if(new URLSearchParams(location.search).get('mode')==='shop') wantShop=true; }catch(e){}
+  if(shopTab){ shopTab.style.display = (aff || isCreator || !wantShop) ? 'none' : '';
     var si=shopTab.querySelector('.tab-ico');
     if(si){ var src=(window._partnerSeg==='retail')?RETAIL_ICO:SHOP_ICO;
       si.setAttribute('src', src); } }
