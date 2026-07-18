@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your OceanSafe Creator Dashboard</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A8BA8'/%3E%3Cpath d='M6 41c6 0 6-8 12-8s6 8 12 8 6-8 12-8 6 8 12 8' fill='none' stroke='%23FFC64B' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --accent:#0A8BA8; --deep:#0c4a58; --deep2:#0a7a94;
+    --ink:#16202A; --bg:#F5F7F9; --card:#ffffff; --line:#E2E8ED;
+    --muted:#56636e; --muted2:#7A8794; --sun:#F5B301; --sun-soft:#FFC64B;
+    --tint:#E8F4F7; --shadow:0 1px 2px rgba(16,32,42,.04),0 8px 24px rgba(16,32,42,.06);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--ink:#e9f1f4; --bg:#0e1519; --card:#15212a; --line:#26343d;
+      --muted:#a4b4be; --muted2:#82929c; --tint:#123039; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);}
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:640px;margin:0 auto;padding:0 20px}
+  a{color:var(--accent)}
+  .wm{font-weight:800;letter-spacing:-.01em}
+
+  header{background:linear-gradient(158deg,var(--deep) 0%,var(--deep2) 100%);color:#eef9fb;padding:24px 0 30px}
+  header .wm{color:#fff;font-size:20px}
+  header .wm i{font-style:normal;color:var(--sun-soft)}
+  .who{margin-top:14px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a9dce7}
+  h1{font-size:clamp(24px,6vw,32px);font-weight:800;letter-spacing:-.02em;margin-top:4px}
+  .sub{margin-top:8px;font-size:14.5px;color:#cfe8ee;max-width:44ch}
+
+  main{padding:26px 0 40px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;
+    box-shadow:var(--shadow);margin-top:16px}
+  .card h2{font-size:17px;font-weight:800;letter-spacing:-.01em}
+  .card .hint{margin-top:4px;font-size:13px;color:var(--muted2)}
+
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+  .stat{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 12px;text-align:center}
+  .stat .n{font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .stat .l{margin-top:3px;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted2)}
+  .delta{font-size:13px;font-weight:700;margin-top:12px}
+  .delta.up{color:#178a4c}.delta.dn{color:#c0392b}.delta.flat{color:var(--muted)}
+
+  .chart{display:flex;align-items:flex-end;gap:4px;height:110px;margin-top:18px;padding-top:6px}
+  .chart .bar{flex:1;min-width:0;background:var(--accent);border-radius:4px 4px 0 0;opacity:.85;min-height:2px}
+  .chart .bar.today{background:var(--sun)}
+  .chart-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted2);margin-top:6px}
+
+  .state{margin-top:18px;background:var(--tint);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;font-size:14px;color:var(--muted)}
+
+  .linkbox{display:flex;gap:10px;margin-top:16px}
+  .linkbox input{flex:1;min-width:0;font:inherit;font-size:14px;font-weight:600;color:var(--ink);
+    background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:11px 13px}
+  .copybtn{flex:0 0 auto;font:inherit;font-size:14px;font-weight:700;cursor:pointer;border-radius:11px;
+    padding:11px 16px;border:1px solid var(--accent);background:var(--card);color:var(--accent)}
+  .copybtn.did{background:var(--accent);color:#fff}
+  .qr-row{display:flex;gap:18px;align-items:center;margin-top:16px;flex-wrap:wrap}
+  .qr-row img{width:120px;height:120px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:6px}
+  .qr-row p{flex:1;min-width:200px;font-size:13.5px;color:var(--muted)}
+
+  .earn-line{display:flex;justify-content:space-between;gap:12px;margin-top:12px;font-size:15px;
+    border-bottom:1px solid var(--line);padding-bottom:10px}
+  .earn-line:last-of-type{border-bottom:none}
+  .earn-line b{font-variant-numeric:tabular-nums}
+
+  .terms{font-size:13px;color:var(--muted);line-height:1.6;margin-top:10px}
+  footer{padding:26px 0 46px;text-align:center;color:var(--muted2);font-size:13px}
+  a.back{display:inline-block;margin-top:6px}
+
+  /* customize editor */
+  .isltabs{display:flex;gap:8px;margin:16px 0 4px}
+  .isltab{flex:1;font:inherit;font-size:14px;font-weight:700;cursor:pointer;padding:9px 6px;border-radius:10px;
+    border:1px solid var(--line);background:var(--bg);color:var(--muted)}
+  .isltab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .isltab.covered:not(.on){border-color:var(--accent);color:var(--accent)}
+  .ed-field{margin-top:18px}
+  .ed-field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+  .ed-field input[type=text]{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);
+    border:1px solid var(--line);border-radius:11px;padding:11px 13px}
+  .ed-lbl{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700;margin-bottom:8px}
+  .ed-count{font-weight:600;color:var(--muted2);font-size:12px}
+  .beachlist{display:grid;grid-template-columns:1fr;gap:7px;max-height:260px;overflow-y:auto;
+    border:1px solid var(--line);border-radius:11px;padding:10px}
+  @media(min-width:520px){.beachlist{grid-template-columns:1fr 1fr}}
+  .beachrow{display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer;padding:4px 2px}
+  .beachrow input{width:17px;height:17px;accent-color:var(--accent);flex:0 0 auto}
+  .beachrow .rg{color:var(--muted2);font-size:11.5px;margin-left:auto}
+  .bannerprev{margin-top:10px}
+  .bannerprev img{width:100%;max-height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+  .bannerprev .pending{display:block;margin-top:6px;font-size:12px;color:#8a6d1f;background:#fdf6e3;
+    border:1px solid #ead9a0;border-radius:8px;padding:6px 9px}
+  @media (prefers-color-scheme:dark){.bannerprev .pending{background:#2c2410;border-color:#4a3d1a;color:#e8d491}}
+  .ed-status{margin-top:10px;font-size:13.5px;font-weight:600;min-height:1em}
+  .ed-status.ok{color:#178a4c}.ed-status.err{color:#c0392b}
+
+  /* guided tour (same engine as /creators) */
+  #osTour{position:fixed;inset:0;z-index:400;display:none}
+  #osTour.on{display:block}
+  .tor-block{position:absolute;inset:0;pointer-events:auto}
+  .tor-hi{position:fixed;border-radius:14px;pointer-events:none;
+    box-shadow:0 0 0 2px rgba(255,253,248,.96), 0 0 0 4000px rgba(15,43,54,.55);
+    transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1),opacity .2s}
+  .tor-hi.off{opacity:0}
+  .tor-card{position:fixed;width:min(358px,calc(100vw - 28px));background:var(--card);color:var(--ink);
+    border:1px solid var(--line);border-radius:16px;padding:16px 17px 14px;pointer-events:auto;
+    box-shadow:0 8px 18px rgba(15,43,54,.18),0 24px 60px rgba(15,43,54,.25);
+    transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1)}
+  .tor-card.center{left:50%!important;top:50%!important;transform:translate(-50%,-50%);width:min(410px,calc(100vw - 28px));text-align:center;padding:26px 24px 20px}
+  .tor-card .tc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .tor-card .tc-step{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .tor-card .tc-skip{margin-left:auto;appearance:none;background:none;border:0;font:inherit;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;padding:2px 4px}
+  .tor-card h4{margin:0 0 6px;font-size:16px;color:var(--ink);font-weight:800}
+  .tor-card p{margin:0;font-size:12.5px;line-height:1.55;color:var(--muted)}
+  .tor-card p b{color:var(--ink)}
+  .tor-card .tc-foot{display:flex;align-items:center;gap:10px;margin-top:14px}
+  .tor-card.center .tc-foot{justify-content:center}
+  .tor-dots{display:flex;gap:5px;margin-right:auto}
+  .tor-card.center .tor-dots{margin-right:0}
+  .tor-dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+  .tor-dots i.on{background:var(--accent);transform:scale(1.25)}
+  .tor-btn{appearance:none;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border-radius:9px;padding:8px 15px;border:1px solid var(--line);background:var(--card);color:var(--muted)}
+  .tor-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .tc-logo{width:52px;height:52px;border-radius:13px;margin:0 auto 12px;display:block}
+  @media(max-width:560px){.tor-card{width:calc(100vw - 20px)}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="wm">Ocean<i>Safe</i></span>
+    <div class="who">Creator dashboard</div>
+    <h1 id="dhHandle">@—</h1>
+    <p class="sub">Your link's activity updates live. Tour commission posts monthly from GetYourGuide reporting.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <div class="card" id="statsCard">
+      <h2>Link activity — last 30 days</h2>
+      <p class="hint">Opens and in-app taps recorded from visitors who arrived on your link. Counted anonymously — no personal data.</p>
+      <div class="stat-row">
+        <div class="stat"><div class="n" id="st30">—</div><div class="l">30-day total</div></div>
+        <div class="stat"><div class="n" id="st7">—</div><div class="l">Last 7 days</div></div>
+        <div class="stat"><div class="n" id="stToday">—</div><div class="l">Today</div></div>
+      </div>
+      <div class="delta flat" id="stDelta"></div>
+      <div class="chart" id="chart" aria-label="Daily activity, last 14 days"></div>
+      <div class="chart-lbl"><span>14 days ago</span><span>today</span></div>
+      <div class="state" id="statsState" style="display:none"></div>
+    </div>
+
+    <div class="card" id="earnCard">
+      <h2>Bookings &amp; commission</h2>
+      <p class="hint">Reconciled monthly against GetYourGuide's partner report, then posted here and paid out ($25 minimum, smaller balances roll over).</p>
+      <div id="earnBody"></div>
+    </div>
+
+    <div class="card" id="kitCard">
+      <h2>Your link &amp; QR</h2>
+      <div class="linkbox">
+        <input id="dhLink" readonly value="" aria-label="Your personal link">
+        <button type="button" class="copybtn" id="copyBtn">Copy</button>
+      </div>
+      <div class="qr-row">
+        <img id="dhQr" src="" alt="Your personal OceanSafe QR code">
+        <p>Long-press (or right-click) to save. Need the full kit — captions, rules, print version? It lives on the <a href="/creators.html">creators page</a> on this device.</p>
+      </div>
+    </div>
+
+    <div class="card" id="editCard" style="display:none">
+      <h2>Customize your link</h2>
+      <p class="hint">Pick the islands you cover, star your favorite beaches, and add your own photo. Followers who open your link see this.</p>
+
+      <div class="isltabs" id="islTabs" role="tablist">
+        <button type="button" class="isltab on" data-isl="kauai">Kauaʻi</button>
+        <button type="button" class="isltab" data-isl="oahu">Oʻahu</button>
+        <button type="button" class="isltab" data-isl="maui">Maui</button>
+      </div>
+
+      <div class="ed-field">
+        <label for="edName">Display name (on your banner)</label>
+        <input id="edName" type="text" maxlength="40" placeholder="@yourhandle">
+      </div>
+
+      <div class="ed-field">
+        <div class="ed-lbl"><span>Your featured beaches on <b id="edIslName">Kauaʻi</b></span><span class="ed-count" id="edCount">0 picked</span></div>
+        <div class="beachlist" id="beachList"></div>
+      </div>
+
+      <div class="ed-field">
+        <label for="edImg">Your banner photo <span style="font-weight:400;color:var(--muted2)">— optional; we show OceanSafe's until yours is approved</span></label>
+        <input id="edImg" type="file" accept="image/jpeg,image/png,image/webp">
+        <div class="bannerprev" id="bannerPrev" style="display:none"><img id="bannerImg" alt="Your banner preview"><span class="pending" id="bannerPending">Pending review — your link shows the default OceanSafe photo until approved.</span></div>
+      </div>
+
+      <button type="button" class="btn" id="saveBtn" style="width:100%;margin-top:8px">Save my link</button>
+      <p class="ed-status" id="edStatus"></p>
+    </div>
+
+    <div class="card">
+      <h2>Payout terms</h2>
+      <p class="terms">50% of the commission on every tour — an even split, rising to 60% after 25 bookings in a quarter. Paid monthly once your balance passes $25; smaller balances roll over. W-9 required before first payout; 1099-NEC if your year passes $600. Questions or payout details: <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a>.</p>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    OceanSafe conditions are information, not a lifeguard or a safety guarantee.
+    <br><a class="back" href="/creators.html">← Creators home</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var API  = 'https://concierge-guide-api.oceansafe-hi.workers.dev';
+  var APP  = 'https://oceansafety.app';
+  var $ = function(id){ return document.getElementById(id); };
+
+  var qs = new URLSearchParams(location.search);
+  // Two shapes:
+  //   ?c=cr-<handle>&k=<key>  — the creator's OWN registered slug (full rollup, access-gated)
+  //   ?u=<handle>             — pooled fallback (this creator is a unit on the shared 'creators' slug)
+  var cParam = String(qs.get('c')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,32);
+  var uParam = String(qs.get('u')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,16);
+  var key    = qs.get('k') || '';
+
+  // Recover from the saved kit if the URL carried nothing.
+  if(!cParam && !uParam){
+    try {
+      var saved = JSON.parse(localStorage.getItem('osc_kit') || 'null');
+      if(saved){
+        if(saved.mode === 'pooled'){ uParam = saved.clean; }
+        else if(saved.slug){ cParam = saved.slug; key = key || saved.key || ''; }
+      }
+    } catch(e){}
+  }
+
+  var mode = cParam ? 'creator' : (uParam ? 'pooled' : null);
+  var querySlug = mode === 'creator' ? cParam : 'creators';   // worker slug to query
+  var display   = mode === 'creator' ? cParam.replace(/^cr-/,'') : uParam;
+  var earnKey   = mode === 'creator' ? cParam : ('cr-' + uParam);   // creators-earnings.json key
+
+  if(!mode){
+    document.querySelector('main .wrap').innerHTML =
+      '<div class="card"><h2>No creator code in this link</h2><p class="terms">Open your dashboard from your kit on the <a href="/creators.html">creators page</a>.</p></div>';
+  } else {
+    $('dhHandle').textContent = '@' + display;
+    var link = mode === 'creator' ? (APP + '/?ref=' + cParam) : (APP + '/?ref=creators&u=' + uParam);
+    $('dhLink').value = link;
+    $('dhQr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=2&data=' + encodeURIComponent(link);
+
+    // ---- live activity ----
+    // Per-creator: the slug's OWN rollup → daily sessions. Pooled: this creator's unit count
+    // inside the shared 'creators' rollup. Same chart either way.
+    fetch(API + '/api/dashboard/' + querySlug + '?period=30' + (key ? '&key=' + encodeURIComponent(key) : ''))
+      .then(function(r){ if(!r.ok) throw new Error('http'+r.status); return r.json(); })
+      .then(function(data){
+        // days[0] = today, going backwards
+        var days = (data.days||[]).map(function(d){
+          if(!d.roll) return 0;
+          return mode === 'creator'
+            ? (d.roll.sessions || 0)
+            : ((d.roll.units && d.roll.units[uParam]) || 0);
+        });
+        var sum = function(a){ return a.reduce(function(x,y){ return x+y; },0); };
+        var t30 = sum(days), t7 = sum(days.slice(0,7)), prev7 = sum(days.slice(7,14));
+        $('st30').textContent = t30; $('st7').textContent = t7; $('stToday').textContent = days[0]||0;
+        var d = $('stDelta');
+        if(prev7 === 0 && t7 === 0){ d.textContent = 'No activity yet — share your link and this chart wakes up.'; }
+        else if(prev7 === 0){ d.textContent = '▲ New this week'; d.className='delta up'; }
+        else { var pct = Math.round((t7-prev7)/prev7*100);
+          d.textContent = (pct>=0?'▲ +':'▼ ') + pct + '% vs the week before';
+          d.className = 'delta ' + (pct>0?'up':(pct<0?'dn':'flat')); }
+        var last14 = days.slice(0,14).reverse();   // oldest → today
+        var max = Math.max.apply(null, last14.concat([1]));
+        var chart = $('chart');
+        last14.forEach(function(v,i){
+          var b = document.createElement('div');
+          b.className = 'bar' + (i === last14.length-1 ? ' today' : '');
+          b.style.height = Math.max(2, Math.round(v/max*100)) + '%';
+          b.title = v + (mode === 'creator' ? ' opens' : ' events');
+          chart.appendChild(b);
+        });
+      })
+      .catch(function(){
+        var s = $('statsState'); s.style.display = 'block';
+        s.textContent = 'Live stats aren’t reachable right now. If you just signed up, tracking activates within a day — check back tomorrow. Your link works and counts either way.';
+        $('st30').textContent = '·'; $('st7').textContent = '·'; $('stToday').textContent = '·';
+      });
+
+    // ---- earnings ----
+    fetch('/creators-earnings.json', { cache:'no-store' })
+      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+      .then(function(all){
+        var e = all && all[earnKey];
+        var body = $('earnBody');
+        if(!e){
+          body.innerHTML = '<div class="state">No bookings posted yet. Commission is reconciled monthly — your first line appears after the first full month with a booking.</div>';
+          return;
+        }
+        body.innerHTML =
+          '<div class="earn-line"><span>Tour bookings credited</span><b>' + (e.bookings||0) + '</b></div>' +
+          '<div class="earn-line"><span>Gross tour value</span><b>$' + (e.gross||0) + '</b></div>' +
+          '<div class="earn-line"><span>Your commission</span><b>$' + (e.commission||0) + '</b></div>' +
+          '<div class="earn-line"><span>Status</span><b>' + (e.status||'accruing') + '</b></div>' +
+          (e.updated ? '<p class="hint" style="margin-top:10px">Last updated ' + e.updated + '</p>' : '');
+      })
+      .catch(function(){
+        $('earnBody').innerHTML = '<div class="state">No bookings posted yet. Commission is reconciled monthly — your first line appears after the first full month with a booking.</div>';
+      });
+  }
+
+  $('copyBtn') && $('copyBtn').addEventListener('click', function(){
+    var inp = $('dhLink'); inp.select();
+    var done = function(){ var b=$('copyBtn'); b.textContent='Copied'; b.classList.add('did');
+      setTimeout(function(){ b.textContent='Copy'; b.classList.remove('did'); }, 1600); };
+    if(navigator.clipboard){ navigator.clipboard.writeText(inp.value).then(done).catch(done); }
+    else { document.execCommand('copy'); done(); }
+  });
+
+  // ── Customize editor (creator mode only — needs the access key to save) ──
+  if(mode === 'creator' && key){
+    var ISL_NAME = { kauai:'Kauaʻi', oahu:'Oʻahu', maui:'Maui' };
+    var BEACHES = {}, picks = { kauai:new Set(), oahu:new Set(), maui:new Set() };
+    var curIsl = 'kauai', bannerDataUrl = null;
+    $('editCard').style.display = 'block';
+
+    function renderBeaches(){
+      var list = BEACHES[curIsl] || [];
+      $('edIslName').textContent = ISL_NAME[curIsl];
+      var html = list.map(function(b){
+        var on = picks[curIsl].has(b.id) ? ' checked' : '';
+        return '<label class="beachrow"><input type="checkbox" data-id="'+b.id+'"'+on+'>'
+          + '<span>'+b.name+'</span><span class="rg">'+(b.region||'')+'</span></label>';
+      }).join('');
+      $('beachList').innerHTML = html || '<p class="hint" style="padding:6px">Beach list unavailable — try reloading.</p>';
+      updateCount();
+    }
+    function updateCount(){ $('edCount').textContent = picks[curIsl].size + ' picked'; }
+    function markCovered(){
+      document.querySelectorAll('#islTabs .isltab').forEach(function(t){
+        t.classList.toggle('covered', picks[t.getAttribute('data-isl')].size > 0);
+      });
+    }
+
+    // Beach checkbox toggles (delegated)
+    $('beachList').addEventListener('change', function(e){
+      var cb = e.target.closest('input[type=checkbox]'); if(!cb) return;
+      var id = cb.getAttribute('data-id');
+      if(cb.checked) picks[curIsl].add(id); else picks[curIsl].delete(id);
+      updateCount(); markCovered();
+    });
+    // Island tabs
+    document.querySelectorAll('#islTabs .isltab').forEach(function(t){
+      t.addEventListener('click', function(){
+        document.querySelectorAll('#islTabs .isltab').forEach(function(x){ x.classList.remove('on'); });
+        t.classList.add('on'); curIsl = t.getAttribute('data-isl'); renderBeaches();
+      });
+    });
+
+    // Image upload → downscale + compress to a bounded JPEG data URL
+    $('edImg').addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0]; if(!file) return;
+      var status = $('edStatus'); status.className='ed-status';
+      var img = new Image();
+      img.onload = function(){
+        var maxW = 1000, scale = Math.min(1, maxW / img.width);
+        var w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+        var cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        var q = 0.82, url = cv.toDataURL('image/jpeg', q);
+        while(url.length > 180*1024 && q > 0.4){ q -= 0.1; url = cv.toDataURL('image/jpeg', q); }
+        if(url.length > 180*1024){ status.textContent='That image is too large even after compression — try a smaller crop.'; status.className='ed-status err'; return; }
+        bannerDataUrl = url;
+        $('bannerImg').src = url; $('bannerPrev').style.display='block';
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = function(){ status.textContent='Could not read that image.'; status.className='ed-status err'; };
+      img.src = URL.createObjectURL(file);
+    });
+
+    // Save
+    $('saveBtn').addEventListener('click', function(){
+      var status = $('edStatus'); status.className='ed-status';
+      var btn = $('saveBtn'); btn.disabled=true; var t=btn.textContent; btn.textContent='Saving…';
+      var islands = {};
+      ['kauai','oahu','maui'].forEach(function(i){ if(picks[i].size) islands[i] = { featured: Array.from(picks[i]) }; });
+      var cfg = { name: ($('edName').value.trim() || ('@'+display)).slice(0,40), islands: islands };
+      if(bannerDataUrl) cfg.banner = bannerDataUrl;
+      fetch('/api/creator-config', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ slug: cParam, key: key, config: cfg }) })
+        .then(function(r){ return r.json().catch(function(){ return {ok:false}; }); })
+        .then(function(res){
+          btn.disabled=false; btn.textContent=t;
+          if(res && res.ok){
+            status.className='ed-status ok';
+            status.textContent = res.bannerPending
+              ? 'Saved. Your picks are live; your photo is pending review (link shows the OceanSafe default meanwhile).'
+              : 'Saved — your link is updated.';
+          } else {
+            status.className='ed-status err';
+            status.textContent = 'Couldn’t save' + (res && res.reason ? ' ('+res.reason+')' : '') + '. Your link still works; try again in a moment.';
+          }
+        })
+        .catch(function(){ btn.disabled=false; btn.textContent=t;
+          status.className='ed-status err'; status.textContent='Save didn’t go through — check your connection and retry.'; });
+    });
+
+    // Load beach lists + any existing config
+    fetch('/creator-beaches.json').then(function(r){ return r.json(); }).then(function(d){ BEACHES = d || {}; renderBeaches(); markCovered(); })
+      .catch(function(){ renderBeaches(); });
+    fetch(API + '/cfg/' + cParam).then(function(r){ return r.ok ? r.json() : null; }).then(function(cfg){
+      if(!cfg) return;
+      if(cfg.name) $('edName').value = cfg.name;
+      if(cfg.islands) Object.keys(cfg.islands).forEach(function(i){
+        if(picks[i] && Array.isArray(cfg.islands[i].featured)) cfg.islands[i].featured.forEach(function(id){ picks[i].add(id); });
+      });
+      if(cfg.banner){ $('bannerImg').src = cfg.banner; $('bannerPrev').style.display='block';
+        $('bannerPending').style.display = cfg.banner_ok ? 'none' : 'block'; }
+      renderBeaches(); markCovered();
+    }).catch(function(){});
+  }
+})();
+</script>
+
+<script>
+/* ============ FIRST-VISIT MINI TOUR ============ */
+(function(){
+  var KEY = 'oscd_tour_done';
+  var LOGO = (document.querySelector('link[rel="icon"]')||{}).href || '';
+  var STEPS = [
+    { center:true, title:'Your dashboard, in three stops',
+      body:'Everything here is yours: what your link is doing, what it’s earned, and the link itself. Thirty seconds.' },
+    { sel:'#statsCard', title:'Live activity',
+      body:'Opens and taps from your visitors, updated as they happen. <b>Today’s bar is gold.</b> If it’s flat, post the link somewhere new and watch it move.' },
+    { sel:'#earnCard', title:'Bookings post monthly',
+      body:'Tour bookings are reconciled against GetYourGuide’s report once a month, then your commission lands here and pays out at $25+.' },
+    { sel:'#kitCard', last:true, title:'Your link never expires',
+      body:'Copy it, re-save the QR, or grab the full kit on the creators page. That’s the whole system — go post something.' }
+  ];
+  var root = document.createElement('div'); root.id = 'osTour';
+  root.innerHTML = '<div class="tor-block"></div><div class="tor-hi off"></div>'+
+    '<div class="tor-card"><div class="tc-top"><span class="tc-step"></span><button type="button" class="tc-skip">Skip</button></div>'+
+    '<img class="tc-logo" alt="" style="display:none"/>'+
+    '<h4></h4><p></p>'+
+    '<div class="tc-foot"><span class="tor-dots"></span><button type="button" class="tor-btn tc-back">Back</button><button type="button" class="tor-btn primary tc-next">Next</button></div></div>';
+  document.body.appendChild(root);
+  var hi = root.querySelector('.tor-hi'), card = root.querySelector('.tor-card'),
+      stepEl = root.querySelector('.tc-step'), titleEl = card.querySelector('h4'),
+      bodyEl = card.querySelector('p'), dotsEl = root.querySelector('.tor-dots'),
+      backBtn = root.querySelector('.tc-back'), nextBtn = root.querySelector('.tc-next'),
+      skipBtn = root.querySelector('.tc-skip'), logoEl = root.querySelector('.tc-logo');
+  if(LOGO) logoEl.src = LOGO;
+  STEPS.forEach(function(){ dotsEl.appendChild(document.createElement('i')); });
+  var idx = -1, curEl = null, active = false;
+  function position(){
+    if(!active || !curEl) return;
+    var r = curEl.getBoundingClientRect(), pad = 9;
+    hi.style.top = (r.top-pad)+'px'; hi.style.left = (r.left-pad)+'px';
+    hi.style.width = (r.width+pad*2)+'px'; hi.style.height = (r.height+pad*2)+'px';
+    var ch = card.offsetHeight, cw = card.offsetWidth, vw = innerWidth, vh = innerHeight;
+    if(vw <= 640){
+      card.style.left='10px'; card.style.right='10px'; card.style.top='auto';
+      card.style.bottom='calc(12px + env(safe-area-inset-bottom,0px))';
+      card.style.width='auto'; card.style.maxWidth='none'; card.style.maxHeight='46vh'; card.style.overflowY='auto';
+      var cardTop = card.getBoundingClientRect().top;
+      var hiTop = Math.max(8, r.top-pad), hiBot = Math.min(r.bottom+pad, cardTop-8);
+      hi.style.top = hiTop+'px'; hi.style.height = Math.max(0, hiBot-hiTop)+'px';
+      return;
+    }
+    card.style.right='auto'; card.style.bottom='auto'; card.style.width=''; card.style.maxWidth='';
+    card.style.maxHeight=''; card.style.overflowY='';
+    var left = Math.min(Math.max(12, r.left), vw-cw-12), top;
+    if(r.bottom+pad+14+ch < vh) top = r.bottom+pad+14;
+    else if(r.top-pad-14-ch > 12) top = r.top-pad-14-ch;
+    else { left = vw-cw-16; top = vh-ch-16; }
+    card.style.top = top+'px'; card.style.left = left+'px';
+  }
+  function setStep(i){
+    idx = i; var s = STEPS[i];
+    stepEl.textContent = 'Step '+(i+1)+' of '+STEPS.length;
+    titleEl.innerHTML = s.title; bodyEl.innerHTML = s.body;
+    dotsEl.querySelectorAll('i').forEach(function(d,j){ d.className = j===i ? 'on' : ''; });
+    backBtn.style.display = i===0 ? 'none' : '';
+    nextBtn.textContent = s.last ? 'Finish' : (i===0 ? 'Show me' : 'Next');
+    logoEl.style.display = (s.center && LOGO) ? '' : 'none';
+    if(s.center){
+      curEl = null; card.classList.add('center'); hi.classList.add('off');
+      card.style.top=''; card.style.left=''; card.style.right=''; card.style.bottom='';
+      card.style.width=''; card.style.maxWidth=''; card.style.maxHeight=''; card.style.overflowY='';
+      return;
+    }
+    card.classList.remove('center');
+    setTimeout(function(){
+      curEl = document.querySelector(s.sel);
+      if(!curEl){ (idx < STEPS.length-1) ? setStep(idx+1) : end(true); return; }
+      hi.classList.remove('off');
+      curEl.scrollIntoView({block:'center'});
+      setTimeout(position, 250);
+    }, 80);
+  }
+  function start(){ active = true; root.classList.add('on'); setStep(0); }
+  function end(markDone){
+    active = false; root.classList.remove('on'); curEl = null; hi.classList.add('off');
+    if(markDone){ try{ localStorage.setItem(KEY,'1'); }catch(e){} }
+  }
+  nextBtn.addEventListener('click', function(){ (idx>=STEPS.length-1) ? end(true) : setStep(idx+1); });
+  backBtn.addEventListener('click', function(){ if(idx>0) setStep(idx-1); });
+  skipBtn.addEventListener('click', function(){ end(true); });
+  document.addEventListener('keydown', function(e){ if(active && e.key==='Escape') end(true); });
+  var rafPending = false;
+  function onMove(){ if(rafPending) return; rafPending = true; requestAnimationFrame(function(){ rafPending=false; position(); }); }
+  addEventListener('scroll', onMove, true); addEventListener('resize', onMove);
+  var done = null; try { done = localStorage.getItem(KEY); } catch(e){}
+  if(!done && new URLSearchParams(location.search).get('c')) setTimeout(start, 1200);
+})();
+</script>
+</body></html>

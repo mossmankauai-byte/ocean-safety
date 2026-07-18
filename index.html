@@ -5323,7 +5323,7 @@ function renderToursSheetContent(){
       <span><strong>Why ${useForecast && _selectedDayIdx > 0 ? 'this day' : 'now'}:</strong> ${featuredMatch.reason}</span>
     </div>
     <div style="margin-top:12px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;min-height:170px">
-      <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${featured.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="${_gygPid()}"><span style="display:none">Powered by GetYourGuide</span></div>
+      <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${featured.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="${_gygPid()}"${_gygCmpAttr()}><span style="display:none">Powered by GetYourGuide</span></div>
     </div>
     ${_tourAskRow(featured.title, featuredMatch.level, askDay)}`;
 
@@ -5356,7 +5356,7 @@ function renderToursSheetContent(){
           </div>
           <div style="font-size:11px;color:var(--mute);margin-bottom:8px;padding-left:2px;line-height:1.4">${m.reason}</div>
           <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px;min-height:140px">
-            <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${t.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="${_gygPid()}"><span style="display:none">Powered by GetYourGuide</span></div>
+            <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${t.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="${_gygPid()}"${_gygCmpAttr()}><span style="display:none">Powered by GetYourGuide</span></div>
           </div>
           ${_tourAskRow(t.title, m.level, askDay)}
         </div>`;
@@ -5386,6 +5386,7 @@ function renderToursSheetContent(){
   gs.src = 'https://widget.getyourguide.com/dist/pa.umd.production.min.js';
   gs.async = true; gs.defer = true;
   gs.setAttribute('data-gyg-partner-id', _gygPid());
+  var _gc = _gygCmp(); if(_gc) gs.setAttribute('data-gyg-cmp', _gc);
   gs.dataset.gygScript = '1';
   gs.onload = () => { _gygScriptLoaded = true; };
   document.head.appendChild(gs);
@@ -8572,6 +8573,54 @@ function dismissWelcomeChip(){
   document.getElementById('welcomeChip')?.remove();
 }
 
+var _OS_BANNER = { kauai:'/assets/stock/kauai-beach.jpg', maui:'/assets/stock/maui-beach.jpg', oahu:'/assets/stock/family-beach.jpg' };
+function _creatorBanner(cfg, name){
+  try {
+    if(!cfg || !cfg.creator || !_cobrandIslandOK(cfg)) return;
+    if(sessionStorage.getItem('creatorBannerDismissed') === '1') return;
+    var bar = document.getElementById('topbar'); if(!bar) return;
+    var a=(window.ACTIVE&&ACTIVE.slug)||'kauai';
+    var approved = cfg.banner_ok === true && typeof cfg.banner === 'string' && /^data:image\//.test(cfg.banner);
+    var img = approved ? cfg.banner : (_OS_BANNER[a] || _OS_BANNER.kauai);
+    var nm = _pesc(String(name || cfg.name || '').slice(0,40));
+    var el = document.createElement('div');
+    el.id = 'creatorBanner';
+    el.style.cssText = 'position:relative;margin:6px 0 0;border-radius:12px;overflow:hidden;height:96px;background:#0c4a58;box-shadow:0 2px 10px rgba(9,40,48,.18)';
+    el.style.backgroundImage = "url('" + String(img).replace(/["'\\]/g,'') + "')";
+    el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center';
+    el.innerHTML =
+      '<div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,45,55,.78),rgba(8,45,55,.28))"></div>'
+      + '<div style="position:absolute;left:14px;bottom:11px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.45)">'
+      +   '<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.92">Curated by</div>'
+      +   '<div style="font-size:18px;font-weight:800;letter-spacing:-.01em">' + nm + '</div></div>'
+      + '<button type="button" aria-label="Dismiss" onclick="dismissCreatorBanner()" style="position:absolute;top:8px;right:8px;width:26px;height:26px;border:none;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;font-size:15px;cursor:pointer;line-height:1;padding:0">&times;</button>';
+    bar.insertBefore(el, bar.firstChild);
+  } catch(e){}
+}
+function dismissCreatorBanner(){
+  try { sessionStorage.setItem('creatorBannerDismissed', '1'); } catch(e){}
+  document.getElementById('creatorBanner')?.remove();
+}
+
+function _creatorTourFab(){
+  try {
+    if(document.getElementById('creatorTourFab')) return;
+    if(typeof openToursSheet !== 'function') return;
+    var b = document.createElement('button');
+    b.id = 'creatorTourFab'; b.type = 'button'; b.setAttribute('aria-label', 'Book a tour');
+    b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));'
+      + 'z-index:360;display:flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:999px;'
+      + 'background:linear-gradient(158deg,#0c4a58,#0a7a94);color:#fff;font:inherit;font-size:14.5px;font-weight:800;'
+      + 'letter-spacing:-.01em;cursor:pointer;box-shadow:0 6px 20px rgba(9,40,48,.4);-webkit-font-smoothing:antialiased';
+    b.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC64B" stroke-width="2" '
+      + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2'
+      + 'v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4z"/><path d="M13 6v12" stroke-dasharray="2 2"/>'
+      + '</svg><span>Tours</span>';
+    b.addEventListener('click', function(){ try{ openToursSheet(); }catch(e){} });
+    document.body.appendChild(b);
+  } catch(e){}
+}
+
 // Tag an outbound affiliate URL with the captured referrer (idempotent).
 // Used wherever affiliate links are assembled so partner clicks are attributable.
 function withReferrer(url){
@@ -8627,6 +8676,16 @@ function _viatorPid(){
   const a = window._partnerCfg && window._partnerCfg.affiliates;
   return _affSafe(a && a.viator_pid, 'P00299666');
 }
+function _gygCmp(){
+  try {
+    const ref = _activeRefSlug();
+    if(!ref) return '';
+    if(ref.indexOf('cr-') === 0) return ref;             // creator's own registered slug (cr-<handle>)
+    if(ref === 'creators'){ const u = _activeUnitId(); return u ? ('cr-' + u) : ''; }  // pooled fallback
+    return '';
+  } catch(e){ return ''; }
+}
+function _gygCmpAttr(){ const c = _gygCmp(); return c ? ' data-gyg-cmp="' + c + '"' : ''; }
 // HTML-escape for config-sourced strings (promo titles etc.).
 function _pesc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
 // ── Demo name override (shared name-box contract, ?demo=freepaid only) ──
@@ -8722,7 +8781,12 @@ function _demoLogoImg(domain, name){
 function _houseFeaturedIds(){
   var out = new Set();
   try {
-    var f = window._partnerCfg && window._partnerCfg.featured;
+    var cfg = window._partnerCfg; if(!cfg) return out;
+    var f = cfg.featured;
+    if(cfg.islands && typeof cfg.islands === 'object'){   // creator per-island picks: read the active island's list
+      var a=(window.ACTIVE&&ACTIVE.slug)||'kauai';
+      f = cfg.islands[a] && cfg.islands[a].featured;
+    }
     if(!f) return out;
     var add = function(v){ if(typeof v === 'string' && v) out.add(v); };
     if(Array.isArray(f)) f.forEach(add);
@@ -8731,7 +8795,7 @@ function _houseFeaturedIds(){
   return out;
 }
 // PAID-gated: the co-brand house-pick treatment never renders on the free plan.
-function _isHousePick(id){ return _planPaid() && _houseFeaturedIds().has(id); }
+function _isHousePick(id){ return (_planPaid() || !!(window._partnerCfg && window._partnerCfg.creator)) && _houseFeaturedIds().has(id); }
 // The gold "★ <Hotel>'s pick" pill for a featured place's hero. Co-branded with
 // the same name contract as the amenity panel (_demoName(cfg.name||'Your Resort'),
 // escaped via _pesc). Free plan or non-featured place → '' (no badge, ever). The
@@ -9315,6 +9379,10 @@ window._partnerSeg = null;
 // _viatorPid affiliates) already reads. Server binding stays authoritative.
 function _cobrandIslandOK(cfg){
   var a=(window.ACTIVE&&ACTIVE.slug)||'kauai';
+  if(cfg&&cfg.creator){                                   // creator co-brand: valid on the islands they cover
+    if(cfg.islands&&typeof cfg.islands==='object') return !!cfg.islands[a];
+    return true;                                          // banner-only creator config → any island
+  }
   var isl=cfg&&cfg.island;
   if(isl) return isl===a;   // explicit binding → must match (fail closed on mismatch)
   return a==='kauai';       // legacy fieldless cfg → honored only on Kauaʻi
@@ -9587,6 +9655,7 @@ async function boot(){
       if(slug){
         localStorage.setItem('referrer', slug);
         localStorage.setItem('referrerFirstSeen', new Date().toISOString());
+        if(slug.indexOf('cr-') === 0) _creatorTourFab();
         const partnerName = PARTNER_NAMES[slug] || slug[0].toUpperCase() + slug.slice(1);
         // Free-plan configs render generic chrome: hold the chip until the
         // config resolves and skip it on plan:"free". No config / paid /
@@ -9604,7 +9673,8 @@ async function boot(){
           // a long name can't blow out the topbar (mirrors the 40-char demo-name cap).
           var cfgNm = cfg && typeof cfg.name === 'string' ? cfg.name.trim().slice(0, 48) : '';
           var nm = PARTNER_NAMES[slug] || (cfgNm ? _pesc(cfgNm) : '') || partnerName;
-          if(_planPaid()) showWelcomeChip(nm);
+          if(cfg && cfg.creator){ _creatorBanner(cfg, nm); }
+          else if(_planPaid()) showWelcomeChip(nm);
         }).catch(function(){});
       }
     }

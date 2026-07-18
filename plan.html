@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan Your Beach Day · OceanSafe Kauaʻi</title>
+<style>
+  :root{
+    --sand:#FBF7EE; --sand2:#F4ECDA; --card:#FFFFFF;
+    --ink:#20323A; --ink2:#5A6B70; --line:#E7DEC9;
+    --green:#2E8B6F; --green-d:#1F6A54;
+    --amber:#E1A33A; --amber-d:#C2832A;
+    --plum:#6E3F63; --teal:#0F4C5C; --rough:#B5552F; --ocean:#0F4C5C;
+    --warm:#FBF7EE; --mute:#5A6B70;
+    --shadow:0 1px 2px rgba(32,50,58,.06),0 8px 24px rgba(32,50,58,.07);
+    --r:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(1200px 380px at 80% -120px, #fdf3df 0%, transparent 60%), var(--sand);
+    color:var(--ink);
+    font:15px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:0 18px 70px;
+  }
+  .wrap{max-width:760px;margin:0 auto}
+
+  header{display:flex;align-items:center;gap:14px;padding:22px 4px 18px}
+  .lockup{display:flex;align-items:center;gap:12px}
+  .host{font-weight:700;font-size:17px;letter-spacing:.2px}
+  .host small{display:block;font-weight:400;color:var(--ink2);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-top:2px}
+  .x{color:var(--line);font-size:18px}
+  .os{display:flex;align-items:center;gap:7px;color:var(--teal);font-weight:700;font-size:14px}
+  .os .dot{width:22px;height:22px;border-radius:50%;background:linear-gradient(150deg,var(--green),var(--teal));display:inline-block}
+
+  h1{font-size:26px;line-height:1.15;margin:8px 4px 4px;letter-spacing:-.4px}
+  .sub{color:var(--ink2);margin:0 4px 18px;max-width:54ch}
+
+  .planner{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:18px}
+  .pgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:620px){.pgrid3{grid-template-columns:1fr}}
+  .daterow{margin-bottom:16px}
+  .daterow .hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink2);font-size:11px;margin-left:6px}
+  .datestrip{display:flex;gap:8px;overflow-x:auto;padding:4px 1px 6px;-webkit-overflow-scrolling:touch}
+  .dchip{flex:0 0 auto;min-width:60px;border:1px solid var(--line);background:#fff;border-radius:14px;padding:9px 10px;text-align:center;cursor:pointer;transition:.15s ease;color:var(--ink)}
+  .dchip:hover{border-color:var(--green)}
+  .dchip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+  .dchip .dw{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+  .dchip[aria-pressed="true"] .dw{color:rgba(255,255,255,.82)}
+  .dchip .dn{font-size:18px;font-weight:700;margin:3px 0 6px;line-height:1}
+  .dchip .ddot{width:7px;height:7px;border-radius:50%;margin:0 auto;display:block}
+  .dchip[aria-pressed="true"] .ddot{box-shadow:0 0 0 1.5px rgba(255,255,255,.9)}
+  .dd-good{background:var(--green)} .dd-mixed{background:var(--amber)} .dd-rough{background:var(--rough)}
+  .field label{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin:0 0 6px 2px}
+  .seg{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:7px 12px;font-size:13px;cursor:pointer;transition:.15s ease;line-height:1}
+  .chip:hover{border-color:var(--green)}
+  .chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff;font-weight:600}
+  .build{margin-top:16px;width:100%;border:0;border-radius:12px;background:linear-gradient(150deg,var(--green),var(--green-d));color:#fff;font-size:15px;font-weight:600;padding:14px;cursor:pointer;letter-spacing:.2px;box-shadow:0 6px 16px rgba(46,139,111,.28)}
+  .build:active{transform:translateY(1px)}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:0 4px 14px;color:var(--ink2);font-size:12.5px}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:12px;height:12px;border-radius:4px;display:inline-block}
+
+  .day{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .dhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)}
+  .dhead .dl{display:flex;align-items:baseline;gap:10px}
+  .dnum{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+  .ddate{font-size:18px;font-weight:700;letter-spacing:-.2px}
+  .badge{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:999px;white-space:nowrap}
+  .b-good{background:rgba(46,139,111,.12);color:var(--green-d)}
+  .b-mixed{background:rgba(225,163,58,.16);color:var(--amber-d)}
+  .b-rough{background:rgba(181,85,47,.13);color:var(--rough)}
+  .badge svg{width:15px;height:15px}
+  .why{padding:11px 18px;background:var(--sand);color:var(--ink2);font-size:13px;border-bottom:1px solid var(--line)}
+  .why b{color:var(--ink);font-weight:600}
+
+  .slots{padding:6px 0}
+  .slot{display:flex;gap:13px;padding:10px 14px 10px 18px;align-items:flex-start}
+  .slot + .slot{border-top:1px dashed var(--line)}
+  .when{flex:0 0 70px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);padding-top:18px}
+  .slotwrap{flex:1;position:relative;border-radius:12px;cursor:pointer;transition:background .15s,box-shadow .15s;padding:2px}
+  .slotwrap:hover{background:var(--sand)}
+  .slotwrap:hover .swaphint{opacity:1;color:var(--green-d)}
+  .swaphint{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;color:var(--ink2);opacity:.4;transition:.15s;background:rgba(255,255,255,.7)}
+  .swaphint svg{width:14px;height:14px;stroke-width:1.8}
+  .item{display:flex;gap:12px;align-items:flex-start;border-radius:12px;padding:10px 34px 10px 12px}
+  .item.host{background:linear-gradient(180deg,#fff,#fdf6e7);border:1px solid #efe2c4}
+  .item.local{background:linear-gradient(180deg,#fff,#eef6f1);border:1px solid #d8e9e1}
+  .item.act{background:linear-gradient(180deg,#fff,#f4eef3);border:1px solid #e4d6e1}
+  .ico{flex:0 0 38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--sand2);color:var(--teal)}
+  .item.host .ico{background:#fbeccd;color:var(--amber-d)}
+  .item.local .ico{background:#d8ece2;color:var(--green-d)}
+  .item.act .ico{background:#ecdfe9;color:var(--plum)}
+  .ibody{flex:1;min-width:0}
+  .ititle{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .idesc{color:var(--ink2);font-size:13px;margin-top:2px}
+  .tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:6px}
+  .tag.on{background:var(--amber);color:#3a2a05}
+  .tag.beach{background:rgba(15,76,92,.1);color:var(--teal)}
+  .tag.local{background:var(--green);color:#fff}
+  .tag.act{background:rgba(110,63,99,.13);color:var(--plum)}
+  .bookrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .bookchip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--green-d);background:#fff;border:1px solid var(--green);border-radius:999px;padding:5px 10px;cursor:pointer;transition:.12s}
+  .bookchip:hover{background:var(--green);color:#fff}
+  .bookchip svg{width:12px;height:12px;stroke-width:1.8}
+  .tag.drive{background:transparent;color:var(--ink2);font-weight:600;text-transform:none;letter-spacing:0;font-size:12px;padding:3px 0}
+  .ico svg{width:20px;height:20px;stroke-width:1.7}
+
+  .dayfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px 16px}
+  .savebtn{border:1px solid var(--green);background:#fff;color:var(--green-d);font-weight:600;font-size:13.5px;border-radius:10px;padding:10px 16px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.15s}
+  .savebtn:hover{background:var(--green);color:#fff}
+  .savebtn.saved{background:var(--green);color:#fff;border-color:var(--green)}
+  .savebtn svg{width:15px;height:15px;stroke-width:1.9}
+  .editnote{font-size:11.5px;color:var(--ink2)}
+
+  .foot{color:var(--ink2);font-size:12px;line-height:1.5;margin:6px 4px 0;padding:14px 4px 0;border-top:1px solid var(--line)}
+  .empty{color:var(--ink2);text-align:center;padding:30px 10px;font-size:14px}
+
+  /* swap picker */
+  #pickerOv{position:fixed;inset:0;background:rgba(20,30,34,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+  #pickerOv.on{opacity:1;pointer-events:auto}
+  #picker{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:min(560px,100%);max-height:80vh;background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.18);transition:transform .26s cubic-bezier(.2,.7,.2,1);z-index:41;display:flex;flex-direction:column}
+  #picker.on{transform:translate(-50%,0)}
+  .pk-head{padding:16px 18px 8px;border-bottom:1px solid var(--line)}
+  .pk-grab{width:38px;height:4px;border-radius:99px;background:var(--line);margin:0 auto 12px}
+  .pk-title{font-size:16px;font-weight:700}
+  .pk-sub{font-size:12px;color:var(--ink2);margin-top:2px}
+  .pk-list{overflow-y:auto;padding:8px 12px 18px}
+  .pk-opt{display:flex;gap:12px;align-items:center;padding:11px 12px;border-radius:12px;cursor:pointer;transition:background .12s}
+  .pk-opt:hover{background:var(--sand)}
+  .pk-opt.cur{background:var(--sand2)}
+  .pk-ico{flex:0 0 34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--sand2);color:var(--teal)}
+  .pk-ico svg{width:18px;height:18px;stroke-width:1.7}
+  .pk-body{flex:1;min-width:0}
+  .pk-name{font-weight:600;font-size:14px}
+  .pk-meta{font-size:12px;color:var(--ink2);margin-top:1px}
+  .pk-pick{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--green-d);text-transform:uppercase;letter-spacing:.04em}
+  .pk-opt.cur .pk-pick{color:var(--ink2)}
+  .pk-info{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 9px;cursor:pointer;transition:.12s}
+  .pk-info:hover{border-color:var(--teal);color:var(--teal)}
+  .pk-detail{padding:6px 8px 4px}
+  .pk-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}
+  .pk-tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--teal);background:rgba(15,76,92,.09);border-radius:6px;padding:3px 8px}
+  .pk-info-body{font-size:13.5px;line-height:1.55;color:var(--ink);margin:0 0 8px}
+  .pk-caveat{font-size:11.5px;color:var(--ink2);margin:10px 0 0}
+  .pk-actions{display:flex;gap:10px;margin-top:14px}
+  .pk-back{flex:0 0 auto;background:#fff;border:1px solid var(--line);color:var(--ink2);font-weight:600;border-radius:10px;padding:11px 16px;cursor:pointer}
+  .pk-choose{flex:1;background:linear-gradient(150deg,var(--green),var(--green-d));border:0;color:#fff;font-weight:700;border-radius:10px;padding:11px;cursor:pointer}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,16px);background:var(--ink);color:#fff;font-size:13.5px;font-weight:600;padding:11px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:50;display:flex;align-items:center;gap:8px}
+  #toast.on{opacity:1;transform:translate(-50%,0)}
+  #toast svg{width:15px;height:15px;stroke-width:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="lockup">
+      <div class="host">OceanSafe<small>Poʻipū · Kauaʻi</small></div>
+      <span class="x">+</span>
+      <span class="os"><span class="dot"></span>OceanSafe</span>
+    </div>
+  </header>
+
+  <h1>Pick a day. We’ll read the forecast.</h1>
+  <p class="sub">Choose a date and we’ll plan it around the ocean — resort mornings and evenings, lunch at a local spot, and the right beach, beach walk, or coastal bike path in between. Tap anything to swap it. Always free.</p>
+
+  <div class="planner">
+    <div class="daterow">
+      <label>Pick your day <span class="hint">tap a date — the dot shows that day’s ocean forecast</span></label>
+      <div class="datestrip" id="dates"></div>
+    </div>
+    <div class="pgrid3">
+      <div class="field">
+        <label>Staying at</label>
+        <div class="seg" data-group="base">
+          <button class="chip" data-v="south" aria-pressed="true">Poʻipū (South)</button>
+          <button class="chip" data-v="north">Princeville (North)</button>
+          <button class="chip" data-v="east">Wailua (East)</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Who’s going</label>
+        <div class="seg" data-group="who">
+          <button class="chip" data-v="couple" aria-pressed="true">Couple</button>
+          <button class="chip" data-v="family">Family + kids</button>
+          <button class="chip" data-v="friends">Friends</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Your vibe</label>
+        <div class="seg" data-group="vibe">
+          <button class="chip" data-v="chill" aria-pressed="true">Chill</button>
+          <button class="chip" data-v="snorkel">Snorkel</button>
+          <button class="chip" data-v="adventure">Adventure</button>
+          <button class="chip" data-v="food">Food</button>
+        </div>
+      </div>
+    </div>
+    <button class="build" id="build">Plan my day</button>
+  </div>
+
+  <div class="legend">
+    <span><i class="sw" style="background:var(--green)"></i> Great ocean day</span>
+    <span><i class="sw" style="background:var(--amber)"></i> Mixed — pick your spot</span>
+    <span><i class="sw" style="background:var(--rough)"></i> Rough — stay close</span>
+  </div>
+
+  <div id="out"><div class="empty">Tap a date above to see that day’s plan.</div></div>
+
+  <p class="foot">Resort offerings and local businesses are suggestions you can swap. Beach notes describe where and when conditions tend to be calmest — not a safety guarantee. Always follow lifeguards, posted signs, and County advisories before entering the water.</p>
+</div>
+
+<div id="pickerOv" onclick="closePicker()"></div>
+<div id="picker" role="dialog" aria-modal="true">
+  <div class="pk-head"><div class="pk-grab"></div><div class="pk-title" id="pkTitle"></div><div class="pk-sub" id="pkSub"></div></div>
+  <div class="pk-list" id="pkList"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  /* ───────── icons (inline SVG, no emoji) ───────── */
+  var I={
+    sun:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" stroke-linecap="round"/>',
+    rain:'<path d="M6 14a4.5 4.5 0 0 1 .6-9 6 6 0 0 1 11.3 1.6A3.7 3.7 0 0 1 18 14H6z"/><path d="M8 18l-1 2M12 18l-1 2M16 18l-1 2" stroke-linecap="round"/>',
+    wave:'<path d="M2 13c2.2 0 2.2-2 4.4-2s2.2 2 4.4 2 2.2-2 4.4-2 2.2 2 4.4 2"/><path d="M2 17c2.2 0 2.2-2 4.4-2s2.2 2 4.4 2 2.2-2 4.4-2 2.2 2 4.4 2" opacity=".55"/>',
+    spa:'<path d="M12 13c0-4 3-7 8-7-1 5-4 7-8 7zM12 13c0-4-3-7-8-7 1 5 4 7 8 7zM12 13v8" stroke-linecap="round" stroke-linejoin="round"/>',
+    dining:'<path d="M6 3v8a2 2 0 0 0 2 2M8 3v18M16 3c-1.5 0-2.5 2-2.5 5s1 4 2.5 4v9" stroke-linecap="round" stroke-linejoin="round"/>',
+    coffee:'<path d="M4 8h13v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M17 9h2a2 2 0 0 1 0 4h-2"/><path d="M7 3v2M10 3v2M13 3v2" stroke-linecap="round"/>',
+    treat:'<path d="M7 9h10l-1.4 11H8.4L7 9z"/><path d="M6.7 9a5.3 5.3 0 0 1 10.6 0z"/><path d="M12 3.5v1.5" stroke-linecap="round"/>',
+    truck:'<path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.5"/><circle cx="17.5" cy="18" r="1.5"/>',
+    pool:'<path d="M4 18c1.5 0 1.5-1.5 3-1.5S8.5 18 10 18s1.5-1.5 3-1.5S14.5 18 16 18s1.5-1.5 3-1.5M7 14V5a2 2 0 0 1 4 0v9M7 9h4" stroke-linecap="round" stroke-linejoin="round"/>',
+    mask:'<path d="M5 8h14a0 0 0 0 1 0 0v3a4 4 0 0 1-4 4h-1l-2-2-2 2H9a4 4 0 0 1-4-4V8z"/><path d="M14 15l1 4" stroke-linecap="round"/>',
+    hike:'<path d="M13 4.5a1.4 1.4 0 1 0 0-.1zM6 21l3-7 2 2 1-3 5 8M9 14l-1-3 3-1" stroke-linecap="round" stroke-linejoin="round"/>',
+    surf:'<path d="M5 19c6-1 11-6 13-15-7 1-13 6-15 13 0 0 1 1 2 2zM7 17l9-9" stroke-linecap="round" stroke-linejoin="round"/>',
+    drink:'<path d="M5 4h14l-7 8-7-8zM12 12v7M8 20h8" stroke-linecap="round" stroke-linejoin="round"/>',
+    flower:'<path d="M12 9.5a2.5 2.5 0 1 0 0 .01zM12 9.5C12 6 13.5 4 16 4c0 2.5-1.5 4.5-4 5.5zM12 9.5C12 6 10.5 4 8 4c0 2.5 1.5 4.5 4 5.5zM12 9.5C9 9.5 6 11 6 14c3 0 5-1.5 6-4.5zM12 9.5c3 0 6 1.5 6 4.5-3 0-5-1.5-6-4.5zM12 14v7" stroke-linecap="round" stroke-linejoin="round"/>',
+    kids:'<circle cx="12" cy="6" r="2.4"/><path d="M12 9v7M8 12h8M9 21l3-5 3 5" stroke-linecap="round" stroke-linejoin="round"/>',
+    yoga:'<circle cx="12" cy="5" r="2"/><path d="M12 8v5M4 20c3-1 5-2 8-2s5 1 8 2M12 13l-4 2M12 13l4 2" stroke-linecap="round" stroke-linejoin="round"/>',
+    beach:'<path d="M12 20V9M12 9c-4-3-9-2-10 1 4 1 7 1 10-1zM12 9c2-4 7-5 10-3-3 3-6 4-10 3z" stroke-linecap="round" stroke-linejoin="round"/>',
+    swap:'<path d="M7 7h12l-3-3M17 17H5l3 3" stroke-linecap="round" stroke-linejoin="round"/>',
+    save:'<path d="M5 4h11l3 3v13H5zM8 4v6h7M8 14h8v6H8z" stroke-linejoin="round"/>',
+    check:'<path d="M4 12l5 5 11-11" stroke-linecap="round" stroke-linejoin="round"/>',
+    walk:'<circle cx="13" cy="4" r="1.7"/><path d="M13 7l-2.5 4.5L13 14l1.5 6M10.5 11.5l-3 1.5M14.2 12.5l3 1.2M9.5 22l2-5" stroke-linecap="round" stroke-linejoin="round"/>',
+    bike:'<circle cx="6" cy="17" r="3.1"/><circle cx="18" cy="17" r="3.1"/><path d="M6 17l4.5-7H15l-3 7M9.5 10h3.5M15 10l-1.8-3H11" stroke-linecap="round" stroke-linejoin="round"/>'
+  };
+  function svg(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">'+(I[k]||I.sun)+'</svg>'}
+
+  var HOST="OceanSafe";
+  /* host (co-brand) suggestions — morning + evening; plus bad-weather midday/afternoon */
+  var STAY_CLOSE=[
+    {id:'h_yoga', ic:'yoga',  t:'Sunrise yoga on the lawn', d:'7:00 AM',           part:'am'},
+    {id:'h_bfast',ic:'dining',t:'Breakfast at the lānai café',d:'open till 11',    part:'am'},
+    {id:'h_pool', ic:'pool',  t:'Pool & cabana morning',    d:'reserve a daybed',  part:'am'},
+    {id:'h_lunch',ic:'dining',t:'Lunch at the beachfront grill',d:'poke + burgers',part:'mid'},
+    {id:'h_spa',  ic:'spa',   t:'Oceanfront spa',           d:'couples room',      part:'pm'},
+    {id:'h_lei',  ic:'flower',t:'Lei-making workshop',      d:'cultural studio',   part:'pm'},
+    {id:'h_kids', ic:'kids',  t:'Keiki club + tide-pool craft',d:'ages 4–11',      part:'pm', kids:true},
+    {id:'h_bar',  ic:'drink', t:'Sunset mai tai hour',      d:'oceanfront bar',    part:'eve'},
+    {id:'h_luau', ic:'flower',t:'Lūʻau under the stars',    d:'Tue/Fri/Sat',       part:'eve', nights:[2,5,6]},
+    {id:'h_dinner',ic:'dining',t:'Chef’s tasting dinner',   d:'signature room',    part:'eve'}
+  ];
+
+  /* beaches (real Kauaʻi) */
+  var BEACHES=[
+    {id:'b_poipu', n:'Poʻipū Beach Park', r:'south', tr:['kids','snorkel','calm','lifeguard']},
+    {id:'b_baby',  n:'Baby Beach, Poʻipū', r:'south', tr:['kids','calm']},
+    {id:'b_lawai', n:'Lāwaʻi (Beach House)', r:'south', tr:['snorkel','sunset']},
+    {id:'b_ship',  n:'Shipwreck Beach', r:'south', tr:['scenic','surf']},
+    {id:'b_maha',  n:'Māhāʻulepū Heritage Trail', r:'south', tr:['hike','scenic']},
+    {id:'b_lydgate',n:'Lydgate Beach Park', r:'east', tr:['kids','calm','lifeguard','snorkel']},
+    {id:'b_kalapaki',n:'Kalapakī Beach', r:'east', tr:['kids','calm']},
+    {id:'b_kealia', n:'Keālia Beach', r:'east', tr:['surf','scenic','lifeguard']},
+    {id:'b_giant', n:'Sleeping Giant (Nounou) Trail', r:'east', tr:['hike','scenic']},
+    {id:'b_hanalei',n:'Hanalei Bay', r:'north', tr:['surf','scenic','lifeguard']},
+    {id:'b_anini', n:'ʻAnini Beach', r:'north', tr:['calm','snorkel','kids']},
+    {id:'b_tunnels',n:'Tunnels (Makua)', r:'north', tr:['snorkel','scenic']},
+    {id:'b_kee',   n:'Hāʻena / Kēʻē', r:'north', tr:['snorkel','scenic','hike']}
+  ];
+
+  /* gentle beach / coastal walks — work even when the surf is up */
+  var WALKS=[
+    {id:'wk_poipu',  n:'Poʻipū coastal walk', r:'south', area:'Poʻipū', note:'easy oceanfront stroll past the blowhole', kind:'walk', tr:['walk','scenic','sunset']},
+    {id:'wk_ship',   n:'Shipwrecks cliff walk', r:'south', area:'Poʻipū', note:'sea-cliff path above the surf', kind:'walk', tr:['walk','scenic']},
+    {id:'wk_kapaa',  n:'Kapaʻa coastal path stroll', r:'east', area:'Kapaʻa', note:'flat seaside walk, shave ice in town', kind:'walk', tr:['walk','scenic','family']},
+    {id:'wk_lydgate',n:'Lydgate beach walk', r:'east', area:'Wailua', note:'protected, family-easy', kind:'walk', tr:['walk','kids','calm']},
+    {id:'wk_hanalei',n:'Hanalei Bay beach walk', r:'north', area:'Hanalei', note:'two-mile crescent bay to the pier', kind:'walk', tr:['walk','scenic','sunset']},
+    {id:'wk_haena',  n:'Hāʻena / Kēʻē beach walk', r:'north', area:'end of the road', note:'reef-edge coast with Nāpali views', kind:'walk', tr:['walk','scenic']}
+  ];
+
+  /* Ke Ala Hele Makalae — East-side paved coastal bike & walking path (researched) */
+  var BIKE={id:'bike_kahm', n:'Ke Ala Hele Makalae coastal path', r:'east', area:'Kapaʻa · Lydgate to Ahihi Point', note:'~8 mi paved oceanfront path, flat & family-easy — walk it or rent a bike in Kapaʻa', kind:'bike', tr:['bike','walk','scenic','family'],
+    book:[
+      {id:'bk_rent', name:'Coconut Coast Bike Rentals', note:'beach cruisers & e-bikes, hourly'},
+      {id:'bk_tour', name:'Kapaʻa Coastal E-Bike Tour', note:'guided 2-hr ride, Lydgate to Donkey Beach'}
+    ]};
+
+  /* combined outdoor pool for the beach / afternoon swap picker */
+  var OUTDOOR=BEACHES.concat(WALKS).concat([BIKE]);
+
+  /* short, conditions-neutral info blurbs for the swap "Info" popup */
+  var BEACH_INFO={
+    b_poipu:'Sandy crescent with a reef-protected keiki pool, a lifeguard tower, restrooms and easy parking. A go-to family and beginner-snorkel spot; the open side picks up shorebreak when south swells run.',
+    b_baby:'A shallow, reef-sheltered pool ideal for toddlers and first swims. Very small, with street parking only.',
+    b_lawai:'Small roadside beach known for easy-entry snorkeling and a front-row sunset. Limited parking, and it fills up at golden hour.',
+    b_ship:'Wide sandy beach below the bluff, with bodyboarders and a dramatic cliff. Strong shorebreak and currents, so it is better for walking and watching than casual swimming.',
+    b_maha:'A two-mile coastal cliff walk past sea caves, dunes and wild shoreline east of Poʻipū. No facilities or lifeguard; bring water and sturdy shoes.',
+    b_lydgate:'Two rock-walled ocean pools make this the East Side’s most protected swim and snorkel, with a lifeguard, big lawn and a famous playground. A great family base right on the bike path.',
+    b_kalapaki:'Calm, gently sloping bay near Līhuʻe with mellow water, easy parking and a short walk to shops. Good for beginners and stand-up paddling.',
+    b_kealia:'A long golden-sand beach right on the bike path, popular with surfers and bodyboarders. The shorebreak and currents are strong — the only reasonable place to swim is the protected north end by the lifeguard tower, behind the breakwater. Check with the lifeguard before going in.',
+    b_giant:'A 3.4-mile round-trip ridge hike with East-Side and ocean views. A moderate climb that can be muddy; this one is a trail, not a beach.',
+    b_hanalei:'A two-mile crescent bay with a historic pier and lifeguards, framed by green peaks. Summer tends calm; winter brings big surf and strong currents.',
+    b_anini:'A long reef-protected lagoon with some of the island’s calmest water, shade and a campground. Reliable for kids and easy snorkeling.',
+    b_tunnels:'A wide reef lagoon famous for summer snorkeling and diving. Parking is tight and the reef is shallow; conditions turn hazardous when North swells arrive.',
+    b_kee:'End-of-the-road beach with a reef-fringed lagoon and Nāpali views; entry to Hāʻena State Park needs a reservation. Calm in summer, dangerous in winter surf.'
+  };
+
+  /* local businesses — suggested for lunch/food, wherever they are */
+  var LOCAL=[
+    {id:'l_s1',name:'South Shore Fish Tacos',type:'lunch',r:'south',area:'Kōloa town',note:'fresh ʻahi tacos',ic:'dining'},
+    {id:'l_s2',name:'Poʻipū Beach Grill',    type:'lunch',r:'south',area:'Poʻipū',    note:'burgers + poke bowls',ic:'dining'},
+    {id:'l_s3',name:'Old Kōloa Shave Ice',   type:'treat',r:'south',area:'Old Kōloa Town',note:'cane-sugar syrups',ic:'treat'},
+    {id:'l_s4',name:'Kōloa Coffee + Kitchen',type:'coffee',r:'south',area:'Kōloa',    note:'espresso + pastries',ic:'coffee'},
+    {id:'l_e1',name:'Kapaʻa Poke Bar',       type:'lunch',r:'east', area:'Kapaʻa',     note:'build-your-own poke',ic:'dining'},
+    {id:'l_e2',name:'Wailua Farm-to-Table',  type:'lunch',r:'east', area:'Wailua',     note:'island-grown plates',ic:'dining'},
+    {id:'l_e3',name:'Kapaʻa Food Trucks',    type:'lunch',r:'east', area:'Kapaʻa',     note:'rotating local trucks',ic:'truck'},
+    {id:'l_e4',name:'Coconut Coast Coffee',  type:'coffee',r:'east',area:'Kapaʻa',     note:'beachside café',ic:'coffee'},
+    {id:'l_n1',name:'Hanalei Bay Café',      type:'lunch',r:'north',area:'Hanalei',    note:'taro burgers + smoothies',ic:'dining'},
+    {id:'l_n2',name:'North Shore Poke Stop',  type:'lunch',r:'north',area:'Hanalei',    note:'fresh-caught poke',ic:'dining'},
+    {id:'l_n3',name:'Hanalei Shave Ice',     type:'treat',r:'north',area:'Hanalei town',note:'lilikoʻi + rainbow',ic:'treat'},
+    {id:'l_w1',name:'Waimea Plate Lunch',    type:'lunch',r:'west', area:'Waimea town', note:'classic plate lunch',ic:'dining'},
+    {id:'l_w2',name:'Hanapēpē Café',         type:'lunch',r:'west', area:'Hanapēpē',    note:'art-town bistro',ic:'dining'}
+  ];
+
+  var REGION={south:'Poʻipū (South)',north:'Princeville (North)',east:'Wailua (East)',west:'West Side'};
+  var DRIVE={
+    south:{south:10,east:30,north:75,west:35},
+    north:{north:10,east:45,south:75,west:95},
+    east:{east:10,south:30,north:45,west:55}
+  };
+
+  /* 7-day conditions per region (demo feed; live build swaps for /api/wx by date) */
+  var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var FC=[
+    {south:{o:'good', s:'2–3 ft, light trades'},          east:{o:'good', s:'calm, clean'},          north:{o:'mixed',s:'small NW, breezy'}},
+    {south:{o:'good', s:'flat & glassy AM'},              east:{o:'mixed',s:'onshore wind picks up'}, north:{o:'good', s:'summer-flat, clear'}},
+    {south:{o:'mixed',s:'building S swell PM'},           east:{o:'good', s:'light, swimmable'},      north:{o:'rough',s:'large NW swell + rain runoff'}},
+    {south:{o:'rough',s:'S swell + brown-water advisory'},east:{o:'mixed',s:'choppy, murky inlets'},  north:{o:'rough',s:'high surf holding'}},
+    {south:{o:'good', s:'cleaning up, 1–2 ft'},           east:{o:'good', s:'calm, clean'},           north:{o:'mixed',s:'easing, still wrapping'}},
+    {south:{o:'mixed',s:'short-period windswell'},        east:{o:'good', s:'light & swimmable'},      north:{o:'good', s:'flat, clear'}},
+    {south:{o:'good', s:'glassy, 1–2 ft'},                east:{o:'mixed',s:'trades up, choppy'},      north:{o:'mixed',s:'small NW returns'}}
+  ];
+  var BASE=new Date(2026,5,27);
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  /* ───────── live forecast (Open-Meteo, no key, CORS-open) ─────────
+     Replaces the demo FC with a real per-region 7-day ocean outlook; falls
+     back silently to the demo feed if the network is unavailable. */
+  var REGION_PTS=[
+    {key:'south', lat:21.875, lon:-159.455},
+    {key:'east',  lat:22.05,  lon:-159.32},
+    {key:'north', lat:22.21,  lon:-159.50}
+  ];
+  function calcOutlook(surf, wind, rain, pp){
+    // Open-Meteo wave_height_max is open-ocean SIGNIFICANT height (runs higher than the
+    // surf face at a given beach), so thresholds are conservative here. Production should
+    // use the app's calibrated per-beach /api/wx model, not this island-wide proxy.
+    if((surf!=null && surf>=10) || rain>=20) return 'rough';     // big swell OR brown-water rain
+    if((surf!=null && surf>=6) || wind>=24 || pp>=70 || rain>=8) return 'mixed';
+    return 'good';
+  }
+  function descFor(surf, wind, rain, pp){
+    var p=[surf!=null ? surf.toFixed(1)+' ft surf' : 'surf n/a', Math.round(wind)+' mph wind'];
+    if(rain>=20) p.push('heavy rain'); else if(pp>=50||rain>=8) p.push('showers likely');
+    return p.join(' · ');
+  }
+  function loadLiveConditions(){
+    var lats=REGION_PTS.map(function(p){return p.lat}).join(',');
+    var lons=REGION_PTS.map(function(p){return p.lon}).join(',');
+    var tz='Pacific%2FHonolulu';
+    var mUrl='https://marine-api.open-meteo.com/v1/marine?latitude='+lats+'&longitude='+lons+'&daily=wave_height_max&length_unit=imperial&timezone='+tz+'&forecast_days=7';
+    var fUrl='https://api.open-meteo.com/v1/forecast?latitude='+lats+'&longitude='+lons+'&daily=wind_speed_10m_max,precipitation_sum,precipitation_probability_max&wind_speed_unit=mph&timezone='+tz+'&forecast_days=7';
+    Promise.all([fetch(mUrl).then(function(r){return r.json()}), fetch(fUrl).then(function(r){return r.json()})]).then(function(res){
+      var marArr=Array.isArray(res[0])?res[0]:[res[0]];
+      var fcArr =Array.isArray(res[1])?res[1]:[res[1]];
+      var days=(fcArr[0]&&fcArr[0].daily&&fcArr[0].daily.time)?fcArr[0].daily.time.length:0;
+      if(days<7) throw new Error('short feed');
+      var newFC=[];
+      for(var d=0; d<7; d++){
+        var day={};
+        REGION_PTS.forEach(function(p,ri){
+          var m=marArr[ri]&&marArr[ri].daily?marArr[ri].daily.wave_height_max:null;
+          var surf=m?m[d]:null;
+          var dd=fcArr[ri].daily;
+          var wind=dd.wind_speed_10m_max[d], rain=dd.precipitation_sum[d]||0;
+          var pp=dd.precipitation_probability_max?(dd.precipitation_probability_max[d]||0):0;
+          day[p.key]={o:calcOutlook(surf,wind,rain,pp), s:descFor(surf,wind,rain,pp)};
+        });
+        newFC.push(day);
+      }
+      FC=newFC;
+      var t=new Date(); t.setHours(0,0,0,0); BASE=t;
+      var hint=document.querySelector('.daterow .hint'); if(hint) hint.textContent='tap a date — live Kauaʻi ocean forecast';
+      renderDates();
+      if(built) build();
+    }).catch(function(e){ if(window.console) console.warn('Live forecast unavailable, using demo feed:', e); });
+  }
+
+  /* ───────── state ───────── */
+  var sel={base:'south',di:0,who:'couple',vibe:'chill'}, built=false;
+  var _model=null;       // current day model
+  var _saved=false;
+  var _swapIdx=-1;       // slot index being swapped
+
+  $$('.seg').forEach(function(seg){
+    seg.addEventListener('click',function(e){
+      var b=e.target.closest('.chip'); if(!b) return;
+      var g=seg.getAttribute('data-group');
+      $$('.chip',seg).forEach(function(c){c.setAttribute('aria-pressed', c===b?'true':'false')});
+      sel[g]=b.getAttribute('data-v');
+      if(g==='base') renderDates();
+      if(built) build();
+    });
+  });
+
+  function outClass(o){return o==='good'?'dd-good':o==='mixed'?'dd-mixed':'dd-rough';}
+  function renderDates(){
+    var h='';
+    for(var i=0;i<7;i++){
+      var dt=new Date(BASE.getFullYear(),BASE.getMonth(),BASE.getDate()+i);
+      var o=FC[i][sel.base].o;
+      h+='<button class="dchip" data-di="'+i+'" aria-pressed="'+(i===sel.di)+'">'+
+         '<span class="dw">'+(i===0?'Today':DOW[dt.getDay()])+'</span>'+
+         '<span class="dn">'+dt.getDate()+'</span>'+
+         '<span class="ddot '+outClass(o)+'"></span></button>';
+    }
+    $('#dates').innerHTML=h;
+  }
+
+  /* ───────── pickers ───────── */
+  function score(b,want){var s=0; if(b.tr.indexOf(want)>=0)s+=3; if(sel.who==='family'&&b.tr.indexOf('kids')>=0)s+=2; if(b.tr.indexOf('lifeguard')>=0)s+=1; return s;}
+  function wantFor(){return sel.vibe==='snorkel'?'snorkel':sel.vibe==='adventure'?'hike':'calm';}
+  function beachById(id){return BEACHES.filter(function(b){return b.id===id})[0];}
+  function hostById(id){return STAY_CLOSE.filter(function(b){return b.id===id})[0];}
+  function localById(id){return LOCAL.filter(function(b){return b.id===id})[0];}
+  function outdoorById(id){return OUTDOOR.filter(function(o){return o.id===id})[0];}
+  function findItem(id){ return outdoorById(id) || localById(id) || hostById(id); }
+  function walkFor(region){
+    var pool=WALKS.filter(function(w){return w.r===region});
+    if(!pool.length) pool=WALKS.slice().sort(function(a,b){return DRIVE[sel.base][a.r]-DRIVE[sel.base][b.r]});
+    return pool[0];
+  }
+
+  function pickBeach(region, want, usedNames){
+    var pool=BEACHES.filter(function(b){return b.r===region && usedNames.indexOf(b.n)<0});
+    pool.sort(function(a,b){return score(b,want)-score(a,want)});
+    return pool[0]||BEACHES.filter(function(b){return b.r===region})[0];
+  }
+  function beachRegion(dayFc){
+    var home=sel.base, order=[home];
+    Object.keys(DRIVE[home]).sort(function(a,b){return DRIVE[home][a]-DRIVE[home][b]}).forEach(function(r){if(order.indexOf(r)<0 && REGION[r] && r!=='west')order.push(r)});
+    var good=order.filter(function(r){return dayFc[r] && dayFc[r].o==='good'});
+    if(good.length) return good[0];
+    var mixed=order.filter(function(r){return dayFc[r] && dayFc[r].o==='mixed' && DRIVE[home][r] < 30;});
+    if(mixed.length) return mixed[0];
+    return null;
+  }
+  function hostFor(part, nightIdx, used){
+    var c=STAY_CLOSE.filter(function(o){
+      if(o.part!==part) return false;
+      if(used.indexOf(o.id)>=0) return false;
+      if(o.kids && sel.who!=='family') return false;
+      if(o.nights && o.nights.indexOf(nightIdx)<0) return false;
+      return true;
+    });
+    return c[0];
+  }
+  function lunchFor(region){
+    var pool=LOCAL.filter(function(b){return b.r===region && (b.type==='lunch')});
+    if(!pool.length) pool=LOCAL.filter(function(b){return b.r===region});
+    if(!pool.length) pool=LOCAL.slice().sort(function(a,b){return DRIVE[sel.base][a.r]-DRIVE[sel.base][b.r]});
+    if(sel.vibe==='food'){ var t=pool.filter(function(b){return b.type==='lunch'}); if(t.length) pool=t; }
+    return pool[0];
+  }
+
+  /* ───────── day model ───────── */
+  function buildDayModel(di){
+    var dt=new Date(BASE.getFullYear(),BASE.getMonth(),BASE.getDate()+di), fc=FC[di], dow=dt.getDay();
+    var home=sel.base, homeO=fc[home].o, bR=beachRegion(fc), used=[];
+    var slots=[];
+    // MORNING — resort suggestion
+    var am=hostFor('am',dow,used); if(am){used.push(am.id); slots.push({when:'Morning', kind:'host', ref:am});}
+    if(bR){
+      var want=wantFor();
+      var b1=pickBeach(bR, want, []);
+      slots.push({when:'Late morning', kind:'beach', ref:b1, region:bR, note:fc[bR].s});
+      // LUNCH — local business near the beach region
+      slots.push({when:'Lunch', kind:'lunch', ref:lunchFor(bR)});
+      // AFTERNOON — bike path on the East side, a 2nd snorkel beach, else a beach walk
+      if(bR==='east'){
+        slots.push({when:'Afternoon', kind:'bike', ref:BIKE, region:'east', note:BIKE.note});
+      } else if(fc[bR].o==='good' && sel.vibe==='snorkel'){
+        var b2=pickBeach(bR, 'scenic', [b1.n]);
+        if(b2) slots.push({when:'Afternoon', kind:'beach', ref:b2, region:bR, note:'easy second stop'});
+      } else {
+        var wk=walkFor(bR);
+        if(wk) slots.push({when:'Afternoon', kind:'walk', ref:wk, region:bR, note:wk.note});
+      }
+    }else{
+      // ROUGH everywhere reachable -> stay close all day
+      var hl=hostFor('mid',dow,used); if(hl){used.push(hl.id); slots.push({when:'Lunch', kind:'host', ref:hl});}
+      var pm2=hostFor('pm',dow,used); if(pm2){used.push(pm2.id); slots.push({when:'Afternoon', kind:'host', ref:pm2});}
+    }
+    // EVENING — resort suggestion
+    var eve=hostFor('eve',dow,used); if(eve){used.push(eve.id); slots.push({when:'Evening', kind:'host', ref:eve});}
+
+    var why;
+    if(!bR) why='<b>'+REGION[home]+' and every nearby shore are rough today</b> ('+fc[home].s+'). Perfect day to stay close — we’ve filled it with what’s here at '+HOST+'.';
+    else if(bR!==home) why='<b>'+REGION[home].split(' ')[0]+' is '+fc[home].o+' today</b> ('+fc[home].s+'), so we’re routing you to '+REGION[bR].split(' ')[0]+' where it’s '+fc[bR].o+' — '+DRIVE[home][bR]+' min away.';
+    else why='<b>'+REGION[home]+' is calling</b> — '+fc[home].s+'. Resort morning and evening, lunch out, beach in between.';
+
+    return {di:di, base:home, date:DOW[dow]+', '+MON[dt.getMonth()]+' '+dt.getDate(), homeO:homeO, why:why, slots:slots};
+  }
+
+  /* ───────── render ───────── */
+  function slotInner(slot){
+    var s=slot.ref;
+    if(slot.kind==='host'){
+      return '<div class="item host"><div class="ico">'+svg(s.ic)+'</div><div class="ibody">'+
+        '<div class="ititle">'+s.t+' <span class="tag on">Resort</span></div>'+
+        '<div class="idesc">At '+HOST+(s.d?' · '+s.d:'')+'</div></div></div>';
+    }
+    if(slot.kind==='lunch'){
+      var dv=DRIVE[sel.base][s.r];
+      return '<div class="item local"><div class="ico">'+svg(s.ic)+'</div><div class="ibody">'+
+        '<div class="ititle">'+s.name+' <span class="tag local">Local</span></div>'+
+        '<div class="idesc">'+s.note+' · '+s.area+' · <span class="tag drive">'+dv+' min from '+HOST+'</span></div></div></div>';
+    }
+    if(slot.kind==='walk' || slot.kind==='bike'){
+      var dvA=DRIVE[sel.base][s.r];
+      var klabel=slot.kind==='bike'?'Ride':'Walk';
+      var icA=slot.kind==='bike'?'bike':'walk';
+      var bookRow = s.book ? '<div class="bookrow">'+s.book.map(function(op){
+          return '<button class="bookchip" onclick="event.stopPropagation();bookOp(\''+op.id+'\')">'+svg('bike')+op.name+'</button>';
+        }).join('')+'</div>' : '';
+      return '<div class="item act"><div class="ico">'+svg(icA)+'</div><div class="ibody">'+
+        '<div class="ititle">'+s.n+' <span class="tag act">'+klabel+'</span></div>'+
+        '<div class="idesc">'+s.note+(s.area?' · '+s.area:'')+' · <span class="tag drive">'+dvA+' min from '+HOST+'</span></div>'+
+        bookRow+'</div></div>';
+    }
+    // beach
+    var ic = s.tr.indexOf('hike')>=0?'hike':s.tr.indexOf('snorkel')>=0?'mask':s.tr.indexOf('surf')>=0?'surf':'beach';
+    var dv2=DRIVE[sel.base][slot.region];
+    return '<div class="item"><div class="ico">'+svg(ic)+'</div><div class="ibody">'+
+      '<div class="ititle">'+s.n+' <span class="tag beach">Beach</span></div>'+
+      '<div class="idesc">'+(slot.note||'')+' · <span class="tag drive">'+dv2+' min from '+HOST+'</span></div></div></div>';
+  }
+  function renderDay(){
+    var m=_model;
+    var cls=m.homeO==='good'?'b-good':m.homeO==='mixed'?'b-mixed':'b-rough';
+    var bi=m.homeO==='good'?'sun':m.homeO==='mixed'?'wave':'rain';
+    var label=m.homeO==='good'?'Great ocean day':m.homeO==='mixed'?'Mixed conditions':'Rough — stay close';
+    var rows=m.slots.map(function(slot,i){
+      return '<div class="slot"><div class="when">'+slot.when+'</div>'+
+        '<div class="slotwrap" onclick="openSwap('+i+')" role="button" aria-label="Change '+slot.when+'">'+
+        slotInner(slot)+'<span class="swaphint">'+svg('swap')+'</span></div></div>';
+    }).join('');
+    var saveLbl=_saved?'<span class="savebtn saved">'+svg('check')+'Saved</span>'
+                      :'<button class="savebtn" onclick="saveDay()">'+svg('save')+'Save this day</button>';
+    $('#out').innerHTML='<div class="day"><div class="dhead">'+
+      '<div class="dl"><span class="dnum">Your day</span><span class="ddate">'+m.date+'</span></div>'+
+      '<span class="badge '+cls+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">'+I[bi]+'</svg>'+label+'</span></div>'+
+      '<div class="why">'+m.why+'</div><div class="slots">'+rows+'</div>'+
+      '<div class="dayfoot"><span class="editnote">Tap any item to see nearby options and swap it.</span>'+saveLbl+'</div></div>';
+  }
+
+  /* ───────── swap picker ───────── */
+  window.openSwap=function(idx){
+    _swapIdx=idx;
+    var slot=_model.slots[idx];
+    var title, sub, opts;
+    if(slot.kind==='host'){
+      title='Swap your '+slot.when.toLowerCase()+' at '+HOST;
+      sub='Other options here at the resort';
+      var dow=new Date(BASE.getFullYear(),BASE.getMonth(),BASE.getDate()+_model.di).getDay();
+      opts=STAY_CLOSE.filter(function(o){return o.part===slot.ref.part && !(o.kids&&sel.who!=='family') && !(o.nights&&o.nights.indexOf(dow)<0);})
+        .map(function(o){return {id:o.id, ic:o.ic, name:o.t, meta:'At '+HOST+(o.d?' · '+o.d:''), cur:o.id===slot.ref.id};});
+    } else if(slot.kind==='lunch'){
+      title='Swap lunch';
+      sub='Local spots — sorted by how close they are';
+      opts=LOCAL.slice().sort(function(a,b){return DRIVE[sel.base][a.r]-DRIVE[sel.base][b.r];})
+        .map(function(o){return {id:o.id, ic:o.ic, name:o.name, meta:o.note+' · '+o.area+' · '+DRIVE[sel.base][o.r]+' min', cur:o.id===slot.ref.id};});
+    } else {
+      title='Swap beach, walk or ride';
+      sub='Nearby beaches, beach walks & the coastal bike path — by drive time';
+      var want=wantFor();
+      opts=OUTDOOR.slice().sort(function(a,b){return (DRIVE[sel.base][a.r]-DRIVE[sel.base][b.r]) || (score(b,want)-score(a,want));})
+        .map(function(o){
+          var k=o.kind||'beach';
+          var ic=k==='bike'?'bike':k==='walk'?'walk':(o.tr.indexOf('hike')>=0?'hike':o.tr.indexOf('snorkel')>=0?'mask':o.tr.indexOf('surf')>=0?'surf':'beach');
+          var kl=k==='bike'?'Ride':k==='walk'?'Walk':'Beach';
+          return {id:o.id, ic:ic, name:o.n, meta:kl+' · '+REGION[o.r].split(' ')[0]+' · '+DRIVE[sel.base][o.r]+' min', cur:o.id===slot.ref.id};});
+    }
+    $('#pkTitle').textContent=title;
+    $('#pkSub').textContent=sub;
+    $('#pkList').innerHTML=opts.map(function(o){
+      return '<div class="pk-opt'+(o.cur?' cur':'')+'" onclick="applySwap(\''+o.id+'\')">'+
+        '<div class="pk-ico">'+svg(o.ic)+'</div>'+
+        '<div class="pk-body"><div class="pk-name">'+o.name+'</div><div class="pk-meta">'+o.meta+'</div></div>'+
+        '<button class="pk-info" onclick="event.stopPropagation();showInfo(\''+o.id+'\')" aria-label="More info">Info</button>'+
+        '<div class="pk-pick">'+(o.cur?'Current':'Pick')+'</div></div>';
+    }).join('');
+    $('#pickerOv').classList.add('on'); $('#picker').classList.add('on');
+  };
+  window.closePicker=function(){ $('#pickerOv').classList.remove('on'); $('#picker').classList.remove('on'); };
+  window.applySwap=function(id){
+    var slot=_model.slots[_swapIdx];
+    if(slot.kind==='host') slot.ref=hostById(id);
+    else if(slot.kind==='lunch') slot.ref=localById(id);
+    else { var o=outdoorById(id); slot.ref=o; slot.kind=o.kind||'beach'; slot.region=o.r; slot.note=(o.kind==='walk'||o.kind==='bike')?o.note:'your pick'; }
+    _saved=false;
+    closePicker(); renderDay();
+  };
+  // Info pop-up inside the swap sheet — details to help decide, then Choose or Back.
+  window.showInfo=function(id){
+    var it=findItem(id); if(!it) return;
+    var kind=it.kind || (LOCAL.indexOf(it)>=0 ? 'local' : (STAY_CLOSE.indexOf(it)>=0 ? 'host' : 'beach'));
+    var name=it.n||it.name||it.t||'';
+    var meta=[];
+    if(it.r && REGION[it.r]) meta.push(REGION[it.r].split(' ')[0]);
+    if(it.area) meta.push(it.area);
+    if(it.r && DRIVE[sel.base][it.r]!=null) meta.push(DRIVE[sel.base][it.r]+' min from '+HOST);
+    var tags;
+    if(kind==='beach') tags=['Beach'].concat(it.tr||[]);
+    else if(kind==='walk') tags=['Walk'].concat((it.tr||[]).filter(function(t){return t!=='walk'}));
+    else if(kind==='bike') tags=['Ride'].concat((it.tr||[]).filter(function(t){return t!=='bike'}));
+    else if(kind==='local') tags=['Local'].concat(it.type?[it.type]:[]);
+    else tags=['Resort'];
+    var body=BEACH_INFO[id]||it.note||it.d||'';
+    var ops=(it.book&&it.book.length)?'<div class="bookrow" style="margin-top:12px">'+it.book.map(function(op){return '<button class="bookchip" onclick="bookOp(\''+op.id+'\')">'+svg('bike')+op.name+'</button>';}).join('')+'</div>':'';
+    $('#pkTitle').textContent=name;
+    $('#pkSub').textContent=meta.join(' · ');
+    $('#pkList').innerHTML='<div class="pk-detail">'+
+      '<div class="pk-tags">'+tags.map(function(t){return '<span class="pk-tag">'+t+'</span>';}).join('')+'</div>'+
+      (body?'<p class="pk-info-body">'+body+'</p>':'')+ ops+
+      '<p class="pk-caveat">Conditions change daily — check today’s outlook and lifeguards before you go.</p>'+
+      '<div class="pk-actions">'+
+        '<button class="pk-back" onclick="openSwap('+_swapIdx+')">Back</button>'+
+        '<button class="pk-choose" onclick="applySwap(\''+id+'\')">Choose this</button>'+
+      '</div></div>';
+  };
+
+  /* ───────── save ───────── */
+  function saveKey(di){ return 'os_itin_'+sel.base+'_'+di; }
+  window.saveDay=function(){
+    try{ localStorage.setItem(saveKey(_model.di), JSON.stringify(_model)); }catch(e){}
+    _saved=true; renderDay(); toast('Day saved');
+  };
+  function toast(msg){
+    var t=$('#toast'); t.innerHTML=svg('check')+msg; t.classList.add('on');
+    setTimeout(function(){ t.classList.remove('on'); }, 1800);
+  }
+  // Referral hand-off — live build opens the operator's tracked booking link; here it confirms.
+  window.bookOp=function(id){
+    var op=(BIKE.book||[]).filter(function(o){return o.id===id})[0];
+    if(op) toast('Booking ' + op.name);
+  };
+
+  /* ───────── build ───────── */
+  function build(){
+    built=true;
+    var saved=null; try{ saved=JSON.parse(localStorage.getItem(saveKey(sel.di))); }catch(e){}
+    if(saved && saved.di===sel.di && saved.base===sel.base){ _model=saved; _saved=true; }
+    else { _model=buildDayModel(sel.di); _saved=false; }
+    renderDay();
+  }
+  $('#dates').addEventListener('click',function(e){
+    var b=e.target.closest('.dchip'); if(!b) return;
+    sel.di=parseInt(b.getAttribute('data-di'),10);
+    renderDates(); build();
+    $('#out').scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+  $('#build').addEventListener('click',function(){ build(); $('#out').scrollIntoView({behavior:'smooth',block:'start'}); });
+
+  renderDates();
+  loadLiveConditions();
+})();
+</script>
+
+<div style="max-width:760px;margin:26px auto 0;text-align:center;padding:0 18px">
+  <a id="osAppCta" href="https://oceansafety.app/" style="display:inline-block;font-weight:700;font-size:16px;text-decoration:none;border-radius:12px;padding:14px 26px;background:#0F4C5C;color:#fff">Open the live beach guide &#8594;</a>
+  <p style="font-size:12.5px;color:#5A6B70;margin-top:9px">Live surf, wind and lifeguard calls for every beach in this plan.</p>
+</div>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var ref = (q.get('ref')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,32);
+  var u   = (q.get('u')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,16);
+  if(ref){
+    document.getElementById('osAppCta').href =
+      'https://oceansafety.app/?ref=' + ref + (u ? '&u=' + u : '');
+  }
+})();
+</script>
+</body>
+</html>
