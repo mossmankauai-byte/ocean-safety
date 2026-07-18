@@ -18,6 +18,7 @@
 
 # Creator ambassador program (2026-07-18)
 /creators   /creators.html      200
+/creator-terms   /creator-terms.html   200
 /creator    /creator-dash.html  200
 /plan       /plan.html          200
 /api/creator-provision   /.netlify/functions/creator-provision   200

@@ -138,6 +138,8 @@
   .ftwo{display:grid;grid-template-columns:1fr;gap:0 14px}
   @media(min-width:560px){.ftwo{grid-template-columns:1fr 1fr}}
   .claim .btn{width:100%;margin-top:22px}
+  .agree{display:flex;gap:10px;align-items:flex-start;margin-top:18px;font-size:13.5px;color:var(--muted);cursor:pointer}
+  .agree input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent);flex:0 0 auto}
   .ferr{display:none;margin-top:12px;font-size:14px;color:#c0392b;font-weight:600}
   .fnote{margin-top:14px;font-size:12.5px;color:var(--muted2)}
 
@@ -401,9 +403,10 @@
           </div>
         </div>
         <input type="text" name="mahalo-field" style="display:none" tabindex="-1" autocomplete="off">
+        <label class="agree"><input type="checkbox" id="cf-agree" required>
+        <span>I agree to the <a href="/creator-terms" target="_blank" rel="noopener">Creator Terms</a> — the 50% commission split, #ad disclosure on commissioned posts, and no safety claims in my own voice.</span></label>
         <p class="ferr" id="ferr"></p>
         <button class="btn" type="submit">Claim my link <span class="ar" aria-hidden="true">→</span></button>
-        <p class="fnote">By claiming a link you agree to the program rules below — including the FTC requirement to mark paid or commissioned posts with #ad.</p>
       </form>
     </div>
   </div>
@@ -557,6 +560,7 @@
 
     var base = { name:name, email:email, handle:handle, clean:clean,
                  platform:$('cf-platform').value, island:$('cf-island').value,
+                 agreedTerms:'creator-terms-2026-07-18',   // checkbox is required; record the version
                  ts:new Date().toISOString() };
 
     // 1) Auto-provision: register this creator's own telemetry slug + dashboard key,

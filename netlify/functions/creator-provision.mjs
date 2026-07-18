@@ -39,6 +39,7 @@ export default async (req) => {
         name: String(body.name || '').slice(0, 80), email: String(body.email || '').slice(0, 120),
         platform: String(body.platform || '').slice(0, 24),
         rawHandle: String(body.handle || '').replace(/^@+/, '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 30),
+        agreedTerms: String(body.agreedTerms || '').slice(0, 48),
       }),
     });
     const out = await r.json().catch(() => null);
