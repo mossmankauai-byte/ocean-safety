@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OceanSafe Creators — earn 50% of the tour commission</title>
+<meta name="description" content="For Hawaiʻi creators: share the free beach-safety app visitors actually use, and earn half the commission on every tour your followers book through your own tracked link. Instant signup, live dashboard, paid monthly.">
+<meta property="og:title" content="OceanSafe Creators — earn 50% of the tour commission">
+<meta property="og:description" content="Share the free beach-safety guide, earn half the commission on every tour booked through your link. Claim your link in one minute.">
+<meta property="og:image" content="https://oceansafety.app/assets/shot-app-kauai.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A8BA8'/%3E%3Cpath d='M6 41c6 0 6-8 12-8s6 8 12 8 6-8 12-8 6 8 12 8' fill='none' stroke='%23FFC64B' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --accent:#0A8BA8; --deep:#0c4a58; --deep2:#0a7a94;
+    --ink:#16202A; --bg:#F5F7F9; --card:#ffffff; --line:#E2E8ED;
+    --muted:#56636e; --muted2:#7A8794; --sun:#F5B301; --sun-soft:#FFC64B;
+    --tint:#E8F4F7; --shadow:0 1px 2px rgba(16,32,42,.04),0 8px 24px rgba(16,32,42,.06);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--ink:#e9f1f4; --bg:#0e1519; --card:#15212a; --line:#26343d;
+      --muted:#a4b4be; --muted2:#82929c; --tint:#123039; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);}
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility}
+  .wrap{max-width:640px;margin:0 auto;padding:0 20px}
+  a{color:var(--accent)}
+  .wm{font-weight:800;letter-spacing:-.01em}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-weight:700;font-size:16.5px;text-decoration:none;border-radius:12px;
+    padding:15px 26px;background:var(--accent);color:#fff;border:none;cursor:pointer;
+    box-shadow:0 6px 18px rgba(10,139,168,.28);transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(10,139,168,.34)}
+  .btn:active{transform:translateY(0)}
+  .btn .ar{transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+  .btn:hover .ar{transform:translateX(3px)}
+  a:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;overflow:hidden;color:#eef9fb;
+    background:linear-gradient(158deg,var(--deep) 0%,var(--deep2) 100%);
+    padding:26px 0 92px}
+  .hero .sun{position:absolute;top:-70px;right:-40px;width:230px;height:230px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,198,75,.30),rgba(255,198,75,0) 70%);pointer-events:none}
+  .hero .wrap{position:relative;z-index:2}
+  .hero .wm{color:#fff;font-size:22px}
+  .hero .wm i{font-style:normal;color:var(--sun-soft)}
+  .eyebrow{display:inline-block;margin:22px 0 0;font-size:12.5px;font-weight:700;
+    letter-spacing:.09em;text-transform:uppercase;color:#a9dce7}
+  h1{font-size:clamp(30px,7.6vw,44px);line-height:1.08;letter-spacing:-.02em;font-weight:800;
+    margin:10px 0 0;max-width:15ch}
+  .lede{margin:16px 0 0;font-size:clamp(16px,4.4vw,18.5px);color:#cfe8ee;max-width:38ch}
+  .priceline{display:flex;align-items:baseline;gap:10px;margin:26px 0 4px;flex-wrap:wrap}
+  .priceline .amt{font-size:44px;font-weight:800;letter-spacing:-.02em;color:#fff;line-height:1}
+  .priceline .per{font-size:16px;color:#bfe0e8}
+  .priceline .flat{font-size:13px;font-weight:700;color:#0c333d;background:var(--sun-soft);
+    padding:4px 10px;border-radius:999px;letter-spacing:.02em}
+  .cta-row{margin-top:20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .hero .btn{background:#fff;color:var(--deep);box-shadow:0 8px 22px rgba(3,26,32,.32)}
+  .hero .btn:hover{box-shadow:0 12px 28px rgba(3,26,32,.38)}
+  .tourlink{appearance:none;background:none;border:0;cursor:pointer;font:inherit;
+    font-size:14px;font-weight:600;color:#a9dce7;text-decoration:underline;text-underline-offset:3px;padding:4px}
+  .reassure{margin-top:12px;font-size:13.5px;color:#a9dce7}
+  .audience{margin-top:20px;font-size:13.5px;color:#bfe0e8;border-top:1px solid rgba(255,255,255,.14);
+    padding-top:16px;max-width:42ch}
+  .hero-phone{position:relative;z-index:2;width:min(232px,58vw);margin:30px auto -34px;
+    border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.28);
+    box-shadow:0 3px 8px rgba(3,26,32,.28),0 30px 60px -18px rgba(3,26,32,.6)}
+  .hero-phone img{display:block;width:100%;height:auto}
+  @media(min-width:700px){.hero{padding-bottom:110px}}
+  .wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:70px;display:block}
+  .wave path{fill:var(--bg)}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:52px 0}
+  .kicker{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+  h2{font-size:clamp(23px,5.6vw,30px);line-height:1.14;letter-spacing:-.02em;font-weight:800;margin:8px 0 0}
+  .sec-sub{margin:12px 0 0;font-size:16.5px;color:var(--muted);max-width:52ch}
+
+  .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:26px}
+  @media(min-width:560px){.grid{grid-template-columns:1fr 1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;
+    box-shadow:var(--shadow);transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+  .card:hover{transform:translateY(-2px)}
+  .ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    background:var(--tint);color:var(--accent);margin-bottom:14px}
+  .ico svg{width:24px;height:24px}
+  .card h3{font-size:17.5px;font-weight:700;letter-spacing:-.01em}
+  .card p{margin-top:7px;font-size:14.8px;color:var(--muted);line-height:1.5}
+
+  .how{background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .steps{display:grid;grid-template-columns:1fr;gap:22px;margin-top:28px}
+  @media(min-width:620px){.steps{grid-template-columns:repeat(3,1fr);gap:18px}}
+  .num{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;
+    font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(10,139,168,.28)}
+  .step h3{font-size:16.5px;font-weight:700;margin:14px 0 0;letter-spacing:-.01em}
+  .step p{margin-top:6px;font-size:14.5px;color:var(--muted)}
+
+  /* the math strip */
+  .math{margin-top:26px;background:var(--tint);border:1px solid var(--line);border-radius:16px;
+    padding:20px 22px;font-size:15.5px}
+  .math b{font-size:19px}
+  .math .sub{display:block;margin-top:6px;font-size:13.5px;color:var(--muted)}
+
+  /* rate recap */
+  .recap{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px 24px;
+    box-shadow:var(--shadow);margin-top:8px;text-align:center}
+  .recap .big{font-size:clamp(38px,10vw,54px);font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--ink)}
+  .recap .big span{color:var(--muted);font-size:.42em;font-weight:700;letter-spacing:0}
+  .recap .tag{margin-top:8px;font-size:15px;color:var(--muted)}
+  .checks{list-style:none;text-align:left;max-width:36ch;margin:22px auto 0;display:grid;gap:11px}
+  .checks li{display:flex;gap:11px;font-size:15px;line-height:1.4}
+  .checks .ck{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--tint);
+    color:var(--accent);display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .checks .ck svg{width:13px;height:13px}
+
+  /* ---------- CLAIM FORM ---------- */
+  .claim{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px 24px;
+    box-shadow:var(--shadow);margin-top:26px}
+  .claim h3{font-size:19px;font-weight:800;letter-spacing:-.01em}
+  .claim .fhint{margin-top:6px;font-size:13.5px;color:var(--muted)}
+  .frow{margin-top:16px}
+  .frow label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+  .frow input,.frow select{width:100%;font:inherit;font-size:16px;color:var(--ink);
+    background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+  .ftwo{display:grid;grid-template-columns:1fr;gap:0 14px}
+  @media(min-width:560px){.ftwo{grid-template-columns:1fr 1fr}}
+  .claim .btn{width:100%;margin-top:22px}
+  .ferr{display:none;margin-top:12px;font-size:14px;color:#c0392b;font-weight:600}
+  .fnote{margin-top:14px;font-size:12.5px;color:var(--muted2)}
+
+  /* ---------- KIT ---------- */
+  #kit{display:none}
+  #kit.on{display:block}
+  .kit-head{display:flex;align-items:center;gap:12px}
+  .kit-badge{width:46px;height:46px;border-radius:50%;background:var(--tint);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .kit-badge svg{width:24px;height:24px}
+  .linkbox{display:flex;gap:10px;margin-top:18px}
+  .linkbox input{flex:1;min-width:0;font:inherit;font-size:14.5px;font-weight:600;color:var(--ink);
+    background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+  .copybtn{flex:0 0 auto;font:inherit;font-size:14px;font-weight:700;cursor:pointer;border-radius:11px;
+    padding:12px 18px;border:1px solid var(--accent);background:var(--card);color:var(--accent)}
+  .copybtn.did{background:var(--accent);color:#fff}
+  .qr-wrap{display:flex;gap:20px;align-items:center;margin-top:20px;flex-wrap:wrap}
+  .qr-wrap img{width:150px;height:150px;border-radius:12px;border:1px solid var(--line);background:#fff;padding:8px}
+  .qr-wrap .qtxt{flex:1;min-width:200px;font-size:14px;color:var(--muted)}
+  .kit-row{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+  .kit-row .btn{flex:1;min-width:180px;font-size:15px;padding:13px 18px}
+  .btn.ghost{background:var(--card);color:var(--accent);border:1px solid var(--accent);box-shadow:none}
+  .caps{margin-top:24px}
+  .caps h4{font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .cap-item{margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:11px;
+    padding:12px 14px;font-size:14px;color:var(--ink);cursor:pointer}
+  .cap-item:hover{border-color:var(--accent)}
+  .ftc{margin-top:22px;background:#FFF7E0;border:1px solid #EAD9A0;border-radius:12px;padding:14px 16px;
+    font-size:13.5px;color:#6b5a1e}
+  @media (prefers-color-scheme:dark){.ftc{background:#2c2410;border-color:#4a3d1a;color:#e8d491}}
+  .reset{margin-top:18px;font-size:13px;color:var(--muted2)}
+  .reset button{appearance:none;background:none;border:0;font:inherit;font-size:13px;color:var(--muted2);
+    text-decoration:underline;cursor:pointer;padding:0}
+
+  /* fine print */
+  .fine{font-size:13.5px;color:var(--muted);line-height:1.6}
+  .fine li{margin-top:8px;margin-left:18px}
+
+  footer{padding:40px 0 56px;text-align:center;color:var(--muted2)}
+  footer .wm{color:var(--ink);font-size:17px}
+  footer .wm i{font-style:normal;color:var(--accent)}
+  .disc{margin:14px auto 0;font-size:12.5px;color:var(--muted2);max-width:44ch;line-height:1.5}
+  .contact{margin-top:14px;font-size:13.5px}
+
+  /* ---------- GUIDED TOUR ---------- */
+  #osTour{position:fixed;inset:0;z-index:400;display:none}
+  #osTour.on{display:block}
+  .tor-block{position:absolute;inset:0;pointer-events:auto}
+  .tor-hi{position:fixed;border-radius:14px;pointer-events:none;
+    box-shadow:0 0 0 2px rgba(255,253,248,.96), 0 0 0 4000px rgba(15,43,54,.55);
+    transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1),opacity .2s}
+  .tor-hi.off{opacity:0}
+  .tor-card{position:fixed;width:min(358px,calc(100vw - 28px));background:var(--card);color:var(--ink);
+    border:1px solid var(--line);border-radius:16px;padding:16px 17px 14px;pointer-events:auto;
+    box-shadow:0 8px 18px rgba(15,43,54,.18),0 24px 60px rgba(15,43,54,.25);
+    transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1)}
+  .tor-card.center{left:50%!important;top:50%!important;transform:translate(-50%,-50%);width:min(410px,calc(100vw - 28px));text-align:center;padding:26px 24px 20px}
+  .tor-card .tc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .tor-card .tc-step{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .tor-card .tc-skip{margin-left:auto;appearance:none;background:none;border:0;font:inherit;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;padding:2px 4px}
+  .tor-card .tc-skip:hover{color:var(--ink);text-decoration:underline}
+  .tor-card .tc-logo{width:52px;height:52px;border-radius:13px;margin:0 auto 12px;display:block}
+  .tor-card h4{margin:0 0 6px;font-size:16px;letter-spacing:-.01em;color:var(--ink);font-weight:800}
+  .tor-card p{margin:0;font-size:12.5px;line-height:1.55;color:var(--muted)}
+  .tor-card p b{color:var(--ink)}
+  .tor-card .tc-foot{display:flex;align-items:center;gap:10px;margin-top:14px}
+  .tor-card.center .tc-foot{justify-content:center}
+  .tor-dots{display:flex;gap:5px;margin-right:auto}
+  .tor-card.center .tor-dots{margin-right:0}
+  .tor-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
+  .tor-dots i.on{background:var(--accent);transform:scale(1.25)}
+  .tor-btn{appearance:none;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border-radius:9px;padding:8px 15px;border:1px solid var(--line);background:var(--card);color:var(--muted)}
+  .tor-btn:hover{border-color:var(--accent)}
+  .tor-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  @media(max-width:560px){.tor-card{width:calc(100vw - 20px)}}
+
+  /* ---------- PRINT: kit only ---------- */
+  @media print{
+    body{background:#fff;color:#111}
+    .np{display:none!important}
+    #kit{display:block!important}
+    #kit .claim{border:none;box-shadow:none;padding:0}
+    .copybtn,.kit-row,.reset,.cap-item{display:none!important}
+    .cap-print{display:block!important}
+    .qr-wrap img{width:220px;height:220px}
+    .print-head{display:flex!important;align-items:center;gap:10px;margin-bottom:18px}
+  }
+  .print-head{display:none}
+  .cap-print{display:none;font-size:13px;margin-top:8px}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body>
+
+<!-- ================= HERO ================= -->
+<header class="hero np">
+  <div class="sun" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="wm">Ocean<i>Safe</i></span>
+    <span class="eyebrow">Hawaiʻi Creator Program</span>
+    <h1>Turn your beach content into tour commission.</h1>
+    <p class="lede">OceanSafe is the free app visitors open to check if the water's safe. Share it with your own link — and when your followers book a tour inside it, you earn half the commission.</p>
+
+    <div class="priceline">
+      <span class="amt">50%</span>
+      <span class="per">of every tour's commission</span>
+      <span class="flat">Paid monthly</span>
+    </div>
+    <div class="cta-row">
+      <a class="btn" href="#claim">Claim your link <span class="ar" aria-hidden="true">→</span></a>
+      <button type="button" class="tourlink" id="tourBtn">Take the 60-second tour</button>
+    </div>
+    <p class="reassure">Free to join. No posting quotas. Your link works forever.</p>
+
+    <p class="audience">For Hawaiʻi-based creators on Kauaʻi, Oʻahu, and Maui — beach, surf, family, food, hiking, photography. Nano and micro accounts welcome; local trust beats follower count here.</p>
+  </div>
+  <div class="hero-phone">
+    <img src="/assets/shot-app-kauai.jpg" width="546" height="1182" alt="The OceanSafe app: today's conditions and every beach scored for swimming, snorkeling and surf.">
+  </div>
+  <svg class="wave" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0,30 C240,72 480,72 720,44 C960,16 1200,16 1440,44 L1440,70 L0,70 Z"/></svg>
+</header>
+
+<!-- ================= HOW THE MONEY WORKS ================= -->
+<section class="how np">
+  <div class="wrap">
+    <span class="kicker">How the money works</span>
+    <h2>Your link, their trip, your cut.</h2>
+
+    <div class="steps" id="howSteps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>Claim your link + QR</h3>
+        <p>Takes one minute, right on this page. No approval wait — your link and QR code appear instantly.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>Share it your way</h3>
+        <p>Bio link, story sticker, a "check the water first" reel. Your followers get the free safety guide — a genuinely useful thing to hand them, not an ad.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>Earn on every booking</h3>
+        <p>Tours are bookable inside the app. Bookings from your visitors are tagged to you — even when they book days after first tapping your link.</p>
+      </div>
+    </div>
+
+    <div class="math" id="mathStrip">
+      A family of four books a <b>$500</b> boat tour through your link → <b>$20</b> to you.
+      <span class="sub">Half the commission GetYourGuide pays, on every booking, from every follower, all season. Your split grows to 60% once you pass 25 bookings in a quarter.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHAT YOU GET ================= -->
+<section class="np">
+  <div class="wrap">
+    <span class="kicker">What you get</span>
+    <h2>More than a referral code.</h2>
+
+    <div class="grid">
+      <div class="card">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><path d="M14 14h3v3M20.5 14v.02M14 20.5v.02M20.5 20.5v.02M17.2 17.2v.02"/></svg></div>
+        <h3>A link and QR that are yours</h3>
+        <p>Use them anywhere — bio, stories, a sticker on your camera case. Every scan and tap is tracked to you.</p>
+      </div>
+
+      <div class="card">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><rect x="5" y="12" width="3" height="5" rx=".8"/><rect x="10.5" y="8" width="3" height="9" rx=".8"/><rect x="16" y="4" width="3" height="13" rx=".8"/></svg></div>
+        <h3>A live dashboard</h3>
+        <p>Watch the taps and opens your link drives, day by day. Booking commission posts monthly from GetYourGuide's reporting.</p>
+      </div>
+
+      <div class="card">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h7M9 17h7"/></svg></div>
+        <h3>A promo kit you can print</h3>
+        <p>Your QR, your rate, caption starters, and the brand rules on one clean page. Print it or save it as a PDF straight from this page.</p>
+      </div>
+
+      <div class="card">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v8H4v-8"/><path d="M2 7h20v5H2z"/><path d="M12 7v13"/><path d="M12 7c-2.5 0-4.5-1.2-4.5-3S9.5 2.5 12 7c2.5-4.5 4.5-4.8 4.5-3S14.5 7 12 7z"/></svg></div>
+        <h3>A real gift for your audience</h3>
+        <p>Your link gives followers the free guide with live surf, lifeguard and hazard calls, plus conditions-aware day planning. You're handing them something they'll actually use on the sand.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= THE RATE ================= -->
+<section class="np">
+  <div class="wrap">
+    <span class="kicker">The rate, in plain terms</span>
+    <h2>Half the commission. Split evenly.</h2>
+
+    <div class="recap" id="rateCard">
+      <div class="big">50%<span> of the commission</span></div>
+      <div class="tag">Half the commission on every tour your followers book — split 50/50 with you, not "up to."</div>
+      <ul class="checks">
+        <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Your split grows to 60% once you pass 25 bookings in a quarter</li>
+        <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Paid monthly — $25 minimum, smaller balances roll over</li>
+        <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>No exclusivity, no posting minimums, cancel anytime</li>
+        <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>W-9 collected before first payout; 1099 if you pass $600/yr</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CLAIM ================= -->
+<section id="claim" class="np">
+  <div class="wrap">
+    <span class="kicker">Claim your link</span>
+    <h2>One minute. No approval wait.</h2>
+    <p class="sec-sub">Fill this in and your link, QR code, and dashboard appear right here on the page.</p>
+
+    <div class="claim" id="claimCard">
+      <h3>Join OceanSafe Creators</h3>
+      <p class="fhint">Free. Your handle becomes your tracking code.</p>
+
+      <!-- Netlify Forms registration (static copy so the build detects it) -->
+      <form name="creator-signup" data-netlify="true" netlify-honeypot="mahalo-field" hidden>
+        <input type="text" name="name"><input type="email" name="email">
+        <input type="text" name="handle"><input type="text" name="platform">
+        <input type="text" name="island"><input type="text" name="slug">
+        <input type="text" name="mahalo-field">
+      </form>
+
+      <form id="claimForm" autocomplete="on">
+        <div class="ftwo">
+          <div class="frow">
+            <label for="cf-name">Your name</label>
+            <input id="cf-name" name="name" type="text" required autocomplete="name">
+          </div>
+          <div class="frow">
+            <label for="cf-email">Email (for payouts)</label>
+            <input id="cf-email" name="email" type="email" required autocomplete="email">
+          </div>
+        </div>
+        <div class="frow">
+          <label for="cf-handle">Primary handle</label>
+          <input id="cf-handle" name="handle" type="text" placeholder="@yourhandle" required>
+        </div>
+        <div class="ftwo">
+          <div class="frow">
+            <label for="cf-platform">Main platform</label>
+            <select id="cf-platform" name="platform">
+              <option>Instagram</option><option>TikTok</option><option>YouTube</option><option>Blog / website</option>
+            </select>
+          </div>
+          <div class="frow">
+            <label for="cf-island">Home island</label>
+            <select id="cf-island" name="island">
+              <option value="kauai">Kauaʻi</option><option value="oahu">Oʻahu</option><option value="maui">Maui</option>
+            </select>
+          </div>
+        </div>
+        <input type="text" name="mahalo-field" style="display:none" tabindex="-1" autocomplete="off">
+        <p class="ferr" id="ferr"></p>
+        <button class="btn" type="submit">Claim my link <span class="ar" aria-hidden="true">→</span></button>
+        <p class="fnote">By claiming a link you agree to the program rules below — including the FTC requirement to mark paid or commissioned posts with #ad.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ================= KIT (revealed after claim) ================= -->
+<section id="kit">
+  <div class="wrap">
+    <div class="claim">
+      <div class="print-head"><span class="wm" style="font-size:20px">Ocean<i style="font-style:normal;color:#F5B301">Safe</i></span> <span style="font-size:13px;color:#666">Creator kit · oceansafety.app/creators</span></div>
+      <div class="kit-head np">
+        <span class="kit-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>
+        <h3>You're in, <span id="kitHandle">@handle</span>.</h3>
+      </div>
+
+      <div class="linkbox">
+        <input id="kitLink" readonly value="" aria-label="Your personal link">
+        <button type="button" class="copybtn" id="copyBtn">Copy</button>
+      </div>
+
+      <div class="qr-wrap">
+        <img id="kitQr" src="" alt="Your personal OceanSafe QR code">
+        <div class="qtxt"><b>Your QR code.</b> Long-press (or right-click) to save the image. It opens the free guide with your code attached — put it anywhere your audience looks.</div>
+      </div>
+
+      <div class="kit-row np">
+        <a class="btn" id="dashLink" href="#">Open your dashboard <span class="ar" aria-hidden="true">→</span></a>
+        <button type="button" class="btn ghost" onclick="window.print()">Print / save kit as PDF</button>
+      </div>
+
+      <div class="caps">
+        <h4>Caption starters <span class="np" style="font-weight:400;text-transform:none;letter-spacing:0">(tap to copy)</span></h4>
+        <div class="cap-item" data-cap>Before you pick a beach here, check the water. This free app scores every beach for swimming + snorkeling with live conditions — link in bio. #ad</div>
+        <div class="cap-item" data-cap>Locals check conditions before the sand. Here's the free beach-safety guide I send everyone visiting — my link gets you the full planner. #ad</div>
+        <div class="cap-item" data-cap>PSA for your Hawaiʻi trip: waves change by the hour. This free app tells you which beaches are safe today (and books your tours in one place). Link in bio. #ad</div>
+        <p class="cap-print">Caption rules: always disclose with #ad. Never state that a specific beach or day is "safe" in your own words — link the app and let the live data do the talking.</p>
+      </div>
+
+      <div class="ftc">
+        <b>Two rules that protect us both:</b> mark commissioned posts with <b>#ad</b> (FTC requirement), and never promise conditions yourself — "check the app" is the only safety claim you make. OceanSafe covers Kauaʻi, Oʻahu, and Maui.
+      </div>
+
+      <p class="reset np">Wrong handle? <button type="button" id="resetKit">Start over</button></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINE PRINT ================= -->
+<section class="np">
+  <div class="wrap">
+    <span class="kicker">Program rules</span>
+    <h2>The fine print, kept short.</h2>
+    <ul class="fine" style="margin-top:18px;list-style:disc">
+      <li>You earn 50% of the commission GetYourGuide pays on tours booked through the app by visitors who arrived on your link — an even split — rising to 60% after 25 bookings in a quarter. Booking data comes from GetYourGuide's partner reporting and posts to your dashboard monthly.</li>
+      <li>Payouts monthly, $25 minimum (smaller balances roll over). A completed W-9 is required before your first payout; we issue a 1099-NEC if your year passes $600.</li>
+      <li>Disclose commissioned or incentivized posts with #ad. Don't make safety claims in your own voice — point to the app's live data instead.</li>
+      <li>OceanSafe covers Kauaʻi, Oʻahu, and Maui. Please don't present it as covering other islands.</li>
+      <li>Either side can end participation anytime; earned commission through the end date still pays out. We may decline or remove accounts that misrepresent the app or the program.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+<section class="np">
+  <div class="wrap">
+    <div class="recap" style="background:linear-gradient(158deg,var(--deep) 0%,var(--deep2) 100%);border:none">
+      <h2 style="color:#fff">Claim your link now.</h2>
+      <p style="margin:12px auto 0;color:#cfe8ee;font-size:16px;max-width:34ch">It takes a minute, and it starts earning the first time someone taps it.</p>
+      <a class="btn" href="#claim" style="margin-top:22px;background:#fff;color:var(--deep)">Claim your link <span class="ar" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="np">
+  <div class="wrap">
+    <span class="wm">Ocean<i>Safe</i></span>
+    <p class="disc">OceanSafe conditions are information, not a lifeguard or a safety guarantee.</p>
+    <p class="contact">Questions? <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a> · oceansafety.app</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var APP = 'https://oceansafety.app';
+  var $ = function(id){ return document.getElementById(id); };
+
+  function cleanHandle(h){
+    return String(h||'').toLowerCase().replace(/^@+/,'').replace(/[^a-z0-9]/g,'').slice(0,29);
+  }
+  // rec carries the provisioning result: slug + key when the creator got their own
+  // registered telemetry slug, or mode:'pooled' when the provision function was
+  // unreachable (local preview / MINT_KEY not set yet) — the pooled link still tracks.
+  function linkFor(rec){
+    var isl = rec.island ? ('island=' + rec.island + '&') : '';
+    return rec.mode === 'pooled'
+      ? APP + '/?' + isl + 'ref=creators&u=' + rec.clean
+      : APP + '/?' + isl + 'ref=' + rec.slug;
+  }
+  function dashFor(rec){
+    return rec.mode === 'pooled'
+      ? '/creator-dash.html?u=' + rec.clean
+      : '/creator-dash.html?c=' + rec.slug + '&k=' + rec.key;
+  }
+  function qrFor(rec){
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=480x480&margin=2&data=' +
+      encodeURIComponent(linkFor(rec));
+  }
+
+  function showKit(rec){
+    $('kitHandle').textContent = '@' + rec.clean;
+    $('kitLink').value = linkFor(rec);
+    $('kitQr').src = qrFor(rec);
+    $('dashLink').href = dashFor(rec);
+    $('kit').classList.add('on');
+  }
+
+  // Returning creator: kit straight away
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem('osc_kit') || 'null'); } catch(e){}
+  if(saved && saved.clean) showKit(saved);
+
+  $('claimForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var err = $('ferr'); err.style.display = 'none';
+    var name = $('cf-name').value.trim(), email = $('cf-email').value.trim();
+    var handle = $('cf-handle').value.trim();
+    var clean = cleanHandle(handle);
+    if(clean.length < 1){
+      err.textContent = 'That handle doesn’t leave any letters or numbers for a tracking code — try the plain handle without emoji or punctuation.';
+      err.style.display = 'block'; return;
+    }
+    var btn = $('claimForm').querySelector('button[type=submit]');
+    btn.disabled = true; var btnHtml = btn.innerHTML; btn.textContent = 'Setting up your link…';
+
+    var base = { name:name, email:email, handle:handle, clean:clean,
+                 platform:$('cf-platform').value, island:$('cf-island').value,
+                 ts:new Date().toISOString() };
+
+    // 1) Auto-provision: register this creator's own telemetry slug + dashboard key,
+    //    exactly like a hotel go-live. Falls back to a pooled tracking link if the
+    //    function isn't reachable yet (local preview, or MINT_KEY not set).
+    fetch('/api/creator-provision', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(base)
+    })
+    .then(function(r){ return r.json().catch(function(){ return {ok:false}; }); })
+    .catch(function(){ return {ok:false, reason:'unreachable'}; })
+    .then(function(res){
+      var rec = res && res.ok
+        ? Object.assign({}, base, { mode:'creator', slug:res.slug, key:res.key })
+        : Object.assign({}, base, { mode:'pooled', slug:'cr-'+clean });
+      try { localStorage.setItem('osc_kit', JSON.stringify(rec)); } catch(e){}
+
+      // 2) Record the human details for payouts (Netlify Forms). Independent of
+      //    provisioning; on failure we surface a mailto so a signup is never lost.
+      var body = new URLSearchParams({ 'form-name':'creator-signup', name:name, email:email,
+        handle:handle, platform:rec.platform, island:rec.island, slug:rec.slug,
+        mode:rec.mode }).toString();
+      fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:body })
+        .then(function(r){ if(!r.ok) throw 0; })
+        .catch(function(){
+          err.innerHTML = 'Your kit is ready below — but our signup recorder didn’t respond, so please also send a quick note to ' +
+            '<a href="mailto:nick@oceansafety.app?subject=' + encodeURIComponent('Creator signup: @' + clean) +
+            '&body=' + encodeURIComponent('Name: ' + name + '\nHandle: ' + handle + '\nEmail: ' + email + '\nPlatform: ' + rec.platform + '\nIsland: ' + rec.island) +
+            '">nick@oceansafety.app</a> so payouts reach you.';
+          err.style.display = 'block';
+        });
+
+      btn.disabled = false; btn.innerHTML = btnHtml;
+      showKit(rec);
+      document.getElementById('kit').scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  });
+
+  $('copyBtn').addEventListener('click', function(){
+    var inp = $('kitLink'); inp.select();
+    var done = function(){ var b=$('copyBtn'); b.textContent='Copied'; b.classList.add('did');
+      setTimeout(function(){ b.textContent='Copy'; b.classList.remove('did'); }, 1600); };
+    if(navigator.clipboard){ navigator.clipboard.writeText(inp.value).then(done).catch(function(){ document.execCommand('copy'); done(); }); }
+    else { document.execCommand('copy'); done(); }
+  });
+
+  document.querySelectorAll('[data-cap]').forEach(function(el){
+    el.addEventListener('click', function(){
+      var t = el.textContent.trim();
+      var flash = function(){ var o=el.style.borderColor; el.style.borderColor='var(--accent)';
+        setTimeout(function(){ el.style.borderColor=o; }, 900); };
+      if(navigator.clipboard){ navigator.clipboard.writeText(t).then(flash).catch(flash); } else flash();
+    });
+  });
+
+  $('resetKit').addEventListener('click', function(){
+    try { localStorage.removeItem('osc_kit'); } catch(e){}
+    $('kit').classList.remove('on');
+    document.getElementById('claim').scrollIntoView({ behavior:'smooth' });
+  });
+})();
+</script>
+
+<script>
+/* ============ GUIDED TOUR (lifted from the operator console engine) ============ */
+(function(){
+  var KEY = 'osc_tour_done';
+  var LOGO = (document.querySelector('link[rel="icon"]')||{}).href || '';
+
+  var STEPS = [
+    { center:true, title:'Sixty seconds, four stops',
+      body:'This is the OceanSafe creator program: share the free beach-safety guide, earn on the tours your followers book. Here’s the quick walk-through — replay it anytime with the tour link up top.' },
+    { sel:'#howSteps', title:'How the money flows',
+      body:'You claim a link, you share it, and tour bookings made in the app by your visitors are tagged to you — <b>even days after the first tap</b>.' },
+    { sel:'#mathStrip', title:'What a booking is worth',
+      body:'Real example: a $500 family boat tour pays you $20. Beach days add up — most visiting families book more than one tour.' },
+    { sel:'#rateCard', title:'An even split, no asterisks',
+      body:'Half the commission on every tour — a 60% split once you’re past 25 bookings a quarter. Paid monthly. No exclusivity and no posting quotas.' },
+    { center:true, last:true, title:'Claim your link',
+      body:'The form takes a minute and your link, QR and dashboard appear instantly — nothing to wait for.' }
+  ];
+
+  var root = document.createElement('div'); root.id = 'osTour';
+  root.innerHTML = '<div class="tor-block"></div><div class="tor-hi off"></div>'+
+    '<div class="tor-card"><div class="tc-top"><span class="tc-step"></span><button type="button" class="tc-skip">Skip tour</button></div>'+
+    '<img class="tc-logo" alt="" style="display:none"/>'+
+    '<h4></h4><p></p>'+
+    '<div class="tc-foot"><span class="tor-dots"></span><button type="button" class="tor-btn tc-back">Back</button><button type="button" class="tor-btn primary tc-next">Next</button></div></div>';
+  document.body.appendChild(root);
+  var hi = root.querySelector('.tor-hi'), card = root.querySelector('.tor-card'),
+      stepEl = root.querySelector('.tc-step'), titleEl = card.querySelector('h4'),
+      bodyEl = card.querySelector('p'), dotsEl = root.querySelector('.tor-dots'),
+      backBtn = root.querySelector('.tc-back'), nextBtn = root.querySelector('.tc-next'),
+      skipBtn = root.querySelector('.tc-skip'), logoEl = root.querySelector('.tc-logo');
+  if(LOGO) logoEl.src = LOGO;
+  STEPS.forEach(function(){ dotsEl.appendChild(document.createElement('i')); });
+
+  var idx = -1, curEl = null, active = false;
+
+  function position(){
+    if(!active || !curEl) return;
+    var r = curEl.getBoundingClientRect(), pad = 9;
+    hi.style.top = (r.top-pad)+'px'; hi.style.left = (r.left-pad)+'px';
+    hi.style.width = (r.width+pad*2)+'px'; hi.style.height = (r.height+pad*2)+'px';
+    var ch = card.offsetHeight, cw = card.offsetWidth, vw = innerWidth, vh = innerHeight;
+    if(vw <= 640){                       /* phone: dock as a bottom sheet, clamp spotlight above it */
+      card.style.left='10px'; card.style.right='10px'; card.style.top='auto';
+      card.style.bottom='calc(12px + env(safe-area-inset-bottom,0px))';
+      card.style.width='auto'; card.style.maxWidth='none'; card.style.maxHeight='46vh'; card.style.overflowY='auto';
+      var cardTop = card.getBoundingClientRect().top;
+      var hiTop = Math.max(8, r.top-pad), hiBot = Math.min(r.bottom+pad, cardTop-8);
+      hi.style.top = hiTop+'px'; hi.style.height = Math.max(0, hiBot-hiTop)+'px';
+      return;
+    }
+    card.style.right='auto'; card.style.bottom='auto'; card.style.width=''; card.style.maxWidth='';
+    card.style.maxHeight=''; card.style.overflowY='';
+    var left = Math.min(Math.max(12, r.left), vw-cw-12), top;
+    if(r.bottom+pad+14+ch < vh) top = r.bottom+pad+14;
+    else if(r.top-pad-14-ch > 12) top = r.top-pad-14-ch;
+    else if(r.right+pad+14+cw < vw){ left = r.right+pad+14; top = Math.min(Math.max(12, r.top), vh-ch-12); }
+    else if(r.left-pad-14-cw > 12){ left = r.left-pad-14-cw; top = Math.min(Math.max(12, r.top), vh-ch-12); }
+    else { left = vw-cw-16; top = vh-ch-16;
+      var ht = Math.max(8, r.top-pad), hb = Math.min(r.bottom+pad, top-8);
+      hi.style.top = ht+'px'; hi.style.height = Math.max(0, hb-ht)+'px'; }
+    card.style.top = top+'px'; card.style.left = left+'px';
+  }
+  function setStep(i){
+    idx = i; var s = STEPS[i];
+    stepEl.textContent = 'Step '+(i+1)+' of '+STEPS.length;
+    titleEl.innerHTML = s.title; bodyEl.innerHTML = s.body;
+    dotsEl.querySelectorAll('i').forEach(function(d,j){ d.className = j===i ? 'on' : ''; });
+    backBtn.style.display = i===0 ? 'none' : '';
+    nextBtn.textContent = s.last ? 'Finish' : (i===0 ? 'Start the tour' : 'Next');
+    logoEl.style.display = (s.center && LOGO) ? '' : 'none';
+    if(s.center){
+      curEl = null; card.classList.add('center'); hi.classList.add('off');
+      card.style.top=''; card.style.left=''; card.style.right=''; card.style.bottom='';
+      card.style.width=''; card.style.maxWidth=''; card.style.maxHeight=''; card.style.overflowY='';
+      return;
+    }
+    card.classList.remove('center');
+    setTimeout(function(){
+      curEl = document.querySelector(s.sel);
+      if(!curEl){ (idx < STEPS.length-1) ? setStep(idx+1) : end(true); return; }
+      hi.classList.remove('off');
+      if(innerWidth <= 640){
+        position();
+        var cardH = card.offsetHeight || 200, rr = curEl.getBoundingClientRect();
+        var absTop = rr.top + (window.pageYOffset || document.documentElement.scrollTop || 0);
+        var top0 = 70, bandH = innerHeight - top0 - (cardH + 24);
+        var desired = (rr.height >= bandH) ? top0 : top0 + (bandH - rr.height)/2;
+        window.scrollTo(0, Math.max(0, absTop - desired));
+        setTimeout(position, 260);
+      } else {
+        curEl.scrollIntoView({block:'center'});
+        setTimeout(position, 250);
+      }
+    }, 80);
+  }
+  function start(){ active = true; root.classList.add('on'); setStep(0); }
+  function end(markDone){
+    active = false; root.classList.remove('on'); curEl = null; hi.classList.add('off');
+    if(markDone){ try{ localStorage.setItem(KEY,'1'); }catch(e){} }
+  }
+  nextBtn.addEventListener('click', function(){ (idx>=STEPS.length-1) ? end(true) : setStep(idx+1); });
+  backBtn.addEventListener('click', function(){ if(idx>0) setStep(idx-1); });
+  skipBtn.addEventListener('click', function(){ end(true); });
+  document.addEventListener('keydown', function(e){ if(active && e.key==='Escape') end(true); });
+  var rafPending = false;
+  function onMove(){ if(rafPending) return; rafPending = true; requestAnimationFrame(function(){ rafPending=false; position(); }); }
+  addEventListener('scroll', onMove, true); addEventListener('resize', onMove);
+  var tourBtn = document.getElementById('tourBtn');
+  if(tourBtn) tourBtn.addEventListener('click', start);
+
+  // First visit: run once automatically (skip if they already have a kit).
+  var done = null, hasKit = null;
+  try { done = localStorage.getItem(KEY); hasKit = localStorage.getItem('osc_kit'); } catch(e){}
+  if(!done && !hasKit) setTimeout(start, 1100);
+})();
+</script>
+</body></html>

@@ -3,6 +3,7 @@
 
 # Conditions proxy + cache (collapses per-visitor open-meteo/NOAA calls into one cached server fetch)
 /api/wx         /.netlify/functions/wx  200
+/api/creator-provision   /.netlify/functions/creator-provision   200
 
 # Store checkout return (create-square-checkout appends ?order=&pickup= to this URL)
 /store/success  /store/success.html  200
@@ -10,3 +11,8 @@
 # DB-driven partner pages + no-login dashboards (runtime from Supabase)
 /p/*  /p.html  200
 /d/*  /d.html  200
+
+# Creator ambassador program (2026-07-17)
+/creators   /creators.html      200
+/creator    /creator-dash.html  200
+/plan       /plan.html          200
