@@ -2121,86 +2121,92 @@ const ISLANDS = {
     geoBox:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
     clamp:{ latMin:21.2, latMax:21.75, lonMin:-158.32, lonMax:-157.55 },
     tideStation:'1612340',
-    zones:[{ key:'waikiki', name:'Waikīkī',
-      outline:[[21.2952,-157.8525],[21.2918,-157.8395],[21.28749,-157.84115],[21.28871,-157.83338],[21.27487,-157.81748],[21.279,-157.811],[21.264,-157.8135],[21.25985,-157.81982],[21.26125,-157.82138],[21.26399,-157.82214],[21.26394,-157.82251],[21.2649,-157.82275],[21.2651,-157.82211],[21.27125,-157.82331],[21.27114,-157.82383],[21.27152,-157.8232],[21.27445,-157.82474],[21.27628,-157.82762],[21.2765,-157.82974],[21.27785,-157.83374],[21.27758,-157.834],[21.27804,-157.83397],[21.28112,-157.83796],[21.2845,-157.84421],[21.2813,-157.84508],[21.28152,-157.8461],[21.28224,-157.84715],[21.28206,-157.84626],[21.28311,-157.84649],[21.28392,-157.84765],[21.28383,-157.84806],[21.28339,-157.84805],[21.28431,-157.84838],[21.28598,-157.84729],[21.28647,-157.84653],[21.28745,-157.84649],[21.28789,-157.84684],[21.29023,-157.85332]],
+    zones:[{ key:'waikiki', name:'Waikīkī', shore:'south',
+      outline:[[21.29695,-157.85093],[21.29636,-157.84987],[21.29076,-157.83723],[21.28749,-157.84115],[21.28871,-157.83338],[21.27487,-157.81748],[21.27327,-157.8168],[21.2707,-157.81605],[21.26902,-157.81586],[21.26725,-157.81623],[21.26556,-157.81729],[21.26495,-157.81754],[21.26355,-157.81856],[21.26123,-157.81824],[21.26024,-157.81825],[21.25985,-157.81982],[21.26125,-157.82138],[21.26399,-157.82214],[21.26394,-157.82251],[21.2649,-157.82275],[21.2651,-157.82211],[21.27125,-157.82331],[21.27114,-157.82383],[21.27152,-157.8232],[21.27445,-157.82474],[21.27628,-157.82762],[21.2765,-157.82974],[21.27785,-157.83374],[21.27758,-157.834],[21.27804,-157.83397],[21.28112,-157.83796],[21.2845,-157.84421],[21.2813,-157.84508],[21.28152,-157.8461],[21.28224,-157.84715],[21.28206,-157.84626],[21.28311,-157.84649],[21.28392,-157.84765],[21.28383,-157.84806],[21.28339,-157.84805],[21.28431,-157.84838],[21.28598,-157.84729],[21.28647,-157.84653],[21.28745,-157.84649],[21.28789,-157.84684],[21.29023,-157.85332]],
       sections:[
-        { name:'Ala Moana', lblAt:[21.2898,-157.8465], outline:[[21.2952,-157.8525],[21.2918,-157.8395],[21.28749,-157.84115],[21.2845,-157.84421],[21.2813,-157.84508],[21.28152,-157.8461],[21.28185,-157.8462],[21.28224,-157.84715],[21.28206,-157.84626],[21.28265,-157.84621],[21.28311,-157.84649],[21.28392,-157.84765],[21.28383,-157.84806],[21.28339,-157.84791],[21.28339,-157.84805],[21.28431,-157.84838],[21.28464,-157.8483],[21.28598,-157.84729],[21.28595,-157.84696],[21.28647,-157.84653],[21.28745,-157.84649],[21.28789,-157.84684],[21.28862,-157.84825],[21.29023,-157.85332]], pois:[
-          {n:'Ala Moana Center',cat:'sight',lat:21.29122,lon:-157.8434,tip:'Open-air mall with 350+ stores, a food court, and free Center Stage hula shows; Hawaii\'s largest.'},
-          {n:'Island Vintage Coffee',cat:'food',lat:21.29158,lon:-157.8434,tip:'Local chain for 100% Kona coffee, acai bowls, and poke; long peak lines, so order on the app.'},
+        { name:'Ala Moana', lblAt:[21.2898,-157.8465], outline:[[21.29695,-157.85093],[21.29636,-157.84987],[21.29076,-157.83723],[21.28749,-157.84115],[21.2845,-157.84421],[21.2813,-157.84508],[21.28154,-157.84597],[21.28152,-157.8461],[21.28161,-157.84619],[21.28185,-157.8462],[21.28224,-157.84715],[21.28233,-157.84707],[21.28206,-157.84626],[21.28265,-157.84621],[21.28311,-157.84649],[21.2836,-157.84706],[21.28392,-157.84765],[21.28383,-157.84806],[21.28371,-157.84809],[21.28339,-157.84791],[21.28339,-157.84805],[21.28381,-157.84827],[21.28431,-157.84838],[21.28464,-157.8483],[21.28598,-157.84729],[21.28595,-157.84696],[21.28647,-157.84653],[21.28745,-157.84649],[21.28789,-157.84684],[21.28824,-157.84733],[21.28862,-157.84825],[21.28973,-157.85166],[21.28993,-157.85261],[21.29023,-157.85332]], pois:[
+          {n:'Ala Moana Center',cat:'mall',lat:21.29122,lon:-157.8434,tip:'Open-air mall with 350+ stores, a food court, and free Center Stage hula shows; Hawaii\'s largest.'},
+          {n:'Island Vintage Coffee',cat:'coffee',lat:21.29158,lon:-157.8434,tip:'Local chain for 100% Kona coffee, acai bowls, and poke; long peak lines, so order on the app.'},
           {n:'Nordstrom Ala Moana',cat:'shop',lat:21.2917,lon:-157.8449,tip:'Full-line Nordstrom anchoring the Ewa wing; two floors of apparel, shoes, and a marketplace cafe.'},
           {n:'Macy\'s Ala Moana',cat:'shop',lat:21.2909,lon:-157.8418,tip:'Multi-floor Macy\'s anchoring the Diamond Head end; the mall\'s longest-standing department store.'},
           {n:'Apple Ala Moana',cat:'shop',lat:21.2913,lon:-157.844,tip:'Apple\'s flagship Hawaii store on Center Stage; sales, repairs, and Today at Apple sessions.'},
           {n:'Foodland Farms Ala Moana',cat:'shop',lat:21.2906,lon:-157.845,tip:'Flagship Foodland supermarket with a large poke counter, hot prepared foods, and a wine bar.'},
           {n:'Target Ala Moana',cat:'shop',lat:21.2913,lon:-157.8451,tip:'Two-level Target in the Ewa wing with groceries, essentials, and beach gear; open until 10pm.'},
-          {n:'Mai Tai\'s',cat:'food',lat:21.2917,lon:-157.843,tip:'Open-air 4th-floor cocktail bar with nightly live Hawaiian music; popular pau hana spot.'},
+          {n:'Mai Tai\'s',cat:'drinks',lat:21.2917,lon:-157.843,tip:'Open-air 4th-floor cocktail bar with nightly live Hawaiian music; popular pau hana spot.'},
           {n:'The Lanai Food Court',cat:'food',lat:21.2913,lon:-157.8422,tip:'Level-2 food hall of local vendors (plate lunch, ramen, poke) with seating for about 450.'},
-          {n:'Ala Moana Beach Park',cat:'beach',lat:21.2897,lon:-157.8468,tip:'Long calm swimming beach with lifeguards 9-5:30; gentler and less crowded than Waikiki.'},
-          {n:'Magic Island (Aina Moana)',cat:'beach',lat:21.2867,lon:-157.8448,tip:'Walled man-made lagoon at the park\'s tip; sheltered calm water good for kids and new swimmers.'} ], family:[
-          {n:'Ala Moana Beach Park',cat:'beach',lat:21.2905,lon:-157.8467,tip:'Wide sandy beach with calm, lifeguarded water and a shallow shelf, so little kids can swim safely.'},
-          {n:'Magic Island Lagoon',cat:'beach',lat:21.2868,lon:-157.8422,tip:'Man-made walled lagoon stays nearly waveless, letting toddlers wade and swim in protected calm water.'},
+          {n:'Ala Moana Beach Park',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Alamoana8.jpg?width=1600',photo_credit:'Drums600 / Public domain',lat:21.2897,lon:-157.8468,tip:'Long calm swimming beach with lifeguards 9-5:30; gentler and less crowded than Waikiki.'},
+          {n:'Magic Island (Aina Moana)',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Honolulu04.JPG?width=1600',photo_credit:'ErgoSum88 / Public domain',lat:21.2867,lon:-157.8448,tip:'Walled man-made lagoon at the park\'s tip; sheltered calm water good for kids and new swimmers.'} ], family:[
+          {n:'Ala Moana Beach Park',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Alamoana8.jpg?width=1600',photo_credit:'Drums600 / Public domain',lat:21.2905,lon:-157.8467,tip:'Wide sandy beach with calm, lifeguarded water and a shallow shelf, so little kids can swim safely.'},
+          {n:'Magic Island Lagoon',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Protected_beach_at_Magic_Island_(4559500455).jpg?width=1600',photo_credit:'Daniel Ramirez / CC BY 2.0',lat:21.2868,lon:-157.8422,tip:'Man-made walled lagoon stays nearly waveless, letting toddlers wade and swim in protected calm water.'},
           {n:'Ala Moana Regional Park Playground',cat:'play',lat:21.2895,lon:-157.8452,tip:'Shaded playground and big grassy lawns by the beach give kids room to run between swims and picnics.'},
-          {n:'Ala Moana Center',cat:'sight',lat:21.29092,lon:-157.8434,tip:'Open-air mall with toy shops, kids\' stores and stroller-easy walkways; a comfortable rainy-day stop.'},
-          {n:'Häagen-Dazs (Ala Moana Center)',cat:'food',lat:21.29128,lon:-157.8434,tip:'Classic ice cream scoop shop inside the mall, an easy cool-down treat after beach or shopping.'},
+          {n:'Ala Moana Center',cat:'mall',lat:21.29092,lon:-157.8434,tip:'Open-air mall with toy shops, kids\' stores and stroller-easy walkways; a comfortable rainy-day stop.'},
+          {n:'Häagen-Dazs (Ala Moana Center)',cat:'treats',lat:21.29128,lon:-157.8434,tip:'Classic ice cream scoop shop inside the mall, an easy cool-down treat after beach or shopping.'},
           {n:'Luckey Climbers Play Area (Ala Moana Center, Level 3)',cat:'play',lat:21.2915,lon:-157.8423,tip:'Free 40-ft wave-shaped climbing structure near Target, netted and safe for kids ages 3 to 12.'},
           {n:'Makai Market Food Court (Ala Moana Center)',cat:'food',lat:21.2907,lon:-157.8442,tip:'Big food court of local and Asian casual eats, so picky kids and parents each find something.'} ]},
-        { name:'Kūhiō Ave', lblAt:[21.2828,-157.8228], outline:[[21.28845,-157.83296],[21.27487,-157.81748],[21.27403,-157.8163],[21.27335,-157.8167],[21.27281,-157.81773],[21.27192,-157.82013],[21.2715,-157.82276],[21.27512,-157.8247],[21.27987,-157.82964],[21.28666,-157.83352]], pois:[
-          {n:'International Market Place',cat:'shop',lat:21.281,lon:-157.827,tip:'Open-air mall around a historic banyan; Target anchor, a downstairs food hall, and free live Hawaiian music.'},
-          {n:'Luxury Row',cat:'shop',lat:21.2812,lon:-157.8297,tip:'Compact block of flagship designer stores: Chanel, Dior, Gucci, Bottega Veneta, Tiffany at 2100 Kalakaua.'},
-          {n:'Duke Kahanamoku Statue',cat:'sight',lat:21.2761,lon:-157.8249,tip:'Bronze statue of the surfing legend, usually draped in lei; the standard Waikiki photo stop on Kalakaua.'},
+        { name:'Kūhiō Ave', lblAt:[21.2828,-157.8228], outline:[[21.28845,-157.83296],[21.27487,-157.81748],[21.27403,-157.8163],[21.27335,-157.8167],[21.27304,-157.81716],[21.27281,-157.81773],[21.27192,-157.82013],[21.27162,-157.82242],[21.2715,-157.82276],[21.27512,-157.8247],[21.27654,-157.82608],[21.27937,-157.82922],[21.27987,-157.82964],[21.28666,-157.83352]], pois:[
+          {n:'International Market Place',cat:'mall',lat:21.281,lon:-157.827,tip:'Open-air mall around a historic banyan; Target anchor, a downstairs food hall, and free live Hawaiian music.'},
+          {n:'Luxury Row',cat:'mall',lat:21.2812,lon:-157.8297,tip:'Compact block of flagship designer stores: Chanel, Dior, Gucci, Bottega Veneta, Tiffany at 2100 Kalakaua.'},
+          {n:'Duke Kahanamoku Statue',cat:'historic',lat:21.2761,lon:-157.8249,tip:'Bronze statue of the surfing legend, usually draped in lei; the standard Waikiki photo stop on Kalakaua.'},
           {n:'Marugame Udon',cat:'food',lat:21.2823,lon:-157.8262,tip:'Self-serve udon made fresh to order with pick-your-own tempura; cheap, fast, and lines move quickly.'},
-          {n:'Kona Coffee Purveyors',cat:'food',lat:21.2819,lon:-157.8267,tip:'100% Kona coffee and b. patisserie kouign-amann at the Kūhiō-side entrance of International Market Place.'},
+          {n:'Kona Coffee Purveyors',cat:'coffee',lat:21.2819,lon:-157.8267,tip:'100% Kona coffee and b. patisserie kouign-amann at the Kūhiō-side entrance of International Market Place.'},
           {n:'Musubi Cafe Iyasume',cat:'food',lat:21.2806,lon:-157.8247,tip:'Grab-and-go Spam musubi and rice balls in many varieties; cheap, quick beach food right on Kūhiō.'},
           {n:'STIX ASIA',cat:'food',lat:21.2813,lon:-157.8285,tip:'Basement Asian food hall (the former Waikīkī Yokocho) with ~15 stalls: ramen, sushi, dumplings, boba.'},
           {n:'Heavenly Island Lifestyle',cat:'food',lat:21.281,lon:-157.8283,tip:'Sit-down local-ingredient breakfast and brunch (loco moco, acai bowls); opens 7am, on Seaside Ave.'},
-          {n:'Wang Chung\'s Karaoke Bar',cat:'food',lat:21.2799,lon:-157.8253,tip:'Small LGBTQ-friendly karaoke bar open nightly till 2am; stiff drinks and a sing-along crowd.'},
+          {n:'Wang Chung\'s Karaoke Bar',cat:'drinks',lat:21.2799,lon:-157.8253,tip:'Small LGBTQ-friendly karaoke bar open nightly till 2am; stiff drinks and a sing-along crowd.'},
           {n:'Waikīkī Market',cat:'shop',lat:21.2811,lon:-157.8255,tip:'Full grocery with hot deli, poke and musubi; the go-to Kūhiō market after Food Pantry closed.'},
           {n:'ABC Stores',cat:'shop',lat:21.2809,lon:-157.825,tip:'Hawaii convenience chain for sunscreen, snacks, water and cheap souvenirs; open late, on Kūhiō.'},
           {n:'Ross Dress for Less',cat:'shop',lat:21.2816,lon:-157.8281,tip:'Multi-floor discount department store for clothes and beach gear; busy, open till late night.'} ], family:[
-          {n:'Kūhiō Beach Park (the Ponds)',cat:'beach',lat:21.2762,lon:-157.825,tip:'Wall breakwater forms two calm, shallow lagoons; safest Waikīkī swim for young kids, lifeguards on duty.'},
-          {n:'Duke Kahanamoku Statue',cat:'sight',lat:21.2766,lon:-157.8256,tip:'Free, iconic lei-draped bronze right on the beachfront; classic quick family photo stop.'},
-          {n:'Kūhiō Beach Hula Mound',cat:'sight',lat:21.276,lon:-157.8247,tip:'Free hula show on the grass near Duke\'s statue, Saturdays 6:30pm; kids can sit up close.'},
-          {n:'Kapahulu Groin (The Wall)',cat:'sight',lat:21.2751,lon:-157.8235,tip:'Walk the little pier and watch bodyboarders launch off the wall; a fun, free spectacle for kids.'},
+          {n:'Kūhiō Beach Park (the Ponds)',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Waikiki%20Beach,%20Honolulu%20(503273)%20(17281283612).jpg?width=1600',photo_credit:'Robert Linsdell / CC BY 2.0',lat:21.2762,lon:-157.825,tip:'Wall breakwater forms two calm, shallow lagoons; safest Waikīkī swim for young kids, lifeguards on duty.'},
+          {n:'Duke Kahanamoku Statue',cat:'historic',lat:21.2766,lon:-157.8256,tip:'Free, iconic lei-draped bronze right on the beachfront; classic quick family photo stop.'},
+          {n:'Kūhiō Beach Hula Mound',cat:'historic',photo:'https://live.staticflickr.com/7421/12863607594_84391f4c33_b.jpg',photo_credit:'Jun Seita / CC BY 2.0',lat:21.276,lon:-157.8247,tip:'Free hula show on the grass near Duke\'s statue, Saturdays 6:30pm; kids can sit up close.'},
+          {n:'Kapahulu Groin (The Wall)',cat:'sight',photo:'https://live.staticflickr.com/3913/15034207165_75ae713f53_b.jpg',photo_credit:'alexeatswhales / CC BY 2.0',lat:21.2751,lon:-157.8235,tip:'Walk the little pier and watch bodyboarders launch off the wall; a fun, free spectacle for kids.'},
           {n:'Marugame Udon',cat:'food',lat:21.2806,lon:-157.8281,tip:'Watch fresh udon noodles made; bowls from about $6 and a fast line keep hungry kids happy.'},
           {n:'Musubi Cafe Iyasume',cat:'food',lat:21.2797,lon:-157.8265,tip:'Grab-and-go Spam musubi and rice balls, cheap and handheld, easy fuel for a family beach day.'},
           {n:'Kuhio Avenue Food Hall (International Market Place)',cat:'food',lat:21.2817,lon:-157.8272,tip:'Ten food stalls under one roof so picky kids and parents each pick their own; validated parking.'},
           {n:'ABC Store (Kūhiō & Liliʻuokalani)',cat:'food',lat:21.2794,lon:-157.8257,tip:'Corner shop stocks beach toys, sunscreen, snacks and cheap musubi, one-stop for a beach day.'},
           {n:'Heavenly Island Lifestyle',cat:'food',lat:21.2801,lon:-157.8285,tip:'Relaxed local breakfast with acai bowls, pancakes and French toast kids love; opens 7am daily.'},
           {n:'Liliha Bakery (International Market Place)',cat:'food',lat:21.2816,lon:-157.8269,tip:'Family diner famous for Coco Puffs, plus all-day pancakes, a fun sit-down treat for kids.'} ]},
-        { name:'Kalākaua & beachfront', label:'Beachfront', lblAt:[21.2782,-157.833], outline:[[21.28749,-157.84115],[21.2889,-157.83462],[21.28887,-157.83386],[21.28845,-157.83296],[21.28666,-157.83352],[21.27987,-157.82964],[21.27512,-157.8247],[21.2715,-157.82276],[21.27152,-157.8232],[21.27196,-157.82331],[21.27321,-157.82423],[21.27327,-157.82414],[21.27428,-157.82457],[21.27465,-157.82503],[21.27457,-157.82533],[21.27489,-157.82523],[21.27554,-157.82605],[21.27628,-157.82762],[21.2765,-157.82974],[21.27661,-157.82973],[21.27676,-157.8302],[21.27693,-157.83125],[21.27725,-157.83178],[21.27754,-157.83278],[21.27746,-157.83292],[21.27785,-157.83374],[21.27758,-157.834],[21.27787,-157.83386],[21.27804,-157.83397],[21.27874,-157.83526],[21.27982,-157.83634],[21.28136,-157.83842]], pois:[
-          {n:'Ala Wai Boat Harbor',cat:'sight',lat:21.2872,lon:-157.8397,tip:'Hawaii\'s largest small-boat harbor and a departure point for many charters, cruises, and tours.'},
-          {n:'Royal Hawaiian Center',cat:'shop',lat:21.277,lon:-157.8281,tip:'Three-block open-air mall on Kalakaua with 90+ shops, a food court, and free lei-making and hula classes.'},
+        { name:'Kalākaua & beachfront', label:'Beachfront', lblAt:[21.2782,-157.833], outline:[[21.28749,-157.84115],[21.2889,-157.83462],[21.28887,-157.83386],[21.28845,-157.83296],[21.28666,-157.83352],[21.27987,-157.82964],[21.27937,-157.82922],[21.27654,-157.82608],[21.27512,-157.8247],[21.2715,-157.82276],[21.27152,-157.8232],[21.27196,-157.82331],[21.27321,-157.82423],[21.27327,-157.82414],[21.27428,-157.82457],[21.27465,-157.82503],[21.27465,-157.82527],[21.27457,-157.82533],[21.27464,-157.82536],[21.27489,-157.82523],[21.27512,-157.82554],[21.2751,-157.82565],[21.27525,-157.82565],[21.27554,-157.82605],[21.2759,-157.82667],[21.27628,-157.82762],[21.2764,-157.82824],[21.2765,-157.82974],[21.27661,-157.82973],[21.27676,-157.8302],[21.27693,-157.83125],[21.27725,-157.83178],[21.27754,-157.83278],[21.27746,-157.83292],[21.27754,-157.83294],[21.27785,-157.83374],[21.27758,-157.834],[21.27787,-157.83386],[21.27804,-157.83397],[21.27862,-157.8349],[21.27874,-157.83526],[21.27982,-157.83634],[21.28038,-157.83724],[21.28068,-157.83765],[21.28086,-157.8377],[21.28112,-157.83796],[21.28136,-157.83842]], pois:[
+          {n:'Ala Wai Boat Harbor',cat:'sight',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Ala%20Wai%20Harbour%20Honolulu.%20(51028198527).jpg?width=1600',photo_credit:'Bernard Spragg / Public domain',lat:21.2872,lon:-157.8397,tip:'Hawaii\'s largest small-boat harbor and a departure point for many charters, cruises, and tours.'},
+          {n:'Royal Hawaiian Center',cat:'mall',lat:21.277,lon:-157.8281,tip:'Three-block open-air mall on Kalakaua with 90+ shops, a food court, and free lei-making and hula classes.'},
           {n:'Duke\'s Waikiki',cat:'food',lat:21.276,lon:-157.8265,tip:'Beachfront bar-restaurant at the Outrigger; huge portions, Barefoot Bar on the sand, live music, gets packed.'},
           {n:'House Without a Key',cat:'food',lat:21.2785,lon:-157.8317,tip:'Halekulani\'s open-air oceanfront lounge; nightly hula and Hawaiian music under an old kiawe tree at sunset.'},
-          {n:'Mai Tai Bar (Royal Hawaiian)',cat:'food',lat:21.2762,lon:-157.8283,tip:'Beachfront bar at the pink Royal Hawaiian; signature mai tais, live music nightly, direct sunset ocean view.'},
+          {n:'Mai Tai Bar (Royal Hawaiian)',cat:'drinks',lat:21.2762,lon:-157.8283,tip:'Beachfront bar at the pink Royal Hawaiian; signature mai tais, live music nightly, direct sunset ocean view.'},
           {n:'Beachhouse at the Moana',cat:'food',lat:21.2759,lon:-157.826,tip:'Oceanfront steak-and-seafood restaurant at the historic Moana Surfrider, beside its old banyan courtyard.'},
-          {n:'Waikīkī Beach (central)',cat:'beach',lat:21.2754,lon:-157.8272,tip:'The main Waikiki sand fronting the Royal Hawaiian and Moana; gentle waves, beginner surf breaks, heavy crowds.'},
-          {n:'Kūhiō Beach Park',cat:'beach',lat:21.2749,lon:-157.8248,tip:'Wall-protected swimming ponds at the Diamond Head end; calm water good for kids, mind the slippery wall.'},
-          {n:'Moana Surfrider (First Lady of Waikīkī)',cat:'sight',lat:21.2765,lon:-157.8262,tip:'The \'First Lady of Waikiki,\' a 1901 colonial hotel with a landmark banyan courtyard open to the public.'},
-          {n:'The Royal Hawaiian (Pink Palace)',cat:'sight',lat:21.2769,lon:-157.8285,tip:'The 1927 \'Pink Palace of the Pacific,\' Waikiki\'s most photographed hotel; walk the gardens and beachfront.'} ], family:[
-          {n:'Central Waikīkī Beach (Royal Hawaiian Beach)',cat:'beach',lat:21.277,lon:-157.8274,tip:'Wide soft-sand stretch with gentle shorebreak; room for sandcastles and easy splashing near lifeguards.'},
+          {n:'Waikīkī Beach (central)',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Waikiki%20Beach%20(2024)-L1004709.jpg?width=1600',photo_credit:'Frank Schulenburg / CC BY-SA 4.0',lat:21.2754,lon:-157.8272,tip:'The main Waikiki sand fronting the Royal Hawaiian and Moana; gentle waves, beginner surf breaks, heavy crowds.'},
+          {n:'Kūhiō Beach Park',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Waikiki%20Beach,%20Honolulu%20(503273)%20(17281283612).jpg?width=1600',photo_credit:'Robert Linsdell / CC BY 2.0',lat:21.2749,lon:-157.8248,tip:'Wall-protected swimming ponds at the Diamond Head end; calm water good for kids, mind the slippery wall.'},
+          {n:'Moana Surfrider (First Lady of Waikīkī)',cat:'historic',lat:21.2765,lon:-157.8262,tip:'The \'First Lady of Waikiki,\' a 1901 colonial hotel with a landmark banyan courtyard open to the public.'},
+          {n:'The Royal Hawaiian (Pink Palace)',cat:'historic',lat:21.2769,lon:-157.8285,tip:'The 1927 \'Pink Palace of the Pacific,\' Waikiki\'s most photographed hotel; walk the gardens and beachfront.'},
+          {n:'Honolulu Coffee (Moana Surfrider)',cat:'coffee',lat:21.277,lon:-157.827,tip:'Kona coffee and pastries just off the Moana Surfrider\'s lobby, opening around dawn — the closest real cup to the Kuhio Beach sand.'},
+          {n:'Hula Grill Waikiki',cat:'food',lat:21.277,lon:-157.8277,tip:'Second-floor open-air lanai above Duke\'s at the Outrigger; breakfast and Hawaiian plates with a rail-side view straight over the sand.'},
+          {n:'Tropics Bar & Grill',cat:'drinks',lat:21.2816,lon:-157.8375,tip:'Casual beachfront tables on the sand at Duke Kahanamoku Beach, serving breakfast through dinner — one of the few sit-down options at the Ewa end.'},
+          {n:'Lappert\'s Hawaii',cat:'treats',lat:21.2829,lon:-157.8376,tip:'Hawaii-made ice cream, shakes and shave ice in the Hilton\'s Rainbow Bazaar; the only real treats stop at the Ewa end of the beach.'} ], family:[
+          {n:'Central Waikīkī Beach (Royal Hawaiian Beach)',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Crowded_Waikiki_Beach_(7002299901).jpg?width=1600',photo_credit:'Daniel Ramirez / CC BY 2.0',lat:21.277,lon:-157.8274,tip:'Wide soft-sand stretch with gentle shorebreak; room for sandcastles and easy splashing near lifeguards.'},
           {n:'Royal Grove at Royal Hawaiian Center',cat:'sight',lat:21.27702,lon:-157.828,tip:'Free weekday lei-making, ukulele and hula classes including keiki sessions; no reservation needed.'},
-          {n:'Island Vintage Shave Ice',cat:'food',lat:21.27738,lon:-157.828,tip:'Real-fruit shave ice, smoothies and ice cream; big bowls kids can share while strolling the strip.'} ]},
-        { name:'Diamond Head end', label:'Diamond Head', lblAt:[21.2678,-157.8185], outline:[[21.27487,-157.81748],[21.279,-157.811],[21.264,-157.8135],[21.25985,-157.81982],[21.26059,-157.82038],[21.26125,-157.82138],[21.26222,-157.82178],[21.26241,-157.82159],[21.26399,-157.82214],[21.26394,-157.82251],[21.2649,-157.82275],[21.2651,-157.82211],[21.26832,-157.82294],[21.27025,-157.82308],[21.27125,-157.82331],[21.27114,-157.82383],[21.27133,-157.82322],[21.27152,-157.8232],[21.2715,-157.82276],[21.27192,-157.82013],[21.27281,-157.81773],[21.27335,-157.8167],[21.27403,-157.8163]], pois:[
-          {n:'Kapiʻolani Regional Park',cat:'sight',lat:21.2673,lon:-157.8205,tip:'300-acre park at Diamond Head\'s foot: big lawns, banyans, tennis courts, jogging paths, weekend events.'},
-          {n:'Kaimana Beach (Sans Souci)',cat:'beach',lat:21.2643,lon:-157.8215,tip:'Calm locals\' swim beach past the aquarium; protected water, good for laps and easy family swims.'},
-          {n:'Queen\'s Surf Beach',cat:'beach',lat:21.266,lon:-157.8228,tip:'Wide beach fronting Kapiʻolani Park; swimming, snorkeling near the wall, longtime LGBTQ gathering spot.'},
-          {n:'Honolulu Zoo',cat:'sight',lat:21.2711,lon:-157.821,tip:'42-acre zoo at the park\'s edge, open daily; strong for kids, African savanna and Komodo dragon exhibits.'},
-          {n:'Waikīkī Aquarium',cat:'sight',lat:21.2657,lon:-157.8222,tip:'Small UH-run aquarium on Kalākaua; Hawaiian reef fish, jellies and a monk-seal exhibit, open daily.'},
-          {n:'Waikīkī War Memorial Natatorium',cat:'sight',lat:21.2649,lon:-157.8228,tip:'1927 saltwater war memorial with landmark arch; pool closed since 1979, view-only, restoration pending.'},
-          {n:'Waikīkī Shell',cat:'sight',lat:21.2695,lon:-157.8188,tip:'Outdoor amphitheater in the park; lawn-and-seat concerts, best on event evenings, check the show calendar.'},
+          {n:'Island Vintage Shave Ice',cat:'treats',lat:21.27738,lon:-157.828,tip:'Real-fruit shave ice, smoothies and ice cream; big bowls kids can share while strolling the strip.'},
+          {n:'U.S. Army Museum of Hawaii',cat:'historic',lat:21.279,lon:-157.8338,tip:'Free museum built inside a WWI coastal gun battery at Fort DeRussy, with tanks and a helicopter outside that kids can climb right up to; Tuesday–Saturday 10–5, closed Sunday and Monday.'},
+          {n:'Fort DeRussy Beach Park',cat:'beach',lat:21.2802,lon:-157.8342,tip:'Wide, shaded, less crowded stretch with lawn, restrooms and showers; water is calm and fine for small kids but goes very shallow at low tide.'} ]},
+        { name:'Diamond Head end', label:'Diamond Head', lblAt:[21.2678,-157.8185], outline:[[21.27487,-157.81748],[21.27327,-157.8168],[21.2707,-157.81605],[21.26902,-157.81586],[21.26725,-157.81623],[21.26556,-157.81729],[21.26495,-157.81754],[21.26355,-157.81856],[21.26123,-157.81824],[21.26024,-157.81825],[21.25985,-157.81982],[21.26015,-157.81996],[21.26059,-157.82038],[21.26091,-157.82086],[21.26097,-157.82111],[21.26125,-157.82138],[21.26222,-157.82178],[21.26233,-157.82179],[21.26241,-157.82159],[21.26399,-157.82214],[21.26394,-157.82251],[21.2649,-157.82275],[21.2651,-157.82211],[21.26695,-157.82263],[21.26721,-157.82268],[21.26723,-157.82259],[21.26832,-157.82294],[21.26898,-157.82293],[21.27025,-157.82308],[21.27125,-157.82331],[21.27109,-157.82381],[21.27114,-157.82383],[21.27133,-157.82322],[21.27152,-157.8232],[21.2715,-157.82276],[21.27162,-157.82242],[21.27192,-157.82013],[21.27281,-157.81773],[21.27304,-157.81716],[21.27335,-157.8167],[21.27403,-157.8163]], pois:[
+          {n:'Kapiʻolani Regional Park',cat:'sight',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Kapiolani%20Park%2C%20Waikiki%2C%20Oahu%2C%20Hawaii%20-%20panoramio%20%282%29.jpg?width=1600',photo_credit:'davidpinter / CC BY 3.0',lat:21.2673,lon:-157.8205,tip:'300-acre park at Diamond Head\'s foot: big lawns, banyans, tennis courts, jogging paths, weekend events.'},
+          {n:'Kaimana Beach (Sans Souci)',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/KaimanaBeachOahu.jpg?width=1600',photo_credit:'Travis.Thurston / CC BY-SA 3.0',lat:21.2643,lon:-157.8215,tip:'Calm locals\' swim beach past the aquarium; protected water, good for laps and easy family swims.'},
+          {n:'Queen\'s Surf Beach',cat:'beach',photo:'https://live.staticflickr.com/2600/4018229319_fca9d9ba6e_b.jpg',photo_credit:'Matt Kieffer / CC BY-SA 2.0',lat:21.266,lon:-157.8228,tip:'Wide beach fronting Kapiʻolani Park; swimming, snorkeling near the wall, longtime LGBTQ gathering spot.'},
+          {n:'Honolulu Zoo',cat:'wildlife',lat:21.2711,lon:-157.821,tip:'42-acre zoo at the park\'s edge, open daily; strong for kids, African savanna and Komodo dragon exhibits.'},
+          {n:'Waikīkī Aquarium',cat:'wildlife',lat:21.2657,lon:-157.8222,tip:'Small UH-run aquarium on Kalākaua; Hawaiian reef fish, jellies and a monk-seal exhibit, open daily.'},
+          {n:'Waikīkī War Memorial Natatorium',cat:'historic',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/War_Memorial_Natatorium_2.jpg?width=1600',photo_credit:'Gerald Watanabe / CC BY-SA 4.0',lat:21.2649,lon:-157.8228,tip:'1927 saltwater war memorial with landmark arch; pool closed since 1979, view-only, restoration pending.'},
+          {n:'Waikīkī Shell',cat:'sight',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Waikiki%20Shell%20Amphitheater.jpg?width=1600',photo_credit:'Eric Tessmer / CC BY 2.0',lat:21.2695,lon:-157.8188,tip:'Outdoor amphitheater in the park; lawn-and-seat concerts, best on event evenings, check the show calendar.'},
           {n:'Hau Tree',cat:'food',lat:21.264,lon:-157.8213,tip:'Open-air oceanfront restaurant at Kaimana Beach Hotel; beachside brunch and dinner, reservations smart.'},
-          {n:'Barefoot Beach Cafe',cat:'food',lat:21.2668,lon:-157.8232,tip:'Casual order-at-counter beach cafe on Queen\'s Surf; breakfast plates, plate lunch, nightly live music.'},
+          {n:'Barefoot Beach Cafe',cat:'drinks',lat:21.2668,lon:-157.8232,tip:'Casual order-at-counter beach cafe on Queen\'s Surf; breakfast plates, plate lunch, nightly live music.'},
           {n:'Diamond Head Market & Grill',cat:'food',lat:21.2687,lon:-157.8156,tip:'Takeout grill plus bakery on Monsarrat; grilled plates and the well-known scones and lemon-crunch cake.'},
           {n:'Michel\'s at the Colony Surf',cat:'food',lat:21.2635,lon:-157.8211,tip:'Oceanfront French fine dining since 1962; dinner only, dressy, book a sunset table on the water.'},
           {n:'ABC Store (near the Zoo)',cat:'shop',lat:21.2696,lon:-157.8241,tip:'Hawaii convenience chain by the zoo corner; snacks, sunscreen, beach gear and cheap grab-and-go basics.'} ], family:[
-          {n:'Honolulu Zoo',cat:'sight',lat:21.2712,lon:-157.8225,tip:'42-acre zoo with elephants, giraffes plus a keiki petting zoo and shaded playground kids love.'},
-          {n:'Waikiki Aquarium',cat:'sight',lat:21.2657,lon:-157.8213,tip:'Small, easy-to-walk aquarium with Hawaiian monk seals, sharks and colorful reef tanks kids love.'},
-          {n:'Kapiolani Regional Park',cat:'play',lat:21.2685,lon:-157.8188,tip:'Huge shaded lawns, picnic tables, tennis and open space where kids can run free for free.'},
+          {n:'Honolulu Zoo',cat:'wildlife',lat:21.2712,lon:-157.8225,tip:'42-acre zoo with elephants, giraffes plus a keiki petting zoo and shaded playground kids love.'},
+          {n:'Waikīkī Aquarium',cat:'wildlife',lat:21.2657,lon:-157.8213,tip:'Small, easy-to-walk aquarium with Hawaiian monk seals, sharks and colorful reef tanks kids love.'},
+          {n:'Kapiʻolani Regional Park',cat:'play',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Kapiolani%20Park%2C%20Waikiki%2C%20Oahu%2C%20Hawaii%20-%20panoramio%20%282%29.jpg?width=1600',photo_credit:'davidpinter / CC BY 3.0',lat:21.2685,lon:-157.8188,tip:'Huge shaded lawns, picnic tables, tennis and open space where kids can run free for free.'},
           {n:'Pākī Community Park Playground',cat:'play',lat:21.2683,lon:-157.8168,tip:'Free shaded jungle-gym, swings and slides under big trees; stroller-friendly, quiet weekday mornings.'},
-          {n:'Kaimana Beach (Sans Souci)',cat:'beach',lat:21.2649,lon:-157.8223,tip:'Calm, shallow, lifeguarded locals\' beach; old natatorium wall makes it ideal for young swimmers.'},
-          {n:'Queen\'s Surf Beach',cat:'beach',lat:21.2665,lon:-157.8236,tip:'Lifeguarded, usually gentle water with restrooms, showers and grassy shade right behind the sand.'},
-          {n:'Waikiki Shell',cat:'sight',lat:21.2697,lon:-157.8212,tip:'Open-air amphitheater in the park hosting family concerts and festivals; free lawn seating on the grass.'},
-          {n:'Barefoot Beach Cafe',cat:'food',lat:21.2672,lon:-157.8227,tip:'Casual on-the-sand cafe with plate lunch, hot dogs, acai bowls and Dole Whip for hungry kids.'} ]}
+          {n:'Kaimana Beach (Sans Souci)',cat:'beach',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/KaimanaBeachOahu.jpg?width=1600',photo_credit:'Travis.Thurston / CC BY-SA 3.0',lat:21.2649,lon:-157.8223,tip:'Calm, shallow, lifeguarded locals\' beach; old natatorium wall makes it ideal for young swimmers.'},
+          {n:'Queen\'s Surf Beach',cat:'beach',photo:'https://live.staticflickr.com/2600/4018229319_fca9d9ba6e_b.jpg',photo_credit:'Matt Kieffer / CC BY-SA 2.0',lat:21.2665,lon:-157.8236,tip:'Lifeguarded, usually gentle water with restrooms, showers and grassy shade right behind the sand.'},
+          {n:'Waikīkī Shell',cat:'sight',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Waikiki%20Shell%20Amphitheater.jpg?width=1600',photo_credit:'Eric Tessmer / CC BY 2.0',lat:21.2697,lon:-157.8212,tip:'Open-air amphitheater in the park hosting family concerts and festivals; free lawn seating on the grass.'},
+          {n:'Barefoot Beach Cafe',cat:'treats',lat:21.2672,lon:-157.8227,tip:'Casual on-the-sand cafe with plate lunch, hot dogs, acai bowls and Dole Whip for hungry kids.'} ]}
       
       ] }],
     regions:[
@@ -7462,7 +7468,11 @@ const ISLAND_OUTLINES={kauai:KAUAI_OUTLINE,maui:[[21.0248,-156.612],[21.0344,-15
 // zoom further): that section's POIs appear, spread out. A back chip returns.
 var _zoneLayers=[]; window._zoomedZone=null; var _zoneWired=false;
 var _ZONE_DISTRICT_ZOOM=12.6, _ZONE_POI_ZOOM=14.4;
-var _WS_CAT={shop:{c:'#c9871f'},food:{c:'#d85a30'},beach:{c:'#1d9e75'},sight:{c:'#534ab7'},play:{c:'#f08c00'}};
+var _WS_FAM={eat:'#c2410c',shop:'#a16207',see:'#5b4bb7',beach:'#0f766e'};
+var _WS_CAT={shop:{c:_WS_FAM.shop},mall:{c:_WS_FAM.shop},
+         food:{c:_WS_FAM.eat},coffee:{c:_WS_FAM.eat},drinks:{c:_WS_FAM.eat},treats:{c:_WS_FAM.eat},
+         historic:{c:_WS_FAM.see},sight:{c:_WS_FAM.see},play:{c:_WS_FAM.see},wildlife:{c:_WS_FAM.see},
+         beach:{c:_WS_FAM.beach}};
 var _ZMAG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"></circle><line x1="15.5" y1="15.5" x2="21" y2="21"></line><line x1="10.5" y1="7.8" x2="10.5" y2="13.2"></line><line x1="7.8" y1="10.5" x2="13.2" y2="10.5"></line></svg>';
 function _zoneGateOK(){ return window._activeTab === 'shopping' || window._activeTab === 'acts'; }
 function clearZones(){ _zoneLayers.forEach(function(l){ try{ l.remove(); }catch(e){} }); _zoneLayers=[]; }
@@ -7514,6 +7524,203 @@ function toggleWaikikiExistingPois(){
     }); });
   }catch(e){}
 }
+// ── District pop-up map card (Option 1) + CO-BRAND OVERLAY ──────────────────
+// Base data (districts + POIs) is shared by every version. A co-brand partner is
+// a thin overlay keyed by ?ref=<slug> (the same referral the app already captures
+// to localStorage 'referrer'): it drops the partner's home pin into its district,
+// adds a "★ Picks" filter for the POIs they promote, and brands the card header.
+// No per-client fork — one config object below per partner.
+var WAIKIKI_PARTNERS={
+  demo:{ brand:{name:'Your Waikīkī Hotel', color:'#8a5a2b'},
+    homePin:{district:'Kalākaua & beachfront', lat:21.2778, lon:-157.8292, label:'Your stay'},
+    picks:['Duke','Royal Hawaiian Center','International Market','Marugame','Kona Coffee','Ala Moana Center','Honolulu Zoo','Waikīkī Aquarium','Luxury Row'] }
+};
+function _activePartner(){
+  var slug=null;
+  try{ slug=new URLSearchParams(location.search).get('ref')||new URLSearchParams(location.search).get('utm_source'); }catch(e){}
+  if(!slug){ try{ slug=localStorage.getItem('referrer'); }catch(e){} }
+  if(!slug) return null;
+  slug=slug.toLowerCase().replace(/[^a-z0-9-]/g,'');
+  return WAIKIKI_PARTNERS[slug]||null;
+}
+var _dvMap=null, _dvLayers=[], _dvMk={}, _dvSet=[], _dvSec=null, _dvCat='all', _dvPartner=null, _dvQuery='', _dvNear=null;
+function _dvCatName(c){ return {shop:'Shops',mall:'Malls',historic:'Historic',food:'Food',coffee:'Coffee',drinks:'Drinks',treats:'Treats',beach:'Beaches',sight:'Sights',play:'Playgrounds',wildlife:'Wildlife'}[c]||c; }
+// Category glyphs: lucide-static v1.16.0 (ISC licence). Deliberately the SAME 24x24 /
+// stroke-width 2 / round-cap language as the app's existing marker icons (mkFoodIcon,
+// mkCoffeeIcon, ...) so the district card matches the map instead of adding a third icon
+// style. These are the real published paths -- do NOT hand-draw replacements.
+var _WS_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+var _WS_ICON={
+  shop: _WS_SVG+'<path d="M16 10a4 4 0 0 1-8 0" /> <path d="M3.103 6.034h17.794" /> <path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z" /></svg>',   // lucide shopping-bag
+  food: _WS_SVG+'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /> <path d="M7 2v20" /> <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></svg>',   // lucide utensils
+  coffee: _WS_SVG+'<path d="M10 2v2" /> <path d="M14 2v2" /> <path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1" /> <path d="M6 2v2" /></svg>',   // lucide coffee
+  drinks: _WS_SVG+'<path d="M8 22h8" /> <path d="M12 11v11" /> <path d="m19 3-7 8-7-8Z" /></svg>',   // lucide martini
+  treats: _WS_SVG+'<path d="m7 11 4.08 10.35a1 1 0 0 0 1.84 0L17 11" /> <path d="M17 7A5 5 0 0 0 7 7" /> <path d="M17 7a2 2 0 0 1 0 4H7a2 2 0 0 1 0-4" /></svg>',   // lucide ice-cream-cone
+  beach: _WS_SVG+'<path d="M12 13v7a2 2 0 0 0 4 0" /> <path d="M12 2v2" /> <path d="M20.992 13a1 1 0 0 0 .97-1.274 10.284 10.284 0 0 0-19.923 0A1 1 0 0 0 3 13z" /></svg>',   // lucide umbrella
+  sight: _WS_SVG+'<path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z" /> <circle cx="12" cy="13" r="3" /></svg>',   // lucide camera (was a 2nd copy of landmark — identical to historic)
+  play: _WS_SVG+'<rect width="18" height="12" x="3" y="8" rx="1" /> <path d="M10 8V5c0-.6-.4-1-1-1H6a1 1 0 0 0-1 1v3" /> <path d="M19 8V5c0-.6-.4-1-1-1h-3a1 1 0 0 0-1 1v3" /></svg>',   // lucide toy-brick
+  mall: _WS_SVG+'<path d="M10 12h4" /> <path d="M10 8h4" /> <path d="M14 21v-3a2 2 0 0 0-4 0v3" /> <path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2" /> <path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" /></svg>',   // lucide building-2 (was a 2nd copy of shopping-bag — identical to shop)
+  historic: _WS_SVG+'<path d="M10 18v-7" /> <path d="M11.12 2.2a2 2 0 0 1 1.76 0l7.84 3.85a.5.5 0 0 1-.22.95H3.5a.5.5 0 0 1-.22-.95Z" /> <path d="M14 18v-7" /> <path d="M18 18v-7" /> <path d="M3 22h18" /> <path d="M6 18v-7" /></svg>',   // lucide landmark
+  wildlife: _WS_SVG+'<path d="m12 10 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a8 8 0 1 0-16 0v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3l2-4h4Z" /> <path d="M4.82 7.9 8 10" /> <path d="M15.18 7.9 12 10" /> <path d="M16.93 10H20a2 2 0 0 1 0 4H2" /></svg>',   // lucide turtle
+};
+function _wsIcon(cat){ return _WS_ICON[cat]||_WS_ICON.sight; }
+function _wsTint(hex,a){ var n=parseInt(String(hex).replace('#',''),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
+function _dvPoiSet(sec){ return (window._activeTab==='acts') ? ((sec.family&&sec.family.length)?sec.family:(sec.pois||[])) : (sec.pois||[]); }
+function _dvIsPick(p){ var pr=_dvPartner; if(!pr||!pr.picks) return false;
+  if(p.cat==='beach') return false; // guardrail: safety/beach POIs are non-sponsorable, never a 'pick'
+  var n=(p.n||'').toLowerCase();
+  return pr.picks.some(function(pk){ pk=String(pk).toLowerCase(); return n.indexOf(pk)>=0 || pk.indexOf(n)>=0; }); }
+function _dvDist(aLat,aLon,bLat,bLon){ var R=6371000,toR=Math.PI/180; var dLat=(bLat-aLat)*toR,dLon=(bLon-aLon)*toR; var s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(aLat*toR)*Math.cos(bLat*toR)*Math.sin(dLon/2)*Math.sin(dLon/2); return 2*R*Math.asin(Math.min(1,Math.sqrt(s))); }
+function _dvFmtDist(m){ var ft=m*3.28084; if(ft<1000) return Math.round(ft/10)*10+' ft'; var mi=m/1609.34; return (mi<10?mi.toFixed(1):Math.round(mi))+' mi'; }
+function _dvRequestNear(){ var btn=document.getElementById('dvNear'); if(!btn) return; var lbl=btn.querySelector('span');
+  if(_dvNear){ _dvNear=null; btn.classList.remove('on'); if(lbl)lbl.textContent='Near me'; _dvRender(); return; }
+  if(!navigator.geolocation){ if(lbl)lbl.textContent='No GPS'; return; }
+  btn.classList.add('busy');
+  navigator.geolocation.getCurrentPosition(function(pos){ _dvNear={lat:pos.coords.latitude,lon:pos.coords.longitude}; btn.classList.remove('busy'); btn.classList.add('on'); if(lbl)lbl.textContent='Nearest'; _dvRender(); },
+    function(){ btn.classList.remove('busy'); if(lbl)lbl.textContent='No GPS'; setTimeout(function(){ if(lbl&&!_dvNear)lbl.textContent='Near me'; },2200); },
+    {enableHighAccuracy:true,timeout:8000,maximumAge:60000}); }
+function _dvEnsureDom(){
+  if(document.getElementById('distView')) return;
+  if(!document.getElementById('os-dv-css')){
+    var st=document.createElement('style'); st.id='os-dv-css';
+    st.textContent='@keyframes dvUp{from{transform:translateY(100%)}to{transform:translateY(0)}}'
+      +'#distView{display:none;position:fixed;inset:0;z-index:3000;background:rgba(10,35,45,.42);align-items:flex-end;justify-content:center}#distView.on{display:flex}'
+      +'#distView.on .dv-card{animation:dvUp .3s cubic-bezier(.22,.61,.36,1)}'
+      +'#distView .dv-card{width:100%;max-width:432px;height:94%;background:#fff;border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -6px 24px rgba(0,0,0,.28)}'
+      +'#distView .dv-grabwrap{background:#0f4c5c;padding:8px 0 3px;flex:0 0 auto}#distView .dv-grab{width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.38);margin:0 auto}'
+      +'#distView .dv-hdr{flex:0 0 auto;display:flex;align-items:center;gap:11px;padding:4px 14px 12px;background:#0f4c5c;color:#fff}'
+      +'#distView .dv-back{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}#distView .dv-back svg{width:19px;height:19px;display:block}'
+      +'#distView .dv-ttl{font:800 16px "DM Sans",sans-serif;line-height:1.12}#distView .dv-ttl small{display:block;font-weight:600;font-size:10px;opacity:.85;letter-spacing:.06em}#distView .dv-ttl small b{font-weight:800;opacity:1}'
+      +'#distView .dv-chips{flex:0 0 auto;display:flex;gap:6px;overflow-x:auto;padding:9px 12px;background:var(--warm,#f5ecd7);border-bottom:1px solid rgba(15,76,92,.1);scrollbar-width:none}#distView .dv-chips::-webkit-scrollbar{display:none}'
+      +'#distView .dv-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;border:1px solid rgba(15,76,92,.25);background:#fff;color:#0f4c5c;font:600 12px "DM Sans",sans-serif;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}#distView .dv-chip.on{background:#0f4c5c;border-color:#0f4c5c;color:#fff}#distView .dv-chip.pick{border-color:#e08a1e;color:#a5620a}#distView .dv-chip.pick.on{background:#e08a1e;border-color:#e08a1e;color:#fff}'
+      +'#distView .dv-chip-ic{display:inline-flex;flex:0 0 auto}#distView .dv-chip-ic svg{width:13px;height:13px;display:block}'
+      +'#dvMap{flex:0 0 40%;min-height:0}'
+      /* Short phones (SE): give the list the room instead of the map. */
+      +'@media (max-height:700px){#dvMap{flex-basis:30%}#distView .dv-card{height:96%}}'
+      +'#dvList{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#fff}'
+      +'#dvList .dv-row{display:flex;gap:11px;align-items:flex-start;padding:11px 14px;border-bottom:.5px solid rgba(15,76,92,.1);cursor:pointer;transition:background .12s}#dvList .dv-row:active{background:rgba(15,76,92,.05)}#dvList .dv-row.sel{background:rgba(31,111,221,.08);box-shadow:inset 3px 0 0 #1f6fdd}'
+      +'#dvList .dv-num{width:22px;height:22px;border-radius:50%;flex:0 0 auto;color:#fff;font:800 11px "DM Sans",sans-serif;display:flex;align-items:center;justify-content:center;margin-top:1px;box-shadow:0 0 0 1px rgba(0,0,0,.1)}'
+      /* Row thumbnail: a real photo when the place has one, else a soft category-tinted icon tile.
+         The tile is deliberately a rounded SQUARE, not a disc — a disc reads as a rank badge. */
+      +'#dvList .dv-thumb{position:relative;width:46px;height:46px;border-radius:12px;flex:0 0 auto;overflow:hidden;display:flex;align-items:center;justify-content:center}'
+      +'#dvList .dv-thumb svg{width:23px;height:23px}'
+      +'#dvList .dv-thumb img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(1.02)}'
+      +'#dvList .dv-thumb .dv-badge{position:absolute;left:3px;bottom:3px;width:17px;height:17px;border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(0,0,0,.18)}'
+      +'#dvList .dv-thumb .dv-badge svg{width:11px;height:11px}'
+      +'.dv-pin svg{width:13px;height:13px;display:block}'
+      +'#dvList .dv-row .rt b{display:block;font:700 13.5px "DM Sans",sans-serif;color:#0f4c5c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+      /* Clamp the tip to 2 lines. It was wrapping to 3 on a 320/375 phone, pushing rows to 93px
+         so only ONE row was visible. 2 lines = ~74px rows = an extra place on every screen. */
+      +'#dvList .dv-row .rt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font:500 12px "DM Sans",sans-serif;color:#4a5a62;line-height:1.35}'
+      +'#dvList .dv-star{color:#e08a1e;font-size:12px;margin-left:5px}#dvList .dv-empty{padding:26px;text-align:center;color:#889;font:500 13px "DM Sans",sans-serif}'
+      +'.dv-pin{transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;transition:transform .14s,box-shadow .14s}'
+      +'.dv-pin.pick{box-shadow:0 0 0 3px rgba(224,138,30,.6),0 1px 4px rgba(0,0,0,.4)}.dv-pin.sel{transform:translate(-50%,-50%) scale(1.3);box-shadow:0 0 0 4px rgba(31,111,221,.4),0 2px 6px rgba(0,0,0,.45)}'
+      +'.dv-home{transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;background:#e08a1e;color:#fff;border:2px solid #fff;border-radius:999px;padding:4px 10px;font:800 11px "DM Sans",sans-serif;box-shadow:0 2px 7px rgba(0,0,0,.42);white-space:nowrap}'
+      +'#distView .dv-tools{flex:0 0 auto;display:flex;gap:8px;align-items:center;padding:8px 12px;background:#fff;border-bottom:1px solid rgba(15,76,92,.1)}'
+      +'#distView .dv-search{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:7px;background:#f1f4f5;border:1px solid rgba(15,76,92,.16);border-radius:9px;padding:7px 11px}#distView .dv-search svg{width:15px;height:15px;flex:0 0 auto;color:#6a7a82}#distView .dv-search input{border:none;background:none;outline:none;width:100%;font:500 13px "DM Sans",sans-serif;color:#0f4c5c;-webkit-appearance:none}'
+      +'#distView .dv-nearbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid rgba(15,76,92,.25);color:#0f4c5c;border-radius:9px;padding:7px 10px;font:700 12px "DM Sans",sans-serif;cursor:pointer;white-space:nowrap}#distView .dv-nearbtn svg{width:14px;height:14px}#distView .dv-nearbtn.on{background:#0f4c5c;border-color:#0f4c5c;color:#fff}#distView .dv-nearbtn.busy{opacity:.55}'
+      +'#dvList .dv-row .rt{flex:1 1 auto;min-width:0}#dvList .dv-row .rt .dv-dist{display:block;margin-top:3px;font:700 11px "DM Sans",sans-serif;color:#1f6fdd}'
+      +'#dvList .dv-dir{flex:0 0 auto;align-self:center;width:36px;height:36px;border-radius:9px;background:rgba(31,111,221,.09);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}#dvList .dv-dir svg{width:17px;height:17px;color:#1f6fdd}#dvList .dv-dir:active{background:rgba(31,111,221,.2)}'
+      +'.dv-userdot{transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#1f6fdd;border:3px solid #fff;box-shadow:0 0 0 4px rgba(31,111,221,.28),0 1px 4px rgba(0,0,0,.4)}';
+    document.head.appendChild(st);
+  }
+  var dv=document.createElement('div'); dv.id='distView';
+  dv.innerHTML='<div class="dv-card"><div class="dv-grabwrap"><div class="dv-grab"></div></div><div class="dv-hdr"><button class="dv-back" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg></button><div class="dv-ttl"><small><b id="dvBrand">WAIKĪKĪ</b> · <span id="dvCount"></span></small><span id="dvName"></span></div></div><div class="dv-chips" id="dvChips"></div><div class="dv-tools"><div class="dv-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input id="dvSearch" type="search" placeholder="Search this area" autocomplete="off"></div><button id="dvNear" class="dv-nearbtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.7-7-12a7 7 0 0 1 14 0c0 5.3-7 12-7 12z"></path><circle cx="12" cy="9" r="2.4"></circle></svg><span>Near me</span></button></div><div id="dvMap"></div><div id="dvList"></div></div>';
+  (document.getElementById('app')||document.body).appendChild(dv);
+  dv.querySelector('.dv-back').addEventListener('click', closeDistrictView);
+  dv.addEventListener('click', function(e){ if(e.target===dv) closeDistrictView(); });
+  var si=dv.querySelector('#dvSearch'); if(si) si.addEventListener('input',function(){ _dvQuery=this.value; _dvRender(); });
+  var nb=dv.querySelector('#dvNear'); if(nb) nb.addEventListener('click',_dvRequestNear);
+}
+function _dvEnsureMap(){
+  if(_dvMap) return _dvMap;
+  _dvMap=L.map('dvMap',{zoomControl:true,attributionControl:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(_dvMap);
+  return _dvMap;
+}
+function _dvSelect(i){
+  var p=_dvSet[i], m=_dvMap; if(!p||!m) return;
+  // NOTE: beach rows have no marker (no beach pins on this map), so everything below must
+  // tolerate _dvMk[i] being undefined — the row still selects, pans and opens its popup.
+  Object.keys(_dvMk).forEach(function(k){ var mk=_dvMk[k]; var el=mk&&mk._icon&&mk._icon.querySelector('.dv-pin'); if(el) el.classList.remove('sel'); });
+  [].forEach.call(document.querySelectorAll('#dvList .dv-row'),function(r){ r.classList.remove('sel'); });
+  var mk=_dvMk[i]; if(mk){ if(mk._icon){ var el=mk._icon.querySelector('.dv-pin'); if(el) el.classList.add('sel'); } if(mk.setZIndexOffset) mk.setZIndexOffset(1000); }
+  var row=document.querySelectorAll('#dvList .dv-row')[i]; if(row){ row.classList.add('sel'); row.scrollIntoView({block:'nearest'}); }
+  m.setView([p.lat,p.lon], Math.max(m.getZoom(),16), {animate:false});
+  L.popup({closeButton:true,className:'ws-pop',autoPan:true,offset:[0,-6]}).setLatLng([p.lat,p.lon]).setContent('<div class="ws-pop">'+((p.photo&&p.photo_credit)?'<img class="ws-pop-img" src="'+p.photo+'" alt="" loading="lazy" onerror="this.remove()">':'')+'<b>'+(_dvIsPick(p)?'★ ':'')+p.n+'</b><span>'+(p.tip||'')+'</span>'+((p.photo&&p.photo_credit)?'<span style="display:block;margin-top:5px;font:500 9.5px \'DM Sans\',sans-serif;color:#8a8078">Photo: '+p.photo_credit+'</span>':'')+'<a href="https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lon+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:7px;font:700 12px \'DM Sans\',sans-serif;color:#1f6fdd;text-decoration:none">▶ Directions</a></div>').openOn(m);
+}
+function _dvRender(){
+  var m=_dvMap, sec=_dvSec; if(!m||!sec) return;
+  _dvLayers.forEach(function(l){ try{ l.remove(); }catch(e){} }); _dvLayers=[]; _dvMk={};
+  var poly=L.polygon(sec.outline,{color:'#1f6fdd',weight:2.5,opacity:.8,fill:false,lineJoin:'round',lineCap:'round',interactive:false}); poly.addTo(m); _dvLayers.push(poly);
+  _dvSet=_dvPoiSet(sec).filter(function(p){ if(_dvCat==='__picks') return _dvIsPick(p); return _dvCat==='all' || p.cat===_dvCat; });
+  var q=(_dvQuery||'').trim().toLowerCase();
+  if(q) _dvSet=_dvSet.filter(function(p){ return (p.n||'').toLowerCase().indexOf(q)>=0 || (p.tip||'').toLowerCase().indexOf(q)>=0; });
+  // PHOTOS FIRST — same rule as the Town browse dropdown. Without it the pictures sank to rows
+  // 10-11 under nine icon-tile businesses, and only ~4 rows fit on a phone, so a real photo was
+  // never on screen. Stable sort, so source order holds inside each group.
+  _dvSet.sort(function(a,b){ return (b.photo?1:0)-(a.photo?1:0); });
+  // Near me still wins when it's on: "what's closest" beats "what's pretty".
+  if(_dvNear) _dvSet=_dvSet.map(function(p){ p.__d=_dvDist(_dvNear.lat,_dvNear.lon,p.lat,p.lon); return p; }).sort(function(a,b){ return a.__d-b.__d; });
+  document.getElementById('dvCount').textContent=_dvSet.length+' place'+(_dvSet.length===1?'':'s');
+  var list=document.getElementById('dvList'); list.innerHTML='';
+  if(!_dvSet.length){ list.innerHTML='<div class="dv-empty">Nothing here in this filter.</div>'; }
+  _dvSet.forEach(function(p,i){
+    var col=(_WS_CAT[p.cat]||{}).c||'#0f4c5c', pick=_dvIsPick(p);
+    // Beaches get NO pin on the district-card map — Nick doesn't want the beach icons in the
+    // sub-area. They keep their ROW (they're the free places, and they carry the photos); only
+    // the map glyph goes. _dvSelect tolerates a row with no marker.
+    if(p.cat!=='beach'){
+      var mk=L.marker([p.lat,p.lon],{zIndexOffset:100,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="dv-pin'+(pick?' pick':'')+'" style="background:'+col+'">'+_wsIcon(p.cat)+'</div>'})});
+      mk.on('click',function(){ _dvSelect(i); }); mk.addTo(m); _dvLayers.push(mk); _dvMk[i]=mk;
+    }
+    var row=document.createElement('div'); row.className='dv-row';
+    var dist=(_dvNear&&isFinite(p.__d))?'<span class="dv-dist">'+_dvFmtDist(p.__d)+' away</span>':'';
+    var _ph=(p.photo&&p.photo_credit)?p.photo:null;   // NO CREDIT -> NO PHOTO (most are CC-BY)
+    var thumb='<span class="dv-thumb" style="background:'+_wsTint(col,.13)+';color:'+col+'">'+_wsIcon(p.cat)
+      +(_ph?'<img src="'+_ph+'" alt="" loading="lazy" onerror="this.remove()"><span class="dv-badge" style="color:'+col+'">'+_wsIcon(p.cat)+'</span>':'')
+      +'</span>';
+    row.innerHTML=thumb+'<span class="rt"><b>'+p.n+(pick?'<span class="dv-star">★</span>':'')+'</b><span>'+(p.tip||'')+'</span>'+dist+'</span><button class="dv-dir" type="button" aria-label="Directions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg></button>';
+    row.addEventListener('click',function(){ _dvSelect(i); });
+    (function(pp){ var db=row.querySelector('.dv-dir'); if(db) db.addEventListener('click',function(e){ e.stopPropagation(); window.open('https://www.google.com/maps/dir/?api=1&destination='+pp.lat+','+pp.lon,'_blank','noopener'); }); })(p);
+    list.appendChild(row);
+  });
+  if(_dvPartner && _dvPartner.homePin){ var hp=_dvPartner.homePin;
+    if(hp.district===sec.name || hp.district===sec.label){
+      var hm=L.marker([hp.lat,hp.lon],{zIndexOffset:3000,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="dv-home">★ '+(hp.label||'Your stay')+'</div>'})});
+      hm.addTo(m); _dvLayers.push(hm);
+    }
+  }
+  if(_dvNear){ var ud=L.marker([_dvNear.lat,_dvNear.lon],{zIndexOffset:2500,interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="dv-userdot"></div>'})}); ud.addTo(m); _dvLayers.push(ud); }
+}
+function _dvBuildChips(sec){
+  var chips=document.getElementById('dvChips'); chips.innerHTML='';
+  var cats=[]; _dvPoiSet(sec).forEach(function(p){ if(cats.indexOf(p.cat)<0) cats.push(p.cat); });
+  function mk(cat,label,pick){ var b=document.createElement('button'); b.className='dv-chip'+(_dvCat===cat?' on':'')+(pick?' pick':'');
+    // Chips carry the same category glyph as the row tile and the map pin — one visual key for
+    // "coffee" everywhere, so the filter reads by shape+colour, not by reading each label.
+    b.innerHTML=(_WS_ICON[cat]?('<span class="dv-chip-ic">'+_WS_ICON[cat]+'</span>'):'')+'<span>'+label+'</span>';
+    b.addEventListener('click',function(){ _dvCat=cat; [].forEach.call(chips.children,function(c){c.classList.remove('on');}); b.classList.add('on'); _dvRender(); });
+    chips.appendChild(b); }
+  mk('all','All');
+  if(_dvPartner) mk('__picks','★ Picks',true);
+  cats.forEach(function(c){ mk(c,_dvCatName(c)); });
+}
+function openDistrictView(sec){
+  _dvEnsureDom(); _dvSec=sec; _dvCat='all'; _dvPartner=_activePartner();
+  document.getElementById('dvName').textContent=(sec.label||sec.name);
+  var col=(_dvPartner&&_dvPartner.brand&&_dvPartner.brand.color)||'#0f4c5c';
+  var hdr=document.querySelector('#distView .dv-hdr'), gw=document.querySelector('#distView .dv-grabwrap');
+  if(hdr) hdr.style.background=col; if(gw) gw.style.background=col;
+  document.getElementById('dvBrand').textContent=_dvPartner?_dvPartner.brand.name:'WAIKĪKĪ';
+  _dvBuildChips(sec);
+  var _si=document.getElementById('dvSearch'); if(_si) _si.value=''; _dvQuery='';
+  var _nb=document.getElementById('dvNear'); if(_nb){ _nb.classList.toggle('on',!!_dvNear); var _l=_nb.querySelector('span'); if(_l)_l.textContent=_dvNear?'Nearest':'Near me'; }
+  document.getElementById('distView').classList.add('on');
+  var m=_dvEnsureMap();
+  setTimeout(function(){ try{ m.invalidateSize(); m.fitBounds(L.latLngBounds(sec.outline),{padding:[24,24],maxZoom:17}); }catch(e){} _dvRender(); document.getElementById('dvList').scrollTop=0; }, 60);
+}
+function closeDistrictView(){ var dv=document.getElementById('distView'); if(dv) dv.classList.remove('on'); }
 function renderZones(){
   try{
   if(typeof map==='undefined'||!map) return;
@@ -7537,7 +7744,7 @@ function renderZones(){
     zones.forEach(function(z){ (z.sections||[]).forEach(function(sec){
       var b=L.latLngBounds(sec.outline);
       var rect=L.polygon(sec.outline,{pane:'zones',className:showPois?'':'os-zone-poly',color:'#1f6fdd',weight:2,opacity:.92,fillColor:'#1f6fdd',fillOpacity:showPois?.04:.10,lineJoin:'round',lineCap:'round',interactive:!showPois});
-      if(!showPois) rect.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); _zoneFit(sec.outline); });
+      if(!showPois) rect.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); openDistrictView(sec); });
       rect.addTo(map); _zoneLayers.push(rect);
       if(showPois){
         var sl=L.marker(sec.lblAt?L.latLng(sec.lblAt[0],sec.lblAt[1]):L.latLng(b.getNorth(),b.getCenter().lng),{interactive:false,keyboard:false,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="os-wsec-lbl">'+(sec.label||sec.name)+'</div>'})});
@@ -7551,7 +7758,7 @@ function renderZones(){
         });
       } else {
         var sb=L.marker(sec.lblAt?L.latLng(sec.lblAt[0],sec.lblAt[1]):b.getCenter(),{interactive:true,keyboard:false,zIndexOffset:2000,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="os-zone-badge sec"><span class="zb">'+_ZMAG+'</span><span class="zn">'+(sec.label||sec.name)+'</span></div>'})});
-        sb.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); _zoneFit(sec.outline); });
+        sb.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); openDistrictView(sec); });
         sb.addTo(map); _zoneLayers.push(sb);
       }
     }); });
