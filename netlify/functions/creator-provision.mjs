@@ -38,6 +38,7 @@ export default async (req) => {
         handle: clean, island: String(body.island || 'kauai').toLowerCase(),
         name: String(body.name || '').slice(0, 80), email: String(body.email || '').slice(0, 120),
         platform: String(body.platform || '').slice(0, 24),
+        rawHandle: String(body.handle || '').replace(/^@+/, '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 30),
       }),
     });
     const out = await r.json().catch(() => null);

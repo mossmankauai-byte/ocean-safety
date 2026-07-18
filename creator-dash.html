@@ -183,7 +183,7 @@
 
     <div class="card" id="editCard" style="display:none">
       <h2>Customize your link</h2>
-      <p class="hint">Pick the islands you cover, then star the beaches, trails, family spots, food and shops that make your ideal trip. Followers who open your link see your picks flagged in the guide.</p>
+      <p class="hint">Pick the islands you cover, then star the beaches, trails, family spots, food and shops that make your ideal trip. Your social profile picture and handle brand the guide header automatically for everyone on your link.</p>
 
       <div class="isltabs" id="islTabs" role="tablist">
         <button type="button" class="isltab on" data-isl="kauai">Kauaʻi</button>
@@ -192,19 +192,21 @@
       </div>
 
       <div class="ed-field">
-        <label for="edName">Display name (on your banner)</label>
+        <label for="edName">Display name (in your header)</label>
         <input id="edName" type="text" maxlength="40" placeholder="@yourhandle">
+      </div>
+
+      <div class="ed-field">
+        <label for="edAvatar">Your profile photo <span style="font-weight:400;color:var(--muted2)">— replaces the OceanSafe icon in your header, live instantly</span></label>
+        <div style="display:flex;align-items:center;gap:14px">
+          <img id="avPrev" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:1px solid var(--line);display:none">
+          <input id="edAvatar" type="file" accept="image/jpeg,image/png,image/webp">
+        </div>
       </div>
 
       <div class="ed-field">
         <div class="ed-lbl"><span>Curate the ideal trip on <b id="edIslName">Kauaʻi</b></span><span class="ed-count" id="edCount">0 picked</span></div>
         <div id="beachList" class="poiwrap"></div>
-      </div>
-
-      <div class="ed-field">
-        <label for="edImg">Your banner photo <span style="font-weight:400;color:var(--muted2)">— optional; we show OceanSafe's until yours is approved</span></label>
-        <input id="edImg" type="file" accept="image/jpeg,image/png,image/webp">
-        <div class="bannerprev" id="bannerPrev" style="display:none"><img id="bannerImg" alt="Your banner preview"><span class="pending" id="bannerPending">Pending review — your link shows the default OceanSafe photo until approved.</span></div>
       </div>
 
       <button type="button" class="btn" id="saveBtn" style="width:100%;margin-top:8px">Save my link</button>
@@ -340,7 +342,7 @@
     var CATS = [['beaches','Beaches'],['hikes','Trails'],['acts','Family'],['foods','Food & drinks'],['crafts','Shops']];
     var PICK_CAP = 25;
     var POIS = {}, picks = { kauai:new Set(), oahu:new Set(), maui:new Set() };
-    var curIsl = 'kauai', bannerDataUrl = null;
+    var curIsl = 'kauai', avatarDataUrl = null;
     $('editCard').style.display = 'block';
 
     function renderBeaches(){
@@ -393,24 +395,24 @@
       });
     });
 
-    // Image upload → downscale + compress to a bounded JPEG data URL
-    $('edImg').addEventListener('change', function(e){
+
+    // Profile photo → square center-crop, 128px, bounded JPEG data URL
+    $('edAvatar').addEventListener('change', function(e){
       var file = e.target.files && e.target.files[0]; if(!file) return;
-      var status = $('edStatus'); status.className='ed-status';
+      var st = $('edStatus'); st.className='ed-status';
       var img = new Image();
       img.onload = function(){
-        var maxW = 1000, scale = Math.min(1, maxW / img.width);
-        var w = Math.round(img.width*scale), h = Math.round(img.height*scale);
-        var cv = document.createElement('canvas'); cv.width=w; cv.height=h;
-        cv.getContext('2d').drawImage(img, 0, 0, w, h);
-        var q = 0.82, url = cv.toDataURL('image/jpeg', q);
-        while(url.length > 180*1024 && q > 0.4){ q -= 0.1; url = cv.toDataURL('image/jpeg', q); }
-        if(url.length > 180*1024){ status.textContent='That image is too large even after compression — try a smaller crop.'; status.className='ed-status err'; return; }
-        bannerDataUrl = url;
-        $('bannerImg').src = url; $('bannerPrev').style.display='block';
+        var side = Math.min(img.width, img.height);
+        var sx = (img.width - side)/2, sy = (img.height - side)/2;
+        var cv = document.createElement('canvas'); cv.width = 128; cv.height = 128;
+        cv.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, 128, 128);
+        var q = 0.85, url = cv.toDataURL('image/jpeg', q);
+        while(url.length > 36*1024 && q > 0.4){ q -= 0.1; url = cv.toDataURL('image/jpeg', q); }
+        avatarDataUrl = url;
+        var pv = $('avPrev'); pv.src = url; pv.style.display = 'block';
         URL.revokeObjectURL(img.src);
       };
-      img.onerror = function(){ status.textContent='Could not read that image.'; status.className='ed-status err'; };
+      img.onerror = function(){ st.textContent='Could not read that image.'; st.className='ed-status err'; };
       img.src = URL.createObjectURL(file);
     });
 
@@ -421,7 +423,7 @@
       var islands = {};
       ['kauai','oahu','maui'].forEach(function(i){ if(picks[i].size) islands[i] = { featured: Array.from(picks[i]) }; });
       var cfg = { name: ($('edName').value.trim() || ('@'+display)).slice(0,40), islands: islands };
-      if(bannerDataUrl) cfg.banner = bannerDataUrl;
+      if(avatarDataUrl) cfg.avatar = avatarDataUrl;
       fetch('/api/creator-config', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ slug: cParam, key: key, config: cfg }) })
         .then(function(r){ return r.json().catch(function(){ return {ok:false}; }); })
@@ -429,9 +431,7 @@
           btn.disabled=false; btn.textContent=t;
           if(res && res.ok){
             status.className='ed-status ok';
-            status.textContent = res.bannerPending
-              ? 'Saved. Your picks are live; your photo is pending review (link shows the OceanSafe default meanwhile).'
-              : 'Saved — your link is updated.';
+            status.textContent = 'Saved — your link is updated.';
           } else {
             status.className='ed-status err';
             status.textContent = 'Couldn’t save' + (res && res.reason ? ' ('+res.reason+')' : '') + '. Your link still works; try again in a moment.';
@@ -453,11 +453,10 @@
       openSaveGate();
       if(!cfg) return;
       if(cfg.name) $('edName').value = cfg.name;
+      if(cfg.avatar){ var pv=$('avPrev'); pv.src=cfg.avatar; pv.style.display='block'; }
       if(cfg.islands) Object.keys(cfg.islands).forEach(function(i){
         if(picks[i] && Array.isArray(cfg.islands[i].featured)) cfg.islands[i].featured.forEach(function(id){ picks[i].add(id); });
       });
-      if(cfg.banner){ $('bannerImg').src = cfg.banner; $('bannerPrev').style.display='block';
-        $('bannerPending').style.display = cfg.banner_ok ? 'none' : 'block'; }
       renderBeaches(); markCovered();
     }).catch(function(){ openSaveGate(); });
   }
