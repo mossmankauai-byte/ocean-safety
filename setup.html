@@ -91,7 +91,7 @@ async function api(body){
   const {data:{session}}=await sb.auth.getSession();
   if(!session||!session.access_token) return {ok:false,error:"__nosession__"};
   const r=await fetch(SB_URL+"/functions/v1/activate-free-verified",{method:"POST",
-    headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token,"apikey":SB_KEY},
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
     body:JSON.stringify(body)});
   return r.json();
 }
