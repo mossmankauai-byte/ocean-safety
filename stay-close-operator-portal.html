@@ -180,6 +180,17 @@
   </div>
 
   <div class="card">
+    <h4>Revenue model</h4>
+    <p class="hint">These power the dollar figures on your dashboard: a <b>projection</b> before outcomes are logged, and <b>actual</b> revenue once your sales desk logs each tour. VPG is your average value per guest tour.</p>
+    <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px">
+      <div class="field"><label for="units">Units (rooms)</label><input type="number" id="units" min="0" placeholder="220"></div>
+      <div class="field"><label for="vpg">Avg value per guest — VPG ($)</label><input type="number" id="vpg" min="0" placeholder="3200"></div>
+      <div class="field"><label for="showrate">Tour show rate (%)</label><input type="number" id="showrate" min="0" max="100" placeholder="70"></div>
+      <div class="field"><label for="closerate">Close rate (%)</label><input type="number" id="closerate" min="0" max="100" placeholder="15"></div>
+    </div>
+  </div>
+
+  <div class="card">
     <h4>Lead routing</h4>
     <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px">
       <div class="field"><label for="crm">CRM webhook URL</label><input type="text" id="crm" placeholder="https://your-crm/webhook"></div>
@@ -201,6 +212,9 @@
 (function(){
   "use strict";
   var CKEY="oceansafe_ts_config";
+  var _sp=new URLSearchParams(location.search);
+  var SLUG=(_sp.get("ref")||_sp.get("slug")||"").toLowerCase();   // operator opens portal with ?ref=<slug>&key=<key>
+  var KEY=_sp.get("key")||"";
   var SEGMETA=[
     {k:"renter",name:"Renter",dot:"d-renter",code:"RES-RENT",funnel:"Tour funnel"},
     {k:"exchange",name:"Exchange (RCI / II)",dot:"d-exchange",code:"RES-EXCH",funnel:"Tour funnel"},
@@ -398,7 +412,24 @@
     var slotCaps=sessions.map(function(s){ return s.cap>0?s.cap:8; });
     return { resort:$("resort").value, deals:deals, qualify:qualify, slots:slots, slotCaps:slotCaps, routing:{crm:$("crm").value, email:$("email").value, digest:$("digest").checked} };
   }
-  $("save").onclick=function(){ localStorage.setItem(CKEY, JSON.stringify(gather())); var s=$("status"); s.classList.add("on"); setTimeout(function(){ s.classList.remove("on"); }, 2200); };
+  $("save").onclick=function(){ localStorage.setItem(CKEY, JSON.stringify(gather())); var s=$("status"); s.classList.add("on"); setTimeout(function(){ s.classList.remove("on"); }, 2200); saveServer(); };
+
+  // ── save the revenue model + CRM webhook to the operator's live config (pcfg) ──
+  function saveServer(){
+    if(!SLUG || !KEY) return;   // demo mode (no ?ref=&key=) → localStorage only, no server write
+    var numv=function(id){ var v=parseFloat($(id).value); return isFinite(v)?v:undefined; };
+    var pct=function(id){ var v=parseFloat($(id).value); return isFinite(v)?Math.max(0,Math.min(1,v/100)):undefined; };
+    var payload={slug:SLUG, key:KEY, resort:$("resort").value, ts_crm_webhook:$("crm").value.trim()};
+    var u=numv("units"); if(u!==undefined) payload.units=u;
+    var vpg=numv("vpg"); if(vpg!==undefined) payload.vpg=vpg;
+    var sr=pct("showrate"); if(sr!==undefined) payload.show_rate=sr;
+    var cr=pct("closerate"); if(cr!==undefined) payload.close_rate=cr;
+    var s=$("status");
+    fetch("/api/ts-cfg",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+      .then(function(r){return r.json();})
+      .then(function(j){ s.textContent = (j&&j.ok) ? "✓ Saved to your live dashboard" : "Saved locally · server: "+((j&&j.reason)||"error"); })
+      .catch(function(){ s.textContent="Saved locally · server unreachable"; });
+  }
 })();
 </script>
 </body>

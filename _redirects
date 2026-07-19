@@ -31,5 +31,11 @@
 /api/creator-provision   /.netlify/functions/creator-provision   200
 /api/creator-config      /.netlify/functions/creator-config      200
 
+# Stay-close (timeshare) CRM/PMS integration (2026-07-19)
+/api/ts-lead     /.netlify/functions/ts-lead     200
+/api/ts-outcome  /.netlify/functions/ts-outcome  200
+/api/ts-cfg      /.netlify/functions/ts-cfg      200
+/api/ts-leads/*  /.netlify/functions/ts-leads/:splat  200
+
 # Overview deck — sendable branded link (2026-07-18)
 /overview   /overview.pdf   200

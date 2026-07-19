@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/png" href="/assets/oceansafe-favicon.png">
+<link rel="apple-touch-icon" href="/assets/oceansafe-favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OceanSafe · Log tour outcome</title>
+<style>
+  :root{
+    --sand:#f3ede0; --sand-2:#faf6ee; --card:#fff; --ink:#2c2a24; --ink-soft:#6b6457; --line:#e7dfce;
+    --green:#628a56; --green-d:#3d5346; --amber:#d97706; --coral:#e07856; --gold:#c9a84c; --ocean:#0f4c5c;
+    --font:"Helvetica Neue",Arial,Helvetica,sans-serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font-family:var(--font); color:var(--ink); background:var(--sand); -webkit-font-smoothing:antialiased}
+  .top{background:rgba(250,246,238,.92); border-bottom:1px solid var(--line)}
+  .topin{max-width:520px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:10px}
+  .flag{width:0;height:0;border-left:13px solid #16a34a;border-top:9px solid transparent;border-bottom:9px solid transparent}
+  .wm{font-weight:700; font-size:15px; color:var(--green-d)} .wm span{color:var(--amber)}
+  .console{font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.07em; padding-left:10px; border-left:1px solid var(--line)}
+  .wrap{max-width:520px; margin:0 auto; padding:20px}
+  h1{font-size:20px; margin:6px 0 2px; letter-spacing:-.01em}
+  .sub{font-size:13px; color:var(--ink-soft); margin:0 0 18px; line-height:1.5}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:14px}
+  h4{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--green-d); margin:0 0 12px; font-weight:700}
+  .opts{display:grid; gap:10px}
+  .opt{display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:12px; padding:14px; background:#fff; cursor:pointer; font-size:15px; font-weight:700; color:var(--ink)}
+  .opt:hover{border-color:var(--green)}
+  .opt.sel{border-color:var(--green); background:#f2f6ee; box-shadow:inset 0 0 0 1px var(--green)}
+  .opt .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);flex:none}
+  .opt.sel .dot{border-color:var(--green); background:var(--green)}
+  .opt small{display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-top:2px}
+  label{font-size:12px; font-weight:700; color:var(--ink-soft); display:block; margin:14px 0 5px}
+  input[type=text],input[type=number]{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font-family:inherit; font-size:15px; background:#fff}
+  input:focus{outline:none; border-color:var(--green)}
+  .chk{display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; margin-top:14px}
+  .chk input{width:20px;height:20px; accent-color:var(--green)}
+  .hide{display:none}
+  .btn{width:100%; border:0; border-radius:12px; padding:15px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; background:var(--green); color:#fff; margin-top:4px}
+  .btn:hover{background:var(--green-d)} .btn:disabled{opacity:.5; cursor:default}
+  .msg{font-size:13.5px; font-weight:700; text-align:center; margin-top:14px; min-height:18px}
+  .msg.ok{color:var(--green-d)} .msg.err{color:var(--coral)}
+  .done{text-align:center; padding:22px 12px}
+  .done .ok{width:64px;height:64px; margin:0 auto 12px; display:block}
+  .done .ok circle{fill:none; stroke:var(--green); stroke-width:5} .done .ok path{fill:none; stroke:var(--green); stroke-width:6; stroke-linecap:round; stroke-linejoin:round}
+  .pb{font-size:11px; font-weight:700; color:var(--ink-soft); text-align:center; margin-top:18px}
+  .pb span{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="top"><div class="topin"><span class="flag"></span><span class="wm">Ocean<span>Safe</span></span><span class="console">Log tour outcome</span></div></div>
+<div class="wrap">
+  <div id="app">
+    <h1>How did the session go?</h1>
+    <p class="sub">Tap the outcome for this guest. It updates your Stay-Close numbers in real time. Takes about ten seconds.</p>
+
+    <div class="card">
+      <h4>Outcome</h4>
+      <div class="opts" id="opts">
+        <div class="opt" data-s="closed"><span class="dot"></span><span>Closed a sale<small>Guest bought — enter the contract value below</small></span></div>
+        <div class="opt" data-s="showed"><span class="dot"></span><span>Showed, no sale<small>Attended the presentation, didn't buy</small></span></div>
+        <div class="opt" data-s="no_show"><span class="dot"></span><span>No-show<small>Booked but didn't attend</small></span></div>
+        <div class="opt" data-s="lost"><span class="dot"></span><span>Cancelled<small>Cancelled before the session</small></span></div>
+      </div>
+
+      <div id="closefields" class="hide">
+        <label for="cv">Contract value ($)</label>
+        <input type="number" id="cv" inputmode="numeric" min="0" placeholder="e.g. 24000">
+        <label for="rep">Closed by (rep name)</label>
+        <input type="text" id="rep" placeholder="optional">
+      </div>
+      <label class="chk"><input type="checkbox" id="redeemed" checked> <span>Gift was redeemed</span></label>
+    </div>
+
+    <button class="btn" id="save" disabled>Save outcome</button>
+    <p class="msg" id="msg"></p>
+  </div>
+  <p class="pb">powered by <span>OceanSafe</span></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var sp=new URLSearchParams(location.search);
+  var token=sp.get("token")||sp.get("t")||"";
+  var status=null;
+
+  if(!token){
+    $("app").innerHTML='<h1>Link expired or invalid</h1><p class="sub">This outcome link is missing its code. Open the link from your lead notification, or ask your OceanSafe contact for a fresh one.</p>';
+    return;
+  }
+
+  var opts=$("opts").querySelectorAll(".opt");
+  Array.prototype.forEach.call(opts,function(o){
+    o.addEventListener("click",function(){
+      Array.prototype.forEach.call(opts,function(x){x.classList.remove("sel");});
+      o.classList.add("sel"); status=o.dataset.s;
+      $("closefields").classList.toggle("hide", status!=="closed");
+      $("save").disabled=false;
+    });
+  });
+
+  $("save").onclick=function(){
+    if(!status) return;
+    var body={token:token, status:status, gift_redeemed:$("redeemed").checked};
+    if(status==="closed"){
+      body.contract_value=Math.max(0, parseInt($("cv").value,10)||0);
+      var rep=$("rep").value.trim(); if(rep) body.rep=rep;
+    }
+    $("save").disabled=true; setMsg("Saving…","");
+    fetch("/api/ts-outcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(j && j.ok){ showDone(status); }
+        else { setMsg(reason(j&&j.reason), "err"); $("save").disabled=false; }
+      })
+      .catch(function(){ setMsg("Couldn't reach the server. Check the connection and try again.","err"); $("save").disabled=false; });
+  };
+
+  function reason(r){
+    if(r==="bad_token") return "This link has expired. Ask for a fresh outcome link.";
+    if(r==="not_found") return "That lead was not found.";
+    return "Something went wrong. Try again in a moment.";
+  }
+  function setMsg(t,c){ var m=$("msg"); m.textContent=t; m.className="msg "+(c||""); }
+  function showDone(s){
+    var label={closed:"Sale recorded — nice close.",showed:"Marked as showed.",no_show:"Marked as a no-show.",lost:"Marked as cancelled."}[s]||"Outcome saved.";
+    $("app").innerHTML='<div class="card"><div class="done">'+
+      '<svg class="ok" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="32"/><path d="M25 41l11 11 20-23"/></svg>'+
+      '<h1 style="margin:0 0 4px">'+label+'</h1>'+
+      '<p class="sub" style="margin:0">Your Stay-Close dashboard is updated. You can close this window.</p>'+
+      '</div></div>';
+  }
+})();
+</script>
+</body>
+</html>

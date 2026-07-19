@@ -748,7 +748,7 @@
         '<div class="gift-row">'+ g.map(function(x){
           return '<div class="gmini"><div class="gi">'+ico(x.ic,22,'var(--gold-d)')+'</div><div class="gt">'+x.t+'</div><div class="gv">$'+x.v+'</div></div>';
         }).join("") +'</div>'+
-        '<div class="disc"><span class="ico">'+ico("info",16)+'</span><span><b>No fine print:</b> it\'s a 90-minute ownership presentation. Come, ask anything, buy nothing — the gift is yours just for showing up. Paid for by the resort.</span></div>',
+        '<div class="disc"><span class="ico">'+ico("info",16)+'</span><span><b>No fine print:</b> it\'s a 90-minute ownership presentation. Come, ask anything, buy nothing. The gift is yours just for showing up. Paid for by the resort.</span></div>',
       cta:"See if I qualify", ctaArrow:true,
       onCta:function(){ go(qualify,"qualify"); },
       ghost:"Maybe later",
@@ -1146,6 +1146,29 @@
       arr.push(rec); localStorage.setItem("oceansafe_v2_events", JSON.stringify(arr.slice(-200)));
     }catch(e){}
     if(window.console) console.log("[OceanSafe]", event, "·", seg, rec.gift?("· "+rec.gift):"");
+    postLead(event);
+  }
+  // ── stay-close CRM lead: fire-and-forget to /api/ts-lead for real routed events only ──
+  var LEAD_EVENTS = {tour_booked:1, owner_update:1, referral:1, nurture:1, owner_nurture:1};
+  function postLead(event){
+    if(!LEAD_EVENTS[event]) return;
+    var sp = new URLSearchParams(location.search);
+    var slug = (sp.get("ref")||sp.get("slug")||"").toLowerCase();
+    if(!slug) return;                          // no operator slug (preview/demo) → nothing to route
+    var g = flow.gift!==null ? giftByKey(flow.gift) : null;
+    var lead = {
+      seg:seg, event:event,
+      gift: g ? {name:g.t, value:g.v} : null,
+      slot: flow.slot||null,
+      daysLeft: DAYS_LEFT,
+      qualify: flow.answers||null,             // operator-owned qualifier answers
+      contact: {name:flow.friend||null, email:flow.email||flow.nurtureEmail||null},
+      ref: slug
+    };
+    try{
+      fetch("/api/ts-lead", {method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({slug:slug, lead:lead}), keepalive:true}).catch(function(){});
+    }catch(e){}
   }
 
   /* ════════════════════════ BOOT ════════════════════════ */
