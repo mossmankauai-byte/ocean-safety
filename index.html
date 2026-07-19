@@ -5970,9 +5970,10 @@ function ensureDeclutterCSS(){
   if(document.getElementById('os-dc-css')) return;
   const st=document.createElement('style'); st.id='os-dc-css';
   st.textContent='.mk-nolbl .mklbl{display:none}'
-    +'.mk-more{position:absolute;top:-5px;left:-3px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;'
-    +'background:#0f4c5c;color:#fff;font:700 9.5px/15px "DM Sans",sans-serif;text-align:center;box-sizing:border-box;'
-    +'box-shadow:0 1px 3px rgba(0,0,0,.35);pointer-events:none;z-index:3}';
+    +'.mk-more{position:absolute;top:-6px;left:-4px;min-width:16px;height:16px;padding:0 3px;border-radius:8px;'
+    +'background:#0f4c5c;color:#fff;font:700 10px/16px "DM Sans",sans-serif;text-align:center;box-sizing:border-box;'
+    +'box-shadow:0 1px 3px rgba(0,0,0,.35);pointer-events:auto;cursor:pointer;z-index:5;transition:transform .1s}'
+    +'.mk-more:active{transform:scale(.88)}';
   document.head.appendChild(st);
 }
 // Core collision pass for ONE marker registry. Reset → sort by priority then position →
@@ -6000,8 +6001,8 @@ function _declutterReg(reg, prioFn){
         const dx=it.p.x-kept[j].p.x, dy=it.p.y-kept[j].p.y;
         if(dx*dx+dy*dy<R2){ hit=kept[j]; break; }
       }
-      if(hit){ it.mk._icon.style.display='none'; hit.more=(hit.more||0)+1; }
-      else { it.more=0; kept.push(it); }
+      if(hit){ it.mk._icon.style.display='none'; hit.more=(hit.more||0)+1; hit.members.push(it.mk); }
+      else { it.more=0; it.members=[it.mk]; kept.push(it); }
     }
     // "+N" badges on cluster leaders, then a greedy label pass so name pills never overlap.
     const lblRects=[];
@@ -6009,7 +6010,8 @@ function _declutterReg(reg, prioFn){
       const e=kept[m];
       if(e.more){
         const wrap=e.mk._icon.querySelector('.mkw'), host=wrap&&wrap.firstElementChild;
-        if(host){ const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more; host.appendChild(s); }
+        if(host){ const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more; host.appendChild(s);
+          const mem=e.members; s.addEventListener('click',function(ev){ ev.stopPropagation(); ev.preventDefault(); spiderfy(mem); }); }
       }
       const w=Math.max(30,e.name.length*6.4+18), x0=e.p.x-w/2, x1=e.p.x+w/2, y0=e.p.y-2, y1=e.p.y+20;
       let clash=false;
@@ -6042,6 +6044,54 @@ function declutterMarks(){
     try{ if(typeof drinkMkrs!=='undefined') regs.push(drinkMkrs); }catch(e){}
     try{ if(typeof stayMkrs!=='undefined') regs.push(stayMkrs); }catch(e){}
     regs.forEach(function(reg){ _declutterReg(reg, flat); });
+  }catch(e){}
+}
+
+// ── SPIDERFY: fan a "+N" cluster out so each stacked pin is individually tappable ────────────
+// Tapping the "+N" badge calls spiderfy(members) — members[0] is the cluster leader. The pins
+// fan into a ring (two rings past 9 so a big cluster stays on-screen), un-hidden with their name
+// labels shown, positioned via Leaflet's own setPosition so getLatLng stays truthful; faint legs
+// join each back to the centre. Collapses on the next map click / pan / zoom, which re-runs
+// declutterMarks to restore the clustered state. Fail-open: any error just leaves the map as-is.
+let _spiderSvg=null, _spidered=null;
+function unspiderfy(){
+  try{
+    if(_spiderSvg){ _spiderSvg.remove(); _spiderSvg=null; }
+    const arr=_spidered; _spidered=null;
+    if(arr){ arr.forEach(function(mk){ if(mk&&mk._icon){
+      mk._icon.style.zIndex=''; mk._icon.style.transition='';
+      if(typeof L!=='undefined'&&L.DomUtil&&mk.getLatLng) L.DomUtil.setPosition(mk._icon, map.latLngToLayerPoint(mk.getLatLng()));
+    } }); }
+    if(typeof declutterMarks==='function') declutterMarks();
+  }catch(e){}
+}
+function spiderfy(members){
+  try{
+    if(typeof map==='undefined'||!map||typeof L==='undefined'||!L.DomUtil||!members||members.length<2) return;
+    unspiderfy();
+    const leader=members[0], base=map.latLngToLayerPoint(leader.getLatLng()), cb=map.latLngToContainerPoint(leader.getLatLng());
+    const n=members.length, TWO=Math.PI*2, offs=[];
+    // One ring up to 9 pins; past that split into inner+outer rings so nothing flies off-screen.
+    if(n<=9){ const R=Math.max(52,n*10); for(let i=0;i<n;i++){ const a=-Math.PI/2+i*(TWO/n); offs.push([Math.cos(a)*R,Math.sin(a)*R]); } }
+    else { const inner=Math.ceil(n/2), outer=n-inner;
+      for(let i=0;i<inner;i++){ const a=-Math.PI/2+i*(TWO/inner); offs.push([Math.cos(a)*58,Math.sin(a)*58]); }
+      for(let i=0;i<outer;i++){ const a=-Math.PI/2+Math.PI/outer+i*(TWO/outer); offs.push([Math.cos(a)*104,Math.sin(a)*104]); } }
+    let legs='';
+    members.forEach(function(mk,i){
+      if(!mk||!mk._icon) return;
+      const dx=offs[i][0], dy=offs[i][1];
+      mk._icon.style.display=''; mk._icon.classList.remove('mk-nolbl');
+      mk._icon.style.zIndex=1000+i; mk._icon.style.transition='transform .26s cubic-bezier(.2,.7,.2,1)';
+      L.DomUtil.setPosition(mk._icon, base.add(L.point(dx,dy)));
+      legs+='<line x1="'+cb.x+'" y1="'+cb.y+'" x2="'+(cb.x+dx)+'" y2="'+(cb.y+dy)+'" stroke="#0f4c5c" stroke-width="1.4" stroke-opacity="0.4" stroke-linecap="round"/>';
+    });
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('class','os-spider-legs');
+    svg.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:640';
+    svg.innerHTML=legs;
+    map.getContainer().appendChild(svg); _spiderSvg=svg; _spidered=members.slice();
+    // Register the collapse triggers on the NEXT tick so this badge's own click doesn't fire them.
+    setTimeout(function(){ try{ map.once('click', unspiderfy); map.once('movestart zoomstart', unspiderfy); }catch(e){} },0);
   }catch(e){}
 }
 
