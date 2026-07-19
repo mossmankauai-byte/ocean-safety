@@ -1828,6 +1828,10 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .town-row-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .town-row-t b{font-size:13.5px;color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .town-row-t span{font-size:11px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Town list: a shorter half-sheet (map stays visible), and the save heart rendered inline in the
+   row rather than the absolute hero-corner it's built for. */
+#sheet.sheet-town{max-height:58vh}
+.town-row .kbg-heart{position:static;top:auto;right:auto;width:34px;height:34px;flex:none;background:transparent;border:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 .poi-hero-icon{font-size:28px;flex-shrink:0}
 .poi-hero-name{font-size:18px;font-weight:700;color:var(--ocean);line-height:1.1}
 .poi-hero-type{font-size:10px;color:var(--mute);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
@@ -7098,7 +7102,7 @@ function disclaimerOnFirstNav(){
 }
 
 function closeSheet(){
-  document.getElementById('sheet').classList.remove('on');
+  document.getElementById('sheet').classList.remove('on', 'sheet-town');
   document.getElementById('overlay').classList.remove('on');
   clearItemRoute();
 }
@@ -7595,16 +7599,16 @@ function openOutlookSheet(focus){
 // with the pins — including coffee, which is tag-driven across three arrays.
 const _townTagged = (arr, tag) => (typeof arr === 'undefined' ? [] : arr.filter(i => Array.isArray(i.tags) && i.tags.includes(tag)));
 const TOWN_SUB_SRC = {
-  food:    () => (typeof FOODS !== 'undefined' ? FOODS : []).map(x => ({x, open:'openFoodSheet'})),
-  drinks:  () => (typeof DRINKS !== 'undefined' ? DRINKS : []).map(x => ({x, open:'openDrinkSheet'})),
-  farmers: () => (typeof FMARKETS !== 'undefined' ? FMARKETS : []).map(x => ({x, open:'openMarketSheet'})),
-  crafts:  () => (typeof LOCAL_CRAFTS !== 'undefined' ? LOCAL_CRAFTS : []).map(x => ({x, open:'openCraftSheet'})),
-  gas:     () => (typeof GAS_STATIONS !== 'undefined' ? GAS_STATIONS : []).map(x => ({x, open:'openGasSheet'})),
-  grocery: () => (typeof GROCERIES !== 'undefined' ? GROCERIES : []).map(x => ({x, open:'openGrocerySheet'})),
+  food:    () => (typeof FOODS !== 'undefined' ? FOODS : []).map(x => ({x, open:'openFoodSheet', kind:'food'})),
+  drinks:  () => (typeof DRINKS !== 'undefined' ? DRINKS : []).map(x => ({x, open:'openDrinkSheet', kind:'drink'})),
+  farmers: () => (typeof FMARKETS !== 'undefined' ? FMARKETS : []).map(x => ({x, open:'openMarketSheet', kind:'market'})),
+  crafts:  () => (typeof LOCAL_CRAFTS !== 'undefined' ? LOCAL_CRAFTS : []).map(x => ({x, open:'openCraftSheet', kind:'craft'})),
+  gas:     () => (typeof GAS_STATIONS !== 'undefined' ? GAS_STATIONS : []).map(x => ({x, open:'openGasSheet', kind:'gas'})),
+  grocery: () => (typeof GROCERIES !== 'undefined' ? GROCERIES : []).map(x => ({x, open:'openGrocerySheet', kind:'grocery'})),
   coffee:  () => [
-    ..._townTagged(typeof FOODS !== 'undefined' ? FOODS : [], 'coffee').map(x => ({x, open:'openFoodSheet'})),
-    ..._townTagged(typeof DRINKS !== 'undefined' ? DRINKS : [], 'coffee').map(x => ({x, open:'openDrinkSheet'})),
-    ..._townTagged(typeof LOCAL_CRAFTS !== 'undefined' ? LOCAL_CRAFTS : [], 'coffee').map(x => ({x, open:'openCraftSheet'}))
+    ..._townTagged(typeof FOODS !== 'undefined' ? FOODS : [], 'coffee').map(x => ({x, open:'openFoodSheet', kind:'food'})),
+    ..._townTagged(typeof DRINKS !== 'undefined' ? DRINKS : [], 'coffee').map(x => ({x, open:'openDrinkSheet', kind:'drink'})),
+    ..._townTagged(typeof LOCAL_CRAFTS !== 'undefined' ? LOCAL_CRAFTS : [], 'coffee').map(x => ({x, open:'openCraftSheet', kind:'craft'}))
   ]
 };
 
@@ -7635,14 +7639,15 @@ function openTownList(){
         <div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${rows.length} ${rows.length === 1 ? 'place' : 'places'} on the map</div>
       </div>
     </div>
-    ${rows.length ? rows.map(({x, open}) => `
+    ${rows.length ? rows.map(({x, open, kind}) => `
       <div class="town-row" onclick="closeSheet();setTimeout(()=>${open}('${x.id}'),320)">
         <span class="town-row-t"><b>${x.name}</b><span>${_townRowSub(x)}</span></span>
+        ${heartButton(kind, x.id)}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="color:var(--mute);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
       </div>`).join('')
       : `<div style="padding:18px 2px;color:var(--mute);font-size:12px">Nothing on the map for this filter.</div>`}
     ${OS_DISCLAIMER}`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-town');
   document.getElementById('overlay').classList.add('on');
 }
 
