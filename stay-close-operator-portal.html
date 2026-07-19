@@ -183,7 +183,7 @@
     <h4>Lead routing</h4>
     <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px">
       <div class="field"><label for="crm">CRM webhook URL</label><input type="text" id="crm" placeholder="https://your-crm/webhook"></div>
-      <div class="field"><label for="email">Notify email (sales desk)</label><input type="email" id="email" placeholder="sales@waiohai.com"></div>
+      <div class="field"><label for="email">Notify email (sales desk)</label><input type="email" id="email" placeholder="sales@yourresort.com"></div>
     </div>
     <div class="chk" style="margin-top:12px"><input type="checkbox" id="digest" checked> <span>Send daily lead digest</span></div>
   </div>
@@ -202,15 +202,15 @@
   "use strict";
   var CKEY="oceansafe_ts_config";
   var SEGMETA=[
-    {k:"renter",name:"Renter",dot:"d-renter",code:"WAI-RENT",funnel:"Tour funnel"},
-    {k:"exchange",name:"Exchange (RCI / II)",dot:"d-exchange",code:"WAI-EXCH",funnel:"Tour funnel"},
-    {k:"owner",name:"Owner",dot:"d-owner",code:"WAI-OWNR",funnel:"Upgrade + referral"}
+    {k:"renter",name:"Renter",dot:"d-renter",code:"RES-RENT",funnel:"Tour funnel"},
+    {k:"exchange",name:"Exchange (RCI / II)",dot:"d-exchange",code:"RES-EXCH",funnel:"Tour funnel"},
+    {k:"owner",name:"Owner",dot:"d-owner",code:"RES-OWN",funnel:"Upgrade + referral"}
   ];
   var DEF={
-    resort:"Marriott’s Your Resort",
+    resort:"Your Resort",
     deals:{
       renter:[{ic:"tour",t:"Sunset dinner cruise",d:"Nāpali coast, for two",v:180},{ic:"lei",t:"Lūʻau for two",d:"Poʻipū, incl. transport",v:300},{ic:"credit",t:"$200 resort credit",d:"dining / spa",v:200}],
-      exchange:[{ic:"snorkel",t:"Snorkel sail for two",d:"south shore reef",v:160},{ic:"dining",t:"$150 dining credit",d:"any on-site restaurant",v:150},{ic:"spa",t:"$175 spa credit",d:"Waiohai spa",v:175}],
+      exchange:[{ic:"snorkel",t:"Snorkel sail for two",d:"south shore reef",v:160},{ic:"dining",t:"$150 dining credit",d:"any on-site restaurant",v:150},{ic:"spa",t:"$175 spa credit",d:"resort spa",v:175}],
       owner:[{ic:"points",t:"15,000 bonus points",d:"added to your account",v:300},{ic:"dining",t:"$250 owner dining credit",d:"any on-site restaurant",v:250},{ic:"lei",t:"Lūʻau for two",d:"Poʻipū, incl. transport",v:300}]
     },
     qualify:{couple:true,age:true,home:true,income:true,ownerCheck:true},
