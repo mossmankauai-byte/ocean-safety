@@ -12,3 +12,21 @@ Edit (2026-07-18): 3 s windows from each source (QHD 2560x1440@60fps), half-spee
 per-clip color grade to a matched turquoise daylight look (clip 3's backlit glare compressed
 and cooled), 1 s cross-dissolves, frame-exact loop trim (end frame is the source frame
 immediately before the start frame). Posters are the first frame of each orientation.
+
+
+## Landing montage loop (2026-07-18, replaces the aerial-only portrait loop)
+
+`bg-port.mp4` is now an 18.4s "Mauka to Makai" montage (960x1706, seamless tail-to-head
+dissolve loop). Additional Pexels-License sources beyond the three aerials above:
+
+- https://www.pexels.com/video/x-17185543/ (fluted ridge aerial opener)
+- https://www.pexels.com/video/x-34300579/ (wild-cliffs top-down)
+- https://www.pexels.com/video/x-28636270/ (Wailua Falls)
+- https://www.pexels.com/video/x-16271810/ (rain through palms)
+- https://www.pexels.com/video/x-27861198/ (fern gully)
+- https://www.pexels.com/video/x-7708933/ (hiker under tree ferns)
+- https://www.pexels.com/video/x-28616147/ (beach aerial)
+- https://www.pexels.com/video/x-17968531/ (snorkeler and sea turtle)
+- https://www.pexels.com/video/x-10493906/ (family splashing, finale)
+
+`bg-land.mp4` (desktop) is unchanged — still the three-aerial loop documented above.
