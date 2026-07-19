@@ -61,6 +61,12 @@
   .qr-row img{width:120px;height:120px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:6px}
   .qr-row p{flex:1;min-width:200px;font-size:13.5px;color:var(--muted)}
 
+  #islandLinks{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+  .ilk-intro{font-size:13px;color:var(--muted);line-height:1.55}
+  .ilk-row{margin-top:14px}
+  .ilk-row .linkbox{margin-top:6px}
+  .ilk-name{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted2)}
+
   .earn-line{display:flex;justify-content:space-between;gap:12px;margin-top:12px;font-size:15px;
     border-bottom:1px solid var(--line);padding-bottom:10px}
   .earn-line:last-of-type{border-bottom:none}
@@ -205,6 +211,10 @@
         <img id="dhQr" src="" alt="Your personal OceanSafe QR code">
         <p>Long-press (or right-click) to save. Need the print kit — rate card, rules, PDF? It lives on the <a href="/creators.html">creators page</a> on this device.</p>
       </div>
+      <div id="islandLinks" style="display:none">
+        <p class="ilk-intro">You’ve set up more than one island. The link above works everywhere — these point straight at a single island, so post the matching one with that island’s content.</p>
+        <div id="islandLinkRows"></div>
+      </div>
     </div>
 
     <div class="card" id="capsCard">
@@ -299,6 +309,42 @@
     var link = mode === 'creator' ? (APP + '/@' + display) : (APP + '/?ref=creators&u=' + uParam);
     $('dhLink').value = link;
     $('dhQr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=2&data=' + encodeURIComponent(link);
+
+    // ---- per-island links (creator mode only) ----
+    // Read the creator's config ONCE and share it with the customize editor below.
+    // The vanity /@handle link routes to one island; when a creator has curated 2+ islands
+    // we give them a direct, copyable ?island=&ref= link for each so their Maui audience
+    // lands on Maui and their Oʻahu audience on Oʻahu.
+    var cfgPromise = (mode === 'creator')
+      ? fetch(API + '/cfg/' + cParam).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+      : Promise.resolve(null);
+    if(mode === 'creator'){
+      var ISLE = { kauai:'Kauaʻi', oahu:'Oʻahu', maui:'Maui' };
+      var ISLE_ORDER = ['kauai','oahu','maui'];
+      var attr = function(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); };
+      cfgPromise.then(function(cfg){
+        if(!cfg || !cfg.islands) return;
+        var set = ISLE_ORDER.filter(function(i){
+          return cfg.islands[i] && Array.isArray(cfg.islands[i].featured) && cfg.islands[i].featured.length;
+        });
+        if(set.length < 2) return;   // one island — the main link already covers it
+        $('islandLinkRows').innerHTML = set.map(function(i){
+          var u = APP + '/?island=' + i + '&ref=' + cParam;
+          return '<div class="ilk-row"><div class="ilk-name">' + ISLE[i] + '</div>'
+            + '<div class="linkbox"><input readonly value="' + attr(u) + '" aria-label="Your ' + ISLE[i] + ' link">'
+            + '<button type="button" class="copybtn" data-ilk>Copy</button></div></div>';
+        }).join('');
+        $('islandLinks').style.display = 'block';
+      });
+      $('islandLinkRows').addEventListener('click', function(e){
+        var btn = e.target.closest('[data-ilk]'); if(!btn) return;
+        var inp = btn.parentNode.querySelector('input'); inp.select();
+        var done = function(){ btn.textContent='Copied'; btn.classList.add('did');
+          setTimeout(function(){ btn.textContent='Copy'; btn.classList.remove('did'); }, 1600); };
+        if(navigator.clipboard){ navigator.clipboard.writeText(inp.value).then(done).catch(done); }
+        else { document.execCommand('copy'); done(); }
+      });
+    }
 
     // ---- post-ready captions ----
     // Rendered generic immediately; re-rendered with the creator's island + starred
@@ -583,7 +629,7 @@
     function openSaveGate(){ saveGate.disabled = false; saveGate.textContent = saveGateT; }
     fetch('/creator-pois.json').then(function(r){ return r.json(); }).then(function(d){ POIS = d || {}; window._POIS = POIS; renderBeaches(); markCovered(); if(window._renderInsights) _renderInsights(); personalizeCaps(); })
       .catch(function(){ renderBeaches(); });
-    fetch(API + '/cfg/' + cParam).then(function(r){ return r.ok ? r.json() : null; }).then(function(cfg){
+    cfgPromise.then(function(cfg){
       openSaveGate();
       if(!cfg) return;
       if(cfg.name) $('edName').value = cfg.name;
