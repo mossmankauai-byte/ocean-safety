@@ -72,14 +72,6 @@
   .earn-line:last-of-type{border-bottom:none}
   .earn-line b{font-variant-numeric:tabular-nums}
 
-  .cap-h{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted2);margin-top:18px}
-  .cap-h:first-child{margin-top:14px}
-  .cap-item{margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:11px;
-    padding:11px 13px;font-size:13.5px;color:var(--ink);cursor:pointer;line-height:1.5}
-  .cap-item:hover{border-color:var(--accent)}
-  .cap-rules{margin-top:16px;background:#FFF7E0;border:1px solid #EAD9A0;border-radius:12px;padding:12px 14px;
-    font-size:13px;color:#6b5a1e;line-height:1.55}
-  @media (prefers-color-scheme:dark){.cap-rules{background:#2c2410;border-color:#4a3d1a;color:#e8d491}}
 
   .terms{font-size:13px;color:var(--muted);line-height:1.6;margin-top:10px}
   footer{padding:26px 0 46px;text-align:center;color:var(--muted2);font-size:13px}
@@ -215,13 +207,6 @@
         <p class="ilk-intro">You’ve set up more than one island. The link above works everywhere — these point straight at a single island, so post the matching one with that island’s content.</p>
         <div id="islandLinkRows"></div>
       </div>
-    </div>
-
-    <div class="card" id="capsCard">
-      <h2>Post-ready captions</h2>
-      <p class="hint">Tap to copy. Post as-is or riff on it — each one routes people to your link.</p>
-      <div id="capsBody"></div>
-      <div class="cap-rules"><b>Two rules:</b> keep <b>#ad</b> on commissioned posts, and never call a beach "safe" in your own words — link the guide and let the live data talk.</div>
     </div>
 
     <div class="card" id="editCard" style="display:none">
@@ -407,54 +392,6 @@
       });
     }
 
-    // ---- post-ready captions ----
-    // Rendered generic immediately; re-rendered with the creator's island + starred
-    // picks once their saved config loads (creator mode, below).
-    var capIsl = null, capPlaces = [];
-    var renderCaps = function(){
-      var here = capIsl ? ('on ' + capIsl) : 'here';
-      var visiting = capIsl || 'Hawaiʻi';
-      var placeList = capPlaces.slice(0,3);
-      var placeStr = placeList.length > 1
-        ? placeList.slice(0,-1).join(', ') + ' and ' + placeList[placeList.length-1] : '';
-      var groups = [
-        ['Feed posts', [
-          'The DM I get most: “which beach should we go to?” Honest answer: it changes daily. My picks plus live ocean conditions are in one free guide — link in bio. #ad',
-          'That beach you saved from a reel was filmed on a flat morning. Check what the water’s doing today before you drive across the island — free guide in my bio. #ad',
-          (placeStr
-            ? 'If you only had a week ' + here + ': ' + placeStr + '. My full list is free in my bio, with live conditions so you know which one to pick today. #ad'
-            : 'Trip-planning tip: pick your beach the morning of, not a month out. Conditions flip overnight here. The free guide in my bio shows today’s picture. #ad'),
-          'Everyone plans the luau. Nobody plans around the ocean. The guide in my bio has live water conditions for every beach, plus my picks for food and trails. Free. #ad'
-        ]],
-        ['Short-video hooks (first line on screen)', [
-          'Stop picking beaches from photos taken in 2019.',
-          'What I check before driving to any beach here.',
-          'Your hotel’s beach isn’t always the right beach.',
-          'The one link I send everyone visiting ' + visiting + '.'
-        ]],
-        ['Story slides (add your link sticker)', [
-          'Everything I recommend ' + here + ' — beaches, trails, food, tours. Free, with live ocean conditions. Link below.',
-          'Don’t pick tomorrow’s beach tonight. Conditions move overnight — check the guide in the morning.'
-        ]],
-        ['When someone asks in comments or DMs', [
-          'All my picks + live beach conditions: ' + link + ' — free, no signup.'
-        ]]
-      ];
-      $('capsBody').innerHTML = groups.map(function(g){
-        return '<div class="cap-h">' + g[0] + '</div>' + g[1].map(function(t){
-          return '<div class="cap-item" data-cap>' + t.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
-        }).join('');
-      }).join('');
-    };
-    renderCaps();
-    $('capsBody').addEventListener('click', function(e){
-      var el = e.target.closest('[data-cap]'); if(!el) return;
-      var flash = function(){ var o = el.style.borderColor; el.style.borderColor = 'var(--accent)';
-        setTimeout(function(){ el.style.borderColor = o; }, 900); };
-      if(navigator.clipboard){ navigator.clipboard.writeText(el.textContent.trim()).then(flash).catch(flash); }
-      else flash();
-    });
-
     // ---- live activity ----
     // Per-creator: the slug's OWN rollup → daily sessions. Pooled: this creator's unit count
     // inside the shared 'creators' rollup. Same chart either way.
@@ -569,23 +506,6 @@
     var curIsl = 'kauai', avatarDataUrl = null;
     $('editCard').style.display = 'block';
 
-    // Re-render the captions card with this creator's island + pick names.
-    // Runs after BOTH the saved config and the POI list land (either order).
-    var _capCfg = null;
-    function personalizeCaps(){
-      var cfg = _capCfg; if(!cfg || !cfg.islands) return;
-      var isl = ['kauai','oahu','maui'].filter(function(i){
-        return cfg.islands[i] && (cfg.islands[i].featured||[]).length; })[0];
-      if(!isl) return;
-      capIsl = ISL_NAME[isl];
-      var cats = POIS[isl] || {};
-      capPlaces = (cfg.islands[isl].featured||[]).map(function(id){
-        for(var c in cats){ var hit = (cats[c]||[]).find(function(p){ return p.id===id; }); if(hit) return hit.name; }
-        return null;
-      }).filter(Boolean);
-      renderCaps();
-    }
-
     function renderBeaches(){
       var cats = POIS[curIsl] || {};
       $('edIslName').textContent = ISL_NAME[curIsl];
@@ -688,7 +608,7 @@
     var saveGate = $('saveBtn'); saveGate.disabled = true;
     var saveGateT = saveGate.textContent; saveGate.textContent = 'Loading your picks\u2026';
     function openSaveGate(){ saveGate.disabled = false; saveGate.textContent = saveGateT; }
-    fetch('/creator-pois.json').then(function(r){ return r.json(); }).then(function(d){ POIS = d || {}; window._POIS = POIS; renderBeaches(); markCovered(); if(window._renderInsights) _renderInsights(); personalizeCaps(); })
+    fetch('/creator-pois.json').then(function(r){ return r.json(); }).then(function(d){ POIS = d || {}; window._POIS = POIS; renderBeaches(); markCovered(); if(window._renderInsights) _renderInsights(); })
       .catch(function(){ renderBeaches(); });
     cfgPromise.then(function(cfg){
       openSaveGate();
@@ -699,7 +619,6 @@
         if(picks[i] && Array.isArray(cfg.islands[i].featured)) cfg.islands[i].featured.forEach(function(id){ picks[i].add(id); });
       });
       renderBeaches(); markCovered();
-      _capCfg = cfg; personalizeCaps();
     }).catch(function(){ openSaveGate(); });
   }
 })();
