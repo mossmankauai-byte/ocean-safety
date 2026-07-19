@@ -5990,6 +5990,7 @@ function _declutterReg(reg, prioFn){
       // Reset every pin to its natural state first — this is also the fail-open baseline.
       mk._icon.style.display=''; mk._icon.classList.remove('mk-nolbl');
       const old=mk._icon.querySelector('.mk-more'); if(old) old.remove();
+      if(mk._clusterClick){ mk._icon.removeEventListener('click', mk._clusterClick, true); mk._clusterClick=null; }
       const lbl=mk._icon.querySelector('.mklbl'), name=(lbl&&lbl.textContent)||'';
       items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio:prioFn(ids[i]),name});
     }
@@ -6011,8 +6012,12 @@ function _declutterReg(reg, prioFn){
       const e=kept[m];
       if(e.more){
         const wrap=e.mk._icon.querySelector('.mkw'), host=wrap&&wrap.firstElementChild;
-        if(host){ const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more; host.appendChild(s);
-          const mem=e.members; s.addEventListener('click',function(ev){ ev.stopPropagation(); ev.preventDefault(); spiderfy(mem); }); }
+        if(host){ const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more; host.appendChild(s); }
+        // The WHOLE cluster pin opens the halo — a far bigger tap target than the little badge.
+        // Capture-phase so it pre-empts Leaflet's marker-click (which would open the leader's sheet).
+        const mem=e.members;
+        e.mk._clusterClick=function(ev){ ev.stopImmediatePropagation(); ev.preventDefault(); spiderfy(mem); };
+        e.mk._icon.addEventListener('click', e.mk._clusterClick, true);
       }
       const w=Math.max(30,e.name.length*6.4+18), x0=e.p.x-w/2, x1=e.p.x+w/2, y0=e.p.y-2, y1=e.p.y+20;
       let clash=false;
