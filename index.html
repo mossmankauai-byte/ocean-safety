@@ -6051,23 +6051,23 @@ function declutterMarks(){
 // ── SPIDERFY: fan a "+N" cluster out so each stacked pin is individually tappable ────────────
 // Tapping the "+N" badge calls spiderfy(members) — members[0] is the cluster LEADER, which stays
 // put as the hub; the folded pins fan into a ring around it (two rings past 8 so a big cluster
-// stays on-screen), shrunk to 0.8 and un-hidden with their labels. Connector legs are drawn from
-// each pin's TRUE on-screen centre (measured after the fan settles, so they connect for every
-// marker type regardless of its icon anchor) and terminate at the pin edges. Collapses when you
-// tap any pin, or on the next map click / pan / zoom, which re-runs declutterMarks to restore the
-// clustered state. Fail-open throughout: any error just leaves the map as-is.
-let _spiderSvg=null, _spidered=null, _spiderTok=0;
+// stays on-screen), shrunk to 0.8 and un-hidden with their labels. A soft translucent "halo" disc
+// sits behind the whole group to read as one cluster: dropped into Leaflet's shadowPane so it
+// renders UNDER every pin (no per-marker z-index guessing), and centred on the hub's MEASURED
+// visual centre — not its latLng anchor, which for a beach teardrop is the bottom tip. Collapses
+// when you tap any pin, or on the next map click / pan / zoom, which re-runs declutterMarks to
+// restore the clustered state. Fail-open throughout: any error just leaves the map as-is.
+let _spiderDeco=null, _spidered=null;
 function _mkCenter(mk, contRect){
-  // True on-screen centre + radius of a marker's glyph (first child of .mkw), in container coords.
+  // True on-screen centre of a marker's glyph (first child of .mkw), in container coords.
   const wrap=mk._icon&&mk._icon.querySelector('.mkw');
   const g=(wrap&&wrap.firstElementChild)||wrap||mk._icon;
   const r=g.getBoundingClientRect();
-  return { x:r.left-contRect.left+r.width/2, y:r.top-contRect.top+r.height/2, rad:Math.max(12,Math.max(r.width,r.height)/2) };
+  return { x:r.left-contRect.left+r.width/2, y:r.top-contRect.top+r.height/2 };
 }
 function unspiderfy(){
   try{
-    _spiderTok++;
-    if(_spiderSvg){ _spiderSvg.remove(); _spiderSvg=null; }
+    if(_spiderDeco){ _spiderDeco.remove(); _spiderDeco=null; }
     const arr=_spidered; _spidered=null;
     if(arr){ arr.forEach(function(mk){ if(mk&&mk._icon){
       mk._icon.style.zIndex=''; mk._icon.style.transition=''; mk._icon.classList.remove('mk-spider');
@@ -6084,10 +6084,21 @@ function spiderfy(members){
     const leader=members[0], others=members.slice(1), m=others.length;
     const base=map.latLngToLayerPoint(leader.getLatLng()), TWO=Math.PI*2, offs=[];
     // One ring up to 8 satellites; past that split into inner+outer rings so nothing flies off-screen.
-    if(m<=8){ const R=Math.max(46,30+m*6); for(let i=0;i<m;i++){ const a=-Math.PI/2+i*(TWO/m); offs.push([Math.cos(a)*R,Math.sin(a)*R]); } }
+    const maxR=(m<=8)?Math.max(46,30+m*6):94;
+    if(m<=8){ for(let i=0;i<m;i++){ const a=-Math.PI/2+i*(TWO/m); offs.push([Math.cos(a)*maxR,Math.sin(a)*maxR]); } }
     else { const inner=Math.ceil(m/2), outer=m-inner;
       for(let i=0;i<inner;i++){ const a=-Math.PI/2+i*(TWO/inner); offs.push([Math.cos(a)*52,Math.sin(a)*52]); }
       for(let i=0;i<outer;i++){ const a=-Math.PI/2+Math.PI/outer+i*(TWO/outer); offs.push([Math.cos(a)*94,Math.sin(a)*94]); } }
+    // Soft halo behind the group — centred on the hub's measured centre, sized to enclose the ring,
+    // placed in shadowPane so it sits UNDER every marker.
+    const contRect=map.getContainer().getBoundingClientRect(), hub=_mkCenter(leader, contRect);
+    const HR=maxR+28, halo=document.createElement('div');
+    halo.className='os-spider-halo';
+    halo.style.cssText='position:absolute;width:'+(HR*2)+'px;height:'+(HR*2)+'px;margin:'+(-HR)+'px 0 0 '+(-HR)+'px;'
+      +'border-radius:50%;background:rgba(15,76,92,.06);border:1px solid rgba(15,76,92,.16);pointer-events:none;opacity:0;transition:opacity .22s';
+    ((map.getPanes&&map.getPanes().shadowPane)||map.getContainer()).appendChild(halo);
+    L.DomUtil.setPosition(halo, map.containerPointToLayerPoint(L.point(hub.x, hub.y)));
+    _spiderDeco=halo;
     // Hide the leader's own +N badge while expanded (declutterMarks restores it on collapse).
     const lb=leader._icon&&leader._icon.querySelector('.mk-more'); if(lb) lb.style.display='none';
     // Fan the satellites out (leader stays put as the hub).
@@ -6101,24 +6112,7 @@ function spiderfy(members){
     // Any pin tap collapses the fan (its own sheet still opens — that handler runs first).
     members.forEach(function(mk){ if(mk&&mk._icon){ mk._spiderClose=function(){ unspiderfy(); }; mk.on('click', mk._spiderClose); } });
     _spidered=members.slice();
-    const tok=++_spiderTok;
-    // Draw the legs AFTER the fan settles, measuring each pin's real centre so they always connect.
-    setTimeout(function(){ try{
-      if(tok!==_spiderTok) return;
-      const contRect=map.getContainer().getBoundingClientRect(), c0=_mkCenter(leader, contRect);
-      let legs='';
-      others.forEach(function(mk){ if(!mk||!mk._icon) return;
-        const c=_mkCenter(mk, contRect), vx=c.x-c0.x, vy=c.y-c0.y, len=Math.hypot(vx,vy)||1, ux=vx/len, uy=vy/len;
-        const x1=c0.x+ux*c0.rad*0.55, y1=c0.y+uy*c0.rad*0.55, x2=c.x-ux*c.rad*0.7, y2=c.y-uy*c.rad*0.7;
-        legs+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#0f4c5c" stroke-width="2" stroke-opacity="0.32" stroke-linecap="round"/>';
-      });
-      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-      svg.setAttribute('class','os-spider-legs');
-      svg.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:590;opacity:0;transition:opacity .2s';
-      svg.innerHTML=legs;
-      map.getContainer().appendChild(svg); _spiderSvg=svg;
-      requestAnimationFrame(function(){ if(_spiderSvg===svg) svg.style.opacity='1'; });
-    }catch(e){} }, 270);
+    requestAnimationFrame(function(){ if(_spiderDeco===halo) halo.style.opacity='1'; });
     // Register the map-level collapse triggers on the NEXT tick so this badge's own click is ignored.
     setTimeout(function(){ try{ map.once('click', unspiderfy); map.once('movestart zoomstart', unspiderfy); }catch(e){} },0);
   }catch(e){}
