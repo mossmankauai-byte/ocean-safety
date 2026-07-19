@@ -6015,8 +6015,12 @@ function _declutterReg(reg, prioFn){
         if(host){ const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more; host.appendChild(s); }
         // The WHOLE cluster pin opens the halo — a far bigger tap target than the little badge.
         // Capture-phase so it pre-empts Leaflet's marker-click (which would open the leader's sheet).
+        // EXCEPTION — the Town tab (data-tab "shopping") is shop/food browsing, not spatial: a
+        // cluster tap there pulls up the bottom-sheet list (like the Waikiki app) instead of fanning.
         const mem=e.members;
-        e.mk._clusterClick=function(ev){ ev.stopImmediatePropagation(); ev.preventDefault(); spiderfy(mem); };
+        e.mk._clusterClick=function(ev){ ev.stopImmediatePropagation(); ev.preventDefault();
+          if(window._activeTab==='shopping' && typeof openTownList==='function') openTownList();
+          else spiderfy(mem); };
         e.mk._icon.addEventListener('click', e.mk._clusterClick, true);
       }
       const w=Math.max(30,e.name.length*6.4+18), x0=e.p.x-w/2, x1=e.p.x+w/2, y0=e.p.y-2, y1=e.p.y+20;
