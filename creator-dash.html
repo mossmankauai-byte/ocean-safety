@@ -163,6 +163,23 @@
       <div class="state" id="statsState" style="display:none"></div>
     </div>
 
+    <div class="card" id="bookCard" style="display:none">
+      <h2>Booking activity</h2>
+      <p class="hint">Tour views = your visitors opening the Tours tab. Booking clicks = taps into the GetYourGuide booking widget (a directional signal — confirmed bookings still post monthly below).</p>
+      <div class="stat-row">
+        <div class="stat"><div class="n" id="bkViews7">—</div><div class="l">Tour views · 7d</div></div>
+        <div class="stat"><div class="n" id="bkClicks7">—</div><div class="l">Booking clicks · 7d</div></div>
+        <div class="stat"><div class="n" id="bkClicks30">—</div><div class="l">Clicks · 30d</div></div>
+      </div>
+      <div class="state" id="bkState" style="display:none"></div>
+    </div>
+
+    <div class="card" id="insightCard" style="display:none">
+      <h2>What your audience loves</h2>
+      <p class="hint">The places your visitors open most — post about these when conditions go green.</p>
+      <div id="insightBody"></div>
+    </div>
+
     <div class="card" id="earnCard">
       <h2>Bookings &amp; commission</h2>
       <p class="hint">Reconciled monthly against GetYourGuide's partner report, then posted here and paid out ($25 minimum, smaller balances roll over).</p>
@@ -263,7 +280,7 @@
       '<div class="card"><h2>No creator code in this link</h2><p class="terms">Open your dashboard from your kit on the <a href="/creators.html">creators page</a>.</p></div>';
   } else {
     $('dhHandle').textContent = '@' + display;
-    var link = mode === 'creator' ? (APP + '/?ref=' + cParam) : (APP + '/?ref=creators&u=' + uParam);
+    var link = mode === 'creator' ? (APP + '/@' + display) : (APP + '/?ref=creators&u=' + uParam);
     $('dhLink').value = link;
     $('dhQr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=2&data=' + encodeURIComponent(link);
 
@@ -289,6 +306,42 @@
         else { var pct = Math.round((t7-prev7)/prev7*100);
           d.textContent = (pct>=0?'▲ +':'▼ ') + pct + '% vs the week before';
           d.className = 'delta ' + (pct>0?'up':(pct<0?'dn':'flat')); }
+        // ---- booking activity + audience insights (creator mode) ----
+        if(mode === 'creator'){
+          try {
+            var rolls = (data.days||[]).map(function(x){ return x.roll || null; });
+            var sumF = function(n,f){ var t=0; for(var i=0;i<n&&i<rolls.length;i++){ if(rolls[i]) t+=(rolls[i][f]||0); } return t; };
+            var sumTab = function(n,tab){ var t=0; for(var i=0;i<n&&i<rolls.length;i++){ var r=rolls[i]; if(r&&r.tabs) t+=(r.tabs[tab]||0); } return t; };
+            $('bookCard').style.display='block';
+            var v7=sumTab(7,'tours'), c7=sumF(7,'tour_lead'), c30=sumF(30,'tour_lead');
+            $('bkViews7').textContent=v7; $('bkClicks7').textContent=c7; $('bkClicks30').textContent=c30;
+            if(!v7 && !c30){ var bs=$('bkState'); bs.style.display='block';
+              bs.textContent='No tour activity yet — the Tours tab on your link is where bookings happen. Mention it in your next post.'; }
+            // insights: merge poi taps across all categories and days
+            var agg={};
+            rolls.forEach(function(r){ if(!r||!r.top) return;
+              Object.keys(r.top).forEach(function(kind){ var m=r.top[kind]||{};
+                Object.keys(m).forEach(function(id){ agg[id]=(agg[id]||0)+m[id]; }); }); });
+            var ids=Object.keys(agg).sort(function(a,b){ return agg[b]-agg[a]; }).slice(0,3);
+            var hrs=Array(24).fill(0);
+            rolls.forEach(function(r){ if(r&&r.hours) r.hours.forEach(function(v,i){ hrs[i]+=v; }); });
+            var peak=hrs.indexOf(Math.max.apply(null,hrs));
+            window._renderInsights = function(){
+              var body=$('insightBody'); $('insightCard').style.display='block';
+              if(!ids.length){ body.innerHTML='<div class="state">Insights appear as your audience explores your guide — share your link and check back.</div>'; return; }
+              var nameOf=function(id){
+                var P=window._POIS||{};
+                for(var isl in P){ for(var cat in P[isl]){ var hit=(P[isl][cat]||[]).find(function(p){ return p.id===id; }); if(hit) return hit.name; } }
+                return id.replace(/_/g,' ').replace(/\b\w/g,function(ch){ return ch.toUpperCase(); });
+              };
+              body.innerHTML = ids.map(function(id){
+                return '<div class="earn-line"><span>'+nameOf(id)+'</span><b>'+agg[id]+' opens</b></div>';
+              }).join('') + (Math.max.apply(null,hrs)>0
+                ? '<p class="hint" style="margin-top:10px">Your audience is most active around '+((peak%12)||12)+(peak<12?' AM':' PM')+' — a good hour to post.</p>' : '');
+            };
+            _renderInsights();
+          } catch(e){}
+        }
         var last14 = days.slice(0,14).reverse();   // oldest → today
         var max = Math.max.apply(null, last14.concat([1]));
         var chart = $('chart');
@@ -447,7 +500,7 @@
     var saveGate = $('saveBtn'); saveGate.disabled = true;
     var saveGateT = saveGate.textContent; saveGate.textContent = 'Loading your picks\u2026';
     function openSaveGate(){ saveGate.disabled = false; saveGate.textContent = saveGateT; }
-    fetch('/creator-pois.json').then(function(r){ return r.json(); }).then(function(d){ POIS = d || {}; renderBeaches(); markCovered(); })
+    fetch('/creator-pois.json').then(function(r){ return r.json(); }).then(function(d){ POIS = d || {}; window._POIS = POIS; renderBeaches(); markCovered(); if(window._renderInsights) _renderInsights(); })
       .catch(function(){ renderBeaches(); });
     fetch(API + '/cfg/' + cParam).then(function(r){ return r.ok ? r.json() : null; }).then(function(cfg){
       openSaveGate();

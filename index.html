@@ -9098,6 +9098,22 @@ function _partnerTrack(type, label){
     }).catch(function(){});
   } catch(e){}
 }
+// Booking-click signal: GYG widgets are iframes, so taps inside them are invisible to us.
+// Proxy: when the window blurs while focus sits in a GYG iframe, count one booking click
+// (whitelisted tour_lead, label gyg_widget). Same ?ref gate as all partner telemetry —
+// organic visitors emit nothing. Throttled so scroll-focus churn can't spam it.
+(function(){
+  var last = 0;
+  addEventListener('blur', function(){
+    try {
+      var ae = document.activeElement;
+      if(!ae || ae.tagName !== 'IFRAME') return;
+      if(!(ae.closest && ae.closest('[data-gyg-widget],[data-gyg-tour-id]'))) return;
+      var now = Date.now(); if(now - last < 20000) return; last = now;
+      if(typeof _partnerTrack === 'function') _partnerTrack('tour_lead', 'gyg_widget');
+    } catch(e){}
+  });
+})();
 // sms: URI prefill fails SILENTLY on most desktops (no handler, or a handler
 // that ignores ?body=). Crude but reliable gate: mobile UA or a real
 // multi-touch screen gets the sms: composer; everything else gets the visible

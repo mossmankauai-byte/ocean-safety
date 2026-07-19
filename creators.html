@@ -254,7 +254,7 @@
       <a class="btn" href="#claim">Claim your link <span class="ar" aria-hidden="true">→</span></a>
       <button type="button" class="tourlink" id="tourBtn">Take the 60-second tour</button>
     </div>
-    <p class="reassure">Free to join. No posting quotas. Your link works forever.</p>
+    <p class="reassure">Free to join. No posting quotas. And a follower who taps once stays yours — bookings days later in their trip still pay you.</p>
 
     <p class="audience">For Hawaiʻi-based creators on Kauaʻi, Oʻahu, and Maui — beach, surf, family, food, hiking, photography. Nano and micro accounts welcome; local trust beats follower count here.</p>
   </div>
@@ -340,6 +340,7 @@
       <div class="tag">Half the commission on every tour your followers book — split 50/50 with you, not "up to."</div>
       <ul class="checks">
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Your split grows to 60% once you pass 25 bookings in a quarter</li>
+        <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Lifetime attribution — your link keeps credit on return visits, not a 24-hour cookie</li>
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Paid monthly — $25 minimum, smaller balances roll over</li>
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>No exclusivity, no posting minimums, cancel anytime</li>
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>W-9 collected before first payout; 1099 if you pass $600/yr</li>
@@ -501,10 +502,9 @@
   // registered telemetry slug, or mode:'pooled' when the provision function was
   // unreachable (local preview / MINT_KEY not set yet) — the pooled link still tracks.
   function linkFor(rec){
+    if(rec.mode !== 'pooled') return APP + '/@' + rec.clean;   // vanity — resolves island + ref
     var isl = rec.island ? ('island=' + rec.island + '&') : '';
-    return rec.mode === 'pooled'
-      ? APP + '/?' + isl + 'ref=creators&u=' + rec.clean
-      : APP + '/?' + isl + 'ref=' + rec.slug;
+    return APP + '/?' + isl + 'ref=creators&u=' + rec.clean;
   }
   function dashFor(rec){
     return rec.mode === 'pooled'
