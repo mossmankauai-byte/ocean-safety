@@ -141,11 +141,10 @@
     var host = url.hostname.replace(/^www\./, '');
     var partner = /booking\./.test(host) ? 'booking'
                 : /(vrbo|expedia)/.test(host) ? 'vrbo'
-                : /opentable/.test(host) ? 'opentable'
                 : /getyourguide/.test(host) ? 'getyourguide'
                 : /viator/.test(host) ? 'viator' : host;
     var isAffiliate = (a.rel && /sponsored/i.test(a.rel)) ||
-      /(aid=|adid=|[?&]ref=|partner|opentable|getyourguide|booking\.|vrbo)/i.test(a.href);
+      /(aid=|adid=|[?&]ref=|partner|getyourguide|booking\.|vrbo)/i.test(a.href);
     var p = ph();
     if(p) p.capture(isAffiliate ? 'affiliate_click' : 'outbound_click',
       { partner: partner, host: host, url: a.href, context: view ? view.name : null });
@@ -3068,9 +3067,6 @@ let ACTS=[
 // 2. Booking.com: Sign up at https://partners.booking.com — replace
 //    'MISSING_YOUR_AFF_ID_BOOKING' with your real `aid` partner code.
 //    Grep for 'MISSING_YOUR_AFF_ID_BOOKING'.
-// 3. OpenTable: Sign up at https://www.opentable.com/affiliate — replace
-//    'MISSING_YOUR_OPENTABLE_REF' (defined a few sections down) with your
-//    `corrid`. Until then sit-down reservations earn $0 commission.
 // Once all three are populated, delete this comment block.
 // ────────────────────────────────────────────────────────────────────────
 // STAYS — RETIRED 2026-07-15 (Nick: "dont use stays i have no plans to ever use that").
@@ -3284,9 +3280,6 @@ let FMARKETS=[
 
 
 // LOCAL FOOD SPOTS — starter list, expand freely
-// OpenTable affiliate. Replace OPENTABLE_REF with your real OpenTable Affiliate ID once approved at opentable.com/affiliate.
-// Restaurants without restRid get a search-style link as fallback.
-const OPENTABLE_REF = 'MISSING_YOUR_OPENTABLE_REF'; // TODO: replace once OpenTable Affiliate account is approved. // TODO: replace with real ref code from OpenTable affiliate dashboard
 let FOODS=[
   {id:'hamura_saimin',phone:'(808) 245-3271',name:'Hamura Saimin',n:'Hamura',r:'East Side',lat:21.971631,lon:-159.365925,
    type:'saimin / local',price:'$',hours:"Mon-Thu 10am-10:30pm, Fri-Sat 10am-12am, Sun 10am-9:30pm",
@@ -3348,7 +3341,6 @@ let FOODS=[
    type:'local market / farm stand',price:'$$',hours:'Daily, varies',
    tip:"Farm-to-table local market at the Kīlauea Agricultural Park. Fresh produce, eggs, prepared local food, smoothies. Cash often preferred. Quick stop on the way to or from Kīlauea Lighthouse.",
    tags:['local','market','farm_fresh','prepared_food','quick']},
-  // Reservation-style sit-down restaurants. restRid values are OpenTable Restaurant IDs — confirm exact IDs in your OpenTable Affiliate dashboard before launch.
   {id:'bar_acuda',phone:"(808) 855-7802",website:'https://restaurantbaracuda.com',name:'Bar Acuda',n:'Bar Acuda',r:'North Shore',lat:22.2028,lon:-159.4958,
    type:'tapas / wine bar',price:'$$$',hours:"5:30pm–9:30pm Tue–Sat, closed Sun & Mon",
    tip:'Chef Jim Moffat\u2019s Hanalei tapas spot — Mediterranean small plates with Kauaʻi-grown produce. Reservations recommended in season. Order the cheese plate and the lamb skewers.',
@@ -5880,43 +5872,6 @@ function openFoodSheet(id){
   const f = FOODS.find(x=>x.id===id); if(!f) return;
   const tagPills = (f.tags||[]).map(t=>`<span style="background:#fef3c7;color:#78530a;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
 
-  // OpenTable reservation block — matches the tours-sheet reservation card styling for visual consistency
-  // 3 modes:
-  //   restRid  → embedded OpenTable widget for 1-click booking
-  //   reservations:true → fallback search-style affiliate link
-  //   default → no reservation block
-  let reservationBlock = '';
-  if(f.restRid){
-    // Default party of 2, today, 7 PM. User adjusts on OpenTable site.
-    const todayStr = new Date().toISOString().slice(0,10);
-    const restefURL = `https://www.opentable.com/restref/client/?rid=${f.restRid}&restref=${f.restRid}&partysize=2&datetime=${todayStr}T19%3A00&corrid=${OPENTABLE_REF}`;
-    reservationBlock = `
-      <div class="slbl" style="margin-top:18px">Reserve a Table</div>
-      <div style="font-size:11px;color:var(--mute);margin-top:-4px;margin-bottom:6px;font-style:italic">Tonight, 7 PM, party of 2 — adjust on next screen</div>
-      <div style="margin-top:6px;padding:14px;background:#fff;border:1px solid var(--border);border-radius:12px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div style="width:36px;height:36px;border-radius:50%;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:700;color:var(--ink);font-size:13px">Book on OpenTable</div>
-            <div style="font-size:10px;color:var(--mute);margin-top:1px">Free reservations · Instant confirmation</div>
-          </div>
-        </div>
-        <a href="${restefURL}" target="_blank" rel="sponsored noopener" style="display:block;text-align:center;padding:12px;background:#dc2626;color:#fff;font-weight:700;border-radius:8px;font-size:13px;text-decoration:none">Check Availability →</a>
-      </div>
-      <div style="font-size:10px;color:var(--mute);margin-top:6px;text-align:center;line-height:1.4"><strong>Reservations via OpenTable.</strong> Bookings may earn a small commission at no extra cost to you.</div>`;
-  } else if(f.reservations){
-    const searchURL = `https://www.opentable.com/s?term=${encodeURIComponent(f.name)}&corrid=${OPENTABLE_REF}`;
-    reservationBlock = `
-      <div class="slbl" style="margin-top:18px">Reserve a Table</div>
-      <div style="margin-top:4px;padding:12px;background:#fff;border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;gap:10px">
-        <div style="width:30px;height:30px;border-radius:50%;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <a href="${searchURL}" target="_blank" rel="sponsored noopener" style="flex:1;color:#dc2626;font-weight:600;font-size:12px;text-decoration:none">Find on OpenTable →</a>
-      </div>`;
-  }
 
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
     ${_placementBadge(f)}<div class="poi-hero" style="background:${heroBg(heroPhoto(f), 'linear-gradient(135deg,#e07856,#c9a84c)')};color:#fff">${_housePickBadge(f.id)}
@@ -5930,7 +5885,6 @@ function openFoodSheet(id){
     <div class="poi-local-tip" style="margin-top:14px"><span style="font-size:14px;flex-shrink:0">◈</span><span>${f.tip}</span></div>
     ${contactRow(f)}
     <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:12px">${tagPills}</div>
-    ${reservationBlock}
     <div class="poi-cta-row">
       <a href="${dirUrl(f.name, f.lat, f.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
     </div>`;
