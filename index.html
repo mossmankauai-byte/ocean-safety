@@ -2382,7 +2382,9 @@ function _gateLive(){
       var isl = ISLANDS[slug]; if(!isl || !isl.live || !isl.seaLevel) return;
       var ctl = ('AbortController' in window) ? new AbortController() : null;
       if(ctl) setTimeout(function(){ ctl.abort(); }, 6000);
-      fetch('/api/wx?k=live&lat=' + isl.seaLevel.lat.toFixed(2) + '&lon=' + isl.seaLevel.lon.toFixed(2),
+      // island= is required: wx.mjs clamps coords to that island's bbox and otherwise
+      // treats every request as Kauaʻi (all three cards would show Kauaʻi numbers).
+      fetch('/api/wx?k=live&island=' + slug + '&lat=' + isl.seaLevel.lat.toFixed(2) + '&lon=' + isl.seaLevel.lon.toFixed(2),
             ctl ? { signal: ctl.signal } : undefined)
         .then(function(r){ return r.json(); })
         .then(function(d){
