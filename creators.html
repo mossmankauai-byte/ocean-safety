@@ -343,7 +343,7 @@
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Lifetime attribution — your link keeps credit on return visits, not a 24-hour cookie</li>
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Paid monthly — $25 minimum, smaller balances roll over</li>
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>No exclusivity, no posting minimums, cancel anytime</li>
-        <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>W-9 collected before first payout; 1099 if you pass $600/yr</li>
+        <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Paid straight to your PayPal — no bank account needed on your end</li>
       </ul>
     </div>
   </div>
@@ -381,13 +381,17 @@
             <input id="cf-name" name="name" type="text" required autocomplete="name">
           </div>
           <div class="frow">
-            <label for="cf-email">Email (for payouts)</label>
+            <label for="cf-email">Email (for account &amp; program updates)</label>
             <input id="cf-email" name="email" type="email" required autocomplete="email">
           </div>
         </div>
         <div class="frow">
           <label for="cf-handle">Primary handle</label>
           <input id="cf-handle" name="handle" type="text" placeholder="@yourhandle" required>
+        </div>
+        <div class="frow">
+          <label for="cf-paypal">PayPal email <span style="font-weight:400;color:var(--muted2)">— where we send your commission (add it now or later on your dashboard)</span></label>
+          <input id="cf-paypal" name="paypal" type="email" placeholder="you@paypal.com" autocomplete="email">
         </div>
         <div class="ftwo">
           <div class="frow">
@@ -462,7 +466,7 @@
     <h2>The fine print, kept short.</h2>
     <ul class="fine" style="margin-top:18px;list-style:disc">
       <li>You earn 50% of the commission GetYourGuide pays on tours booked through the app by visitors who arrived on your link — an even split — rising to 60% after 25 bookings in a quarter. Booking data comes from GetYourGuide's partner reporting and posts to your dashboard monthly.</li>
-      <li>Payouts monthly, $25 minimum (smaller balances roll over). A completed W-9 is required before your first payout; we issue a 1099-NEC if your year passes $600.</li>
+      <li>Payouts are sent to your PayPal, monthly, $25 minimum (smaller balances roll over). You’re an independent contractor responsible for your own taxes; if your annual earnings cross the IRS reporting threshold you’ll receive the appropriate 1099 form.</li>
       <li>Disclose commissioned or incentivized posts with #ad. Don't make safety claims in your own voice — point to the app's live data instead.</li>
       <li>OceanSafe covers Kauaʻi, Oʻahu, and Maui. Please don't present it as covering other islands.</li>
       <li>Either side can end participation anytime; earned commission through the end date still pays out. We may decline or remove accounts that misrepresent the app or the program.</li>
@@ -549,6 +553,7 @@
     e.preventDefault();
     var err = $('ferr'); err.style.display = 'none';
     var name = $('cf-name').value.trim(), email = $('cf-email').value.trim();
+    var paypal = $('cf-paypal').value.trim();
     var handle = $('cf-handle').value.trim();
     var clean = cleanHandle(handle);
     if(clean.length < 1){
@@ -558,7 +563,7 @@
     var btn = $('claimForm').querySelector('button[type=submit]');
     btn.disabled = true; var btnHtml = btn.innerHTML; btn.textContent = 'Setting up your link…';
 
-    var base = { name:name, email:email, handle:handle, clean:clean,
+    var base = { name:name, email:email, paypal:paypal, handle:handle, clean:clean,
                  platform:$('cf-platform').value, island:$('cf-island').value,
                  agreedTerms:'creator-terms-2026-07-18',   // checkbox is required; record the version
                  ts:new Date().toISOString() };
@@ -588,7 +593,7 @@
         .catch(function(){
           err.innerHTML = 'Your kit is ready below — but our signup recorder didn’t respond, so please also send a quick note to ' +
             '<a href="mailto:nick@oceansafety.app?subject=' + encodeURIComponent('Creator signup: @' + clean) +
-            '&body=' + encodeURIComponent('Name: ' + name + '\nHandle: ' + handle + '\nEmail: ' + email + '\nPlatform: ' + rec.platform + '\nIsland: ' + rec.island) +
+            '&body=' + encodeURIComponent('Name: ' + name + '\nHandle: ' + handle + '\nEmail: ' + email + '\nPayPal: ' + paypal + '\nPlatform: ' + rec.platform + '\nIsland: ' + rec.island) +
             '">nick@oceansafety.app</a> so payouts reach you.';
           err.style.display = 'block';
         });

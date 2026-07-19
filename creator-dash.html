@@ -256,9 +256,15 @@
       <p class="ed-status" id="edStatus"></p>
     </div>
 
+    <div class="card" id="payCard">
+      <h2>Getting paid</h2>
+      <div id="payState"></div>
+      <p class="terms">We send your commission to <b>PayPal</b> — no bank account needed on your end. Don’t have PayPal yet? It’s free at <a href="https://www.paypal.com/" target="_blank" rel="noopener">paypal.com</a>. Use the same email above.</p>
+    </div>
+
     <div class="card">
       <h2>Payout terms</h2>
-      <p class="terms">50% of the commission on every tour — an even split, rising to 60% after 25 bookings in a quarter. Paid monthly once your balance passes $25; smaller balances roll over. W-9 required before first payout; 1099-NEC if your year passes $600. Questions or payout details: <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a>.</p>
+      <p class="terms">50% of the commission on every tour — an even split, rising to 60% after 25 bookings in a quarter. Sent to your PayPal once your balance passes $25; smaller balances roll over. You’re an independent contractor responsible for your own taxes. Questions or payout details: <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a>.</p>
     </div>
 
   </div>
@@ -318,6 +324,61 @@
     var cfgPromise = (mode === 'creator')
       ? fetch(API + '/cfg/' + cParam).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
       : Promise.resolve(null);
+
+    // ---- PayPal payout setup ----
+    (function(){
+      var el = $('payState'); if(!el) return;
+      function chip(color, label){
+        return '<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;'
+          + 'background:var(--tint);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:4px 11px">'
+          + '<span style="width:8px;height:8px;border-radius:50%;background:' + color + '"></span>' + label + '</span>';
+      }
+      function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+      if(mode !== 'creator' || !key){
+        el.innerHTML = chip('var(--muted2)', 'Shared link')
+          + '<div style="background:var(--tint);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 0">'
+          + '<div style="font-weight:800;font-size:15px;margin-bottom:4px">Set up your payout</div>'
+          + '<div style="font-size:13.5px;color:var(--muted);line-height:1.55">Email <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a> with your PayPal address and we’ll send your commission there.</div></div>';
+        return;
+      }
+
+      function renderSet(paypal){
+        el.innerHTML = chip('#1AA67A', 'PayPal on file')
+          + '<div style="background:var(--tint);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 0">'
+          + '<div style="font-weight:800;font-size:15px;margin-bottom:4px">You’re set up</div>'
+          + '<div style="font-size:13.5px;color:var(--muted);line-height:1.55">We send your commission to <b>' + esc(paypal) + '</b> each month. '
+          + '<a href="#" id="ppEdit">Change</a></div></div>';
+        $('ppEdit').addEventListener('click', function(e){ e.preventDefault(); renderForm(paypal); });
+      }
+      function renderForm(current){
+        el.innerHTML = chip('var(--muted2)', 'Not set up yet')
+          + '<div style="background:var(--tint);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 0">'
+          + '<div style="font-weight:800;font-size:15px;margin-bottom:4px">Add your PayPal email</div>'
+          + '<div style="font-size:13.5px;color:var(--muted);line-height:1.5;margin-bottom:10px">This is where we send your commission — no bank account needed.</div>'
+          + '<div class="linkbox"><input id="ppInput" type="email" placeholder="you@paypal.com" value="' + esc(current || '') + '" aria-label="Your PayPal email">'
+          + '<button type="button" class="copybtn" id="ppSave">Save</button></div>'
+          + '<p class="ed-status" id="ppStatus"></p></div>';
+        $('ppSave').addEventListener('click', savePaypal);
+        $('ppInput').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); savePaypal(); } });
+      }
+      function savePaypal(){
+        var v = $('ppInput').value.trim(), st = $('ppStatus');
+        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ st.className = 'ed-status err'; st.textContent = 'That doesn’t look like an email — check and try again.'; return; }
+        var b = $('ppSave'); b.disabled = true; b.textContent = 'Saving…';
+        fetch(API + '/creator-payout', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ slug:cParam, key:key, paypal:v }) })
+          .then(function(r){ return r.json(); })
+          .then(function(d){ if(d && d.ok){ renderSet(d.paypal || v); } else { throw new Error((d && d.reason) || 'failed'); } })
+          .catch(function(){ b.disabled = false; b.textContent = 'Save'; st.className = 'ed-status err'; st.textContent = 'Didn’t save — check your connection and retry.'; });
+      }
+
+      fetch(API + '/creator-payout?c=' + encodeURIComponent(cParam) + '&k=' + encodeURIComponent(key))
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){ if(d && d.paypal){ renderSet(d.paypal); } else { renderForm(''); } })
+        .catch(function(){ renderForm(''); });
+    })();
+
     if(mode === 'creator'){
       var ISLE = { kauai:'Kauaʻi', oahu:'Oʻahu', maui:'Maui' };
       var ISLE_ORDER = ['kauai','oahu','maui'];
