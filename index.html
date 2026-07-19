@@ -5975,25 +5975,25 @@ function ensureDeclutterCSS(){
     +'box-shadow:0 1px 3px rgba(0,0,0,.35);pointer-events:none;z-index:3}';
   document.head.appendChild(st);
 }
-function declutterMarks(){
+// Core collision pass for ONE marker registry. Reset → sort by priority then position →
+// hide any pin whose cluster leader sits within R px → tag the leader "+N" → de-overlap the
+// name pills. The name is read from the rendered .mklbl, so this works unchanged for beach
+// pins and every POI pin (both use the same .mkw/.mklbl markup). Fail-open on any error.
+function _declutterReg(reg, prioFn){
   try{
-    if(typeof map==='undefined'||!map) return;
-    ensureDeclutterCSS();
-    const ids=Object.keys(mkrs), items=[];
-    // Reset every pin to its natural state first — this is also the fail-open baseline.
+    if(!reg) return;
+    const ids=Object.keys(reg), items=[];
     for(let i=0;i<ids.length;i++){
-      const mk=mkrs[ids[i]]; if(!mk||!mk._icon) continue;
+      const mk=reg[ids[i]]; if(!mk||!mk._icon) continue;
+      // Reset every pin to its natural state first — this is also the fail-open baseline.
       mk._icon.style.display=''; mk._icon.classList.remove('mk-nolbl');
       const old=mk._icon.querySelector('.mk-more'); if(old) old.remove();
-      const r=scored[ids[i]]||{};
-      // Keep the most cautionary pin when a cluster collides: warning > big-surf caution > green > default.
-      const prio=(r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3;
-      items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio,name:(mk._b&&mk._b.n)||''});
+      const lbl=mk._icon.querySelector('.mklbl'), name=(lbl&&lbl.textContent)||'';
+      items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio:prioFn(ids[i]),name});
     }
-    if(window._activeSub==='hazards') return;   // never hide a hazard pin
     // Priority first, then top→bottom, left→right so the survivor set is stable across renders.
     items.sort((a,b)=>a.prio-b.prio || a.p.y-b.p.y || a.p.x-b.p.x);
-    const R=32, R2=R*R, kept=[];
+    const R=44, R2=R*R, kept=[];
     for(let k=0;k<items.length;k++){
       const it=items[k]; let hit=null;
       for(let j=0;j<kept.length;j++){
@@ -6018,6 +6018,30 @@ function declutterMarks(){
       if(clash) e.mk._icon.classList.add('mk-nolbl');
       else lblRects.push([x0,y0,x1,y1]);
     }
+  }catch(e){}
+}
+function declutterMarks(){
+  try{
+    if(typeof map==='undefined'||!map) return;
+    ensureDeclutterCSS();
+    if(window._activeSub==='hazards') return;   // never thin a hazard pin — skip the whole pass on the hazards subtab
+    // Beaches keep their severity-aware priority: warning > big-surf caution > green > default.
+    _declutterReg(mkrs, function(id){ const r=scored[id]||{}; return (r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3; });
+    // POI tabs (Family / Trails / Town / Stays) pile up in dense areas just like beaches, but
+    // places carry no severity — so keep-by-position (flat priority, ties broken top→bottom).
+    // Each registry is thinned on its own, so a pin only ever hides a same-category neighbour.
+    const flat=function(){ return 0; }, regs=[];
+    try{ if(typeof actMkrs!=='undefined') regs.push(actMkrs); }catch(e){}
+    try{ if(typeof hikeMkrs!=='undefined') regs.push(hikeMkrs); }catch(e){}
+    try{ if(typeof mktMkrs!=='undefined') regs.push(mktMkrs); }catch(e){}
+    try{ if(typeof foodMkrs!=='undefined') regs.push(foodMkrs); }catch(e){}
+    try{ if(typeof groceryMkrs!=='undefined') regs.push(groceryMkrs); }catch(e){}
+    try{ if(typeof gasMkrs!=='undefined') regs.push(gasMkrs); }catch(e){}
+    try{ if(typeof craftMkrs!=='undefined') regs.push(craftMkrs); }catch(e){}
+    try{ if(typeof coffeeMkrs!=='undefined') regs.push(coffeeMkrs); }catch(e){}
+    try{ if(typeof drinkMkrs!=='undefined') regs.push(drinkMkrs); }catch(e){}
+    try{ if(typeof stayMkrs!=='undefined') regs.push(stayMkrs); }catch(e){}
+    regs.forEach(function(reg){ _declutterReg(reg, flat); });
   }catch(e){}
 }
 
