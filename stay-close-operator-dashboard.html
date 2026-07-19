@@ -463,33 +463,42 @@
     .then(function(r){ return r.json(); })
     .then(function(j){
       if(!j || j.error) return;
-      var R=j.roll||{}, live=(R.leads||0)>0;
+      var R=j.roll||{}, live=(R.leads||0)>0, tier=(j.tier||"free"), paid=(tier==="paid");
       var bar=document.querySelector(".samplebar");
       if(bar && live){
         bar.style.background="oklch(0.30 0.05 155)";
         var st=bar.querySelector("strong"); if(st) st.textContent="Live data";
         var sn=bar.querySelector("span"); if(sn) sn.textContent="Real figures from your Stay-Close leads and logged tour outcomes.";
       }
-      var realRev=R.revenue_closed||0, proj=(R.model&&R.model.projected_revenue)||0;
-      var cards=[
-        ["Leads captured", (R.leads||0)],
-        ["Sessions booked", (R.booked||0)],
-        ["Showed", (R.showed||0)],
-        ["Closed", (R.closed||0)],
-        ["Show rate", pct(R.show_rate)],
-        ["Close rate", pct(R.close_rate)],
-        ["Actual revenue", money(realRev)],
-        ["Gift cost", money(R.gift_redeemed_cost||R.gift_offered)],
-        ["Net revenue", money(R.net_revenue)],
-        ["Cost / booking", money(R.cost_per_booking)]
-      ];
-      if(R.revenue_per_room!=null) cards.push(["Revenue / room", money(R.revenue_per_room)]);
-      var html='<div class="sectiontitle">Live results &middot; last 30 days</div>';
-      html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px">';
-      cards.forEach(function(c){ html+='<div style="background:#fff;border:1px solid #e7dfce;border-radius:12px;padding:12px"><div style="font-size:11px;color:#6b6457;font-weight:700">'+c[0]+'</div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:2px">'+c[1]+'</div></div>'; });
-      html+='</div>';
-      if(!realRev && proj){
-        html+='<div style="background:#fff;border:1px solid #e7dfce;border-left:4px solid #d97706;border-radius:0 12px 12px 0;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#2c2a24;line-height:1.5"><b>Projected '+money(proj)+'</b> from '+(R.booked||0)+' booked tours × '+pct(R.model.show_rate)+' show × '+pct(R.model.close_rate)+' close × '+money(R.model.vpg)+' VPG. Actual dollars replace this as your sales desk logs each outcome.</div>';
+      var esc=function(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});};
+      var tierName={free:"Free",paid:"Paid"}[tier]||"Free";
+      function grid(cards){ var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px">'; cards.forEach(function(c){ h+='<div style="background:#fff;border:1px solid #e7dfce;border-radius:12px;padding:12px"><div style="font-size:11px;color:#6b6457;font-weight:700">'+c[0]+'</div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:2px">'+c[1]+'</div></div>'; }); return h+'</div>'; }
+      function panel(t,inner){ return '<div style="background:#fff;border:1px solid #e7dfce;border-radius:12px;padding:14px;margin-bottom:12px"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#3d5346;margin-bottom:10px">'+t+'</div>'+inner+'</div>'; }
+      var badgeCol = paid ? "#0f6e56;background:#e1f5ee" : "#6b6457;background:#f1efe8";
+      var html='<div class="sectiontitle" style="display:flex;align-items:center;gap:8px">Live results &middot; last 30 days <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:'+badgeCol+';border-radius:999px;padding:3px 10px">'+tierName+' plan</span></div>';
+      html+=grid([["Leads captured",(R.leads||0)],["Sessions booked",(R.booked||0)],["Owner updates",(R.owner_updates||0)],["Referrals",(R.referrals||0)]]);
+      if(!paid){
+        html+='<div style="background:#faf6ee;border:1.5px dashed #c9a84c;border-radius:12px;padding:16px;font-size:13px;color:#2c2a24;line-height:1.55;margin-bottom:14px"><b>Unlock dollar analytics with the paid plan.</b> Actual revenue, VPG projection, net per room, show/close rates, the sales-desk disposition loop, timed promotions, and guest insights. Your lead engine and safety guide stay free.</div>';
+      } else {
+        var realRev=R.revenue_closed||0, proj=(R.model&&R.model.projected_revenue)||0;
+        var d=[["Showed",(R.showed||0)],["Closed",(R.closed||0)],["Show rate",pct(R.show_rate)],["Close rate",pct(R.close_rate)],["Actual revenue",money(realRev)],["Gift cost",money(R.gift_redeemed_cost||R.gift_offered)],["Net revenue",money(R.net_revenue)],["Cost / booking",money(R.cost_per_booking)]];
+        if(R.revenue_per_room!=null) d.push(["Revenue / room",money(R.revenue_per_room)]);
+        html+=grid(d);
+        if(!realRev && proj){
+          html+='<div style="background:#fff;border:1px solid #e7dfce;border-left:4px solid #d97706;border-radius:0 12px 12px 0;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#2c2a24;line-height:1.5"><b>Projected '+money(proj)+'</b> from '+(R.booked||0)+' booked tours × '+pct(R.model.show_rate)+' show × '+pct(R.model.close_rate)+' close × '+money(R.model.vpg)+' VPG. Actual dollars replace this as your sales desk logs each outcome.</div>';
+        }
+        if(R.gifts && R.gifts.length){
+          var gr=R.gifts.map(function(g){ return '<tr><td style="padding:5px 0;font-weight:600">'+esc(g.name)+'</td><td style="text-align:right;color:#6b6457">'+g.booked+' booked</td><td style="text-align:right;color:#6b6457">'+g.closed+' closed</td><td style="text-align:right;font-weight:700">'+money(g.revenue)+'</td></tr>'; }).join("");
+          html+=panel("Offers that land",'<table style="width:100%;font-size:13px;border-collapse:collapse">'+gr+'</table>');
+        }
+        if(R.reps && R.reps.length){
+          var rr=R.reps.map(function(r,i){ return '<tr><td style="padding:5px 0;color:#6b6457;width:22px">'+(i+1)+'</td><td style="font-weight:600">'+esc(r.rep)+'</td><td style="text-align:right;color:#6b6457">'+r.closes+' closed</td><td style="text-align:right;font-weight:700">'+money(r.revenue)+'</td></tr>'; }).join("");
+          html+=panel("Top reps",'<table style="width:100%;font-size:13px;border-collapse:collapse">'+rr+'</table>');
+        }
+        var dl=R.days_left||{}, order=[["6-7","6–7 nights left"],["4-5","4–5 nights"],["2-3","2–3 nights"],["0-1","0–1 (last day)"]];
+        var mx=Math.max(1,dl["0-1"]||0,dl["2-3"]||0,dl["4-5"]||0,dl["6-7"]||0);
+        var bars=order.map(function(o){ var v=dl[o[0]]||0, w=Math.round(v/mx*100); return '<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px"><span style="width:112px;color:#6b6457">'+o[1]+'</span><span style="flex:1;height:14px;background:#f1efe8;border-radius:7px;overflow:hidden"><span style="display:block;height:100%;width:'+w+'%;background:#628a56"></span></span><span style="width:24px;text-align:right;font-weight:700">'+v+'</span></div>'; }).join("");
+        html+=panel("When guests book (nights left in stay)", bars);
       }
       if(!live){
         html+='<div style="background:#faf6ee;border:1.5px dashed #e7dfce;border-radius:12px;padding:16px;text-align:center;font-size:13px;color:#6b6457">No leads yet. Real results appear here once guests start booking through the app.</div>';
