@@ -1205,7 +1205,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 		print-color-adjust: exact;
 		}
 	}
-@media (min-width:760px){html{background:#dce8eb}body{background:radial-gradient(1100px 680px at 50% -8%,#d8e9ef 0%,rgba(216,233,239,0) 62%),linear-gradient(180deg,#eaf2f4 0%,#d6e3e6 100%);background-attachment:fixed}#app{max-width:432px;margin:0 auto;transform:translateZ(0);box-shadow:0 0 0 1px rgba(15,76,92,.07),0 24px 70px -28px rgba(15,76,92,.45)}#overlay,#sheet,#locHelpOverlay,.dis-modal,#loader,#islandGate{left:50%!important;right:auto!important;width:432px!important;max-width:432px!important;margin-left:-216px!important}}
+@media (min-width:760px){html{background:#dce8eb}body{background:radial-gradient(1100px 680px at 50% -8%,#d8e9ef 0%,rgba(216,233,239,0) 62%),linear-gradient(180deg,#eaf2f4 0%,#d6e3e6 100%);background-attachment:fixed}#app{max-width:432px;margin:0 auto;transform:translateZ(0);box-shadow:0 0 0 1px rgba(15,76,92,.07),0 24px 70px -28px rgba(15,76,92,.45)}#overlay,#sheet,#locHelpOverlay,.dis-modal,#loader{left:50%!important;right:auto!important;width:432px!important;max-width:432px!important;margin-left:-216px!important}}
 </style>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -1693,21 +1693,25 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .ldfill{height:100%;background:var(--ocean);border-radius:2px;animation:ld 1.4s ease-in-out infinite}
 @keyframes ld{0%{width:0;margin-left:0}50%{width:50%;margin-left:25%}100%{width:0;margin-left:100%}}
 
-/* ISLAND GATE — landing chooser shown only on a bare "/" visit with no island signal */
-#islandGate{position:fixed;inset:0;z-index:100000;background:#fefbf3;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px 24px;transition:opacity .4s}
+/* ISLAND GATE — cinematic landing chooser. Shows on a bare "/" visit with no island signal,
+   and re-opens as a dismissable island switcher from the top-left brand tap. Background is a
+   15s graded aerial loop (assets/video/, injected by JS only when the gate opens). */
+#islandGate{position:fixed;inset:0;z-index:100000;background:#0b2531 center/cover no-repeat;display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;transition:opacity .45s;overflow:hidden}
 #islandGate.hide{opacity:0;pointer-events:none}
-.ig-brand{width:56px;height:56px;border-radius:14px}
-.ig-title{font-size:23px;color:var(--ocean);font-weight:700;text-align:center}
-.ig-sub{font-size:12px;color:var(--mute);letter-spacing:.04em;margin-top:-8px;text-align:center}
-.ig-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px;margin-top:8px}
-.ig-card{position:relative;overflow:hidden;display:block;width:100%;text-align:left;padding:18px 20px;border-radius:16px;color:#fff;box-shadow:0 8px 22px -10px rgba(15,76,92,.55);transition:transform .12s}
-.ig-card:active{transform:scale(.97)}
-.ig-card .ig-wave{position:absolute;right:-6px;top:50%;transform:translateY(-50%);opacity:.3;pointer-events:none}
-.ig-name{font-size:22px;font-weight:700;font-style:italic;position:relative}
-.ig-tag{font-size:11px;opacity:.85;letter-spacing:.06em;margin-top:2px;position:relative}
-.ig-kauai{background:linear-gradient(135deg,#0b485b,#177a63)}
-.ig-oahu{background:linear-gradient(135deg,#0b485b,#1b6d83)}
-.ig-maui{background:linear-gradient(135deg,#0b485b,#8a6b1f)}
+#igVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.ig-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(11,37,49,.68) 0%,rgba(11,37,49,.30) 34%,rgba(11,37,49,.36) 60%,rgba(11,37,49,.82) 100%)}
+.ig-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:340px}
+.ig-brand{width:58px;height:58px;border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.4)}
+.ig-title{font-size:24px;color:#fff;font-weight:700;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+.ig-sub{font-size:12.5px;color:rgba(255,255,255,.88);letter-spacing:.04em;margin-top:-6px;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.ig-cards{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:10px}
+.ig-card{display:block;width:100%;text-align:left;padding:16px 20px;border-radius:16px;color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 26px rgba(0,0,0,.28);transition:transform .12s,background .2s}
+.ig-card:active{transform:scale(.97);background:rgba(255,255,255,.2)}
+.ig-name{font-size:21px;font-weight:700;font-style:italic;text-shadow:0 1px 10px rgba(0,0,0,.35)}
+.ig-tag{font-size:10.5px;opacity:.82;letter-spacing:.09em;margin-top:2px;text-transform:uppercase}
+.ig-close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;z-index:3;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:19px;line-height:36px;text-align:center;display:none}
+#islandGate.ig-dismissable .ig-close{display:block}
+@media (min-width:760px){#islandGate .ig-inner{max-width:380px}}
 #nores{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:25;background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 16px;font-size:12px;color:var(--mute);white-space:nowrap;display:none;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 
 /* CHANNEL MARKERS */
@@ -1941,29 +1945,30 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 </div>
 
 <div id="islandGate" role="dialog" aria-label="Choose your island">
-  <img class="ig-brand" alt="" src="/icons/pwa-192.png">
-  <div class="ig-title">Which island are you on?</div>
-  <div class="ig-sub">Today's ocean conditions, beach by beach</div>
-  <div class="ig-cards">
-    <button type="button" class="ig-card ig-kauai" onclick="_gatePick('kauai')">
-      <svg class="ig-wave" width="130" height="70" viewBox="0 0 64 64" aria-hidden="true"><path d="M5 24 Q15 18 25 24 T45 24 T62 24" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 34 Q15 28 25 34 T45 34 T62 34" stroke="#94becc" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 44 Q15 38 25 44 T45 44 T62 44" stroke="#f5ecd7" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/></svg>
-      <div class="ig-name">Kauaʻi</div><div class="ig-tag">The Garden Isle</div>
-    </button>
-    <button type="button" class="ig-card ig-oahu" onclick="_gatePick('oahu')">
-      <svg class="ig-wave" width="130" height="70" viewBox="0 0 64 64" aria-hidden="true"><path d="M5 24 Q15 18 25 24 T45 24 T62 24" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 34 Q15 28 25 34 T45 34 T62 34" stroke="#94becc" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 44 Q15 38 25 44 T45 44 T62 44" stroke="#f5ecd7" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/></svg>
-      <div class="ig-name">Oʻahu</div><div class="ig-tag">The Gathering Place</div>
-    </button>
-    <button type="button" class="ig-card ig-maui" onclick="_gatePick('maui')">
-      <svg class="ig-wave" width="130" height="70" viewBox="0 0 64 64" aria-hidden="true"><path d="M5 24 Q15 18 25 24 T45 24 T62 24" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 34 Q15 28 25 34 T45 34 T62 34" stroke="#94becc" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 44 Q15 38 25 44 T45 44 T62 44" stroke="#f5ecd7" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/></svg>
-      <div class="ig-name">Maui</div><div class="ig-tag">The Valley Isle</div>
-    </button>
+  <div class="ig-shade"></div>
+  <button type="button" class="ig-close" onclick="_gateClose()" aria-label="Close">&#10005;</button>
+  <div class="ig-inner">
+    <img class="ig-brand" alt="" src="/icons/pwa-192.png">
+    <div class="ig-title">Which island are you on?</div>
+    <div class="ig-sub">Today's ocean conditions, beach by beach</div>
+    <div class="ig-cards">
+      <button type="button" class="ig-card" onclick="_gatePick('kauai')">
+        <div class="ig-name">Kauaʻi</div><div class="ig-tag">The Garden Isle</div>
+      </button>
+      <button type="button" class="ig-card" onclick="_gatePick('oahu')">
+        <div class="ig-name">Oʻahu</div><div class="ig-tag">The Gathering Place</div>
+      </button>
+      <button type="button" class="ig-card" onclick="_gatePick('maui')">
+        <div class="ig-name">Maui</div><div class="ig-tag">The Valley Isle</div>
+      </button>
+    </div>
   </div>
 </div>
 
 <div id="app">
   <div id="topbar">
     <div class="tb1">
-      <div class="brand-lockup" onclick="openRoadmapSheet()" role="button" style="cursor:pointer"><img class="brand-icon" alt="Ocean Safe" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAMAAAAOusbgAAADAFBMVEX9zCf+0C39xRj8/P39vBEBeNAChtoCSJAAa8UAAADr17ABjOEBZLoBV6cEUZoDkeL922sAO4j99dPmzJTsx2j////Q5vX56cf76LL82FWw1vAJkN3K2uv+5ZBvuOksh9InWY6PxuxQeKv+0xapyujQti7k7PMAR6UAN3suWHf+4nX1xk6Ih0sxZqg0pObizqZup9lMl9f98tRQot30vScwltyIueS3pTjy2I6Ulk7989f66cT56cejttNIp+RIZ2n//6zJqSj66smKpsszZJMsm+NqdVarmDJrms736sf87c53glj46Mb46siyxdhbsupTcWyWstL+8dBri7X/9LK84fUvcrJ3lLt2wu0qe8lsq+T147z+8dL/qqr/+9JGiMr//3+qpET98M42Y3RxgWUORnz98NKc0vIBW8FhcmFbZ1h8s97/6r3//wAAKIP/AP84od9jbVYlXKH/AAAAPqhCaYJZhrrashwubcPz4r0hT3j99+z89eZslHT89OKpjy4mTI7Dnx//5rxKkJ/c8Prd0qKAfT0kj+AdUX7dwCVckOBke7FDXmn/f3//75//4VreyqKAncLUw2ainUYdcKj/359EX5pUf40AKXjv37/Qz5gAHW7/1H9Uh4nJpBry3rq9vHH88+X/9uEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACbUZE0AAABAHRSTlP+/v7+/v////8A/v///////v/8/v8B//v+/v////7////////////////+/v////7//5b///////7/0VGU////A/92////////KBb/zqv/////Jv//////////0HUDDv8C/0v///+0//////8YAf8B////Af//////l/9cl//P////Kv////////////8CEP///////xD///8Q//8G///f/3C+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAk8VrBAAADqVJREFUeNq1m4V/28gSx9crtGXJtlJzHHYbapukaaiQS1Nur1fmVzhmxnf0mJmZ/tI3syDtyrJjp735hCTH+mpmfjO7K0skq1q5DD+ufv7Fxr1aa7ZYrNeLkdWZFXFPnX2JvcVe1mrVqhsbS89flceOjajYZ7LZN+//L7ze+nUmQxTL6JsDWabYCo3w5fvns9lnyulgwH5vKQxnM4QyWEwVFh+M/8h0nFEmZYMCu2YY4dI5hugEl7N/XAqvFzOUH44dkv9OYOPj9hUI9tY6ur10PlvuAEMGjmyExchBxdFOj0nnHu2Molcz8t8JrdfCcOP57KOyDgbuCeN6hsZv0ZEavPNU8D+Uv7Q3iujQTKsahvezb5VVcLn8jyVjNs3LLkaUk9DE1xmq6JRIHchLD4S6Cec+etmo035gidDHcuiQYjIu8Ee9Vg1fLnMyB2efDesD+Kv5kklKKZ3NfwP52WwELmfvG7vgZjQNid9ddBkZkO8zMoC/lT0SFulAnmaIfnzSuSv9jZP1ajV8HpAALpd/tdEiA4a4S7ntEBn4B1qshhvnIc0Azi6FAwc3tZSTwiOpWlyrhkcBSsrvnBtYWPwIlEKTw4FjdhaHkPh0lMbRJc1Xs2UCDl8ng+uJZurFFjQjI7aw1qpnKI2QqWQebHCZZN8cxGHRK6Dtq0jFarMZ2qu6MBq5avUB5Pi/1wf1FQebHlYr8uGN9HD5RJY8+mqgVknqvak86HWa6rGsuFx4sUyuhoPU0Wxo9GW1evfmnaFr1epV8nnf0qJ9Y9GKXfMMUctVj5AvWv01LUoHwYK1lMFSx5NMrnqUbPSVYhjIB8MynxWy1tagiVwkG/0UE8m0jMFNJeouFwFc7SfMxdDYDZh2GznquRqpkZ3drRm7shZOHFMPj+Cu2pKVsIvsxlWVoeldJJcjvURNWJi1Qw1fuTI1kMJoakX1AnNlUE1Vx/Y7YCcV9PD2xMT23l5Op7awtRxR5h4kOZ6CqendO+E4QQDk0iW565YzDZtjw736Z0rXJkMS3LFYEfWnyepkyRE2Jtzdz/YEzvupyL3HKpzcuRiS4JTuwtiarCamX5ouBXkrD6wJjO52AEzHh+/SsVTy8M/Z/hrVj044mEQjNunJPYbeWZ7nFWwfcBMTY+ht3rbt/EvT17rE+U/XYoWpaAnumCKx/9O4ezG5VsHzbNuzZMgdC7i2F5RE7C/d2q7o5O9MyB6WSQm1TKk2faN625goob82M8/Cs3D8vMd2eBD8iQqk9OT09HQi6sN/QZ9bVB+TBTh1HRzVUaUBmq1cm3ZKvi0Nwm1ZGHZOtiHLzthYiUmtpEv81t/xTORqSzZtFUxSudtYue/vhwOXAiR6ghYxmVn4OosBgM/q0nacvTzLGTlaJcFEWRyTOs/ZWFRBClfA7MNxBOy8v8/3IQa2Mz2hZ/nW279FYevLtyQ4JrP3XJuOuAHmU+OOjvxYYtkrbKdl56eDRE05wV7sIupqupvHGd44UE9OYIE/ll0oeAUltrZ1vHHK9vSAY94tiDrIafjWxFnZSPeXrmCStckIA2sLTbYsorMRN89dgjIaOeXFObZGKgXbVrGAzOfzPrYTZ+ymUypFjXSiBMHP6NMRxWM5ELK/I66L3jJrPIdeS/CI0cTMxlhkRtXtQIq+7ZQmJHhMgEkaWKGzCr6G3T+PWWNWGfea0t+CN2KcstUQuxJbcmZe2JxxnM02PSMLa6IUxP1aGA918vpVUTRIxuW96cYPvEJUSvZx4zm7GYeZxZhhZ+a3cCnXbk9OkskLb2+LHAfG9d5g0deYFDG/nuDaDeOAIOH3KeMVr9AsiLOIsM4Lq1QaHurx27eYqksAnqWZ3mAMNLYObBu+TK91G0lRSr2KARJHQ3DMvRAx8XIemVwtjaGwoY/u5/O+3mCmrO1SgHXEtGpbhw2joDStcWPEbkqwC1zWuJ3fTzKe7PSEtmGGcOwSDNnT27M0cckxBYwOD+NEg40IWJh2xbjN+jOHHTAq4D7nem7k7+NJQvVDTZ4uwQAOWvHXOq7+pXkMg+EEDPC+bEXWOHPYLghroLJ4ry7EslqfTF7BhB+bgIWv/2SSF6VSwDipvIQTC4v3IRbocSAVFIdFCTNunvl7mRKaclFzfmZm5kK785U0cA2VFaCyhDUMlLT012tghlnPatpRoGdMStOv3Ha51t0BpjAqXWFzHEs4fMowbngS27QPQNy9Ju7wCpbrCofXaTq4q3WC10QpcSwkGRwekbqC7dtGQ0bdBq7LHH6BpkV6MHAVMow9WoKbUFynJNjDGpa1BBmWDs9T8oQeUyjijyOHMdIjBlaP9BikJRKOpeRKaW3RJw01aHqvD9LKS0nbN5imRWxt77ZRKTRZt1QijdJ6UnDNuAIz9CByGGoJylYUMfx+xWh4DGwzaXHwa3RgckeOQ+OmE/hapCG2om01m82KMe7xqCPY5eB5DqZPAjYq4K+fj4oYulbctqCLgMTtAlaT93TBdR7pGFyRYI+F+hQGvtnEucBTBYO2Pt4Hs6Yo0jZO6O2mmHXZ2D6es8WYiGBLA9Pdg9ewXUpt2VxbjXjyjGDZTRTwZVMZ/3cHbuGAGMTaeleCvRhsF+w4x/m4nJ4IXJtSwZZ1CMA3OJjNASACr2DkEWxHYN5ABiIrYMrA27rHx1mO7Wgm24xSDhtupK4X6aDkCCxmSq2zWMWxxxFYGqi8yRctOBpLl4PlQcmxxxzfeqiDMdSMJA3GquO23JGP5HWa0sHQEixGNTp7x/E7wIVobVaAURFadzyfjrK8SjU07Q8cnWkHGMsJXBRcDyc+aujjLI8RSvvwmnYDFz/1NTA2ECggZTFaiU4Er0gwMpvdXsbDJuH8O46DOCP4mQTX9+tg1jIb6vp/nBc2r2tPCfblJLeXdYDJfhRX4FrKTA8mAspy9F02XEXbOBcQs4FNslswauLkPlR1PgLjsGgcUFffN7ClxDsicuCcbE+S3YHBAByoYCbrcbWSj4upgUpmCoNFzzzdNfgyAyfUpbUQdFlbHVsIdsUy9cwgYGV78sUEmCXZOG4poAOoN0sn53ESxC7UnFxv08k0VrvdC0zXOTgRa42DwjamtD0MzdYUUFrB5fV2kmquXggeK6XVASZth4ETBWUcthMN27htJa5FYMDFgrXkvHB6fbUtD7k6v/kT2NfuCaaIDfwgctkd6XSZ9bMRbZdA5/1AXI6DuAdjaIHYOkl7gicvw9RHG5KZvOJuxSCnmNZ1MkzTWGkpF39K3OAU/Lz7pSriJBjUhUlGi3vIeKeweeanLE1ijJ0X5vvSd2j+qHr3cS9Vo/iwHlNc1iPLyZVRfafMDpuacMOBk838/0B7gwn9iHEDP3Z5gZEP6xCWZ+NQ5LTVwxD8JV3uDcZY+0xgiVquJDI6yuTeGGWz0R3MzVs/1QPbGWpKfJ9VFAhbOj1qpIjJsqdEDqyduYt/ozuBefNi6CjY7l2ZZiuWEXzx3ZW7O2Dd0SmDmDuCSRu7D5CVYLtTIqO2LuRRvr+yMtoVClgoi5q5s8dwDZI1Pi3YFr8cumhxV6Ppr7UoLg03Dt1hAk6EOG8davAPdOnOOabL/JI8K2ZX65ycrNsh+XlP443FUVFLLjsJe/GNBo/I72gfYMjyPAOjsuM0c4Fh/STdEk5xxNT4ytnFxcWFuytT8oQqd79vmv2AweexfQ4bLIAs4yfJqSIeXal0+0izsmD5bdoneHJV9M2AkRHuRuTxdBktjjQ6P8ytrCzCm9epySwaI0UDMVPIUFI8z44f5czlLYP1jFT9WqMLEOBKZS9YZXjqjUWmN/efnIZgDhfglpk2XxgTH/pEZPTZEslc6FE8btQlWaN23ZumGmiTnwL/xDzNtiRYI/PBGZw+7Fq94JHBCP1JMsESXEvjmvBRhgD7AR/WGFuG2xgfdXeCcvIW1fLLXaZzAA5T58LLdL4kqxkuxiiHWhHCWelAd1Jdty2CazJXYcNkX3sQPGemT0FPS4FhuBX0qLw1YfywxVIat4wOdFxIpogyP4chAH9VTAdDH9kXJ1pVt7soO8bwwh10KyW3aK/mV/X8Cq5pkoO5e2SjZnabdl/4MP7sLHZajDeyUS6MpuXWhdFt/1ZCV6a0uVztHlkKiUm7sOfjD1NZpq34sDcXhuM+ubJ4x8r7keHZPbx7ifCEqtIS7D252mfkiFHsBpbadmQDzSuh9N2HaqOEjnFlYeEs2MLKeKNSafwwo3qpebx8MFc7ArfO1bp6bNKtMdVnvMypzuHc0YWplHtPKlM/+3S9I8pxpEHTtXOkfNGYkypPIZunlTwzlakKh/jmbz4EJ6eGmU2Njyw8vOl/OLYVH46XEhW6wuoaylXhZkG407gmT6XTc9hxJv64XpsoK1NoXG1Ff/mv5tcVIfGDmopB96jC7ZHZB2E4ZyYGkO5Os+IKBCnN3Ff/3FarVrSN2JahiKvns3gLbOxymtewvfWak2IpeNjz0SpNisnUDr/nINwqiPfefnA1DNfiF2KwDAD+3jrtlNLgvmb7nM0zZiov5s4dBIfPfVDG25yPhuGexMt62HHjk/mZVLSyRHNe2wFrsqaV47c5w43d5y+GVZJydlTNDmyceW/G6QKHewJe/3pHqkjwxfOPyvxW9ufDVHLnmcDKHu4A4GtPZSn60uaFVZPujGVcuAuV38qON++fCKvVOdPsi23+68z86dc3N+GD0plfvP7e6R99/V2zLyo1CXLhTuNn1McVdiB39L+05r+DzTGu8rgCpPmZl4G8RnqfcN+EdIM6Qq76gAaQHywBOTdnfmO2PMS4Rx+8U9YewnkL8oxOf0Nosuc3wK1Bq9QfwgHyI3zsqJrLrc0t9yGTwZydGzrI3L14JPvLcsqDVm8uVcMa/MOendgDgJeX5/ZwbLV69K8pD1rxR8vOARq8zh0cGtrzNGxoiGUWqdWj57BldH2Y7vyJZ6u1Wi33FK1Wq1afPdHjYTr5iN+5I0fv3Xt63H/f++zIuWwCm83+H3tH5QfC2RSaAAAAAElFTkSuQmCC"><div class="brand-text"><div class="bname">Kauaʻi</div></div></div>
+      <div class="brand-lockup" onclick="openIslandGate()" role="button" aria-label="Switch island" style="cursor:pointer"><img class="brand-icon" alt="Ocean Safe" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAMAAAAOusbgAAADAFBMVEX9zCf+0C39xRj8/P39vBEBeNAChtoCSJAAa8UAAADr17ABjOEBZLoBV6cEUZoDkeL922sAO4j99dPmzJTsx2j////Q5vX56cf76LL82FWw1vAJkN3K2uv+5ZBvuOksh9InWY6PxuxQeKv+0xapyujQti7k7PMAR6UAN3suWHf+4nX1xk6Ih0sxZqg0pObizqZup9lMl9f98tRQot30vScwltyIueS3pTjy2I6Ulk7989f66cT56cejttNIp+RIZ2n//6zJqSj66smKpsszZJMsm+NqdVarmDJrms736sf87c53glj46Mb46siyxdhbsupTcWyWstL+8dBri7X/9LK84fUvcrJ3lLt2wu0qe8lsq+T147z+8dL/qqr/+9JGiMr//3+qpET98M42Y3RxgWUORnz98NKc0vIBW8FhcmFbZ1h8s97/6r3//wAAKIP/AP84od9jbVYlXKH/AAAAPqhCaYJZhrrashwubcPz4r0hT3j99+z89eZslHT89OKpjy4mTI7Dnx//5rxKkJ/c8Prd0qKAfT0kj+AdUX7dwCVckOBke7FDXmn/f3//75//4VreyqKAncLUw2ainUYdcKj/359EX5pUf40AKXjv37/Qz5gAHW7/1H9Uh4nJpBry3rq9vHH88+X/9uEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACbUZE0AAABAHRSTlP+/v7+/v////8A/v///////v/8/v8B//v+/v////7////////////////+/v////7//5b///////7/0VGU////A/92////////KBb/zqv/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"><div class="brand-text"><div class="bname">Kauaʻi</div></div></div>
       <div class="hdr-wx" id="hdrWx">
         <div class="hdr-wx-item" id="hdrTemp" aria-label="Temperature outlook">
           <span class="hdr-wx-ic"><img class="hdr-wx-png" alt="" src="data:image/png;base64,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"></span>
@@ -2318,6 +2323,47 @@ try { var _ld=document.querySelector('.ldname'); if(_ld) _ld.textContent=ACTIVE.
 // "/" with no island signal — any deep-link/partner param, a /go/<slug> or /<slug> path, or a
 // remembered os_island skips it, so every distributed link and returning guest goes straight
 // in. Fail-safe: any error → gate stays hidden and the app boots exactly as before.
+// The 15s aerial loop is injected only when the gate actually opens, so normal app boots
+// never pay for it. Reduced-motion / data-saver visitors get the still poster instead.
+function _gateVideo(g){
+  var port = innerHeight >= innerWidth;
+  var poster = '/assets/video/poster-' + (port ? 'port' : 'land') + '.jpg';
+  g.style.backgroundImage = "url('" + poster + "')";   // instant paint + no-video fallback
+  try {
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if(navigator.connection && navigator.connection.saveData) return;
+  } catch(e){}
+  if(document.getElementById('igVideo')) return;
+  var v = document.createElement('video');
+  v.id = 'igVideo'; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+  v.setAttribute('muted',''); v.setAttribute('playsinline','');
+  v.poster = poster;
+  v.src = '/assets/video/bg-' + (port ? 'port' : 'land') + '.mp4';
+  // Some engines drop the eager play() issued before media data exists — retry once playable.
+  v.addEventListener('canplay', function(){ if(v.paused) v.play().catch(function(){}); });
+  g.insertBefore(v, g.firstChild);
+}
+function _gateShow(dismissable){
+  var g = document.getElementById('islandGate'); if(!g) return;
+  if(dismissable) g.classList.add('ig-dismissable'); else g.classList.remove('ig-dismissable');
+  g.classList.remove('hide');
+  g.style.display = 'flex';
+  _gateVideo(g);
+  try { var v = document.getElementById('igVideo'); if(v && v.paused) v.play().catch(function(){}); } catch(e){}
+}
+window._gateClose = function(){
+  var g = document.getElementById('islandGate'); if(!g) return;
+  g.classList.add('hide');
+  setTimeout(function(){
+    g.style.display = 'none';
+    // Remove (not pause) the video: engines can suspend a media element inside a hidden
+    // subtree so a later play() silently no-ops. A fresh element on reopen always plays,
+    // and the file comes straight from HTTP cache.
+    try { var v = document.getElementById('igVideo'); if(v){ v.pause(); v.removeAttribute('src'); v.load(); v.remove(); } } catch(e){}
+  }, 450);
+};
+// Reopen as a switcher from the top-left brand / co-brand logo tap.
+window.openIslandGate = function(){ _gateShow(true); };
 (function(){
   try {
     if(location.pathname !== '/' && location.pathname !== '/index.html') return;
@@ -2326,17 +2372,21 @@ try { var _ld=document.querySelector('.ldname'); if(_ld) _ld.textContent=ACTIVE.
     for(var i=0;i<skip.length;i++){ if(q.has(skip[i])) return; }
     var s = null; try { s = localStorage.getItem('os_island'); } catch(e){}
     if(s && ISLANDS[s] && ISLANDS[s].live) return;
-    var g = document.getElementById('islandGate'); if(g) g.style.display = 'flex';
+    _gateShow(false);
   } catch(e){}
 })();
 window._gatePick = function(slug){
   if(!ISLANDS[slug] || !ISLANDS[slug].live) return;
   try { localStorage.setItem('os_island', slug); } catch(e){}
   if(ACTIVE && ACTIVE.slug === slug){
-    // Already booting this island underneath — lift the gate and clean the URL in place.
-    var g = document.getElementById('islandGate');
-    if(g){ g.classList.add('hide'); setTimeout(function(){ g.style.display='none'; }, 450); }
-    try { history.replaceState(null, '', '/' + slug); } catch(e){}
+    // Already showing this island underneath — lift the gate; clean the URL only when there
+    // are no params to preserve.
+    _gateClose();
+    if(!location.search){ try { history.replaceState(null, '', '/' + slug); } catch(e){} }
+  } else if(location.search){
+    // Keep partner/deep-link params (?ref etc.) — same mechanism as switchIsland().
+    try { var u = new URL(location.href); u.searchParams.set('island', slug); location.href = u.toString(); }
+    catch(e){ location.href = '/' + slug; }
   } else {
     location.href = '/' + slug;   // clean reload; resolveIsland() reads the path slug
   }
