@@ -16,6 +16,12 @@
 # path survives and index.html's resolveIsland() can read the /go/<slug>
 /go/*  /index.html  200
 
+# Top-level island URLs (2026-07-18) — oceansafety.app/kauai|oahu|maui. Same rewrite
+# mechanism as /go/*: exact paths only, so nothing else at root is shadowed.
+/kauai  /index.html  200
+/oahu   /index.html  200
+/maui   /index.html  200
+
 # Creator ambassador program (2026-07-18)
 /creators   /creators.html      200
 /@*         /at.html            200

@@ -1205,7 +1205,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 		print-color-adjust: exact;
 		}
 	}
-@media (min-width:760px){html{background:#dce8eb}body{background:radial-gradient(1100px 680px at 50% -8%,#d8e9ef 0%,rgba(216,233,239,0) 62%),linear-gradient(180deg,#eaf2f4 0%,#d6e3e6 100%);background-attachment:fixed}#app{max-width:432px;margin:0 auto;transform:translateZ(0);box-shadow:0 0 0 1px rgba(15,76,92,.07),0 24px 70px -28px rgba(15,76,92,.45)}#overlay,#sheet,#locHelpOverlay,.dis-modal,#loader{left:50%!important;right:auto!important;width:432px!important;max-width:432px!important;margin-left:-216px!important}}
+@media (min-width:760px){html{background:#dce8eb}body{background:radial-gradient(1100px 680px at 50% -8%,#d8e9ef 0%,rgba(216,233,239,0) 62%),linear-gradient(180deg,#eaf2f4 0%,#d6e3e6 100%);background-attachment:fixed}#app{max-width:432px;margin:0 auto;transform:translateZ(0);box-shadow:0 0 0 1px rgba(15,76,92,.07),0 24px 70px -28px rgba(15,76,92,.45)}#overlay,#sheet,#locHelpOverlay,.dis-modal,#loader,#islandGate{left:50%!important;right:auto!important;width:432px!important;max-width:432px!important;margin-left:-216px!important}}
 </style>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -1692,6 +1692,22 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .ldbar{width:100px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
 .ldfill{height:100%;background:var(--ocean);border-radius:2px;animation:ld 1.4s ease-in-out infinite}
 @keyframes ld{0%{width:0;margin-left:0}50%{width:50%;margin-left:25%}100%{width:0;margin-left:100%}}
+
+/* ISLAND GATE — landing chooser shown only on a bare "/" visit with no island signal */
+#islandGate{position:fixed;inset:0;z-index:100000;background:#fefbf3;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px 24px;transition:opacity .4s}
+#islandGate.hide{opacity:0;pointer-events:none}
+.ig-brand{width:56px;height:56px;border-radius:14px}
+.ig-title{font-size:23px;color:var(--ocean);font-weight:700;text-align:center}
+.ig-sub{font-size:12px;color:var(--mute);letter-spacing:.04em;margin-top:-8px;text-align:center}
+.ig-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px;margin-top:8px}
+.ig-card{position:relative;overflow:hidden;display:block;width:100%;text-align:left;padding:18px 20px;border-radius:16px;color:#fff;box-shadow:0 8px 22px -10px rgba(15,76,92,.55);transition:transform .12s}
+.ig-card:active{transform:scale(.97)}
+.ig-card .ig-wave{position:absolute;right:-6px;top:50%;transform:translateY(-50%);opacity:.3;pointer-events:none}
+.ig-name{font-size:22px;font-weight:700;font-style:italic;position:relative}
+.ig-tag{font-size:11px;opacity:.85;letter-spacing:.06em;margin-top:2px;position:relative}
+.ig-kauai{background:linear-gradient(135deg,#0b485b,#177a63)}
+.ig-oahu{background:linear-gradient(135deg,#0b485b,#1b6d83)}
+.ig-maui{background:linear-gradient(135deg,#0b485b,#8a6b1f)}
 #nores{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:25;background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 16px;font-size:12px;color:var(--mute);white-space:nowrap;display:none;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 
 /* CHANNEL MARKERS */
@@ -1922,6 +1938,26 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
   <div class="ldname">Kauaʻi</div>
   <div class="ldsub">loading today's conditions</div>
   <div class="ldbar"><div class="ldfill"></div></div>
+</div>
+
+<div id="islandGate" role="dialog" aria-label="Choose your island">
+  <img class="ig-brand" alt="" src="/icons/pwa-192.png">
+  <div class="ig-title">Which island are you on?</div>
+  <div class="ig-sub">Today's ocean conditions, beach by beach</div>
+  <div class="ig-cards">
+    <button type="button" class="ig-card ig-kauai" onclick="_gatePick('kauai')">
+      <svg class="ig-wave" width="130" height="70" viewBox="0 0 64 64" aria-hidden="true"><path d="M5 24 Q15 18 25 24 T45 24 T62 24" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 34 Q15 28 25 34 T45 34 T62 34" stroke="#94becc" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 44 Q15 38 25 44 T45 44 T62 44" stroke="#f5ecd7" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/></svg>
+      <div class="ig-name">Kauaʻi</div><div class="ig-tag">The Garden Isle</div>
+    </button>
+    <button type="button" class="ig-card ig-oahu" onclick="_gatePick('oahu')">
+      <svg class="ig-wave" width="130" height="70" viewBox="0 0 64 64" aria-hidden="true"><path d="M5 24 Q15 18 25 24 T45 24 T62 24" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 34 Q15 28 25 34 T45 34 T62 34" stroke="#94becc" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 44 Q15 38 25 44 T45 44 T62 44" stroke="#f5ecd7" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/></svg>
+      <div class="ig-name">Oʻahu</div><div class="ig-tag">The Gathering Place</div>
+    </button>
+    <button type="button" class="ig-card ig-maui" onclick="_gatePick('maui')">
+      <svg class="ig-wave" width="130" height="70" viewBox="0 0 64 64" aria-hidden="true"><path d="M5 24 Q15 18 25 24 T45 24 T62 24" stroke="#f5ecd7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 34 Q15 28 25 34 T45 34 T62 34" stroke="#94becc" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M5 44 Q15 38 25 44 T45 44 T62 44" stroke="#f5ecd7" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/></svg>
+      <div class="ig-name">Maui</div><div class="ig-tag">The Valley Isle</div>
+    </button>
+  </div>
 </div>
 
 <div id="app">
@@ -2263,8 +2299,10 @@ function resolveIsland(){
   // Explicit ?island= wins first — the in-app switcher navigates to <path>?island=slug and KEEPS
   // the path, so on a /go/<slug> entry the query must beat the path or switching would no-op.
   try { var p = new URLSearchParams(location.search).get('island'); if(p && ISLANDS[p] && ISLANDS[p].live) return p; } catch(e){}
-  // Clean launch URL /go/<slug> (QR codes, cards, email) — beats a stale localStorage island.
-  try { var m = location.pathname.match(/^\/go\/([a-z]+)\/?$/); if(m && ISLANDS[m[1]] && ISLANDS[m[1]].live) return m[1]; } catch(e){}
+  // Clean launch URL /go/<slug> or top-level /<slug> (QR codes, cards, email) — beats a
+  // stale localStorage island. Non-island single-segment paths (/plan, /creators) never
+  // serve this file, and the ISLANDS live-check rejects anything else.
+  try { var m = location.pathname.match(/^\/(?:go\/)?([a-z]+)\/?$/); if(m && ISLANDS[m[1]] && ISLANDS[m[1]].live) return m[1]; } catch(e){}
   try { var s = localStorage.getItem('os_island'); if(s && ISLANDS[s] && ISLANDS[s].live) return s; } catch(e){}
   return 'kauai';
 }
@@ -2276,6 +2314,33 @@ try { window.ACTIVE = ACTIVE; window.ISLANDS = ISLANDS; } catch(e){}
 // before DOMContentLoaded (deferring it to DOMContentLoaded would leave the wrong name painted on
 // the very splash being corrected). Kauaʻi writes "Kauaʻi" over "Kauaʻi" → unchanged.
 try { var _ld=document.querySelector('.ldname'); if(_ld) _ld.textContent=ACTIVE.name; }catch(e){}
+// ── Island gate (2026-07-18): bare-root landing chooser. Shows ONLY on an organic visit to
+// "/" with no island signal — any deep-link/partner param, a /go/<slug> or /<slug> path, or a
+// remembered os_island skips it, so every distributed link and returning guest goes straight
+// in. Fail-safe: any error → gate stays hidden and the app boots exactly as before.
+(function(){
+  try {
+    if(location.pathname !== '/' && location.pathname !== '/index.html') return;
+    var q = new URLSearchParams(location.search);
+    var skip = ['island','ref','mode','demo','lang','u','beach','hike','act','stay','food','market','tour','channel'];
+    for(var i=0;i<skip.length;i++){ if(q.has(skip[i])) return; }
+    var s = null; try { s = localStorage.getItem('os_island'); } catch(e){}
+    if(s && ISLANDS[s] && ISLANDS[s].live) return;
+    var g = document.getElementById('islandGate'); if(g) g.style.display = 'flex';
+  } catch(e){}
+})();
+window._gatePick = function(slug){
+  if(!ISLANDS[slug] || !ISLANDS[slug].live) return;
+  try { localStorage.setItem('os_island', slug); } catch(e){}
+  if(ACTIVE && ACTIVE.slug === slug){
+    // Already booting this island underneath — lift the gate and clean the URL in place.
+    var g = document.getElementById('islandGate');
+    if(g){ g.classList.add('hide'); setTimeout(function(){ g.style.display='none'; }, 450); }
+    try { history.replaceState(null, '', '/' + slug); } catch(e){}
+  } else {
+    location.href = '/' + slug;   // clean reload; resolveIsland() reads the path slug
+  }
+};
 // Per-island safety contacts for the disclaimer + emergency footer (carbon-copy parity).
 // Verified 2026-07-13 from official county sites; Hawaiʻi Island leads with 911 (no dept line yet).
 const SAFETY_INFO={
