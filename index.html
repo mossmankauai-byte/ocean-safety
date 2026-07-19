@@ -1831,6 +1831,9 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 /* Town list: a shorter half-sheet (map stays visible), and the save heart rendered inline in the
    row rather than the absolute hero-corner it's built for. */
 #sheet.sheet-town{max-height:58vh}
+/* +N cluster popup: a short quarter-height sheet so the map stays visible, with a compact header. */
+#sheet.sheet-cluster{max-height:30vh}
+.cluster-head{font:600 11px/1 'DM Sans',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);padding:14px 4px 9px}
 .town-row .kbg-heart{position:static;top:auto;right:auto;width:34px;height:34px;flex:none;background:transparent;border:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 .poi-hero-icon{font-size:28px;flex-shrink:0}
 .poi-hero-name{font-size:18px;font-weight:700;color:var(--ocean);line-height:1.1}
@@ -6016,14 +6019,17 @@ function _declutterReg(reg, prioFn){
       const e=kept[m];
       if(e.more){
         const wrap=e.mk._icon.querySelector('.mkw'), host=wrap&&wrap.firstElementChild;
-        if(host){ const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more; host.appendChild(s); }
+        // Anchor the "+N" to the glyph: POI glyphs (.mkfood etc.) are position:static, so an
+        // absolute badge would otherwise pin to the whole marker icon and land off the pin.
+        if(host){ host.style.position='relative'; const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more; host.appendChild(s); }
         // The WHOLE cluster pin opens the halo — a far bigger tap target than the little badge.
         // Capture-phase so it pre-empts Leaflet's marker-click (which would open the leader's sheet).
         // EXCEPTION — the Town tab (data-tab "shopping") is shop/food browsing, not spatial: a
-        // cluster tap there pulls up the bottom-sheet list (like the Waikiki app) instead of fanning.
+        // cluster tap pulls up a short bottom sheet listing JUST this cluster's places (Waikiki-style),
+        // instead of the halo fan.
         const mem=e.members;
         e.mk._clusterClick=function(ev){ ev.stopImmediatePropagation(); ev.preventDefault();
-          if(window._activeTab==='shopping' && typeof openTownList==='function') openTownList();
+          if(window._activeTab==='shopping' && typeof openClusterSheet==='function') openClusterSheet(mem);
           else spiderfy(mem); };
         e.mk._icon.addEventListener('click', e.mk._clusterClick, true);
       }
@@ -7102,7 +7108,7 @@ function disclaimerOnFirstNav(){
 }
 
 function closeSheet(){
-  document.getElementById('sheet').classList.remove('on', 'sheet-town');
+  document.getElementById('sheet').classList.remove('on', 'sheet-town', 'sheet-cluster');
   document.getElementById('overlay').classList.remove('on');
   clearItemRoute();
 }
@@ -7623,6 +7629,38 @@ function _townRowSub(x){
   return bits.filter(Boolean).join(' · ');
 }
 
+// +N cluster popup (Town tab): list ONLY the POIs stacked in the tapped cluster. Members are
+// markers; match each to the current subtab's source (TOWN_SUB_SRC) by coordinate, so no per-marker
+// data plumbing is needed. Short quarter-height sheet; each row carries the save heart. Falls back
+// to the full subtab list if nothing lines up, so it never dead-ends.
+function openClusterSheet(members){
+  try{
+    const sub = window._activeSub || 'food';
+    const src = (typeof TOWN_SUB_SRC !== 'undefined' && TOWN_SUB_SRC[sub]) ? TOWN_SUB_SRC[sub]() : [];
+    const byCoord = {};
+    src.forEach(s => { if(s && s.x) byCoord[s.x.lat.toFixed(5)+','+s.x.lon.toFixed(5)] = s; });
+    const seen = {}, rows = [];
+    (members||[]).forEach(mk => {
+      if(!mk || !mk.getLatLng) return;
+      const ll = mk.getLatLng(), hit = byCoord[ll.lat.toFixed(5)+','+ll.lng.toFixed(5)];
+      if(hit && !seen[hit.kind+':'+hit.x.id]){ seen[hit.kind+':'+hit.x.id] = 1; rows.push(hit); }
+    });
+    if(!rows.length) return openTownList();          // never dead-end
+    const _sc = document.getElementById('sc');
+    _sc.style.display = '';
+    _sc.innerHTML = `
+      <div class="cluster-head">${rows.length} ${rows.length === 1 ? 'place' : 'places'} here</div>
+      ${rows.map(({x, open, kind}) => `
+        <div class="town-row" onclick="closeSheet();setTimeout(()=>${open}('${x.id}'),320)">
+          <span class="town-row-t"><b>${x.name}</b><span>${_townRowSub(x)}</span></span>
+          ${heartButton(kind, x.id)}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="color:var(--mute);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>`).join('')}
+      ${OS_DISCLAIMER}`;
+    document.getElementById('sheet').classList.add('on', 'sheet-cluster');
+    document.getElementById('overlay').classList.add('on');
+  }catch(e){ try{ openTownList(); }catch(_){} }
+}
 function openTownList(){
   const sub = window._activeSub || 'food';
   const src = TOWN_SUB_SRC[sub];
