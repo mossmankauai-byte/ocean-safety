@@ -1702,13 +1702,25 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .ig-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(11,37,49,.68) 0%,rgba(11,37,49,.30) 34%,rgba(11,37,49,.36) 60%,rgba(11,37,49,.82) 100%)}
 .ig-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:340px}
 .ig-brand{width:58px;height:58px;border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.4)}
+.ig-word{font-size:12px;font-weight:700;color:rgba(255,255,255,.92);letter-spacing:.34em;text-transform:uppercase;margin:-4px 0 0 .34em;text-shadow:0 1px 8px rgba(0,0,0,.5)}
 .ig-title{font-size:24px;color:#fff;font-weight:700;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.45)}
 .ig-sub{font-size:12.5px;color:rgba(255,255,255,.88);letter-spacing:.04em;margin-top:-6px;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.5)}
 .ig-cards{display:flex;flex-direction:column;gap:12px;width:100%;margin-top:10px}
-.ig-card{display:block;width:100%;text-align:left;padding:16px 20px;border-radius:16px;color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 26px rgba(0,0,0,.28);transition:transform .12s,background .2s}
-.ig-card:active{transform:scale(.97);background:rgba(255,255,255,.2)}
+.ig-card{display:block;width:100%;text-align:left;padding:14px 20px;border-radius:16px;color:#fff;background:rgba(8,32,44,.38);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 8px 26px rgba(0,0,0,.3);transition:transform .12s,background .2s}
+.ig-card:active{transform:scale(.97);background:rgba(8,32,44,.55)}
+.ig-card:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .ig-name{font-size:21px;font-weight:700;font-style:italic;text-shadow:0 1px 10px rgba(0,0,0,.35)}
 .ig-tag{font-size:10.5px;opacity:.82;letter-spacing:.09em;margin-top:2px;text-transform:uppercase}
+.ig-live{font-size:12px;color:rgba(255,255,255,.95);margin-top:7px;min-height:15px;display:flex;align-items:center;gap:7px;opacity:0;transition:opacity .5s}
+.ig-live.on{opacity:1}
+.ig-live .ig-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;flex-shrink:0;animation:igPulse 2.2s ease-in-out infinite}
+@keyframes igPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes igIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+#islandGate .ig-inner>*{animation:igIn .55s cubic-bezier(.22,.9,.36,1) both}
+#islandGate .ig-cards .ig-card:nth-child(1){animation:igIn .55s .08s cubic-bezier(.22,.9,.36,1) both}
+#islandGate .ig-cards .ig-card:nth-child(2){animation:igIn .55s .16s cubic-bezier(.22,.9,.36,1) both}
+#islandGate .ig-cards .ig-card:nth-child(3){animation:igIn .55s .24s cubic-bezier(.22,.9,.36,1) both}
+@media (prefers-reduced-motion:reduce){#islandGate .ig-inner>*,#islandGate .ig-cards .ig-card,.ig-live .ig-dot{animation:none}}
 .ig-close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;z-index:3;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:19px;line-height:36px;text-align:center;display:none}
 #islandGate.ig-dismissable .ig-close{display:block}
 @media (min-width:760px){#islandGate .ig-inner{max-width:380px}}
@@ -1949,17 +1961,21 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
   <button type="button" class="ig-close" onclick="_gateClose()" aria-label="Close">&#10005;</button>
   <div class="ig-inner">
     <img class="ig-brand" alt="" src="/icons/pwa-192.png">
+    <div class="ig-word">Ocean Safe</div>
     <div class="ig-title">Which island are you on?</div>
     <div class="ig-sub">Today's ocean conditions, beach by beach</div>
     <div class="ig-cards">
       <button type="button" class="ig-card" onclick="_gatePick('kauai')">
         <div class="ig-name">Kauaʻi</div><div class="ig-tag">The Garden Isle</div>
+        <div class="ig-live" data-live="kauai"></div>
       </button>
       <button type="button" class="ig-card" onclick="_gatePick('oahu')">
         <div class="ig-name">Oʻahu</div><div class="ig-tag">The Gathering Place</div>
+        <div class="ig-live" data-live="oahu"></div>
       </button>
       <button type="button" class="ig-card" onclick="_gatePick('maui')">
         <div class="ig-name">Maui</div><div class="ig-tag">The Valley Isle</div>
+        <div class="ig-live" data-live="maui"></div>
       </button>
     </div>
   </div>
@@ -2341,7 +2357,47 @@ function _gateVideo(g){
   v.src = '/assets/video/bg-' + (port ? 'port' : 'land') + '.mp4';
   // Some engines drop the eager play() issued before media data exists — retry once playable.
   v.addEventListener('canplay', function(){ if(v.paused) v.play().catch(function(){}); });
+  // Engines may also suspend an on-screen loop (tab occlusion, energy heuristics). Retry once
+  // per engine pause while the gate is up; a deliberate block (e.g. iOS Low Power Mode)
+  // rejects the play() and is respected — the graded poster frame stands in.
+  v.addEventListener('pause', function(){
+    setTimeout(function(){
+      if(v.paused && !v.ended && g.style.display !== 'none' && !document.hidden && document.getElementById('igVideo') === v){
+        v.play().catch(function(){});
+      }
+    }, 500);
+  });
   g.insertBefore(v, g.firstChild);
+}
+// Per-island live teaser on the chooser cards: one /api/wx call per island (server-side
+// CDN-cached, coords are each island's seaLevel point). Purely additive — any failure or
+// slow network just leaves the line blank; fetched at most once per 10 min per page.
+var _gateLiveAt = 0;
+function _gateLive(){
+  var now = Date.now();
+  if(now - _gateLiveAt < 10*60*1000) return;
+  _gateLiveAt = now;
+  ['kauai','oahu','maui'].forEach(function(slug){
+    try {
+      var isl = ISLANDS[slug]; if(!isl || !isl.live || !isl.seaLevel) return;
+      var ctl = ('AbortController' in window) ? new AbortController() : null;
+      if(ctl) setTimeout(function(){ ctl.abort(); }, 6000);
+      fetch('/api/wx?k=live&lat=' + isl.seaLevel.lat.toFixed(2) + '&lon=' + isl.seaLevel.lon.toFixed(2),
+            ctl ? { signal: ctl.signal } : undefined)
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          var surf = d && d.s && d.s.current && d.s.current.wave_height;
+          var wind = d && d.w && d.w.current && d.w.current.wind_speed_10m;
+          if(surf == null && wind == null) return;
+          var bits = [];
+          if(surf != null) bits.push('Surf ' + Math.round(surf) + ' ft');
+          if(wind != null) bits.push('Wind ' + Math.round(wind) + ' mph');
+          var el = document.querySelector('.ig-live[data-live="' + slug + '"]');
+          if(el){ el.innerHTML = '<span class="ig-dot"></span>' + bits.join(' &middot; '); el.classList.add('on'); }
+        })
+        .catch(function(){});
+    } catch(e){}
+  });
 }
 function _gateShow(dismissable){
   var g = document.getElementById('islandGate'); if(!g) return;
@@ -2349,6 +2405,7 @@ function _gateShow(dismissable){
   g.classList.remove('hide');
   g.style.display = 'flex';
   _gateVideo(g);
+  _gateLive();
   try { var v = document.getElementById('igVideo'); if(v && v.paused) v.play().catch(function(){}); } catch(e){}
 }
 window._gateClose = function(){
