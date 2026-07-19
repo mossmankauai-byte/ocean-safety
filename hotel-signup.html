@@ -184,9 +184,10 @@ const T={
     freePr:"<b>$0</b>/mo — we take 3% only on what the app sells for you. You keep 97%.",
     paidPr:"<b>$500</b>/store/mo — 0% on sales, plus the full data layer. We set this up with you personally.", paidSelfServe:false},
   townad:{h1:"Get your business in front of every visitor checking the beach.",
-    sub:"A printable QR that opens the free beach-safety guide with your business in it, a timed promotion that pops on guests' phones, and a simple dashboard — $30/mo, set up in two minutes.",
+    sub:"Your listing in the free beach-safety guide, a printable QR for your counter, and a dashboard to make the guide your own. Start free — set up in two minutes.",
     nameLabel:"Business name", namePh:"Your Beach Grill",
-    freePr:"", paidPr:"<b>$30</b>/mo — your listing, a printable QR, a timed promotion slot, and your own dashboard. Billed monthly, cancel anytime.", paidSelfServe:true},
+    freePr:"<b>$0</b> — your listing, your co-branded guide page, a printable QR, and your dashboard. Sell tours or activities through your page and we split 50/50, paid into your own Square.",
+    paidPr:"<b>$50</b>/mo — everything in free, plus a timed promotion that pops on guests' phones, the full QR set, and full analytics. Billed monthly, cancel anytime.", paidSelfServe:true},
   onlineshop:{h1:"Sell your products to visitors before they hit the beach.",
     sub:"Everything in a Town Ad — your listing, a printable QR, a timed promotion — plus your products selling right inside the app. We take 0% of your sales.",
     nameLabel:"Shop name", namePh:"Your Surf & Gift Co.",
@@ -196,11 +197,12 @@ const TC=T[TYPE]||T.hotel;
 $("heroH1").textContent=TC.h1; $("heroSub").textContent=TC.sub;
 $("nameLabel").innerHTML=TC.nameLabel+' <span class="req">*</span>'; $("name").placeholder=TC.namePh;
 $("freePr").innerHTML=TC.freePr; $("paidPr").innerHTML=TC.paidPr;
-document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":TYPE==="townad"?"Get your business on OceanSafe — $30/mo":TYPE==="onlineshop"?"Sell your products on OceanSafe — $100/mo":"Get your store on OceanSafe");
+document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":TYPE==="townad"?"Get your business on OceanSafe — free":TYPE==="onlineshop"?"Sell your products on OceanSafe — $100/mo":"Get your store on OceanSafe");
 
-// Town Ad ($30/mo) and Online Shop ($100/mo) are single paid tiers — no free option.
-// Hide the plan chooser and lock to paid.
-if(TYPE==="townad"||TYPE==="onlineshop"){
+// Online Shop ($100/mo) is a single paid tier — no free option (the server routes a free
+// online_shop attempt to Town Ad). Town Ad shows BOTH plans since the 2026-07-18
+// restructure: free listing with a 50/50 split on page sales, or $50/mo adding the promo.
+if(TYPE==="onlineshop"){
   const pf=$("planFree"); if(pf) pf.style.display="none";
   const chooseLbl=document.querySelector("form#f label.first"); if(chooseLbl) chooseLbl.style.display="none";
   const paidInput=$("planPaid").querySelector("input"); paidInput.checked=true;
@@ -208,6 +210,8 @@ if(TYPE==="townad"||TYPE==="onlineshop"){
   $("planPaid").classList.add("on"); $("planFree").classList.remove("on");
   $("planPaid").style.gridColumn="1 / -1";
   $("go").textContent="Continue to secure payment →";
+}
+if(TYPE==="townad"||TYPE==="onlineshop"){
   const talk=$("talkLine"); if(talk) talk.style.display="none";
   const webLbl=[...document.querySelectorAll("form#f label")].find(l=>/Property website/i.test(l.textContent)); if(webLbl) webLbl.textContent="Website";
 
@@ -237,10 +241,10 @@ if(TYPE==="townad"||TYPE==="onlineshop"){
   // what's included — reinforce the offer under the price (per tier)
   const INCL={
     townad:[
-      "Your business listed in the guide visitors open before the beach",
-      "A printable QR for your counter and receipts, opening the free guide",
-      "A timed promotion that pops for guests who scan your QR",
-      "A simple dashboard to upload your promo, with a phone preview"
+      "Free: your business listed in the guide visitors open before the beach",
+      "Free: a printable QR for your counter and receipts, opening the free guide",
+      "Free: sell tours & activities through your page — paid into your own Square, split 50/50",
+      "Paid $50/mo adds: a timed promotion for guests who scan your QR, the full QR set, and full analytics"
     ],
     onlineshop:[
       "Your products selling right inside the app",

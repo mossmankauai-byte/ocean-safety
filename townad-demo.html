@@ -101,7 +101,7 @@ const _ISL=(_P.get("isl")||"oahu").toLowerCase();
 const sb={rpc:async()=>({data:[{
   slug:"townad-demo-"+_ISL, name:"Your Beach Grill", segment:"town_ad",
   island:_ISL, region:_REGION[_ISL]||"Waikīkī", primary_hex:"0f4c5c",
-  monthly_cents:3000, live:true, paid_at:new Date().toISOString(),
+  monthly_cents:5000, live:true, paid_at:new Date().toISOString(),
   // the map pin the sample shows off — real coords per island so "Your pin" renders its
   // placed state rather than the "we couldn't find you" fallback
   category:"food", address:_ADDR[_ISL]||_ADDR.oahu,
@@ -147,7 +147,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   const isFree = Number(p.monthly_cents||0)===0;
   const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : seg==="rental"?"Business" : seg==="retail"?"Store" : isTownAd?"Business" : "Shop";
   const planTerms = isTownAd
-    ? "Town Ad, $30/mo flat. Your listing, a printable QR, a timed promotion, and this dashboard. Billed monthly through Square, cancel anytime. No cut of your sales."
+    ? "Town Ad, $50/mo flat. Your listing, printable QRs, a timed promotion, and this dashboard. Billed monthly through Square, cancel anytime. No cut of what you sell at the register."
     : isOperator
     ? (isFree
         ? (seg==="retail" ? "OceanSafe for Retail — Free. $0/mo; OceanSafe takes 3% only on app sales (you keep 97%). Your page, QR codes, and analytics included."

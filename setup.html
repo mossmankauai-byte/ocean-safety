@@ -71,13 +71,15 @@ const SUGGESTS={
   rental:["Snorkel sets","Boards & bikes","Beach gear","Kayaks & SUPs","Surf lessons","Boat tours","Ziplines & hikes","Luau tickets"],
   retail:["Reef-safe sunscreen","Beach gear","Cold drinks & snacks","Souvenirs & gifts","Coffee","Apparel","Snorkel gear","Boogie boards"],
   pm:["In-unit beach gear","Snorkel sets","Beach chairs","Tours & activities","Mid-stay clean","Late checkout"],
-  timeshare:["Spa","Restaurant","Pool & pool bar","Activities desk","Owner events","Tours & activities"]};
+  timeshare:["Spa","Restaurant","Pool & pool bar","Activities desk","Owner events","Tours & activities"],
+  town_ad:["Takeout","Outdoor seating","Happy hour","Live music","Kid-friendly","Local & handmade","Grab-and-go","Easy parking"]};
 const AMCOPY={
   hotel:{h:"What can guests do at your property?",why:"On rough-ocean days, OceanSafe nudges your guests toward <b>your</b> spa, dining, and pool instead of leaving — this is how you keep them (and their spend) on-site.",label:"ON-PROPERTY"},
   rental:{h:"What do you rent or offer?",why:"Your gear and tours show right on your page — and on the days the ocean's calm, the guide points guests at exactly what you offer.",label:"WHAT WE OFFER"},
   retail:{h:"What do visitors find in your store?",why:"The guide surfaces the right item for the day — reef-safe sunscreen on high-UV mornings, boogie boards on calm days — and points them to your store.",label:"IN THE STORE"},
   pm:{h:"What comes with your units?",why:"What's in the unit shows on your guest page — and the guide nudges guests toward it on the right days.",label:"IN YOUR UNITS"},
-  timeshare:{h:"What can guests do at your property?",why:"On rough-ocean days the guide nudges owners and guests toward what's on-site.",label:"ON-PROPERTY"}};
+  timeshare:{h:"What can guests do at your property?",why:"On rough-ocean days the guide nudges owners and guests toward what's on-site.",label:"ON-PROPERTY"},
+  town_ad:{h:"What should visitors know about your business?",why:"These show on your listing — visitors browsing the Town tab before or after the beach see exactly what you offer.",label:"AT YOUR PLACE"}};
 const segOf=()=>S.segment&&SUGGESTS[S.segment]?S.segment:"hotel";
 let S={}, STEP=0;
 

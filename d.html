@@ -126,7 +126,9 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   const isFree = Number(p.monthly_cents||0)===0;
   const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : seg==="rental"?"Business" : seg==="retail"?"Store" : isTownAd?"Business" : "Shop";
   const planTerms = isTownAd
-    ? "Town Ad, $30/mo flat. Your listing, a printable QR, a timed promotion, and this dashboard. Billed monthly through Square, cancel anytime. No cut of your sales."
+    ? (isFree
+        ? "Town Ad — Free. Your listing, your printable QR, and this dashboard. Sell tours or activities through your page and we split those 50/50, paid into your own Square."
+        : "Town Ad, $50/mo flat. Your listing, printable QRs, a timed promotion, and this dashboard. Billed monthly through Square, cancel anytime. No cut of what you sell at the register.")
     : isOperator
     ? (isFree
         ? (seg==="retail" ? "OceanSafe for Retail — Free. $0/mo; OceanSafe takes 3% only on app sales (you keep 97%). Your page, QR codes, and analytics included."
@@ -134,7 +136,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
           : "OceanSafe for "+(seg==="hotel"?"Hotels":"Operators")+" — Free. The co-branded guide, your QR codes, and your analytics at no cost.")
         : "$"+Math.round((p.monthly_cents||0)/100)+"/mo flat — the whole property: all co-branding, promotions, and unlimited amenities. No per-room, no per-booking.")
     : "Storefront — Free: $0/mo + 3% only on in-app sales (you keep 97%) · or $500/store/mo with 0%. Square's card processing (~3.3% + 30¢) is your own cost as merchant of record — we don't mark it up.";
-  const renews = isOperator && isFree ? null : renewal(p.paid_at);
+  const renews = (isOperator || isTownAd) && isFree ? null : renewal(p.paid_at);
   const ams=(Array.isArray(p.amenities)?p.amenities:[]).map(a=>a&&a.name?a.name:a).filter(Boolean);
   const qrCats = seg==="hotel"?[["room","In-room card"],["lobby","Lobby / front desk"],["welcome_email","Welcome email"],["general","Your own signage"]]
     : (seg==="pm"||seg==="timeshare")?[["unit","In each unit"],["welcome_email","Welcome email"],["general","Your signage"]]
@@ -164,7 +166,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     ? '<div class="card"><h2><span class="t">Your assets</span></h2>'
       +'<p class="lead">Every asset here already has <b>your</b> QR code built into it. Pick the ones you want, download, and print as many as you like — they’re digital, so reprinting costs you nothing.</p>'
       +'<div class="assets" id="assetGrid"><span class="dim">Building your assets…</span></div>'
-      +'<div class="hint">Scanning any of them opens the free '+islandName+' beach guide with your business inside — and your promotion on their screen.</div></div>'
+      +'<div class="hint">Scanning any of them opens the free '+islandName+' beach guide with your business inside'+(isFree?'.':' — and your promotion on their screen.')+'</div></div>'
     : '<div class="card"><h2>Your QR codes</h2>'
       +'<p class="lead">'+(isOperator?'Print each where guests will see it — in the room, at the lobby, in your welcome email. Every code is tracked so you can tell which spot brings the most scans.':'Print these for your counter, receipts, and signage — each one is tracked.')+'</p>'
       +'<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px">'+qrGrid+'</div></div>')
@@ -190,8 +192,15 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     +'<div class="row" style="margin-top:10px"><a class="btn ghost" href="'+ml("Update "+p.name+"’s OceanSafe page","Hi OceanSafe team, please update the following for "+p.name+":\n\n- ")+'">Request a change ↗</a></div></div>'
   +'<div class="card"><h2>Your plan</h2><div class="kv"><span class="k">Plan</span><span>'+esc(planTerms)+'</span>'
     +(renews?'<span class="k">Renews</span><span>'+esc(renews)+'</span>':'')+'</div>'
-    +(isOperator&&isFree?'<div class="hint">Free, no card. Upgrade to unlock the sections below whenever you’re ready.</div>':'<div class="hint">We’ll email you before any renewal, no surprises.</div>')+'</div>'
-  +(isTownAd ? pinCard()+promoCard()
+    +((isOperator||isTownAd)&&isFree?'<div class="hint">Free, no card. Upgrade to unlock the sections below whenever you’re ready.</div>':'<div class="hint">We’ll email you before any renewal, no surprises.</div>')+'</div>'
+  // 2026-07-18 restructure: free town_ad sees the promo card LOCKED (the $50/mo headline
+  // feature — partner-promo enforces the same gate server-side) plus the connect-Square
+  // card that carries the free tier's 50/50 selling pitch. Paid sees the live promo form.
+  +(isTownAd ? pinCard()
+      +(isFree
+        ? lockCard("Your promotion","A timed offer that pops on the phone of every guest who scans your QR — upload an image or PDF, pick the hours, it goes live. Part of the $50/mo plan.",true)
+        : promoCard())
+      +sellCard()
     : lockCard("Promotions","Timed, condition-triggered offers on the guide your guests already open — the spa when the surf’s up, the right item on the right day.",isFree)
       +lockCard("Market intelligence","The full demand board — what the weather drives, when guests plan, trends and forecasts.",isFree))
   +'<div class="card"><h2>Visits &amp; scans</h2>'
@@ -200,6 +209,16 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     +'<div class="empty">Your QR codes are already tracked by placement; the counts turn on when analytics goes live — we’ll email you. Nothing to set up.</div></div>'
   +'<div class="card"><h2>Questions?</h2><p class="lead">Email or text us — a real person. <a href="mailto:'+NICK+'">'+NICK+'</a></p>'
     +'<div class="hint">Reply to any email to change anything, or to cancel.</div></div>';
+  // Both town_ad tiers can sell through their page on the 50/50 split, but it needs the
+  // portal (Supabase auth + Square OAuth) — this no-login dashboard can't connect Square.
+  // Shown unconditionally: get_partner_dashboard doesn't project square_merchant_id, and
+  // widening that RPC for a nag isn't worth the drift risk (see 0029's warning).
+  function sellCard(){
+    return '<div class="card"><h2>Sell through your page</h2>'
+      +'<p class="lead">Sell tours or activities? Connect your Square account and bookings made through your page are paid straight into it — you keep 50%, we keep 50%. Nothing else to set up.</p>'
+      +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+SITE+'/portal/" target="_blank" rel="noopener">Sign in &amp; connect Square ↗</a></div>'
+      +'<div class="hint">Use the same email you signed up with. Already connected? You’re set.</div></div>';
+  }
   function lockCard(title,desc,locked){
     if(locked) return '<div class="card" style="position:relative;background:#F7F9FA"><h2>'+title+' <span class="pill" style="background:#FDF4DD;color:#a9781f;border-color:#ecdca0">\uD83D\uDD12 Paid</span></h2>'
       +'<p class="lead" style="color:#64727F">'+desc+'</p>'
@@ -277,7 +296,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   // The partner uploads their own image/PDF and picks the hours; partner-promo validates and
   // publishes it to the guide. This form is convenience only — every rule is enforced again
   // server-side, so a hand-crafted request gains nothing.
-  if(isTownAd){
+  if(isTownAd && !isFree){   // free tier renders lockCard, no promo form to wire
     const PROMO_FN="https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-promo";
     const $p=id=>document.getElementById(id);
     const msg=(t,cls)=>{ const m=$p("promoMsg"); if(!m) return; m.textContent=t||""; m.className="hint"+(cls?" "+cls:""); };
