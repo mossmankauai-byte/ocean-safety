@@ -53,12 +53,17 @@ const slug=(m?m[1]:new URLSearchParams(location.search).get("slug")||"").toLower
   const p=Array.isArray(data)?data[0]:null;
   if(error||!p){
     card.innerHTML='<h1>Not found</h1><div class="sub">This partner page isn’t live yet.</div>'
-      +'<a class="cta" style="background:#0a8ba8" href="https://oceansafety.app">Check Kauaʻi beach safety →</a>';
+      +'<a class="cta" style="background:#0a8ba8" href="https://oceansafety.app">Check beach safety →</a>';
     return;
   }
   const primary="#"+(p.primary_hex||"0a8ba8").replace(/^#/,"");
   document.getElementById("bar").style.background=primary;
   const seg=p.segment;
+  // Route the CTA to the partner's own island (get_partner_page projects partners.island,
+  // migration 0024). hawaii (not live) or missing falls back to kauai — same guard as
+  // d.html's PROMO_SHOT_ISLANDS.
+  const LIVE_ISLANDS={kauai:"Kauaʻi",maui:"Maui",oahu:"Oʻahu"};
+  const island=LIVE_ISLANDS[p.island]?p.island:"kauai";
   const tag = seg==="hotel"?"Your resort’s beach-safety guide"
             : seg==="timeshare"?"Your club’s beach-safety guide"
             : seg==="pm"?"Your rentals’ beach-safety guide"
@@ -78,7 +83,7 @@ const slug=(m?m[1]:new URLSearchParams(location.search).get("slug")||"").toLower
     '<h1 style="color:'+esc(primary)+'">'+esc(p.name)+'</h1>'
     +(p.short?'<div class="sub">'+esc(p.short)+'</div>':'')
     +'<div class="tag">'+esc(tag)+(p.region?' · '+esc(p.region):'')+'</div>'
-    +'<a class="cta" style="background:'+esc(primary)+'" href="https://oceansafety.app/?ref='+encodeURIComponent(p.slug)+'">See today’s Kauaʻi beach-safety report →</a>'
+    +'<a class="cta" style="background:'+esc(primary)+'" href="https://oceansafety.app/go/'+island+'?ref='+encodeURIComponent(p.slug)+'">See today’s '+LIVE_ISLANDS[island]+' beach-safety report →</a>'
     +(ams.length?'<div class="amwrap"><div class="amh">'+esc(onProp)+'</div>'+ams.map(a=>'<span class="amchip">'+esc(a)+'</span>').join('')+'</div>':'')
     +'<div class="shopwrap" id="shopwrap" style="display:none"><div class="amh" id="shopH">Shop</div><div class="shopgrid" id="shopgrid"></div><div class="dim" id="shopNote" style="margin-top:8px"></div></div>'
     +'<div class="meta">'+meta+'</div>';

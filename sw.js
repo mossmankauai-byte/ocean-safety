@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v183-2026-07-20-email-swap';
+const CACHE_VERSION = 'v184-2026-07-20-audit-blockers';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 

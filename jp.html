@@ -2147,7 +2147,8 @@ const ISLANDS = {
     data:null   // lazy-loaded from /data/oahu.js
   },
   hawaii: {
-    slug:'hawaii', name:'Hawaiʻi Island', live:true, defaultSide:'kona', sideKey:'os_side_hawaii',
+    // live:false mirrors index.html's gate — flip only with the same human sign-off.
+    slug:'hawaii', name:'Hawaiʻi Island', live:false, defaultSide:'kona', sideKey:'os_side_hawaii',
     map:{ center:[19.60,-155.50], zoom:9, minZoom:8, maxBounds:[[18.40,-156.50],[20.75,-154.40]] },
     seaLevel:{ lat:19.64, lon:-155.99 },
     geoBox:{ latMin:18.85, latMax:20.30, lonMin:-156.15, lonMax:-154.75 },
