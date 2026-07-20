@@ -46,3 +46,8 @@
   X-Robots-Tag: noindex, nofollow
 /jade-payment-walkthrough
   X-Robots-Tag: noindex, nofollow
+# sales.html = NickM-gated copy of the sales dashboard — same private material.
+/sales.html
+  X-Robots-Tag: noindex, nofollow
+/sales
+  X-Robots-Tag: noindex, nofollow
