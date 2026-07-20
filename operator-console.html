@@ -570,6 +570,7 @@
           <div class="period" aria-label="Reporting period">
             <b>7d</b><b class="sel">30d</b><b>90d</b>
           </div>
+          <button class="texbtn" type="button" id="dlDashBtn" onclick="osDownloadDashboard(this)" title="Save this dashboard to your computer. It opens on your desktop and refreshes live whenever you're online.">&#8595;&nbsp;Download to desktop</button>
           <button class="texbtn" type="button" onclick="document.body.classList.toggle('textured')" title="Toggle the nautical depth-line texture">Depth texture</button>
         </div>
       </div>
@@ -590,6 +591,45 @@
       </div>
     </div>
     <script>(function(){try{var p=new URLSearchParams(location.search);if(p.get('rep')==='1'||p.get('jade')==='1'){var b=document.getElementById('repbar');if(b)b.style.display='flex';var reveal=function(){var r=document.querySelectorAll('.rep-only');for(var i=0;i<r.length;i++){r[i].hidden=false;}};if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',reveal);}else{reveal();}var s=p.get('slug');if(s){var l=document.getElementById('repLink');if(l)l.href='jade-live.html?ref='+encodeURIComponent(s);}}}catch(e){}})();</script>
+
+    <script>
+    /* ===== Download to desktop ==================================================
+       Saves a single self-contained copy of THIS console to the operator's computer,
+       with their slug baked in. When they double-click the saved file it opens on the
+       desktop and — because the telemetry API sends Access-Control-Allow-Origin: * —
+       refreshes with live data every time they're online. Works from file:// : we
+       absolutize the /assets refs and inject a tiny shim that re-adds ?slug= on open
+       (a double-clicked file carries no query string of its own). No new backend;
+       the download IS the page you're looking at. */
+    async function osDownloadDashboard(btn){
+      var label = btn ? btn.innerHTML : '';
+      var restore = function(t){ if(btn){ btn.innerHTML=t; setTimeout(function(){ btn.innerHTML=label; btn.disabled=false; },2200); } };
+      try{
+        if(btn){ btn.disabled=true; btn.innerHTML='Preparing…'; }
+        var qp = new URLSearchParams(location.search);
+        var slug = (qp.get('slug')||'').trim() || 'demo-resort';
+        var api  = (qp.get('api')||'').trim();
+        var src = await fetch(location.pathname, {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
+        var ORIGIN = location.origin;
+        var dir = location.pathname.replace(/[^/]*$/,'');            // e.g. "/"
+        src = src.replace(/((?:src|href)=")assets\//g, '$1'+ORIGIN+dir+'assets/');
+        src = src.replace(/(url\((['"]?))assets\//g, '$1'+ORIGIN+dir+'assets/');
+        var baked = 'slug:'+JSON.stringify(slug)+(api?(',api:'+JSON.stringify(api)):'');
+        var shim = '\n<script>(function(){var B={'+baked+'};if(!/[?&]slug=/.test(location.search)){var q="?slug="+encodeURIComponent(B.slug)+(B.api?("&api="+encodeURIComponent(B.api)):"");location.replace(location.pathname+q+location.hash);}else{try{document.documentElement.setAttribute("data-osdesktop","1");}catch(e){}}})();<\/scr'+'ipt>';
+        src = src.replace(/<head[^>]*>/i, function(m){ return m+shim; });
+        var blob = new Blob([src], {type:'text/html'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = 'OceanSafe-Dashboard-'+slug.replace(/[^a-z0-9_-]/gi,'')+'.html';
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1500);
+        restore('Saved ✓');
+      }catch(e){
+        restore('Try again');
+        try{ alert('Could not prepare the download.\n'+(e&&e.message||e)); }catch(_){}
+      }
+    }
+    </script>
 
     <style>
       /* ============ FREE PLAN (?plan=free) — locked-surface chrome ============
