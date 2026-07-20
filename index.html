@@ -1835,6 +1835,11 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 #sheet.sheet-town{max-height:58vh}
 /* +N cluster popup: a short quarter-height sheet so the map stays visible, with a compact header. */
 #sheet.sheet-cluster{max-height:30vh}
+/* Sand-glass wash on the "a place you tapped" detail sheets (beach/food/drink/hike/family/etc.) —
+   the same sand->seafoam gradient as the Waikīkī district popup, extended to every island since
+   these detail sheets are what Kauaʻi/Maui show in place of a map popup. Functional sheets
+   (outlook, saved, town/cluster list, plan, promo) keep their neutral #fff and opt out by class. */
+#sheet.sheet-poi{background:linear-gradient(158deg,#fbeecb 0%,#f5e9d2 42%,#dcefec 100%)}
 .cluster-head{font:600 11px/1 'DM Sans',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);padding:14px 4px 9px}
 .town-row .kbg-heart{position:static;top:auto;right:auto;width:34px;height:34px;flex:none;background:transparent;border:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 .poi-hero-icon{font-size:28px;flex-shrink:0}
@@ -4859,7 +4864,7 @@ function openMarketSheet(id){
     <div class="poi-cta-row">
       <a href="${dirUrl(m.name, m.lat, m.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
     </div>`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
   pushItemRoute('market', m.id, m.name);
 }
@@ -4946,7 +4951,7 @@ function openHikeSheet(id){
     <div class="poi-cta-row">
       <a href="${dirUrl(hk.name, hk.lat, hk.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Directions to Trailhead</a>
     </div>`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
   pushItemRoute('hike', hk.id, hk.name);
 }
@@ -5725,7 +5730,7 @@ function openActSheet(id){
     <div class="poi-cta-row">
       <a href="${dirUrl(a.name, a.lat, a.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
     </div>`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
   pushItemRoute('act', a.id, a.name);
 }
@@ -5873,7 +5878,7 @@ function openCraftSheet(id){
     <div class="poi-cta-row">
       <a href="${dirUrl(c.name, c.lat, c.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
     </div>`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
 }
 function openDrinkSheet(id){
@@ -5894,7 +5899,7 @@ function openDrinkSheet(id){
     <div class="poi-cta-row">
       <a href="${dirUrl(d.name, d.lat, d.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
     </div>`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
 }
 function openGasSheet(id){
@@ -5913,7 +5918,7 @@ function openGasSheet(id){
     <div class="poi-cta-row">
       <a href="${dirUrl(s.name, s.lat, s.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
     </div>`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
 }
 
@@ -5971,7 +5976,7 @@ function openFoodSheet(id){
     <div class="poi-cta-row">
       <a href="${dirUrl(f.name, f.lat, f.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
     </div>`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
   pushItemRoute('food', f.id, f.name);
 }
@@ -5994,7 +5999,7 @@ function openGrocerySheet(id){
     <div class="poi-cta-row">
       <a href="${dirUrl(g.name, g.lat, g.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
     </div>`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
 }
 
@@ -6662,7 +6667,7 @@ function openPoiSheet(pid){
       ${p.url?`<a href="${p.url}" target="_blank" rel="noopener" class="poi-cta-main">${p.cta}</a>`:''}
       <a href="${dirURL}" target="_blank" rel="noopener" class="poi-cta-dir">📍 Map</a>
     </div>`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
 }
 // DISTANCE HELPERS — for "nearby" sections that filter by miles from a given point
@@ -6722,7 +6727,7 @@ function openSheet(id){
         <a href="tel:911" class="poi-cta-dir" style="background:#fef3c7;border-color:#d97706;color:#7c2d12;display:flex;align-items:center;gap:6px" aria-label="Call 911 in an emergency"><span aria-hidden="true">⚠</span>911</a>
       </div>
       <div style="font-size:11px;color:var(--mute);margin-top:10px;line-height:1.4;text-align:center"><b>Emergency:</b> dial 911${safetyFooterSuffix()}</div>`;
-    document.getElementById('sheet').classList.add('on');
+    document.getElementById('sheet').classList.add('on', 'sheet-poi');
     document.getElementById('overlay').classList.add('on');
     pushItemRoute('beach', _bw.id, _bw.name);
     return;
@@ -7009,7 +7014,7 @@ function openSheet(id){
     <details style="margin-top:12px"><summary style="font-size:10px;color:var(--mute);cursor:pointer;text-transform:uppercase;letter-spacing:.06em">Tide today</summary>${tideGraph(c)}</details>
     <a href="${murl}" target="_blank" rel="noopener" class="dirbtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="1,8 15,1 9,8 15,15"/></svg>Get Directions</a>
     ${viatorBlock}`;
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
   pushItemRoute('beach', b.id, b.name);
   // Lazy-load Viator widget script. We re-append on every open so the widget rescans the freshly-injected divs.
@@ -7185,7 +7190,7 @@ function disclaimerOnFirstNav(){
 
 function closeSheet(){
   var s = document.getElementById('sheet');
-  s.classList.remove('on', 'sheet-town', 'sheet-cluster', 'expanded', 'dragging');   // reset drag state so the next open starts at default height
+  s.classList.remove('on', 'sheet-town', 'sheet-cluster', 'sheet-poi', 'expanded', 'dragging');   // reset drag state so the next open starts at default height
   s.style.transform = '';
   document.getElementById('overlay').classList.remove('on');
   clearItemRoute();
