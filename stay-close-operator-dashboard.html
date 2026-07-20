@@ -478,7 +478,7 @@
       var html='<div class="sectiontitle" style="display:flex;align-items:center;gap:8px">Live results &middot; last 30 days <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:'+badgeCol+';border-radius:999px;padding:3px 10px">'+tierName+' plan</span></div>';
       html+=grid([["Leads captured",(R.leads||0)],["Sessions booked",(R.booked||0)],["Owner updates",(R.owner_updates||0)],["Referrals",(R.referrals||0)]]);
       if(!paid){
-        html+='<div style="background:#faf6ee;border:1.5px dashed #c9a84c;border-radius:12px;padding:16px;font-size:13px;color:#2c2a24;line-height:1.55;margin-bottom:14px"><b>Unlock dollar analytics with the paid plan.</b> Actual revenue, VPG projection, net per room, show/close rates, the sales-desk disposition loop, timed promotions, and guest insights. Your lead engine and safety guide stay free.</div>';
+        html+='<div style="background:#faf6ee;border:1.5px dashed #c9a84c;border-radius:12px;padding:16px;font-size:13px;color:#2c2a24;line-height:1.55;margin-bottom:14px"><b>Unlock dollar analytics with the paid plan.</b> Actual revenue, VPG projection, net per room, show/close rates, the sales-desk disposition loop, timed campaigns, and guest insights. Your lead engine and safety guide stay free.</div>';
       } else {
         var realRev=R.revenue_closed||0, proj=(R.model&&R.model.projected_revenue)||0;
         var d=[["Showed",(R.showed||0)],["Closed",(R.closed||0)],["Show rate",pct(R.show_rate)],["Close rate",pct(R.close_rate)],["Actual revenue",money(realRev)],["Gift cost",money(R.gift_redeemed_cost||R.gift_offered)],["Net revenue",money(R.net_revenue)],["Cost / booking",money(R.cost_per_booking)]];
@@ -504,7 +504,7 @@
         if(proms.length){
           var segLbl={all:"All",renter:"Renter",exchange:"Exchange",owner:"Owner"};
           var pr=proms.map(function(p){ return '<tr><td style="padding:5px 0;font-weight:600">'+esc(p.label)+'</td><td style="text-align:right;color:#6b6457">'+(segLbl[p.seg]||"All")+'</td><td style="text-align:right;color:#6b6457">'+(p.end?("ends "+esc(p.end)):"")+'</td></tr>'; }).join("");
-          html+=panel("Active promotions", '<table style="width:100%;font-size:13px;border-collapse:collapse">'+pr+'</table>');
+          html+=panel("Active campaigns", '<table style="width:100%;font-size:13px;border-collapse:collapse">'+pr+'</table>');
         }
       }
       if(!live){

@@ -191,10 +191,10 @@
   </div>
 
   <div class="card">
-    <h4>Timed promotions</h4>
-    <p class="hint">Schedule a limited-time boost for a date range. Guests see it in the app <b>only while it's live</b>, then it expires on its own. Paid plan.</p>
+    <h4>Timed campaigns</h4>
+    <p class="hint">A limited-time push on top of your standing offers — a boost or bonus for a set date range. Guests see it in the app <b>only while it's live</b>, then it expires on its own. Paid plan.</p>
     <div id="promolist"></div>
-    <button class="chip" id="promoAdd" type="button" style="margin-top:12px">+ Add promotion</button>
+    <button class="chip" id="promoAdd" type="button" style="margin-top:12px">+ Add campaign</button>
   </div>
 
   <div class="card">
@@ -421,7 +421,7 @@
   }
   $("save").onclick=function(){ localStorage.setItem(CKEY, JSON.stringify(gather())); var s=$("status"); s.classList.add("on"); setTimeout(function(){ s.classList.remove("on"); }, 2200); saveServer(); };
 
-  // ── timed promotions editor ──
+  // ── timed campaigns editor ──
   var PROMOS=[];
   var SEGNAME={all:"All guests",renter:"Renter",exchange:"Exchange",owner:"Owner"};
   function promoRow(p,i){
@@ -444,7 +444,7 @@
   }
   function renderPromos(){
     var box=$("promolist");
-    box.innerHTML = PROMOS.length ? PROMOS.map(promoRow).join("") : '<p class="hint" style="margin:0">No promotions scheduled. Add one to run a limited-time offer.</p>';
+    box.innerHTML = PROMOS.length ? PROMOS.map(promoRow).join("") : '<p class="hint" style="margin:0">No campaigns scheduled. Add one to run a limited-time push on top of your standing offers.</p>';
     box.querySelectorAll("[data-rm]").forEach(function(b){ b.onclick=function(){ syncPromos(); PROMOS.splice(+b.dataset.rm,1); renderPromos(); }; });
   }
   $("promoAdd").onclick=function(){ syncPromos(); PROMOS.push({seg:"all"}); renderPromos(); };
