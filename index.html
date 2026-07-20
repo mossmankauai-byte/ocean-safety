@@ -1839,7 +1839,7 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
    the same sand->seafoam gradient as the Waikīkī district popup, extended to every island since
    these detail sheets are what Kauaʻi/Maui show in place of a map popup. Functional sheets
    (outlook, saved, town/cluster list, plan, promo) keep their neutral #fff and opt out by class. */
-#sheet.sheet-poi{background:linear-gradient(158deg,#fbeecb 0%,#f5e9d2 42%,#dcefec 100%)}
+#sheet.sheet-poi,#sheet.sheet-outlook{background:linear-gradient(158deg,#fbeecb 0%,#f5e9d2 42%,#dcefec 100%)}
 .cluster-head{font:600 11px/1 'DM Sans',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);padding:14px 4px 9px}
 .town-row .kbg-heart{position:static;top:auto;right:auto;width:34px;height:34px;flex:none;background:transparent;border:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 .poi-hero-icon{font-size:28px;flex-shrink:0}
@@ -7190,7 +7190,7 @@ function disclaimerOnFirstNav(){
 
 function closeSheet(){
   var s = document.getElementById('sheet');
-  s.classList.remove('on', 'sheet-town', 'sheet-cluster', 'sheet-poi', 'expanded', 'dragging');   // reset drag state so the next open starts at default height
+  s.classList.remove('on', 'sheet-town', 'sheet-cluster', 'sheet-poi', 'sheet-outlook', 'expanded', 'dragging');   // reset drag state so the next open starts at default height
   s.style.transform = '';
   document.getElementById('overlay').classList.remove('on');
   clearItemRoute();
@@ -7716,7 +7716,7 @@ window._outlookFocus  = window._outlookFocus  || null;
 function openOutlookSheet(focus){
   if(focus !== undefined) window._outlookFocus = focus;
   renderOutlookSheet();
-  document.getElementById('sheet').classList.add('on');
+  document.getElementById('sheet').classList.add('on', 'sheet-outlook');
   document.getElementById('overlay').classList.add('on');
 }
 
@@ -8158,7 +8158,7 @@ function _activePartner(){
   slug=slug.toLowerCase().replace(/[^a-z0-9-]/g,'');
   return WAIKIKI_PARTNERS[slug]||null;
 }
-var _dvMap=null, _dvLayers=[], _dvMk={}, _dvSet=[], _dvSec=null, _dvCat='all', _dvPartner=null, _dvQuery='', _dvNear=null;
+var _dvMap=null, _dvLayers=[], _dvMk={}, _dvSet=[], _dvSec=null, _dvCat='all', _dvPartner=null, _dvQuery='', _dvNear=null, _dvMode='town';
 function _dvCatName(c){ return {shop:'Shops',mall:'Malls',historic:'Historic',food:'Food',coffee:'Coffee',drinks:'Drinks',treats:'Treats',beach:'Beaches',sight:'Sights',play:'Playgrounds',wildlife:'Wildlife'}[c]||c; }
 // Category glyphs: lucide-static v1.16.0 (ISC licence). Deliberately the SAME 24x24 /
 // stroke-width 2 / round-cap language as the app's existing marker icons (mkFoodIcon,
@@ -8180,7 +8180,12 @@ var _WS_ICON={
 };
 function _wsIcon(cat){ return _WS_ICON[cat]||_WS_ICON.sight; }
 function _wsTint(hex,a){ var n=parseInt(String(hex).replace('#',''),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
-function _dvPoiSet(sec){ return (window._activeTab==='acts') ? ((sec.family&&sec.family.length)?sec.family:(sec.pois||[])) : (sec.pois||[]); }
+// The drill-in shows TOWN pois by default; the Town/Family toggle (_dvMode) flips it to the
+// section's family set. Falls back to the other set if the requested one is empty.
+function _dvPoiSet(sec){
+  var town=(sec.pois||[]), fam=(sec.family&&sec.family.length)?sec.family:town;
+  return (_dvMode==='family') ? fam : town;
+}
 function _dvIsPick(p){ var pr=_dvPartner; if(!pr||!pr.picks) return false;
   if(p.cat==='beach') return false; // guardrail: safety/beach POIs are non-sponsorable, never a 'pick'
   var n=(p.n||'').toLowerCase();
@@ -8206,6 +8211,10 @@ function _dvEnsureDom(){
       +'#distView .dv-hdr{flex:0 0 auto;display:flex;align-items:center;gap:11px;padding:4px 14px 12px;background:#0f4c5c;color:#fff}'
       +'#distView .dv-back{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}#distView .dv-back svg{width:19px;height:19px;display:block}'
       +'#distView .dv-ttl{font:800 16px "DM Sans",sans-serif;line-height:1.12}#distView .dv-ttl small{display:block;font-weight:600;font-size:10px;opacity:.85;letter-spacing:.06em}#distView .dv-ttl small b{font-weight:800;opacity:1}'
+      +'#distView .dv-modes{flex:0 0 auto;padding:10px 12px 4px;background:var(--warm,#f5ecd7)}'
+      +'#distView .dv-seg{display:flex;gap:3px;background:#e7dcc4;border-radius:11px;padding:3px}'
+      +'#distView .dv-mode{flex:1 1 0;text-align:center;padding:8px 0;border:none;border-radius:9px;background:none;color:#5a6b73;font:800 13px "DM Sans",sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,color .15s}'
+      +'#distView .dv-mode.on{background:#0f4c5c;color:#fff;box-shadow:0 1px 3px rgba(15,76,92,.28)}'
       +'#distView .dv-chips{flex:0 0 auto;display:flex;gap:6px;overflow-x:auto;padding:9px 12px;background:var(--warm,#f5ecd7);border-bottom:1px solid rgba(15,76,92,.1);scrollbar-width:none}#distView .dv-chips::-webkit-scrollbar{display:none}'
       +'#distView .dv-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;border:1px solid rgba(15,76,92,.25);background:#fff;color:#0f4c5c;font:600 12px "DM Sans",sans-serif;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}#distView .dv-chip.on{background:#0f4c5c;border-color:#0f4c5c;color:#fff}#distView .dv-chip.pick{border-color:#e08a1e;color:#a5620a}#distView .dv-chip.pick.on{background:#e08a1e;border-color:#e08a1e;color:#fff}'
       +'#distView .dv-chip-ic{display:inline-flex;flex:0 0 auto}#distView .dv-chip-ic svg{width:13px;height:13px;display:block}'
@@ -8242,12 +8251,23 @@ function _dvEnsureDom(){
     document.head.appendChild(st);
   }
   var dv=document.createElement('div'); dv.id='distView';
-  dv.innerHTML='<div class="dv-card"><div class="dv-grabwrap"><div class="dv-grab"></div></div><div class="dv-hdr"><button class="dv-back" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg></button><div class="dv-ttl"><small><b id="dvBrand">WAIKĪKĪ</b> · <span id="dvCount"></span></small><span id="dvName"></span></div></div><div class="dv-chips" id="dvChips"></div><div class="dv-tools"><div class="dv-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input id="dvSearch" type="search" placeholder="Search this area" autocomplete="off"></div><button id="dvNear" class="dv-nearbtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.7-7-12a7 7 0 0 1 14 0c0 5.3-7 12-7 12z"></path><circle cx="12" cy="9" r="2.4"></circle></svg><span>Near me</span></button></div><div id="dvMap"></div><div id="dvList"></div></div>';
+  dv.innerHTML='<div class="dv-card"><div class="dv-grabwrap"><div class="dv-grab"></div></div><div class="dv-hdr"><button class="dv-back" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg></button><div class="dv-ttl"><small><b id="dvBrand">WAIKĪKĪ</b> · <span id="dvCount"></span></small><span id="dvName"></span></div></div><div class="dv-modes" id="dvModes"><div class="dv-seg"><button type="button" class="dv-mode on" data-mode="town">Town</button><button type="button" class="dv-mode" data-mode="family">Family</button></div></div><div class="dv-chips" id="dvChips"></div><div class="dv-tools"><div class="dv-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input id="dvSearch" type="search" placeholder="Search this area" autocomplete="off"></div><button id="dvNear" class="dv-nearbtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.7-7-12a7 7 0 0 1 14 0c0 5.3-7 12-7 12z"></path><circle cx="12" cy="9" r="2.4"></circle></svg><span>Near me</span></button></div><div id="dvMap"></div><div id="dvList"></div></div>';
   (document.getElementById('app')||document.body).appendChild(dv);
   dv.querySelector('.dv-back').addEventListener('click', closeDistrictView);
   dv.addEventListener('click', function(e){ if(e.target===dv) closeDistrictView(); });
   var si=dv.querySelector('#dvSearch'); if(si) si.addEventListener('input',function(){ _dvQuery=this.value; _dvRender(); });
   var nb=dv.querySelector('#dvNear'); if(nb) nb.addEventListener('click',_dvRequestNear);
+  var mb=dv.querySelector('#dvModes'); if(mb) mb.addEventListener('click',function(e){ var b=e.target.closest('.dv-mode'); if(b) _dvSetMode(b.dataset.mode); });
+}
+// Town/Family toggle inside the district drill-in. Switches which POI set (sec.pois vs sec.family)
+// populates the map + list, resets the category filter, and rebuilds the category chips to match.
+function _dvSetMode(m){
+  if(m!=='town' && m!=='family') return;
+  if(_dvMode===m) return;
+  _dvMode=m; _dvCat='all';
+  var mb=document.getElementById('dvModes');
+  if(mb) [].forEach.call(mb.querySelectorAll('.dv-mode'),function(b){ b.classList.toggle('on', b.dataset.mode===m); });
+  if(_dvSec){ _dvBuildChips(_dvSec); _dvRender(); document.getElementById('dvList').scrollTop=0; }
 }
 function _dvEnsureMap(){
   if(_dvMap) return _dvMap;
@@ -8324,7 +8344,11 @@ function _dvBuildChips(sec){
   cats.forEach(function(c){ mk(c,_dvCatName(c)); });
 }
 function openDistrictView(sec){
-  _dvEnsureDom(); _dvSec=sec; _dvCat='all'; _dvPartner=_activePartner();
+  _dvEnsureDom(); _dvSec=sec; _dvCat='all'; _dvMode='town'; _dvPartner=_activePartner();
+  // Default to Town pois; sync the toggle and hide Family when a section carries none.
+  var _mb=document.getElementById('dvModes');
+  if(_mb){ var _hasFam=!!(sec.family&&sec.family.length); _mb.style.display=_hasFam?'':'none';
+    [].forEach.call(_mb.querySelectorAll('.dv-mode'),function(b){ b.classList.toggle('on', b.dataset.mode==='town'); }); }
   document.getElementById('dvName').textContent=(sec.label||sec.name);
   var col=(_dvPartner&&_dvPartner.brand&&_dvPartner.brand.color)||'#0f4c5c';
   var hdr=document.querySelector('#distView .dv-hdr'), gw=document.querySelector('#distView .dv-grabwrap');
