@@ -56,18 +56,19 @@
 <div class="wrap">
   <div id="form">
     <h1>Onboard a Stay-Close operator</h1>
-    <p class="sub">One form. Provisions the operator on the free plan, generates their portal link and 3 room QR codes, and (if you enter rooms + email) hands you the billing command for the paid upgrade.</p>
+    <p class="sub">Enter the property and its room count, then pick a plan. Provisions the operator, generates their portal link + 3 room QR codes, and — if you pick Paid — starts the Square billing.</p>
     <div class="card">
       <h4>New operator</h4>
       <label for="name">Property name</label>
       <input type="text" id="name" placeholder="Marriott's Ko Olina Beach Club">
-      <div class="row">
-        <div><label for="email">Billing / AP email <span style="font-weight:400">(optional)</span></label><input type="email" id="email" placeholder="ap@theirbilling.com"></div>
-        <div><label for="rooms">Rooms <span style="font-weight:400">(optional)</span></label><input type="number" id="rooms" min="1" placeholder="550"></div>
-      </div>
+      <label for="rooms">Number of rooms / units</label>
+      <input type="number" id="rooms" min="1" placeholder="550">
+      <p style="font-size:11.5px;color:var(--ink2);margin:5px 0 0">Sets the paid price — <b>$8 per room per month</b>. Required.</p>
+      <label for="email">Billing / AP email</label>
+      <input type="email" id="email" placeholder="ap@theirbilling.com">
       <label for="admin">Admin key</label>
       <input type="password" id="admin" placeholder="operator onboarding key" autocomplete="off">
-      <button class="btn" id="go">Provision operator</button>
+      <button class="btn" id="go">Next — choose a plan</button>
       <p class="msg" id="msg"></p>
     </div>
   </div>
@@ -113,6 +114,8 @@
   $("go").onclick=function(){
     var name=$("name").value.trim(), email=$("email").value.trim(), rooms=parseInt($("rooms").value,10)||null, admin=$("admin").value.trim();
     if(name.length<2){ setMsg("Enter a property name.","err"); return; }
+    if(!rooms || rooms<1){ setMsg("Enter the number of rooms — it sets the paid price.","err"); return; }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ setMsg("Enter a valid billing email.","err"); return; }
     if(!admin){ setMsg("Enter the admin key.","err"); return; }
     _admin=admin; _email=email;
     $("go").disabled=true; setMsg("Provisioning…","");
@@ -137,15 +140,25 @@
       var box=$("qr-"+seg); box.innerHTML="";
       new QRCode(box, {text:j.guest_urls[seg], width:150, height:150, correctLevel:QRCode.CorrectLevel.M});
     });
-    // billing
-    if(j.monthly_8 && _email){
-      $("billBody").innerHTML='<b>Monthly license: $'+j.monthly_8.toLocaleString()+'</b> ('+j.units+' rooms &times; $8), billed by an emailed invoice to '+_email+' — no card on file. One click starts the Square subscription and flips them to Paid.'+
-        '<button id="startBill" style="display:block;margin-top:12px;background:var(--green);color:#fff;border:0;border-radius:10px;padding:12px 16px;font-weight:800;font-size:14px;cursor:pointer">Start paid billing — $'+j.monthly_8.toLocaleString()+'/mo</button>'+
-        '<p id="billMsg" style="margin:9px 0 0;font-size:12.5px;font-weight:700;line-height:1.45"></p>';
-      $("startBill").onclick=startBilling;
-    } else {
-      $("billBody").innerHTML='Add a room count and billing email above to enable one-click paid billing. They stay on the free plan until you do.';
-    }
+    // plan choice — rooms drives the paid price
+    $("billCard").querySelector("h4").textContent = "Choose a plan";
+    $("billBody").innerHTML=
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+        '<div style="border:1.5px solid var(--green);border-radius:12px;padding:15px;background:#f2f6ee">'+
+          '<div style="font-size:11px;font-weight:800;color:var(--green-d);letter-spacing:.05em">FREE &middot; ACTIVE NOW</div>'+
+          '<div style="font-size:26px;font-weight:800;margin:4px 0 6px">$0</div>'+
+          '<div style="font-size:12px;color:var(--ink2);line-height:1.5">Safety guide + lead engine + standing offers + basic counts. Already live &mdash; nothing to do.</div>'+
+        '</div>'+
+        '<div style="border:2px solid var(--gold);border-radius:12px;padding:15px;background:#fff7e6">'+
+          '<div style="font-size:11px;font-weight:800;color:#a8862f;letter-spacing:.05em">PAID</div>'+
+          '<div style="font-size:26px;font-weight:800;margin:4px 0 2px">$'+j.monthly_8.toLocaleString()+'<span style="font-size:13px;font-weight:600;color:var(--ink2)"> /mo</span></div>'+
+          '<div style="font-size:11.5px;color:var(--ink2);margin-bottom:8px">'+j.units+' rooms &times; $8 &middot; emailed invoice to '+_email+'</div>'+
+          '<div style="font-size:12px;color:var(--ink2);line-height:1.5;margin-bottom:10px">Everything in Free, plus the dollar dashboard, CRM routing, timed campaigns, and guest insights.</div>'+
+          '<button id="startBill" style="width:100%;background:var(--green);color:#fff;border:0;border-radius:10px;padding:12px;font-weight:800;font-size:14px;cursor:pointer">Start paid billing</button>'+
+          '<p id="billMsg" style="margin:9px 0 0;font-size:12.5px;font-weight:700;line-height:1.45"></p>'+
+        '</div>'+
+      '</div>';
+    $("startBill").onclick=startBilling;
   }
 
   function startBilling(){
