@@ -18,3 +18,31 @@
   X-Robots-Tag: noindex, nofollow
 /p/demo
   X-Robots-Tag: noindex, nofollow
+
+# Jade kit — private sales material. Never index. Paths listed explicitly
+# (both .html and clean-URL forms) rather than /jade-* because Netlify splats
+# only match whole trailing segments.
+/jade-sales.html
+  X-Robots-Tag: noindex, nofollow
+/jade-sales
+  X-Robots-Tag: noindex, nofollow
+/jade-live.html
+  X-Robots-Tag: noindex, nofollow
+/jade-live
+  X-Robots-Tag: noindex, nofollow
+/jade-flow.html
+  X-Robots-Tag: noindex, nofollow
+/jade-flow
+  X-Robots-Tag: noindex, nofollow
+/jade-deal-flow.html
+  X-Robots-Tag: noindex, nofollow
+/jade-deal-flow
+  X-Robots-Tag: noindex, nofollow
+/jade-mint.html
+  X-Robots-Tag: noindex, nofollow
+/jade-mint
+  X-Robots-Tag: noindex, nofollow
+/jade-payment-walkthrough.html
+  X-Robots-Tag: noindex, nofollow
+/jade-payment-walkthrough
+  X-Robots-Tag: noindex, nofollow
