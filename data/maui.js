@@ -233,8 +233,7 @@
       "swim",
       "walk",
       "sunset",
-      "photography",
-      "surf"
+      "photography"
     ],
     "tip": "Beautiful guarded beach (one of only two lifeguarded beaches in West Maui), but it faces more north and catches winter and NW swell that build a powerful shorebreak and rip currents — swim near the lifeguard tower and heed the flags. The steep nearshore slope can cause a strong undertow when surf is up.",
     "photo": "",
@@ -306,7 +305,6 @@
     "parking": "Free county lot off Honoapiʻilani Hwy with restrooms and showers — popular but usually has turnover.",
     "intents": [
       "swim",
-      "surf",
       "sunset",
       "photography"
     ],
@@ -381,7 +379,6 @@
     "intents": [
       "swim",
       "walk",
-      "surf",
       "snorkel"
     ],
     "tip": "A long, shaded sand-and-pebble beach with a beginner surf break offshore (Thousand Peaks); swimming is reasonable on calm days but the bottom drops off and south swells bring shorebreak, so watch conditions. No lifeguard — and this stretch (with Olowalu) sees elevated tiger-shark activity, so avoid murky water and dawn/dusk.",
@@ -960,7 +957,6 @@
     "intents": [
       "swim",
       "walk",
-      "windsurf",
       "photography"
     ],
     "tip": "World-class kite/windsurf launch with a guarded swim section inside the reef. Swimmers must stay in the buoyed zone in front of the lifeguard tower; windsurfers/kiters launch after 11am, so swim early. Calmest for swimming early morning before trades. Avoid the water 72hrs after heavy rain (Kahului runoff).",
@@ -1075,7 +1071,6 @@
     "parking": "Roadside/dirt access off Nonohe Pl and the Stable Rd end. No facilities.",
     "intents": [
       "walk",
-      "windsurf",
       "sunset",
       "photography"
     ],
@@ -1114,8 +1109,7 @@
     "intents": [
       "walk",
       "sunset",
-      "photography",
-      "windsurf"
+      "photography"
     ],
     "tip": "A small sandy pocket at the east end of the Spreckelsville reef. Pretty and quiet, but reef shelves and trade-wind current make it a stronger-swimmer's beach with no lifeguard — scout before entering and stay out in rough trades.",
     "photo": "",
@@ -1155,8 +1149,7 @@
     "intents": [
       "walk",
       "sunset",
-      "photography",
-      "surf"
+      "photography"
     ],
     "tip": "A locals' pocket beach between Pāʻia and Hoʻokipa with a small-wave surf break. No lifeguard and a past drowning in the shorebreak — fine for a stroll, but scout very carefully and do not swim alone if you enter.",
     "photo": "",
@@ -1230,7 +1223,6 @@
     "danger": "Expert-only water. A rock and reef ledge rings a tiny pocket of sand, with strong rip currents, urchins, and heavy shorebreak — even with lifeguards present, swimming is not recommended. World-class winter waves (over ~20 ft on N swells) draw pro windsurfers and surfers only. Sudden building afternoon winds and shallow reef can quickly overpower novices; rogue waves possible even on calm-looking days. Watch the action from the bluff; do not enter unless you are a local-level wave sailor and very strong swimmer.",
     "parking": "Paved lot and a scenic overlook on Hāna Hwy east of Pāʻia. Restrooms, showers. Sea turtles bask on the sand most afternoons — stay 10+ ft back.",
     "intents": [
-      "surf",
       "photography",
       "sunset"
     ],
@@ -1309,8 +1301,7 @@
       "swim",
       "walk",
       "sunset",
-      "photography",
-      "surf"
+      "photography"
     ],
     "tip": "A stunning cliff-backed crescent, but it faces open ocean — the shorebreak and a rip toward the rocks pull hard on a swell. Calm days only, stay near shore, and never turn your back on the water.",
     "photo": "https://commons.wikimedia.org/wiki/Special:FilePath/HamoaBeach.jpg?width=800", "photo_credit": "navin75 / CC BY-SA 2.0",

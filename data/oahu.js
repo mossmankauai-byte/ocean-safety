@@ -76,7 +76,6 @@
     "water_temp": 77,
     "parking": "Small ʻEhukai Beach Park lot across from Sunset Beach Elementary; fills before dawn in winter. Roadside parking heavily enforced.",
     "intents": [
-      "surf",
       "sunset",
       "photography"
     ],
@@ -115,7 +114,6 @@
     "water_temp": 77,
     "parking": "Sunset Beach Park lot and roadside pullouts along Kamehameha Hwy; very limited in winter surf season.",
     "intents": [
-      "surf",
       "sunset",
       "walk",
       "photography"
@@ -156,7 +154,6 @@
     "parking": "Large free lot at Haleʻiwa Aliʻi Beach Park with restrooms and showers; generally easy parking.",
     "intents": [
       "swim",
-      "surf",
       "walk",
       "photography"
     ],
@@ -312,7 +309,6 @@
     "water_temp": 77,
     "parking": "Limited roadside pullouts along Kamehameha Hwy; small and often full.",
     "intents": [
-      "surf",
       "snorkel",
       "photography"
     ],
@@ -617,7 +613,6 @@
       "swim",
       "walk",
       "sunset",
-      "surf",
       "photography"
     ],
     "tip": "The central, guarded heart of the strip — the sand in front of the Royal Hawaiian and Moana, between the Dukes and Kuhio towers. Offshore reefs keep it gentle most days; the beginner breaks (Canoes, Queens) sit outside the swim zone. Watch for surfboard traffic and slippery reef shelves at low tide. Waikīkī's deaths are mostly medical events in the water offshore, not the surf — don't swim alone and stay within your depth. Waikīkī is not one beach: Gray's and Fort DeRussy have no lifeguard, Kūhiō is a walled pond, and Queen's Surf is a surf break. Check the section you're actually standing on.",
@@ -917,7 +912,6 @@
     "access_level": "easy",
     "parking": "Free lot and roadside parking along Farrington Hwy fronting the beach.",
     "intents": [
-      "surf",
       "swim",
       "walk",
       "sunset",
@@ -1263,7 +1257,6 @@
     "parking": "Kapiʻolani Park free lot (fills early) and metered spots along Kalākaua Ave.",
     "intents": [
       "swim",
-      "surf",
       "snorkel",
       "walk",
       "sunset",

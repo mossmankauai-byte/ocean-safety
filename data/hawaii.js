@@ -776,7 +776,6 @@
     "water_temp": 76,
     "parking": "Roadside on Kahoa St, ~2 mi N of Hilo. Stairs down to the cove.",
     "intents": [
-      "surf",
       "photography"
     ],
     "tip": "The best-known surf break on the Hilo side — not a swim beach. Rocky bottom, rip currents, a fast-changing river mouth, and a quick drop-off. Watch the surfers from the bluff; stay out of the water unless you surf at a local level.",
