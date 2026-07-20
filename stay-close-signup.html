@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/png" href="/assets/oceansafe-favicon.png">
+<link rel="apple-touch-icon" href="/assets/oceansafe-favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OceanSafe · Onboard a Stay-Close operator</title>
+<style>
+  :root{
+    --sand:#f3ede0; --sand2:#faf6ee; --card:#fff; --ink:#2c2a24; --ink2:#6b6457; --line:#e7dfce;
+    --green:#628a56; --green-d:#3d5346; --amber:#d97706; --gold:#c9a84c; --ocean:#0f4c5c;
+    --font:"Helvetica Neue",Arial,Helvetica,sans-serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font-family:var(--font); color:var(--ink); background:var(--sand); -webkit-font-smoothing:antialiased}
+  .top{background:rgba(250,246,238,.92); border-bottom:1px solid var(--line)}
+  .topin{max-width:760px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:10px}
+  .flag{width:0;height:0;border-left:13px solid #16a34a;border-top:9px solid transparent;border-bottom:9px solid transparent}
+  .wm{font-weight:700; font-size:15px; color:var(--green-d)} .wm span{color:var(--amber)}
+  .console{font-size:11px; font-weight:700; color:var(--ink2); text-transform:uppercase; letter-spacing:.07em; padding-left:10px; border-left:1px solid var(--line)}
+  .wrap{max-width:760px; margin:0 auto; padding:22px 20px 60px}
+  h1{font-size:23px; margin:6px 0 4px; letter-spacing:-.01em}
+  .sub{font-size:13.5px; color:var(--ink2); margin:0 0 20px; line-height:1.5}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-bottom:16px}
+  h4{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--green-d); margin:0 0 14px; font-weight:700}
+  label{font-size:12px; font-weight:700; color:var(--ink2); display:block; margin:12px 0 5px}
+  input{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font-family:inherit; font-size:15px; background:#fff}
+  input:focus{outline:none; border-color:var(--green)}
+  .row{display:grid; grid-template-columns:1fr 140px; gap:12px}
+  @media(max-width:520px){.row{grid-template-columns:1fr}}
+  .btn{width:100%; border:0; border-radius:12px; padding:14px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; background:var(--green); color:#fff; margin-top:18px}
+  .btn:hover{background:var(--green-d)} .btn:disabled{opacity:.5}
+  .msg{font-size:13px; font-weight:700; text-align:center; margin-top:12px; min-height:16px}
+  .msg.err{color:#c0492b} .msg.ok{color:var(--green-d)}
+  .hide{display:none}
+  .linkrow{display:flex; align-items:center; gap:8px; margin:8px 0}
+  .linkrow code{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; background:var(--sand2); border:1px solid var(--line); border-radius:8px; padding:9px 11px; font-size:12px; font-family:ui-monospace,Menlo,monospace}
+  .cp{border:1px solid var(--line); background:var(--sand2); color:var(--green-d); border-radius:8px; padding:9px 12px; font-weight:700; font-size:12.5px; cursor:pointer; white-space:nowrap}
+  .cp:hover{border-color:var(--green)}
+  .qrgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:6px}
+  @media(max-width:560px){.qrgrid{grid-template-columns:1fr}}
+  .qrcard{border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center; background:var(--sand2)}
+  .qrcard .qt{font-size:13px; font-weight:800; color:var(--ocean); margin-bottom:2px}
+  .qrcard .qs{font-size:11px; color:var(--ink2); margin-bottom:10px}
+  .qrcard .qbox{background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px; display:inline-block; line-height:0}
+  .qrcard .dl{display:inline-block; margin-top:10px; border:1px solid var(--line); background:#fff; color:var(--green-d); border-radius:8px; padding:7px 12px; font-weight:700; font-size:12px; cursor:pointer; text-decoration:none}
+  .qrcard .dl:hover{border-color:var(--green)}
+  .bill{background:#fff7e6; border:1px solid #e8d9a8; border-left:4px solid var(--gold); border-radius:0 12px 12px 0; padding:14px 16px; font-size:13px; color:#5b4a1a; line-height:1.55}
+  .bill code{display:block; background:#2c2a24; color:#f3ede0; border-radius:8px; padding:10px 12px; font-size:12px; margin-top:8px; overflow-x:auto; white-space:pre}
+  .pb{font-size:11px; font-weight:700; color:var(--ink2); text-align:center; margin-top:22px} .pb span{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="top"><div class="topin"><span class="flag"></span><span class="wm">Ocean<span>Safe</span></span><span class="console">Onboard a Stay-Close operator</span></div></div>
+<div class="wrap">
+  <div id="form">
+    <h1>Onboard a Stay-Close operator</h1>
+    <p class="sub">One form. Provisions the operator on the free plan, generates their portal link and 3 room QR codes, and (if you enter rooms + email) hands you the billing command for the paid upgrade.</p>
+    <div class="card">
+      <h4>New operator</h4>
+      <label for="name">Property name</label>
+      <input type="text" id="name" placeholder="Marriott's Ko Olina Beach Club">
+      <div class="row">
+        <div><label for="email">Billing / AP email <span style="font-weight:400">(optional)</span></label><input type="email" id="email" placeholder="ap@theirbilling.com"></div>
+        <div><label for="rooms">Rooms <span style="font-weight:400">(optional)</span></label><input type="number" id="rooms" min="1" placeholder="550"></div>
+      </div>
+      <label for="admin">Admin key</label>
+      <input type="password" id="admin" placeholder="operator onboarding key" autocomplete="off">
+      <button class="btn" id="go">Provision operator</button>
+      <p class="msg" id="msg"></p>
+    </div>
+  </div>
+
+  <div id="result" class="hide">
+    <h1 id="rTitle">Provisioned</h1>
+    <p class="sub" id="rSub"></p>
+
+    <div class="card">
+      <h4>Operator links</h4>
+      <div class="linkrow"><code id="lPortal"></code><button class="cp" data-copy="lPortal">Copy portal</button></div>
+      <div class="linkrow"><code id="lDash"></code><button class="cp" data-copy="lDash">Copy dashboard</button></div>
+      <p class="sub" style="margin:10px 0 0">Send the <b>portal</b> link to the operator to configure their offers. The <b>dashboard</b> is where they watch results.</p>
+    </div>
+
+    <div class="card">
+      <h4>Room QR codes — print one per reservation type</h4>
+      <div class="qrgrid">
+        <div class="qrcard"><div class="qt">Renter</div><div class="qs">Tour funnel</div><div class="qbox" id="qr-renter"></div><a class="dl" data-dl="renter" data-seg="renter">Download PNG</a></div>
+        <div class="qrcard"><div class="qt">Exchange</div><div class="qs">Tour funnel</div><div class="qbox" id="qr-exchange"></div><a class="dl" data-dl="exchange" data-seg="exchange">Download PNG</a></div>
+        <div class="qrcard"><div class="qt">Owner</div><div class="qs">Update + referral</div><div class="qbox" id="qr-owner"></div><a class="dl" data-dl="owner" data-seg="owner">Download PNG</a></div>
+      </div>
+    </div>
+
+    <div class="card" id="billCard">
+      <h4>Billing — paid upgrade</h4>
+      <div class="bill" id="billBody"></div>
+    </div>
+
+    <button class="btn" id="another" style="background:var(--ocean)">Onboard another</button>
+  </div>
+  <p class="pb">powered by <span>OceanSafe</span></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var DATA=null;
+  function setMsg(t,c){ var m=$("msg"); m.textContent=t; m.className="msg "+(c||""); }
+
+  $("go").onclick=function(){
+    var name=$("name").value.trim(), email=$("email").value.trim(), rooms=parseInt($("rooms").value,10)||null, admin=$("admin").value.trim();
+    if(name.length<2){ setMsg("Enter a property name.","err"); return; }
+    if(!admin){ setMsg("Enter the admin key.","err"); return; }
+    $("go").disabled=true; setMsg("Provisioning…","");
+    fetch("/api/ts-signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin:admin,name:name,email:email,rooms:rooms})})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        $("go").disabled=false;
+        if(!j || !j.ok){ setMsg(reason(j&&j.reason),"err"); return; }
+        DATA=j; showResult(j);
+      })
+      .catch(function(){ $("go").disabled=false; setMsg("Couldn't reach the server. Try again.","err"); });
+  };
+  function reason(r){ return r==="forbidden"?"Wrong admin key.":r==="bad_name"?"Property name is too short.":r==="rate_limited"?"Too many signups today — try again tomorrow.":("Something went wrong ("+(r||"error")+")."); }
+
+  function showResult(j){
+    $("form").classList.add("hide"); $("result").classList.remove("hide"); window.scrollTo(0,0);
+    $("rTitle").textContent = j.resort;
+    $("rSub").textContent = "Live on the free plan"+(j.units?(" · "+j.units+" rooms"):"")+" · slug "+j.slug;
+    $("lPortal").textContent=j.portal_url; $("lDash").textContent=j.dashboard_url;
+    // QR codes
+    ["renter","exchange","owner"].forEach(function(seg){
+      var box=$("qr-"+seg); box.innerHTML="";
+      new QRCode(box, {text:j.guest_urls[seg], width:150, height:150, correctLevel:QRCode.CorrectLevel.M});
+    });
+    // billing
+    if(j.subscribe_cmd){
+      $("billBody").innerHTML='<b>Monthly license: $'+(j.monthly_8||0).toLocaleString()+'</b> ('+j.units+' rooms &times; $8). When they say yes to paid, run this to start the Square subscription (emails them the monthly invoice):<code>'+j.subscribe_cmd.replace(/</g,"&lt;")+'</code>';
+    } else {
+      $("billBody").innerHTML='Add a room count and billing email above to get the exact monthly amount and the Square subscribe command. They stay on the free plan until you do.';
+    }
+  }
+
+  // copy buttons
+  document.addEventListener("click", function(e){
+    var b=e.target.closest(".cp"); if(b){ var t=$(b.dataset.copy).textContent; navigator.clipboard.writeText(t).then(function(){ var o=b.textContent; b.textContent="Copied ✓"; setTimeout(function(){b.textContent=o;},1200); }); }
+    var d=e.target.closest(".dl"); if(d && DATA){ e.preventDefault(); var seg=d.dataset.seg; var cv=$("qr-"+seg).querySelector("canvas"); if(cv){ var a=document.createElement("a"); a.href=cv.toDataURL("image/png"); a.download="stayclose-"+DATA.slug+"-"+seg+"-qr.png"; a.click(); } }
+  });
+
+  $("another").onclick=function(){ $("result").classList.add("hide"); $("form").classList.remove("hide"); $("name").value=""; $("email").value=""; $("rooms").value=""; setMsg("",""); window.scrollTo(0,0); };
+})();
+</script>
+</body>
+</html>

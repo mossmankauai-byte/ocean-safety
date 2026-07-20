@@ -37,6 +37,8 @@
 /api/ts-cfg      /.netlify/functions/ts-cfg      200
 /api/ts-leads/*  /.netlify/functions/ts-leads/:splat  200
 /api/ts-promos/* /.netlify/functions/ts-promos/:splat 200
+/api/ts-signup   /.netlify/functions/ts-signup   200
+/onboard         /stay-close-signup.html         200
 
 # Overview deck — sendable branded link (2026-07-18)
 /overview   /overview.pdf   200
