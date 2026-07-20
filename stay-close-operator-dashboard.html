@@ -499,6 +499,13 @@
         var mx=Math.max(1,dl["0-1"]||0,dl["2-3"]||0,dl["4-5"]||0,dl["6-7"]||0);
         var bars=order.map(function(o){ var v=dl[o[0]]||0, w=Math.round(v/mx*100); return '<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px"><span style="width:112px;color:#6b6457">'+o[1]+'</span><span style="flex:1;height:14px;background:#f1efe8;border-radius:7px;overflow:hidden"><span style="display:block;height:100%;width:'+w+'%;background:#628a56"></span></span><span style="width:24px;text-align:right;font-weight:700">'+v+'</span></div>'; }).join("");
         html+=panel("When guests book (nights left in stay)", bars);
+        var todayStr=new Date().toISOString().slice(0,10);
+        var proms=(j.promos||[]).filter(function(p){ return (!p.start||p.start<=todayStr)&&(!p.end||p.end>=todayStr); });
+        if(proms.length){
+          var segLbl={all:"All",renter:"Renter",exchange:"Exchange",owner:"Owner"};
+          var pr=proms.map(function(p){ return '<tr><td style="padding:5px 0;font-weight:600">'+esc(p.label)+'</td><td style="text-align:right;color:#6b6457">'+(segLbl[p.seg]||"All")+'</td><td style="text-align:right;color:#6b6457">'+(p.end?("ends "+esc(p.end)):"")+'</td></tr>'; }).join("");
+          html+=panel("Active promotions", '<table style="width:100%;font-size:13px;border-collapse:collapse">'+pr+'</table>');
+        }
       }
       if(!live){
         html+='<div style="background:#faf6ee;border:1.5px dashed #e7dfce;border-radius:12px;padding:16px;text-align:center;font-size:13px;color:#6b6457">No leads yet. Real results appear here once guests start booking through the app.</div>';

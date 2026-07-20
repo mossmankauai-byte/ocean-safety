@@ -191,6 +191,13 @@
   </div>
 
   <div class="card">
+    <h4>Timed promotions</h4>
+    <p class="hint">Schedule a limited-time boost for a date range. Guests see it in the app <b>only while it's live</b>, then it expires on its own. Paid plan.</p>
+    <div id="promolist"></div>
+    <button class="chip" id="promoAdd" type="button" style="margin-top:12px">+ Add promotion</button>
+  </div>
+
+  <div class="card">
     <h4>Lead routing</h4>
     <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px">
       <div class="field"><label for="crm">CRM webhook URL</label><input type="text" id="crm" placeholder="https://your-crm/webhook"></div>
@@ -414,12 +421,47 @@
   }
   $("save").onclick=function(){ localStorage.setItem(CKEY, JSON.stringify(gather())); var s=$("status"); s.classList.add("on"); setTimeout(function(){ s.classList.remove("on"); }, 2200); saveServer(); };
 
+  // ── timed promotions editor ──
+  var PROMOS=[];
+  var SEGNAME={all:"All guests",renter:"Renter",exchange:"Exchange",owner:"Owner"};
+  function promoRow(p,i){
+    return '<div class="segblock" data-i="'+i+'">'+
+      '<div class="field"><label>Message guests see</label><input type="text" class="pm_label" value="'+esc(p.label||"")+'" placeholder="+$50 dining credit for booking a session by Friday"></div>'+
+      '<div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">'+
+        '<div class="field"><label>Guest type</label><select class="pm_seg">'+["all","renter","exchange","owner"].map(function(s){return '<option value="'+s+'"'+(p.seg===s?" selected":"")+'>'+SEGNAME[s]+'</option>';}).join("")+'</select></div>'+
+        '<div class="field"><label>Boost $ (optional)</label><input type="number" class="pm_boost" min="0" value="'+(p.boost?p.boost:"")+'"></div>'+
+        '<div class="field"><label>Start date</label><input type="date" class="pm_start" value="'+esc(p.start||"")+'"></div>'+
+        '<div class="field"><label>End date</label><input type="date" class="pm_end" value="'+esc(p.end||"")+'"></div>'+
+      '</div>'+
+      '<div style="text-align:right;margin-top:8px"><button class="rm" type="button" data-rm="'+i+'">Remove</button></div>'+
+    '</div>';
+  }
+  function syncPromos(){
+    PROMOS=[];
+    $("promolist").querySelectorAll(".segblock").forEach(function(r){
+      PROMOS.push({ label:r.querySelector(".pm_label").value.trim(), seg:r.querySelector(".pm_seg").value, boost:parseInt(r.querySelector(".pm_boost").value,10)||0, start:r.querySelector(".pm_start").value, end:r.querySelector(".pm_end").value });
+    });
+  }
+  function renderPromos(){
+    var box=$("promolist");
+    box.innerHTML = PROMOS.length ? PROMOS.map(promoRow).join("") : '<p class="hint" style="margin:0">No promotions scheduled. Add one to run a limited-time offer.</p>';
+    box.querySelectorAll("[data-rm]").forEach(function(b){ b.onclick=function(){ syncPromos(); PROMOS.splice(+b.dataset.rm,1); renderPromos(); }; });
+  }
+  $("promoAdd").onclick=function(){ syncPromos(); PROMOS.push({seg:"all"}); renderPromos(); };
+  if(SLUG && KEY){   // prefill existing promos from the operator's live config
+    fetch("/api/ts-leads/"+encodeURIComponent(SLUG)+"?key="+encodeURIComponent(KEY)).then(function(r){return r.json();}).then(function(j){
+      if(j && Array.isArray(j.promos) && j.promos.length){ PROMOS=j.promos; renderPromos(); }
+    }).catch(function(){});
+  }
+  renderPromos();
+
   // ── save the revenue model + CRM webhook to the operator's live config (pcfg) ──
   function saveServer(){
     if(!SLUG || !KEY) return;   // demo mode (no ?ref=&key=) → localStorage only, no server write
     var numv=function(id){ var v=parseFloat($(id).value); return isFinite(v)?v:undefined; };
     var pct=function(id){ var v=parseFloat($(id).value); return isFinite(v)?Math.max(0,Math.min(1,v/100)):undefined; };
     var payload={slug:SLUG, key:KEY, resort:$("resort").value, ts_crm_webhook:$("crm").value.trim()};
+    syncPromos(); payload.ts_promos = PROMOS.filter(function(p){return p.label;});
     var u=numv("units"); if(u!==undefined) payload.units=u;
     var vpg=numv("vpg"); if(vpg!==undefined) payload.vpg=vpg;
     var sr=pct("showrate"); if(sr!==undefined) payload.show_rate=sr;

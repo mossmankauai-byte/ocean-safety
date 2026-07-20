@@ -742,6 +742,7 @@
       canBack:true,
       body:
         '<div class="pill aqua"><span class="dotpulse"></span>6 Kauaʻi beaches explored this trip</div>'+
+        promoBanner()+
         '<h2 class="h2">'+hook+'</h2>'+
         '<p class="p">'+line+'</p>'+
         giftFeatHtml(feat)+
@@ -1170,6 +1171,23 @@
         body:JSON.stringify({slug:slug, lead:lead}), keepalive:true}).catch(function(){});
     }catch(e){}
   }
+  // ── timed promotions: pull the operator's currently-active promo for this segment ──
+  var TS_PROMO=null;
+  function fetchPromos(){
+    var sp=new URLSearchParams(location.search); var slug=(sp.get("ref")||sp.get("slug")||"").toLowerCase();
+    if(!slug) return;
+    try{
+      fetch("/api/ts-promos/"+encodeURIComponent(slug)).then(function(r){return r.json();}).then(function(j){
+        if(!j||!j.promos||!j.promos.length) return;
+        TS_PROMO = j.promos.filter(function(p){return p.seg==="all"||p.seg===seg;})[0] || null;
+      }).catch(function(){});
+    }catch(e){}
+  }
+  function promoBanner(){
+    if(!TS_PROMO||!TS_PROMO.label) return "";
+    var s=String(TS_PROMO.label).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});
+    return '<div style="display:flex;gap:9px;align-items:flex-start;background:#fff7e6;border:1px solid #e8d9a8;border-left:4px solid #c9a84c;border-radius:0 12px 12px 0;padding:10px 12px;margin:0 0 12px;font-size:13px;color:#5a4a1c;line-height:1.4"><b>Limited time&nbsp;&mdash;&nbsp;</b>'+s+'</div>';
+  }
 
   /* ════════════════════════ BOOT ════════════════════════ */
   function applySegment(s){
@@ -1178,6 +1196,8 @@
     segTag.classList.toggle("owner", seg==="owner");
     assertOwnerSafe();          // re-verify guardrail on every segment switch
     log("app_open");
+    fetchPromos();              // pull active timed promo for this segment
+
     $("#start").style.display="none";
     hub();
   }
