@@ -107,13 +107,14 @@
 (function(){
   "use strict";
   var $=function(id){return document.getElementById(id);};
-  var DATA=null;
+  var DATA=null, _admin="", _email="";
   function setMsg(t,c){ var m=$("msg"); m.textContent=t; m.className="msg "+(c||""); }
 
   $("go").onclick=function(){
     var name=$("name").value.trim(), email=$("email").value.trim(), rooms=parseInt($("rooms").value,10)||null, admin=$("admin").value.trim();
     if(name.length<2){ setMsg("Enter a property name.","err"); return; }
     if(!admin){ setMsg("Enter the admin key.","err"); return; }
+    _admin=admin; _email=email;
     $("go").disabled=true; setMsg("Provisioning…","");
     fetch("/api/ts-signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin:admin,name:name,email:email,rooms:rooms})})
       .then(function(r){return r.json();})
@@ -137,11 +138,25 @@
       new QRCode(box, {text:j.guest_urls[seg], width:150, height:150, correctLevel:QRCode.CorrectLevel.M});
     });
     // billing
-    if(j.subscribe_cmd){
-      $("billBody").innerHTML='<b>Monthly license: $'+(j.monthly_8||0).toLocaleString()+'</b> ('+j.units+' rooms &times; $8). When they say yes to paid, run this to start the Square subscription (emails them the monthly invoice):<code>'+j.subscribe_cmd.replace(/</g,"&lt;")+'</code>';
+    if(j.monthly_8 && _email){
+      $("billBody").innerHTML='<b>Monthly license: $'+j.monthly_8.toLocaleString()+'</b> ('+j.units+' rooms &times; $8), billed by an emailed invoice to '+_email+' — no card on file. One click starts the Square subscription and flips them to Paid.'+
+        '<button id="startBill" style="display:block;margin-top:12px;background:var(--green);color:#fff;border:0;border-radius:10px;padding:12px 16px;font-weight:800;font-size:14px;cursor:pointer">Start paid billing — $'+j.monthly_8.toLocaleString()+'/mo</button>'+
+        '<p id="billMsg" style="margin:9px 0 0;font-size:12.5px;font-weight:700;line-height:1.45"></p>';
+      $("startBill").onclick=startBilling;
     } else {
-      $("billBody").innerHTML='Add a room count and billing email above to get the exact monthly amount and the Square subscribe command. They stay on the free plan until you do.';
+      $("billBody").innerHTML='Add a room count and billing email above to enable one-click paid billing. They stay on the free plan until you do.';
     }
+  }
+
+  function startBilling(){
+    var b=$("startBill"), m=$("billMsg"); b.disabled=true; b.textContent="Starting…"; m.textContent="";
+    fetch("/api/ts-upgrade",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin:_admin,slug:DATA.slug,key:DATA.key,name:DATA.resort,email:_email,rooms:DATA.units})})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(j.ok){ b.style.display="none"; m.style.color="var(--green-d)"; m.innerHTML="✓ Billing started — Square emailed the monthly invoice to "+_email+". Operator is now on the Paid plan (subscription "+j.subscription_id+")."; }
+        else { b.disabled=false; b.textContent="Retry"; m.style.color="#c0492b"; m.textContent = j.reason==="square_not_configured" ? "Square isn't connected yet — add SQUARE_ACCESS_TOKEN, SQUARE_LOCATION_ID and SQUARE_ENVIRONMENT in Netlify env, then retry." : ("Couldn't start billing ("+(j.reason||"error")+")."); }
+      })
+      .catch(function(){ b.disabled=false; b.textContent="Retry"; m.style.color="#c0492b"; m.textContent="Network error — try again."; });
   }
 
   // copy buttons
