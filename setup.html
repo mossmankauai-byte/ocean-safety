@@ -249,7 +249,7 @@ function go(n){ STEP=n; render(); }
     $("stage").innerHTML='<div class="card"><div class="err">'+esc(needLink
         ? "Open the link we emailed you to set up your page. If it expired, start again from the signup page."
         : (out.error||"We couldn’t find your page. Ask us for a fresh link."))+'</div>'
-      +'<p class="muted center" style="margin-top:14px">Need help? <a href="mailto:mossmankauai@gmail.com">Email us</a></p></div>'; return; }
+      +'<p class="muted center" style="margin-top:14px">Need help? <a href="mailto:nick@oceansafety.app">Email us</a></p></div>'; return; }
   const p=out.partner;
   S={name:p.name,slug:p.slug,primary_hex:p.primary_hex,short:p.short||"",region:p.region||"",phone:p.phone||"",website:p.website||"",amenities:Array.isArray(p.amenities)?p.amenities.map(a=>a&&a.name?a.name:a).filter(Boolean):[],plan:p.plan||"free",segment:p.segment||"hotel",status:p.status,page_url:p.page_url,dashboard_url:p.dashboard_url};
   if(S.status==="live"){ STEP=5; renderLive(); return; }
