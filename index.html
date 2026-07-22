@@ -8516,7 +8516,7 @@ function renderSwellLayer(){
       +'#os-swell-overlay.paused .os-wv-drift{animation-play-state:paused}'
       +'.os-swell-clip{position:absolute;inset:0;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip)}'
       +'.os-swell-rot{position:absolute;inset:-70%;transform-origin:center center;opacity:.6}'
-      +'.os-swell-drift{position:absolute;inset:0;width:100%;height:100%}.os-wv-drift{animation:os_swelldrift 2.2s linear infinite;will-change:transform}.os-wv{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round}'
+      +'.os-swell-drift{position:absolute;inset:0;width:100%;height:100%}.os-wv-drift{animation:os_swelldrift 2.2s linear infinite;will-change:transform}.os-wv{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round}#os-ocean-tint{position:absolute;inset:0;pointer-events:none;clip-path:url(#os-ocean-clip);-webkit-clip-path:url(#os-ocean-clip);background:rgba(15,76,92,.27)}'
       +'@media (prefers-reduced-motion:reduce){.os-wv-drift{animation:none}}'
       +'#os-swell-badge{position:absolute;right:112px;top:160px;z-index:700;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(8,40,50,.82);color:#eaf6f8;border:1px solid rgba(255,255,255,.22);border-radius:10px;cursor:pointer;pointer-events:auto;-webkit-user-select:none;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.25);overflow:hidden;transition:transform .2s}'
       +'#os-swell-badge:hover{transform:scale(1.05)}'
@@ -8575,7 +8575,7 @@ function renderSwellLayer(){
   let ov=document.getElementById('os-swell-overlay');
   if(!ov){
     ov=document.createElement('div'); ov.id='os-swell-overlay';
-    ov.innerHTML='<div class="os-swell-clip"><div class="os-swell-rot"><svg class="os-swell-drift" aria-hidden="true" preserveAspectRatio="none"><g class="os-wv-drift"><path class="os-wv"></path></g></svg></div></div>';
+    ov.innerHTML='<div id="os-ocean-tint"></div><div class="os-swell-clip"><div class="os-swell-rot"><svg class="os-swell-drift" aria-hidden="true" preserveAspectRatio="none"><g class="os-wv-drift"><path class="os-wv"></path></g></svg></div></div>';
     const badge=document.createElement('div'); badge.id='os-swell-badge';
     badge.addEventListener('click',()=>{ ov.classList.toggle('off'); try{localStorage.setItem('os_swell_off',ov.classList.contains('off')?'1':'');}catch(e){} paint(); });
     (function(){var _s=document.getElementById('satToggle');(_s&&_s.parentNode?_s.parentNode:ov).appendChild(badge);})();
@@ -8596,9 +8596,16 @@ function renderSwellLayer(){
   const _at=window._activeTab, _sub=window._activeSub;
   const beachTab=(_at==='beaches')||(_at==='acts'&&(_sub==='beaches'||_sub==='hazards'));
   var _b=document.getElementById('os-swell-badge');
-  if(sd===null||unknown||!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; return; }
-  ov.style.display=''; if(_b)_b.style.display='flex';
-  var _rg=ov.querySelector('.os-swell-rot'); if(_rg) _rg.style.transform='rotate('+sd+'deg)';
+  // Ocean-contrast tint (#os-ocean-tint) stays on whenever the island map is visible so the
+  // island reads even in the last-known-conditions state; only the drift-wave layer gates on
+  // live swell (sd/unknown). Off a map tab, hide the whole overlay (no ocean to tint).
+  var _clip=ov.querySelector('.os-swell-clip');
+  if(!beachTab){ ov.style.display='none'; if(_b)_b.style.display='none'; return; }
+  ov.style.display='';
+  var _waves=!(sd===null||unknown);
+  if(_clip) _clip.style.display=_waves?'':'none';
+  if(_b)_b.style.display=_waves?'flex':'none';
+  if(_waves){ var _rg=ov.querySelector('.os-swell-rot'); if(_rg) _rg.style.transform='rotate('+sd+'deg)'; }
   updateClip();
   paint();
   }catch(e){}
