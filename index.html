@@ -1812,6 +1812,10 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .pc-chip{padding:2px 7px;border-radius:999px;font-size:9px;font-weight:500;background:var(--ocean-lt);color:var(--ocean);border:1px solid rgba(15,76,92,.12)}
 .pc-chip.gold{background:var(--gold-lt);color:#78530a;border-color:rgba(201,168,76,.3)}
 .pc-tap{font-size:9px;color:var(--mute);margin-top:7px;text-align:right}
+/* Card photo header — a credited POI photo replaces the flat colour band (same gate as the detail hero). */
+.pc-thumb{position:relative;height:96px;background-size:cover;background-position:center;background-repeat:no-repeat;display:flex;align-items:flex-end}
+.pc-thumb-type{padding:6px 10px;font-size:10px;font-weight:600;letter-spacing:.04em;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.55)}
+.pc-credit{padding:4px 10px 0;font-size:8px;line-height:1.2;color:var(--mute);opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* POI DETAIL SHEET */
 /* Placement disclosure. Sits above the sheet hero — the first thing read, before anything
@@ -2988,7 +2992,7 @@ let ACTS=[
    type:'wildlife',price:'$10 adults / kids free',hours:"10am–4pm Wed-Sat (reservations required; gate closes at 3:30pm; closed most major federal holidays)",duration_min:60,
    tip:'Wildlife refuge with seabirds, dolphins, whales (winter). Stroller path to viewing platforms.',
    tags:['wildlife','ada','stroller','restrooms','little_kid','school_age']},
-  {id:'lydgate_park',name:'Lydgate Park (Kamalani Playground)',n:'Lydgate Playground',r:'East Side',lat:22.0418,lon:-159.3471,
+  {id:'lydgate_park',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg/1280px-Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg',photo_credit:'Grace808 / CC BY-SA 3.0',name:'Lydgate Park (Kamalani Playground)',n:'Lydgate Playground',r:'East Side',lat:22.0418,lon:-159.3471,
    type:'playground',price:'Free',hours:'Sunrise to sunset',duration_min:90,
    tip:'Massive wooden castle playground next to safe lifeguarded swim lagoon. Best combo on island.',
    tags:['playground','beach','free','lifeguard','calm','restrooms','toddler','little_kid']},
@@ -3014,7 +3018,7 @@ let ACTS=[
    tags:['wildlife','free','ada','stroller','toddler','little_kid']},
   // ---- Added family POIs (matched to existing typed subtabs: playground / wildlife / scenic / town / cultural) ----
   // PLAYGROUNDS
-  {id:'salt_pond_park',name:'Salt Pond Beach Park',n:'Salt Pond Park',r:'West Side',lat:21.9098,lon:-159.6048,
+  {id:'salt_pond_park',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Beach_at_Salt_Pond_Park,_Kauai,_Hawaii_(41862317925).jpg?width=1600',photo_credit:'Christoph Strässler / CC BY-SA 2.0',name:'Salt Pond Beach Park',n:'Salt Pond Park',r:'West Side',lat:21.9098,lon:-159.6048,
    type:'playground',price:'Free',hours:'Sunrise to sunset',duration_min:120,
    tip:'Big grassy lawn, playground, lifeguarded swim pool inside the reef. One of the calmest swim spots on the west side. Pavilions and BBQ grills.',
    tags:['playground','beach','free','lifeguard','calm','restrooms','toddler','little_kid','parking_easy']},
@@ -3032,7 +3036,7 @@ let ACTS=[
   // HIKES entry at line ~1695. Same coastal walk, but the Family-tab card frames it around
   // seal-watching and the dramatic cliffs rather than the hike stats. Old saves under the
   // 'act:mahaulepu_trail' key are migrated by getSavedSet() so users don't lose them.
-  {id:'mahaulepu_wildlife',name:'Mahaʻulepū Wildlife Walk',n:'Mahaʻulepu Wildlife',r:'South Shore',lat:21.8847,lon:-159.4310,
+  {id:'mahaulepu_wildlife',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Makawehi_Bluff,_Maha%27ulepu_Heritage_Trail,_Koloa_(503149)_(16913372967).jpg?width=1600',photo_credit:'Robert Linsdell / CC BY 2.0',name:'Mahaʻulepū Wildlife Walk',n:'Mahaʻulepu Wildlife',r:'South Shore',lat:21.8847,lon:-159.4310,
    type:'wildlife',price:'Free',hours:'Sunrise to sunset',duration_min:90,
    tip:'2-mile coastal cliff walk from Shipwrecks Beach. Hawaiian monk seals haul out on the beaches below. Sea cliffs, blowholes, and ancient sand dunes.',
    tags:['wildlife','scenic','free','school_age','teen','little_kid']},
@@ -3086,14 +3090,10 @@ let ACTS=[
    type:'cultural',price:'$50 adults',hours:"Tours Tue–Sat, select times 9am–4:30pm (advance reservation required)",duration_min:150,
    tip:'2.5-hour guided walk through movie-set valley (the giant Jurassic Park fig trees) and historic estate gardens. Reserve in advance — tours sell out.',
    tags:['cultural','garden','reservations','school_age','teen']},
-  {id:'wailua_heiau',name:'Wailua Heiau Complex',n:'Wailua Heiau',r:'East Side',lat:22.0470,lon:-159.3372,
+  {id:'wailua_heiau',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Holoholok%C5%AB_Heiau_(14730222126).jpg?width=1600',photo_credit:'Teemu008 / CC BY-SA 2.0',name:'Wailua Heiau Complex',n:'Wailua Heiau',r:'East Side',lat:22.0470,lon:-159.3372,
    type:'cultural',price:'Free',hours:"Daily during daylight hours; non-resident entry fee $5/person + $10/vehicle parking (credit card only at on-site kiosks, effective Feb 22 2026)",duration_min:30,
    tip:'String of seven sacred sites along the Wailua River — Hawaiian royalty\'s spiritual capital. Hikinaakalā Heiau and Holoholokū Heiau are roadside-accessible.',
    tags:['cultural','free','school_age','teen','parking_easy']},
-  {id:'russian_fort',name:'Russian Fort Elizabeth State Historical Park',n:'Russian Fort',r:'West Side',lat:21.9470,lon:-159.6602,
-   type:'cultural',price:'Free',hours:'Sunrise to sunset',duration_min:30,
-   tip:'1817 fort ruins from a brief Russian-Hawaiian Kingdom alliance. Self-guided trails through the star-shaped wall foundations. View of Waimea River mouth.',
-   tags:['cultural','scenic','free','school_age','teen']},
   {id:'grove_farm',name:'Grove Farm Homestead Museum',n:'Grove Farm',r:'East Side',lat:21.9789,lon:-159.3880,
    type:'cultural',price:'$25 adults / $10 kids',hours:'Tours 10am & 1pm Mon, Wed, Thu',duration_min:120,
    tip:'Preserved 1864 sugar plantation home — original furnishings, kitchens, outbuildings. 2-hour guided tour, reservations required. Good rainy day option.',
@@ -3987,6 +3987,20 @@ function photoCreditLine(item){
   return `<div class="poi-photo-credit">Photo: ${safe}</div>`;
 }
 
+function pcTop(item, typeLabel, bandBg, bandCol, iconPrefix){
+  const ph = heroPhoto(item);
+  if(ph){
+    const scrim = 'linear-gradient(0deg,rgba(8,40,50,.55),rgba(8,40,50,.08) 55%,rgba(8,40,50,.30))';
+    return `<div class="pc-thumb" style="background-image:${scrim},url('${ph}')"><span class="pc-thumb-type">${typeLabel}</span></div>`;
+  }
+  return `<div class="pc-band" style="background:${bandBg};color:${bandCol}">${iconPrefix?iconPrefix+' ':''}${typeLabel}</div>`;
+}
+function pcCredit(item){
+  if(!heroPhoto(item)) return '';
+  const safe = String(item.photo_credit).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return `<div class="pc-credit" title="Photo: ${safe}">Photo: ${safe}</div>`;
+}
+
 // Single source of truth for which kinds are savable and how to resolve their IDs.
 // Used by openSavedSheet (to render cards) AND cleanOrphanedSaves (to drop stale keys
 // on boot — important: prevents the badge count from being inflated by leftover entries
@@ -4004,7 +4018,6 @@ const WALKS=[
   {id:'wwk_swinging_bridge',name:'Hanapēpē Swinging Bridge',n:'Swinging Bridge',r:'West Side',area:'Hanapēpē',kind:'walk',note:'Historic wobbly footbridge over the Hanapēpē River in the old art town.'},
   {id:'wwk_art_night',name:'Hanapēpē Friday Art Night',n:'Art Night',r:'West Side',area:'Hanapēpē',kind:'walk',note:'Fridays 5–9pm: galleries open late, food trucks and live music in Kauaʻi’s art town.'},
   {id:'wwk_glass_beach',name:'Glass Beach (Port Allen)',n:'Glass Beach',r:'West Side',area:'ʻEleʻele',kind:'walk',note:'Sea-glass cove near Port Allen; tide-pools and a short rugged shoreline walk. Take only photos.'},
-  {id:'wwk_russian_fort',name:'Russian Fort Elizabeth',n:'Russian Fort',r:'West Side',area:'Waimea',kind:'walk',note:'1817 Russian-era fort ruins with Waimea River and bay views; easy interpretive loop.'},
   {id:'wwk_kokee_museum',name:'Kōkeʻe Natural History Museum',n:'Kōkeʻe Museum',r:'West Side',area:'Kōkeʻe',kind:'walk',note:'Small museum and trail maps at ~3,600 ft; a good first stop before the canyon trails.'}
 ];
 const PLAN_BIKE=[
@@ -6681,10 +6694,11 @@ function poiCard(pid){
   const priceChip=p.price_from?`<span class="pc-chip gold">${p.price_from.split('—')[0].trim()}</span>`:'';
   const hoursChip=p.hours?`<span class="pc-chip">${p.hours.split(',')[0]}</span>`:'';
   return`<div class="pc" onclick="openPoiSheet('${pid}');event.stopPropagation()">
-    <div class="pc-band" style="background:${p.hero_col||'#e0f2f7'};color:var(--ocean)">${p.icon||'+'} ${p.type}</div>
+    ${pcTop(p, p.type, p.hero_col||'#e0f2f7', 'var(--ocean)', p.icon||'+')}
     <div class="pn" style="margin-top:8px">${p.name}</div>
     <div class="pd">${p.desc}</div>
     <div class="pc-chips">${hoursChip}${priceChip}</div>
+    ${pcCredit(p)}
     <div class="pc-tap">details →</div>
   </div>`;
 }
@@ -6739,10 +6753,11 @@ function nearbyActCard(a,dist){
   const distChip=`<span class="pc-chip">${dist.toFixed(1)} mi</span>`;
   const priceChip=a.price?`<span class="pc-chip gold">${a.price.split('—')[0].trim()}</span>`:'';
   return`<div class="pc" onclick="openActSheet('${a.id}');event.stopPropagation()">
-    <div class="pc-band" style="background:#fef3c7;color:#a16207">★ ${a.type}</div>
+    ${pcTop(a, a.type, '#fef3c7', '#a16207', '★')}
     <div class="pn" style="margin-top:8px">${a.name}</div>
     <div class="pd">${(a.tip||'').slice(0,90)}${(a.tip||'').length>90?'…':''}</div>
     <div class="pc-chips">${distChip}${priceChip}</div>
+    ${pcCredit(a)}
     <div class="pc-tap">details →</div>
   </div>`;
 }
