@@ -48,7 +48,14 @@
 # Overview deck — sendable branded link (2026-07-18)
 /overview   /overview.pdf   200
 /stay-close-brochure   /stay-close-brochure.pdf   200
-/timeshare             /stay-close-brochure.pdf   200
+/timeshare-brochure    /stay-close-brochure.pdf              200
+/timeshare             /stay-close-operator-dashboard.html   200
 
 # Wyndham demo link points here — fit it with the new operator console (2026-07-21)
 /analytics-console.html   /stay-close-operator-dashboard.html   200
+
+# ── Clean per-segment dashboard URLs (rewrite; address bar stays clean) 2026-07-22 ──
+/hotel      /operator-console.html               200
+/rental     /rentals-operator-dashboard.html     200
+/shop       /demo-dashboard.html                 200
+/townad     /townad-demo.html                    200
