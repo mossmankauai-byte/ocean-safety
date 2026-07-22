@@ -539,7 +539,7 @@
 
   /* ════════════════════════ STATE ════════════════════════ */
   var seg = "renter";              // set by QR / ?seg=
-  var DAYS_LEFT = 2;               // demo: nights remaining (operator: real)
+  var DAYS_LEFT = 2;               // fallback nights remaining; real value = ?days= or first-open clock (set at init)
   var flow = {};
   function resetFlow(){ flow = {gift:null, answers:{}, slot:null, topic:null, friend:"", email:"", optin:false, nurtureEmail:""}; }
   resetFlow();
@@ -674,7 +674,7 @@
       '<div class="sect-h">Your stay · unit '+UNIT+'</div>'+
       '<div class="trip">'+
         ringSvg(6,8)+
-        '<span><b>6 beaches explored</b><span class="s">Day '+(8-DAYS_LEFT)+' of 7 · '+RESORT+'</span></span>'+
+        '<span><b>6 beaches explored</b><span class="s">Day '+Math.min(7,(8-DAYS_LEFT))+' of 7 · '+RESORT+'</span></span>'+
       '</div>';
 
     render({
@@ -1203,9 +1203,29 @@
   }
 
   // ?seg= deep-link skips the chooser; otherwise show the QR start screen
+  /* ── stay clock: first open starts the timer; day-of-stay counts down a 7-night stay ── */
+  var STAY_NIGHTS = 7, STAY_KEY = "oceansafe_v2_stay_start";
+  function stampStayStart(daysLeft){        // seed/rebase the clock to a known nights-remaining value
+    try{ localStorage.setItem(STAY_KEY, String(Date.now() - (STAY_NIGHTS - daysLeft) * 86400000)); }catch(e){}
+  }
+  function daysLeftFromFirstOpen(){
+    try{
+      var now = Date.now(), start = parseInt(localStorage.getItem(STAY_KEY), 10);
+      if(!start){ start = now; localStorage.setItem(STAY_KEY, String(start)); }   // first open = arrival (day 1)
+      return Math.max(0, Math.min(STAY_NIGHTS, STAY_NIGHTS - Math.floor((now - start) / 86400000)));
+    }catch(e){ return DAYS_LEFT; }           // storage blocked → keep the compiled-in fallback
+  }
+
   var params = new URLSearchParams(location.search);
   var qp = params.get("seg");
-  if(params.get("days")) DAYS_LEFT = Math.max(0, Math.min(7, parseInt(params.get("days"),10)||2));
+  // Day-of-stay: an operator/QR ?days= value always wins; otherwise the clock
+  // anchors to first open (arrival = day 1) and counts down the 7-night stay.
+  if(params.get("days")){
+    DAYS_LEFT = Math.max(0, Math.min(7, parseInt(params.get("days"),10)||2));
+    stampStayStart(DAYS_LEFT);               // back-date the clock so later reopens stay consistent
+  } else {
+    DAYS_LEFT = daysLeftFromFirstOpen();     // first open here starts the timer
+  }
   if(qp){ applySegment(qp); }
   else {
     Array.prototype.forEach.call(document.querySelectorAll("#start .qr"), function(b){
