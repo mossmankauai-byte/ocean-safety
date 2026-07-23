@@ -5522,8 +5522,7 @@ function renderPlanDay(){
     '<div class="plan-controls"><div class="plan-lbl">Pick your day</div><div class="plan-strip">'+strip+'</div>'+
       '<div class="plan-row2"><div class="plan-col"><div class="plan-lbl">Area</div><div class="plan-seg">'+areaChips+'</div></div>'+
       '<div class="plan-col"><div class="plan-lbl">Type of day</div><div class="plan-seg">'+vibeChips+'</div></div></div>'+
-      '<div class="plan-tours"><div class="plan-tours-l">Tours & paid activities<small>Add conditions-matched tours</small></div>'+
-      '<button class="plan-toggle'+(_planTours?' on':'')+'" onclick="planToggleTours()" aria-pressed="'+_planTours+'"><span></span></button></div></div>'+
+      '</div>'+
     '<div class="plan-why">'+_planWhy()+'</div>'+
     '<div class="plan-day">'+rows+'</div>'+
     '<div class="plan-foot">'+saveBtn+'<button class="plan-shuffle" onclick="planRandomize()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px"><path d="M16 3h5v5M21 3l-7 7M4 20l6-6M16 21h5v-5M14 14l7 7M4 4l5 5" stroke-linecap="round" stroke-linejoin="round"/></svg> Shuffle</button><span class="plan-note">Tap any item to swap it. Hearts save it.</span></div>'+
@@ -7596,10 +7595,16 @@ function applyPartnerMode(){
   // C-3: a non-sellable island never surfaces Shop/buy (guide-only). UX-only; the server gate
   // is authoritative. Kauaʻi stays sellable → unchanged.
   var aff=window.PARTNER_MODE==='affiliate' || !_islandSellable();
-  // Plan tab off for now (2026-07-13); Shop takes its slot. Star icon by default,
-  // the Town bag icon when the active partner is a RETAIL store (window._partnerSeg).
+  // Plan replaces Tours in the commerce slot for organic guests (2026-07-23):
+  // show the Plan day-planner (POIs only), hide the Tours tab. Affiliate mode, creators
+  // (their commission funnel), and non-sellable islands keep Tours; retail keeps Shop below.
+  // Star/Town bag icon on the Shop tab handled further down (window._partnerSeg).
   var plan=document.querySelector('#tabs .tab[data-tab="activities"]');
-  if(plan) plan.style.display='none';
+  var toursTab=document.querySelector('#tabs .tab[data-tab="tours"]');
+  var _cr=false; try{ _cr=(typeof _activeRefSlug==='function' && String(_activeRefSlug()||'').indexOf('cr-')===0); }catch(e){}
+  var keepTours = aff || _cr;
+  if(plan) plan.style.display = keepTours ? 'none' : '';
+  if(toursTab) toursTab.style.display = keepTours ? '' : 'none';
   var shopTab=document.querySelector('#tabs .tab[data-tab="shop"]');
   // Creator links drop the Shop tab entirely — creator traffic funnels to Tours (their commission),
   // not the Amazon shop. Organic loads DROP Shop too (2026-07-18): Tours owns the organic commerce
