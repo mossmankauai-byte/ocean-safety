@@ -12080,7 +12080,10 @@ if('serviceWorker' in navigator){
     openSheet=window.openSheet=function(id){ var r=_origOS.apply(this,arguments); try{ adoptBadge(id); }catch(e){} return r; };
   }
 
-  function init(){ mountChip(); wireTownContext(); wireSheet(); }
+  function init(){ mountChip(); wireTownContext(); wireSheet();
+    // ?tour=1 opens the Ways-to-help sheet on load (used by the brochure/tour deep-links)
+    try{ if(/[?&]tour=1/.test(location.search)) setTimeout(function(){ openStewardSheet('tour'); }, 1500); }catch(e){}
+  }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
   setTimeout(mountChip, 1500);  // safety net if #topbar renders late
 })();
