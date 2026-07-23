@@ -188,7 +188,14 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
             <button class="btn sea" id="dlQr">Download QR (PNG)</button>
           </div>
         </div>
-        <p class="note">Every scan of this link is attributed to <b id="lnkName">your group</b> in the Impact tab. Organic app visitors are never tracked.</p>
+        <p class="note">Every scan of this link is attributed to <b id="lnkName">your group</b> in the Impact tab. Organic app visitors are never tracked. The guide works across Kauaʻi, Oʻahu, and Maui — one link, all islands.</p>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <label class="fl">Dashboard access — to hand off to a group</label>
+        <div class="linkbox"><code id="dashUrl">—</code><button class="btn ghost sm" id="copyDash">Copy</button></div>
+        <div style="margin-top:10px"><span class="fl" style="display:inline">Access code:</span> <code id="accessCode" style="background:var(--sea-tint);color:var(--sea);padding:3px 8px;border-radius:6px">—</code></div>
+        <button class="btn sea" id="copyEmail" style="margin-top:14px">Copy welcome email</button>
+        <p class="note" id="accessNote"></p>
       </div>
     </section>
 
@@ -200,6 +207,7 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
           <h3 style="font-size:16px;margin-bottom:10px" id="evFormTitle">Add a cleanup</h3>
           <div class="field"><label class="fl">Title</label><input type="text" id="evTitle" placeholder="Poʻipū Beach cleanup"></div>
           <div class="field"><label class="fl">Date</label><input type="date" id="evDate"></div>
+          <div class="field"><label class="fl">Island</label><select id="evIsland"></select></div>
           <div class="field"><label class="fl">Beach</label><select id="evBeach"></select></div>
           <div class="field"><label class="fl">Meeting point &amp; time</label><input type="text" id="evMeet" placeholder="Meet at the pavilion · 8:00 AM"></div>
           <div class="field"><label class="fl">RSVP link (optional)</label><input type="url" id="evRsvp" placeholder="https://…"></div>
@@ -220,6 +228,7 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
       <div class="grid row2">
         <div class="card">
           <h3 style="font-size:16px;margin-bottom:10px">Adopt a beach</h3>
+          <div class="field"><label class="fl">Island</label><select id="stIsland"></select></div>
           <div class="field"><label class="fl">Beach</label><select id="stBeach"></select></div>
           <div class="field"><label class="fl">What you do there</label><input type="text" id="stNote" placeholder="Monthly cleanup + dune restoration"></div>
           <button class="btn sea" id="stAdd">Add site</button>
@@ -308,18 +317,27 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
   var KEY=(qp.get('key')||'').trim();
   var DEMO = !REF || REF==='steward-demo' || /^demo(-|$)/.test(REF);
   var SLUG = DEMO ? 'steward-demo' : REF;
+  var CONSOLE_BASE='https://oceansafety.app/steward-console.html';
+  // Access: real partners open ?ref=<slug>&key=<key> (emailed link), OR ?ref=<slug> and enter
+  // their access code once (remembered on this device). The demo needs no code.
+  var PWKEY='os_steward_pw_'+SLUG;
+  if(!DEMO){ if(!KEY){ try{ KEY=localStorage.getItem(PWKEY)||''; }catch(e){} } if(KEY){ try{ localStorage.setItem(PWKEY,KEY); }catch(e){} } }
   var $=function(id){return document.getElementById(id);};
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
   var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var ct=function(n){ return (n==null||isNaN(n))?'—':Number(n).toLocaleString('en-US'); };
 
-  // ── Kaua‘i beach options (matches the guest app's beach ids). Editors pick from these. ──
-  var BEACHES=[
-    {id:'poipu',name:'Poʻipū Beach Park'},{id:'hanalei',name:'Hanalei Bay'},{id:'anini',name:'ʻAnini Beach'},
-    {id:'tunnels',name:'Tunnels (Makua)'},{id:'kee',name:'Kēʻē Beach'},{id:'polihale',name:'Polihale'},
-    {id:'lydgate',name:'Lydgate Beach Park'},{id:'kalapaki',name:'Kalapakī Beach'},{id:'salt-pond',name:'Salt Pond Beach Park'}
-  ];
-  var beachName=function(id){ for(var i=0;i<BEACHES.length;i++) if(BEACHES[i].id===id) return BEACHES[i].name; return id; };
+  // ── Beach options per island (match the guest app's beach ids). Editors pick from these. ──
+  var ISLANDS_ORDER=['kauai','oahu','maui'];
+  var ISLAND_NAMES={kauai:'Kauaʻi',oahu:'Oʻahu',maui:'Maui'};
+  var ISLAND_BEACHES={
+    kauai:[{id:'poipu',name:'Poʻipū Beach Park'},{id:'hanalei',name:'Hanalei Bay'},{id:'anini',name:'ʻAnini Beach'},{id:'tunnels',name:'Tunnels (Makua)'},{id:'kee',name:'Kēʻē Beach'},{id:'polihale',name:'Polihale'},{id:'lydgate',name:'Lydgate Beach Park'},{id:'kalapaki',name:'Kalapakī Beach'},{id:'salt-pond',name:'Salt Pond Beach Park'}],
+    oahu:[{id:'waikiki',name:'Waikīkī Beach'},{id:'ala_moana',name:'Ala Moana Beach Park'},{id:'kailua_beach_park',name:'Kailua Beach Park'},{id:'waimanalo_bay',name:'Waimānalo Bay'},{id:'kualoa',name:'Kualoa Regional Park'},{id:'haleiwa_alii',name:'Haleʻiwa Aliʻi Beach Park'},{id:'bellows',name:'Bellows Field Beach Park'},{id:'kaimana',name:'Kaimana Beach'}],
+    maui:[{id:'kaanapali',name:'Kāʻanapali Beach'},{id:'kapalua_bay',name:'Kapalua Bay'},{id:'napili_bay',name:'Nāpili Bay'},{id:'dt_fleming',name:'D.T. Fleming Beach Park'},{id:'kamaole_i',name:'Kamaʻole Beach Park I'},{id:'kahekili_airport',name:'Kahekili Beach Park'},{id:'launiupoko',name:'Launiupoko Beach Park'},{id:'olowalu',name:'Olowalu Beach'}]
+  };
+  function allBeaches(){ return ISLAND_BEACHES.kauai.concat(ISLAND_BEACHES.oahu, ISLAND_BEACHES.maui); }
+  function beachIsland(id){ for(var k in ISLAND_BEACHES){ for(var i=0;i<ISLAND_BEACHES[k].length;i++) if(ISLAND_BEACHES[k][i].id===id) return k; } return 'kauai'; }
+  var beachName=function(id){ var a=allBeaches(); for(var i=0;i<a.length;i++) if(a[i].id===id) return a[i].name; return id; };
 
   // ── Config (draft) — the object steward.html reads. Seeded with SAMPLE demo content. ──
   var CFG_KEY='os_steward_cfg_'+SLUG;
@@ -327,16 +345,24 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
     slug:SLUG, name:'Your Logo', accent:'#0e6b74', logo:'',
     mission:'Local volunteers keeping Kauaʻi’s beaches clean, safe, and open to everyone.',
     volunteerUrl:'', donateUrl:'', showSunscreen:true, showLNT:true,
-    featured:['poipu','hanalei'],
+    featured:['poipu','hanalei','kaanapali'],
     events:[
-      {id:'c1',title:'Poʻipū Beach cleanup',date:'2026-08-09',beachId:'poipu',area:'South Shore',meet:'Meet at Poʻipū Beach Park pavilion · 8:00–10:00 AM',rsvpUrl:''},
-      {id:'c2',title:'Hanalei Bay shoreline sweep',date:'2026-08-16',beachId:'hanalei',area:'North Shore',meet:'Meet at Hanalei Pavilion · 8:30 AM',rsvpUrl:''},
-      {id:'c3',title:'ʻAnini reef marine-debris day',date:'2026-08-23',beachId:'anini',area:'North Shore',meet:'Meet at ʻAnini Beach Park · 9:00 AM',rsvpUrl:''}
+      {id:'k1',island:'kauai',title:'Poʻipū Beach cleanup',date:'2026-08-09',beachId:'poipu',meet:'Meet at Poʻipū Beach Park pavilion · 8:00–10:00 AM',rsvpUrl:''},
+      {id:'k2',island:'kauai',title:'Hanalei Bay shoreline sweep',date:'2026-08-16',beachId:'hanalei',meet:'Meet at Hanalei Pavilion · 8:30 AM',rsvpUrl:''},
+      {id:'k3',island:'kauai',title:'ʻAnini reef marine-debris day',date:'2026-08-23',beachId:'anini',meet:'Meet at ʻAnini Beach Park · 9:00 AM',rsvpUrl:''},
+      {id:'o1',island:'oahu',title:'Ala Moana Beach cleanup',date:'2026-08-10',beachId:'ala_moana',meet:'Meet at Ala Moana Beach Park (Magic Island) · 8:00 AM',rsvpUrl:''},
+      {id:'o2',island:'oahu',title:'Waimānalo Bay sweep',date:'2026-08-17',beachId:'waimanalo_bay',meet:'Meet at Waimānalo Bay Beach Park · 8:30 AM',rsvpUrl:''},
+      {id:'m1',island:'maui',title:'Kāʻanapali Beach cleanup',date:'2026-08-11',beachId:'kaanapali',meet:'Meet at Kāʻanapali Beach (Whalers Village) · 8:00 AM',rsvpUrl:''},
+      {id:'m2',island:'maui',title:'Kamaʻole Beach sweep',date:'2026-08-18',beachId:'kamaole_i',meet:'Meet at Kamaʻole Beach Park I · 8:30 AM',rsvpUrl:''}
     ],
     sites:[
-      {beachId:'poipu',note:'Monthly cleanup + dune restoration'},
-      {beachId:'hanalei',note:'Weekly shoreline sweep'},
-      {beachId:'anini',note:'Reef-flat marine-debris removal'}
+      {island:'kauai',beachId:'poipu',note:'Monthly cleanup + dune restoration'},
+      {island:'kauai',beachId:'hanalei',note:'Weekly shoreline sweep'},
+      {island:'kauai',beachId:'anini',note:'Reef-flat marine-debris removal'},
+      {island:'oahu',beachId:'ala_moana',note:'Monthly shoreline cleanup'},
+      {island:'oahu',beachId:'kualoa',note:'Quarterly marine-debris day'},
+      {island:'maui',beachId:'kaanapali',note:'Monthly cleanup + reef watch'},
+      {island:'maui',beachId:'kapalua_bay',note:'Snorkel-survey debris removal'}
     ]
   };
   var cfg;
@@ -385,7 +411,27 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
   }
 
   // ─────────────────────────── Link + QR ───────────────────────────
-  function guestUrl(){ return GUEST_BASE+'?ref='+encodeURIComponent(SLUG)+'&island=kauai'; }
+  function guestUrl(){ return GUEST_BASE+'?ref='+encodeURIComponent(SLUG); }
+  function dashUrlStr(){ return CONSOLE_BASE+'?ref='+encodeURIComponent(DEMO?'your-slug':SLUG); }
+  function accessCodeStr(){ return DEMO ? 'set when you hand it off' : (KEY||'set when you hand it off'); }
+  function welcomeEmail(){
+    var name=cfg.name||'your group';
+    return 'Subject: Your OceanSafe beach guide is ready\n\n'
+      +'Aloha,\n\n'
+      +'Your co-branded OceanSafe guide and dashboard are set up for '+name+' — free to use, across Kauaʻi, Oʻahu, and Maui.\n\n'
+      +'Your guide (share it, or print the QR from the dashboard):\n'+guestUrl()+'\n\n'
+      +'Your dashboard (bookmark it):\n'+dashUrlStr()+'\n'
+      +'Access code: '+accessCodeStr()+'\n\n'
+      +'Open the dashboard, add your cleanups and the beaches you look after, and you are live.\n\n'
+      +'— OceanSafe';
+  }
+  function renderAccess(){
+    var d=$('dashUrl'); if(d) d.textContent=dashUrlStr();
+    var c=$('accessCode'); if(c) c.textContent=accessCodeStr();
+    var n=$('accessNote'); if(n) n.innerHTML=DEMO
+      ? 'This is how a hand-off looks. Each group gets their own link and access code; they open the dashboard, enter the code once, and it is remembered on their device.'
+      : 'Send this to the group. They open the dashboard link, enter the access code once, and can return to it any time.';
+  }
   function renderLink(){
     $('guestLink').textContent=guestUrl();
     $('lnkName').textContent=cfg.name||'your group';
@@ -404,27 +450,28 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
     var evs=(cfg.events||[]).slice().sort(function(a,b){return a.date<b.date?-1:1;});
     if(!evs.length){ l.innerHTML='<p class="note" style="margin-top:0">No events yet — add one.</p>'; return; }
     l.innerHTML=evs.map(function(e){
-      return '<div class="itemrow">'+evDateBox(e.date)+'<div class="body"><div class="t">'+esc(e.title)+'</div><div class="s">'+esc(beachName(e.beachId))+' · '+esc(e.meet||'')+'</div></div>'
+      return '<div class="itemrow">'+evDateBox(e.date)+'<div class="body"><div class="t">'+esc(e.title)+'</div><div class="s">'+esc(ISLAND_NAMES[e.island||beachIsland(e.beachId)]||'')+' · '+esc(beachName(e.beachId))+' · '+esc(e.meet||'')+'</div></div>'
         +'<div style="display:flex;gap:6px;flex:none"><button class="btn ghost sm" data-ev-edit="'+esc(e.id)+'">Edit</button><button class="btn ghost sm" data-ev-del="'+esc(e.id)+'">Delete</button></div></div>';
     }).join('');
   }
-  function evFormReset(){ editingEv=null; $('evTitle').value='';$('evDate').value='';$('evMeet').value='';$('evRsvp').value=''; $('evBeach').selectedIndex=0; $('evFormTitle').textContent='Add a cleanup'; $('evAdd').textContent='Add event'; $('evCancel').style.display='none'; }
+  function evFormReset(){ editingEv=null; $('evTitle').value='';$('evDate').value='';$('evMeet').value='';$('evRsvp').value=''; try{ $('evIsland').selectedIndex=0; fillBeachSelect($('evBeach'), $('evIsland').value); }catch(e){} $('evFormTitle').textContent='Add a cleanup'; $('evAdd').textContent='Add event'; $('evCancel').style.display='none'; }
 
   // ─────────────────────────── Adopt-a-Site editor ───────────────────────────
   function renderSites(){
     var l=$('stList');
     if(!(cfg.sites||[]).length){ l.innerHTML='<p class="note" style="margin-top:0">No adopted beaches yet.</p>'; return; }
     l.innerHTML=cfg.sites.map(function(s,i){
-      return '<div class="itemrow"><div class="body"><div class="t">'+esc(beachName(s.beachId))+'</div><div class="s">'+esc(s.note||'')+'</div></div><button class="btn ghost sm" data-st-del="'+i+'" style="flex:none">Remove</button></div>';
+      return '<div class="itemrow"><div class="body"><div class="t">'+esc(beachName(s.beachId))+'</div><div class="s">'+esc(ISLAND_NAMES[s.island||beachIsland(s.beachId)]||'')+' · '+esc(s.note||'')+'</div></div><button class="btn ghost sm" data-st-del="'+i+'" style="flex:none">Remove</button></div>';
     }).join('');
   }
 
   // ─────────────────────────── Featured beaches ───────────────────────────
   function renderFeatured(){
     cfg.featured=cfg.featured||[];
-    $('featList').innerHTML=BEACHES.map(function(b){
-      var on=cfg.featured.indexOf(b.id)>=0;
-      return '<button class="btn '+(on?'sea':'ghost')+' sm" data-feat="'+b.id+'">'+(on?'✓ ':'')+esc(b.name)+'</button>';
+    $('featList').innerHTML=ISLANDS_ORDER.map(function(k){
+      return '<div style="width:100%"><div class="fl" style="margin:10px 0 4px">'+esc(ISLAND_NAMES[k])+'</div><div style="display:flex;flex-wrap:wrap;gap:8px">'
+        +ISLAND_BEACHES[k].map(function(b){ var on=cfg.featured.indexOf(b.id)>=0; return '<button class="btn '+(on?'sea':'ghost')+' sm" data-feat="'+b.id+'">'+(on?'✓ ':'')+esc(b.name)+'</button>'; }).join('')
+        +'</div></div>';
     }).join('');
   }
 
@@ -440,8 +487,8 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
       welcome:'In partnership with '+(cfg.name||'Your Logo'),
       volunteerUrl:cfg.volunteerUrl||'#',donateUrl:cfg.donateUrl||'#',
       showSunscreen:!!cfg.showSunscreen,showLNT:!!cfg.showLNT,featured:cfg.featured||[],
-      events:(cfg.events||[]).map(function(e){return {id:e.id,title:e.title,date:e.date,beachId:e.beachId,area:AREA[e.beachId]||'',meet:e.meet,rsvpUrl:e.rsvpUrl||'#'};}),
-      sites:cfg.sites||[]};
+      events:(cfg.events||[]).map(function(e){var isl=e.island||beachIsland(e.beachId);return {id:e.id,island:isl,title:e.title,date:e.date,beachId:e.beachId,area:(isl==='kauai'?(AREA[e.beachId]||''):''),meet:e.meet,rsvpUrl:e.rsvpUrl||'#'};}),
+      sites:(cfg.sites||[]).map(function(s){return {island:s.island||beachIsland(s.beachId),beachId:s.beachId,note:s.note};})};
     dl(JSON.stringify(out,null,2),'steward-config-'+SLUG+'.json','application/json');
   }
   function renderCfgPreview(){ try{ $('cfgPreview').textContent=JSON.stringify(cfg,null,2); }catch(e){} }
@@ -542,12 +589,16 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
   }
 
   // ─────────────────────────── wire up ───────────────────────────
-  function fillBeachSelect(sel){ sel.innerHTML=BEACHES.map(function(b){return '<option value="'+b.id+'">'+esc(b.name)+'</option>';}).join(''); }
+  function fillIslandSelect(sel){ sel.innerHTML=ISLANDS_ORDER.map(function(k){return '<option value="'+k+'">'+esc(ISLAND_NAMES[k])+'</option>';}).join(''); }
+  function fillBeachSelect(sel,island){ var list=ISLAND_BEACHES[island]||ISLAND_BEACHES.kauai; sel.innerHTML=list.map(function(b){return '<option value="'+b.id+'">'+esc(b.name)+'</option>';}).join(''); }
   function init(){
     // brand strings
     $('cbName').textContent=cfg.name||'Your Logo'; $('propName').textContent=cfg.name||'Your Logo';
     $('propSlug').textContent=SLUG; $('cbLogo').textContent=(cfg.name||'Y').slice(0,1).toUpperCase();
-    fillBeachSelect($('evBeach')); fillBeachSelect($('stBeach'));
+    fillIslandSelect($('evIsland')); fillIslandSelect($('stIsland'));
+    fillBeachSelect($('evBeach'), $('evIsland').value); fillBeachSelect($('stBeach'), $('stIsland').value);
+    $('evIsland').addEventListener('change',function(){ fillBeachSelect($('evBeach'), this.value); });
+    $('stIsland').addEventListener('change',function(){ fillBeachSelect($('stBeach'), this.value); });
     // tabs
     $('tabnav').addEventListener('click',function(e){ var b=e.target.closest('button[data-view]'); if(b) showView(b.getAttribute('data-view')); });
     try{ var _dv=qp.get('view'); if(_dv && document.getElementById('view-'+_dv)) showView(_dv); }catch(e){}
@@ -556,7 +607,7 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
     // events
     $('evAdd').addEventListener('click',function(){
       var t=$('evTitle').value.trim(); if(!t){ alert('Add a title'); return; }
-      var rec={id:editingEv||('c'+Date.now().toString(36)),title:t,date:$('evDate').value,beachId:$('evBeach').value,area:AREA[$('evBeach').value]||'',meet:$('evMeet').value.trim(),rsvpUrl:$('evRsvp').value.trim()};
+      var rec={id:editingEv||('c'+Date.now().toString(36)),island:$('evIsland').value,title:t,date:$('evDate').value,beachId:$('evBeach').value,meet:$('evMeet').value.trim(),rsvpUrl:$('evRsvp').value.trim()};
       if(editingEv){ cfg.events=cfg.events.map(function(e){return e.id===editingEv?rec:e;}); }
       else cfg.events.push(rec);
       saveCfg(); renderEvents(); evFormReset();
@@ -565,10 +616,10 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
     $('evList').addEventListener('click',function(e){
       var del=e.target.closest('[data-ev-del]'), ed=e.target.closest('[data-ev-edit]');
       if(del){ var id=del.getAttribute('data-ev-del'); cfg.events=cfg.events.filter(function(x){return x.id!==id;}); saveCfg(); renderEvents(); }
-      else if(ed){ var i2=ed.getAttribute('data-ev-edit'); var ev=cfg.events.filter(function(x){return x.id===i2;})[0]; if(ev){ editingEv=ev.id; $('evTitle').value=ev.title; $('evDate').value=ev.date; $('evBeach').value=ev.beachId; $('evMeet').value=ev.meet||''; $('evRsvp').value=ev.rsvpUrl||''; $('evFormTitle').textContent='Edit cleanup'; $('evAdd').textContent='Save changes'; $('evCancel').style.display=''; } }
+      else if(ed){ var i2=ed.getAttribute('data-ev-edit'); var ev=cfg.events.filter(function(x){return x.id===i2;})[0]; if(ev){ editingEv=ev.id; $('evTitle').value=ev.title; $('evDate').value=ev.date; var isl=ev.island||beachIsland(ev.beachId); $('evIsland').value=isl; fillBeachSelect($('evBeach'), isl); $('evBeach').value=ev.beachId; $('evMeet').value=ev.meet||''; $('evRsvp').value=ev.rsvpUrl||''; $('evFormTitle').textContent='Edit cleanup'; $('evAdd').textContent='Save changes'; $('evCancel').style.display=''; } }
     });
     // sites
-    $('stAdd').addEventListener('click',function(){ cfg.sites=cfg.sites||[]; cfg.sites.push({beachId:$('stBeach').value,note:$('stNote').value.trim()}); $('stNote').value=''; saveCfg(); renderSites(); });
+    $('stAdd').addEventListener('click',function(){ cfg.sites=cfg.sites||[]; cfg.sites.push({island:$('stIsland').value,beachId:$('stBeach').value,note:$('stNote').value.trim()}); $('stNote').value=''; saveCfg(); renderSites(); });
     $('stList').addEventListener('click',function(e){ var d=e.target.closest('[data-st-del]'); if(d){ cfg.sites.splice(+d.getAttribute('data-st-del'),1); saveCfg(); renderSites(); } });
     // featured
     $('featList').addEventListener('click',function(e){ var b=e.target.closest('[data-feat]'); if(!b) return; var id=b.getAttribute('data-feat'); cfg.featured=cfg.featured||[]; var i=cfg.featured.indexOf(id); if(i>=0) cfg.featured.splice(i,1); else cfg.featured.push(id); saveCfg(); renderFeatured(); });
@@ -580,6 +631,8 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
     tog($('tgSun'),'showSunscreen'); tog($('tgLnt'),'showLNT');
     // link + report + downloads
     $('copyLink').addEventListener('click',function(){ try{ navigator.clipboard.writeText(guestUrl()); this.textContent='Copied'; var b=this; setTimeout(function(){b.textContent='Copy';},1200); }catch(e){} });
+    $('copyDash').addEventListener('click',function(){ try{ navigator.clipboard.writeText(dashUrlStr()); this.textContent='Copied'; var b=this; setTimeout(function(){b.textContent='Copy';},1200); }catch(e){} });
+    $('copyEmail').addEventListener('click',function(){ try{ navigator.clipboard.writeText(welcomeEmail()); this.textContent='Copied ✓'; var b=this; setTimeout(function(){b.textContent='Copy welcome email';},1400); }catch(e){} });
     $('dlQr').addEventListener('click',function(){ if(window.__qrData) dl64(window.__qrData,'OceanSafe-QR-'+SLUG+'.png'); });
     $('csvBtn').addEventListener('click',exportCsv);
     $('printBtn').addEventListener('click',function(){ window.print(); });
@@ -589,11 +642,22 @@ table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size
   }
   function init2(){
     $('cbName').textContent=cfg.name||'Your Logo'; $('propName').textContent=cfg.name||'Your Logo'; $('cbLogo').textContent=(cfg.name||'Y').slice(0,1).toUpperCase();
-    renderEvents(); renderSites(); renderFeatured(); renderBranding(); renderLink(); renderImpact();
+    renderEvents(); renderSites(); renderFeatured(); renderBranding(); renderLink(); renderAccess(); renderImpact();
   }
   function dl64(dataUrl,name){ try{ var a=document.createElement('a'); a.href=dataUrl; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }catch(e){} }
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  function showGate(){
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:100000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px';
+    ov.innerHTML='<div class="card" style="max-width:360px;width:100%;text-align:center"><div style="font-size:20px;font-weight:700;margin-bottom:6px">Dashboard access</div><p class="note" style="margin:0 0 14px">Enter the access code for <b>'+esc(SLUG)+'</b>. It was in your welcome email.</p><input id="pwIn" type="password" placeholder="Access code" autocomplete="off" style="width:100%;margin-bottom:10px"><button class="btn sea" id="pwGo" style="width:100%">Open dashboard</button></div>';
+    document.body.appendChild(ov);
+    function go(){ var v=(document.getElementById('pwIn').value||'').trim(); if(!v) return; KEY=v; try{ localStorage.setItem(PWKEY,KEY); }catch(e){} ov.remove(); init(); }
+    document.getElementById('pwGo').addEventListener('click',go);
+    document.getElementById('pwIn').addEventListener('keydown',function(e){ if(e.key==='Enter') go(); });
+    setTimeout(function(){ try{ document.getElementById('pwIn').focus(); }catch(e){} },60);
+  }
+  function boot(){ if(!DEMO && !KEY){ showGate(); return; } init(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
 </script>
 </body>

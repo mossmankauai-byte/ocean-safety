@@ -11863,6 +11863,7 @@ if('serviceWorker' in navigator){
 .stw-cta-don{background:var(--stw-gold);color:#3a2d05}
 .stw-info{background:var(--warm);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin:10px 16px 0;font-size:12.5px;color:var(--ink);line-height:1.45}
 .stw-info b{color:var(--stw-accent)}
+.stw-empty{background:var(--warm);border:1px dashed var(--border);border-radius:12px;padding:14px;font-size:13px;color:var(--muted);line-height:1.45;text-align:center}
 .stw-legal{font-size:11px;color:var(--mute);line-height:1.45;padding:12px 16px 18px}
 .stw-adopt{display:flex;gap:9px;align-items:center;background:#e9f6f0;border:1px solid #bfe3d3;border-radius:11px;padding:10px 12px;margin:0 0 12px;font-size:12.5px;color:#0b3f39;line-height:1.35}
 .stw-adopt b{color:#0b5a52}
@@ -11878,26 +11879,35 @@ if('serviceWorker' in navigator){
    A co-brand of the guest app. PURELY ADDITIVE and config-driven:
    the layer lights up only on a steward ?ref (else the app behaves exactly as
    production). THE SAFETY LAYER IS IMMUTABLE — nothing here reads, writes,
-   hides, or restyles hazard data, warnings, the disclaimer, or tab visibility.
-   It appends stewardship cards + a welcome chip and nothing more.
+   hides, or restyles hazard data, warnings, or the disclaimer.
+   MULTI-ISLAND: events/sites carry an island; the layer shows the ACTIVE island's
+   content and follows the guest as they switch islands (?ref survives the switch).
    Add another partner later = one more entry in STEWARD_CONFIGS (config only). */
 (function(){
   var STEWARD_CONFIGS = {
     'steward-demo': {
       slug:'steward-demo', name:'Your Logo', sample:true,
       accent:'#0e6b74', logo:'',
-      mission:'Local volunteers keeping Kauaʻi’s beaches clean, safe, and open to everyone.',
+      mission:'Local volunteers keeping Hawaiʻi’s beaches clean, safe, and open to everyone.',
       volunteerUrl:'#', donateUrl:'#',
       showSunscreen:true, showLNT:true,
       events:[
-        {id:'c1', title:'Poʻipū Beach cleanup', date:'2026-08-09', beachId:'poipu', area:'South Shore', meet:'Meet at Poʻipū Beach Park pavilion · 8:00–10:00 AM', rsvpUrl:'#'},
-        {id:'c2', title:'Hanalei Bay shoreline sweep', date:'2026-08-16', beachId:'hanalei', area:'North Shore', meet:'Meet at Hanalei Pavilion · 8:30 AM', rsvpUrl:'#'},
-        {id:'c3', title:'ʻAnini reef marine-debris day', date:'2026-08-23', beachId:'anini', area:'North Shore', meet:'Meet at ʻAnini Beach Park · 9:00 AM', rsvpUrl:'#'}
+        {id:'k1', island:'kauai', title:'Poʻipū Beach cleanup', date:'2026-08-09', beachId:'poipu', area:'South Shore', meet:'Meet at Poʻipū Beach Park pavilion · 8:00–10:00 AM', rsvpUrl:'#'},
+        {id:'k2', island:'kauai', title:'Hanalei Bay shoreline sweep', date:'2026-08-16', beachId:'hanalei', area:'North Shore', meet:'Meet at Hanalei Pavilion · 8:30 AM', rsvpUrl:'#'},
+        {id:'k3', island:'kauai', title:'ʻAnini reef marine-debris day', date:'2026-08-23', beachId:'anini', area:'North Shore', meet:'Meet at ʻAnini Beach Park · 9:00 AM', rsvpUrl:'#'},
+        {id:'o1', island:'oahu', title:'Ala Moana Beach cleanup', date:'2026-08-10', beachId:'ala_moana', meet:'Meet at Ala Moana Beach Park (Magic Island) · 8:00 AM', rsvpUrl:'#'},
+        {id:'o2', island:'oahu', title:'Waimānalo Bay sweep', date:'2026-08-17', beachId:'waimanalo_bay', meet:'Meet at Waimānalo Bay Beach Park · 8:30 AM', rsvpUrl:'#'},
+        {id:'m1', island:'maui', title:'Kāʻanapali Beach cleanup', date:'2026-08-11', beachId:'kaanapali', meet:'Meet at Kāʻanapali Beach (Whalers Village) · 8:00 AM', rsvpUrl:'#'},
+        {id:'m2', island:'maui', title:'Kamaʻole Beach sweep', date:'2026-08-18', beachId:'kamaole_i', meet:'Meet at Kamaʻole Beach Park I · 8:30 AM', rsvpUrl:'#'}
       ],
       sites:[
-        {beachId:'poipu', note:'Monthly cleanup + dune restoration'},
-        {beachId:'hanalei', note:'Weekly shoreline sweep'},
-        {beachId:'anini', note:'Reef-flat marine-debris removal'}
+        {island:'kauai', beachId:'poipu', note:'Monthly cleanup + dune restoration'},
+        {island:'kauai', beachId:'hanalei', note:'Weekly shoreline sweep'},
+        {island:'kauai', beachId:'anini', note:'Reef-flat marine-debris removal'},
+        {island:'oahu', beachId:'ala_moana', note:'Monthly shoreline cleanup'},
+        {island:'oahu', beachId:'kualoa', note:'Quarterly marine-debris day'},
+        {island:'maui', beachId:'kaanapali', note:'Monthly cleanup + reef watch'},
+        {island:'maui', beachId:'kapalua_bay', note:'Snorkel-survey debris removal'}
       ]
     }
   };
@@ -11925,13 +11935,20 @@ if('serviceWorker' in navigator){
     try{ if(typeof window.__cgStewardPush==='function'){ var e={type:type}; if(extra){ for(var k in extra) e[k]=extra[k]; } window.__cgStewardPush(e); } }catch(_){}
   }
 
+  // ── Island context (follows the guest as they switch islands) ──
+  function activeIsland(){ try{ return (window.ACTIVE && ACTIVE.slug) || 'kauai'; }catch(e){ return 'kauai'; } }
+  function islandName(){ try{ return (window.ACTIVE && ACTIVE.name) || 'this island'; }catch(e){ return 'this island'; } }
+  function islOf(x){ return (x && x.island) || 'kauai'; }  // legacy items with no island → Kauaʻi
+
   function evParts(iso){ var p=String(iso||'').split('-'); return {y:+p[0], m:+p[1], d:+p[2]}; }
   function shortDate(iso){ var o=evParts(iso); return (MON[(o.m||1)-1]||'')+' '+(o.d||''); }
   function evDateBox(iso){ var o=evParts(iso); return '<div class="stw-ev-date"><span class="d">'+(o.d||'')+'</span><span class="m">'+(MON[(o.m||1)-1]||'')+'</span></div>'; }
   function beachName(id){ try{ if(typeof B!=='undefined'&&B){ var b=B.filter(function(x){return x.id===id;})[0]; if(b) return b.name||id; } }catch(e){} return id; }
-  function events(){ return (cfg.events||[]).slice().sort(function(a,b){ return a.date<b.date?-1:1; }); }
+  // Events/sites for the ACTIVE island only.
+  function islandEvents(){ var isl=activeIsland(); return (cfg.events||[]).filter(function(e){ return islOf(e)===isl; }).sort(function(a,b){ return a.date<b.date?-1:1; }); }
+  function islandSites(){ var isl=activeIsland(); return (cfg.sites||[]).filter(function(s){ return islOf(s)===isl; }); }
   function nextEvent(){
-    var evs=events(), t=null;
+    var evs=islandEvents(), t=null;
     try{ var n=new Date(); t=n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2); }catch(e){}
     if(t){ var up=evs.filter(function(e){ return e.date>=t; }); if(up.length) return up[0]; }
     return evs[0]||null;
@@ -11950,20 +11967,23 @@ if('serviceWorker' in navigator){
 
   // ── Ways-to-help sheet: reuses the app's own #sheet / #sc / #overlay (same as Plan) ──
   function openStewardSheet(src){
-    track('steward_open', {src: src||''});
-    var evs=events(), sites=(cfg.sites||[]);
+    track('steward_open', {src: src||'', island: activeIsland()});
+    var evs=islandEvents(), sites=islandSites();
     var html='<div class="stw-hero"><div class="stw-hero-logo">'+(cfg.logo?'<img src="'+esc(cfg.logo)+'" alt="">':esc((cfg.name||'?').slice(0,1)))+'</div>'
       +'<div><h2>'+esc(cfg.name)+(cfg.sample?'<span class="stw-sample">SAMPLE</span>':'')+'</h2><p>'+esc(cfg.mission||'')+'</p></div></div>';
+    html+='<div class="stw-sec"><div class="stw-sec-h">Upcoming beach cleanups · '+esc(islandName())+(cfg.sample?' · sample':'')+'</div>';
     if(evs.length){
-      html+='<div class="stw-sec"><div class="stw-sec-h">Upcoming beach cleanups'+(cfg.sample?' · sample':'')+'</div>'
-        +evs.map(function(ev){
-          return '<div class="stw-ev">'+evDateBox(ev.date)+'<div class="stw-ev-b"><div class="stw-ev-t">'+esc(ev.title)+'</div>'
-            +'<div class="stw-ev-m">'+esc(beachName(ev.beachId))+' · '+esc(ev.meet||'')+'</div>'
-            +'<a class="stw-rsvp" href="javascript:void(0)" data-stw="rsvp" data-id="'+esc(ev.id)+'" data-url="'+esc(ev.rsvpUrl||'#')+'">RSVP to help</a></div></div>';
-        }).join('')+'</div>';
+      html+=evs.map(function(ev){
+        return '<div class="stw-ev">'+evDateBox(ev.date)+'<div class="stw-ev-b"><div class="stw-ev-t">'+esc(ev.title)+'</div>'
+          +'<div class="stw-ev-m">'+esc(beachName(ev.beachId))+' · '+esc(ev.meet||'')+'</div>'
+          +'<a class="stw-rsvp" href="javascript:void(0)" data-stw="rsvp" data-id="'+esc(ev.id)+'" data-url="'+esc(ev.rsvpUrl||'#')+'">RSVP to help</a></div></div>';
+      }).join('');
+    } else {
+      html+='<div class="stw-empty">No cleanups scheduled on '+esc(islandName())+' just yet — check back, or lend a hand another way below.</div>';
     }
+    html+='</div>';
     if(sites.length){
-      html+='<div class="stw-sec"><div class="stw-sec-h">Beaches we care for</div>'
+      html+='<div class="stw-sec"><div class="stw-sec-h">Beaches we care for · '+esc(islandName())+'</div>'
         +sites.map(function(s){
           return '<div class="stw-site"><span class="stw-badge">'+SVG_LEAF+' Steward</span><div class="stw-site-b"><div class="stw-site-n">'+esc(beachName(s.beachId))+'</div><div class="stw-site-note">'+esc(s.note||'')+'</div></div></div>';
         }).join('')+'</div>';
@@ -12035,6 +12055,14 @@ if('serviceWorker' in navigator){
     }, true);
   }
 
+  // ── Non-commerce on EVERY island: hide the Tours + Shop tabs. On Kauaʻi the app
+  //    already shows Plan; on Oʻahu/Maui it would surface the Tours (affiliate) tab,
+  //    which a stewardship guide should not — so we hide it after applyPartnerMode runs. ──
+  function hideCommerceTabs(){
+    var tours=document.querySelector('#tabs .tab[data-tab="tours"]'); if(tours) tours.style.display='none';
+    var shop=document.querySelector('#tabs .tab[data-tab="shop"]'); if(shop) shop.style.display='none';
+  }
+
   // ── Plan sheet: append a "give back near your plan" block (surfaces cleanups in Plan) ──
   function planAppend(){
     var sc=q('sc'); if(!sc) return;
@@ -12042,8 +12070,9 @@ if('serviceWorker' in navigator){
     if(!sc.querySelector('.plan-controls')) return;  // only the main plan view
     var area=null; try{ area=(typeof _planArea!=='undefined')?_planArea:null; }catch(e){}
     var slotIds={}; try{ (_planSlots||[]).forEach(function(s){ if(s&&s.kind==='beach'&&s.ref) slotIds[s.ref.id]=1; }); }catch(e){}
-    var matched=(cfg.events||[]).filter(function(ev){ return (area && ev.area===area) || slotIds[ev.beachId]; });
-    var near=matched.length?matched:events().slice(0,1);
+    var isl=islandEvents();
+    var matched=isl.filter(function(ev){ return (area && ev.area===area) || slotIds[ev.beachId]; });
+    var near=matched.length?matched:isl.slice(0,1);
     if(!near.length) return;
     var box=document.createElement('div'); box.className='stw-plan';
     var body=near.slice(0,2).map(function(ev){
@@ -12059,7 +12088,7 @@ if('serviceWorker' in navigator){
 
   // ── Adopt-a-Site badge on an adopted beach's sheet (additive; safety UI untouched) ──
   function adoptBadge(id){
-    var site=(cfg.sites||[]).filter(function(s){ return s.beachId===id; })[0]; if(!site) return;
+    var site=islandSites().filter(function(s){ return s.beachId===id; })[0]; if(!site) return;
     var sc=q('sc'); if(!sc || sc.querySelector('.stw-adopt')) return;
     var box=document.createElement('div'); box.className='stw-adopt';
     box.innerHTML='<span style="color:#0b5a52;flex:0 0 auto">'+SVG_LEAF+'</span><span>Cared for by <b>'+esc(cfg.name)+'</b>'+(site.note?(' · '+esc(site.note)):'')+'</span>'
@@ -12070,7 +12099,7 @@ if('serviceWorker' in navigator){
     wireSheet();
   }
 
-  // ── Wrap two render entry points (late-bound globals; purely append-after) ──
+  // ── Wrap render entry points (late-bound globals; purely append-after / non-destructive) ──
   if(typeof renderPlanDay==='function'){
     var _origRPD=renderPlanDay;
     renderPlanDay=window.renderPlanDay=function(){ var r=_origRPD.apply(this,arguments); try{ planAppend(); }catch(e){} return r; };
@@ -12079,13 +12108,17 @@ if('serviceWorker' in navigator){
     var _origOS=openSheet;
     openSheet=window.openSheet=function(id){ var r=_origOS.apply(this,arguments); try{ adoptBadge(id); }catch(e){} return r; };
   }
+  if(typeof applyPartnerMode==='function'){
+    var _origAPM=applyPartnerMode;
+    applyPartnerMode=window.applyPartnerMode=function(){ var r=_origAPM.apply(this,arguments); try{ hideCommerceTabs(); }catch(e){} return r; };
+  }
 
-  function init(){ mountChip(); wireTownContext(); wireSheet();
+  function init(){ mountChip(); wireTownContext(); wireSheet(); try{ hideCommerceTabs(); }catch(e){}
     // ?tour=1 opens the Ways-to-help sheet on load (used by the brochure/tour deep-links)
     try{ if(/[?&]tour=1/.test(location.search)) setTimeout(function(){ openStewardSheet('tour'); }, 1500); }catch(e){}
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
-  setTimeout(mountChip, 1500);  // safety net if #topbar renders late
+  setTimeout(function(){ mountChip(); try{ hideCommerceTabs(); }catch(e){} }, 1500);  // safety net if chrome renders late
 })();
 </script>
 </body>
