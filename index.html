@@ -2641,7 +2641,7 @@ let B=[
   {id:'lydgate',name:'Lydgate Beach Park',n:'Lydgate',r:'East Side',lat:22.0388,lon:-159.3406,
    caution:"The walled lagoon is calm and guarded, good for young kids. The open beach outside the breakwater has strong surf and current, and a drowning has happened there. Keep little ones inside the lagoon.",
    facing:90,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'full_time',lg_hours:'9am–5:30pm daily',sq:7,scenic:6,len:600,
-   depth:4,stream:false,rain_mm:40,tidal:false,west:false,kid:true,drown:true,black:false,water_temp:78,
+   depth:4,stream:true,rain_mm:40,tidal:false,west:false,kid:true,drown:true,black:false,water_temp:78,
    parking:'Large free lot — easiest beach access on the east side.',
    intents:['snorkel','swim','walk','tidepools'],
    tip:'Stone breakwater creates the most protected lagoon on the east side. Perfect for first-time snorkelers.',
@@ -6948,6 +6948,33 @@ function openSheet(id){
         <span><b>Reef break.</b> On a south swell like today's, the surf here can break a good bit bigger than this open-water reading. Watch a few sets from shore before you go in, and check with a lifeguard if one's on duty.</span>
       </div>`
     : '';
+  // WATER-QUALITY / BACTERIA note — additive + informational only. Shows for beaches we've
+  // grounded against State DOH enterococcus monitoring near a chronically-elevated stream/canal
+  // (WQ_NOTES). Firms up when today's runoff flag (c.brown, same bw() trigger as the amber pill)
+  // is active; otherwise a calm standing "after rain" note. NEVER changes a pin color, the verdict,
+  // or gate() — an official DOH advisory always overrides. Wording is a caution, not a measurement.
+  const WQ_NOTES = {
+    wailua:{ww:'the Wailua River mouth',dohn:'the Wailua River'},
+    lydgate:{ww:'the Wailua River mouth',dohn:'the Wailua River'},
+    hanalei:{ww:'the Hanalei River and Waiʻoli stream',dohn:'Hanalei Bay'},
+    lumahai:{ww:'the Lumahaʻi River mouth',dohn:'the Lumahaʻi River'},
+    ala_moana:{ww:'the Ala Wai Canal',dohn:'the Ala Wai Canal'},
+    duke_kahanamoku:{ww:'the Ala Wai Canal',dohn:'the Ala Wai Canal'},
+    fort_derussy:{ww:'the Ala Wai Canal',dohn:'the Ala Wai Canal'},
+    grays_beach:{ww:'the Ala Wai Canal',dohn:'the Ala Wai Canal'},
+    waikiki:{ww:'the Ala Wai Canal',dohn:'the Ala Wai Canal'},
+    kuhio_beach:{ww:'the Ala Wai Canal',dohn:'the Ala Wai Canal'}
+  };
+  const _wq = WQ_NOTES[b.id];
+  const _bactBrown = !!(c && c.brown);
+  const _bacteriaNotice = _wq
+    ? `<div style="margin:10px 0 4px;padding:10px 12px;background:${_bactBrown?'#fef3c7':'#eef3f5'};border-left:3px solid ${_bactBrown?'#d97706':'#5b8a9a'};border-radius:8px;color:${_bactBrown?'#78530a':'#33414a'};font-size:12.5px;line-height:1.45;display:flex;align-items:flex-start;gap:8px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${_bactBrown?'#d97706':'#5b8a9a'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px" aria-hidden="true"><path d="M12 2.6c4 5 6.4 8 6.4 11a6.4 6.4 0 0 1-12.8 0c0-3 2.4-6 6.4-11z"/></svg>
+        <span>${_bactBrown
+          ? `<b>Possible elevated bacteria today.</b> Heavy recent rain can push runoff from ${_wq.ww} into the water here. The State has measured elevated bacteria along this shore after storms, so stay out of murky or brown water, especially near the mouth. `
+          : `<b>Water quality after rain.</b> This beach sits near ${_wq.ww}. After heavy rain it can carry runoff bacteria into the water, and the State has measured elevated bacteria near ${_wq.dohn} after storms. Give murky or brown water a day or two to clear. `}<a href="https://health.hawaii.gov/cwb/beach-monitoring-program/" target="_blank" rel="noopener" style="color:${_bactBrown?'#78530a':'#2c5c6e'};text-decoration:underline">State water-quality testing ↗</a></span>
+      </div>`
+    : '';
   // WAVE-1 wind + tide chips — the two questions a swimmer reflexively asks
   // ("which way is the wind" / "is the tide coming in or going out"). 0-KB inline SVG,
   // static, honest labels ("forecast" / "predicted"); arrow + word so meaning never rides
@@ -7056,6 +7083,7 @@ function openSheet(id){
     ${_jellyNotice}
     ${_brownNotice}
     ${_reefNotice}
+    ${_bacteriaNotice}
     ${_windTideChips}
     ${_ripRow}
     ${_amenityPanel(_amenityCondStates(b, r, c))}
