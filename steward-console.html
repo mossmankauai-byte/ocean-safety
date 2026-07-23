@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f3b49">
+<meta name="robots" content="noindex">
+<title>OceanSafe · Stewardship Console (Preview)</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAMAAAAOusbgAAADAFBMVEX9zCf+0C39xRj8/P39vBEBeNAChtoCSJAAa8UAAADr17ABjOEBZLoBV6cEUZoDkeL922sAO4j99dPmzJTsx2j////Q5vX56cf76LL82FWw1vAJkN3K2uv+5ZBvuOksh9InWY6PxuxQeKv+0xapyujQti7k7PMAR6UAN3suWHf+4nX1xk6Ih0sxZqg0pObizqZup9lMl9f98tRQot30vScwltyIueS3pTjy2I6Ulk7989f66cT56cejttNIp+RIZ2n//6zJqSj66smKpsszZJMsm+NqdVarmDJrms736sf87c53glj46Mb46siyxdhbsupTcWyWstL+8dBri7X/9LK84fUvcrJ3lLt2wu0qe8lsq+T147z+8dL/qqr/+9JGiMr//3+qpET98M42Y3RxgWUORnz98NKc0vIBW8FhcmFbZ1h8s97/6r3//wAAKIP/AP84od9jbVYlXKH/AAAAPqhCaYJZhrrashwubcPz4r0hT3j99+z89eZslHT89OKpjy4mTI7Dnx//5rxKkJ/c8Prd0qKAfT0kj+AdUX7dwCVckOBke7FDXmn/f3//75//4VreyqKAncLUw2ainUYdcKj/359EX5pUf40AKXjv37/Qz5gAHW7/1H9Uh4nJpBry3rq9vHH88+X/9uEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACbUZE0AAABAHRSTlP+/v7+/v////8A/v///////v/8/v8B//v+/v////7////////////////+/v////7//5b///////7/0VGU////A/92////////KBb/zqv/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">
+<style>
+/* Design tokens lifted from operator-console.html so this reads as the same family of consoles. */
+:root{
+  --bg:#f6f1e7; --bg-2:#efe7d6; --card:#fffdf8; --tint:#eef4f2;
+  --ink:#0f3b49; --ink-2:#2e5568; --muted:#557280; --line:#e3dac7; --hair:#e7dfcf;
+  --sea:#0e6e8c; --sea-2:#0d8bb0; --sea-deep:#0f3b49; --sea-tint:#e7f1f4; --on-sea:#fff;
+  --gold:#c9a84c; --gold-ink:#5f4a12; --gold-tint:#f5ecd6; --on-gold:#241d04;
+  --good:#17805a; --warn:#a06712; --risk:#b4452f;
+  --sample:#8a6320; --sample-bg:#f3e9d2;
+  --shadow:0 1px 2px rgba(58,47,22,.05),0 10px 28px rgba(58,47,22,.07);
+  --radius:14px; --maxw:1120px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif;font-weight:500;margin:0}
+a{color:var(--sea)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 18px}
+.stage{position:relative;min-height:100vh;padding-bottom:60px}
+/* SAMPLE quarantine — full-surface watermark on the demo preview; dropped in Live. */
+.stage::after{content:"SAMPLE · ILLUSTRATIVE · NOT REAL GUEST DATA";position:fixed;inset:0;z-index:0;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;font:700 26px/1.3 -apple-system,sans-serif;letter-spacing:.12em;
+  color:rgba(138,99,32,.06);transform:rotate(-24deg)}
+.stage.live-on::after{display:none}
+.stage>*{position:relative;z-index:1}
+/* top bar */
+header.top{padding:22px 0 8px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fffdf8,rgba(255,253,248,0))}
+.toprow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px;color:var(--ink)}
+.brand .wave{width:34px;height:34px;border-radius:9px;flex:none;object-fit:contain}
+.cobrand{margin-left:6px;display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:12px;font-weight:600}
+.cobrand .logo{width:26px;height:26px;border-radius:6px;background:var(--sea-tint);color:var(--sea);display:flex;align-items:center;justify-content:center;font-weight:800;overflow:hidden}
+.cobrand .logo img{width:100%;height:100%;object-fit:contain}
+.spacer{flex:1}
+.modeswitch{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px}
+.modeswitch button{border:none;background:transparent;padding:6px 13px;border-radius:999px;font:600 13px/1 inherit;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.modeswitch button.on{background:var(--sample-bg);color:var(--sample)}
+.modeswitch button.on.live{background:#e4f1f5;color:var(--sea)}
+.pv{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pv.sample{background:var(--sample)} .pv.measured{background:var(--sea)}
+.texbtn{border:1px solid var(--sea);color:var(--sea);background:#fff;border-radius:10px;padding:8px 13px;font:600 13px/1 inherit;cursor:pointer;white-space:nowrap}
+.texbtn:hover{background:var(--sea-tint)}
+.property{padding:14px 0 4px}
+.property h1{font-size:26px;line-height:1.15}
+.property .meta{color:var(--muted);font-size:13px;margin-top:4px}
+.freshness{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:7px 12px;border-radius:999px;background:var(--sample-bg);color:var(--sample);font-size:12.5px;font-weight:600;border:1px solid #e6d6ad}
+/* tab nav */
+.tabbar{position:sticky;top:0;z-index:30;background:rgba(246,241,231,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin-top:12px}
+.tabbar .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tabbar .wrap::-webkit-scrollbar{display:none}
+.tabbar button{flex:0 0 auto;border:none;background:transparent;padding:12px 12px 11px;font:600 13.5px/1 inherit;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap}
+.tabbar button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--sea)}
+/* views */
+.view{display:none;padding:22px 0 10px}
+.view.on{display:block}
+.sec-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:2px 0 14px}
+.sec-h h2{font-size:20px}
+.sec-h .sub{color:var(--muted);font-size:13px}
+.samp{display:inline-block;background:var(--sample-bg);color:var(--sample);font:800 9.5px/1 -apple-system,sans-serif;letter-spacing:.06em;padding:3px 7px;border-radius:6px;vertical-align:middle}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(3,1fr)}
+@media(max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi .lab{color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}
+.kpi .val{font-family:'Fraunces',Georgia,serif;font-size:32px;line-height:1.05;margin:8px 0 2px;color:var(--ink)}
+.kpi .val.pending{font-size:20px;color:var(--muted)}
+.kpi .foot{color:var(--muted);font-size:12px}
+.pill{display:inline-block;font:700 9.5px/1 -apple-system,sans-serif;letter-spacing:.05em;padding:3px 7px;border-radius:6px}
+.pill.samp{background:var(--sample-bg);color:var(--sample)}
+.pill.meas{background:#e4f1f5;color:var(--sea)}
+.pill.pend{background:#efe7d6;color:var(--muted)}
+.row2{grid-template-columns:1fr 1fr}
+@media(max-width:720px){.row2{grid-template-columns:1fr}}
+label.fl{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin:0 0 5px}
+input[type=text],input[type=url],input[type=date],textarea,select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font:14px/1.4 inherit;background:#fff;color:var(--ink)}
+textarea{min-height:64px;resize:vertical}
+.field{margin-bottom:11px}
+.btn{border:none;border-radius:10px;padding:9px 14px;font:700 13.5px/1 inherit;cursor:pointer}
+.btn.sea{background:var(--sea);color:#fff} .btn.gold{background:var(--gold);color:var(--on-gold)}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{padding:6px 10px;font-size:12.5px;border-radius:8px}
+.itemrow{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--hair)}
+.itemrow:last-child{border-bottom:none}
+.itemrow .body{flex:1;min-width:0}
+.itemrow .t{font-weight:700}
+.itemrow .s{color:var(--muted);font-size:12.5px;margin-top:2px}
+.datebox{flex:none;width:46px;text-align:center;background:var(--sea);color:#fff;border-radius:8px;padding:6px 0;line-height:1.05}
+.datebox .d{font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:600;display:block}
+.datebox .m{font-size:9px;text-transform:uppercase;letter-spacing:.06em;opacity:.9}
+.note{color:var(--muted);font-size:12.5px;line-height:1.5;margin-top:10px}
+.note code{background:var(--sea-tint);color:var(--sea);padding:1px 5px;border-radius:4px;font-size:11.5px}
+.qrbox{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.qrbox img{width:168px;height:168px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px}
+.linkbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.linkbox code{flex:1;min-width:220px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:12.5px;word-break:break-all;color:var(--ink)}
+table.rep{width:100%;border-collapse:collapse;font-size:13.5px}
+table.rep th,table.rep td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--hair)}
+table.rep th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+table.rep td.num{text-align:right;font-family:'Fraunces',Georgia,serif;font-size:16px}
+.togglerow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--hair)}
+.togglerow:last-child{border-bottom:none}
+.toggle{width:46px;height:26px;border-radius:999px;border:1px solid var(--line);background:#e9e4d4;position:relative;flex:none;cursor:pointer;transition:.15s}
+.toggle.on{background:var(--good);border-color:var(--good)}
+.toggle span{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.15s}
+.toggle.on span{left:22px}
+.legalline{color:var(--muted);font-size:11.5px;line-height:1.5;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.repbrand{display:none}
+/* print-clean county report */
+@media print{
+  header.top,.tabbar,.modeswitch,.texbtn,.stage::after,.no-print{display:none!important}
+  .view{display:none!important}
+  #view-report{display:block!important;padding:0}
+  body{background:#fff}
+  .repbrand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .card{box-shadow:none;border-color:#ccc}
+  a{color:#000;text-decoration:none}
+}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <header class="top">
+    <div class="wrap toprow">
+      <div class="brand">
+        <img class="wave" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAMAAAAOusbgAAADAFBMVEX9zCf+0C39xRj8/P39vBEBeNAChtoCSJAAa8UAAADr17ABjOEBZLoBV6cEUZoDkeL922sAO4j99dPmzJTsx2j////Q5vX56cf76LL82FWw1vAJkN3K2uv+5ZBvuOksh9InWY6PxuxQeKv+0xapyujQti7k7PMAR6UAN3suWHf+4nX1xk6Ih0sxZqg0pObizqZup9lMl9f98tRQot30vScwltyIueS3pTjy2I6Ulk7989f66cT56cejttNIp+RIZ2n//6zJqSj66smKpsszZJMsm+NqdVarmDJrms736sf87c53glj46Mb46siyxdhbsupTcWyWstL+8dBri7X/9LK84fUvcrJ3lLt2wu0qe8lsq+T147z+8dL/qqr/+9JGiMr//3+qpET98M42Y3RxgWUORnz98NKc0vIBW8FhcmFbZ1h8s97/6r3//wAAKIP/AP84od9jbVYlXKH/AAAAPqhCaYJZhrrashwubcPz4r0hT3j99+z89eZslHT89OKpjy4mTI7Dnx//5rxKkJ/c8Prd0qKAfT0kj+AdUX7dwCVckOBke7FDXmn/f3//75//4VreyqKAncLUw2ainUYdcKj/359EX5pUf40AKXjv37/Qz5gAHW7/1H9Uh4nJpBry3rq9vHH88+X/9uEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACbUZE0AAABAHRSTlP+/v7+/v////8A/v///////v/8/v8B//v+/v////7////////////////+/v////7//5b///////7/0VGU////A/92////////KBb/zqv/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" alt="OceanSafe">
+        OceanSafe · Stewardship Console
+      </div>
+      <div class="cobrand"><span class="logo" id="cbLogo">Y</span><span id="cbName">Your Nonprofit</span></div>
+      <div class="spacer"></div>
+      <div class="modeswitch" role="group" aria-label="Data mode">
+        <button class="on" id="mPreview" aria-pressed="true"><span class="pv sample"></span>Preview</button>
+        <button id="mLive" aria-pressed="false" disabled title="Opens with your live link — ?ref=your-slug&key=your-key"><span class="pv measured"></span>Live data</button>
+      </div>
+      <button class="texbtn no-print" id="dlBtn" title="Save this console to your computer. It reopens with your link baked in and refreshes live whenever you're online.">&#8595;&nbsp;Download to desktop</button>
+    </div>
+    <div class="wrap property">
+      <h1 id="propName">Your Nonprofit</h1>
+      <div class="meta">Stewardship partner · slug <code id="propSlug" style="background:var(--sea-tint);padding:1px 5px;border-radius:4px;color:var(--sea);font-size:12px">steward-demo</code> · Kaua‘i · fiscal-sponsor reporting built in</div>
+      <span class="freshness" id="fresh"><span class="pv sample"></span> Preview — illustrative numbers, not your guests</span>
+    </div>
+  </header>
+
+  <nav class="tabbar" aria-label="Console sections">
+    <div class="wrap" id="tabnav">
+      <button data-view="impact" aria-selected="true">Impact</button>
+      <button data-view="link" aria-selected="false">Your link &amp; QR</button>
+      <button data-view="events" aria-selected="false">Cleanup events</button>
+      <button data-view="sites" aria-selected="false">Adopt-a-Site</button>
+      <button data-view="beaches" aria-selected="false">Featured beaches</button>
+      <button data-view="branding" aria-selected="false">Branding</button>
+      <button data-view="content" aria-selected="false">Content</button>
+      <button data-view="report" aria-selected="false">County report</button>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <!-- 1 · IMPACT -->
+    <section class="view on" id="view-impact">
+      <div class="sec-h"><h2>Impact overview</h2><span class="sub">How beachgoers are using your co-branded guide</span></div>
+      <div class="field no-print" style="margin-bottom:14px">
+        <label class="fl">Window</label>
+        <select id="period" style="max-width:180px"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
+      </div>
+      <div class="grid kpis" id="kpis"></div>
+      <p class="note" id="impactNote"></p>
+    </section>
+
+    <!-- 2 · LINK + QR -->
+    <section class="view" id="view-link">
+      <div class="sec-h"><h2>Your link &amp; QR</h2><span class="sub">Put this where beachgoers see it — flyers, tents, signup tables</span></div>
+      <div class="card">
+        <label class="fl">Your co-branded guest link</label>
+        <div class="linkbox"><code id="guestLink">—</code><button class="btn ghost sm" id="copyLink">Copy</button></div>
+        <div class="qrbox" style="margin-top:16px">
+          <img id="qrImg" alt="QR code for your guest link">
+          <div>
+            <div style="font-weight:700;margin-bottom:6px">Downloadable QR</div>
+            <p class="note" style="margin:0 0 10px">Print it at any size — error-correction is set to High so it scans even with your logo in the center.</p>
+            <button class="btn sea" id="dlQr">Download QR (PNG)</button>
+          </div>
+        </div>
+        <p class="note">Every scan of this link is attributed to <b id="lnkName">your nonprofit</b> in the Impact tab. Organic app visitors are never tracked.</p>
+      </div>
+    </section>
+
+    <!-- 3 · EVENTS -->
+    <section class="view" id="view-events">
+      <div class="sec-h"><h2>Cleanup events</h2><span class="sub">These appear in the app’s Plan and Town, and on adopted beaches</span></div>
+      <div class="grid row2">
+        <div class="card">
+          <h3 style="font-size:16px;margin-bottom:10px" id="evFormTitle">Add a cleanup</h3>
+          <div class="field"><label class="fl">Title</label><input type="text" id="evTitle" placeholder="Poʻipū Beach cleanup"></div>
+          <div class="field"><label class="fl">Date</label><input type="date" id="evDate"></div>
+          <div class="field"><label class="fl">Beach</label><select id="evBeach"></select></div>
+          <div class="field"><label class="fl">Meeting point &amp; time</label><input type="text" id="evMeet" placeholder="Meet at the pavilion · 8:00 AM"></div>
+          <div class="field"><label class="fl">RSVP link (optional)</label><input type="url" id="evRsvp" placeholder="https://…"></div>
+          <button class="btn sea" id="evAdd">Add event</button>
+          <button class="btn ghost" id="evCancel" style="display:none">Cancel</button>
+        </div>
+        <div class="card">
+          <h3 style="font-size:16px;margin-bottom:6px">Upcoming</h3>
+          <div id="evList"></div>
+        </div>
+      </div>
+      <p class="note">Drafts save in this browser only. <b>Export config</b> (Branding tab) downloads the JSON that drives your co-branded guide — nothing publishes on its own.</p>
+    </section>
+
+    <!-- 4 · ADOPT-A-SITE -->
+    <section class="view" id="view-sites">
+      <div class="sec-h"><h2>Adopt-a-Site</h2><span class="sub">Beaches your group stewards — each gets a small “cared for by” badge in the app</span></div>
+      <div class="grid row2">
+        <div class="card">
+          <h3 style="font-size:16px;margin-bottom:10px">Adopt a beach</h3>
+          <div class="field"><label class="fl">Beach</label><select id="stBeach"></select></div>
+          <div class="field"><label class="fl">What you do there</label><input type="text" id="stNote" placeholder="Monthly cleanup + dune restoration"></div>
+          <button class="btn sea" id="stAdd">Add site</button>
+        </div>
+        <div class="card"><h3 style="font-size:16px;margin-bottom:6px">Adopted beaches</h3><div id="stList"></div></div>
+      </div>
+      <p class="note">The steward badge is additive only — it never changes a beach’s hazard rating, warnings, or safety verdict. Safety ranking always wins.</p>
+    </section>
+
+    <!-- 5 · FEATURED BEACHES -->
+    <section class="view" id="view-beaches">
+      <div class="sec-h"><h2>Featured beaches</h2><span class="sub">Your picks to highlight — safety ranking still comes first</span></div>
+      <div class="card">
+        <label class="fl">Choose beaches to feature</label>
+        <div id="featList" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
+        <p class="note"><b>Safety always wins.</b> On a high-surf or brown-water day, the app ranks by conditions first; your featured picks show only when they’re not overridden by a live hazard. A partner can never surface a beach the safety layer is warning against.</p>
+      </div>
+    </section>
+
+    <!-- 6 · BRANDING -->
+    <section class="view" id="view-branding">
+      <div class="sec-h"><h2>Branding</h2><span class="sub">Your name, accent, welcome line, logo</span></div>
+      <div class="grid row2">
+        <div class="card">
+          <div class="field"><label class="fl">Nonprofit name</label><input type="text" id="brName" placeholder="Your Nonprofit"></div>
+          <div class="field"><label class="fl">Accent color (steward UI only — never safety UI)</label><input type="text" id="brAccent" placeholder="#0e6b74"></div>
+          <div class="field"><label class="fl">Mission line</label><textarea id="brMission" placeholder="Local volunteers keeping our beaches clean and safe."></textarea></div>
+          <div class="field"><label class="fl">Volunteer link</label><input type="url" id="brVol" placeholder="https://…"></div>
+          <div class="field"><label class="fl">Donate link</label><input type="url" id="brDon" placeholder="https://…"></div>
+          <div class="field"><label class="fl">Logo URL (optional)</label><input type="url" id="brLogo" placeholder="https://…/logo.png"></div>
+          <button class="btn sea" id="brSave">Save branding</button>
+        </div>
+        <div class="card">
+          <h3 style="font-size:16px;margin-bottom:10px">Export &amp; hand-off</h3>
+          <p class="note" style="margin-top:0">Download the config file that drives your co-branded guide. Send it back and your guide goes live in your name — safety data unchanged.</p>
+          <button class="btn gold" id="exportCfg" style="margin-top:8px">Export config (JSON)</button>
+          <div style="margin-top:16px"><label class="fl">Preview</label><pre id="cfgPreview" style="background:#0f3b49;color:#d9ecf2;border-radius:10px;padding:12px;font-size:11.5px;line-height:1.5;overflow:auto;max-height:240px;white-space:pre-wrap;word-break:break-word"></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 · CONTENT -->
+    <section class="view" id="view-content">
+      <div class="sec-h"><h2>Content</h2><span class="sub">Optional stewardship cards in the app</span></div>
+      <div class="card">
+        <div class="togglerow"><div><div style="font-weight:700">Reef-safe sunscreen card</div><div class="note" style="margin-top:2px">Hawaiʻi Act 104 — mineral sunscreen only. Shown in the Ways-to-help sheet.</div></div><button class="toggle on" id="tgSun" role="switch" aria-checked="true"><span></span></button></div>
+        <div class="togglerow"><div><div style="font-weight:700">Leave-no-trace card</div><div class="note" style="margin-top:2px">Pack it out, give honu space, don’t stack rocks.</div></div><button class="toggle on" id="tgLnt" role="switch" aria-checked="true"><span></span></button></div>
+      </div>
+      <p class="note">Safety warnings, the disclaimer, and hazard data are always on and can’t be toggled — that layer is immutable.</p>
+    </section>
+
+    <!-- 8 · COUNTY REPORT -->
+    <section class="view" id="view-report">
+      <div class="repbrand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAMAAAAOusbgAAADAFBMVEX9zCf+0C39xRj8/P39vBEBeNAChtoCSJAAa8UAAADr17ABjOEBZLoBV6cEUZoDkeL922sAO4j99dPmzJTsx2j////Q5vX56cf76LL82FWw1vAJkN3K2uv+5ZBvuOksh9InWY6PxuxQeKv+0xapyujQti7k7PMAR6UAN3suWHf+4nX1xk6Ih0sxZqg0pObizqZup9lMl9f98tRQot30vScwltyIueS3pTjy2I6Ulk7989f66cT56cejttNIp+RIZ2n//6zJqSj66smKpsszZJMsm+NqdVarmDJrms736sf87c53glj46Mb46siyxdhbsupTcWyWstL+8dBri7X/9LK84fUvcrJ3lLt2wu0qe8lsq+T147z+8dL/qqr/+9JGiMr//3+qpET98M42Y3RxgWUORnz98NKc0vIBW8FhcmFbZ1h8s97/6r3//wAAKIP/AP84od9jbVYlXKH/AAAAPqhCaYJZhrrashwubcPz4r0hT3j99+z89eZslHT89OKpjy4mTI7Dnx//5rxKkJ/c8Prd0qKAfT0kj+AdUX7dwCVckOBke7FDXmn/f3//75//4VreyqKAncLUw2ainUYdcKj/359EX5pUf40AKXjv37/Qz5gAHW7/1H9Uh4nJpBry3rq9vHH88+X/9uEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACbUZE0AAABAHRSTlP+/v7+/v////8A/v///////v/8/v8B//v+/v////7////////////////+/v////7//5b///////7/0VGU////A/92////////KBb/zqv/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" alt="OceanSafe" style="width:30px;height:30px;border-radius:7px"><b>OceanSafe · Stewardship impact summary</b></div>
+      <div class="sec-h"><h2>County report</h2><span class="sub no-print">One-click grant-reporting summary — the reporting the fiscal sponsor owns</span></div>
+      <div class="card">
+        <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <button class="btn sea" id="csvBtn">Download CSV</button>
+          <button class="btn ghost" id="printBtn">Print / Save as PDF</button>
+        </div>
+        <div id="repMeta" class="note" style="margin-top:0"></div>
+        <table class="rep" id="repTable"><thead><tr><th>Metric</th><th>Value</th><th>Window</th><th>Source</th></tr></thead><tbody></tbody></table>
+        <p class="legalline">Generated by OceanSafe for <b id="repName">Your Nonprofit</b>. Guest metrics are anonymous, aggregated counts from the co-branded guide (no personal data). Ocean-safety information in the app is provided as a public guide and is not a safety certification.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/vendor/qrcode.min.js"></script>
+<script>
+/* ══ OceanSafe · Stewardship Console ═══════════════════════════════════════════
+   Raw partner-dashboard template. Two modes, one file:
+   • DEMO  (no ?ref, or ?ref=steward-demo) → in-page SAMPLE data, watermarked.
+   • REAL  (?ref=<slug>&key=<key>)         → fetches the live rollup for the fields
+     the Worker actually returns (sessions, POI taps). Steward-specific counts that
+     the current rollup does not expose show an honest "pending" state — never a
+     fabricated live-looking number.
+   Editors persist drafts to localStorage and export the SAME config shape steward.html
+   consumes, so a new nonprofit is stood up by config alone. ════════════════════ */
+(function(){
+  "use strict";
+  var API='https://concierge-guide-api.oceansafe-hi.workers.dev';
+  var GUEST_BASE='https://oceansafety.app/steward.html';
+  var qp; try{ qp=new URLSearchParams(location.search); }catch(e){ qp=new URLSearchParams(''); }
+  var REF=(qp.get('ref')||'').trim().toLowerCase();
+  var KEY=(qp.get('key')||'').trim();
+  var DEMO = !REF || REF==='steward-demo' || /^demo(-|$)/.test(REF);
+  var SLUG = DEMO ? 'steward-demo' : REF;
+  var $=function(id){return document.getElementById(id);};
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var ct=function(n){ return (n==null||isNaN(n))?'—':Number(n).toLocaleString('en-US'); };
+
+  // ── Kaua‘i beach options (matches the guest app's beach ids). Editors pick from these. ──
+  var BEACHES=[
+    {id:'poipu',name:'Poʻipū Beach Park'},{id:'hanalei',name:'Hanalei Bay'},{id:'anini',name:'ʻAnini Beach'},
+    {id:'tunnels',name:'Tunnels (Makua)'},{id:'kee',name:'Kēʻē Beach'},{id:'polihale',name:'Polihale'},
+    {id:'lydgate',name:'Lydgate Beach Park'},{id:'kalapaki',name:'Kalapakī Beach'},{id:'salt-pond',name:'Salt Pond Beach Park'}
+  ];
+  var beachName=function(id){ for(var i=0;i<BEACHES.length;i++) if(BEACHES[i].id===id) return BEACHES[i].name; return id; };
+
+  // ── Config (draft) — the object steward.html reads. Seeded with SAMPLE demo content. ──
+  var CFG_KEY='os_steward_cfg_'+SLUG;
+  var DEFAULT_CFG={
+    slug:SLUG, name:'Your Nonprofit', accent:'#0e6b74', logo:'',
+    mission:'Local volunteers keeping Kauaʻi’s beaches clean, safe, and open to everyone.',
+    volunteerUrl:'', donateUrl:'', showSunscreen:true, showLNT:true,
+    featured:['poipu','hanalei'],
+    events:[
+      {id:'c1',title:'Poʻipū Beach cleanup',date:'2026-08-09',beachId:'poipu',area:'South Shore',meet:'Meet at Poʻipū Beach Park pavilion · 8:00–10:00 AM',rsvpUrl:''},
+      {id:'c2',title:'Hanalei Bay shoreline sweep',date:'2026-08-16',beachId:'hanalei',area:'North Shore',meet:'Meet at Hanalei Pavilion · 8:30 AM',rsvpUrl:''},
+      {id:'c3',title:'ʻAnini reef marine-debris day',date:'2026-08-23',beachId:'anini',area:'North Shore',meet:'Meet at ʻAnini Beach Park · 9:00 AM',rsvpUrl:''}
+    ],
+    sites:[
+      {beachId:'poipu',note:'Monthly cleanup + dune restoration'},
+      {beachId:'hanalei',note:'Weekly shoreline sweep'},
+      {beachId:'anini',note:'Reef-flat marine-debris removal'}
+    ]
+  };
+  var cfg;
+  try{ cfg=JSON.parse(localStorage.getItem(CFG_KEY))||null; }catch(e){ cfg=null; }
+  if(!cfg) cfg=JSON.parse(JSON.stringify(DEFAULT_CFG));
+  // region lookup for events (for the guest app's Plan-area match)
+  var AREA={poipu:'South Shore','salt-pond':'West Side',polihale:'West Side',hanalei:'North Shore',anini:'North Shore',tunnels:'North Shore',kee:'North Shore',lydgate:'East Side',kalapaki:'East Side'};
+  function saveCfg(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){} renderCfgPreview(); }
+
+  // ── Live metrics (real mode). Only sessions + poi_tap come from the current rollup. ──
+  var METRICS = { sessions:null, poi_tap:null, live:false };
+  var SAMPLE = { sessions:968, qr:1284, poi_tap:1519, safety:742, plan:213, volunteer:57, donate:34, eventsHeld:2 };
+
+  // ─────────────────────────── Impact tiles ───────────────────────────
+  function kpiTile(lab,val,foot,state){
+    var pill = state==='sample'?'<span class="pill samp">SAMPLE</span>':state==='measured'?'<span class="pill meas">MEASURED</span>':'<span class="pill pend">PENDING</span>';
+    var valHtml = (val==null)?'<div class="val pending">— <span style="font-size:12px">not yet measured</span></div>':'<div class="val">'+ct(val)+'</div>';
+    return '<div class="card kpi"><div class="lab">'+esc(lab)+' '+pill+'</div>'+valHtml+'<div class="foot">'+esc(foot)+'</div></div>';
+  }
+  function renderImpact(){
+    var per=$('period').value;
+    var tiles;
+    if(DEMO){
+      tiles=[
+        kpiTile('QR scans',SAMPLE.qr,'People who opened your link','sample'),
+        kpiTile('Guest sessions',SAMPLE.sessions,'Visits to your co-branded guide','sample'),
+        kpiTile('Safety-warning views',SAMPLE.safety,'Hazard cards & advisories read','sample'),
+        kpiTile('Plan-day builds',SAMPLE.plan,'Itineraries made in the app','sample'),
+        kpiTile('Volunteer clicks',SAMPLE.volunteer,'Taps on your Volunteer button','sample'),
+        kpiTile('Donate clicks',SAMPLE.donate,'Taps on your Donate button','sample')
+      ];
+      $('impactNote').innerHTML='These are <b>illustrative sample numbers</b> so you can see the shape of the report. Your real figures replace them once your link is live and beachgoers start scanning it.';
+    } else {
+      tiles=[
+        kpiTile('QR scans',METRICS.sessions,'Sessions from your link · last '+per+' days','measured'),
+        kpiTile('Guest sessions',METRICS.sessions,'Visits to your co-branded guide','measured'),
+        kpiTile('Beach / POI taps',METRICS.poi_tap,'Places opened in the app','measured'),
+        kpiTile('Safety-warning views',null,'Wiring pending — needs event rollup','pending'),
+        kpiTile('Plan-day builds',null,'Wiring pending — needs event rollup','pending'),
+        kpiTile('Volunteer / Donate clicks',null,'Wiring pending — needs event rollup','pending')
+      ];
+      $('impactNote').innerHTML='Live rollups for <b>sessions</b> and <b>beach taps</b> are wired to the telemetry Worker. Steward-specific taps (safety views, plan builds, volunteer/donate) are emitted by the app and stored, but are <b>not yet surfaced by the dashboard rollup</b> — shown as pending rather than a fabricated number.';
+    }
+    $('kpis').innerHTML=tiles.join('');
+    renderReport();
+  }
+
+  // ─────────────────────────── Link + QR ───────────────────────────
+  function guestUrl(){ return GUEST_BASE+'?ref='+encodeURIComponent(SLUG)+'&island=kauai'; }
+  function renderLink(){
+    $('guestLink').textContent=guestUrl();
+    $('lnkName').textContent=cfg.name||'your nonprofit';
+    if(window.QRCode && QRCode.toDataURL){
+      QRCode.toDataURL(guestUrl(),{margin:1,width:512,errorCorrectionLevel:'H',color:{dark:'#0f3b49',light:'#ffffff'}},function(err,url){
+        if(!err && url){ $('qrImg').src=url; window.__qrData=url; }
+      });
+    }
+  }
+
+  // ─────────────────────────── Events editor ───────────────────────────
+  var editingEv=null;
+  function evDateBox(iso){ var p=String(iso||'').split('-'); return '<div class="datebox"><span class="d">'+(+p[2]||'')+'</span><span class="m">'+(MON[(+p[1]||1)-1]||'')+'</span></div>'; }
+  function renderEvents(){
+    var l=$('evList');
+    var evs=(cfg.events||[]).slice().sort(function(a,b){return a.date<b.date?-1:1;});
+    if(!evs.length){ l.innerHTML='<p class="note" style="margin-top:0">No events yet — add one.</p>'; return; }
+    l.innerHTML=evs.map(function(e){
+      return '<div class="itemrow">'+evDateBox(e.date)+'<div class="body"><div class="t">'+esc(e.title)+'</div><div class="s">'+esc(beachName(e.beachId))+' · '+esc(e.meet||'')+'</div></div>'
+        +'<div style="display:flex;gap:6px;flex:none"><button class="btn ghost sm" data-ev-edit="'+esc(e.id)+'">Edit</button><button class="btn ghost sm" data-ev-del="'+esc(e.id)+'">Delete</button></div></div>';
+    }).join('');
+  }
+  function evFormReset(){ editingEv=null; $('evTitle').value='';$('evDate').value='';$('evMeet').value='';$('evRsvp').value=''; $('evBeach').selectedIndex=0; $('evFormTitle').textContent='Add a cleanup'; $('evAdd').textContent='Add event'; $('evCancel').style.display='none'; }
+
+  // ─────────────────────────── Adopt-a-Site editor ───────────────────────────
+  function renderSites(){
+    var l=$('stList');
+    if(!(cfg.sites||[]).length){ l.innerHTML='<p class="note" style="margin-top:0">No adopted beaches yet.</p>'; return; }
+    l.innerHTML=cfg.sites.map(function(s,i){
+      return '<div class="itemrow"><div class="body"><div class="t">'+esc(beachName(s.beachId))+'</div><div class="s">'+esc(s.note||'')+'</div></div><button class="btn ghost sm" data-st-del="'+i+'" style="flex:none">Remove</button></div>';
+    }).join('');
+  }
+
+  // ─────────────────────────── Featured beaches ───────────────────────────
+  function renderFeatured(){
+    cfg.featured=cfg.featured||[];
+    $('featList').innerHTML=BEACHES.map(function(b){
+      var on=cfg.featured.indexOf(b.id)>=0;
+      return '<button class="btn '+(on?'sea':'ghost')+' sm" data-feat="'+b.id+'">'+(on?'✓ ':'')+esc(b.name)+'</button>';
+    }).join('');
+  }
+
+  // ─────────────────────────── Branding + export ───────────────────────────
+  function renderBranding(){
+    $('brName').value=cfg.name||''; $('brAccent').value=cfg.accent||''; $('brMission').value=cfg.mission||'';
+    $('brVol').value=cfg.volunteerUrl||''; $('brDon').value=cfg.donateUrl||''; $('brLogo').value=cfg.logo||'';
+    renderCfgPreview();
+  }
+  function exportCfg(){
+    // strip UI-only fields; produce the shape steward.html consumes
+    var out={slug:cfg.slug,name:cfg.name,accent:cfg.accent,logo:cfg.logo,mission:cfg.mission,
+      welcome:'In partnership with '+(cfg.name||'Your Nonprofit'),
+      volunteerUrl:cfg.volunteerUrl||'#',donateUrl:cfg.donateUrl||'#',
+      showSunscreen:!!cfg.showSunscreen,showLNT:!!cfg.showLNT,featured:cfg.featured||[],
+      events:(cfg.events||[]).map(function(e){return {id:e.id,title:e.title,date:e.date,beachId:e.beachId,area:AREA[e.beachId]||'',meet:e.meet,rsvpUrl:e.rsvpUrl||'#'};}),
+      sites:cfg.sites||[]};
+    dl(JSON.stringify(out,null,2),'steward-config-'+SLUG+'.json','application/json');
+  }
+  function renderCfgPreview(){ try{ $('cfgPreview').textContent=JSON.stringify(cfg,null,2); }catch(e){} }
+
+  // ─────────────────────────── County report ───────────────────────────
+  function reportRows(){
+    var per=$('period').value+' days';
+    if(DEMO){
+      return [
+        ['Guest sessions',SAMPLE.sessions,per,'Sample'],
+        ['QR scans',SAMPLE.qr,per,'Sample'],
+        ['Safety-warning views',SAMPLE.safety,per,'Sample'],
+        ['Beach / POI taps',SAMPLE.poi_tap,per,'Sample'],
+        ['Plan-day builds',SAMPLE.plan,per,'Sample'],
+        ['Volunteer clicks',SAMPLE.volunteer,per,'Sample'],
+        ['Donate clicks',SAMPLE.donate,per,'Sample'],
+        ['Cleanup events scheduled',(cfg.events||[]).length,'current','Your config'],
+        ['Beaches adopted',(cfg.sites||[]).length,'current','Your config']
+      ];
+    }
+    return [
+      ['Guest sessions',METRICS.sessions,per,'Measured'],
+      ['Beach / POI taps',METRICS.poi_tap,per,'Measured'],
+      ['Safety-warning views','—',per,'Pending rollup'],
+      ['Plan-day builds','—',per,'Pending rollup'],
+      ['Volunteer clicks','—',per,'Pending rollup'],
+      ['Donate clicks','—',per,'Pending rollup'],
+      ['Cleanup events scheduled',(cfg.events||[]).length,'current','Your config'],
+      ['Beaches adopted',(cfg.sites||[]).length,'current','Your config']
+    ];
+  }
+  function renderReport(){
+    $('repName').textContent=cfg.name||'Your Nonprofit';
+    var d=new Date(); // report generation date (client)
+    $('repMeta').innerHTML='<b>'+esc(cfg.name||'Your Nonprofit')+'</b> · slug <code>'+esc(SLUG)+'</code> · '+(DEMO?'Preview (sample data)':'Live data')+' · generated '+MON[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();
+    var tb=$('repTable').getElementsByTagName('tbody')[0];
+    tb.innerHTML=reportRows().map(function(r){
+      var v=(typeof r[1]==='number')?ct(r[1]):esc(r[1]);
+      return '<tr><td>'+esc(r[0])+'</td><td class="num">'+v+'</td><td>'+esc(r[2])+'</td><td>'+esc(r[3])+'</td></tr>';
+    }).join('');
+  }
+  function csvCell(v){ v=String(v==null?'':v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+  function exportCsv(){
+    var head=['OceanSafe stewardship impact summary'],meta=[cfg.name||'Your Nonprofit','slug '+SLUG,DEMO?'Preview (sample data)':'Live data'];
+    var lines=[head.map(csvCell).join(','),meta.map(csvCell).join(','),'',['Metric','Value','Window','Source'].map(csvCell).join(',')];
+    reportRows().forEach(function(r){ lines.push([r[0],r[1],r[2],r[3]].map(csvCell).join(',')); });
+    dl(lines.join('\n'),'stewardship-impact-'+SLUG+'.csv','text/csv');
+  }
+
+  // ─────────────────────────── helpers: download, tabs ───────────────────────────
+  function dl(text,name,type){
+    try{ var b=new Blob([text],{type:type||'text/plain'}); var u=URL.createObjectURL(b); var a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); URL.revokeObjectURL(u); },200); }catch(e){ alert('Download failed: '+(e&&e.message||e)); }
+  }
+  function showView(v){
+    var btns=$('tabnav').querySelectorAll('button');
+    for(var i=0;i<btns.length;i++) btns[i].setAttribute('aria-selected', btns[i].getAttribute('data-view')===v?'true':'false');
+    var views=document.querySelectorAll('.view');
+    for(var j=0;j<views.length;j++) views[j].classList.toggle('on', views[j].id==='view-'+v);
+    if(v==='link') renderLink();
+  }
+
+  // ── Download-to-desktop: bake the current ?ref&key into a saved copy (absolutize assets). ──
+  async function downloadDesktop(btn){
+    try{
+      if(btn){ btn.disabled=true; btn.textContent='Preparing…'; }
+      var doc='<!doctype html>\n'+document.documentElement.outerHTML;
+      // absolutize the vendor + any /assets refs so the saved file still loads them
+      doc=doc.replace(/(src|href)="\/assets\//g,'$1="https://oceansafety.app/assets/');
+      var baked='ref:'+JSON.stringify(SLUG)+(KEY?(',key:'+JSON.stringify(KEY)):'');
+      var shim='\n<script>(function(){var B={'+baked+'};if(!/[?&]ref=/.test(location.search)){var q="?ref="+encodeURIComponent(B.ref)+(B.key?("&key="+encodeURIComponent(B.key)):"");location.replace(location.pathname+q+location.hash);}})();<\/scr'+'ipt>';
+      doc=doc.replace('</body>',shim+'\n</body>');
+      dl(doc,'OceanSafe-Stewardship-'+SLUG.replace(/[^a-z0-9_-]/gi,'')+'.html','text/html');
+    }catch(e){ alert('Could not prepare the download.'); }
+    finally{ if(btn){ btn.disabled=false; btn.innerHTML='&#8595;&nbsp;Download to desktop'; } }
+  }
+
+  // ─────────────────────────── real-mode telemetry fetch ───────────────────────────
+  function goLive(){
+    if(DEMO) return;
+    var per=parseInt($('period').value,10)||30;
+    var u=API+'/api/dashboard/'+encodeURIComponent(SLUG)+'?period='+per+(KEY?('&key='+encodeURIComponent(KEY)):'');
+    fetch(u).then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); }).then(function(data){
+      var sessions=0,poi=0,any=false;
+      // sum across days; tolerate {days:[{sessions,poi_tap}]} or {days:[{roll:{...}}]} / {totals:{...}}
+      function add(o){ if(!o) return; if(typeof o.sessions==='number'){sessions+=o.sessions;any=true;} if(typeof o.poi_tap==='number'){poi+=o.poi_tap;any=true;} }
+      (data.days||[]).forEach(function(d){ add(d); add(d.roll); add(d.totals); });
+      METRICS.sessions=sessions; METRICS.poi_tap=poi; METRICS.live=true;
+      $('stage').classList.add('live-on');
+      $('mPreview').className=''; $('mPreview').setAttribute('aria-pressed','false');
+      $('mLive').className='on live'; $('mLive').setAttribute('aria-pressed','true'); $('mLive').removeAttribute('disabled');
+      var f=$('fresh'); f.style.background='#e4f1f5'; f.style.color='var(--sea)'; f.style.borderColor='#bcdde7';
+      f.innerHTML='<span class="pv measured"></span> '+(any?('Live · '+ct(sessions)+' sessions · '+ct(poi)+' beach taps · last '+per+' days'):('Live · collecting — no guest data yet · last '+per+' days'));
+      renderImpact();
+    }).catch(function(){
+      var f=$('fresh'); f.innerHTML='<span class="pv sample"></span> Live link set, but the rollup didn’t load — showing pending states.';
+      renderImpact();
+    });
+  }
+
+  // ─────────────────────────── wire up ───────────────────────────
+  function fillBeachSelect(sel){ sel.innerHTML=BEACHES.map(function(b){return '<option value="'+b.id+'">'+esc(b.name)+'</option>';}).join(''); }
+  function init(){
+    // brand strings
+    $('cbName').textContent=cfg.name||'Your Nonprofit'; $('propName').textContent=cfg.name||'Your Nonprofit';
+    $('propSlug').textContent=SLUG; $('cbLogo').textContent=(cfg.name||'Y').slice(0,1).toUpperCase();
+    fillBeachSelect($('evBeach')); fillBeachSelect($('stBeach'));
+    // tabs
+    $('tabnav').addEventListener('click',function(e){ var b=e.target.closest('button[data-view]'); if(b) showView(b.getAttribute('data-view')); });
+    // period
+    $('period').addEventListener('change',function(){ if(!DEMO) goLive(); else renderImpact(); });
+    // events
+    $('evAdd').addEventListener('click',function(){
+      var t=$('evTitle').value.trim(); if(!t){ alert('Add a title'); return; }
+      var rec={id:editingEv||('c'+Date.now().toString(36)),title:t,date:$('evDate').value,beachId:$('evBeach').value,area:AREA[$('evBeach').value]||'',meet:$('evMeet').value.trim(),rsvpUrl:$('evRsvp').value.trim()};
+      if(editingEv){ cfg.events=cfg.events.map(function(e){return e.id===editingEv?rec:e;}); }
+      else cfg.events.push(rec);
+      saveCfg(); renderEvents(); evFormReset();
+    });
+    $('evCancel').addEventListener('click',evFormReset);
+    $('evList').addEventListener('click',function(e){
+      var del=e.target.closest('[data-ev-del]'), ed=e.target.closest('[data-ev-edit]');
+      if(del){ var id=del.getAttribute('data-ev-del'); cfg.events=cfg.events.filter(function(x){return x.id!==id;}); saveCfg(); renderEvents(); }
+      else if(ed){ var i2=ed.getAttribute('data-ev-edit'); var ev=cfg.events.filter(function(x){return x.id===i2;})[0]; if(ev){ editingEv=ev.id; $('evTitle').value=ev.title; $('evDate').value=ev.date; $('evBeach').value=ev.beachId; $('evMeet').value=ev.meet||''; $('evRsvp').value=ev.rsvpUrl||''; $('evFormTitle').textContent='Edit cleanup'; $('evAdd').textContent='Save changes'; $('evCancel').style.display=''; } }
+    });
+    // sites
+    $('stAdd').addEventListener('click',function(){ cfg.sites=cfg.sites||[]; cfg.sites.push({beachId:$('stBeach').value,note:$('stNote').value.trim()}); $('stNote').value=''; saveCfg(); renderSites(); });
+    $('stList').addEventListener('click',function(e){ var d=e.target.closest('[data-st-del]'); if(d){ cfg.sites.splice(+d.getAttribute('data-st-del'),1); saveCfg(); renderSites(); } });
+    // featured
+    $('featList').addEventListener('click',function(e){ var b=e.target.closest('[data-feat]'); if(!b) return; var id=b.getAttribute('data-feat'); cfg.featured=cfg.featured||[]; var i=cfg.featured.indexOf(id); if(i>=0) cfg.featured.splice(i,1); else cfg.featured.push(id); saveCfg(); renderFeatured(); });
+    // branding
+    $('brSave').addEventListener('click',function(){ cfg.name=$('brName').value.trim()||'Your Nonprofit'; cfg.accent=$('brAccent').value.trim(); cfg.mission=$('brMission').value.trim(); cfg.volunteerUrl=$('brVol').value.trim(); cfg.donateUrl=$('brDon').value.trim(); cfg.logo=$('brLogo').value.trim(); saveCfg(); init2(); });
+    $('exportCfg').addEventListener('click',exportCfg);
+    // content toggles
+    function tog(el,key){ el.addEventListener('click',function(){ cfg[key]=!cfg[key]; el.classList.toggle('on',cfg[key]); el.setAttribute('aria-checked',cfg[key]?'true':'false'); saveCfg(); }); el.classList.toggle('on',!!cfg[key]); el.setAttribute('aria-checked',cfg[key]?'true':'false'); }
+    tog($('tgSun'),'showSunscreen'); tog($('tgLnt'),'showLNT');
+    // link + report + downloads
+    $('copyLink').addEventListener('click',function(){ try{ navigator.clipboard.writeText(guestUrl()); this.textContent='Copied'; var b=this; setTimeout(function(){b.textContent='Copy';},1200); }catch(e){} });
+    $('dlQr').addEventListener('click',function(){ if(window.__qrData) dl64(window.__qrData,'OceanSafe-QR-'+SLUG+'.png'); });
+    $('csvBtn').addEventListener('click',exportCsv);
+    $('printBtn').addEventListener('click',function(){ window.print(); });
+    $('dlBtn').addEventListener('click',function(){ downloadDesktop(this); });
+    init2();
+    if(!DEMO) goLive(); else renderImpact();
+  }
+  function init2(){
+    $('cbName').textContent=cfg.name||'Your Nonprofit'; $('propName').textContent=cfg.name||'Your Nonprofit'; $('cbLogo').textContent=(cfg.name||'Y').slice(0,1).toUpperCase();
+    renderEvents(); renderSites(); renderFeatured(); renderBranding(); renderLink(); renderImpact();
+  }
+  function dl64(dataUrl,name){ try{ var a=document.createElement('a'); a.href=dataUrl; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }catch(e){} }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+</body>
+</html>
