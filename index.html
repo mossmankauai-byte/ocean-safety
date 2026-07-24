@@ -1885,9 +1885,17 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 .hero[data-pano="true"] .hero-img{background-position:center 65%}
 </style>
 <style id="rs-scanner-css">
-.rs-wrap{margin-top:14px;border-top:1px dashed var(--border);padding-top:6px}
-.rs-head{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#5b7682}
-.rs-logo{width:19px;height:19px;border-radius:5px;display:block;flex:0 0 auto}
+.rs-wrap{margin:16px 0 6px}
+.rs-fold{margin:0}
+.rs-fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:13px;background:linear-gradient(135deg,#0f4c5c,#14697e);color:#fff;box-shadow:0 2px 9px rgba(15,76,92,.22);-webkit-user-select:none;user-select:none}
+.rs-fold>summary::-webkit-details-marker{display:none}
+.rs-fold[open]>summary{border-radius:13px 13px 0 0}
+.rs-sum-logo{width:26px;height:26px;border-radius:7px;display:block;flex:0 0 auto;box-shadow:0 0 0 2px rgba(255,255,255,.3)}
+.rs-sum-tt{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.rs-sum-tt b{font-size:14px;font-weight:800}
+.rs-sum-tt span{font-size:11.5px;color:#c6e2ea;font-weight:500;margin-top:2px}
+.rs-cta-chev{margin-left:auto;flex:0 0 auto;transition:transform .25s;color:#cfe6ec}
+.rs-fold[open] .rs-cta-chev{transform:rotate(180deg)}
 .rs-body{padding:8px 2px 2px}
 .rs-lead{font-size:12.5px;color:#5b7682;margin:2px 0 10px;line-height:1.5}
 .rs-cam{position:relative;height:128px;border-radius:12px;overflow:hidden;margin-bottom:9px;background:linear-gradient(135deg,#0f4c5c,#1c6b7e);display:flex;align-items:center;justify-content:center}
@@ -7151,11 +7159,10 @@ function openSheet(id){
       <div class="vis-row"><div class="vis-icon-lbl">UV</div>${uvBar(c.uv)}</div>
       <div class="vis-row" style="border-top:1px dashed var(--border);padding-top:10px"><div class="vis-icon-lbl">Tide</div><div class="vis-text"><span class="vis-lbl">${c.tt==='rising'?'Rising':c.tt==='falling'?'Falling':'Slack'}</span><span class="vis-num">${c.tide.toFixed(1)} ft</span></div></div>
     </div>
-    ${caut}${dgr}${tp}${rope}${cs}${ps}${nas}
+    ${caut}${dgr}${tp}${rope}${cs}${(typeof rsSheetHtml==='function')?rsSheetHtml(b):''}${ps}${nas}
     <details style="margin-top:12px"><summary style="font-size:10px;color:var(--mute);cursor:pointer;text-transform:uppercase;letter-spacing:.06em">Tide today</summary>${tideGraph(c)}</details>
     <a href="${murl}" target="_blank" rel="noopener" class="dirbtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="1,8 15,1 9,8 15,15"/></svg>Get Directions</a>
-    ${viatorBlock}
-    ${(typeof rsSheetHtml==='function')?rsSheetHtml(b):''}`;
+    ${viatorBlock}`;
   document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
   pushItemRoute('beach', b.id, b.name);
@@ -11994,7 +12001,7 @@ if('serviceWorker' in navigator){
     try{ if(window.rsStopScan) rsStopScan(); }catch(e){}
     var hint=hasCam?'Point the camera at the barcode &mdash; OceanSafe looks the product up on <b>Open Beauty Facts</b> (needs a connection). The camera image stays on your phone; only the number is looked up.':'Type the barcode number, or paste the ingredients below.';
     var scanBtn=hasCam?'<button class="rs-btn" id="rsScanBtn" onclick="rsToggleScan()">'+camIcon+'Scan a barcode</button>':'';
-    return '<div class="rs-wrap"><details class="cond-fold rs-fold"><summary class="cond-fold-sum"><svg class="cf-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg><span class="rs-head"><img class="rs-logo" src="icons/favicon-32.png" alt="OceanSafe">Reef-safe sunscreen check</span></summary><div class="rs-body"><p class="rs-lead">Scan or type a sunscreen barcode and OceanSafe reads the <b>active ingredients</b> — not the marketing — for Hawaiʻi’s reef (Act 104 bans oxybenzone &amp; octinoxate).</p><div class="rs-cam" id="rsCam"><video id="rsVid" playsinline muted></video><div class="rs-frame"></div><span class="rs-lbl" id="rsCamlbl">◎ Tap “Scan a barcode” to start</span></div>'+scanBtn+'<div class="rs-bcrow"><input id="rsBcode" inputmode="numeric" placeholder="…or type the barcode number" onkeydown="if(event.key===\'Enter\')rsLookup(this.value)"><button class="rs-btn ghost" onclick="rsLookup(document.getElementById(\'rsBcode\').value)">Look up</button></div><p class="rs-hint">'+hint+'</p><div id="rsResult"></div><div class="rs-bcrow" style="margin-top:10px"><input id="rsPaste" placeholder="…or paste the Active Ingredients" onkeydown="if(event.key===\'Enter\')rsReadPaste()"><button class="rs-btn ghost" onclick="rsReadPaste()">Read</button></div><div class="rs-note2">'+infoIcon+'<div><b>“Reef-safe” on a label is unregulated</b> — a bottle can say reef-friendly and still flag Caution. Formulations change, so confirm the current label.</div></div></div></details></div>';
+    return '<div class="rs-wrap"><details class="rs-fold"><summary><img class="rs-sum-logo" src="icons/favicon-32.png" alt="OceanSafe"><span class="rs-sum-tt"><b>Reef-safe sunscreen check</b><span>Scan a bottle — is it safe for the reef?</span></span><svg class="rs-cta-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="rs-body"><p class="rs-lead">Scan or type a sunscreen barcode and OceanSafe reads the <b>active ingredients</b> — not the marketing — for Hawaiʻi’s reef (Act 104 bans oxybenzone &amp; octinoxate).</p><div class="rs-cam" id="rsCam"><video id="rsVid" playsinline muted></video><div class="rs-frame"></div><span class="rs-lbl" id="rsCamlbl">◎ Tap “Scan a barcode” to start</span></div>'+scanBtn+'<div class="rs-bcrow"><input id="rsBcode" inputmode="numeric" placeholder="…or type the barcode number" onkeydown="if(event.key===\'Enter\')rsLookup(this.value)"><button class="rs-btn ghost" onclick="rsLookup(document.getElementById(\'rsBcode\').value)">Look up</button></div><p class="rs-hint">'+hint+'</p><div id="rsResult"></div><div class="rs-bcrow" style="margin-top:10px"><input id="rsPaste" placeholder="…or paste the Active Ingredients" onkeydown="if(event.key===\'Enter\')rsReadPaste()"><button class="rs-btn ghost" onclick="rsReadPaste()">Read</button></div><div class="rs-note2">'+infoIcon+'<div><b>“Reef-safe” on a label is unregulated</b> — a bottle can say reef-friendly and still flag Caution. Formulations change, so confirm the current label.</div></div></div></details></div>';
   };
 })();
 </script>
