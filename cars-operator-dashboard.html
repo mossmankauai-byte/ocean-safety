@@ -824,6 +824,7 @@
       <div class="sec-h"><h2>Free vs the per-vehicle plan</h2><p>Guide and safety are never gated on either tier &mdash; the paid plan adds the weather-swap, the presentation push and promotions.</p></div>
       <div class="card" id="planCompare">
         <div class="pc-tr pc-head"><span></span><span class="pc-cell">Free &middot; $0/vehicle</span><span class="pc-cell pc-paid">Paid &middot; $5/vehicle/mo</span></div>
+        <div class="pc-tr"><b>Your store</b><span class="pc-cell pc-dash">&mdash;</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Sell or rent gear in the guide &mdash; you keep <b>100%</b> of store sales</span></div>
         <div class="pc-tr"><b>Branding</b><span class="pc-cell">OceanSafe</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your name, logo, colors &amp; photos</span></div>
         <div class="pc-tr"><b>Add-ons</b><span class="pc-cell">1 featured</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Unlimited, with contact info</span></div>
         <div class="pc-tr"><b>Weather-swap</b><span class="pc-cell pc-dash">1 add-on shown</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Full swap + presentation push on trigger days</span></div>
@@ -832,7 +833,7 @@
         <div class="pc-tr"><b>Guest analytics</b><span class="pc-cell"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything &mdash; same as free</span></div>
         <div class="pc-tr"><b>Multi-location portfolio view</b><span class="pc-cell pc-dash">&mdash;</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Available (ask us)</span></div>
         <div class="pc-tr"><b>Price</b><span class="pc-cell pc-strong">Free &mdash; $0/vehicle</span><span class="pc-cell pc-paid pc-strong">$5/vehicle/mo</span></div>
-        <div class="mg-foot" id="pcFoot"><span class="cap"><b>$5/vehicle/mo</b> &mdash; one paid tier, everything above. The free guide is free forever; leads stay free on both tiers.</span><span style="flex:1"></span></div>
+        <div class="mg-foot" id="pcFoot"><span class="cap"><b>$5/vehicle/mo</b> &mdash; one paid tier, everything above, and the store is the piece you can only get on it. The free guide is free forever; leads stay free on both tiers.</span><span style="flex:1"></span></div>
       </div>
     </section>
 
@@ -1439,10 +1440,12 @@
 
     <!-- ============ SHOP — the seller portal, mounted whole ============
          Not a re-implementation: this frames the already-built partner portal
-         (/portal-demo/*) with ?embed=1, which drops the portal's own top bar so
-         the sub-tab row below is the only navigation. ?plan=paid because the
-         store IS the paid gate for a fleet — every demo opens on the full
-         product, and ?plan=free swaps the whole frame for the lock card. -->
+         with ?embed=1, which drops the portal's own top bar so the sub-tab row
+         below is the only navigation. A real fleet (?ref=) frames /portal/ —
+         their own products, orders and payouts behind their own sign-in; the
+         un-slugged sales demo frames /portal-demo/, the sample shop. ?plan=paid
+         because the store IS the paid gate for a fleet: it only exists on paid,
+         and ?plan=free swaps the whole frame for the lock card. -->
     <div id="view-shop" hidden>
       <section style="margin-top:18px">
         <div class="sec-h">
@@ -1463,7 +1466,7 @@
             <div class="shopframe-load" id="shopLoad">Loading your store&hellip;</div>
             <iframe id="shopFrame" title="Your OceanSafe store" loading="lazy"></iframe>
           </div>
-          <p class="cap" style="margin:10px 2px 0">Sample store. Once your Square is connected, these are your real products, orders and payouts.</p>
+          <p class="cap" id="shopCap" style="margin:10px 2px 0">Sample store. Once your Square is connected, these are your real products, orders and payouts.</p>
         </div>
 
         <!-- free plan only — filled + revealed by the free-tier engine -->
@@ -1770,7 +1773,12 @@
    whole frame for the lock card below (built by the free-tier engine). */
 (function(){
   var PAGES = ['dashboard','sales','products','inventory','promotions'];
-  var BASE  = '/portal-demo/';
+  // A REAL fleet (?ref=<slug>) gets the REAL portal — their own products, orders and
+  // payouts, read from Supabase behind their own sign-in. Only the un-slugged sales demo
+  // gets /portal-demo/, whose placeholder keys put it in sample mode. Same code either
+  // side; the ONLY difference between the two directories is config.js.
+  var REAL  = !!(window.OS_SLUG || '').trim();
+  var BASE  = REAL ? '/portal/' : '/portal-demo/';
   var frame = document.getElementById('shopFrame');
   var load  = document.getElementById('shopLoad');
   var wrap  = document.getElementById('shopFrameWrap');
@@ -1779,6 +1787,15 @@
 
   var isFree = (window.OS_PLAN === 'free');
   var cur = 'dashboard', mounted = false;
+
+  // The "sample store" caption is a lie once it IS their store — swap it, and say the one
+  // thing a real fleet needs to know: the portal has its own sign-in, on their billing email.
+  if(REAL){
+    var cap = document.getElementById('shopCap');
+    if(cap) cap.innerHTML = 'Your live store. It signs in separately &mdash; a one-tap email link to your billing address &mdash; because payouts are yours, not ours to hold.';
+    // the markup's href is the demo one; correct it before first paint, not just on mount
+    if(pop) pop.href = BASE + 'dashboard.html?plan=paid';
+  }
 
   function src(page){
     // embed=1 drops the portal's own top bar; plan=paid is explicit so a stale
@@ -1807,8 +1824,18 @@
     try{
       var d = frame.contentDocument;
       if(!d || !d.body) return;
-      var h = Math.max(d.body.scrollHeight, d.documentElement.scrollHeight);
-      if(h > 0) frame.style.height = (h + 24) + 'px';
+      // Measure the BODY only. documentElement.scrollHeight is at least the iframe's own
+      // height, so feeding it back in is a ratchet — the frame can grow but never shrink,
+      // and a short page (the sign-in card) keeps the tall page's height as dead space.
+      var h = d.body.scrollHeight;
+      if(h > 0){
+        var want = Math.max(h + 24, 320);
+        // Only write when it actually moved: a no-op style write still fires the
+        // ResizeObserver, and that loops. NaN = no inline height yet (go() clears it),
+        // and every NaN comparison is false — so test for it, don't compare through it.
+        var have = parseFloat(frame.style.height);
+        if(isNaN(have) || Math.abs(have - want) > 2) frame.style.height = want + 'px';
+      }
       if(window.ResizeObserver && !ro){
         ro = new ResizeObserver(function(){ fit(); });
         ro.observe(d.body);
