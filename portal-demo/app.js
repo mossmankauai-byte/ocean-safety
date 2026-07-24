@@ -141,7 +141,9 @@ async function currentSession() {
 async function requireAuth() {
   if (DEMO) return { user: { id: "demo" } };
   const session = await currentSession();
-  if (!session) { location.replace("index.html"); throw new Error("not authed"); }
+  // Carry embed across the auth bounce: without it the sign-in card lands un-embedded
+  // inside the console's frame and renders in a 100vh well of dead space.
+  if (!session) { location.replace("index.html" + (EMBED ? "?embed=1" : "")); throw new Error("not authed"); }
   return session;
 }
 async function signOut() { await sb.auth.signOut(); location.replace("index.html"); }
