@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/png" href="/assets/oceansafe-favicon.png">
+<link rel="apple-touch-icon" href="/assets/oceansafe-favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>OceanSafe · Onboard a car fleet</title>
+<style>
+  :root{
+    --sand:#f3ede0; --sand2:#faf6ee; --card:#fff; --ink:#2c2a24; --ink2:#6b6457; --line:#e7dfce;
+    --green:#628a56; --green-d:#3d5346; --amber:#d97706; --gold:#c9a84c; --ocean:#0f4c5c; --aqua:#0a8ba8;
+    --font:"Helvetica Neue",Arial,Helvetica,sans-serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font-family:var(--font); color:var(--ink); background:var(--sand); -webkit-font-smoothing:antialiased}
+  .top{background:rgba(250,246,238,.92); border-bottom:1px solid var(--line)}
+  .topin{max-width:760px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:10px}
+  .wave{width:22px;height:22px;flex:none}
+  .wm{font-weight:700; font-size:15px; color:var(--green-d)} .wm span{color:var(--amber)}
+  .console{font-size:11px; font-weight:700; color:var(--ink2); text-transform:uppercase; letter-spacing:.07em; padding-left:10px; border-left:1px solid var(--line)}
+  .wrap{max-width:760px; margin:0 auto; padding:22px 20px 60px}
+  h1{font-size:23px; margin:6px 0 4px; letter-spacing:-.01em}
+  .sub{font-size:13.5px; color:var(--ink2); margin:0 0 20px; line-height:1.5}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-bottom:16px}
+  h4{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--green-d); margin:0 0 14px; font-weight:700}
+  label{font-size:12px; font-weight:700; color:var(--ink2); display:block; margin:12px 0 5px}
+  input{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font-family:inherit; font-size:15px; background:#fff}
+  input:focus{outline:none; border-color:var(--green)}
+  .btn{width:100%; border:0; border-radius:12px; padding:14px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; background:var(--green); color:#fff; margin-top:18px}
+  .btn:hover{background:var(--green-d)} .btn:disabled{opacity:.5; cursor:default}
+  .msg{font-size:13px; font-weight:700; text-align:center; margin-top:12px; min-height:16px}
+  .msg.err{color:#c0492b} .msg.ok{color:var(--green-d)}
+  .hide{display:none}
+  .linkrow{display:flex; align-items:center; gap:8px; margin:8px 0}
+  .linkrow code{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; background:var(--sand2); border:1px solid var(--line); border-radius:8px; padding:9px 11px; font-size:12px; font-family:ui-monospace,Menlo,monospace}
+  .cp{border:1px solid var(--line); background:var(--sand2); color:var(--green-d); border-radius:8px; padding:9px 12px; font-weight:700; font-size:12.5px; cursor:pointer; white-space:nowrap}
+  .cp:hover{border-color:var(--green)}
+  .qrgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:6px}
+  @media(max-width:560px){.qrgrid{grid-template-columns:1fr}}
+  .qrcard{border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center; background:var(--sand2)}
+  .qrcard .qt{font-size:13px; font-weight:800; color:var(--ocean); margin-bottom:2px}
+  .qrcard .qs{font-size:11px; color:var(--ink2); margin-bottom:10px; min-height:26px}
+  .qrcard .qbox{background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px; display:inline-block; line-height:0}
+  .qrcard .dl{display:inline-block; margin-top:10px; border:1px solid var(--line); background:#fff; color:var(--green-d); border-radius:8px; padding:7px 12px; font-weight:700; font-size:12px; cursor:pointer; text-decoration:none}
+  .qrcard .dl:hover{border-color:var(--green)}
+  .plans{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media(max-width:560px){.plans{grid-template-columns:1fr}}
+  .pl{border:1.5px solid var(--line); border-radius:12px; padding:15px; background:#fff}
+  .pl.free{border-color:var(--green); background:#f2f6ee}
+  .pl.paid{border:2px solid var(--gold); background:#fff7e6}
+  .pl .k{font-size:11px; font-weight:800; letter-spacing:.05em}
+  .pl.free .k{color:var(--green-d)} .pl.paid .k{color:#a8862f}
+  .pl .amt{font-size:26px; font-weight:800; margin:4px 0 2px}
+  .pl .amt small{font-size:13px; font-weight:600; color:var(--ink2)}
+  .pl .mth{font-size:11.5px; color:var(--ink2); margin-bottom:8px}
+  .pl ul{list-style:none; padding:0; margin:0 0 10px; display:flex; flex-direction:column; gap:6px}
+  .pl li{font-size:12.5px; color:var(--ink2); line-height:1.45; display:flex; gap:7px; align-items:flex-start}
+  .pl li i{font-style:normal; flex:none; font-weight:800}
+  .pl li.y i{color:var(--green)} .pl li.n i{color:#bfae8e}
+  .pgo{width:100%; background:var(--green); color:#fff; border:0; border-radius:10px; padding:12px; font-weight:800; font-size:14px; cursor:pointer; font-family:inherit}
+  .pgo:disabled{opacity:.5; cursor:default}
+  .pmsg{margin:9px 0 0; font-size:12.5px; font-weight:700; line-height:1.45}
+  /* tour */
+  .tourhead{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  .lockpill{font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; border-radius:999px; padding:4px 10px; border:1px solid}
+  .lockpill.locked{color:#8a7c5c; background:#f6f0e2; border-color:#e2d5b6}
+  .lockpill.open{color:var(--green-d); background:#eaf2e5; border-color:#c3d8b8}
+  .bar{height:5px; background:#ece4d3; border-radius:999px; overflow:hidden; margin:14px 0 4px}
+  .bar i{display:block; height:100%; background:var(--gold); width:0; transition:width .25s}
+  .barlab{font-size:11px; font-weight:700; color:var(--ink2); text-align:right}
+  .step{display:flex; gap:13px; align-items:flex-start; padding:15px 0; border-top:1px solid #f0e9db}
+  .step:first-of-type{border-top:none}
+  .num{width:27px;height:27px;border-radius:50%;background:var(--ocean);color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center;flex:none}
+  .step.done .num{background:var(--green)}
+  .step .t{flex:1; min-width:0}
+  .step .t b{display:block; font-size:15px; margin-bottom:3px}
+  .step .t p{font-size:13.5px; color:var(--ink2); margin:0; line-height:1.55}
+  .step .t a.go{display:inline-block; margin-top:9px; font-size:12.5px; font-weight:700; color:var(--green-d); text-decoration:none; border:1px solid var(--line); background:var(--sand2); border-radius:8px; padding:7px 12px}
+  .step .t a.go:hover{border-color:var(--green)}
+  .chk{flex:none; width:22px; height:22px; border:1.5px solid var(--line); border-radius:6px; background:#fff; cursor:pointer; display:grid; place-items:center; margin-top:2px}
+  .chk svg{width:13px; height:13px; opacity:0; transition:opacity .15s}
+  .step.done .chk{background:var(--green); border-color:var(--green)}
+  .step.done .chk svg{opacity:1}
+  .gear{display:flex; flex-wrap:wrap; gap:6px; margin-top:9px}
+  .gear span{font-size:11.5px; font-weight:600; color:var(--green-d); background:#eef3ea; border:1px solid #d9e5d2; border-radius:999px; padding:4px 9px}
+  .lockbox{background:#f8f4ea; border:1px dashed #ddd0b2; border-radius:12px; padding:18px; text-align:center}
+  .lockbox b{display:block; font-size:14.5px; margin-bottom:5px}
+  .lockbox p{font-size:13px; color:var(--ink2); margin:0; line-height:1.5}
+  .note{background:#fff7e6; border:1px solid #e8d9a8; border-left:4px solid var(--gold); border-radius:0 12px 12px 0; padding:13px 15px; font-size:12.5px; color:#5b4a1a; line-height:1.55; margin-top:14px}
+  .pb{font-size:11px; font-weight:700; color:var(--ink2); text-align:center; margin-top:22px} .pb span{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="top"><div class="topin">
+  <svg class="wave" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2.4" stroke-linecap="round">
+    <path d="M2 8.5c2.2 0 2.2 2 4.4 2s2.2-2 4.4-2 2.2 2 4.4 2 2.2-2 4.4-2M2 14.5c2.2 0 2.2 2 4.4 2s2.2-2 4.4-2 2.2 2 4.4 2 2.2-2 4.4-2"/>
+  </svg>
+  <span class="wm">Ocean<span>Safe</span></span><span class="console">Onboard a car fleet</span>
+</div></div>
+<div class="wrap">
+
+  <div id="form">
+    <h1>Onboard a car fleet</h1>
+    <p class="sub">For Turo hosts and rental-car operators. Enter the fleet and its vehicle count, then pick a plan. Provisions the operator, generates their portal link and three scannable QR codes, and — if you pick Paid — starts the Square billing at <b>$5 per vehicle per month</b>.</p>
+    <div class="card">
+      <h4>New fleet</h4>
+      <label for="name">Fleet / business name</label>
+      <input type="text" id="name" placeholder="Chosen Rentals">
+      <label for="cars">Number of vehicles</label>
+      <input type="number" id="cars" min="1" placeholder="75">
+      <p style="font-size:11.5px;color:var(--ink2);margin:5px 0 0">Sets the paid price — <b>$5 per vehicle per month</b>. Required.</p>
+      <label for="email">Billing email</label>
+      <input type="email" id="email" placeholder="billing@theirfleet.com">
+      <label for="admin">Admin key</label>
+      <input type="password" id="admin" placeholder="operator onboarding key" autocomplete="off">
+      <button class="btn" id="go">Next — choose a plan</button>
+      <p class="msg" id="msg"></p>
+    </div>
+  </div>
+
+  <div id="result" class="hide">
+    <h1 id="rTitle">Provisioned</h1>
+    <p class="sub" id="rSub"></p>
+
+    <div class="card">
+      <h4>Fleet links</h4>
+      <div class="linkrow"><code id="lPortal"></code><button class="cp" data-copy="lPortal">Copy portal</button></div>
+      <div class="linkrow"><code id="lDash"></code><button class="cp" data-copy="lDash">Copy dashboard</button></div>
+      <p class="sub" style="margin:10px 0 0">Send the <b>portal</b> link to the host so they can set up their offers. The <b>dashboard</b> is where they watch results.</p>
+    </div>
+
+    <div class="card">
+      <h4>Three QR codes — one per touchpoint</h4>
+      <div class="qrgrid">
+        <div class="qrcard"><div class="qt">Booking confirmation</div><div class="qs">Goes out days before arrival</div><div class="qbox" id="qr-renter"></div><a class="dl" data-seg="renter">Download PNG</a></div>
+        <div class="qrcard"><div class="qt">In-car card</div><div class="qs">Glovebox or dash mount</div><div class="qbox" id="qr-exchange"></div><a class="dl" data-seg="exchange">Download PNG</a></div>
+        <div class="qrcard"><div class="qt">Key-fob tag</div><div class="qs">Handed over at pickup</div><div class="qbox" id="qr-owner"></div><a class="dl" data-seg="owner">Download PNG</a></div>
+      </div>
+      <div class="note"><b>Why three:</b> the booking-confirmation scan is the one that earns — it lands while the guest is still deciding where to go first. The other two catch anyone who missed it.</div>
+    </div>
+
+    <div class="card">
+      <h4 id="planH4">Choose a plan</h4>
+      <div class="plans">
+        <div class="pl free">
+          <div class="k">FREE · ACTIVE NOW</div>
+          <div class="amt">$0</div>
+          <div class="mth">Nothing to pay, nothing to cancel</div>
+          <ul>
+            <li class="y"><i>✓</i>Safety guide + conditions in every car</li>
+            <li class="y"><i>✓</i>Tour bookings — <b>50/50 split</b></li>
+            <li class="y"><i>✓</i>Basic scan and booking counts</li>
+            <li class="n"><i>✕</i><b>No in-app store</b></li>
+          </ul>
+        </div>
+        <div class="pl paid">
+          <div class="k">PAID</div>
+          <div class="amt" id="pAmt">$0<small> /mo</small></div>
+          <div class="mth" id="pMth"></div>
+          <ul>
+            <li class="y"><i>✓</i>Everything in Free</li>
+            <li class="y"><i>✓</i><b>Your in-app store</b> — sell gear from the trunk</li>
+            <li class="y"><i>✓</i>They are the merchant of record</li>
+            <li class="y"><i>✓</i>Full dashboard, timed campaigns, guest insights</li>
+          </ul>
+          <button class="pgo" id="startBill">Start paid billing</button>
+          <p class="pmsg" id="billMsg"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tourhead">
+        <h4 style="margin:0">Set up the store</h4>
+        <span class="lockpill locked" id="lockPill">Paid plan only</span>
+      </div>
+
+      <div id="tourLocked">
+        <div class="lockbox" style="margin-top:14px">
+          <b>The store unlocks on the paid plan</b>
+          <p>Free fleets get the safety guide and the tour split. The in-app store — your own gear, your own prices, settling into your own Square — is what the $5 per vehicle buys. Start billing above and this walkthrough opens.</p>
+        </div>
+      </div>
+
+      <div id="tourOpen" class="hide">
+        <div class="bar"><i id="tBar"></i></div>
+        <div class="barlab" id="tLab">0 of 5 done</div>
+
+        <div class="step" data-step="0">
+          <div class="num">1</div>
+          <div class="t">
+            <b>Open your storefront</b>
+            <p>It already exists — it was created the moment the fleet was provisioned. This is the page a guest lands on when they scan. Empty for now.</p>
+            <a class="go" id="tStore" target="_blank" rel="noopener">Open the storefront</a>
+          </div>
+          <div class="chk" data-chk="0"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg></div>
+        </div>
+
+        <div class="step" data-step="1">
+          <div class="num">2</div>
+          <div class="t">
+            <b>Load the gear list</b>
+            <p>In the portal, add what you'd rent or sell alongside a car. It sells here because the guest has a trunk to put it in — that's the whole advantage over a hotel desk. Start with six items; you can add more any time.</p>
+            <div class="gear"><span>Cooler</span><span>Beach chairs</span><span>Snorkel set</span><span>Boogie board</span><span>Reef-safe sunscreen</span><span>Dry bag</span></div>
+            <a class="go" id="tPortal" target="_blank" rel="noopener">Open the portal</a>
+          </div>
+          <div class="chk" data-chk="1"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg></div>
+        </div>
+
+        <div class="step" data-step="2">
+          <div class="num">3</div>
+          <div class="t">
+            <b>Connect their Square</b>
+            <p>The host is the merchant of record. Every sale settles into their own Square account, in their name, on their books. We never run the sale on their register and never hold their money — so deposits and refunds stay entirely theirs.</p>
+            <a class="go" href="https://squareup.com/dashboard" target="_blank" rel="noopener">Square dashboard</a>
+          </div>
+          <div class="chk" data-chk="2"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg></div>
+        </div>
+
+        <div class="step" data-step="3">
+          <div class="num">4</div>
+          <div class="t">
+            <b>Put the QR where it gets scanned</b>
+            <p>Paste the booking-confirmation code into the Turo message template that fires on every booking. Print the other two — the glovebox card and the key-fob tag — from the codes above. One link, printed once, works everywhere.</p>
+          </div>
+          <div class="chk" data-chk="3"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg></div>
+        </div>
+
+        <div class="step" data-step="4">
+          <div class="num">5</div>
+          <div class="t">
+            <b>Watch the first week</b>
+            <p>The dashboard shows scans, what guests looked at, and what sold. Give it a full booking cycle before judging it — the booking-confirmation scan lands days before the guest arrives, so the sale often closes later than the scan.</p>
+            <a class="go" id="tDash" target="_blank" rel="noopener">Open the dashboard</a>
+          </div>
+          <div class="chk" data-chk="4"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg></div>
+        </div>
+
+        <div class="note" id="tDone" style="display:none"><b>That's the whole setup.</b> The fleet is live, billing is running, and the store is theirs. Send them the portal link and the printed codes.</div>
+      </div>
+    </div>
+
+    <button class="btn" id="another" style="background:var(--ocean)">Onboard another fleet</button>
+  </div>
+  <p class="pb">powered by <span>OceanSafe</span></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var DATA=null, _admin="", _email="", _cars=0, PAID=false;
+  var SEGS=["renter","exchange","owner"];
+  function setMsg(t,c){ var m=$("msg"); m.textContent=t; m.className="msg "+(c||""); }
+
+  $("go").onclick=function(){
+    var name=$("name").value.trim(), email=$("email").value.trim(), cars=parseInt($("cars").value,10)||null, admin=$("admin").value.trim();
+    if(name.length<2){ setMsg("Enter a fleet name.","err"); return; }
+    if(!cars || cars<1){ setMsg("Enter the number of vehicles — it sets the paid price.","err"); return; }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ setMsg("Enter a valid billing email.","err"); return; }
+    if(!admin){ setMsg("Enter the admin key.","err"); return; }
+    _admin=admin; _email=email; _cars=cars;
+    $("go").disabled=true; setMsg("Provisioning…","");
+    // the operator backbone counts units generically — a fleet's units are its vehicles
+    fetch("/api/ts-signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin:admin,name:name,email:email,rooms:cars})})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        $("go").disabled=false;
+        if(!j || !j.ok){ setMsg(reason(j&&j.reason),"err"); return; }
+        DATA=j; showResult(j);
+      })
+      .catch(function(){ $("go").disabled=false; setMsg("Couldn't reach the server. Try again.","err"); });
+  };
+  function reason(r){ return r==="forbidden"?"Wrong admin key.":r==="bad_name"?"Fleet name is too short.":r==="rate_limited"?"Too many signups today — try again tomorrow.":("Something went wrong ("+(r||"error")+")."); }
+
+  function showResult(j){
+    $("form").classList.add("hide"); $("result").classList.remove("hide"); window.scrollTo(0,0);
+    $("rTitle").textContent = j.resort || "Provisioned";
+    $("rSub").textContent = "Live on the free plan · "+_cars+" vehicle"+(_cars===1?"":"s")+" · slug "+j.slug;
+    $("lPortal").textContent=j.portal_url; $("lDash").textContent=j.dashboard_url;
+    SEGS.forEach(function(seg){
+      var box=$("qr-"+seg); box.innerHTML="";
+      new QRCode(box, {text:j.guest_urls[seg], width:150, height:150, correctLevel:QRCode.CorrectLevel.M});
+    });
+    var monthly=_cars*5;
+    $("pAmt").innerHTML="$"+monthly.toLocaleString()+"<small> /mo</small>";
+    $("pMth").innerHTML=_cars+" vehicle"+(_cars===1?"":"s")+" &times; $5 &middot; emailed invoice to "+_email;
+    $("tStore").href="https://oceansafety.app/p/"+j.slug+"?mode=shop";
+    $("tPortal").href=j.portal_url; $("tDash").href=j.dashboard_url;
+  }
+
+  $("startBill").onclick=function(){
+    var b=$("startBill"), m=$("billMsg"); b.disabled=true; b.textContent="Starting…"; m.textContent="";
+    fetch("/api/car-upgrade",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin:_admin,slug:DATA.slug,key:DATA.key,name:DATA.resort,email:_email,cars:_cars})})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(j.ok){
+          b.style.display="none"; m.style.color="var(--green-d)";
+          m.innerHTML="&#10003; Billing started &mdash; Square emailed the $"+j.monthly.toLocaleString()+"/mo invoice to "+_email+".";
+          unlockTour();
+        } else {
+          b.disabled=false; b.textContent="Retry"; m.style.color="#c0492b";
+          m.textContent = j.reason==="square_not_configured" ? "Square isn't connected yet — add SQUARE_ACCESS_TOKEN, SQUARE_LOCATION_ID and SQUARE_ENVIRONMENT in Netlify env, then retry." : ("Couldn't start billing ("+(j.reason||"error")+").");
+        }
+      })
+      .catch(function(){ b.disabled=false; b.textContent="Retry"; m.style.color="#c0492b"; m.textContent="Network error — try again."; });
+  };
+
+  function unlockTour(){
+    PAID=true;
+    $("tourLocked").classList.add("hide");
+    $("tourOpen").classList.remove("hide");
+    var p=$("lockPill"); p.textContent="Unlocked"; p.className="lockpill open";
+    $("planH4").textContent="Plan — paid";
+    paint();
+    $("tourOpen").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
+  function key(){ return "os_cartour_"+(DATA?DATA.slug:"x"); }
+  function state(){ try{ return JSON.parse(localStorage.getItem(key())||"[]"); }catch(e){ return []; } }
+  function paint(){
+    var s=state(), n=s.length;
+    document.querySelectorAll(".step").forEach(function(el){
+      el.classList.toggle("done", s.indexOf(+el.dataset.step)>-1);
+    });
+    $("tBar").style.width=(n/5*100)+"%";
+    $("tLab").textContent=n+" of 5 done";
+    $("tDone").style.display = n===5 ? "block" : "none";
+  }
+  document.addEventListener("click", function(e){
+    var c=e.target.closest(".chk");
+    if(c && PAID){
+      var i=+c.dataset.chk, s=state(), at=s.indexOf(i);
+      if(at>-1) s.splice(at,1); else s.push(i);
+      try{ localStorage.setItem(key(), JSON.stringify(s)); }catch(err){}
+      paint();
+    }
+    var b=e.target.closest(".cp");
+    if(b){ var t=$(b.dataset.copy).textContent; navigator.clipboard.writeText(t).then(function(){ var o=b.textContent; b.textContent="Copied ✓"; setTimeout(function(){b.textContent=o;},1200); }); }
+    var d=e.target.closest(".dl");
+    if(d && DATA){ e.preventDefault(); var seg=d.dataset.seg, cv=$("qr-"+seg).querySelector("canvas");
+      if(cv){ var a=document.createElement("a"); a.href=cv.toDataURL("image/png"); a.download="oceansafe-"+DATA.slug+"-"+seg+"-qr.png"; a.click(); } }
+  });
+
+  $("another").onclick=function(){
+    $("result").classList.add("hide"); $("form").classList.remove("hide");
+    $("name").value=""; $("email").value=""; $("cars").value=""; setMsg("","");
+    PAID=false; DATA=null;
+    $("tourLocked").classList.remove("hide"); $("tourOpen").classList.add("hide");
+    var p=$("lockPill"); p.textContent="Paid plan only"; p.className="lockpill locked";
+    $("planH4").textContent="Choose a plan";
+    var b=$("startBill"); b.style.display=""; b.disabled=false; b.textContent="Start paid billing"; $("billMsg").textContent="";
+    window.scrollTo(0,0);
+  };
+})();
+</script>
+</body>
+</html>
