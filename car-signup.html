@@ -281,9 +281,9 @@
     $("rTitle").textContent = j.resort || "Provisioned";
     $("rSub").textContent = "Live on the free plan · "+_cars+" vehicle"+(_cars===1?"":"s")+" · slug "+j.slug;
     // The worker's /ts-signup hands back the TIMESHARE console (rooms, owner sessions,
-    // RCI/II) — wrong surface for a car fleet. Re-point at the rentals console, which
+    // RCI/II) — wrong surface for a car fleet. Re-point at the car-fleet console, which
     // shares the same ?ref&key contract. Portal is shared across segments already.
-    var dash = String(j.dashboard_url||"").replace("/stay-close-operator-dashboard.html", "/rental");
+    var dash = String(j.dashboard_url||"").replace("/stay-close-operator-dashboard.html", "/fleet");
     $("lPortal").textContent=j.portal_url; $("lDash").textContent=dash;
     SEGS.forEach(function(seg){
       var box=$("qr-"+seg); box.innerHTML="";
