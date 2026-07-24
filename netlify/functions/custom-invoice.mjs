@@ -52,17 +52,27 @@ export default async (req) => {
   const dLabel = Number.isInteger(dollars) ? String(dollars) : dollars.toFixed(2);
   const per = cadence === 'monthly' ? '/mo' : ' one-time';
   const name = `OceanSafe — ${business} — $${dLabel}${per}`;
-  const pre = email ? { pre_populated_data: { buyer_email: email } } : {};
 
   if (body.dry) return json({ ok: true, dry: true, business, amount: dollars, cadence, would_charge: name });
 
+  // buyer_email is a best-effort checkout prefill: attach only if it looks valid, and
+  // if Square still rejects it, retry once without it — a bad email (it's optional) must
+  // never block link creation.
+  const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  const createLink = async (base) => {
+    const b = { ...base, idempotency_key: `ci_${uniq()}` };
+    if (emailOk) b.pre_populated_data = { buyer_email: email };
+    let r = await sq('/v2/online-checkout/payment-links', b);
+    if (!r.ok && b.pre_populated_data && JSON.stringify(r.out?.errors || '').includes('buyer_email')) {
+      delete b.pre_populated_data; b.idempotency_key = `ci_${uniq()}`;
+      r = await sq('/v2/online-checkout/payment-links', b);
+    }
+    return r;
+  };
+
   // ONE-TIME: quick_pay carries the amount directly.
   if (cadence === 'once') {
-    const link = await sq('/v2/online-checkout/payment-links', {
-      idempotency_key: `ci_once_${uniq()}`,
-      quick_pay: { name, price_money: { amount: cents, currency: 'USD' }, location_id: LOCATION },
-      ...pre,
-    });
+    const link = await createLink({ quick_pay: { name, price_money: { amount: cents, currency: 'USD' }, location_id: LOCATION } });
     if (!link.ok) return json({ ok: false, reason: 'square_link_failed', detail: link.out?.errors || link.status }, 502);
     return json({ ok: true, url: link.out.payment_link?.url || link.out.payment_link?.long_url, amount: dollars, cadence, business });
   }
@@ -86,12 +96,7 @@ export default async (req) => {
     if (!v.ok) return json({ ok: false, reason: 'square_variation_failed', detail: v.out?.errors || v.status }, 502);
     variationId = v.out.catalog_object.id;
   }
-  const link = await sq('/v2/online-checkout/payment-links', {
-    idempotency_key: `ci_mo_${uniq()}`,
-    quick_pay: { name, price_money: { amount: 0, currency: 'USD' }, location_id: LOCATION },
-    checkout_options: { subscription_plan_id: variationId },
-    ...pre,
-  });
+  const link = await createLink({ quick_pay: { name, price_money: { amount: 0, currency: 'USD' }, location_id: LOCATION }, checkout_options: { subscription_plan_id: variationId } });
   if (!link.ok) return json({ ok: false, reason: 'square_link_failed', detail: link.out?.errors || link.status }, 502);
   return json({ ok: true, url: link.out.payment_link?.url || link.out.payment_link?.long_url, amount: dollars, cadence, business, variation_id: variationId });
 };
