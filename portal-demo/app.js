@@ -7,6 +7,16 @@ const CFG = window.OCEANSAFE_CONFIG;
 const sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_PUBLISHABLE_KEY);
 window.sb = sb;
 
+// ── embedded mode (?embed=1) ─────────────────────────────────────────────────
+// The operator consoles mount this portal inside their Shop tab as an iframe
+// (first: /fleet). The console supplies the sub-tabs and the sign-out, so the
+// portal's own top bar would be duplicate chrome — drop it. Also suppress the
+// first-open tour: the console runs its own, and two spotlight overlays at once
+// is worse than none. The Tour link still replays on demand where it's shown.
+const EMBED = new URLSearchParams(location.search).get("embed") === "1";
+window.OCEANSAFE_EMBED = EMBED;
+if (EMBED) document.documentElement.classList.add("os-embed");
+
 // ── demo mode ────────────────────────────────────────────────────────────────
 // When the Supabase keys are still placeholders, the portal runs off built-in
 // sample data so it's fully viewable locally — no login, no backend.
@@ -290,5 +300,5 @@ function osPortalTour(opts) {
   if (opts.button) opts.button.addEventListener("click", (e) => { e.preventDefault(); start(); });
   let done = null;
   try { done = localStorage.getItem(opts.key); } catch (_) {}
-  if (opts.auto && !done) setTimeout(start, opts.delay || 700);
+  if (opts.auto && !done && !EMBED) setTimeout(start, opts.delay || 700);
 }
