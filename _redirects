@@ -59,3 +59,9 @@
 /hotel      /operator-console.html               200
 /rental     /rentals-operator-dashboard.html     200
 /townad     /townad-demo.html                    200
+
+# ── Turo hosts / car fleets (2026-07-24) — $5 per vehicle per month ──
+/api/car-upgrade   /.netlify/functions/car-upgrade   200
+/onboard-cars      /car-signup.html                  200
+/cars              /car-providers.html               200
+/cars-onepager     /OceanSafe-Cars-OnePager.pdf      200
