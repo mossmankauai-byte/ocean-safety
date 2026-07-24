@@ -5528,10 +5528,11 @@ function _planSlotRow(s,idx){
   var m=PLAN_KMETA[s.kind]||PLAN_KMETA.beach, it=s.ref, name=it.name||it.title||it.n||'';
   var heart=(s.kind==='tour')?'':heartButton(s.kind,it.id);
   var act=(s.kind==='tour')?'<button class="plan-book" onclick="event.stopPropagation();openToursSheet()">See times & book</button>':'';
+  var swap=(s.kind==='tour')?'':'<span class="plan-swap"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h13"/><path d="m17 20 4-4-4-4"/><path d="M21 16H8"/></svg>Swap</span>';
   return '<div class="plan-slot" onclick="planSwap('+idx+')"><div class="plan-when">'+s.when+'</div>'+
     '<div class="plan-card" style="border-left:4px solid '+m.color+'">'+
     '<div class="plan-card-b"><div class="plan-card-name">'+name+' <span class="plan-tag" style="color:'+m.color+'">'+m.label+'</span></div>'+
-    '<div class="plan-card-sub">'+_planSlotSub(s)+'</div>'+act+'</div>'+heart+'</div></div>';
+    '<div class="plan-card-sub">'+_planSlotSub(s)+'</div>'+act+'</div>'+((swap||heart)?'<div class="plan-actions">'+swap+heart+'</div>':'')+'</div></div>';
 }
 function _planWhy(){
   var bits=[], outlook=_planDayOutlook();
@@ -5559,7 +5560,7 @@ function renderPlanDay(){
   var areaChips=PLAN_AREAS.map(function(a){return '<button class="plan-chip'+(a.key===_planArea?' on':'')+'" onclick="planSetArea(\''+a.key+'\')">'+a.label+'</button>';}).join('');
   var vibeChips=PLAN_VIBES.map(function(v){return '<button class="plan-chip'+(v.key===_planVibe?' on':'')+'" onclick="planSetVibe(\''+v.key+'\')">'+v.label+'</button>';}).join('');
   var rows=(_planSlots||[]).map(function(s,idx){return _planSlotRow(s,idx);}).join('');
-  var saveBtn=_planSaved?'<span class="plan-save saved">Saved ✓</span>':'<button class="plan-save" onclick="savePlanDay()">Save this day</button>';
+  var saveBtn=_planSaved?'<span class="plan-save saved">Saved to ♥</span>':'<button class="plan-save" onclick="savePlanDay()">Save this day</button>';
   document.getElementById('sc').innerHTML=
     '<div class="poi-hero" style="background:linear-gradient(135deg,var(--ocean),#1a7a8a);color:#fff"><div><div class="poi-hero-name" style="color:#fff">Plan your day</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">Beaches & local spots, around the forecast</div></div></div>'+
     '<div class="plan-controls"><div class="plan-lbl">Pick your day</div><div class="plan-strip">'+strip+'</div>'+
@@ -5568,7 +5569,7 @@ function renderPlanDay(){
       '</div>'+
     '<div class="plan-why">'+_planWhy()+'</div>'+
     '<div class="plan-day">'+rows+'</div>'+
-    '<div class="plan-foot">'+saveBtn+'<button class="plan-shuffle" onclick="planRandomize()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px"><path d="M16 3h5v5M21 3l-7 7M4 20l6-6M16 21h5v-5M14 14l7 7M4 4l5 5" stroke-linecap="round" stroke-linejoin="round"/></svg> Shuffle</button><span class="plan-note">Tap any item to swap it. Hearts save it.</span></div>'+
+    '<div class="plan-foot">'+saveBtn+'<button class="plan-shuffle" onclick="planRandomize()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px"><path d="M16 3h5v5M21 3l-7 7M4 20l6-6M16 21h5v-5M14 14l7 7M4 4l5 5" stroke-linecap="round" stroke-linejoin="round"/></svg> Shuffle</button><span class="plan-note">Tap <b>Swap</b> on any card to change it — or switch the Area / Type of day above.</span></div>'+
     '<div class="plan-legal">Conditions change fast — always check posted signs and lifeguards before entering the water. A guide, not a safety guarantee.</div>';
   document.getElementById('sc').style.display='';
 }
@@ -5614,6 +5615,11 @@ function planApply(idx,kind,id){
 }
 function savePlanDay(){
   try{ var ids=(_planSlots||[]).map(function(s){return s.kind+':'+(s.ref?s.ref.id:'?');}); localStorage.setItem('kbg_plan_v1', JSON.stringify({day:_planDay,area:_planArea,vibe:_planVibe,tours:_planTours,slots:ids})); }catch(e){}
+  // Heart every spot in the day so the saved places flow into the Save (♥) tab.
+  // Idempotent: only add spots that resolve to a saveable kind and aren't already saved.
+  (_planSlots||[]).forEach(function(s){
+    if(s.ref && s.ref.id && KBG_SAVED_KIND_META[s.kind] && !isSaved(s.kind,s.ref.id)) toggleSaved(s.kind,s.ref.id);
+  });
   _planSaved=true; renderPlanDay();
 }
 
@@ -5648,10 +5654,13 @@ function injectPlanCss(){
     '.plan-when{flex:0 0 62px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding-top:14px;font-weight:700}'+
     '.plan-card{flex:1;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:11px;padding:11px 12px;cursor:pointer}'+
     '.plan-card-b{flex:1;min-width:0}'+
+    '.plan-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}'+
+    '.plan-card .kbg-heart{position:static;top:auto;right:auto;flex:none}'+
     '.plan-card-name{font-size:14px;font-weight:700;color:var(--ink);line-height:1.25}'+
     '.plan-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-left:5px}'+
     '.plan-card-sub{font-size:11.5px;color:var(--mute);margin-top:2px}'+
     '.plan-book{margin-top:7px;font-size:11.5px;font-weight:600;color:var(--ocean);background:#fff;border:1px solid var(--ocean);border-radius:999px;padding:5px 11px}'+
+    '.plan-swap{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;letter-spacing:.02em;color:var(--ocean);background:rgba(15,76,92,.06);border:1px solid rgba(15,76,92,.16);border-radius:999px;padding:3px 8px;white-space:nowrap;flex:none}'+
     '.plan-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px 4px}'+
     '.plan-save{font-size:13px;font-weight:600;color:#fff;background:var(--ocean);border-radius:10px;padding:9px 15px}'+
     '.plan-shuffle{font-size:13px;font-weight:600;color:var(--ocean);background:#fff;border:1px solid var(--ocean);border-radius:10px;padding:8px 14px;display:inline-flex;align-items:center;gap:5px}'+
@@ -9052,7 +9061,7 @@ const IC_PIN = OS_IC('<path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l
 const IC_TRASH = OS_IC('<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>');
 
 const OS_VERDICT_COL = {green:'#16a34a', yellow:'#d97706', red:'#b91c1c', warning:'#b91c1c'};
-const KIND_LABEL = {beach:'Beaches', hike:'Trails', act:'Family', food:'Food', grocery:'Grocery', gas:'Gas', craft:'Crafts', market:'Markets', drink:'Drinks'};
+const KIND_LABEL = {beach:'Beaches', hike:'Trails', act:'Family', food:'Food', grocery:'Grocery', gas:'Gas', craft:'Crafts', market:'Markets', drink:'Drinks', walk:'Walks', bike:'Bikes'};
 
 function getSavedCards(){
   cleanOrphanedSaves();
