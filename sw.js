@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v200-2026-07-24-scanner-cta';
+const CACHE_VERSION = 'v201-2026-07-24-portal-fresh';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -159,6 +159,21 @@ if (workbox) {
     ({ url }) => url.origin === self.location.origin && /^\/(jade[a-z-]*|sales|hotel-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|analytics-console)\.html$/.test(url.pathname),
     new workbox.strategies.NetworkFirst({
       cacheName: "jade-pages",
+      networkTimeoutSeconds: 4,
+      plugins: [ new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }) ]
+    })
+  );
+
+  // ---- Seller portal (/portal/ + /portal-demo/): always fresh ----
+  // Same reasoning as the sales tools above. The portal is what a shop owner runs
+  // their store from and what Jade demos to a prospect, so a stale app.js means
+  // wrong prices, wrong plan gating, or wrong payout percentages on screen. The
+  // app-shell StaleWhileRevalidate below would otherwise serve the previous build
+  // on the first visit after every deploy.
+  workbox.routing.registerRoute(
+    ({ url }) => url.origin === self.location.origin && /^\/portal(-demo)?\//.test(url.pathname),
+    new workbox.strategies.NetworkFirst({
+      cacheName: "portal-pages",
       networkTimeoutSeconds: 4,
       plugins: [ new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }) ]
     })
