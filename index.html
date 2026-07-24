@@ -3696,6 +3696,7 @@ const FEED_CAL = {
   // arrives as _px.q ⇒ window._streamQ (NO client USGS fetch — owner instruction).
   brown: {
     usgsEnabled: true, // LIVE: USGS NWIS daily-max routed THROUGH the /api/wx proxy → window._streamQ
+    rain72_mm: 10,     // 72h antecedent rainfall (mm, ~0.4in) — additive OR-leg in bw(); real-gauge calibrated 2026-07-24 (72h beats current-hr 2-4x)
     Q: { 'North Shore': { sites: ['16103000','16108000'], site: '16103000', cfs: 1000 }, 'East Side': { site: '16060000', cfs: 800 } }
   }
 };
@@ -3800,7 +3801,7 @@ function rip(b,c){return cl((C.rip[b.morph]||.7)*Math.min(1.5,(c.per||10)/12)*(c
 // OR'd with the region's USGS upland-discharge leg (c.streamQ, set in getCond for TODAY only). UNION
 // can only ADD a fire ⇒ no beach's brown-water sensitivity is ever lowered. The USGS feed is LIVE
 // (usgsEnabled:true); on a USGS/proxy outage c.streamQ is null so the airport leg governs alone.
-function bw(b,c){return b.stream && ( c.rain>=(b.rain_mm||30) || (c.streamQ!=null && c.streamQ>=(FEED_CAL.brown.Q[b.r]?.cfs ?? Infinity)) )}
+function bw(b,c){return b.stream && ( c.rain>=(b.rain_mm||30) || (c.streamQ!=null && c.streamQ>=(FEED_CAL.brown.Q[b.r]?.cfs ?? Infinity)) || (typeof c.rain72==='number' && c.rain72>=(FEED_CAL.brown.rain72_mm ?? 10)) )}
 function crowd(d,h){const we=d===0||d===6,am=h<10;const k=!we&&am?1:!we?.8:am?.7:h<13?.5:.6;return k}
 function gate(b,c){
   // Hard fail-safe: if live surf is unknown (fetch failure / null marine payload), no
@@ -4403,6 +4404,15 @@ async function fetchLive(){
         LIVE.rain_now_mm = nowMm;
         // Retain the next-12h hourly precip (mm) + times for the WHEN intensity strip.
         LIVE.rain_hourly = { mm: hp.slice(bestIdx, maxLookahead).map(x => (typeof x === 'number' ? x : 0)), t: ht.slice(bestIdx, maxLookahead) };
+        // 72h ANTECEDENT rainfall (mm) for the runoff/brown-water OR-leg in bw(). Needs wx.mjs
+        // past_days=3 so hourly[] carries the prior 72h. Sum the 72 hourly values up to and
+        // including the current hour. FAIL-SAFE: an old cached proxy without past_days leaves
+        // bestIdx < 71 (today-only hourly) ⇒ LIVE.rain72 stays undefined ⇒ bw() adds no fire.
+        if(bestIdx >= 71){
+          let s72 = 0;
+          for(let i = bestIdx - 71; i <= bestIdx; i++){ s72 += (typeof hp[i] === 'number' ? hp[i] : 0); }
+          LIVE.rain72 = Math.round(s72 * 10) / 10;
+        }
       }
     } else {
       LIVE.precip_chance = SNAP.precip_chance;
@@ -4506,7 +4516,7 @@ async function getCond(b){
     oc:oc(D.wind,D.wd,b),
     tide:D.tide, per:D.period, tt:D.tt, sd:D.swell_dir,
     wind:D.wind, wd:D.wd, cloud:D.cloud, uv:uvDay,
-    rain:D.rain, rating:0,
+    rain:D.rain, rain72:D.rain72, rating:0,
     golden, dow:new Date().getDay(), mo:new Date().getMonth(), h
   };
   c.surf_unknown = surfUnknown;

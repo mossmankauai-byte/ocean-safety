@@ -89,7 +89,7 @@ export default async (req) => {
   if (!Number.isFinite(lon) || lon < isl.lonMin || lon > isl.lonMax) lon = isl.dLon;
   lat = +lat.toFixed(2); lon = +lon.toFixed(2);
 
-  const fUrl = `${OM}?latitude=${lat}&longitude=${lon}&current=${LIVE_CUR}&hourly=${LIVE_HRLY}&daily=${LIVE_DAILY}&wind_speed_unit=mph&temperature_unit=fahrenheit&timezone=${TZ}`;
+  const fUrl = `${OM}?latitude=${lat}&longitude=${lon}&current=${LIVE_CUR}&hourly=${LIVE_HRLY}&daily=${LIVE_DAILY}&past_days=3&wind_speed_unit=mph&temperature_unit=fahrenheit&timezone=${TZ}`;
   const sUrl = `${MARINE}?latitude=${lat}&longitude=${lon}&current=${MAR_CUR}&daily=${MAR_DAILY}&models=best_match&length_unit=imperial&timezone=${TZ}`;
   // USGS gauges are per-island (or absent). Sites come from the in-code map -> SSRF-safe.
   const sites = isl.usgs ? Object.values(isl.usgs).flat() : null;
