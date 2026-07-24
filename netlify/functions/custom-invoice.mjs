@@ -21,7 +21,6 @@ const env = (k) => (globalThis.Netlify?.env?.get?.(k)) ?? process.env[k];
 
 const HEADERS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
 const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: HEADERS });
-const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32) || 'deal';
 
 export default async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: HEADERS });
@@ -43,6 +42,7 @@ export default async (req) => {
   const BASE = env('SQUARE_ENVIRONMENT') === 'production' ? 'https://connect.squareup.com' : 'https://connect.squareupsandbox.com';
   if (!TOKEN || !LOCATION) return json({ ok: false, reason: 'square_not_configured', hint: 'Set SQUARE_ACCESS_TOKEN + SQUARE_LOCATION_ID + SQUARE_ENVIRONMENT in Netlify env vars.' }, 503);
 
+  const uniq = () => `${Date.now()}${Math.round(Math.random() * 1e9)}`; // fresh key per link — avoids IDEMPOTENCY_KEY_REUSED when the same business/amount is re-sent with a tweaked body
   const sq = async (path, b, method = 'POST') => {
     const r = await fetch(`${BASE}${path}`, { method, headers: { Authorization: `Bearer ${TOKEN}`, 'Square-Version': '2025-01-23', 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : undefined });
     const out = await r.json().catch(() => null);
@@ -59,7 +59,7 @@ export default async (req) => {
   // ONE-TIME: quick_pay carries the amount directly.
   if (cadence === 'once') {
     const link = await sq('/v2/online-checkout/payment-links', {
-      idempotency_key: `ci_once_${cents}_${slug(business)}`,
+      idempotency_key: `ci_once_${uniq()}`,
       quick_pay: { name, price_money: { amount: cents, currency: 'USD' }, location_id: LOCATION },
       ...pre,
     });
@@ -87,7 +87,7 @@ export default async (req) => {
     variationId = v.out.catalog_object.id;
   }
   const link = await sq('/v2/online-checkout/payment-links', {
-    idempotency_key: `ci_mo_${cents}_${slug(business)}`,
+    idempotency_key: `ci_mo_${uniq()}`,
     quick_pay: { name, price_money: { amount: 0, currency: 'USD' }, location_id: LOCATION },
     checkout_options: { subscription_plan_id: variationId },
     ...pre,
