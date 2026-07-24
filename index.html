@@ -11917,8 +11917,8 @@ if('serviceWorker' in navigator){
   var LAB={avoid:"Avoid",caution:"Caution",safer:"Reef-safer"};
   var camIcon='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
   var infoIcon='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01" stroke-linecap="round"/></svg>';
-  var stream=null,scanning=false,detector=null,raf=null;
-  var hasBD=('BarcodeDetector' in window), hasCam=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
+  var scanning=false, zxReader=null, zxLoading=null;
+  var hasCam=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
   function $(id){return document.getElementById(id);}
   function verdict(text){
     var t=" "+String(text).toLowerCase()+" ", f=function(l){return l.filter(function(k){return t.indexOf(k)>=0;});}, h;
@@ -11936,25 +11936,43 @@ if('serviceWorker' in navigator){
     $('rsResult').innerHTML='<div class="rs-verdict '+cls+'"><div class="rs-vtop"><span class="rs-dot"></span><span class="rs-vlabel">'+LAB[res.v]+'</span>'+(name?'<span class="rs-vname">'+name+'</span>':'')+'</div><p class="rs-vbody">'+MEAN[res.v]+'</p>'+(tags?'<div class="rs-tags">'+tags+'</div>':'')+(res.why?'<p class="rs-muted" style="margin:7px 0 0">Flagged on: '+res.why+'</p>':'')+swap(res.v)+'<p class="rs-muted" style="margin:8px 0 0">'+(note||'Verify the current label before relying on it.')+'</p></div>';
   }
   function note(msg){ if($('rsResult'))$('rsResult').innerHTML='<div class="rs-note2">'+infoIcon+'<div>'+msg+'</div></div>'; }
+  // Barcode decode uses ZXing (works in iOS Safari, which lacks BarcodeDetector). Lazy-loaded on first tap.
+  function loadZX(){
+    if(window.ZXing&&window.ZXing.BrowserMultiFormatReader) return Promise.resolve();
+    if(zxLoading) return zxLoading;
+    zxLoading=new Promise(function(res,rej){
+      var s=document.createElement('script'); s.src='/vendor/zxing.min.js';
+      s.onload=function(){ res(); }; s.onerror=function(){ zxLoading=null; rej(new Error('load')); };
+      document.head.appendChild(s);
+    });
+    return zxLoading;
+  }
   window.rsStopScan=function(){
-    scanning=false; if(raf)cancelAnimationFrame(raf);
-    if(stream){ try{stream.getTracks().forEach(function(t){t.stop();});}catch(e){} stream=null; }
+    scanning=false;
+    try{ if(zxReader) zxReader.reset(); }catch(e){}
+    var v=$('rsVid'); if(v){ try{ if(v.srcObject){ v.srcObject.getTracks().forEach(function(t){t.stop();}); } }catch(e){} v.srcObject=null; }
     var cam=$('rsCam'); if(cam)cam.classList.remove('live');
     var lbl=$('rsCamlbl'); if(lbl)lbl.textContent='◎ Tap “Scan a barcode” to start';
     var btn=$('rsScanBtn'); if(btn)btn.innerHTML=camIcon+'Scan a barcode';
   };
   window.rsToggleScan=function(){
     if(scanning){ rsStopScan(); return; }
-    var cam=$('rsCam'), vid=$('rsVid');
-    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}}).then(function(s){ stream=s; vid.srcObject=s; return vid.play(); }).then(function(){
-      detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128']});
-      scanning=true; cam.classList.add('live'); $('rsCamlbl').textContent='◎ Point at the barcode'; $('rsScanBtn').innerHTML=camIcon+'Stop'; loop();
-    }).catch(function(){ if($('rsCamlbl'))$('rsCamlbl').textContent='Camera blocked — allow access, or type the barcode below'; });
+    var cam=$('rsCam'), lbl=$('rsCamlbl'), btn=$('rsScanBtn');
+    if(lbl)lbl.textContent='◎ Starting camera…';
+    loadZX().then(function(){
+      if(!zxReader){
+        var hints=new Map();
+        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E, ZXing.BarcodeFormat.CODE_128]);
+        zxReader=new ZXing.BrowserMultiFormatReader(hints);
+      }
+      scanning=true; if(cam)cam.classList.add('live'); if(btn)btn.innerHTML=camIcon+'Stop';
+      return zxReader.decodeFromConstraints({video:{facingMode:{ideal:'environment'}}}, 'rsVid', function(result){
+        if(result&&scanning){ var raw=result.getText?result.getText():String(result); rsStopScan(); window.rsLookup(raw); }
+      });
+    }).then(function(){ if(scanning&&lbl)lbl.textContent='◎ Point at the barcode — hold steady'; })
+    .catch(function(e){ scanning=false; if(cam)cam.classList.remove('live'); if(btn)btn.innerHTML=camIcon+'Scan a barcode'; if(lbl)lbl.textContent=(e&&e.message==='load')?'Couldn’t load the scanner — type the barcode below':'Camera blocked — allow access, or type the barcode below'; });
   };
-  function loop(){
-    if(!scanning)return;
-    detector.detect($('rsVid')).then(function(codes){ if(codes&&codes.length){ var raw=codes[0].rawValue; rsStopScan(); window.rsLookup(raw); return; } raf=requestAnimationFrame(loop); }).catch(function(){ raf=requestAnimationFrame(loop); });
-  }
   window.rsLookup=function(code){
     code=String(code||'').replace(/\D/g,'');
     if(code.length<6){ note('Enter a full barcode number — the 12–13 digits under the bars.'); return; }
@@ -11974,8 +11992,8 @@ if('serviceWorker' in navigator){
   };
   window.rsSheetHtml=function(b){
     try{ if(window.rsStopScan) rsStopScan(); }catch(e){}
-    var hint=(hasBD&&hasCam)?'Live scan reads the UPC/EAN barcode, then pulls ingredients from <b>Open Beauty Facts</b> (needs a connection). The camera image stays on your phone — only the number is looked up.':(hasCam?'This browser can’t read barcodes live yet (e.g. iPhone Safari) — <b>type the barcode number</b>, or paste the ingredients. Live scan works in Chrome / Android.':'Type the barcode number, or paste the ingredients below.');
-    var scanBtn=(hasBD&&hasCam)?'<button class="rs-btn" id="rsScanBtn" onclick="rsToggleScan()">'+camIcon+'Scan a barcode</button>':'';
+    var hint=hasCam?'Point the camera at the barcode &mdash; OceanSafe looks the product up on <b>Open Beauty Facts</b> (needs a connection). The camera image stays on your phone; only the number is looked up.':'Type the barcode number, or paste the ingredients below.';
+    var scanBtn=hasCam?'<button class="rs-btn" id="rsScanBtn" onclick="rsToggleScan()">'+camIcon+'Scan a barcode</button>':'';
     return '<div class="rs-wrap"><details class="cond-fold rs-fold"><summary class="cond-fold-sum"><svg class="cf-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg><span class="rs-head"><img class="rs-logo" src="icons/favicon-32.png" alt="OceanSafe">Reef-safe sunscreen check</span></summary><div class="rs-body"><p class="rs-lead">Scan or type a sunscreen barcode and OceanSafe reads the <b>active ingredients</b> — not the marketing — for Hawaiʻi’s reef (Act 104 bans oxybenzone &amp; octinoxate).</p><div class="rs-cam" id="rsCam"><video id="rsVid" playsinline muted></video><div class="rs-frame"></div><span class="rs-lbl" id="rsCamlbl">◎ Tap “Scan a barcode” to start</span></div>'+scanBtn+'<div class="rs-bcrow"><input id="rsBcode" inputmode="numeric" placeholder="…or type the barcode number" onkeydown="if(event.key===\'Enter\')rsLookup(this.value)"><button class="rs-btn ghost" onclick="rsLookup(document.getElementById(\'rsBcode\').value)">Look up</button></div><p class="rs-hint">'+hint+'</p><div id="rsResult"></div><div class="rs-bcrow" style="margin-top:10px"><input id="rsPaste" placeholder="…or paste the Active Ingredients" onkeydown="if(event.key===\'Enter\')rsReadPaste()"><button class="rs-btn ghost" onclick="rsReadPaste()">Read</button></div><div class="rs-note2">'+infoIcon+'<div><b>“Reef-safe” on a label is unregulated</b> — a bottle can say reef-friendly and still flag Caution. Formulations change, so confirm the current label.</div></div></div></details></div>';
   };
 })();
