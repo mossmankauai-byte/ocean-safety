@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="/assets/oceansafe-favicon.png">
+<link rel="apple-touch-icon" href="/assets/oceansafe-favicon.png">
+<title>OceanSafe for Turo hosts &amp; car fleets</title>
+<style>
+  :root{--ocean:#0f4c5c;--aqua:#0a8ba8;--gold:#c9a84c;--ink:#16202a;--mute:#5d6a76;--line:#e2e8ed;--sand:#faf7f0}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#e9edf0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;color:var(--ink);
+       -webkit-font-smoothing:antialiased;line-height:1.5;padding:24px 14px}
+  .page{width:8.5in;max-width:100%;min-height:11in;margin:0 auto;background:#fff;padding:0.5in 0.55in 0.36in;
+        box-shadow:0 6px 30px rgba(16,32,42,.16);display:flex;flex-direction:column}
+  /* on-screen at narrow widths the letter sheet would force a sideways scroll — let it reflow instead */
+  @media screen and (max-width:8.9in){ .page{min-height:0;padding:22px 20px 20px} body{padding:14px 10px} }
+
+  /* masthead */
+  .mast{display:flex;align-items:center;justify-content:space-between;gap:14px;
+        border-bottom:2.5px solid var(--ocean);padding-bottom:9px}
+  .wm{display:flex;align-items:center;gap:8px;font-weight:800;font-size:19px;letter-spacing:-.3px}
+  .wm .c{color:var(--aqua)}
+  .wave{width:22px;height:22px;flex:none}
+  .kick{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;
+        background:var(--ocean);border-radius:999px;padding:5px 12px}
+
+  h1{font-size:26px;line-height:1.16;letter-spacing:-.5px;margin:13px 0 7px;max-width:6.4in}
+  .lede{font-size:13.5px;color:#3d4a55;max-width:6.6in}
+  .lede b{color:var(--ink)}
+
+  h2{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute);
+     font-weight:800;margin-bottom:9px}
+
+  .why{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:15px}
+  .w{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--sand)}
+  .w .ic{width:19px;height:19px;color:var(--aqua);margin-bottom:6px}
+  .w b{display:block;font-size:12.5px;margin-bottom:3px;line-height:1.3}
+  .w p{font-size:11.5px;color:var(--mute);line-height:1.45}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:9px}
+  .pl{border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+  .pl.free{background:#f4f8f4;border-color:#cfe0cd}
+  .pl.paid{background:#fffaee;border:1.8px solid var(--gold)}
+  .pl .tag{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .pl.free .tag{color:#4c7345} .pl.paid .tag{color:#a8862f}
+  .pl .amt{font-size:23px;font-weight:800;letter-spacing:-.5px;margin:2px 0 1px}
+  .pl .amt small{font-size:11.5px;font-weight:600;color:var(--mute);letter-spacing:0}
+  .pl .cap{font-size:11px;color:var(--mute);margin-bottom:7px}
+  .pl ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+  .pl li{font-size:11.5px;line-height:1.4;display:flex;gap:6px;align-items:flex-start;color:#3d4a55}
+  .pl li i{font-style:normal;font-weight:800;flex:none;font-size:11px;line-height:1.5}
+  .pl li.y i{color:#5c8a52} .pl li.n i{color:#b9a883} .pl li.n{color:#7d8791}
+
+  .scale{margin-top:9px;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  th,td{font-size:11.5px;padding:6px 12px;text-align:left}
+  th{background:#f2f6f8;color:var(--mute);font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;font-weight:800}
+  td{border-top:1px solid #eef2f5}
+  td.n{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ocean)}
+  tr.hl td{background:#fffaee}
+
+  .honest{margin-top:9px;background:#fcfaf3;border:1px solid #efe4c4;border-left:3.5px solid var(--gold);
+          border-radius:0 9px 9px 0;padding:10px 12px}
+  .honest b{font-size:11.5px}
+  .honest p{font-size:11.5px;color:#6b6045;margin-top:3px;line-height:1.5}
+
+  .cta{margin-top:auto;padding-top:11px;border-top:1px solid var(--line);
+       display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+  .cta .l b{display:block;font-size:14.5px;margin-bottom:2px}
+  .cta .l p{font-size:11.5px;color:var(--mute)}
+  .cta .r{text-align:right;flex:none}
+  .cta .r .ph{font-size:16px;font-weight:800;color:var(--ocean);letter-spacing:-.3px}
+  .cta .r .em{font-size:11.5px;color:var(--mute);margin-top:1px}
+  .foot{font-size:9.5px;color:#95a1ab;text-align:center;margin-top:9px}
+
+  @media print{
+    html,body{background:#fff}
+    body{padding:0}
+    .page{width:auto;min-height:auto;box-shadow:none;padding:0.4in 0.5in}
+    @page{size:letter;margin:0}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="mast">
+    <div class="wm">
+      <svg class="wave" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2.4" stroke-linecap="round">
+        <path d="M2 8.5c2.2 0 2.2 2 4.4 2s2.2-2 4.4-2 2.2 2 4.4 2 2.2-2 4.4-2M2 14.5c2.2 0 2.2 2 4.4 2s2.2-2 4.4-2 2.2 2 4.4 2 2.2-2 4.4-2"/>
+      </svg>
+      <span>Ocean<span class="c">Safe</span></span>
+    </div>
+    <span class="kick">For Turo hosts &amp; car fleets</span>
+  </div>
+
+  <h1>Your renter has your car before they have anything else.</h1>
+  <p class="lede">They booked weeks ago and nobody has told them a thing about the water. You are the first
+  local business they deal with, and the only one whose product has a trunk. <b>A code on your booking
+  confirmation puts live ocean conditions, the beach guide, and your own storefront in their hand while
+  they are still deciding where to go first.</b></p>
+
+  <div class="why">
+    <div class="w">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 22v-6M4.9 4.9l4.2 4.2M19.1 19.1l-4.2-4.2M2 12h6M22 12h-6M4.9 19.1l4.2-4.2M19.1 4.9l-4.2 4.2"/></svg>
+      <b>Nobody briefs a Turo renter</b>
+      <p>A hotel guest gets a front desk. Your renter gets keys in a parking lot and a beach they have never
+      seen. The guide fills a gap that genuinely exists.</p>
+    </div>
+    <div class="w">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l1.6-4.3A2 2 0 018.5 5.4h7a2 2 0 011.9 1.3L19 11"/><path d="M4 11h16a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4a1 1 0 011-1z"/><circle cx="7" cy="14" r="1"/><circle cx="17" cy="14" r="1"/></svg>
+      <b>The car is the trunk</b>
+      <p>Gear sells to a driver because they can actually carry it. A cooler and two chairs are an easy yes
+      when the car is right there. A walk-up guest says no.</p>
+    </div>
+    <div class="w">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 1.9"/></svg>
+      <b>You reach them first</b>
+      <p>The confirmation lands days or weeks before arrival — well before any concierge desk gets a word in.
+      That window currently earns you nothing.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:17px">
+    <h2>What it costs</h2>
+    <div class="split">
+      <div class="pl free">
+        <div class="tag">Free</div>
+        <div class="amt">$0<small> forever</small></div>
+        <div class="cap">Nothing to sign, nothing to cancel</div>
+        <ul>
+          <li class="y"><i>&#10003;</i>Live conditions + beach guide in every car</li>
+          <li class="y"><i>&#10003;</i>Tour bookings, split <b>50/50</b></li>
+          <li class="y"><i>&#10003;</i>Scan and booking counts</li>
+          <li class="n"><i>&#10007;</i>No storefront</li>
+        </ul>
+      </div>
+      <div class="pl paid">
+        <div class="tag">Paid</div>
+        <div class="amt">$5<small> per vehicle / month</small></div>
+        <div class="cap">Cancel any month, billed by invoice</div>
+        <ul>
+          <li class="y"><i>&#10003;</i>Everything in Free</li>
+          <li class="y"><i>&#10003;</i><b>Your storefront</b> — your gear, your prices</li>
+          <li class="y"><i>&#10003;</i>You are the merchant of record</li>
+          <li class="y"><i>&#10003;</i>Full dashboard and guest insights</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="scale">
+    <table>
+      <tr><th>Fleet size</th><th>Paid plan</th><th>What that is per car, per day</th></tr>
+      <tr><td>5 vehicles</td><td class="n">$25 / mo</td><td>17&cent;</td></tr>
+      <tr><td>20 vehicles</td><td class="n">$100 / mo</td><td>17&cent;</td></tr>
+      <tr class="hl"><td>75 vehicles</td><td class="n">$375 / mo</td><td>17&cent;</td></tr>
+      <tr><td>200 vehicles</td><td class="n">$1,000 / mo</td><td>17&cent;</td></tr>
+    </table>
+  </div>
+
+  <div class="honest">
+    <b>How the money actually moves</b>
+    <p>You are the merchant of record. Store sales settle into your own Square account, in your name, on your
+    books — we never run a sale on your register and never hold your money. The safety guide itself is free to
+    the guest and always will be, so the scan is worth something even to a renter who buys nothing.</p>
+  </div>
+
+  <div class="cta">
+    <div class="l">
+      <b>Want to see it with your fleet's name on it?</b>
+      <p>We'll build a demo storefront with your gear list and send you the codes. No cost, no commitment.</p>
+    </div>
+    <div class="r">
+      <div class="ph">(808) 975-2054</div>
+      <div class="em">oceansafety.app/join</div>
+    </div>
+  </div>
+
+  <p class="foot">OceanSafe — Tropical Agronomics LLC · Kaua&#699;i, Hawai&#699;i · Pricing current as of July 2026</p>
+
+</div>
+</body>
+</html>
