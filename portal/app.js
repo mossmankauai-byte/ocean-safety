@@ -13,26 +13,85 @@ window.sb = sb;
 const DEMO = /YOUR-PROJECT|REPLACE_ME|^$/.test(CFG.SUPABASE_URL || "") || /REPLACE_ME|^$/.test(CFG.SUPABASE_PUBLISHABLE_KEY || "");
 window.OCEANSAFE_DEMO = DEMO;
 const DEMO_PARTNER = { id: "demo", name: "Your Shop (demo)", slug: "your-shop", store_mode: "storefront",
-  status: "live", stripe_charges_enabled: true, stripe_payouts_enabled: true, stripe_onboarded_at: "2026-06-01", platform_fee_bps: 670, amazon_tag: "oceansafety-20", fulfillment_mode: "both" };
+  status: "live", stripe_charges_enabled: true, stripe_payouts_enabled: true, stripe_onboarded_at: "2026-06-01", platform_fee_bps: 1270, amazon_tag: "oceansafety-20", fulfillment_mode: "both" };
+
+// ── plan gate: Free vs Paid ──────────────────────────────────────────────────
+// Canonical concierge/3rd-party model: Free = $0/mo, OceanSafe takes 12.7% of
+// store sales (shop keeps 87.3%) + 50/50 on tour commissions. Paid = $829/mo,
+// shop keeps 100% of both AND unlocks visitor analytics + promotions.
+// So analytics and promotions are PAID-ONLY — on Free they render locked, never
+// as data. Demo/sales calls can flip with ?plan=paid to show a prospect both.
+const PLAN_PAID_PRICE = "$829/mo";
+window.OCEANSAFE_PLAN = (function () {
+  const q = new URLSearchParams(location.search).get("plan");
+  if (q === "paid" || q === "free") { try { localStorage.setItem("os_portal_plan", q); } catch (e) {} return q; }
+  try { return localStorage.getItem("os_portal_plan") || "free"; } catch (e) { return "free"; }
+})();
+window.isPaid = function () { return window.OCEANSAFE_PLAN === "paid"; };
+// Store take: Free 12.7% (payout 87.3%) · Paid 0% (payout 100%).
+window.payoutRate = function () { return window.isPaid() ? 1 : 0.873; };
+window.payoutPct  = function () { return window.isPaid() ? "100%" : "87.3%"; };
+window.feePct     = function () { return window.isPaid() ? "0%" : "12.7%"; };
+// Renders in place of a Paid-only panel when the shop is on Free.
+window.lockedPanel = function (what, why) {
+  return `<div class="lockwrap">
+    <div class="lockico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+    <div class="lockt">${what} — part of the Paid plan</div>
+    <div class="locks">${why} Your storefront, orders, inventory and payouts stay free — this is the part that comes with the ${PLAN_PAID_PRICE} plan.</div>
+    <a class="btn primary" href="mailto:nick@oceansafety.app?subject=Upgrade%20to%20Paid%20—%20OceanSafe">Upgrade to Paid — ${PLAN_PAID_PRICE} ↗</a>
+    <div class="lockn">On Paid you also keep <b>100%</b> of store sales and <b>100%</b> of tour commissions instead of 87.3% / 50%.</div>
+  </div>`;
+};
+// One-line "this is sample data" badge — only ever shown in demo mode.
+window.sampleBadge = function (extra) {
+  return window.OCEANSAFE_DEMO ? `<span class="samp" title="Demo figures — not a real shop">SAMPLE${extra ? " · " + extra : ""}</span>` : "";
+};
+// ── the one sample catalog ───────────────────────────────────────────────────
+// Single source of truth for demo prices. These match the guest app's storefront
+// (index.html shop sheet) item-for-item, so a prospect never sees the same product
+// at two different prices across the app, the portal and the product preview.
+window.DEMO_CATALOG = [
+  // stock/active mirror the inventory tables on dashboard.html + inventory.html,
+  // so "4 items tracked · 1 to reorder · 1 sold out" is true of this same list.
+  { id: "demo-p1", sku: "SPF50-8OZ",   title: "Reef-safe SPF 50",         price_cents: 2200, stock: 4,    active: true },
+  { id: "demo-p2", sku: "SNK-SET",     title: "Snorkel set — day rental", price_cents: 4500, stock: 9,    active: true },
+  { id: "demo-p3", sku: "RG-UPF50-M",  title: "UPF 50+ rash guard",       price_cents: 3200, stock: 0,    active: true },
+  { id: "demo-p4", sku: "WS-10",       title: "Water shoes",              price_cents: 3000, stock: 22,   active: true },
+  { id: "demo-p5", sku: "DRY-20L",     title: "Dry bag — 20L",            price_cents: 2800, stock: null, active: true },
+];
 window.demoData = function () {
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  const pat = [2200,0,1800,4900,2200,0,0,6600,2200,1800,0,4900,2200,8800,0,2200,1800,4900,6600,2200,0,11000,2200,4900,1800,8800,2200,6600,4900,13200];
-  const titles = ["Reef-safe SPF 50", "Snorkel set — day rental", "UPF 50+ rash guard", "Water shoes"];
+  const cat = window.DEMO_CATALOG;
+  // Orders per day across the last 30 — a real beach shop does several a day, and
+  // weekends run hot. Deterministic so the demo reads the same on every load.
+  const perDay = [3,3,4,5,6,4,3, 4,3,5,6,7,4,3, 4,4,5,7,8,5,3, 4,5,6,7,9,5,4, 6,5];
+  // Each order takes 1–3 items off the catalog; the basket pattern keeps the mix
+  // realistic (sunscreen attaches to almost everything) and the totals honest —
+  // an order's total is the sum of its lines, never an invented number.
+  const baskets = [[0],[1],[0,2],[1,0],[2,4],[0,1,4],[3],[1,4],[0,3],[2,0,4],[1,2],[4,0]];
   // A mix of fulfillment + status so the orders/fulfillment UI shows its full range.
-  const fulfills = ["pickup", "pickup", "ship", "pickup", "ship"];
-  const statuses = ["paid", "ready", "shipped", "collected", "paid"];
+  const fulfills = ["pickup", "pickup", "ship", "pickup", "pickup", "ship"];
+  const statuses = ["paid", "paid", "collected", "paid", "shipped", "paid", "paid", "ready"];
   const orders = [], items = []; let n = 0;
-  pat.forEach((amt, i) => {
-    if (!amt) return;
+  perDay.forEach((count, i) => {
     const d = new Date(today); d.setDate(d.getDate() - (29 - i));
-    const id = "demo-" + (++n);
-    const fulfillment = fulfills[n % fulfills.length];
-    const status = statuses[n % statuses.length];
-    const o = { id, total_cents: amt, status, fulfillment, created_at: d.toISOString() };
-    if (fulfillment === "pickup") o.pickup_code = ["NALU", "HONU", "REEF", "TIDE", "SURF", "PALM", "WAVE", "SAND"][n % 8];
-    if (fulfillment === "ship" && status === "shipped") o.tracking = "1Z" + String(900000 + n);
-    orders.push(o);
-    items.push({ order_id: id, title: titles[n % titles.length], qty: 1, price_cents: amt });
+    for (let k = 0; k < count; k++) {
+      const id = "demo-" + (++n);
+      const hr = 9 + ((n * 3) % 9); const dd = new Date(d); dd.setHours(hr, (n * 7) % 60, 0, 0);
+      const fulfillment = fulfills[n % fulfills.length];
+      const status = statuses[n % statuses.length];
+      const basket = baskets[n % baskets.length];
+      let total = 0;
+      basket.forEach((ci) => {
+        const p = cat[ci]; const qty = (n + ci) % 5 === 0 ? 2 : 1;
+        total += p.price_cents * qty;
+        items.push({ order_id: id, title: p.title, qty, price_cents: p.price_cents });
+      });
+      const o = { id, total_cents: total, status, fulfillment, created_at: dd.toISOString() };
+      if (fulfillment === "pickup") o.pickup_code = ["NALU", "HONU", "REEF", "TIDE", "SURF", "PALM", "WAVE", "SAND"][n % 8];
+      if (fulfillment === "ship" && status === "shipped") o.tracking = "1Z" + String(900000 + n);
+      orders.push(o);
+    }
   });
   orders.push({ id: "demo-0", total_cents: 3400, status: "pending", fulfillment: "pickup", pickup_code: "LIMU", created_at: today.toISOString() });
   // Rental examples (orders.rental_return_due, 0015) — clearly demo: one due
@@ -50,13 +109,7 @@ window.demoData = function () {
   items.push({ order_id: "demo-r2", title: "Kayak — 3-day rental (demo)", qty: 1, price_cents: 9800 });
   orders.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
   // Inventory: one sold out (0), one unlimited (null), the rest counted.
-  const products = [
-    { id: "demo-p1", title: "Reef-safe SPF 50", price_cents: 2200, stock: 18, active: true },
-    { id: "demo-p2", title: "Snorkel set — day rental", price_cents: 4900, stock: null, active: true },
-    { id: "demo-p3", title: "UPF 50+ rash guard", price_cents: 3800, stock: 3, active: true },
-    { id: "demo-p4", title: "Water shoes", price_cents: 2800, stock: 0, active: false },
-    { id: "demo-p5", title: "Dry bag — 10L", price_cents: 1800, stock: 7, active: true },
-  ];
+  const products = cat.map((p) => ({ ...p }));
   return { orders, items, products };
 };
 

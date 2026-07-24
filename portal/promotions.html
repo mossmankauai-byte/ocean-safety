@@ -95,6 +95,17 @@
     if (!partner) return location.replace("get-started.html");
     el("shopName").textContent = "· " + partner.name;
     el("out").addEventListener("click", (e) => { e.preventDefault(); signOut(); });
+
+    // Promotions are PAID-ONLY. On Free, everything below the header is replaced
+    // by the lock — no upload card, no editor, no list, no guest preview.
+    if (!isPaid()) {
+      el("addBtn").style.display = "none";
+      ["dropCard", "editor", "guestPromoPreview"].forEach((id) => { const n = el(id); if (n) n.style.display = "none"; });
+      el("list").parentElement.innerHTML = lockedPanel("Promotions",
+        "Put a flyer — a sale, a coupon, an event — in front of guests who are already near you, timed to the dates you set.");
+      return;
+    }
+
     el("addBtn").addEventListener("click", () => openEditor(null));
     el("cancel").addEventListener("click", closeEditor);
     el("save").addEventListener("click", save);

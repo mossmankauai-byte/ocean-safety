@@ -28,20 +28,21 @@
   </nav></div>
 
 <div class="wrap">
-  <h1>Sales</h1>
+  <h1>Sales <span id="planChip"></span></h1>
+  <div id="sampBar"></div>
 
   <!-- stat cards -->
   <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:12px">
-    <div class="card"><div class="lbl">Sales this month</div><div class="big" id="mSales">—</div><div class="muted small" id="mCount">0 orders</div></div>
-    <div class="card"><div class="lbl">Your payout (87.3%)</div><div class="big" id="mPayout" style="color:var(--green)">—</div><div class="muted small">after OceanSafe's 12.7% (card processing via your Square, at cost)</div></div>
+    <div class="card"><div class="lbl">Sales this month <span id="sampSales"></span></div><div class="big" id="mSales">—</div><div class="muted small" id="mCount">0 orders</div></div>
+    <div class="card"><div class="lbl">Your payout <span id="payoutPctLbl">(87.3%)</span></div><div class="big" id="mPayout" style="color:var(--green)">—</div><div class="muted small" id="payoutNote">after OceanSafe's 12.7% (card processing via your Square, at cost)</div></div>
     <div class="card"><div class="lbl">Avg order</div><div class="big" id="mAvg">—</div><div class="muted small">per paid order</div></div>
     <div class="card"><div class="lbl">All-time orders</div><div class="big" id="mAll">—</div><div class="muted small">paid, lifetime</div></div>
   </div>
 
-  <!-- chart + top sellers -->
-  <div class="grid two" style="margin-top:14px;grid-template-columns:1.7fr 1fr">
-    <div class="card"><h2>Sales — last 30 days</h2><div id="chart"><span class="muted small">…</span></div></div>
-    <div class="card"><h2>Top sellers</h2><div id="top"><span class="muted small">…</span></div></div>
+  <!-- chart + top sellers — PAID-ONLY (analytics). On Free these render locked. -->
+  <div class="grid two" style="margin-top:14px;grid-template-columns:1.7fr 1fr" id="analyticsRow">
+    <div class="card"><h2>Sales — last 30 days <span id="sampChart"></span></h2><div id="chart"><span class="muted small">…</span></div></div>
+    <div class="card"><h2>Top sellers <span id="sampTop"></span></h2><div id="top"><span class="muted small">…</span></div></div>
   </div>
 
   <!-- order history -->
@@ -87,9 +88,31 @@
     const cents = paidMonth.reduce((s, o) => s + (o.total_cents || 0), 0);
     el("mSales").textContent = money(cents);
     el("mCount").textContent = `${paidMonth.length} order${paidMonth.length === 1 ? "" : "s"}`;
-    el("mPayout").textContent = money(Math.round(cents * 0.873));
+    el("mPayout").textContent = money(Math.round(cents * payoutRate()));
     el("mAvg").textContent = paidMonth.length ? money(Math.round(cents / paidMonth.length)) : "—";
     el("mAll").textContent = paid.length;
+
+    // plan-aware payout labelling — Free keeps 87.3%, Paid keeps all of it.
+    el("payoutPctLbl").textContent = `(${payoutPct()})`;
+    el("payoutNote").textContent = isPaid()
+      ? "you keep 100% on the Paid plan — card processing via your Square, at cost"
+      : `after OceanSafe's ${feePct()} (card processing via your Square, at cost)`;
+    el("planChip").innerHTML = `<span class="planchip ${isPaid() ? "paid" : "free"}">${isPaid() ? "Paid plan" : "Free plan"}</span>`;
+    if (window.OCEANSAFE_DEMO) {
+      el("sampBar").innerHTML = `<div class="sampbar"><b>Sample data</b> — these orders and totals are a demo shop, not a real one. Your own numbers replace them the moment your first order comes in.</div>`;
+      el("sampSales").innerHTML = sampleBadge();
+    }
+
+    // chart + top sellers are PAID-ONLY analytics
+    if (!isPaid()) {
+      el("analyticsRow").innerHTML = lockedPanel("Sales analytics",
+        "Your 30-day sales trend and best sellers — what's moving, what's stalling, and which day carries the week.");
+      historyOrders = all.slice(0, 40);
+      renderHistory();
+      return;
+    }
+    el("sampChart").innerHTML = sampleBadge();
+    el("sampTop").innerHTML = sampleBadge();
 
     // chart
     el("chart").innerHTML = affiliate

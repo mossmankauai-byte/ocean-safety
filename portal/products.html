@@ -186,9 +186,9 @@
         await new Promise((res) => setTimeout(res, 700));
         demoSynced = [
           { id: "demo-sq1", title: "Reef-safe SPF 50 — 6 oz", category: "sunscreen", price_cents: 2200, mode: "storefront", active: false, image_url: "", square_variation_id: "demo" },
-          { id: "demo-sq2", title: "Snorkel set — adult", category: "snorkel gear", price_cents: 4900, mode: "storefront", active: false, image_url: "", square_variation_id: "demo" },
-          { id: "demo-sq3", title: "UPF 50+ rash guard — M", category: "apparel", price_cents: 3800, mode: "storefront", active: false, image_url: "", square_variation_id: "demo" },
-          { id: "demo-sq4", title: "UPF 50+ rash guard — L", category: "apparel", price_cents: 3800, mode: "storefront", active: false, image_url: "", square_variation_id: "demo" },
+          { id: "demo-sq2", title: "Snorkel set — adult", category: "snorkel gear", price_cents: 4500, mode: "storefront", active: false, image_url: "", square_variation_id: "demo" },
+          { id: "demo-sq3", title: "UPF 50+ rash guard — M", category: "apparel", price_cents: 3200, mode: "storefront", active: false, image_url: "", square_variation_id: "demo" },
+          { id: "demo-sq4", title: "UPF 50+ rash guard — L", category: "apparel", price_cents: 3200, mode: "storefront", active: false, image_url: "", square_variation_id: "demo" },
         ];
         r = { imported: 4, updated: 0, deactivated: 0, skipped_variable: 1, skipped_currency: 0 };
       } else {
@@ -379,10 +379,10 @@
   // a line in the frame says they're samples, and they NEVER render once even
   // one real row exists (hidden or not) — real products always win.
   const GP_SAMPLES = [
-    { title: "Kayak — half-day", price_cents: 4500 },
-    { title: "Snorkel set — 24 hours", price_cents: 2200 },
-    { title: "Beach chairs (pair) — day", price_cents: 1800 },
-    { title: "Boogie board — day", price_cents: 1500 },
+    { title: "Reef-safe SPF 50", price_cents: 2200 },
+    { title: "Snorkel set — day rental", price_cents: 4500 },
+    { title: "UPF 50+ rash guard", price_cents: 3200 },
+    { title: "Water shoes", price_cents: 3000 },
   ];
   function gpSampleCard(p) {
     return `<div class="os-store-prod" title="Sample item — replaced by your real products">` +
