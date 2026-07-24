@@ -64,4 +64,4 @@
 /api/car-upgrade   /.netlify/functions/car-upgrade   200
 /onboard-cars      /car-signup.html                  200
 /cars              /car-providers.html               200
-/cars-onepager     /OceanSafe-Cars-OnePager.pdf      200
+/cars-pdf          /OceanSafe-Cars-OnePager.pdf      200
