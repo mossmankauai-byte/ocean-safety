@@ -1,0 +1,5 @@
+{
+  "_note": "Self-test config for the car-fleet rail (2026-07-24). Proves the worker-provisioned fleet needs a committed partner-config for its NAME and its ISLAND — _cobrandIslandOK fails closed without `island`.",
+  "island": "maui",
+  "name": "OceanSafe Car Test"
+}
