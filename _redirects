@@ -60,6 +60,16 @@
 /rental     /rentals-operator-dashboard.html     200
 /townad     /townad-demo.html                    200
 
+# ── Shop/seller portal demo — the short link to send a prospect (2026-07-24) ──
+# 301, NOT a 200 rewrite like the lines above: those consoles are single files at
+# the root, so a rewrite keeps their relative paths working. The portal lives in a
+# folder and links to portal.css / app.js / sales.html relatively — served under
+# /shopdemo those would resolve to the ROOT and 404. The redirect moves the browser
+# into /portal-demo/ so every relative path stays correct. Query strings carry
+# through, so /shopdemo?plan=paid still lands on the Paid view.
+/shopdemo    /portal-demo/dashboard.html   301
+/shop-demo   /portal-demo/dashboard.html   301
+
 # ── Turo hosts / car fleets (2026-07-24) — $5 per vehicle per month ──
 /api/car-upgrade   /.netlify/functions/car-upgrade   200
 /onboard-cars      /car-signup.html                  200
