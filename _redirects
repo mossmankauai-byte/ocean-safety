@@ -2,8 +2,9 @@
 /p/demo         /p/demo.html           200
 
 # Retired "$990/yr Gear partner" demo removed 2026-07-20 — legacy printed URL lands on the current demo
-/demo/dashboard    /demo-dashboard.html   200
-/demo/dashboard/*  /demo-dashboard.html   301
+# demo-dashboard.html retired 2026-07-24 — repointed at the current seller-portal demo
+/demo/dashboard    /portal-demo/dashboard.html   200
+/demo/dashboard/*  /portal-demo/dashboard.html   301
 
 # Conditions proxy + cache (collapses per-visitor open-meteo/NOAA calls into one cached server fetch)
 /api/wx         /.netlify/functions/wx  200
@@ -57,5 +58,4 @@
 # ── Clean per-segment dashboard URLs (rewrite; address bar stays clean) 2026-07-22 ──
 /hotel      /operator-console.html               200
 /rental     /rentals-operator-dashboard.html     200
-/shop       /demo-dashboard.html                 200
 /townad     /townad-demo.html                    200
