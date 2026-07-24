@@ -15,6 +15,10 @@ const CAR_PLAN = { variationId: 'X5T5UFGCRLIXWW3NEY3NJ7GO', planId: 'HAIFGDNCFDF
 const WORKER = (globalThis.Netlify?.env?.get?.('TELEMETRY_URL')
   || process.env.TELEMETRY_URL || 'https://concierge-guide-api.oceansafe-hi.workers.dev').replace(/\/+$/, '');
 const ADMIN = (globalThis.Netlify?.env?.get?.('TS_ADMIN_KEY') || process.env.TS_ADMIN_KEY || 'os-stayclose-admin-2026');
+// The store lives in Supabase, the guide lives in the worker KV — two systems that never
+// met. This is the bridge: paying creates the partners row, so the thing the fleet is
+// actually buying exists the moment the subscription does.
+const SUPA_FN = 'https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1';
 
 const env = (k) => (globalThis.Netlify?.env?.get?.(k)) ?? process.env[k];
 
@@ -57,7 +61,9 @@ export default async (req) => {
   const subBody = { idempotency_key: `sub_car_${slug}`, location_id: LOCATION, plan_variation_id: CAR_PLAN.variationId, customer_id: customerId || '(new customer)', price_override_money: { amount, currency: 'USD' } };
 
   if (body.dry) {
-    return json({ ok: true, dry: true, monthly: amount / 100, cars, rate: CAR_PLAN.base / 100, customer_exists: !!customerId, would_create: subBody });
+    // store_ready reports whether step 4 would actually be able to build the store, so a
+    // dry run pre-flights the WHOLE upgrade — not just the charge.
+    return json({ ok: true, dry: true, monthly: amount / 100, cars, rate: CAR_PLAN.base / 100, customer_exists: !!customerId, store_ready: !!env('CAR_PROVISION_SECRET'), would_create: subBody });
   }
 
   if (!customerId) {
@@ -79,5 +85,39 @@ export default async (req) => {
     tierSet = (await c.json().catch(() => ({})))?.ok === true;
   } catch {}
 
-  return json({ ok: true, subscription_id: s.id, status: s.status, monthly: amount / 100, cars, rate: CAR_PLAN.base / 100, customer_id: customerId, tier_set_paid: tierSet, invoiced_to: email });
+  // 4) build the actual store — a live `partners` row in Supabase. The subscription id
+  // created above is the payment proof the go-live invariant requires, so this is the
+  // only point in the flow where a fleet can legitimately be published.
+  //
+  // Reported, never thrown: the subscription is already real by the time we get here, so
+  // a Supabase blip must not surface as "payment failed". `store_provisioned:false` tells
+  // the caller (and /onboard-cars) to retry rather than re-charge.
+  const store = { provisioned: false, reason: null, page_url: null, qr_codes: [] };
+  const secret = env('CAR_PROVISION_SECRET');
+  if (!secret) {
+    store.reason = 'not_configured';
+  } else {
+    try {
+      const r = await fetch(`${SUPA_FN}/car-provision`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret, slug, name, email, cars,
+          island: String(body.island || 'kauai').toLowerCase(),
+          subscription_id: s.id, customer_id: customerId,
+        }),
+      });
+      const out = await r.json().catch(() => ({}));
+      if (out?.ok) {
+        store.provisioned = true;
+        store.page_url = out.page_url;
+        store.qr_codes = out.qr_codes || [];
+      } else {
+        store.reason = out?.error || `http_${r.status}`;
+      }
+    } catch (e) {
+      store.reason = 'unreachable';
+    }
+  }
+
+  return json({ ok: true, subscription_id: s.id, status: s.status, monthly: amount / 100, cars, rate: CAR_PLAN.base / 100, customer_id: customerId, tier_set_paid: tierSet, invoiced_to: email, store });
 };
