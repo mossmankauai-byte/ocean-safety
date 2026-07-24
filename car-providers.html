@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c5c">
+<meta name="robots" content="noindex, nofollow">
+<title>OceanSafe for Car Providers — the pre-arrival QR</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<style>
+  :root{--ocean:#0f4c5c;--aqua:#0a8ba8;--gold:#c9a84c;--accent:#0f4c5c;--ink:#16202A;--mute:#64727F;--line:#E2E8ED}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#F5F7F9;color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:30px 18px 70px}
+  .wrap{max-width:760px;margin:0 auto}
+  .hero{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;border-top:6px solid var(--accent)}
+  .wm{font-weight:800;font-size:22px;letter-spacing:-.3px;display:flex;align-items:center;gap:9px}
+  .wm .c{color:var(--aqua)}
+  .tagpill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--aqua);background:#E8F4F7;border:1px solid #CBE6ED;border-radius:999px;padding:4px 10px;margin-top:14px}
+  h1{font-size:27px;line-height:1.18;margin:12px 0 10px;letter-spacing:-.4px}
+  .sub{color:#48555F;font-size:16.5px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin-top:16px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin-bottom:15px;font-weight:700}
+  h3{font-size:16px}
+  .step{display:flex;gap:13px;align-items:flex-start;padding:13px 0;border-top:1px solid #EDF1F4}
+  .step:first-child{border-top:none}
+  .num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:14px;
+    display:grid;place-items:center;flex:none}
+  .step .t b{display:block;font-size:15.5px}.step .t span{font-size:14.5px;color:var(--mute)}
+  ul.inc{list-style:none;display:flex;flex-direction:column;gap:10px}
+  ul.inc li{display:flex;gap:10px;font-size:15.5px}
+  ul.inc li::before{content:"✓";color:var(--gold);font-weight:700;flex:none}
+  .qrbox{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .qr{width:190px;height:190px;flex:none;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
+  .qr svg{width:100%;height:100%;display:block}
+  .qrtext{flex:1;min-width:220px}
+  .qrtext b{display:block;font-size:16px;margin-bottom:6px}
+  .qrtext p{font-size:15px;color:var(--mute)}
+  .plan{border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px}
+  .plan.pick{border-color:var(--ocean);box-shadow:0 0 0 3px rgba(15,76,92,.12)}
+  .plan .price{font-size:15px;font-weight:600;margin-top:3px}
+  .plan .price b{color:var(--accent)}
+  .plan .note{font-size:14px;color:var(--mute);margin-top:5px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px}
+  a.tile{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:11px;padding:15px;
+    background:#fff;transition:transform .08s,box-shadow .08s}
+  a.tile:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(15,76,92,.13)}
+  a.tile b{display:block;font-size:14.5px;margin-bottom:3px}
+  a.tile span{font-size:13.5px;color:var(--mute);display:block}
+  a.tile .k{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--aqua);display:block;margin-bottom:7px}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:16px;text-decoration:none;border-radius:10px;
+    padding:14px 22px;background:var(--accent);color:#fff;border:none;cursor:pointer}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid #D5DCE2;font-weight:600;font-size:14.5px;padding:11px 17px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .honest{background:#FCFAF3;border:1px solid #EFE4C4;border-radius:11px;padding:16px;margin-top:14px}
+  .honest b{font-size:14.5px}
+  .honest p{font-size:14.5px;color:#6B6045;margin-top:5px}
+  .foot{font-size:13px;color:#8A97A3;text-align:center;margin-top:26px}
+  a{color:var(--aqua)}
+  .wave{width:26px;height:26px;flex:none}
+</style></head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="wm">
+      <svg class="wave" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2.4" stroke-linecap="round">
+        <path d="M2 8.5c2.2 0 2.2 2 4.4 2s2.2-2 4.4-2 2.2 2 4.4 2 2.2-2 4.4-2M2 14.5c2.2 0 2.2 2 4.4 2s2.2-2 4.4-2 2.2 2 4.4 2 2.2-2 4.4-2"/>
+      </svg>
+      <span>Ocean<span class="c">Safe</span></span>
+    </div>
+    <span class="tagpill">For car providers</span>
+    <h1>Your guest has your car before they have anything else.</h1>
+    <p class="sub">You meet them days before the hotel does — at booking, then at the counter. A QR on that
+    confirmation puts your own storefront and the island's safety guide in their hand while they are still
+    deciding where to go first.</p>
+  </div>
+
+  <div class="card">
+    <h2>The pre-arrival play</h2>
+    <div class="step"><div class="num">1</div><div class="t"><b>Your QR goes on the booking confirmation</b>
+      <span>Same code on the counter card and the key-fob tag. One link, printed once, works everywhere.</span></div></div>
+    <div class="step"><div class="num">2</div><div class="t"><b>They scan before they land</b>
+      <span>On the plane, in the shuttle, or while your agent runs the paperwork. That waiting time is the
+      best conversion window you have and it currently earns you nothing.</span></div></div>
+    <div class="step"><div class="num">3</div><div class="t"><b>They land in your store</b>
+      <span>Beach gear, tours, and the live conditions guide — all under your name. They add a cooler and two
+      chairs to the booking and pick them up with the keys.</span></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Scan it — this is the live demo store</h2>
+    <div class="qrbox">
+      <div class="qr"><svg viewBox="0 0 37 37" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect width="37" height="37" fill="#fff"/><path fill="#0f4c5c" d="M4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM7 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM15 4h1v1h-1zM16 4h1v1h-1zM19 4h1v1h-1zM20 4h1v1h-1zM21 4h1v1h-1zM26 4h1v1h-1zM27 4h1v1h-1zM28 4h1v1h-1zM29 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM4 5h1v1h-1zM10 5h1v1h-1zM13 5h1v1h-1zM16 5h1v1h-1zM17 5h1v1h-1zM18 5h1v1h-1zM20 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM4 6h1v1h-1zM6 6h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM15 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM20 6h1v1h-1zM21 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM29 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM4 7h1v1h-1zM6 7h1v1h-1zM7 7h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM15 7h1v1h-1zM18 7h1v1h-1zM21 7h1v1h-1zM24 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM29 7h1v1h-1zM30 7h1v1h-1zM32 7h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM13 8h1v1h-1zM17 8h1v1h-1zM18 8h1v1h-1zM19 8h1v1h-1zM22 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM32 8h1v1h-1zM4 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM15 9h1v1h-1zM16 9h1v1h-1zM19 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM24 9h1v1h-1zM26 9h1v1h-1zM32 9h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM10 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM22 10h1v1h-1zM24 10h1v1h-1zM26 10h1v1h-1zM27 10h1v1h-1zM28 10h1v1h-1zM29 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM32 10h1v1h-1zM15 11h1v1h-1zM18 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM22 11h1v1h-1zM4 12h1v1h-1zM6 12h1v1h-1zM10 12h1v1h-1zM11 12h1v1h-1zM13 12h1v1h-1zM14 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM17 12h1v1h-1zM18 12h1v1h-1zM23 12h1v1h-1zM24 12h1v1h-1zM27 12h1v1h-1zM30 12h1v1h-1zM32 12h1v1h-1zM4 13h1v1h-1zM5 13h1v1h-1zM7 13h1v1h-1zM11 13h1v1h-1zM12 13h1v1h-1zM15 13h1v1h-1zM17 13h1v1h-1zM18 13h1v1h-1zM22 13h1v1h-1zM23 13h1v1h-1zM24 13h1v1h-1zM26 13h1v1h-1zM27 13h1v1h-1zM31 13h1v1h-1zM32 13h1v1h-1zM4 14h1v1h-1zM6 14h1v1h-1zM9 14h1v1h-1zM10 14h1v1h-1zM11 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM15 14h1v1h-1zM19 14h1v1h-1zM21 14h1v1h-1zM22 14h1v1h-1zM23 14h1v1h-1zM24 14h1v1h-1zM28 14h1v1h-1zM29 14h1v1h-1zM30 14h1v1h-1zM32 14h1v1h-1zM4 15h1v1h-1zM5 15h1v1h-1zM7 15h1v1h-1zM8 15h1v1h-1zM9 15h1v1h-1zM11 15h1v1h-1zM12 15h1v1h-1zM13 15h1v1h-1zM14 15h1v1h-1zM15 15h1v1h-1zM17 15h1v1h-1zM23 15h1v1h-1zM24 15h1v1h-1zM26 15h1v1h-1zM29 15h1v1h-1zM4 16h1v1h-1zM5 16h1v1h-1zM6 16h1v1h-1zM10 16h1v1h-1zM11 16h1v1h-1zM14 16h1v1h-1zM15 16h1v1h-1zM17 16h1v1h-1zM19 16h1v1h-1zM20 16h1v1h-1zM22 16h1v1h-1zM24 16h1v1h-1zM26 16h1v1h-1zM27 16h1v1h-1zM32 16h1v1h-1zM4 17h1v1h-1zM8 17h1v1h-1zM9 17h1v1h-1zM12 17h1v1h-1zM13 17h1v1h-1zM15 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM23 17h1v1h-1zM25 17h1v1h-1zM26 17h1v1h-1zM27 17h1v1h-1zM31 17h1v1h-1zM32 17h1v1h-1zM7 18h1v1h-1zM8 18h1v1h-1zM10 18h1v1h-1zM12 18h1v1h-1zM13 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM18 18h1v1h-1zM20 18h1v1h-1zM23 18h1v1h-1zM25 18h1v1h-1zM26 18h1v1h-1zM28 18h1v1h-1zM32 18h1v1h-1zM4 19h1v1h-1zM7 19h1v1h-1zM13 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM22 19h1v1h-1zM25 19h1v1h-1zM26 19h1v1h-1zM27 19h1v1h-1zM4 20h1v1h-1zM5 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM9 20h1v1h-1zM10 20h1v1h-1zM11 20h1v1h-1zM14 20h1v1h-1zM15 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM26 20h1v1h-1zM27 20h1v1h-1zM32 20h1v1h-1zM6 21h1v1h-1zM7 21h1v1h-1zM11 21h1v1h-1zM13 21h1v1h-1zM14 21h1v1h-1zM17 21h1v1h-1zM18 21h1v1h-1zM23 21h1v1h-1zM24 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM30 21h1v1h-1zM31 21h1v1h-1zM32 21h1v1h-1zM4 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM7 22h1v1h-1zM9 22h1v1h-1zM10 22h1v1h-1zM11 22h1v1h-1zM12 22h1v1h-1zM14 22h1v1h-1zM15 22h1v1h-1zM16 22h1v1h-1zM19 22h1v1h-1zM21 22h1v1h-1zM23 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM26 22h1v1h-1zM29 22h1v1h-1zM32 22h1v1h-1zM6 23h1v1h-1zM11 23h1v1h-1zM12 23h1v1h-1zM17 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM4 24h1v1h-1zM5 24h1v1h-1zM6 24h1v1h-1zM8 24h1v1h-1zM10 24h1v1h-1zM13 24h1v1h-1zM14 24h1v1h-1zM16 24h1v1h-1zM17 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM26 24h1v1h-1zM27 24h1v1h-1zM28 24h1v1h-1zM29 24h1v1h-1zM31 24h1v1h-1zM12 25h1v1h-1zM15 25h1v1h-1zM20 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM28 25h1v1h-1zM29 25h1v1h-1zM30 25h1v1h-1zM32 25h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM6 26h1v1h-1zM7 26h1v1h-1zM8 26h1v1h-1zM9 26h1v1h-1zM10 26h1v1h-1zM12 26h1v1h-1zM13 26h1v1h-1zM15 26h1v1h-1zM16 26h1v1h-1zM17 26h1v1h-1zM18 26h1v1h-1zM20 26h1v1h-1zM21 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM28 26h1v1h-1zM32 26h1v1h-1zM4 27h1v1h-1zM10 27h1v1h-1zM13 27h1v1h-1zM15 27h1v1h-1zM16 27h1v1h-1zM18 27h1v1h-1zM19 27h1v1h-1zM20 27h1v1h-1zM22 27h1v1h-1zM23 27h1v1h-1zM24 27h1v1h-1zM28 27h1v1h-1zM32 27h1v1h-1zM4 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM10 28h1v1h-1zM14 28h1v1h-1zM15 28h1v1h-1zM17 28h1v1h-1zM18 28h1v1h-1zM20 28h1v1h-1zM23 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM27 28h1v1h-1zM28 28h1v1h-1zM29 28h1v1h-1zM4 29h1v1h-1zM6 29h1v1h-1zM7 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM13 29h1v1h-1zM15 29h1v1h-1zM16 29h1v1h-1zM18 29h1v1h-1zM21 29h1v1h-1zM23 29h1v1h-1zM25 29h1v1h-1zM28 29h1v1h-1zM29 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM4 30h1v1h-1zM6 30h1v1h-1zM7 30h1v1h-1zM8 30h1v1h-1zM10 30h1v1h-1zM12 30h1v1h-1zM13 30h1v1h-1zM14 30h1v1h-1zM16 30h1v1h-1zM17 30h1v1h-1zM18 30h1v1h-1zM19 30h1v1h-1zM21 30h1v1h-1zM24 30h1v1h-1zM25 30h1v1h-1zM28 30h1v1h-1zM31 30h1v1h-1zM32 30h1v1h-1zM4 31h1v1h-1zM10 31h1v1h-1zM13 31h1v1h-1zM14 31h1v1h-1zM15 31h1v1h-1zM16 31h1v1h-1zM18 31h1v1h-1zM19 31h1v1h-1zM20 31h1v1h-1zM22 31h1v1h-1zM24 31h1v1h-1zM25 31h1v1h-1zM27 31h1v1h-1zM28 31h1v1h-1zM29 31h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM7 32h1v1h-1zM8 32h1v1h-1zM9 32h1v1h-1zM10 32h1v1h-1zM12 32h1v1h-1zM15 32h1v1h-1zM16 32h1v1h-1zM20 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM29 32h1v1h-1zM32 32h1v1h-1z"/></svg></div>
+      <div class="qrtext">
+        <b>oceansafety.app/p/demo</b>
+        <p>Point a phone camera at this. It opens the same co-branded storefront a guest would get, with a
+        working cart and checkout. Yours carries your name, your gear, and your prices.</p>
+        <div class="row" style="margin-top:13px">
+          <a class="btn ghost" href="https://oceansafety.app/p/demo">Open the demo store</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Why this works better for you than for a hotel</h2>
+    <ul class="inc">
+      <li>You are the <b>first vendor the guest meets</b> — often booked weeks out, long before any concierge desk.</li>
+      <li><b>The car is the trunk.</b> Gear sells to a driver because they can actually carry it. A walk-up guest can't.</li>
+      <li><b>Counter time is dead time.</b> The paperwork window is a captive, bored, planning-minded audience.</li>
+      <li>Every guest leaves your lot asking "where do we go first" — you can be the one who answers it.</li>
+      <li>The safety guide is free and stays free, so the scan is worth something even to a guest who buys nothing.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>What it costs</h2>
+    <div class="plan">
+      <h3>Free</h3>
+      <div class="price">No monthly fee — <b>50/50</b> on tours booked through your page, <b>12.7%</b> on store sales</div>
+      <div class="note">You keep 87.3% of store revenue. Nothing to sign up front, nothing to lose if it doesn't move.</div>
+    </div>
+    <div class="plan pick">
+      <h3>Paid — $829/mo</h3>
+      <div class="price"><b>Keep 100%</b> of everything you sell</div>
+      <div class="note">Adds analytics, promotions, and multi-property data. If you are moving real volume this
+      is the cheaper of the two — the split stops mattering the moment your store outgrows it.</div>
+    </div>
+    <div class="honest">
+      <b>How the money actually moves</b>
+      <p>You are the merchant of record. The sale settles into your own Square account, in your name, on your
+      books. We never run the sale on your register and never hold your money.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Demos, docs, and links</h2>
+    <div class="grid">
+      <a class="tile" href="https://oceansafety.app/p/demo">
+        <span class="k">Demo · live</span><b>Co-branded storefront</b>
+        <span>The page behind the QR. Real cart and checkout.</span></a>
+      <a class="tile" href="https://oceansafety.app/analytics-console-concierge.html">
+        <span class="k">Demo · live</span><b>Analytics console</b>
+        <span>What the $829/mo tier shows you: scans, sales, and what guests looked at.</span></a>
+      <a class="tile" href="https://oceansafety.app/assets/OceanSafe-Concierge.pdf">
+        <span class="k">Doc · PDF</span><b>Concierge brochure</b>
+        <span>The full written offer to leave behind or attach to an email.</span></a>
+      <a class="tile" href="https://oceansafety.app/rentals.html">
+        <span class="k">Live page</span><b>Rentals &amp; concierge directory</b>
+        <span>The free public directory. Shows the neighborhood you'd be listed in.</span></a>
+      <a class="tile" href="https://oceansafety.app/">
+        <span class="k">Live app</span><b>The guest app</b>
+        <span>Conditions, hazards, and beach guide — what the guest gets for free.</span></a>
+      <a class="tile" href="https://oceansafety.app/join">
+        <span class="k">Sign up</span><b>Partner intake</b>
+        <span>Short form. We quote per property once we know the fleet size.</span></a>
+      <a class="tile" href="https://oceansafety.app/onboard">
+        <span class="k">Sign up</span><b>Onboarding</b>
+        <span>Connect Square, load the gear list, mint the QR.</span></a>
+      <a class="tile" href="https://square.link/u/BnIm6KAZ">
+        <span class="k">Checkout</span><b>Paid tier — $829/mo</b>
+        <span>Direct Square link for the keep-100% plan.</span></a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Straight answers to the three questions you'll ask</h2>
+    <ul class="inc">
+      <li><b>"Do I have to change my POS?"</b> No. Day one runs off a spreadsheet of your gear and a printed or
+      emailed pickup slip — that works with any register you own. Live sync with Square, Shopify, Clover, or
+      Lightspeed is available on request; those connectors are built per partner, not self-serve today.</li>
+      <li><b>"Who handles deposits?"</b> You do, inside your own Square, exactly as you do now. We deliberately
+      keep security deposits off our rail so nothing of yours is ever tied up in our system.</li>
+      <li><b>"Who texts my customer?"</b> You do, from your own account. We never text your guests and never
+      store their phone numbers.</li>
+    </ul>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <h3 style="font-size:19px;margin-bottom:6px">Want to see it with your own name on it?</h3>
+    <p style="color:var(--mute);font-size:15px;margin-bottom:16px">We'll build a demo store with your fleet's
+    gear list and send you the QR. No cost, no commitment.</p>
+    <div class="row" style="justify-content:center">
+      <a class="btn" href="https://oceansafety.app/join">Start here</a>
+      <a class="btn ghost" href="https://oceansafety.app/assets/OceanSafe-Concierge.pdf">Read the brochure</a>
+    </div>
+  </div>
+
+  <p class="foot">OceanSafe — Tropical Agronomics LLC · Kauaʻi, Hawaiʻi<br>
+  Internal sales kit. Pricing shown is the Concierge tier and is current as of July 2026.</p>
+
+</div>
+</body>
+</html>
