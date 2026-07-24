@@ -23,6 +23,12 @@ a{color:var(--ocean)}
 .nav a.on{background:#eef6f9;color:var(--ocean)}
 .nav a:hover{background:#f0f3f4}
 
+/* embedded in an operator console's Shop tab (?embed=1, class set in app.js):
+   the console owns the chrome, so drop the portal's own bar and the page's top
+   padding — the console's sub-tab row sits directly above this iframe. */
+.os-embed .bar{display:none}
+.os-embed .wrap{padding-top:4px}
+
 /* cards */
 .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px}
 .card+.card{margin-top:14px}
