@@ -8,7 +8,7 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=(), usb=()
+  Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()
   # Allow large image previews in Search / Discover (thumbnail-size directive; does NOT force indexing).
   X-Robots-Tag: max-image-preview:large
 
