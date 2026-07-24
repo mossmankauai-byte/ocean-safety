@@ -280,7 +280,11 @@
     $("form").classList.add("hide"); $("result").classList.remove("hide"); window.scrollTo(0,0);
     $("rTitle").textContent = j.resort || "Provisioned";
     $("rSub").textContent = "Live on the free plan · "+_cars+" vehicle"+(_cars===1?"":"s")+" · slug "+j.slug;
-    $("lPortal").textContent=j.portal_url; $("lDash").textContent=j.dashboard_url;
+    // The worker's /ts-signup hands back the TIMESHARE console (rooms, owner sessions,
+    // RCI/II) — wrong surface for a car fleet. Re-point at the rentals console, which
+    // shares the same ?ref&key contract. Portal is shared across segments already.
+    var dash = String(j.dashboard_url||"").replace("/stay-close-operator-dashboard.html", "/rental");
+    $("lPortal").textContent=j.portal_url; $("lDash").textContent=dash;
     SEGS.forEach(function(seg){
       var box=$("qr-"+seg); box.innerHTML="";
       new QRCode(box, {text:j.guest_urls[seg], width:150, height:150, correctLevel:QRCode.CorrectLevel.M});
@@ -289,7 +293,7 @@
     $("pAmt").innerHTML="$"+monthly.toLocaleString()+"<small> /mo</small>";
     $("pMth").innerHTML=_cars+" vehicle"+(_cars===1?"":"s")+" &times; $5 &middot; emailed invoice to "+_email;
     $("tStore").href="https://oceansafety.app/p/"+j.slug+"?mode=shop";
-    $("tPortal").href=j.portal_url; $("tDash").href=j.dashboard_url;
+    $("tPortal").href=j.portal_url; $("tDash").href=dash;
   }
 
   $("startBill").onclick=function(){
