@@ -406,6 +406,40 @@
   .viewtabs .vb-badge{font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 7px;background:var(--hair-soft);color:var(--muted)}
   .viewtabs button[aria-selected="true"] .vb-badge{background:rgba(255,255,255,.24);color:var(--on-sea)}
 
+  /* ============ SHOP SUB-TABS + PORTAL FRAME ============
+     Deliberately NOT .viewtabs: a second pill row identical to the top one would
+     read as a peer, not a child. Square, smaller, underline-selected — clearly
+     one level down, so "Promotions" here can't be mistaken for the guide's
+     Promotions tab a row above. */
+  .shoptabs{display:flex;gap:2px;flex-wrap:wrap;align-items:center;
+    border-bottom:1px solid var(--line);margin:16px 0 0;padding:0 2px}
+  .shoptabs button{appearance:none;font:inherit;font-size:13px;font-weight:600;color:var(--muted);
+    background:none;border:0;border-bottom:2px solid transparent;border-radius:6px 6px 0 0;
+    padding:9px 13px;margin-bottom:-1px;cursor:pointer;transition:color .12s,border-color .12s,background .12s}
+  .shoptabs button:hover{color:var(--ink-2);background:var(--hair-soft)}
+  .shoptabs button[aria-selected="true"]{color:var(--sea);border-bottom-color:var(--sea);background:none}
+  .shoptabs .shop-pop{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);
+    text-decoration:none;padding:8px 6px;white-space:nowrap}
+  .shoptabs .shop-pop:hover{color:var(--sea)}
+  .shopframe{position:relative;border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;
+    overflow:hidden;background:#fff}
+  /* Height is set from the framed page's own content (same origin) so there is
+     ONE scrollbar — the console's. This value is only the pre-measure fallback. */
+  .shopframe iframe{display:block;width:100%;height:900px;border:0;background:#fff;
+    opacity:0;transition:opacity .18s}
+  .shopframe iframe.ready{opacity:1}
+  .shopframe-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:13px;color:var(--muted);background:#fff}
+  .shopframe-load[hidden]{display:none}
+  /* On a phone the console's own padding leaves the frame ~337px, below the
+     portal's responsive floor — its tables spill. Hold the portal at the width
+     it was designed for and let the frame scroll sideways instead. */
+  @media(max-width:640px){
+    .shoptabs .shop-pop{display:none}
+    .shopframe{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .shopframe iframe{min-width:370px}
+  }
+
   /* ============ PLACES CONTROL ============ */
   .pl-intro{font-size:13px;color:var(--ink-2);max-width:78ch;margin:2px 0 14px;line-height:1.55}
   .pl-safety{display:flex;gap:11px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
@@ -706,6 +740,7 @@
       <button role="tab" aria-selected="false" data-view="places">Places <span class="vb-badge" id="vbPlaces">—</span></button>
       <button role="tab" aria-selected="false" data-view="segments">Vehicles &amp; codes</button>
       <button role="tab" aria-selected="false" data-view="desk">Tours</button>
+      <button role="tab" aria-selected="false" data-view="shop">Shop</button>
       <button type="button" id="tourBtn" class="tourbtn" title="Replay the console tour">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M10.3 8.4l5.2 3.6-5.2 3.6V8.4z" fill="currentColor"/></svg>
         Take the tour
@@ -1402,6 +1437,40 @@
       </section>
     </div><!-- /view-desk -->
 
+    <!-- ============ SHOP — the seller portal, mounted whole ============
+         Not a re-implementation: this frames the already-built partner portal
+         (/portal-demo/*) with ?embed=1, which drops the portal's own top bar so
+         the sub-tab row below is the only navigation. ?plan=paid because the
+         store IS the paid gate for a fleet — every demo opens on the full
+         product, and ?plan=free swaps the whole frame for the lock card. -->
+    <div id="view-shop" hidden>
+      <section style="margin-top:18px">
+        <div class="sec-h">
+          <h2>Your store</h2>
+          <p>The gear guests can buy or rent straight from your guide &mdash; coolers, snorkel sets, boards. Money lands in your own Square account; OceanSafe never holds it.</p>
+        </div>
+
+        <div id="shopFrameWrap">
+          <div class="shoptabs" role="tablist" aria-label="Store sections">
+            <button role="tab" aria-selected="true"  data-shop="dashboard">Overview</button>
+            <button role="tab" aria-selected="false" data-shop="sales">Sales</button>
+            <button role="tab" aria-selected="false" data-shop="products">Products</button>
+            <button role="tab" aria-selected="false" data-shop="inventory">Inventory</button>
+            <button role="tab" aria-selected="false" data-shop="promotions">Promotions</button>
+            <a class="shop-pop" id="shopPop" href="/portal-demo/dashboard.html?plan=paid" target="_blank" rel="noopener">Open in its own tab &#8599;</a>
+          </div>
+          <div class="shopframe">
+            <div class="shopframe-load" id="shopLoad">Loading your store&hellip;</div>
+            <iframe id="shopFrame" title="Your OceanSafe store" loading="lazy"></iframe>
+          </div>
+          <p class="cap" style="margin:10px 2px 0">Sample store. Once your Square is connected, these are your real products, orders and payouts.</p>
+        </div>
+
+        <!-- free plan only — filled + revealed by the free-tier engine -->
+        <div class="card" id="shopLock" hidden style="text-align:center"></div>
+      </section>
+    </div><!-- /view-shop -->
+
     <!-- ============ PORTFOLIO MODE (?group=) — rendered by the portfolio module at the end of the file ============ -->
     <div id="view-portfolio" hidden></div>
 
@@ -1666,24 +1735,104 @@
   var rendered = false;
   function show(view){
     tabs.forEach(function(t){ t.setAttribute('aria-selected', String(t.dataset.view===view)); });
-    ['home','stayclose','promos','guests','places','segments','desk'].forEach(function(v){
+    ['home','stayclose','promos','guests','places','segments','desk','shop'].forEach(function(v){
       var el = document.getElementById('view-'+v);
       if(el) el.hidden = (v!==view);
     });
     stage.classList.toggle('quiet-view', view==='home'||view==='promos'||view==='places');
     // The data-dictionary footer only belongs where Sample tiles live — keep it
     // off the image-led Home and the drop-a-promo view.
+    // Shop joins them: the portal is its own product with its own sample badges,
+    // so the console's data dictionary doesn't describe anything on that view.
     var df = document.getElementById('dataFoot');
-    if(df) df.style.display = (view==='home'||view==='promos') ? 'none' : '';
+    if(df) df.style.display = (view==='home'||view==='promos'||view==='shop') ? 'none' : '';
     var fb = document.getElementById('freshBanner');
-    if(fb) fb.style.display = (view==='home'||view==='promos') ? 'none' : '';
+    if(fb) fb.style.display = (view==='home'||view==='promos'||view==='shop') ? 'none' : '';
     if(view==='places' && !rendered){ render(); rendered=true; }
+    if(view==='shop' && window.osShopMount){ window.osShopMount(); }  // iframe loads on first open, never on page load
     window.scrollTo(0,0);
   }
   tabs.forEach(function(t){ t.addEventListener('click', function(){ show(this.dataset.view); }); });
 
   stats(); // seed the tab badge on load
   show('home'); // seed initial view state (hides the data-only banner/footer on Home)
+})();
+</script>
+
+<script>
+/* ============ SHOP TAB — mounts the partner portal in an iframe ============
+   The portal (/portal-demo/*) is already built and live; this only frames it.
+   Sub-tab click swaps the iframe src, so each portal page loads on demand and
+   the console never pays for six pages it may not open.
+
+   PLAN: paid by default — for a car fleet the store IS the $5/vehicle unlock,
+   and a demo must never open a prospect onto a locked box. ?plan=free swaps the
+   whole frame for the lock card below (built by the free-tier engine). */
+(function(){
+  var PAGES = ['dashboard','sales','products','inventory','promotions'];
+  var BASE  = '/portal-demo/';
+  var frame = document.getElementById('shopFrame');
+  var load  = document.getElementById('shopLoad');
+  var wrap  = document.getElementById('shopFrameWrap');
+  var pop   = document.getElementById('shopPop');
+  if(!frame || !wrap) return;
+
+  var isFree = (window.OS_PLAN === 'free');
+  var cur = 'dashboard', mounted = false;
+
+  function src(page){
+    // embed=1 drops the portal's own top bar; plan=paid is explicit so a stale
+    // os_portal_plan in localStorage can't open the demo on the gated view.
+    return BASE + page + '.html?embed=1&plan=' + (isFree ? 'free' : 'paid');
+  }
+  function go(page){
+    if(PAGES.indexOf(page) < 0) page = 'dashboard';
+    cur = page;
+    document.querySelectorAll('.shoptabs button[data-shop]').forEach(function(b){
+      b.setAttribute('aria-selected', String(b.dataset.shop === page));
+    });
+    if(load){ load.hidden = false; }
+    frame.classList.remove('ready');
+    frame.style.height = '';        // back to the CSS fallback until the new page measures
+    frame.src = src(page);
+    if(pop) pop.href = BASE + page + '.html?plan=' + (isFree ? 'free' : 'paid');
+  }
+
+  // Grow the frame to its content so the console has ONE scrollbar, not a
+  // 900px window onto a 7,000px page. Same origin, so the height is readable;
+  // if that ever changes the catch leaves the CSS fallback height in place and
+  // the portal scrolls internally — degraded, not broken.
+  var ro = null;
+  function fit(){
+    try{
+      var d = frame.contentDocument;
+      if(!d || !d.body) return;
+      var h = Math.max(d.body.scrollHeight, d.documentElement.scrollHeight);
+      if(h > 0) frame.style.height = (h + 24) + 'px';
+      if(window.ResizeObserver && !ro){
+        ro = new ResizeObserver(function(){ fit(); });
+        ro.observe(d.body);
+      }
+    }catch(e){}
+  }
+
+  frame.addEventListener('load', function(){
+    if(load) load.hidden = true;
+    frame.classList.add('ready');
+    if(ro){ ro.disconnect(); ro = null; }   // observer belonged to the previous page's body
+    fit();
+    setTimeout(fit, 400);   // the portal fills its cards async — re-measure once they land
+  });
+  document.querySelectorAll('.shoptabs button[data-shop]').forEach(function(b){
+    b.addEventListener('click', function(){ go(this.dataset.shop); });
+  });
+
+  // Called by the view switcher the first time the Shop tab is opened.
+  window.osShopMount = function(){
+    if(mounted || isFree) return;
+    mounted = true;
+    go(cur);
+  };
 })();
 </script>
 
@@ -2475,6 +2624,8 @@
       body:'Renters, repeat guests and owners each get their own QR and their own funnel — owners never see a sales pitch.' },
     { view:'desk', sel:'#affInput', title:'Tours & affiliate',
       body:'Add your own tour affiliate link — Viator, GetYourGuide or a direct link — and every tour a guest taps routes through it, so you keep the commission.' },
+    { view:'shop', sel:'.shoptabs', title:'Your store',
+      body:'Sell or rent your gear straight from the guide &mdash; coolers, chairs, snorkel sets. Guests pay in the app before they reach the beach, and the money lands in your own Square account.' },
     { center:true, title:'It’s yours', last:true,
       body:'Everything you shape here saves as a browser draft as you go; Export sends it into your app build. Questions? Your OceanSafe contact is one text away. Replay with the <b>Tour</b> button.' }
   ];
@@ -3172,6 +3323,24 @@
   }
   var vbP = document.getElementById('vbPromos');
   if(vbP) vbP.textContent = '—';
+
+  /* ---- SHOP: the store is the paid gate for a fleet ----
+     Free = no store, full stop (that's the line drawn for this segment), so the
+     portal frame is removed entirely rather than shown gated — a half-store the
+     host can't use would read as broken. */
+  var shopWrap = document.getElementById('shopFrameWrap');
+  var shopLock = document.getElementById('shopLock');
+  if(shopWrap) shopWrap.hidden = true;
+  if(shopLock){
+    shopLock.hidden = false;
+    shopLock.innerHTML =
+      '<div style="color:var(--muted)">' + LOCK_BIG + '</div>' +
+      '<div style="font-size:16px;font-weight:800;color:var(--ink);margin-top:4px">Your store is part of the $5/vehicle plan</div>' +
+      '<p style="margin:8px auto 0;max-width:56ch;font-size:13.5px;line-height:1.55;color:var(--ink-2)">Sell or rent gear straight from the guide &mdash; coolers, chairs, snorkel sets, boards. Guests pay in-app before they even reach the beach, and the money lands in your own Square account.</p>' +
+      btnsHTML.replace('class="lockcard-btns"', 'class="lockcard-btns" style="justify-content:center"');
+  }
+  var shopTabBtn = document.querySelector('.viewtabs [data-view="shop"]');
+  if(shopTabBtn) shopTabBtn.insertAdjacentHTML('beforeend', ' <span class="plan-lock">' + LOCK + 'Locked</span>');
 })();
 </script>
 <script>
@@ -3412,7 +3581,7 @@
   .portfolio-on .viewtabs,.portfolio-on #view-home,.portfolio-on #view-guests,.portfolio-on #view-stayclose,
   .portfolio-on #view-promos,.portfolio-on #view-places,.portfolio-on #dataFoot,.portfolio-on .freshness,
   .portfolio-on .period,.portfolio-on .osdemo-start,.portfolio-on #osTour,.portfolio-on #tourBtn
-  ,.portfolio-on #view-segments,.portfolio-on #view-desk{display:none!important}
+  ,.portfolio-on #view-segments,.portfolio-on #view-desk,.portfolio-on #view-shop{display:none!important}
   /* the demo-live rule demotes per-card Sample chips — portfolio cards keep theirs (Sample-ribbon honesty) */
   .stage.demo-live .chip.sample.pf-keep{display:inline-flex}
   .pf-chip{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--sea);background:var(--sea-tint);border:1px solid #c4dde8;border-radius:999px;padding:6px 13px;white-space:nowrap}
