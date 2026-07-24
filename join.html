@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://oceansafety.app/join">
 <meta property="og:image" content="https://oceansafety.app/assets/join-hero.jpg">
-<link rel="preload" as="image" href="/assets/join-hero.jpg" fetchpriority="high">
+<link rel="preload" as="image" href="/assets/join-hero-mauka.jpg" fetchpriority="high">
 <style>
   :root{
     /* ---- color ---- */
@@ -68,7 +68,7 @@
   .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
   .wm{font-weight:800;font-size:21px;letter-spacing:-.03em;color:#fff;display:inline-flex;align-items:center;gap:8px}
   .wm .c{color:#fff;opacity:.78}
-  .wm .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(201,168,76,.28)}
+  .wm .mark{width:32px;height:32px;border-radius:9px;display:block;flex:none;box-shadow:0 3px 12px rgba(7,18,24,.32)}
   .nav .links{display:flex;align-items:center;gap:6px}
   .nav .navlink{color:rgba(255,255,255,.86);font-size:14px;font-weight:600;padding:9px 14px;border-radius:999px;transition:background .2s var(--ease),color .2s var(--ease)}
   .nav .navlink:hover{background:rgba(255,255,255,.13);color:#fff}
@@ -349,6 +349,7 @@
   .foot{padding-block:48px;text-align:center;color:var(--muted-2);font-size:13.5px}
   .foot .wm{color:var(--ocean);justify-content:center;margin-bottom:12px}
   .foot .wm .c{color:var(--aqua);opacity:1}
+  .foot .wm .mark{box-shadow:0 3px 12px rgba(15,76,92,.18)}
   .foot a{font-weight:600}
   .foot .fineprint{margin-top:14px;max-width:64ch;margin-inline:auto;color:var(--muted-2);font-size:12.5px;line-height:1.6}
 
@@ -376,7 +377,7 @@
 <!-- ============ NAV ============ -->
 <nav class="nav" aria-label="Primary">
   <div class="wrap">
-    <a class="wm" href="https://oceansafety.app" aria-label="OceanSafe home"><span class="dot"></span>Ocean<span class="c">Safe</span></a>
+    <a class="wm" href="https://oceansafety.app" aria-label="OceanSafe home"><img class="mark" src="/assets/logo-mark.png" width="32" height="32" alt="" aria-hidden="true">Ocean<span class="c">Safe</span></a>
     <div class="links">
       <a class="navlink" href="#what">What you get</a>
       <a class="navlink" href="#offer">The deal</a>
@@ -389,9 +390,17 @@
 <!-- ============ HERO ============ -->
 <header class="hero" id="top">
   <div class="hero__media">
-    <video autoplay muted loop playsinline preload="metadata" poster="/assets/join-hero.jpg" id="heroVideo" aria-hidden="true">
-      <source src="/assets/join-hero.mp4" type="video/mp4">
+    <video autoplay muted loop playsinline preload="metadata" poster="/assets/join-hero-mauka.jpg" id="heroVideo" aria-hidden="true">
+      <source id="heroSrc" src="/assets/join-hero-mauka.mp4" type="video/mp4">
     </video>
+    <script>
+      /* portrait viewports get the 9:16 cut — the landscape crop would show as a sliver on phones */
+      if(window.innerWidth > 0 && window.innerWidth < window.innerHeight){
+        var hs = document.getElementById("heroSrc");
+        hs.src = "/assets/join-hero-mauka-9x16.mp4";
+        hs.parentNode.load();
+      }
+    </script>
   </div>
   <div class="hero__scrim"></div>
   <div class="hero__inner">
@@ -733,7 +742,7 @@
 <!-- ============ FOOTER ============ -->
 <footer class="foot">
   <div class="wrap">
-    <a class="wm" href="https://oceansafety.app"><span class="dot" style="background:var(--gold)"></span>Ocean<span class="c">Safe</span></a>
+    <a class="wm" href="https://oceansafety.app"><img class="mark" src="/assets/logo-mark.png" width="32" height="32" alt="" aria-hidden="true">Ocean<span class="c">Safe</span></a>
     <div>Questions first? Email or text us — <a href="mailto:mossmankauai@gmail.com">mossmankauai@gmail.com</a> · <a href="https://oceansafety.app">oceansafety.app</a></div>
     <p class="fineprint">OceanSafe shows general ocean and weather conditions from public sources (NOAA, NWS). It is guidance, not a guarantee of safety, and does not replace lifeguards or posted advisories.</p>
   </div>
