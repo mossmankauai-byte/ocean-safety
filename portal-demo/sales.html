@@ -32,7 +32,7 @@
   <div id="sampBar"></div>
 
   <!-- stat cards -->
-  <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:12px">
+  <div class="grid four" style="gap:12px">
     <div class="card"><div class="lbl">Sales this month <span id="sampSales"></span></div><div class="big" id="mSales">—</div><div class="muted small" id="mCount">0 orders</div></div>
     <div class="card"><div class="lbl">Your payout <span id="payoutPctLbl">(87.3%)</span></div><div class="big" id="mPayout" style="color:var(--green)">—</div><div class="muted small" id="payoutNote">after OceanSafe's 12.7% (card processing via your Square, at cost)</div></div>
     <div class="card"><div class="lbl">Avg order</div><div class="big" id="mAvg">—</div><div class="muted small">per paid order</div></div>
@@ -40,7 +40,7 @@
   </div>
 
   <!-- chart + top sellers — PAID-ONLY (analytics). On Free these render locked. -->
-  <div class="grid two" style="margin-top:14px;grid-template-columns:1.7fr 1fr" id="analyticsRow">
+  <div class="grid chartrow" style="margin-top:14px" id="analyticsRow">
     <div class="card"><h2>Sales — last 30 days <span id="sampChart"></span></h2><div id="chart"><span class="muted small">…</span></div></div>
     <div class="card"><h2>Top sellers <span id="sampTop"></span></h2><div id="top"><span class="muted small">…</span></div></div>
   </div>
