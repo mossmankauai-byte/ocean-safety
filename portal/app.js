@@ -22,10 +22,19 @@ const DEMO_PARTNER = { id: "demo", name: "Your Shop (demo)", slug: "your-shop", 
 // So analytics and promotions are PAID-ONLY — on Free they render locked, never
 // as data. Demo/sales calls can flip with ?plan=paid to show a prospect both.
 const PLAN_PAID_PRICE = "$829/mo";
+// DEFAULTS DIFFER BY MODE, on purpose:
+//   demo  -> "paid". Every OceanSafe demo shows the FULL product (same as the
+//            operator consoles, whose isFree is only true on an explicit
+//            ?plan=free). A prospect should never open a sales link onto a
+//            locked box. ?plan=free still shows the gated view for contrast.
+//   real  -> "free". A signed-in shop must actually see its gate, and no paid
+//            shop exists yet. When the Paid plan is wired to the backend this
+//            should read the partner row instead of defaulting.
 window.OCEANSAFE_PLAN = (function () {
+  const fallback = DEMO ? "paid" : "free";
   const q = new URLSearchParams(location.search).get("plan");
   if (q === "paid" || q === "free") { try { localStorage.setItem("os_portal_plan", q); } catch (e) {} return q; }
-  try { return localStorage.getItem("os_portal_plan") || "free"; } catch (e) { return "free"; }
+  try { return localStorage.getItem("os_portal_plan") || fallback; } catch (e) { return fallback; }
 })();
 window.isPaid = function () { return window.OCEANSAFE_PLAN === "paid"; };
 // Store take: Free 12.7% (payout 87.3%) · Paid 0% (payout 100%).
