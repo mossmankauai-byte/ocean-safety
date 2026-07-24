@@ -26,7 +26,10 @@
   .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-bottom:16px}
   h4{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--green-d); margin:0 0 14px; font-weight:700}
   label{font-size:12px; font-weight:700; color:var(--ink2); display:block; margin:12px 0 5px}
-  input{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font-family:inherit; font-size:15px; background:#fff}
+  input,select{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px; font-family:inherit; font-size:15px; background:#fff}
+  select{appearance:none; -webkit-appearance:none; cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b7a80' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 12px center; padding-right:32px}
   input:focus{outline:none; border-color:var(--green)}
   .btn{width:100%; border:0; border-radius:12px; padding:14px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; background:var(--green); color:#fff; margin-top:18px}
   .btn:hover{background:var(--green-d)} .btn:disabled{opacity:.5; cursor:default}
@@ -111,6 +114,13 @@
       <label for="cars">Number of vehicles</label>
       <input type="number" id="cars" min="1" placeholder="75">
       <p style="font-size:11.5px;color:var(--ink2);margin:5px 0 0">Sets the paid price — <b>$5 per vehicle per month</b>. Required.</p>
+      <label for="island">Island</label>
+      <select id="island">
+        <option value="kauai">Kaua&#699;i</option>
+        <option value="maui">Maui</option>
+        <option value="oahu">O&#699;ahu</option>
+      </select>
+      <p style="font-size:11.5px;color:var(--ink2);margin:5px 0 0">Where the fleet operates. This is what their store and co-branded guide are keyed to &mdash; get it wrong and the co-brand goes inert, because a guide only honours its own island.</p>
       <label for="email">Billing email</label>
       <input type="email" id="email" placeholder="billing@theirfleet.com">
       <label for="admin">Admin key</label>
@@ -252,7 +262,7 @@
 (function(){
   "use strict";
   var $=function(id){return document.getElementById(id);};
-  var DATA=null, _admin="", _email="", _cars=0, PAID=false;
+  var DATA=null, _admin="", _email="", _cars=0, _island="kauai", PAID=false;
   var SEGS=["renter","exchange","owner"];
   function setMsg(t,c){ var m=$("msg"); m.textContent=t; m.className="msg "+(c||""); }
 
@@ -262,7 +272,7 @@
     if(!cars || cars<1){ setMsg("Enter the number of vehicles — it sets the paid price.","err"); return; }
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ setMsg("Enter a valid billing email.","err"); return; }
     if(!admin){ setMsg("Enter the admin key.","err"); return; }
-    _admin=admin; _email=email; _cars=cars;
+    _admin=admin; _email=email; _cars=cars; _island=$("island").value;
     $("go").disabled=true; setMsg("Provisioning…","");
     // the operator backbone counts units generically — a fleet's units are its vehicles
     fetch("/api/ts-signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin:admin,name:name,email:email,rooms:cars})})
@@ -298,12 +308,23 @@
 
   $("startBill").onclick=function(){
     var b=$("startBill"), m=$("billMsg"); b.disabled=true; b.textContent="Starting…"; m.textContent="";
-    fetch("/api/car-upgrade",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin:_admin,slug:DATA.slug,key:DATA.key,name:DATA.resort,email:_email,cars:_cars})})
+    fetch("/api/car-upgrade",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin:_admin,slug:DATA.slug,key:DATA.key,name:DATA.resort,email:_email,cars:_cars,island:_island})})
       .then(function(r){return r.json();})
       .then(function(j){
         if(j.ok){
-          b.style.display="none"; m.style.color="var(--green-d)";
-          m.innerHTML="&#10003; Billing started &mdash; Square emailed the $"+j.monthly.toLocaleString()+"/mo invoice to "+_email+".";
+          b.style.display="none";
+          var line="&#10003; Billing started &mdash; Square emailed the $"+j.monthly.toLocaleString()+"/mo invoice to "+_email+".";
+          // Billing and the store are two systems. Say which one landed, because "paid but
+          // no store" is the exact failure this whole rail was built to stop being silent.
+          if(j.store && j.store.provisioned){
+            m.style.color="var(--green-d)";
+            m.innerHTML=line+" Their store is live at <b>/p/"+DATA.slug+"</b>.";
+          } else {
+            m.style.color="#8a6d1f";
+            m.innerHTML=line+" <b>The store did not provision</b> ("+((j.store&&j.store.reason)||"unknown")+
+              ") &mdash; they are being charged for a store they cannot see. Press Retry; it will not charge twice.";
+            b.style.display=""; b.disabled=false; b.textContent="Retry store setup";
+          }
           unlockTour();
         } else {
           b.disabled=false; b.textContent="Retry"; m.style.color="#c0492b";
