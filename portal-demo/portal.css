@@ -28,6 +28,9 @@ a{color:var(--ocean)}
    padding — the console's sub-tab row sits directly above this iframe. */
 .os-embed .bar{display:none}
 .os-embed .wrap{padding-top:4px}
+/* .center is a 100vh flex well — inside a console frame that's a screen of nothing
+   above the sign-in card. Let it size to its content instead. */
+.os-embed .center{min-height:0;padding:28px 20px}
 
 /* cards */
 .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px}
