@@ -5059,7 +5059,14 @@ function renderActs(){
   // Beaches: kid-friendly beach pins only — first filter, default for the Family tab.
   if(sub === 'beaches'){
     B.forEach(b=>{
-      if(!b.kid || b.warning_only || kidHazardFloor(b,{mo:new Date().getMonth()}))return; // floor-aware: drop the kid pin for intrinsically/seasonally unsafe beaches (condition-independent, so stable during data outages)
+      // Unsafe-for-kids beaches populate as hazard pins instead of disappearing.
+      if(b.warning_only || (b.kid && kidHazardFloor(b,{mo:new Date().getMonth()}))){
+        const mk=L.marker([b.lat,b.lon],{icon:mkHazardIcon(b)}).addTo(map);
+        mk.on('click',()=>openSheet(b.id));
+        actMkrs['hazard_'+b.id]=mk;
+        return;
+      }
+      if(!b.kid)return;
       const r=scored[b.id]||{status:'green',kid:true};
       const mk=L.marker([b.lat,b.lon],{icon:mkIcon(b,r)}).addTo(map);
       mk.on('click',()=>openSheet(b.id));
@@ -5077,7 +5084,13 @@ function renderActs(){
   });
   if(sub === 'all'){
     B.forEach(b=>{
-      if(!b.kid || b.warning_only || kidHazardFloor(b,{mo:new Date().getMonth()}))return; // floor-aware: drop the kid pin for intrinsically/seasonally unsafe beaches (condition-independent, so stable during data outages)
+      if(b.warning_only || (b.kid && kidHazardFloor(b,{mo:new Date().getMonth()}))){
+        const mk=L.marker([b.lat,b.lon],{icon:mkHazardIcon(b)}).addTo(map);
+        mk.on('click',()=>openSheet(b.id));
+        actMkrs['hazard_'+b.id]=mk;
+        return;
+      }
+      if(!b.kid)return;
       const r=scored[b.id]||{status:'green',kid:true};
       const mk=L.marker([b.lat,b.lon],{icon:mkIcon(b,r)}).addTo(map);
       mk.on('click',()=>openSheet(b.id));
@@ -6212,7 +6225,8 @@ function renderMap(){
   let mi=0;
   if(window._activeTab === 'beaches' || !window._activeTab){
   const hazardsOnly = window._activeSub === 'hazards';
-  const showDanger = hazardsOnly || ints.includes('danger');
+  const showAll = window._activeSub === 'all';
+  const showDanger = hazardsOnly || showAll || ints.includes('danger');
   B.forEach(b=>{
     let r;
     if(hazardsOnly){
@@ -6231,7 +6245,8 @@ function renderMap(){
       if(r.status==='warning' && !showDanger)return;
     }
     vis++;
-    const mk=L.marker([b.lat,b.lon],{icon:mkIcon(b,r)}).addTo(map);
+    // A dangerous beach never wears a normal beach pin, whatever filter surfaced it.
+    const mk=L.marker([b.lat,b.lon],{icon:b.warning_only?mkHazardIcon(b):mkIcon(b,r)}).addTo(map);
     const isFirst = !window._mapPainted;
     if(isFirst){
       const delay=80+mi*70; mi++;
@@ -7535,7 +7550,7 @@ const SUBTABS = {
     {sub:'hazards',label:'Hazards'},
     {sub:'all',label:'All'}
   ]},
-  beaches: {default:'swim', items:[
+  beaches: {default:'all', items:[
     {sub:'hazards',label:'Hazards'},
     {sub:'all',label:'All'},
     {sub:'swim',label:'Swim'},
@@ -7606,7 +7621,7 @@ function beachesFilterCounts(){
   const intentCount = (intent) => safe.filter(b => Array.isArray(b.intents) && b.intents.includes(intent)).length;
   return {
     hazards,
-    all:         safe.length,
+    all:         safe.length + hazards,
     swim:        intentCount('swim'),
     snorkel:     intentCount('snorkel'),
     walk:        intentCount('walk'),
@@ -7653,7 +7668,7 @@ function subtabCountsFor(tabName){
 }
 
 function familyFilterCounts(){
-  const beaches  = (typeof B !== 'undefined') ? B.filter(b => b.kid && !b.warning_only && !kidHazardFloor(b, {mo:new Date().getMonth()})).length : 0;
+  const beaches  = (typeof B !== 'undefined') ? B.filter(b => b.warning_only || b.kid).length : 0;
   const hazards  = (typeof B !== 'undefined') ? B.filter(b => b.warning_only).length : 0;
   const easyHikes = (typeof HIKES !== 'undefined') ? HIKES.filter(h => h.difficulty === 'easy').length : 0;
   const c = (t) => ACTS.filter(a => a.type === t).length;
