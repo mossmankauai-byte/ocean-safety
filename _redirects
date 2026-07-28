@@ -76,3 +76,10 @@
 /cars              /car-providers.html               200
 /fleet             /cars-operator-dashboard.html      200
 /cars-pdf          /OceanSafe-Cars-OnePager.pdf      200
+
+# ── Short segment URLs so the summary sheet is typeable (2026-07-27) ──
+# /concierge is a single root file, so a 200 rewrite is safe (same as /hotel).
+# /retail points into the portal folder, so it must 301 like /shopdemo above,
+# or the portal's relative portal.css / app.js / sales.html would resolve to root.
+/concierge   /analytics-console-concierge.html   200
+/retail      /portal-demo/dashboard.html         301
