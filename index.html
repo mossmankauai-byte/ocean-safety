@@ -6261,7 +6261,10 @@ function renderMap(){
   // Re-render channels so they stay in sync and visible
   if(typeof renderChannels === 'function') renderChannels();
   try{ declutterMarks(); }catch(e){}
-  document.getElementById('nores').style.display=vis?'none':'block';
+  // The empty-state banner belongs to the Beaches tab only. renderMap skips its beach loop
+  // on every other tab, so vis stays 0 there and the banner used to hang over Family/Trails.
+  const _onBeaches = (window._activeTab === 'beaches' || !window._activeTab);
+  document.getElementById('nores').style.display=(_onBeaches && !vis)?'block':'none';
 }
 
 // ── MAP DECLUTTER ───────────────────────────────────────────────────────────
