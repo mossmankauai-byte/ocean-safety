@@ -4770,7 +4770,13 @@ function mkIcon(b,r){
   // cream "do-not-enter" pictogram on a teal disk — unmistakable at a glance.
   const _c = (r && r._c) ? r._c : null;
   ensureRipCSS();
-  if(isDangerCondition(b, r, _c)){
+  // Family tab, no verdict at all → hazard pictogram, not the orange caution dot. "We can't
+  // rate this beach right now" is a stronger statement than "not great today", so it gets the
+  // louder treatment. Checks the authoritative `scored` map because renderActs substitutes
+  // {status:'green'} for an unscored beach, which would otherwise read as an all-clear.
+  const _famUnscored = window._activeTab === 'acts' && !b.warning_only &&
+    !(typeof scored !== 'undefined' && scored[b.id]);
+  if(_famUnscored || isDangerCondition(b, r, _c)){
     // Brown-water identification on the danger pin: ring + brown-tinted title pill with an
     // inline droplet, so the cause reads at a glance and can't be covered by a neighboring
     // marker (a separate stacked tag could be). Brown always routes through this branch —
@@ -4844,12 +4850,24 @@ function mkIcon(b,r){
     return `<span class="os-ripdot${hi}" style="background:${dc}" aria-label="${lvl}" title="${lvl} — relative estimate, not a measurement"></span>`;
   })() : '';
 
+  // CAUTION DOT — Family tab only. A kid-friendly beach keeps its pin here even when today's
+  // conditions gate it off the Beaches tab (parents planning a day should still see the spot
+  // exists). Without a marker, those pins fall through to the neutral teal "no live data" disk
+  // and read as an all-clear. The orange dot says "not rated good today — open the card".
+  const _cauDot = (()=>{
+    if(window._activeTab !== 'acts' || b.warning_only) return '';
+    const st = (typeof scored !== 'undefined' && scored[b.id]) ? scored[b.id].status : null;
+    if(!st || st === 'green') return '';   // unscored took the hazard-glyph path above
+    const lvl = "Use caution today — this beach isn't rated good right now. Tap the pin for today's read.";
+    return `<span class="os-ripdot" style="background:#d97706" aria-label="${lvl}" title="${lvl}"></span>`;
+  })();
+
   if(glyphSrc){
     // Primary path: brand circular disk PNG with conditional disk color. Drop-shadow gives
     // it a slight lift off the map tiles; animation delay staggers the markers in on load.
     const delay = Math.round(Math.random() * 250);
     return L.divIcon({
-      html:`<div class="mkw${isBrown ? ' mk-brown' : ''}" style="animation-delay:${delay}ms" data-glyph="${glyphKey}"><div style="position:relative">${_ripDot}<img src="${glyphSrc}" alt="" style="width:42px;height:42px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.22))"></div>${brownLbl}</div>`,
+      html:`<div class="mkw${isBrown ? ' mk-brown' : ''}" style="animation-delay:${delay}ms" data-glyph="${glyphKey}"><div style="position:relative">${_ripDot}${_cauDot}<img src="${glyphSrc}" alt="" style="width:42px;height:42px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.22))"></div>${brownLbl}</div>`,
       className:'',iconSize:[120,72],iconAnchor:[60,46]
     });
   }
@@ -5445,7 +5463,7 @@ function openToursSheet(){
    Reuses the app's REAL primitives: B (beaches), score()/getDayConditions()/FORECAST
    (conditions), FOODS/DRINKS (local spots), WALKS/PLAN_BIKE (new), TOURS_LIBRARY/
    pickFeaturedTour (opt-in tours), and the kbg_saves_v1 favorites (heartButton/isSaved). */
-var _planDay=0, _planArea='South Shore', _planVibe='chill', _planTours=false, _planPickSlot=-1, _planSlots=null, _planSaved=false, _planRandom=false;
+var _planDay=0, _planArea=null, _planVibe='chill', _planTours=false, _planPickSlot=-1, _planSlots=null, _planSaved=false, _planRandom=false;
 function _planById(arr,id){return arr.filter(function(x){return x.id===id;})[0];}
 function _planParseHours(h){
   if(!h) return null;
@@ -5465,9 +5483,31 @@ function _planOpenFor(item, part){
 }
 // Pick the top choice normally, or a random valid one when Shuffle is on.
 function _planChoose(list){ if(!list||!list.length) return null; return (_planRandom && list.length>1) ? list[Math.floor(Math.random()*list.length)] : list[0]; }
-var PLAN_AREAS=[{key:'South Shore',label:'South'},{key:'East Side',label:'East'},{key:'North Shore',label:'North'},{key:'West Side',label:'West'}];
+var PLAN_AREAS_KAUAI=[{key:'South Shore',label:'South'},{key:'East Side',label:'East'},{key:'North Shore',label:'North'},{key:'West Side',label:'West'}];
+function _planAreas(){
+  var rs=(window.ACTIVE&&ACTIVE.regions)||[];
+  // Kauaʻi keeps its shipped chip order (South first) — this change is additive for the
+  // other islands, which read their own ISLANDS[*].regions.
+  if(!rs.length || _planIsKauai()) return PLAN_AREAS_KAUAI;
+  return rs.map(function(r){ return {key:r.r,label:r.label}; });
+}
+function _planDefaultArea(){ var a=_planAreas(); return a[0]&&a[0].key; }
+// Walks + the Kapaʻa bike path are Kauaʻi-only datasets (they are NOT repointed by
+// repointIslandGlobals). Never serve them on another island.
+function _planIsKauai(){ return ((window.ACTIVE&&ACTIVE.slug)||'kauai')==='kauai'; }
+function _planWalks(){ return _planIsKauai() ? WALKS : []; }
+// Island-safe "on land" slot: a local walk if this island has them, else a real family
+// activity from the island's own ACTS, else nothing (caller renders the unknown card).
+function _planLandPick(area){
+  var w=_planSavedFirst(_planWalks().filter(function(x){return x.r===area;}),'walk')[0];
+  if(w) return {kind:(w.kind||'walk'),ref:w};
+  if(_planIsKauai() && area==='East Side' && PLAN_BIKE[0]) return {kind:'bike',ref:PLAN_BIKE[0]};
+  var a=_planChoose(_planSavedFirst((typeof ACTS!=='undefined'?ACTS:[]).filter(function(x){return x.r===area;}),'act'));
+  if(a) return {kind:'act',ref:a};
+  return null;
+}
 var PLAN_VIBES=[{key:'chill',label:'Beach & chill',ints:['swim','walk']},{key:'snorkel',label:'Snorkel',ints:['snorkel']},{key:'family',label:'Family',ints:['swim','snorkel']},{key:'adventure',label:'Adventure',ints:['walk','tidepools']},{key:'food',label:'Foodie',ints:['swim','walk']}];
-var PLAN_KMETA={beach:{label:'Beach',color:'#0f4c5c'},drink:{label:'Coffee',color:'#4f46e5'},food:{label:'Eat',color:'#e07856'},walk:{label:'Walk',color:'#4a7c59'},bike:{label:'Ride',color:'#16a34a'},hike:{label:'Hike',color:'#4a7c59'},tour:{label:'Tour',color:'#c9a84c'}};
+var PLAN_KMETA={beach:{label:'Beach',color:'#0f4c5c'},drink:{label:'Coffee',color:'#4f46e5'},food:{label:'Eat',color:'#e07856'},walk:{label:'Walk',color:'#4a7c59'},bike:{label:'Ride',color:'#16a34a'},hike:{label:'Hike',color:'#4a7c59'},act:{label:'Family',color:'#c9a84c'},tour:{label:'Tour',color:'#c9a84c'}};
 function _planVibeObj(){var v=PLAN_VIBES.filter(function(x){return x.key===_planVibe;})[0];return v||PLAN_VIBES[0];}
 function _planClip(s,n){s=s||'';return s.length>n?s.slice(0,n-1)+'…':s;}
 function _planSavedFirst(list,kind){return list.slice().sort(function(a,b){var sa=isSaved(kind,a.id)?1:0,sb=isSaved(kind,b.id)?1:0;return sb-sa;});}
@@ -5502,32 +5542,32 @@ function _planGoodBeaches(){
   return cands;
 }
 function _planAfternoon(slots){
-  if(_planArea==='West Side'){
+  if(_planIsKauai() && _planArea==='West Side'){
     if(_planDayOutlook()==='ok'){ var sp=B.filter(function(b){return b.id==='salt_pond';})[0]; if(sp) return {when:'Afternoon',kind:'beach',ref:sp}; }
-    var ww=_planChoose(_planSavedFirst(WALKS.filter(function(x){return x.r==='West Side';}),'walk'));
+    var ww=_planChoose(_planSavedFirst(_planWalks().filter(function(x){return x.r==='West Side';}),'walk'));
     if(ww) return {when:'Afternoon',kind:'walk',ref:ww}; // a West thing-to-do (canyon lookout, Hanapēpē, Glass Beach, Russian Fort)
     var usedH=slots.filter(function(s){return s.kind==='hike';}).map(function(s){return s.ref.id;});
     var h2=_planChoose(_planSavedFirst(_planWestHikes().filter(function(h){return usedH.indexOf(h.id)<0;}),'hike'))||_planWestHikes()[0];
     if(h2) return {when:'Afternoon',kind:'hike',ref:h2};
   }
-  if(_planArea==='East Side') return {when:'Afternoon',kind:'bike',ref:PLAN_BIKE[0]};
+  if(_planIsKauai() && _planArea==='East Side') return {when:'Afternoon',kind:'bike',ref:PLAN_BIKE[0]};
   if(_planDayOutlook()==='ok'){
     var usedB=slots.filter(function(s){return s.kind==='beach';}).map(function(s){return s.ref.id;});
     var b2=_planChoose(_planGoodBeaches().filter(function(b){return usedB.indexOf(b.id)<0;}));
     if(b2) return {when:'Afternoon',kind:'beach',ref:b2};
   }
-  var w=_planSavedFirst(WALKS.filter(function(x){return x.r===_planArea;}),'walk')[0]||WALKS[0];
-  return {when:'Afternoon',kind:'walk',ref:w};
+  var lp=_planLandPick(_planArea);
+  return lp ? {when:'Afternoon',kind:lp.kind,ref:lp.ref} : {when:'Afternoon',kind:'unknown'};
 }
 function buildPlanDay(){
   var area=_planArea, c=getDayConditions(_planDay), slots=[];
   var drList=DRINKS.filter(function(x){return x.r===area && _planOpenFor(x,'morning');}); if(!drList.length) drList=DRINKS.filter(function(x){return x.r===area;});
   var morn=null, mornKind='drink';
-  if(area==='North Shore'){ var tri=_planById(FOODS,'trilogy_coffee'); if(tri){ morn=tri; mornKind='food'; } } // Trilogy Coffee lives in FOODS — save as 'food' so the heart resolves
+  if(_planIsKauai() && area==='North Shore'){ var tri=_planById(FOODS,'trilogy_coffee'); if(tri){ morn=tri; mornKind='food'; } } // Trilogy Coffee lives in FOODS — save as 'food' so the heart resolves
   if(!morn){ morn=_planChoose(_planSavedFirst(drList,'drink'))||drList[0]||DRINKS[0]; mornKind='drink'; }
   if(morn) slots.push({when:'Morning',kind:mornKind,ref:morn});
   var outlook=_planDayOutlook();
-  if(area==='West Side'){
+  if(_planIsKauai() && area==='West Side'){
     var whs=_planWestHikes();
     if(_planVibe==='family'||_planVibe==='chill'){ var easy=whs.filter(function(h){return (h.difficulty||'').toLowerCase()==='easy';}); if(easy.length) whs=easy; } // easy lookouts for family/chill
     var wh=_planChoose(_planSavedFirst(whs,'hike'))||whs[0]||_planWestHikes()[0];
@@ -5535,12 +5575,12 @@ function buildPlanDay(){
   } else if(outlook==='unknown'){
     slots.push({when:'Late morning',kind:'unknown'});
   } else if(outlook==='rough'){
-    var wr=_planSavedFirst(WALKS.filter(function(x){return x.r===area;}),'walk')[0]||(area==='East Side'?PLAN_BIKE[0]:WALKS.filter(function(x){return x.r===area;})[0]||WALKS[0]);
-    slots.push({when:'Late morning',kind:(wr.kind||'walk'),ref:wr});
+    var wr=_planLandPick(area);
+    slots.push(wr?{when:'Late morning',kind:wr.kind,ref:wr.ref}:{when:'Late morning',kind:'unknown'});
   } else {
     var good=_planGoodBeaches();
     if(good.length) slots.push({when:'Late morning',kind:'beach',ref:_planChoose(good)});
-    else { var w=_planSavedFirst(WALKS.filter(function(x){return x.r===area;}),'walk')[0]||(area==='East Side'?PLAN_BIKE[0]:WALKS.filter(function(x){return x.r===area;})[0]||WALKS[0]); slots.push({when:'Late morning',kind:(w.kind||'walk'),ref:w}); }
+    else { var w=_planLandPick(area); slots.push(w?{when:'Late morning',kind:w.kind,ref:w.ref}:{when:'Late morning',kind:'unknown'}); }
   }
   var lfList=FOODS.filter(function(x){return x.r===area && _planOpenFor(x,'lunch');}); if(!lfList.length) lfList=FOODS.filter(function(x){return x.r===area;});
   var lf=_planChoose(_planSavedFirst(lfList,'food')); if(lf) slots.push({when:'Lunch',kind:'food',ref:lf});
@@ -5566,6 +5606,7 @@ function _planSlotSub(s){
   }
   if(s.kind==='drink'||s.kind==='food') return (it.type||'')+' · '+it.r+(it.price?' · '+it.price:'');
   if(s.kind==='walk'||s.kind==='bike') return _planClip(it.note||'',80)+' · '+it.r;
+  if(s.kind==='act') return _planClip(it.tip||'',80)+' · '+it.r+(it.price?' · '+it.price:'');
   if(s.kind==='hike') return (it.difficulty?it.difficulty.charAt(0).toUpperCase()+it.difficulty.slice(1):'Hike')+(it.length_mi?' · '+it.length_mi+' mi':'')+' · '+_planClip(it.tip||it.r,60);
   if(s.kind==='tour') return (it.subtitle||'')+' · conditions-matched';
   return '';
@@ -5606,7 +5647,7 @@ function renderPlanDay(){
     var dn=(typeof FORECAST!=='undefined'&&FORECAST&&FORECAST[i]&&FORECAST[i].shortDate)?FORECAST[i].shortDate:'';
     strip+='<button class="plan-dchip'+(i===_planDay?' on':'')+'" onclick="planSetDay('+i+')"><span class="plan-dw">'+lab+'</span><span class="plan-dn">'+dn+'</span><span class="plan-dot" style="background:'+dot+'"></span></button>';
   }
-  var areaChips=PLAN_AREAS.map(function(a){return '<button class="plan-chip'+(a.key===_planArea?' on':'')+'" onclick="planSetArea(\''+a.key+'\')">'+a.label+'</button>';}).join('');
+  var areaChips=_planAreas().map(function(a){return '<button class="plan-chip'+(a.key===_planArea?' on':'')+'" onclick="planSetArea(\''+a.key+'\')">'+a.label+'</button>';}).join('');
   var vibeChips=PLAN_VIBES.map(function(v){return '<button class="plan-chip'+(v.key===_planVibe?' on':'')+'" onclick="planSetVibe(\''+v.key+'\')">'+v.label+'</button>';}).join('');
   var rows=(_planSlots||[]).map(function(s,idx){return _planSlotRow(s,idx);}).join('');
   var saveBtn=_planSaved?'<span class="plan-save saved">Saved to ♥</span>':'<button class="plan-save" onclick="savePlanDay()">Save this day</button>';
@@ -5624,7 +5665,8 @@ function renderPlanDay(){
 }
 function planRebuild(){ _planSlots=buildPlanDay(); _planSaved=false; renderPlanDay(); }
 function openPlanSheet(opts){
-  if(!_planArea) _planArea='South Shore';
+  var _areas=_planAreas().map(function(a){return a.key;});
+  if(!_planArea || _areas.indexOf(_planArea)<0) _planArea=_planDefaultArea();
   planRebuild();
   document.getElementById('sheet').classList.add('on');
   document.getElementById('overlay').classList.add('on');
@@ -7741,7 +7783,11 @@ function applyPartnerMode(){
   var plan=document.querySelector('#tabs .tab[data-tab="activities"]');
   var toursTab=document.querySelector('#tabs .tab[data-tab="tours"]');
   var _cr=false; try{ _cr=(typeof _activeRefSlug==='function' && String(_activeRefSlug()||'').indexOf('cr-')===0); }catch(e){}
-  var keepTours = aff || _cr;
+  // Plan now shows on EVERY island (2026-07-28). `aff` still gates Shop below, but the
+  // Plan/Tours swap keys only on real affiliate mode + creator refs — non-sellable islands
+  // (Oʻahu/Maui/Hawaiʻi Island) get Plan like Kauaʻi. The Kauaʻi-only walk/bike data is
+  // gated inside the planner (_planWalks), so no Kauaʻi POI leaks onto another island.
+  var keepTours = (window.PARTNER_MODE==='affiliate') || _cr;
   if(plan) plan.style.display = keepTours ? 'none' : '';
   if(toursTab) toursTab.style.display = keepTours ? '' : 'none';
   var shopTab=document.querySelector('#tabs .tab[data-tab="shop"]');
