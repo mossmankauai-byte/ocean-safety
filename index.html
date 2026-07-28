@@ -2647,8 +2647,8 @@ window.switchLang = function(code){
 let B=[
   {id:'anini',name:'ʻAnini Beach',n:'Anini',r:'North Shore',lat:22.2233,lon:-159.4620,
    caution:"Calm inside Kauaʻi's biggest reef in summer, but the channel and outer water turn dangerous in winter swell, and there have been drownings here. Stay inside the reef and check today's surf.",
-   facing:0,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'seasonal_active',lg_hours:'9am–5:30pm seasonal',sq:8,scenic:9,len:2200,
-   depth:5,stream:false,rain_mm:40,tidal:false,west:false,kid:true,drown:true,black:false,water_temp:78,
+   facing:0,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:8,scenic:9,len:2200,
+   depth:5,stream:false,rain_mm:40,tidal:false,west:false,kid:true,drown:true,drown_zone:'channel',black:false,water_temp:78,
    parking:'Small lot off Anini Rd. Fills fast on weekends — arrive before 8am.',
    intents:['snorkel','swim','walk','photography','tidepools'],
    tip:"Kauaʻi's largest reef creates a protected lagoon. Best snorkel at mid-to-high tide.",
@@ -2691,10 +2691,18 @@ let B=[
   {id:'kee',name:"Keʻe Beach",n:"Ke'e",r:'North Shore End',lat:22.2244,lon:-159.5827,
    facing:330,reef:true,morph:'reef_shielded',sb:2,sandy:true,lg:'seasonal_active',lg_hours:'9am–5pm seasonal',sq:9,scenic:10,len:400,
    depth:6,stream:false,rain_mm:20,tidal:false,west:false,kid:false,black:false,water_temp:77,
-   parking:'Permit required — book via gostateparks.hawaii.gov. No permit, no entry. Book weeks in advance.',
+   parking:'Permit required — book via gostateparks.hawaii.gov. No permit, no entry. Book weeks in advance. Nearest free parking is the county lot at Hāʻena Beach Park, about 3/4 mile east — it fills early.',
    intents:['snorkel','photography','walk','tidepools'],
    tip:"End of the road. Raised reef lagoon, excellent visibility. Summer only — if surf breaks over the reef, don't enter. Parking permit required.",
    photo:'https://live.staticflickr.com/1497/23865814933_f7eef4cb36_b.jpg',photo_credit:'Peter Burka / CC BY-SA 2.0',
+   pois:['napali']},
+  {id:'haena',name:'Hāʻena Beach Park',n:'Haena',r:'North Shore',lat:22.2223,lon:-159.5715,
+   caution:"Guarded daily, but there is no reef in front of the park — open swell funnels straight in between Mākua and Hauwa reefs. The shorebreak and backwash are what injure people here, and there have been drownings. Ask the lifeguard before entering, and stay out in any north swell.",
+   facing:0,reef:false,morph:'open_beach',sb:8,sandy:true,lg:'full_time',lg_hours:'8am–6pm daily',sq:6,scenic:10,len:800,
+   depth:8,stream:false,rain_mm:60,tidal:false,west:false,kid:false,drown:true,black:false,water_temp:77,
+   access_level:'easy',parking:'County lot at the park, fills early. This is the last free lot — Hāʻena State Park and Keʻe beyond it need a reservation.',
+   intents:['snorkel','walk','photography','sunset'],
+   tip:'Maniniholo Dry Cave is across the road and Nā Pali starts here. Pounding shorebreak — calm-summer snorkeling only, and only when the lifeguard says so.',
    pois:['napali']},
   {id:'queens_bath',name:"Queen's Bath",n:"Queen's Bath",r:'Princeville',lat:22.2272,lon:-159.4808,
    facing:0,reef:false,morph:'channel_reef',sb:9,sandy:false,lg:'none',lg_hours:null,sq:7,scenic:9,len:0,
@@ -2762,8 +2770,16 @@ let B=[
    intents:['walk','photography','sunset'],
    tip:'Long sandy stretch good for walking. Strong shorebreak — body surfers only.',
    photo:'https://upload.wikimedia.org/wikipedia/commons/9/9a/Kealia_Beach_Kauai_Hawaii_%2845554020174%29.jpg',photo_credit:'dronepicr / CC BY 2.0',pois:[]},
+  {id:'anahola',name:'Anahola Beach Park',n:'Anahola',r:'East Side',lat:22.1460,lon:-159.3010,
+   caution:"Guarded daily, and the reef-shielded east end of the bay is the calm water. The Anahola River mouth mid-beach is the hazard — rip currents on an outgoing tide, murky water after rain, and it sits away from the tower. Swim toward the east end.",
+   facing:75,reef:true,morph:'reef_shielded',sb:2,sandy:true,lg:'full_time',lg_hours:'8am–6pm daily',sq:6,scenic:8,len:1200,
+   depth:5,stream:true,rain_mm:35,tidal:false,west:false,kid:true,black:false,water_temp:78,
+   access_level:'easy',parking:'Paved county lot with restrooms and showers. Rarely fills.',
+   intents:['swim','snorkel','walk','photography'],
+   tip:'Local east-side pick with ironwood shade and camping. Swim the east end — stay off the river mouth in the middle, especially on a falling tide or after rain.',
+   pois:[]},
   {id:'kalapaki',name:'Kalapakī Beach',n:'Kalapaki',r:'East Side',lat:21.9540,lon:-159.3530,
-   facing:135,reef:false,morph:'bay',sb:2,sandy:true,lg:'full_time',lg_hours:'9am–5pm daily',sq:7,scenic:7,len:600,
+   facing:135,reef:false,morph:'bay',sb:2,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:7,scenic:7,len:600,
    depth:4,stream:false,rain_mm:35,tidal:false,west:false,kid:true,black:false,water_temp:78,ada:true,
    access_level:'easy',parking:'Marriott resort lot — beach is public. Paved path to sand.',
    intents:['swim','snorkel','walk'],
@@ -3894,7 +3910,12 @@ function northWinter(b,c){const f=b.facing;return (f<=45||f>=315)&&(c.mo>=10||c.
 // Missing lg counts as unguarded: the less reassuring default is the safe one.
 function noLifeguard(b){ return !b.lg || b.lg === 'none'; }
 function kidHazardFloor(b,c){
-  if(b.drown&&b.lg==='none')return true;
+  // drown_zone:'channel' = the documented fatality is OUTSIDE the swimmable water, in a reef
+  // channel this app already surfaces as its own CHANNELS hazard with its own warning. That
+  // should not blanket-disqualify a protected lagoon that is calm and family-usable inside the
+  // reef. Opt-in per record; absent (every other beach) keeps the original rule unchanged.
+  // Only rule (1) is exempted — rule (2) below still pulls these beaches in winter.
+  if(b.drown&&b.drown_zone!=='channel'&&b.lg==='none')return true;
   if(b.drown&&b.lg!=='full_time'&&northWinter(b,c))return true;
   return false;
 }
