@@ -2645,7 +2645,7 @@ window.switchLang = function(code){
 })();
 
 let B=[
-  {id:'anini',name:'ʻAnini Beach',n:'Anini',r:'North Shore',lat:22.2255,lon:-159.5012,
+  {id:'anini',name:'ʻAnini Beach',n:'Anini',r:'North Shore',lat:22.2233,lon:-159.4620,
    caution:"Calm inside Kauaʻi's biggest reef in summer, but the channel and outer water turn dangerous in winter swell, and there have been drownings here. Stay inside the reef and check today's surf.",
    facing:0,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'seasonal_active',lg_hours:'9am–5:30pm seasonal',sq:8,scenic:9,len:2200,
    depth:5,stream:false,rain_mm:40,tidal:false,west:false,kid:true,drown:true,black:false,water_temp:78,
@@ -2948,7 +2948,7 @@ let CHANNELS=[
    rule:"Stay inside the lagoon. The exit channel is outside the reef line.",
    tidal_amplify:true},
   {id:'anini_gap',name:'ʻAnini Reef Gap',beach_id:'anini',
-   lat:22.2251,lon:-159.4955,dir_deg:15,severity:.45,
+   lat:22.2229,lon:-159.4563,dir_deg:15,severity:.45,
    type:'reef_gap',
    desc:"A natural gap in the fringing reef at the east end of Anini. Gentle flow on most days. Strengthens when north swell pushes over the reef and water seeks the path out.",
    rule:"Stay west of the reef gap. Snorkel along the inside of the reef, not the outer edge.",
@@ -3053,7 +3053,7 @@ let ACTS=[
    type:'cultural',price:'$15 adults',hours:'9am–4pm Mon-Sat',duration_min:60,
    tip:'Best rainy day option. Hawaiian artifacts, history exhibits, gift shop with local crafts.',
    tags:['indoor','cultural','rain_ok','school_age','teen']},
-  {id:'fish_pier',name:'Anini Fishing Pier',n:'Anini Pier',r:'North Shore',lat:22.2233,lon:-159.5018,
+  {id:'fish_pier',name:'Anini Fishing Pier',n:'Anini Pier',r:'North Shore',lat:22.2211,lon:-159.4626,
    type:'wildlife',price:'Free',hours:'Always open',duration_min:30,
    tip:'Watch tropical fish in clear lagoon water from above. No swimming needed.',
    tags:['wildlife','free','ada','stroller','toddler','little_kid']},
@@ -3693,6 +3693,22 @@ const ws=(s,c)=>Math.max(0,1-Math.pow(s/c,2));
 //      "Conditions unavailable" state rather than displaying this raw number.
 // Never lower this; never coerce unknown surf to a calm value.
 const SURF_UNAVAILABLE = 99;
+// NIGHT CLOCK. Sunrise/sunset are compared as TIME-OF-DAY, never as absolute Dates.
+// The API's daily.sunrise[0] can carry an older calendar date (stale SW cache, a
+// prerendered payload, a device clock that rolled past midnight mid-session). Comparing
+// full Dates then made `now >= sunset` permanently true and painted every pin the night
+// colour in broad daylight. Minutes-of-day is immune to that: only the clock time matters.
+function _minOfDay(d){ return d.getHours()*60 + d.getMinutes(); }
+function isNightNow(now){
+  const sr = (window._sunriseToday instanceof Date) ? window._sunriseToday : null;
+  const ss = (window._sunsetToday  instanceof Date) ? window._sunsetToday  : null;
+  if(sr && ss && !isNaN(sr) && !isNaN(ss)){
+    const m = _minOfDay(now);
+    return m < _minOfDay(sr) || m >= _minOfDay(ss);
+  }
+  return now.getHours() < 6 || now.getHours() >= 19;  // coarse fallback, pre-fetch
+}
+
 // FRESHNESS BUDGET (Commit B). A successful live fetch stamps window._liveFetchedAt.
 // Surf older than this budget — or never fetched at all (offline / SNAP cold-start /
 // repeated fetch failures, where the timestamp is null) — is no longer trusted as
@@ -4613,6 +4629,14 @@ function initMap(){
   window.frameIsland = function(animate){
     try{
       if(typeof map==='undefined' || !map) return;
+      // A fitBounds() against a not-yet-laid-out container (height ~0) resolves to maxZoom —
+      // the map lands at z19 over open ocean, so no island, no tiles and no beach pins are in
+      // view, and nothing re-frames it afterwards. Wait for real height, then fit.
+      var _sz = map.getSize();
+      if(!_sz || _sz.y < 50 || _sz.x < 50){
+        requestAnimationFrame(function(){ try{ map.invalidateSize(); frameIsland(animate); }catch(e){} });
+        return;
+      }
       window._zoomedZone=null;
       var g = ACTIVE && ACTIVE.geoBox; if(!g) return;
       // zoomSnap:0.5 rounds the computed fit DOWN, which threw away ~40% of the island's
@@ -4762,11 +4786,7 @@ function mkIcon(b,r){
   // NIGHT: same sunrise/sunset clock the header chips use. Pulled from the globals fetchLive
   // sets after API success; falls back to a coarse 6am/7pm window pre-fetch.
   const _now = new Date();
-  const _sr = (window._sunriseToday instanceof Date) ? window._sunriseToday : null;
-  const _ss = (window._sunsetToday  instanceof Date) ? window._sunsetToday  : null;
-  const isNight = (_sr && _ss)
-    ? (_now < _sr || _now >= _ss)
-    : (_now.getHours() < 6 || _now.getHours() >= 19);
+  const isNight = isNightNow(_now);
 
   // COLOR (priority): warning > surfHazard > night > status-derived. Warning and hazard win
   // over night so a midnight-rendered map still flags genuine danger in red/amber, not gray.
@@ -6360,29 +6380,29 @@ let chHeat={};  // Heat map polygons by channel id
 // Channel direction: ~15° true (NNE outflow on falling tide).
 const ANINI_REEF_CHANNEL = [
   // West wall, lagoon end → ocean end
-  [22.22455, -159.49605],   // inside SW corner (narrow inlet)
-  [22.22510, -159.49620],
-  [22.22580, -159.49640],
-  [22.22650, -159.49665],
-  [22.22720, -159.49695],
-  [22.22790, -159.49725],   // outside NW corner (wider mouth)
+  [22.22235, -159.45685],   // inside SW corner (narrow inlet)
+  [22.22290, -159.45700],
+  [22.22360, -159.45720],
+  [22.22430, -159.45745],
+  [22.22500, -159.45775],
+  [22.22570, -159.45805],   // outside NW corner (wider mouth)
   // East wall, ocean end → lagoon end (closing the polygon)
-  [22.22810, -159.49490],   // outside NE corner
-  [22.22735, -159.49475],
-  [22.22660, -159.49470],
-  [22.22585, -159.49475],
-  [22.22510, -159.49490],
-  [22.22465, -159.49510]    // inside SE corner
+  [22.22590, -159.45570],   // outside NE corner
+  [22.22515, -159.45555],
+  [22.22440, -159.45550],
+  [22.22365, -159.45555],
+  [22.22290, -159.45570],
+  [22.22245, -159.45590]    // inside SE corner
 ];
 
 // Centerline of the channel (lagoon end → ocean end) — used for arrow placement
 const ANINI_CENTERLINE = [
-  [22.22460, -159.49558],
-  [22.22510, -159.49555],
-  [22.22585, -159.49555],
-  [22.22660, -159.49565],
-  [22.22735, -159.49580],
-  [22.22800, -159.49605]
+  [22.22240, -159.45638],
+  [22.22290, -159.45635],
+  [22.22365, -159.45635],
+  [22.22440, -159.45645],
+  [22.22515, -159.45660],
+  [22.22580, -159.45685]
 ];
 
 // Compute polygon centroid for shrinking the heat layer toward the core
@@ -8750,21 +8770,18 @@ async function rescore(){
     const airTemp = _sw && typeof _sw.temp === 'number' ? _sw.temp
                   : (typeof window._airTemp === 'number') ? window._airTemp : 78;
     const _now = new Date();
-    const hourNow = _now.getHours();
     // Prefer the actual sunrise/sunset times the API returned (window._sunriseToday /
     // window._sunsetToday — populated in fetchLive). Falls back to the old hardcoded
     // 6am/7pm window only if those globals haven't been set yet (e.g. before first fetch).
+    const isNight = isNightNow(_now);
     const _sr = (window._sunriseToday instanceof Date) ? window._sunriseToday : null;
     const _ss = (window._sunsetToday  instanceof Date) ? window._sunsetToday  : null;
-    const isNight = (_sr && _ss)
-      ? (_now < _sr || _now >= _ss)
-      : (hourNow < 6 || hourNow >= 19);
     // Minutes-since-sunrise / minutes-until-sunset — used to clamp the UV chip near
     // dawn/dusk where Open-Meteo's hour-quantized uv_index lags reality. Within 45 min
     // of either boundary, real UV is dropping fast and "Low" reads more honestly than
     // whatever the API returned for that hour.
-    const _minSinceSunrise = _sr ? (_now - _sr) / 60000 : 999;
-    const _minUntilSunset  = _ss ? (_ss - _now) / 60000 : 999;
+    const _minSinceSunrise = _sr ? (_minOfDay(_now) - _minOfDay(_sr)) : 999;
+    const _minUntilSunset  = _ss ? (_minOfDay(_ss) - _minOfDay(_now)) : 999;
     const _nearTwilight    = !isNight && (_minSinceSunrise < 45 || _minUntilSunset < 45);
 
     // Helper: paint a chip with value, hint label, and activity-readiness color class
@@ -10571,8 +10588,16 @@ async function boot(){
   if(pills) pills.style.display = 'none';
   if(typeof buildShoreChips === 'function') buildShoreChips();
   initMap();
-  await wireTabs();(async()=>{await fetchLive();rescore();})();
-  setTimeout(()=>map.invalidateSize(),100);
+  await wireTabs();
+  // FIRST PAINT: score and color the pins immediately from cached/SNAP data so the map
+  // never shows a field of default-teal markers while the network is still in flight.
+  // surfDataStale() is true pre-fetch, so this pass renders CAUTION (amber), never a
+  // false calm 'go' — the live pass below upgrades it to the real verdict.
+  rescore();
+  (async()=>{await fetchLive();rescore();})();
+  // Re-frame after the size settles: invalidateSize() alone corrects the viewport but leaves
+  // whatever zoom the first fit computed, so a late layout would otherwise stay stuck at z19.
+  setTimeout(()=>{ map.invalidateSize(); if(typeof frameIsland==='function' && !window._zoomedZone) frameIsland(false); },100);
   // Refresh weather every 15 minutes so the header chips don't go stale on long sessions
   setInterval(async () => {
     await fetchLive();

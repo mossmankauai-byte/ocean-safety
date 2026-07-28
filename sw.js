@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v203-2026-07-24-maui-bacteria';
+const CACHE_VERSION = 'v204-2026-07-27-night-colors-map-frame';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -71,9 +71,18 @@ if (workbox) {
   );
 
   // ---- Open-Meteo weather/forecast ----
+  // NetworkFirst, NOT StaleWhileRevalidate. SWR answers from cache first, so a cold launch
+  // was served the PREVIOUS payload — days old if the app hadn't been opened — while the app
+  // stamped it as a fresh fetch. That is how every pin turned night-grey in daylight (the
+  // sunrise/sunset in that payload was 3 days stale) and how old surf could read as current.
+  // NetworkFirst with a short timeout keeps the offline story intact (cache is still the
+  // fallback, and fetchLive already has its own 8s abort + SNAP path) while guaranteeing that
+  // any usable connection yields today's conditions. Conditions are safety data — a slow
+  // correct answer beats an instant stale one.
   workbox.routing.registerRoute(
     /^https:\/\/api\.open-meteo\.com\//,
-    new workbox.strategies.StaleWhileRevalidate({
+    new workbox.strategies.NetworkFirst({
+      networkTimeoutSeconds: 5,
       cacheName: 'open-meteo',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
