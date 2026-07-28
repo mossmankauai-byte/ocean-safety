@@ -1,14 +1,21 @@
 # Security headers — brand InfoSec / vendor-scan readiness.
-# (Content-Security-Policy is intentionally NOT here yet: the app loads many third-party
-#  origins — Leaflet CDN, map tiles, Google Fonts, GetYourGuide/Viator widgets, PostHog,
-#  Wikimedia/Unsplash/Flickr images — so CSP is being built + tested separately to avoid
-#  breaking the map or the tour widgets.)
+# CSP is REPORT-ONLY on purpose (2026-07-27). Browsers never block on it, so this cannot
+# break the map or the tour widgets — it only reports what an enforced policy WOULD block.
+# Two reasons it is not enforced yet:
+#   1. The app is ~10 inline <script> blocks, so script-src needs 'unsafe-inline' until
+#      those are moved out or nonced — which removes most of CSP's real value.
+#   2. ~60 third-party origins are referenced (tour widgets, tiles, photo hosts, telemetry)
+#      and many load only on specific tabs, so an enforced policy guessed wrong = broken app.
+# Origins below were MEASURED off the live site, not guessed. Before flipping this to the
+# enforcing `Content-Security-Policy`, exercise every tab and confirm zero violation reports.
+# ⚠ frame-ancestors stays permissive — the app is an intentionally embeddable widget.
 # No X-Frame-Options: the app is an intentionally embeddable widget (hotels embed it).
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()
+  Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors *; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.sentry-cdn.com https://widget.getyourguide.com https://www.viator.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.open-meteo.com https://*.supabase.co https://*.workers.dev https://*.i.posthog.com https://*.ingest.us.sentry.io https://world.openbeautyfacts.org; frame-src https://widget.getyourguide.com https://www.viator.com https://partners.booking.com https://www.google.com https://maps.google.com; worker-src 'self' blob:; manifest-src 'self'
   # Allow large image previews in Search / Discover (thumbnail-size directive; does NOT force indexing).
   X-Robots-Tag: max-image-preview:large
 
