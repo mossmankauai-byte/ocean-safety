@@ -2671,12 +2671,12 @@ let B=[
    photo:'https://upload.wikimedia.org/wikipedia/commons/3/3d/Beach_at_Salt_Pond_Park%2C_Kauai%2C_Hawaii_%2841862317925%29.jpg',photo_credit:'Christoph Strässler / CC BY-SA 2.0',
    pois:['sunscreen','kauaisea']},
   {id:'hanalei',name:'Hanalei Bay',n:'Hanalei',r:'North Shore',lat:22.2097,lon:-159.5033,
-   caution:"A summer swim bay that closes to swimming roughly November through March, when big north swell and a strong river-mouth current take over. There have been drownings here. Swim near the lifeguard when flags allow.",
-   facing:355,reef:false,morph:'open_beach',sb:4,sandy:true,lg:'seasonal_active',lg_hours:'9am–5:30pm seasonal',sq:4,scenic:10,len:7920,
-   depth:9,stream:true,rain_mm:25,tidal:false,west:false,kid:false,black:false,water_temp:77,
+   caution:"Guarded daily, and Kauaʻi's most popular swim bay in summer. Winter north swell brings big surf and a strong river-mouth current, and there have been drownings here. Swim near a tower and follow the flags.",
+   facing:355,reef:false,morph:'open_beach',sb:4,sandy:true,lg:'full_time',lg_hours:'8am–6pm daily',sq:4,scenic:10,len:7920,
+   depth:9,stream:true,rain_mm:25,tidal:false,west:false,kid:false,drown:true,black:false,water_temp:77,
    parking:'Black Pot Beach lot fills by 8am on weekends. Overflow parking on Weke Rd.',
-   intents:['walk','sunset','photography'],
-   tip:'2-mile crescent backed by Nā Pali mountains. Closes for swimming Nov–Mar. River mouth = brown water after rain.',
+   intents:['swim','walk','sunset','photography'],
+   tip:'2-mile crescent backed by Nā Pali mountains. Guarded daily — follow the flags; winter north swell brings big surf. River mouth = brown water after rain.',
    photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Hanalei_Bay_2_-_Kauai.jpg/1280px-Hanalei_Bay_2_-_Kauai.jpg',photo_credit:'Ralf Beier / CC BY 3.0',
    pois:['napali','kayakwailua']},
   {id:'lydgate',name:'Lydgate Beach Park',n:'Lydgate',r:'East Side',lat:22.0388,lon:-159.3406,
@@ -3908,7 +3908,7 @@ function score(b,c,ints){
   // Winter off-model rip: a drowning-history north-facing beach in the Nov–Mar swell season
   // has channel/exit currents the nearshore surf number underreads on a calm reading. Drop
   // the in-water recs (snorkel/swim) — the same beach keeps them Apr–Oct. Only ever REMOVES.
-  const offSeasonRip=b.drown&&northWinter(b,c);
+  const offSeasonRip=b.drown&&b.lg!=='full_time'&&northWinter(b,c);
   const sc={};
   // SURF-CEILING GATE (safety, monotonic-toward-caution). ws() only zeros the WAVE
   // sub-score past a ceiling — the wind/tide/rip/lifeguard/depth terms still sum to a
