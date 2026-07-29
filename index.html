@@ -2630,7 +2630,7 @@ window.switchLang = function(code){
 })();
 
 let B=[
-  {id:'anini',name:'ʻAnini Beach',n:'Anini',r:'North Shore',lat:22.2233,lon:-159.4620,
+  {id:'anini',landmark:true,name:'ʻAnini Beach',n:'Anini',r:'North Shore',lat:22.2233,lon:-159.4620,
    caution:"Calm inside Kauaʻi's biggest reef in summer, but the channel and outer water turn dangerous in winter swell, and there have been drownings here. Stay inside the reef and check today's surf.",
    facing:0,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:8,scenic:9,len:2200,
    depth:5,stream:false,rain_mm:40,tidal:false,west:false,kid:true,drown:true,drown_zone:'channel',black:false,water_temp:78,
@@ -2639,7 +2639,7 @@ let B=[
    tip:"Kauaʻi's largest reef creates a protected lagoon. Best snorkel at mid-to-high tide.",
    photo:'https://live.staticflickr.com/8093/8549882237_62a1dd11ca_b.jpg',photo_credit:'Gord Webster / CC BY-SA 2.0',
    pois:['sunscreen']},
-  {id:'poipu',name:"Poʻipū Beach Park",n:'Poipu',r:'South Shore',lat:21.8726,lon:-159.4598,
+  {id:'poipu',landmark:true,name:"Poʻipū Beach Park",n:'Poipu',r:'South Shore',lat:21.8726,lon:-159.4598,
    facing:180,reef:true,morph:'reef_shielded',sb:3,sandy:true,lg:'full_time',lg_hours:'9am–5:30pm daily',sq:7,scenic:8,len:1000,
    depth:7,stream:false,rain_mm:45,tidal:false,west:false,kid:true,black:false,water_temp:78,
    parking:'Free parking lot adjacent to beach. Busy weekends — arrive early.',
@@ -2655,16 +2655,16 @@ let B=[
    tip:"Kauaʻi's best-kept secret. Two protected coves, very calm water. Best sunset on the west side.",
    photo:'https://upload.wikimedia.org/wikipedia/commons/3/3d/Beach_at_Salt_Pond_Park%2C_Kauai%2C_Hawaii_%2841862317925%29.jpg',photo_credit:'Christoph Strässler / CC BY-SA 2.0',
    pois:['sunscreen','kauaisea']},
-  {id:'hanalei',name:'Hanalei Bay',n:'Hanalei',r:'North Shore',lat:22.2097,lon:-159.5033,
+  {id:'hanalei',landmark:true,name:'Hanalei Bay',n:'Hanalei',r:'North Shore',lat:22.2097,lon:-159.5033,
    caution:"Guarded daily, and Kauaʻi's most popular swim bay in summer. Winter north swell brings big surf and a strong river-mouth current, and there have been drownings here. Swim near a tower and follow the flags.",
    facing:355,reef:false,morph:'open_beach',sb:4,sandy:true,lg:'full_time',lg_hours:'8am–6pm daily',sq:4,scenic:10,len:7920,
-   depth:9,stream:true,rain_mm:25,tidal:false,west:false,kid:false,drown:true,black:false,water_temp:77,
+   depth:9,stream:true,rain_mm:25,tidal:false,west:false,kid:true,drown:true,black:false,water_temp:77,
    parking:'Black Pot Beach lot fills by 8am on weekends. Overflow parking on Weke Rd.',
    intents:['swim','walk','sunset','photography'],
    tip:'2-mile crescent backed by Nā Pali mountains. Guarded daily — follow the flags; winter north swell brings big surf. River mouth = brown water after rain.',
    photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Hanalei_Bay_2_-_Kauai.jpg/1280px-Hanalei_Bay_2_-_Kauai.jpg',photo_credit:'Ralf Beier / CC BY 3.0',
    pois:['napali','kayakwailua']},
-  {id:'lydgate',name:'Lydgate Beach Park',n:'Lydgate',r:'East Side',lat:22.0388,lon:-159.3406,
+  {id:'lydgate',landmark:true,name:'Lydgate Beach Park',n:'Lydgate',r:'East Side',lat:22.0388,lon:-159.3406,
    caution:"The walled lagoon is calm and guarded, good for young kids. The open beach outside the breakwater has strong surf and current, and a drowning has happened there. Keep little ones inside the lagoon.",
    facing:90,reef:true,morph:'lagoon',sb:1,sandy:true,lg:'full_time',lg_hours:'9am–5:30pm daily',sq:7,scenic:6,len:600,
    depth:4,stream:true,rain_mm:40,tidal:false,west:false,kid:true,drown:true,black:false,water_temp:78,
@@ -2673,7 +2673,7 @@ let B=[
    tip:'Stone breakwater creates the most protected lagoon on the east side. Perfect for first-time snorkelers.',
    photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg/1280px-Lydgate_Beach%2C_Kauai%2C_Hawaii.jpeg',photo_credit:'Grace808 / CC BY-SA 3.0',
    pois:['sunscreen']},
-  {id:'kee',name:"Keʻe Beach",n:"Ke'e",r:'North Shore End',lat:22.2221,lon:-159.5827,
+  {id:'kee',landmark:true,name:"Keʻe Beach",n:"Ke'e",r:'North Shore End',lat:22.2221,lon:-159.5827,
    facing:330,reef:true,morph:'reef_shielded',sb:2,sandy:true,lg:'seasonal_active',lg_hours:'9am–5pm seasonal',sq:9,scenic:10,len:400,
    depth:6,stream:false,rain_mm:20,tidal:false,west:false,kid:false,black:false,water_temp:77,
    parking:'Permit required — book via gostateparks.hawaii.gov. No permit, no entry. Book weeks in advance. Nearest free parking is the county lot at Hāʻena Beach Park, about 3/4 mile east — it fills early.',
@@ -2684,7 +2684,7 @@ let B=[
   {id:'haena',name:'Hāʻena Beach Park',n:'Haena',r:'North Shore',lat:22.2198,lon:-159.5661,
    caution:"Guarded daily, but there is no reef in front of the park — open swell funnels straight in between Mākua and Hauwa reefs. The shorebreak and backwash are what injure people here, and there have been drownings. Ask the lifeguard before entering, and stay out in any north swell.",
    facing:0,reef:false,morph:'open_beach',sb:8,sandy:true,lg:'full_time',lg_hours:'8am–6pm daily',sq:6,scenic:10,len:800,
-   depth:8,stream:false,rain_mm:60,tidal:false,west:false,kid:false,drown:true,black:false,water_temp:77,
+   depth:8,stream:false,rain_mm:60,tidal:false,west:false,kid:true,drown:true,black:false,water_temp:77,
    access_level:'easy',parking:'County lot at the park, fills early. This is the last free lot — Hāʻena State Park and Keʻe beyond it need a reservation.',
    intents:['snorkel','walk','photography','sunset'],
    tip:'Maniniholo Dry Cave is across the road and Nā Pali starts here. Pounding shorebreak — calm-summer snorkeling only, and only when the lifeguard says so.',
@@ -2733,7 +2733,7 @@ let B=[
    intents:[],tip:'Spectacular sunset and stargazing — but stay out of the water entirely.',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/PolihaleStatePark.jpg/1280px-PolihaleStatePark.jpg',photo_credit:'YuriVict / CC BY 3.0',pois:[]},
 
   // === SCOREABLE BEACHES (new additions with full data) ===
-  {id:'tunnels',name:'Tunnels (Mākua)',n:'Tunnels',r:'North Shore',lat:22.2238,lon:-159.5609,
+  {id:'tunnels',landmark:true,name:'Tunnels (Mākua)',n:'Tunnels',r:'North Shore',lat:22.2238,lon:-159.5609,
    caution:"Great summer snorkeling, but there is no lifeguard, and winter swell turns the reef channels into strong exit currents. There have been drownings here. Summer and calm days only; watch from shore in any north swell.",
    facing:0,reef:true,morph:'lagoon',sb:2,sandy:true,lg:'none',lg_hours:'No lifeguard — closest at Haena',sq:9,scenic:10,len:1500,
    depth:6,stream:false,rain_mm:55,tidal:true,west:false,kid:true,drown:true,black:false,water_temp:78,
@@ -2744,7 +2744,7 @@ let B=[
   {id:'kealia',name:'Keālia Beach',n:'Kealia',r:'East Side',lat:22.0936,lon:-159.3033,
    caution:"A heavy shorebreak drops straight onto the sand here and has caused serious injury. Best near the lifeguard tower on calm days; otherwise a beach to enjoy from the sand.",
    facing:90,reef:false,morph:'open',sb:6,sandy:true,lg:'full_time',lg_hours:'9am–5pm daily',sq:7,scenic:8,len:1500,
-   depth:5,stream:false,rain_mm:40,tidal:false,west:false,kid:false,black:false,water_temp:78,
+   depth:5,stream:false,rain_mm:40,tidal:false,west:false,kid:true,black:false,water_temp:78,
    access_level:'easy',parking:'Large paved lot off Kuhio Hwy. Restrooms.',
    intents:['walk','photography','sunset'],
    tip:'Long sandy stretch good for walking. Strong shorebreak — body surfers only.',
@@ -2758,6 +2758,7 @@ let B=[
    tip:'Local east-side pick with ironwood shade and camping. Swim the east end — stay off the river mouth in the middle, especially on a falling tide or after rain.',
    pois:[]},
   {id:'kalapaki',name:'Kalapakī Beach',n:'Kalapaki',r:'East Side',lat:21.9540,lon:-159.3530,
+   caution:"No lifeguard here, so you are watching your own kids. The inner bay is shallow and protected, which is what makes it good for little ones, but it deepens and the current picks up toward the harbor mouth, and Nawiliwili is a working harbor with boat traffic. Keep them in close, and give the water a day to clear after heavy rain.",
    facing:135,reef:false,morph:'bay',sb:2,sandy:true,lg:'none',lg_hours:'No lifeguard',sq:7,scenic:7,len:600,
    depth:4,stream:false,rain_mm:35,tidal:false,west:false,kid:true,black:false,water_temp:78,ada:true,
    access_level:'easy',parking:'Marriott resort lot — beach is public. Paved path to sand.',
@@ -6328,7 +6329,14 @@ function declutterMarks(){
     ensureDeclutterCSS();
     if(window._activeSub==='hazards') return;   // never thin a hazard pin — skip the whole pass on the hazards subtab
     // Beaches keep their severity-aware priority: warning > big-surf caution > green > default.
-    _declutterReg(mkrs, function(id){ const r=scored[id]||{}; return (r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3; });
+    _declutterReg(mkrs, function(id){
+      const r=scored[id]||{}, b=B.find(x=>x.id===id);
+      // Severity picks the tier; INSIDE a tier the beach people actually search for leads, so a
+      // cluster wears a name a visitor recognises (Hanalei, not the unnamed cove next to it).
+      // Doubling the tier leaves room for the landmark bonus without ever crossing tiers.
+      const tier=(r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3;
+      return tier*2 - ((b&&b.landmark)?1:0);
+    });
     // POI tabs (Family / Trails / Town / Stays) pile up in dense areas just like beaches, but
     // places carry no severity — so keep-by-position (flat priority, ties broken top→bottom).
     // Each registry is thinned on its own, so a pin only ever hides a same-category neighbour.
