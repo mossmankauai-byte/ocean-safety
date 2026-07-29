@@ -2459,7 +2459,7 @@ function _gateLive(){
   var now = Date.now();
   if(now - _gateLiveAt < 10*60*1000) return;
   _gateLiveAt = now;
-  ['kauai','oahu','maui'].forEach(function(slug){
+  ['kauai','oahu','maui','hawaii'].forEach(function(slug){
     try {
       var isl = ISLANDS[slug]; if(!isl || !isl.live || !isl.seaLevel) return;
       var ctl = ('AbortController' in window) ? new AbortController() : null;

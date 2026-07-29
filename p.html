@@ -60,9 +60,11 @@ const slug=(m?m[1]:new URLSearchParams(location.search).get("slug")||"").toLower
   document.getElementById("bar").style.background=primary;
   const seg=p.segment;
   // Route the CTA to the partner's own island (get_partner_page projects partners.island,
-  // migration 0024). hawaii (not live) or missing falls back to kauai — same guard as
-  // d.html's PROMO_SHOT_ISLANDS.
-  const LIVE_ISLANDS={kauai:"Kauaʻi",maui:"Maui",oahu:"Oʻahu"};
+  // migration 0024). A missing/unknown island falls back to kauai. hawaii JOINED 2026-07-28 when
+  // ISLANDS.hawaii.live went true — before that a Big Island partner's own co-brand page sent
+  // their guests to /go/kauai under the label "See today's Kauaʻi beach-safety report", i.e. the
+  // wrong island's beaches, rips and weather under that partner's brand.
+  const LIVE_ISLANDS={kauai:"Kauaʻi",maui:"Maui",oahu:"Oʻahu",hawaii:"Hawaiʻi Island"};
   const island=LIVE_ISLANDS[p.island]?p.island:"kauai";
   const tag = seg==="hotel"?"Your resort’s beach-safety guide"
             : seg==="timeshare"?"Your club’s beach-safety guide"
