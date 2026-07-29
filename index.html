@@ -2433,18 +2433,27 @@ function _gateVideo(g){
   } catch(e){}
   if(document.getElementById('igVideo')) return;
   var v = document.createElement('video');
-  v.id = 'igVideo'; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+  // MAX_PLAYS caps the loop: the gate is decorative, so after a few passes we drop the
+  // <video> and let the graded poster stand in. Saves battery/CPU on a phone left open
+  // (it does NOT save bandwidth — the file is fetched once and replays from memory).
+  var MAX_PLAYS = 3, _plays = 0;
+  v.id = 'igVideo'; v.muted = true; v.loop = false; v.autoplay = true; v.playsInline = true;
   v.setAttribute('muted',''); v.setAttribute('playsinline','');
   v.poster = poster;
   v.src = '/assets/video/bg-' + (port ? 'port' : 'land') + '.mp4';
   // Some engines drop the eager play() issued before media data exists — retry once playable.
   v.addEventListener('canplay', function(){ if(v.paused) v.play().catch(function(){}); });
+  v.addEventListener('ended', function(){
+    _plays++;
+    if(_plays < MAX_PLAYS){ try{ v.currentTime = 0; }catch(e){} v.play().catch(function(){}); }
+    else if(v.parentNode){ v.parentNode.removeChild(v); }   // poster backgroundImage stays
+  });
   // Engines may also suspend an on-screen loop (tab occlusion, energy heuristics). Retry once
   // per engine pause while the gate is up; a deliberate block (e.g. iOS Low Power Mode)
   // rejects the play() and is respected — the graded poster frame stands in.
   v.addEventListener('pause', function(){
     setTimeout(function(){
-      if(v.paused && !v.ended && g.style.display !== 'none' && !document.hidden && document.getElementById('igVideo') === v){
+      if(v.paused && !v.ended && _plays < MAX_PLAYS && g.style.display !== 'none' && !document.hidden && document.getElementById('igVideo') === v){
         v.play().catch(function(){});
       }
     }, 500);
