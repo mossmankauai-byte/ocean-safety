@@ -83,3 +83,10 @@
 # or the portal's relative portal.css / app.js / sales.html would resolve to root.
 /concierge   /analytics-console-concierge.html   200
 /retail      /portal-demo/dashboard.html         301
+
+# ── Kōloa Landing is a boat ramp and shore-dive site, NOT a beach (2026-07-28) ──
+# Pulled from the beach dataset so it can never surface on a beach filter. The old
+# conditions page scored it as a beach, so it retires here rather than 404ing —
+# the dangerous-beaches guide is the honest destination for the search intent.
+/today/koloa_landing       /today/dangerous-beaches   301
+/today/koloa_landing.html  /today/dangerous-beaches   301
