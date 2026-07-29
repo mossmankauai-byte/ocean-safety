@@ -2365,13 +2365,20 @@ const ISLANDS = {
     data:null   // lazy-loaded from /data/oahu.js
   },
   hawaii: {
-    // live:false — Hawaiʻi Island is BUILT but NOT signed off. The 4-yr stress test flagged 6
-    // of its beaches (4 under-warned, 2 calm-but-fatal) and those fixes were never applied —
-    // only Maui (9) and Oʻahu (11) were resolved. resolveIsland() only returns a slug whose
-    // live flag is true, so ?island=hawaii falls back to honest, correctly-labeled Kauaʻi.
-    // Flip to true ONLY after its 6 flags are resolved + human sign-off. See
-    // Desktop/OceanSafe/BEACH-SAFETY-SIGNOFF-OAHU-MAUI.md.
-    slug:'hawaii', name:'Hawaiʻi Island', live:false, defaultSide:'kona', sideKey:'os_side_hawaii',
+    // live:true — OPENED 2026-07-28 by Nick's explicit decision. The old comment here claimed the
+    // 6 stress-test flags were never applied and that data/hawaii.js carried 0 danger text: both
+    // were STALE. All 6 flagged beaches (richardson, carlsmith, leleiwi, onekahakaha, hapuna,
+    // kaunaoa) carry hazard text in `danger` AND `tip`, and the amber `dgr` advisory in openSheet
+    // renders `danger` for NON-warning_only beaches — verified in-browser on all 6 before this flip.
+    //
+    // ⚠️ Per-beach HUMAN sign-off was deliberately SKIPPED for this island (Nick's call, 2026-07-28)
+    // — Kauaʻi, Oʻahu and Maui each had one. Adversarial machine verification is the only gate that
+    // ran here. It remains an OPEN item; the lifeguard field in particular has not had the human
+    // pass that Oʻahu's 22 lifeguard claims got.
+    //
+    // SELLABLE_ISLANDS in the store's supabase/functions/_shared/islands.ts MUST stay in lockstep
+    // with this flag — an island that is live but not sellable 403s its own paying prospects.
+    slug:'hawaii', name:'Hawaiʻi Island', live:true, defaultSide:'kona', sideKey:'os_side_hawaii',
     map:{ center:[19.60,-155.50], zoom:9, minZoom:8, maxBounds:[[18.40,-156.50],[20.75,-154.40]] },
     seaLevel:{ lat:19.64, lon:-155.99 },
     geoBox:{ latMin:18.85, latMax:20.30, lonMin:-156.15, lonMax:-154.75 },
