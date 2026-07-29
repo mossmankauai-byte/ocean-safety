@@ -4923,7 +4923,7 @@ function mkHazardIcon(b){
     ? `<img src="${src}" alt="" style="width:40px;height:40px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">`
     : `<div class="mka" style="border-color:#d97706;background:#fef3c7;color:#b45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></svg></div>`;
   return L.divIcon({
-    html:`<div class="mkw">${inner}<div class="mklbl" style="border-color:#fca5a5;color:#b91c1c">${b.n}</div></div>`,
+    html:`<div class="mkw" data-glyph="danger">${inner}<div class="mklbl" style="border-color:#fca5a5;color:#b91c1c">${b.n}</div></div>`,
     className:'',iconSize:[120,62],iconAnchor:[60,20]
   });
 }
@@ -6253,7 +6253,7 @@ function ensureDeclutterCSS(){
 // hide any pin whose cluster leader sits within R px → tag the leader "+N" → de-overlap the
 // name pills. The name is read from the rendered .mklbl, so this works unchanged for beach
 // pins and every POI pin (both use the same .mkw/.mklbl markup). Fail-open on any error.
-function _declutterReg(reg, prioFn, exemptFn){
+function _declutterReg(reg, prioFn){
   try{
     if(!reg) return;
     const ids=Object.keys(reg), items=[];
@@ -6264,7 +6264,13 @@ function _declutterReg(reg, prioFn, exemptFn){
       const old=mk._icon.querySelector('.mk-more'); if(old) old.remove();
       if(mk._clusterClick){ mk._icon.removeEventListener('click', mk._clusterClick, true); mk._clusterClick=null; }
       const lbl=mk._icon.querySelector('.mklbl'), name=(lbl&&lbl.textContent)||'';
-      items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio:prioFn(ids[i]),name,exempt:exemptFn?!!exemptFn(ids[i]):false});
+      // A pin counts as a hazard when its renderer tagged it data-glyph="danger" — both
+      // mkHazardIcon and mkIcon's danger branch do. Reading what was actually DRAWN, rather
+      // than re-deriving the condition here, means this rule can never drift out of sync
+      // with the renderer (the first version of it tested r.status and silently missed every
+      // beach turned dangerous by live conditions).
+      const _hazard = !!mk._icon.querySelector('[data-glyph="danger"]');
+      items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio:prioFn(ids[i]),name,exempt:_hazard});
     }
     // Priority first, then top→bottom, left→right so the survivor set is stable across renders.
     items.sort((a,b)=>a.prio-b.prio || a.p.y-b.p.y || a.p.x-b.p.x);
@@ -6322,8 +6328,7 @@ function declutterMarks(){
     ensureDeclutterCSS();
     if(window._activeSub==='hazards') return;   // never thin a hazard pin — skip the whole pass on the hazards subtab
     // Beaches keep their severity-aware priority: warning > big-surf caution > green > default.
-    _declutterReg(mkrs, function(id){ const r=scored[id]||{}; return (r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3; },
-      function(id){ const b=B.find(x=>x.id===id); if(b&&b.warning_only) return true; const r=scored[id]||{}; return r.status==='warning'; });
+    _declutterReg(mkrs, function(id){ const r=scored[id]||{}; return (r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3; });
     // POI tabs (Family / Trails / Town / Stays) pile up in dense areas just like beaches, but
     // places carry no severity — so keep-by-position (flat priority, ties broken top→bottom).
     // Each registry is thinned on its own, so a pin only ever hides a same-category neighbour.
