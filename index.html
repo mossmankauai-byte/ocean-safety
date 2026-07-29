@@ -8776,7 +8776,26 @@ function renderZones(){
     var poly=L.polygon(z.outline,{pane:'zones',className:'os-zone-poly',color:'#1f6fdd',weight:2.5,opacity:.95,fillColor:'#1f6fdd',fillOpacity:.06,lineJoin:'round',lineCap:'round',bubblingMouseEvents:false});
     poly.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); zoomToZone(z); });
     poly.addTo(map); _zoneLayers.push(poly);
-    var bb=poly.getBounds(), badgePt=L.latLng(bb.getNorth(), bb.getCenter().lng);
+    // The badge used to sit on the district's INLAND edge, which for Waikīkī parked the
+    // magnifier right on top of the beach cluster — the two competed for the same taps. Push
+    // it off the SEAWARD edge instead (the shore the district faces, so this stays right if a
+    // north- or west-facing district is ever added) and nudge it clear by a fixed number of
+    // SCREEN pixels, converted through the current zoom, so the gap looks the same at every
+    // zoom level rather than collapsing as you zoom out. renderZones re-runs on zoomend, so
+    // the offset is recomputed each time.
+    var bb=poly.getBounds(), _sh=z.shore||'south';
+    var badgePt=(_sh==='north') ? L.latLng(bb.getNorth(), bb.getCenter().lng)
+              : (_sh==='east')  ? L.latLng(bb.getCenter().lat, bb.getEast())
+              : (_sh==='west')  ? L.latLng(bb.getCenter().lat, bb.getWest())
+                                : L.latLng(bb.getSouth(), bb.getCenter().lng);
+    try{
+      // 18px, not more: the seaward edge already clears the beach pins by ~50px, and at the
+      // default island frame there is only ~37px of water between that edge and the bottom of
+      // the map, so a bigger nudge walks the badge off-screen.
+      var _o=18, _dx=(_sh==='east')?_o:(_sh==='west')?-_o:0, _dy=(_sh==='north')?-_o:(_sh==='south')?_o:0;
+      var _pt=map.latLngToLayerPoint(badgePt);
+      badgePt=map.layerPointToLatLng(L.point(_pt.x+_dx, _pt.y+_dy));
+    }catch(e){}
     var lbl=L.marker(badgePt,{interactive:true,keyboard:false,zIndexOffset:2000,icon:L.divIcon({className:'',iconSize:[0,0],iconAnchor:[0,0],html:'<div class="os-zone-badge"><span class="zb">'+_ZMAG+'</span><span class="zn">'+z.name+'</span></div>'})});
     lbl.on('click',function(e){ if(L.DomEvent)L.DomEvent.stop(e); zoomToZone(z); });
     lbl.addTo(map); _zoneLayers.push(lbl);
