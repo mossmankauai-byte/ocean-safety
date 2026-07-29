@@ -108,11 +108,11 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   const ISLAND_LABEL={kauai:["Kauaʻi","Kauaʻi"],maui:["Maui","Maui"],oahu:["Oʻahu","Oʻahu"],hawaii:["Hawaiʻi Island","Hawaiʻi"]};
   const [islandName,islandShort]=ISLAND_LABEL[p.island]||ISLAND_LABEL.kauai;
   // Islands that have a /assets/shot-promo-<island>.png capture. Gated so a missing shot can't
-  // render a broken image; Hawaiʻi has none yet (not live). Add a key when its capture lands.
+  // render a broken image. Hawaiʻi Island's capture landed 2026-07-28 with its go-live.
   // MUST be declared up here, above the root.innerHTML build: that build calls promoCard() ->
   // phonePreview(), and `const` is not hoisted — declaring it next to phonePreview put it in the
   // temporal dead zone at call time and threw ReferenceError, killing the whole town_ad dashboard.
-  const PROMO_SHOT_ISLANDS = { kauai:1, maui:1, oahu:1 };
+  const PROMO_SHOT_ISLANDS = { kauai:1, maui:1, oahu:1, hawaii:1 };
   // Town-filter labels for the "Your pin" card. Up HERE with the other island constants for the
   // same reason PROMO_SHOT_ISLANDS is: the root.innerHTML build calls pinCard() long before this
   // point in the file, and `const` is not hoisted — declaring it next to pinCard() puts it in the
