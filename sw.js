@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v211-2026-07-28-revert-hazard-pins';
+const CACHE_VERSION = 'v212-2026-07-28-koloa-not-a-beach-hazard-never-leads-cluster';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
