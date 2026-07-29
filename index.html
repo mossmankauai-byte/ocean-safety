@@ -4346,9 +4346,17 @@ function contactRow(item){
 
 // // Directions URL — prefer the place name so Google routes to its canonical pin
 // (more reliable than our hand-typed lat/lon, which can be off by a few hundred feet).
+// Google-Maps search label per island. ASCII on purpose — this string goes into a maps query,
+// not into UI copy. Until 2026-07-28 this function hardcoded ', Kauai, HI' for EVERY island, so
+// every "Get Directions" button on Maui, Oʻahu and Hawaiʻi Island searched Kauaʻi: "Kāʻanapali
+// Beach, Kauai, HI", "Waimea Bay, Kauai, HI", "Hāpuna Beach, Kauai, HI". Worst on the names that
+// repeat across islands (Punaluʻu, Kahaluʻu, Kailua, Waimea), where the guest is not merely
+// unfound but actively pointed at the wrong place. Verified in production before the fix.
+const DIR_ISLAND = { kauai:'Kauai', maui:'Maui', oahu:'Oahu', hawaii:'Hawaii Island' };
 function dirUrl(name, lat, lon){
+  const isl = DIR_ISLAND[(window.ACTIVE && ACTIVE.slug)] || 'Kauai';
   return name
-    ? `https://maps.google.com/?q=${encodeURIComponent(name + ', Kauai, HI')}`
+    ? `https://maps.google.com/?q=${encodeURIComponent(name + ', ' + isl + ', HI')}`
     : `https://maps.google.com/?q=${lat},${lon}`;
 }
 let LIVE=null;

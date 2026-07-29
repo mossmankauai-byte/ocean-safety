@@ -112,7 +112,7 @@
     "sb": 7,
     "sandy": true,
     "lg": "seasonal_active",
-    "lg_hours": "County funded a lifeguard tower here in July 2019 and lifeguards have been reported on duty during the day, BUT Kua Bay is NOT on the current oceansafety.hawaii.gov guarded list — staffing/hours UNCONFIRMED [verify]",
+    "lg_hours": "County funded a lifeguard tower here in July 2019 and lifeguards have been reported on duty during the day, BUT Kua Bay is NOT on the current oceansafety.hawaii.gov guarded list — staffing/hours UNCONFIRMED",
     "sq": 4,
     "scenic": 9,
     "len": 250,
