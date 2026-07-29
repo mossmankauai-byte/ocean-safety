@@ -6331,11 +6331,14 @@ function declutterMarks(){
     // Beaches keep their severity-aware priority: warning > big-surf caution > green > default.
     _declutterReg(mkrs, function(id){
       const r=scored[id]||{}, b=B.find(x=>x.id===id);
-      // Severity picks the tier; INSIDE a tier the beach people actually search for leads, so a
-      // cluster wears a name a visitor recognises (Hanalei, not the unnamed cove next to it).
-      // Doubling the tier leaves room for the landmark bonus without ever crossing tiers.
+      // PROMINENCE OUTRANKS SEVERITY HERE, and that is deliberate: hazard pins are exempt from
+      // this pass entirely (they never lead and are never hidden), so every pin still in the
+      // running is a usable beach. Between usable beaches, which one wears the label is a
+      // legibility question, not a safety one — so the name a visitor actually recognises wins,
+      // and the cluster reads "Poʻipū", not "Shipwreck". Status still orders within each group,
+      // and everything hidden stays reachable in the list view and by zooming in.
       const tier=(r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3;
-      return tier*2 - ((b&&b.landmark)?1:0);
+      return ((b&&b.landmark)?0:10) + tier;
     });
     // POI tabs (Family / Trails / Town / Stays) pile up in dense areas just like beaches, but
     // places carry no severity — so keep-by-position (flat priority, ties broken top→bottom).
