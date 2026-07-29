@@ -392,21 +392,6 @@
     },
     {
       "@type": "TouristAttraction",
-      "name": "Kōloa Landing",
-      "url": "https://oceansafety.app/?beach=koloa_landing",
-      "description": "Popular shore dive but ROPE deaths in 2023-2024. Calm water can mask danger.",
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 21.8775,
-        "longitude": -159.4748
-      },
-      "containedInPlace": {
-        "@type": "Place",
-        "name": "Kauaʻi, Hawaiʻi"
-      }
-    },
-    {
-      "@type": "TouristAttraction",
       "name": "Tunnels (Mākua)",
       "url": "https://oceansafety.app/?beach=tunnels",
       "description": "Best snorkel on the north shore in summer. Dangerous in winter — channels become exit rips.",
@@ -2746,12 +2731,6 @@ let B=[
    depth:9,stream:false,rain_mm:5,tidal:false,west:true,kid:false,black:false,water_temp:78,
    access_level:'difficult',parking:'5-mile dirt road, 4WD only. No facilities.',
    intents:[],tip:'Spectacular sunset and stargazing — but stay out of the water entirely.',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/PolihaleStatePark.jpg/1280px-PolihaleStatePark.jpg',photo_credit:'YuriVict / CC BY 3.0',pois:[]},
-  {id:'koloa_landing',name:'Kōloa Landing',n:'Koloa Landing',r:'South Shore',lat:21.8775,lon:-159.4748,
-   warning_only:true,danger:'Popular shore dive but ROPE deaths in 2023-2024. Calm water can mask danger.',
-   facing:180,reef:true,morph:'rocky',sb:1,sandy:false,lg:'none',lg_hours:'No lifeguard',sq:5,scenic:6,len:300,
-   depth:9,stream:false,rain_mm:20,tidal:false,west:false,kid:false,black:true,water_temp:78,
-   access_level:'easy',parking:'Public lot at end of Hoonani Rd.',
-   intents:[],tip:'Snorkel/dive site — watch for sudden swimmer-induced pulmonary edema. Buddy required.',photo:'https://live.staticflickr.com/4630/28306804339_bc20c6e051_b.jpg',photo_credit:'Jeremy Bradford / CC BY 2.0',pois:[]},
 
   // === SCOREABLE BEACHES (new additions with full data) ===
   {id:'tunnels',name:'Tunnels (Mākua)',n:'Tunnels',r:'North Shore',lat:22.2238,lon:-159.5609,
@@ -6274,7 +6253,7 @@ function ensureDeclutterCSS(){
 // hide any pin whose cluster leader sits within R px → tag the leader "+N" → de-overlap the
 // name pills. The name is read from the rendered .mklbl, so this works unchanged for beach
 // pins and every POI pin (both use the same .mkw/.mklbl markup). Fail-open on any error.
-function _declutterReg(reg, prioFn){
+function _declutterReg(reg, prioFn, exemptFn){
   try{
     if(!reg) return;
     const ids=Object.keys(reg), items=[];
@@ -6285,16 +6264,25 @@ function _declutterReg(reg, prioFn){
       const old=mk._icon.querySelector('.mk-more'); if(old) old.remove();
       if(mk._clusterClick){ mk._icon.removeEventListener('click', mk._clusterClick, true); mk._clusterClick=null; }
       const lbl=mk._icon.querySelector('.mklbl'), name=(lbl&&lbl.textContent)||'';
-      items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio:prioFn(ids[i]),name});
+      items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio:prioFn(ids[i]),name,exempt:exemptFn?!!exemptFn(ids[i]):false});
     }
     // Priority first, then top→bottom, left→right so the survivor set is stable across renders.
     items.sort((a,b)=>a.prio-b.prio || a.p.y-b.p.y || a.p.x-b.p.x);
     const R=44, R2=R*R, kept=[];
     for(let k=0;k<items.length;k++){
       const it=items[k]; let hit=null;
-      for(let j=0;j<kept.length;j++){
-        const dx=it.p.x-kept[j].p.x, dy=it.p.y-kept[j].p.y;
-        if(dx*dx+dy*dy<R2){ hit=kept[j]; break; }
+      // SAFETY RULE — a hazard pin is exempt from clustering in BOTH directions. It never
+      // becomes a cluster leader (a red "do not enter" pin must never be the visible face of
+      // a group of safe beaches — tapping it then fans out places that are actually fine;
+      // that is exactly how tapping "Kōloa Landing" surfaced Poʻipū and Brennecke), and it is
+      // never hidden underneath a safe leader either (a missing hazard reads as "nothing to
+      // worry about here"). It simply draws on its own.
+      if(!it.exempt){
+        for(let j=0;j<kept.length;j++){
+          if(kept[j].exempt) continue;
+          const dx=it.p.x-kept[j].p.x, dy=it.p.y-kept[j].p.y;
+          if(dx*dx+dy*dy<R2){ hit=kept[j]; break; }
+        }
       }
       if(hit){ it.mk._icon.style.display='none'; hit.more=(hit.more||0)+1; hit.members.push(it.mk); }
       else { it.more=0; it.members=[it.mk]; kept.push(it); }
@@ -6334,7 +6322,8 @@ function declutterMarks(){
     ensureDeclutterCSS();
     if(window._activeSub==='hazards') return;   // never thin a hazard pin — skip the whole pass on the hazards subtab
     // Beaches keep their severity-aware priority: warning > big-surf caution > green > default.
-    _declutterReg(mkrs, function(id){ const r=scored[id]||{}; return (r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3; });
+    _declutterReg(mkrs, function(id){ const r=scored[id]||{}; return (r.status==='warning')?0:(r.status==='yellow')?1:(r.status==='green')?2:3; },
+      function(id){ const b=B.find(x=>x.id===id); if(b&&b.warning_only) return true; const r=scored[id]||{}; return r.status==='warning'; });
     // POI tabs (Family / Trails / Town / Stays) pile up in dense areas just like beaches, but
     // places carry no severity — so keep-by-position (flat priority, ties broken top→bottom).
     // Each registry is thinned on its own, so a pin only ever hides a same-category neighbour.
