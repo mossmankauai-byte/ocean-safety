@@ -6952,6 +6952,15 @@ function openSheet(id){
         <div><div class="poi-hero-name" style="color:#fff">${_bw.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${_bw.r} • Caution beach</div></div>
       </div>
       <div style="background:#fef3c7;border-left:3px solid #d97706;padding:12px 14px;margin-bottom:14px;border-radius:8px;color:#78530a;font-weight:600;font-size:14px;line-height:1.4"><span style="margin-right:6px">ⓘ</span>${_bw.danger}</div>
+      ${(function(){
+        // Current Hazards — the named rip/reef-exit/shorebreak channels attached to this beach.
+        // This warning_only branch returns before the main sheet template, so it never reached the
+        // ${cs} block below and a warning beach's channels rendered nowhere. Kauaʻi links channels
+        // only on non-warning beaches and Maui/Oʻahu link none, so no existing island rendered
+        // differently before or after this line: with no b.channels it produces the empty string.
+        var _ch = (_bw.channels || []).map(channelCard).join('');
+        return _ch ? '<div class="slbl hazard">Current Hazards</div><div class="prow">' + _ch + '</div>' : '';
+      })()}
       ${_wqNotice(_bw.id, false)}
       ${_amenityPanel(_amenityCondStates(_bw, null, null))}
       <div class="poi-grid">
