@@ -26,6 +26,10 @@
 /kauai  /index.html  200
 /oahu   /index.html  200
 /maui   /index.html  200
+# hawaii OPENED 2026-07-28. Required by the island gate: _gatePick() rewrites the URL to
+# /<slug>, so without this the Big Island card produced a URL that 404s on reload. This is
+# the exact-path app launcher — the public page tree stays at /big-island/, never /hawaii/.
+/hawaii /index.html  200
 
 # Creator ambassador program (2026-07-18)
 /creators   /creators.html      200
