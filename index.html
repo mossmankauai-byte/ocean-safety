@@ -7807,6 +7807,10 @@ function buildSubtabs(tabName){
         renderCoffee();
         renderDrinks();
         renderMarkets();
+        // Thin the pins we just painted. declutterMarks only ran from renderMap() (beaches) and
+        // on zoomend/moveend, so POI tabs painted un-clustered and only snapped into "+N" groups
+        // once the user nudged the map — dense areas (Waikīkī) looked like an unthinned pile.
+        try{ declutterMarks(); }catch(e){}
       }
       if(typeof renderSwellLayer==='function') renderSwellLayer();  if(typeof renderZones==='function') renderZones();  // gate waves per subtab (Layer 8: + Waikīkī zones)
     });
@@ -7923,6 +7927,10 @@ function wireTabs(){
       renderCrafts();
       renderCoffee();
       renderDrinks();
+      // renderMap() above already ran the declutter pass, but it ran BEFORE these POI
+      // registries were torn down and repainted — so the fresh pins came out unthinned.
+      // Re-run it here, after every registry exists.
+      try{ declutterMarks(); }catch(e){}
       if(window._activeTab !== 'beaches'){
         Object.values(chMkrs||{}).forEach(m=>m.remove());chMkrs={};
       } else {
@@ -8880,6 +8888,9 @@ async function rescore(){
   renderCrafts();
   renderCoffee();
   renderDrinks();
+  // Boot paints POI pins after renderMap()'s declutter pass, so thin them once here too —
+  // otherwise the first screen shows an unthinned pile until the user pans or zooms.
+  try{ declutterMarks(); }catch(e){}
   // Update header weather strip from live or snapshot data
   const D = (typeof LIVE !== 'undefined' && LIVE) ? LIVE : SNAP;
   if(D){
