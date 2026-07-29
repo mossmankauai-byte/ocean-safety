@@ -6306,11 +6306,24 @@ function _declutterReg(reg, prioFn){
       // than re-deriving the condition here, means this rule can never drift out of sync
       // with the renderer (the first version of it tested r.status and silently missed every
       // beach turned dangerous by live conditions).
-      const _hazard = !!mk._icon.querySelector('[data-glyph="danger"]');
-      items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio:prioFn(ids[i]),name,exempt:_hazard});
+      // BROWN-WATER CARVE-OUT — mkIcon routes a brown-gated beach through the SAME danger
+      // branch, so it carries data-glyph="danger" too, and the blanket exemption below made it
+      // unclusterable. In Waikīkī one rain event turns six beaches inside a 16px box brown and
+      // all six drew on top of each other, permanently. A brown gate is a conditions call on an
+      // otherwise usable beach, not a "never enter" hazard, so it DOES cluster — but it may
+      // never be the face of the group: the demotion in the sort below puts every brown pin
+      // behind every non-brown one, so a safer beach leads whenever the cluster contains one,
+      // and a brown pin only leads when every member is brown. Read from the rendered pin
+      // (mk-brown sits on the same .mkw), same principle as the hazard test itself.
+      const _dgEl = mk._icon.querySelector('[data-glyph="danger"]');
+      const _brown = !!(_dgEl && _dgEl.classList.contains('mk-brown'));
+      const _hazard = !!_dgEl && !_brown;
+      items.push({mk,p:map.latLngToContainerPoint(mk.getLatLng()),prio:prioFn(ids[i]),name,exempt:_hazard,brown:_brown});
     }
-    // Priority first, then top→bottom, left→right so the survivor set is stable across renders.
-    items.sort((a,b)=>a.prio-b.prio || a.p.y-b.p.y || a.p.x-b.p.x);
+    // Non-brown first (a brown pin never outranks a usable beach for leadership, whatever its
+    // priority — that beats even the landmark bonus), then priority, then top→bottom, left→right
+    // so the survivor set is stable across renders.
+    items.sort((a,b)=>(a.brown?1:0)-(b.brown?1:0) || a.prio-b.prio || a.p.y-b.p.y || a.p.x-b.p.x);
     const R=44, R2=R*R, kept=[];
     for(let k=0;k<items.length;k++){
       const it=items[k]; let hit=null;
