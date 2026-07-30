@@ -129,9 +129,13 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
                       farmers:"Farmers market", crafts:"Shop / crafts / gifts",
                       grocery:"Grocery / market", gas:"Gas / convenience" };
   const isTownAd = seg==="town_ad";
-  const isOperator = seg==="hotel"||seg==="pm"||seg==="timeshare"||seg==="rental"||seg==="retail";
+  // cars = Turo hosts / rental-car fleets (segment added by migration 0034). They are an
+  // operator like any other — co-branded guide, tracked QR codes, analytics — so they belong
+  // in isOperator. Without this they fell through to the storefront branch and were quoted
+  // shop pricing.
+  const isOperator = seg==="hotel"||seg==="pm"||seg==="timeshare"||seg==="rental"||seg==="retail"||seg==="cars";
   const isFree = Number(p.monthly_cents||0)===0;
-  const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : seg==="rental"?"Business" : seg==="retail"?"Store" : isTownAd?"Business" : "Shop";
+  const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : seg==="rental"?"Business" : seg==="retail"?"Store" : seg==="cars"?"Fleet" : isTownAd?"Business" : "Shop";
   const planTerms = isTownAd
     ? (isFree
         ? "Town Ad — Free. Your listing, your printable QR, and this dashboard. Sell tours or activities through your page and we split those 50/50, paid into your own Square."
@@ -140,13 +144,25 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     ? (isFree
         ? (seg==="retail" ? "OceanSafe for Retail — Free. $0/mo; OceanSafe takes 3% only on app sales (you keep 97%). Your page, QR codes, and analytics included."
           : seg==="rental" ? "OceanSafe for Rentals & Tours — Free to join. Tour commissions split 50/50; 12.7% on store sales (you keep 87.3%). Your page, QR codes, and analytics included."
+          // Cars free tier: the storefront IS the paid gate for this segment, so free
+          // deliberately has no store. Tour commissions split 50/50. Says nothing about the
+          // paid tier's tour split — that has never been ruled, so it stays unstated.
+          : seg==="cars" ? "OceanSafe for Car Fleets — Free. Your co-branded guide, your QR codes, and your analytics at no cost. Tour commissions split 50/50, paid into your own Square. The storefront comes with the paid plan."
           : "OceanSafe for "+(seg==="hotel"?"Hotels":"Operators")+" — Free. The co-branded guide, your QR codes, and your analytics at no cost.")
+        // Cars are priced PER VEHICLE, so the flat-rate "no per-room" line below would be a
+        // false description of their own bill.
+        : seg==="cars" ? "$"+Math.round((p.monthly_cents||0)/100)+"/mo — $5 per vehicle across your fleet. Adds your storefront, so guests can buy or rent gear straight from your guide, paid into your own Square."
         : "$"+Math.round((p.monthly_cents||0)/100)+"/mo flat — the whole property: all co-branding, promotions, and unlimited amenities. No per-room, no per-booking.")
     : "Storefront — Free: $0/mo + 3% only on in-app sales (you keep 97%) · or $500/store/mo with 0%. Square's card processing (~3.3% + 30¢) is your own cost as merchant of record — we don't mark it up.";
   const renews = (isOperator || isTownAd) && isFree ? null : renewal(p.paid_at);
   const ams=(Array.isArray(p.amenities)?p.amenities:[]).map(a=>a&&a.name?a.name:a).filter(Boolean);
   const qrCats = seg==="hotel"?[["room","In-room card"],["lobby","Lobby / front desk"],["welcome_email","Welcome email"],["general","Your own signage"]]
     : (seg==="pm"||seg==="timeshare")?[["unit","In each unit"],["welcome_email","Welcome email"],["general","Your signage"]]
+    // cars — these three keys are exactly what seed_partner_qr() creates for the segment
+    // (migration 0034). They must stay in lockstep: a cat with no qr_codes row scans into an
+    // untracked bucket, which would make the "which spot brings the most scans" line untrue.
+    // Note 'general' is NOT among them, so cars cannot use the shared BARE_GENERAL tile.
+    : seg==="cars"?[["booking","Booking confirmation"],["in_car","In the car"],["key_fob","On the keys"]]
     : isTownAd?[["receipt","Counter & receipt QR"]]
     : [["counter","Counter card"],["receipt","Receipt"],["general","Your signage"]];
   const qrUrl=cat=>live+"?ref="+encodeURIComponent(p.slug)+"&qr="+cat;
@@ -545,6 +561,16 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
         {key:"lobby",   label:"Lobby / front-desk sign", w:1650,h:2550, sz:"5.5 × 8.5 in",layout:"tall", cat:"lobby"},
         {key:"email",   label:"Welcome-email graphic",   w:1000,h:1000, sz:"square · for email", layout:"square", cat:"welcome_email"},
         {key:"sticker", label:"Door / window sticker",   w:900, h:900,  sz:"3 × 3 in",   layout:"square",cat:"general"}
+      ]
+      // cars — the three touchpoints a fleet actually has (0034: booking · in_car · key_fob).
+      // Uses its OWN bare tile, not BARE_GENERAL: that one carries cat:"general", which is not
+      // a category seed_partner_qr() creates for cars, so its scans would go untracked.
+      : seg==="cars"?[
+        {key:"bare",    label:"Just the QR code",   w:1200,h:1200, sz:"any size · for your own artwork", layout:"bare", cat:"in_car"},
+        {key:"incar",   label:"In-car card",        w:1200,h:1800, sz:"4 × 6 in · glovebox or dash", layout:"tall", cat:"in_car"},
+        {key:"sticker", label:"Window / dash sticker", w:900, h:900, sz:"3 × 3 in",      layout:"square",cat:"in_car"},
+        {key:"email",   label:"Booking-confirmation graphic", w:1000,h:1000, sz:"square · for email", layout:"square", cat:"booking"},
+        {key:"keytag",  label:"Key-fob tag",        w:900, h:900,  sz:"2 × 2 in",        layout:"square",cat:"key_fob"}
       ]
       : (seg==="pm"||seg==="timeshare")?[
         BARE_GENERAL,
