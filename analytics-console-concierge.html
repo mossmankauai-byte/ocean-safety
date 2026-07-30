@@ -3959,5 +3959,57 @@ if(DEMO){
 <script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="a1a7b085-e29e-4494-9d1e-6d2655ac5006" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiYTFhN2IwODUtZTI5ZS00NDk0LTlkMWUtNmQyNjU1YWM1MDA2IiwiYWNjb3VudF9pZCI6IjY5Yjc4Zjc1YzdjYTZlMTQ3ZjRjZjRjZSIsImRlcGxveV9pZCI6IjZhNjJmYTExNWUxNjk3MDAwODQzMjYxZiIsImlzc3VlciI6Im5mc2VydmVyIn0.42KX_QKsjuZVlm1_xmGiEpqxD-cfTwcRpS3P9vmiKBA"></script>
 
 <script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="a1a7b085-e29e-4494-9d1e-6d2655ac5006" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiYTFhN2IwODUtZTI5ZS00NDk0LTlkMWUtNmQyNjU1YWM1MDA2IiwiYWNjb3VudF9pZCI6IjY5Yjc4Zjc1YzdjYTZlMTQ3ZjRjZjRjZSIsImRlcGxveV9pZCI6IjZhNjdmYjJjNzY3OWMxMDAwODJhNzJiMSIsImlzc3VlciI6Im5mc2VydmVyIn0.1_0JPrSNWeqev9mc446p2_q5IFK0MXtGMDbT8ensPCo"></script>
+
+<script>
+/* OD-13 guard — wrong-island / demo-slug Stay-Close links.
+   See ~/.claude/oceansafe-standards/standards/open-defects.md
+
+   Every console in this family shipped its Stay-Close entry points hardcoded to a DEMO slug
+   (`your-resort` / `your-rentals`), pointing at /stay-close-v2 — a module that is hardcoded to
+   Kauaʻi. Measured 2026-07-30 with a real Maui partner slug: the page still rendered
+   "OceanSafe · Kauaʻi" with Poʻipū Beach Park lifeguard flags, and `&island=maui` was ignored.
+   For any non-Kauaʻi partner that is wrong-island SAFETY data one click from their own console.
+
+   Rule, applied to [data-guide-link] and [data-guide-screen]:
+     • island is kauaʻi  → keep the feature, but repoint at the partner's REAL slug
+                           (stay-close-v2 is correct there; only the demo slug was wrong)
+     • anything else     → REMOVE the entry point entirely
+   "Anything else" deliberately includes UNKNOWN. This fails CLOSED: the shipped href points at
+   another partner's demo either way, so removing it is never worse than leaving it. A missing
+   button beats a confidently wrong one.
+
+   This does not fix stay-close-v2 itself. Restore these entry points only once that module
+   reads an island. */
+(function(){
+  function containerOf(el){
+    return el.closest('.qa') || (el.classList && el.classList.contains('lobby-frame') ? el.closest('section') : null) || el;
+  }
+  function removeAll(){
+    document.querySelectorAll('[data-guide-link],[data-guide-screen]').forEach(function(el){
+      var c = containerOf(el);
+      if(c && c.parentNode) c.remove();
+    });
+  }
+  try{
+    var qp = new URLSearchParams(location.search);
+    var slug = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
+    if(!slug || slug === 'demo' || !/^[a-z0-9-]{1,64}$/.test(slug)){ removeAll(); return; }
+
+    fetch('partner-config/' + slug + '.json', { cache: 'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cfg){
+        var island = cfg && typeof cfg.island === 'string' ? cfg.island.trim().toLowerCase() : '';
+        if(island !== 'kauai'){ removeAll(); return; }
+        // Kauaʻi: the module is correct here — just stop sending them the demo partner.
+        document.querySelectorAll('[data-guide-link],[data-guide-screen]').forEach(function(a){
+          var href = a.getAttribute && a.getAttribute('href');
+          if(!href || href.indexOf('stay-close-v2') === -1) return;
+          a.setAttribute('href', href.replace(/([?&]ref=)[^&]*/, '$1' + encodeURIComponent(slug)));
+        });
+      })
+      .catch(removeAll);
+  }catch(e){ try{ removeAll(); }catch(_){} }
+})();
+</script>
 </body>
 </html>
