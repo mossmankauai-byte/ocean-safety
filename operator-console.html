@@ -3248,22 +3248,27 @@ if(DEMO){
    See ~/.claude/oceansafe-standards/standards/open-defects.md
 
    Every console in this family shipped its Stay-Close entry points hardcoded to a DEMO slug
-   (`your-resort` / `your-rentals`), pointing at /stay-close-v2 — a module that is hardcoded to
-   Kauaʻi. Measured 2026-07-30 with a real Maui partner slug: the page still rendered
-   "OceanSafe · Kauaʻi" with Poʻipū Beach Park lifeguard flags, and `&island=maui` was ignored.
-   For any non-Kauaʻi partner that is wrong-island SAFETY data one click from their own console.
+   (`your-resort` / `your-rentals`) pointing at /stay-close-v2 — a module hardcoded to Kauaʻi.
+   Measured 2026-07-30 with a real Maui slug: still rendered "OceanSafe · Kauaʻi" with Poʻipū
+   lifeguard flags, and `&island=maui` was ignored. For any non-Kauaʻi partner that put
+   wrong-island SAFETY data one click from their own console.
 
-   Rule, applied to [data-guide-link] and [data-guide-screen]:
-     • island is kauaʻi  → keep the feature, but repoint at the partner's REAL slug
-                           (stay-close-v2 is correct there; only the demo slug was wrong)
-     • anything else     → REMOVE the entry point entirely
-   "Anything else" deliberately includes UNKNOWN. This fails CLOSED: the shipped href points at
-   another partner's demo either way, so removing it is never worse than leaving it. A missing
-   button beats a confidently wrong one.
+   THE FIX IS A REPOINT, NOT A REWRITE. The guest app is already island-aware and already has
+   the lobby/pickup board at `?ref=<slug>&island=<island>&mode=screen` — verified on Maui, it
+   renders the partner's name over SOUTH MAUI / Kamaʻole Beach Park I with live surf and
+   lifeguard hours. stay-close-v2 is not a generic guide at all: it is a Kauaʻi TIMESHARE sales
+   tool (resort-funded gift menus, a 5-tap qualifier, "Welcome home to Poʻipū"), so
+   parameterising it by island would mean rewriting that sales content per island for no gain.
 
-   This does not fix stay-close-v2 itself. Restore these entry points only once that module
-   reads an island. */
+   Rule applied to [data-guide-link] / [data-guide-screen], for ALL islands:
+     • screen links → /?ref=<slug>&island=<island>&mode=screen   (island-aware board)
+     • guide links  → kauaʻi: keep stay-close-v2 but repoint to the partner's REAL slug, so a
+                      timeshare operator keeps the Stay-Close product where it genuinely works
+                      other:  /?ref=<slug>&island=<island>       (the island-aware guest guide)
+     • island unknown / no ref → REMOVE the entry point (fails closed; the shipped href points
+                      at another partner's demo either way, so removing is never worse) */
 (function(){
+  var VALID = { kauai:1, maui:1, oahu:1, hawaii:1 };
   function containerOf(el){
     return el.closest('.qa') || (el.classList && el.classList.contains('lobby-frame') ? el.closest('section') : null) || el;
   }
@@ -3282,12 +3287,27 @@ if(DEMO){
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(cfg){
         var island = cfg && typeof cfg.island === 'string' ? cfg.island.trim().toLowerCase() : '';
-        if(island !== 'kauai'){ removeAll(); return; }
-        // Kauaʻi: the module is correct here — just stop sending them the demo partner.
-        document.querySelectorAll('[data-guide-link],[data-guide-screen]').forEach(function(a){
-          var href = a.getAttribute && a.getAttribute('href');
-          if(!href || href.indexOf('stay-close-v2') === -1) return;
-          a.setAttribute('href', href.replace(/([?&]ref=)[^&]*/, '$1' + encodeURIComponent(slug)));
+        if(!VALID[island]){ removeAll(); return; }
+        var s = encodeURIComponent(slug), i = encodeURIComponent(island);
+
+        document.querySelectorAll('[data-guide-screen]').forEach(function(a){
+          if(a.setAttribute) a.setAttribute('href', '/?ref=' + s + '&island=' + i + '&mode=screen');
+        });
+        // The preview under that button is a STATIC screenshot of the Kauaʻi RESORT lobby
+        // board — it reads "Your Resort" over Māhāʻulepū Beach no matter who is looking. The
+        // link above is now correct for every island, but a baked JPG cannot be. Drop it and
+        // keep the caption + button: an honest entry point beats an illustrated lie.
+        document.querySelectorAll('img.lobby-img').forEach(function(im){ if(im.parentNode) im.remove(); });
+        document.querySelectorAll('[data-guide-link]').forEach(function(a){
+          if(!a.setAttribute) return;
+          if(island === 'kauai'){
+            var href = a.getAttribute('href') || '';
+            if(href.indexOf('stay-close-v2') !== -1){
+              a.setAttribute('href', href.replace(/([?&]ref=)[^&]*/, '$1' + s));
+              return;
+            }
+          }
+          a.setAttribute('href', '/?ref=' + s + '&island=' + i);
         });
       })
       .catch(removeAll);
