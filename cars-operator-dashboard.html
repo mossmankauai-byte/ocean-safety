@@ -571,6 +571,163 @@
 <script src="/assets/vendor/qrcode.min.js"></script>
 </head>
 <body class="textured">
+<script>
+/* Effective slug for anything that renders partner-specific content.
+   The URL is NOT authority: with a ?ref= present we wait for the sign-in gate to prove a
+   session and then use OS_SLUG. Without one we stay the sample demo. Anything that names,
+   fetches or draws for a partner must go through this — reading ?ref= directly is how the
+   business name leaked onto a locked page. */
+window.osWhenSlug=function(cb){
+  var q=new URLSearchParams(location.search);
+  var want=(q.get('ref')||q.get('slug')||'').trim().toLowerCase();
+  if(!want||want==='demo') return cb('demo');
+  if(window.OS_SLUG) return cb(window.OS_SLUG);
+  document.addEventListener('os-authed',function(e){ cb(e.detail.slug); },{once:true});
+};
+</script>
+<style id="osGateCss">
+  /* The gate paints over everything until a session is proven. Inlined and FIRST so there is
+     no frame in which console content is on screen unauthenticated. */
+  html.os-locked body > *:not(#osGate){ display:none !important; }
+  #osGate{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;
+    padding:24px;background:radial-gradient(130% 120% at 88% -25%,#0A8BA8 0%,#0F3D49 52%,#0b2f39 100%);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+  html.os-locked #osGate{display:flex}
+  #osGate .box{width:100%;max-width:390px;background:#fff;border-radius:18px;padding:30px 28px 26px;
+    box-shadow:0 30px 70px -30px rgba(0,0,0,.55)}
+  #osGate .mk{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;color:#0F3D49}
+  #osGate .mk img{width:26px;height:26px;border-radius:6px}
+  #osGate h1{font-size:20px;line-height:1.25;margin:16px 0 5px;color:#16202A;font-weight:700}
+  #osGate p.sub{font-size:13.5px;color:#5B6B76;margin:0 0 18px;line-height:1.5}
+  #osGate label{display:block;font-size:12.5px;font-weight:600;color:#5B6B76;margin:0 0 5px}
+  #osGate input{width:100%;font:inherit;font-size:15px;padding:11px 12px;border:1px solid #D5DCE2;
+    border-radius:10px;background:#fff;color:#16202A;margin-bottom:13px}
+  #osGate input:focus{outline:2px solid #0A8BA8;outline-offset:1px;border-color:transparent}
+  #osGate button{width:100%;font:inherit;font-weight:600;font-size:15px;padding:12px;border:0;
+    border-radius:10px;background:linear-gradient(180deg,#0A8BA8,#0b6f88);color:#fff;cursor:pointer}
+  #osGate button[disabled]{opacity:.6;cursor:default}
+  #osGate .err{font-size:13px;color:#b3261e;min-height:18px;margin:2px 0 8px;line-height:1.4}
+  #osGate .foot{font-size:12.5px;color:#7d8b95;margin-top:15px;line-height:1.5}
+  #osGate .foot a{color:#0b6f88}
+</style>
+<div id="osGate" role="dialog" aria-modal="true" aria-labelledby="osGateH">
+  <form class="box" id="osGateForm" autocomplete="on">
+    <div class="mk"><img src="/assets/oceansafe-favicon.png" alt=""><span>OceanSafe</span></div>
+    <h1 id="osGateH">Sign in to your console</h1>
+    <p class="sub">Your business name and the password you set.</p>
+    <label for="osGateSlug">Business</label>
+    <input id="osGateSlug" name="username" autocomplete="username" autocapitalize="none"
+           spellcheck="false" placeholder="kihei-rent-a-car" required>
+    <label for="osGatePw">Password</label>
+    <input id="osGatePw" name="password" type="password" autocomplete="current-password" required>
+    <div class="err" id="osGateErr" role="alert" aria-live="polite"></div>
+    <button type="submit" id="osGateBtn">Sign in</button>
+    <div class="foot">Forgotten it, or never set one? Email
+      <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a> and we&rsquo;ll send you a set-up link.</div>
+  </form>
+</div>
+<script>
+/* ── Console sign-in ────────────────────────────────────────────────────────────────────────
+   The console used to take its identity AND its entitlement from the query string:
+   ?ref=<slug> chose whose console this was, and ?plan=paid chose the tier. Both were
+   guessable, so any visitor could open a named operator's console and hand themselves the
+   paid view. This makes the password the credential and the DATABASE the entitlement.
+
+   window.OS_SLUG and window.OS_PLAN are now set from the verified session, never the URL.
+
+   HONEST LIMIT, do not oversell this: the console FILE is a public static asset and always
+   will be — anyone can curl it and read the sample layout. What this gate protects is (a)
+   whose console you are looking at, (b) the tier, and (c) anything fetched from the server
+   with the session. It is not a claim that the page's markup is secret.
+
+   The demo is deliberately NOT gated: with no ?ref= this stays the un-slugged SAMPLE preview
+   Jade shows on calls. A demo must never open onto a login box.                             */
+(function(){
+  var FN   = "https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-auth";
+  var KEY  = "os_console_session";
+  var doc  = document.documentElement;
+  var qp   = new URLSearchParams(location.search);
+  var wants = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
+
+  // The un-slugged / explicit demo path stays open and stays SAMPLE.
+  if(!wants || wants === 'demo'){ window.OS_AUTH = null; return; }
+
+  function stored(){ try{ return JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){ return null; } }
+  function save(s,p){ try{ localStorage.setItem(KEY, JSON.stringify({session:s, partner:p})); }catch(e){} }
+  function clear(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+
+  // Apply the verified identity. Everything downstream in this console reads these two.
+  function apply(p, session){
+    window.OS_SLUG = p.slug;
+    window.OS_PLAN = p.paid ? 'paid' : 'free';
+    window.OS_AUTH = { session: session, partner: p };
+    if(!p.paid) document.body && document.body.classList.add('plan-free');
+    doc.classList.remove('os-locked');
+    document.dispatchEvent(new CustomEvent('os-authed', {detail:p}));
+  }
+
+  function lock(msg){
+    doc.classList.add('os-locked');
+    var s = document.getElementById('osGateSlug');
+    if(s && !s.value) s.value = wants;
+    var e = document.getElementById('osGateErr');
+    if(e && msg) e.textContent = msg;
+    if(s) setTimeout(function(){ (s.value ? document.getElementById('osGatePw') : s).focus(); }, 60);
+  }
+
+  // Lock synchronously, before the console's own scripts get a chance to paint anything for
+  // the slug in the URL. Unlocked only after the server confirms the session.
+  doc.classList.add('os-locked');
+
+  function post(body){
+    return fetch(FN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); });
+  }
+
+  var have = stored();
+  if(have && have.session){
+    // Re-validate on EVERY load rather than trusting the cached copy: it re-reads the tier from
+    // the database, so an upgrade or a cancellation lands on next open instead of whenever the
+    // cache happens to expire.
+    post({action:'session', session:have.session}).then(function(r){
+      if(r.ok && r.j.ok){ save(have.session, r.j.partner); apply(r.j.partner, have.session); }
+      else { clear(); lock(''); }
+    }).catch(function(){
+      // Offline with a cached session: let them in on the cached profile rather than locking an
+      // operator out of their own console at the counter. Server calls will still fail closed.
+      apply(have.partner, have.session);
+    });
+  } else {
+    lock('');
+  }
+
+  document.addEventListener('submit', function(ev){
+    if(!ev.target || ev.target.id !== 'osGateForm') return;
+    ev.preventDefault();
+    var slug = (document.getElementById('osGateSlug').value||'').trim().toLowerCase().replace(/\s+/g,'-');
+    var pw   = document.getElementById('osGatePw').value || '';
+    var btn  = document.getElementById('osGateBtn');
+    var err  = document.getElementById('osGateErr');
+    err.textContent = ''; btn.disabled = true; btn.textContent = 'Signing in…';
+    post({action:'login', slug:slug, password:pw}).then(function(r){
+      btn.disabled = false; btn.textContent = 'Sign in';
+      if(r.ok && r.j.ok){
+        save(r.j.session, r.j.partner);
+        // Reload so the console's own boot scripts run with OS_SLUG/OS_PLAN already correct,
+        // rather than trying to retrofit a half-rendered sample console in place.
+        location.replace(location.pathname + '?ref=' + encodeURIComponent(r.j.partner.slug));
+      } else {
+        err.textContent = r.j.error || 'That didn’t work — try again.';
+        document.getElementById('osGatePw').value = '';
+      }
+    }).catch(function(){
+      btn.disabled = false; btn.textContent = 'Sign in';
+      err.textContent = 'Couldn’t reach the server. Check your connection and try again.';
+    });
+  });
+})();
+</script>
+
 <div class="stage quiet-view">
 
   <div class="demo-ribbon" id="demoRibbon" aria-label="Sample data notice">
@@ -667,14 +824,26 @@
        for back-compat with existing hotel-console links). Every surface that needs the
        property slug or telemetry key reads window.OS_SLUG / window.OS_KEY. */
     var _q=new URLSearchParams(location.search);
-    window.OS_SLUG=_q.get('slug')||_q.get('ref')||'';
+    // ?ref= no longer NAMES the console — it only says which login to prefill. A real slug is
+    // written here by the sign-in gate above once the server has verified a session, so a
+    // visitor typing another operator's slug gets a login box, not their console.
+    var _wantRef=(_q.get('slug')||_q.get('ref')||'').trim().toLowerCase();
+    window.OS_SLUG=(!_wantRef||_wantRef==='demo')?_wantRef:(window.OS_SLUG||'');
     window.OS_KEY=_q.get('key')||'';
     </script>
     <script>
     /* FREE-PLAN flag: ?plan=free flips the console to the free-tier view. Anything
        else (including no param at all) = paid, so every existing link is unchanged. */
-    window.OS_PLAN='paid';
-    try{ if(new URLSearchParams(location.search).get('plan')==='free'){ window.OS_PLAN='free'; document.body.classList.add('plan-free'); } }catch(e){}
+    // TIER. For a signed-in console the gate has already set OS_PLAN from monthly_cents in the
+    // database — ?plan= is ignored there, because it used to let any visitor hand themselves
+    // the paid view. ?plan=free still works on the UN-SLUGGED demo so Jade can show both tiers.
+    try{
+      var _p=new URLSearchParams(location.search);
+      var _real=(_p.get('slug')||_p.get('ref')||'').trim().toLowerCase();
+      var _isDemo=(!_real||_real==='demo');
+      if(!window.OS_PLAN) window.OS_PLAN='paid';
+      if(_isDemo && _p.get('plan')==='free'){ window.OS_PLAN='free'; document.body.classList.add('plan-free'); }
+    }catch(e){ window.OS_PLAN=window.OS_PLAN||'paid'; }
     </script>
     <script>
     /* PORTFOLIO MODE flag (?group=<id>) — early-apply. Without ?group this script is a
@@ -862,15 +1031,19 @@
       </div>
     </section>
 
-    <!-- PICKUP-SPOT SCREEN — REMOVED 2026-07-30.
-         It previewed a static assets/shot-lobby-screen.jpg (a RESORT lobby board reading
-         "Your Resort" over Kauai's Mahaulepu Beach) and its "Open screen mode" button linked
-         /stay-close-v2?ref=your-rentals&seg=renter&mode=screen — a hardcoded DEMO slug on a
-         module that is hardcoded to Kauai. Measured: passing a real slug AND &island=maui
-         still rendered "OceanSafe . Kauai" with Poipu Beach Park lifeguard flags. That put
-         WRONG-ISLAND SAFETY DATA one click from a Maui fleet's own console, which is exactly
-         what the SELLABLE_ISLANDS gate exists to prevent. Not re-pointable — stay-close-v2
-         would have to become island-aware first. Restore only after that lands. -->
+    <!-- PICKUP-SPOT SCREEN — the live conditions board, scaled into a 16:9 frame -->
+    <section aria-label="Pickup-spot screen">
+      <div class="sec-h"><h2>Pickup-spot screen</h2><p>The big-screen conditions board your guests glance at on the way out the door &mdash; live surf, wind, and a scan-to-open QR.</p></div>
+      <div class="card">
+        <a class='lobby-frame' data-guide-screen href='/stay-close-v2?ref=your-rentals&amp;seg=renter&amp;mode=screen' rel='noopener' target='_blank' title='Open the live pickup board'>
+          <img class="lobby-img" src="assets/shot-lobby-screen.jpg" alt="Pickup-spot conditions board: today's beach conditions with a scan-to-open QR code" loading="lazy">
+        </a>
+        <div class="lobby-foot">
+          <p class="lobby-cap">A big-screen conditions board with a scan-to-open QR for your pickup spot or counter.</p>
+          <a class='pl-btn primary' data-guide-screen href='/stay-close-v2?ref=your-rentals&amp;seg=renter&amp;mode=screen' rel='noopener' target='_blank'>Open screen mode <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L9 15"/></svg></a>
+        </div>
+      </div>
+    </section>
 
     <!-- JOIN / GET STARTED — link to the partner signup page (added 2026-07-22) -->
     <section aria-label="Get your fleet on OceanSafe">
@@ -4248,47 +4421,29 @@ if(DEMO){
      A wrong name is worse than a generic one. */
 (function(){
   try{
-    var qp = new URLSearchParams(location.search);
-    var slug = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
+    window.osWhenSlug(function(slug){
     if(!slug || slug === 'demo') return;
     if(!/^[a-z0-9-]{1,64}$/.test(slug)) return;
+    // Prefer the signed-in profile: it is the partners row itself, so it is right even for a
+    // fleet that has no partner-config file on disk yet.
+    var live = window.OS_AUTH && window.OS_AUTH.partner;
+    if(live && live.name){
+      var h0 = document.querySelector('.property h1');
+      if(h0) h0.textContent = live.name;
+      document.title = live.name + ' \u00b7 OceanSafe Car Fleet Console';
+      return;
+    }
     fetch('partner-config/' + slug + '.json', { cache: 'no-store' })
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(cfg){
-        if(!cfg) return;
-
-        var name = typeof cfg.name === 'string' ? cfg.name.trim() : '';
-        if(name){
-          var h = document.querySelector('.property h1');
-          if(h) h.textContent = name;
-          document.title = name + ' · OceanSafe Car Fleet Console';
-        }
-
-        // ── Guest-guide links: point them at THIS fleet, on THIS island ──
-        // Every [data-guide-link]/[data-guide-screen] shipped hardcoded to
-        // /stay-close-v2?ref=your-rentals — someone else's DEMO slug, on a module that is
-        // hardcoded to Kauai. Measured 2026-07-30: a real slug AND &island=maui still rendered
-        // "OceanSafe . Kauai" with Poipu Beach Park lifeguard flags. For any non-Kauai fleet
-        // that is wrong-island SAFETY data one click from their own console, and the tile
-        // claiming "on your fleet's own link" was simply untrue.
-        //
-        // data-guide-link  → repointed to /?ref=<slug>&island=<island>, which IS island-aware
-        //                    and renders their co-brand (verified on Maui).
-        // data-guide-screen→ REMOVED. There is no island-aware screen mode to point at, and a
-        //                    button is better absent than confidently wrong. Restore when
-        //                    stay-close-v2 learns about islands.
-        var island = typeof cfg.island === 'string' ? cfg.island.trim().toLowerCase() : '';
-        if(!/^[a-z]{2,20}$/.test(island)) return;   // unknown island → change nothing
-
-        document.querySelectorAll('[data-guide-link]').forEach(function(a){
-          a.setAttribute('href', '/?ref=' + encodeURIComponent(slug) + '&island=' + encodeURIComponent(island));
-        });
-        document.querySelectorAll('[data-guide-screen]').forEach(function(el){
-          var card = el.closest('.qa') || el;
-          (card.parentNode ? card : el).remove();
-        });
+        var name = cfg && typeof cfg.name === 'string' ? cfg.name.trim() : '';
+        if(!name) return;
+        var h = document.querySelector('.property h1');
+        if(h) h.textContent = name;
+        document.title = name + ' · OceanSafe Car Fleet Console';
       })
-      .catch(function(){ /* leave the page exactly as shipped */ });
+      .catch(function(){ /* keep the generic heading */ });
+    });
   }catch(e){ /* keep the generic heading */ }
 })();
 </script>
@@ -4315,9 +4470,7 @@ if(DEMO){
       preview still shows a working code.                                                */
 (function(){
   if(!window.QRCode) return;
-  var qp   = new URLSearchParams(location.search);
-  var slug = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
-  if(!/^[a-z0-9-]{1,64}$/.test(slug)) slug = 'demo';
+  var slug = 'demo';
 
   var OS_MARK = "/assets/oceansafe-favicon.png";
   var MARK_FRAC = 0.16;   // measured cliff — see d.html. Do not raise without re-decoding.
@@ -4500,13 +4653,18 @@ if(DEMO){
 
   // Island decides the headline and the &island= param, so resolve it before drawing anything.
   // A missing/failed config falls back to kauai rather than blocking the whole kit.
-  if(slug === 'demo'){ build('kauai'); }
-  else{
+  window.osWhenSlug(function(s){
+    slug = /^[a-z0-9-]{1,64}$/.test(s) ? s : 'demo';
+    if(slug === 'demo'){ build('kauai'); return; }
+    // Island decides the headline AND the &island= in the printed code, so take it from the
+    // verified profile when we have one — a wrong island on a printed card is unfixable.
+    var live = window.OS_AUTH && window.OS_AUTH.partner;
+    if(live && live.island){ build(String(live.island)); return; }
     fetch('partner-config/' + slug + '.json', {cache:'no-store'})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(cfg){ build(cfg && cfg.island ? String(cfg.island) : 'kauai'); })
       .catch(function(){ build('kauai'); });
-  }
+  });
 })();
 </script>
 </body>
