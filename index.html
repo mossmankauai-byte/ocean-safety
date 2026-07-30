@@ -1578,7 +1578,7 @@ a{text-decoration:none;color:inherit}
 #rainToggle:hover{transform:scale(1.05)}
 #rainToggle svg{width:22px;height:22px}
 #rainToggle.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
-#fcBar{position:absolute;top:212px;left:50%;transform:translateX(-50%);z-index:700;display:none;flex-direction:column;align-items:center;gap:5px;background:rgba(8,40,50,.9);color:#eaf6f8;padding:6px 11px 7px;border-radius:16px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 120px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.fcBar-row{display:flex;align-items:center;gap:8px}.fc-legend{display:flex;align-items:center;gap:6px;line-height:1}.fc-lg-lbl{font-size:9px;font-weight:700;letter-spacing:.03em;opacity:.9;text-transform:uppercase}.fc-lg-end{font-weight:600;opacity:.6}.fc-lg-grad{width:90px;height:7px;border-radius:4px;background:linear-gradient(90deg,#a0e77b,#34c759,#ffcc00,#ff9500,#ff3b30);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}.fc-lg-drop{color:#eaf6f8;opacity:.92;flex-shrink:0;margin-right:1px}
+#fcBar{position:absolute;bottom:127px;left:50%;transform:translateX(-50%);z-index:700;display:none;flex-direction:column;align-items:center;gap:5px;background:rgba(8,40,50,.9);color:#eaf6f8;padding:6px 11px 7px;border-radius:16px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 120px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.fcBar-row{display:flex;align-items:center;gap:8px}.fc-legend{display:flex;align-items:center;gap:6px;line-height:1}.fc-lg-lbl{font-size:9px;font-weight:700;letter-spacing:.03em;opacity:.9;text-transform:uppercase}.fc-lg-end{font-weight:600;opacity:.6}.fc-lg-grad{width:90px;height:7px;border-radius:4px;background:linear-gradient(90deg,#a0e77b,#34c759,#ffcc00,#ff9500,#ff3b30);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}.fc-lg-drop{color:#eaf6f8;opacity:.92;flex-shrink:0;margin-right:1px}
 #fcBar #fcTime{font-weight:600;min-width:56px;white-space:nowrap;flex-shrink:0}
 #fcBar input[type=range]{width:140px;min-width:64px;max-width:42vw;accent-color:#ff9500;cursor:pointer}
 #fcBar .fc-cap{opacity:.8;font-size:10.5px;white-space:nowrap;flex-shrink:0}
@@ -1596,8 +1596,7 @@ body[data-tab="acts"] .kidbadge,body[data-tab="beaches"] .kidbadge{top:108px}
 body[data-tab="acts"] #satToggle{top:188px}
 body[data-tab="acts"] #rainToggle{top:188px}
 body[data-tab="acts"] #os-swell-badge{top:188px}
-body[data-tab="acts"] #fcBar{top:248px}
-body[data-tab="acts"] #locateBtn{top:238px}
+body[data-tab="acts"] body[data-tab="acts"] #locateBtn{top:238px}
 body[data-tab="acts"] .saved-chip{top:243px}
 /* Collapsible wind/tide/swell chips in the beach card */
 summary.cond-fold-sum{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#5b7682;padding:5px 2px;-webkit-user-select:none;user-select:none}
@@ -5428,7 +5427,7 @@ function renderHeaderForecast(){
 }
 // The outlook chip + North pill live in the band under the header, but the
 // header's height is dynamic (7-DAY strip, offline bar) and the rain scrub
-// bar (#fcBar) shares the band — a fixed CSS top collides in some state.
+// bar is bottom-docked over the map, so only the header stack matters here.
 // So: measure the real stack and place chip below it, North pill below chip.
 function layoutOutlookChip(){
   var chip = document.getElementById('liveNow'); if(!chip) return;
@@ -5442,10 +5441,6 @@ function layoutOutlookChip(){
   var st = document.getElementById('subtabs');
   var base = mapEl ? mapEl.getBoundingClientRect().top
            : (st && st.getBoundingClientRect().height > 0 ? st.getBoundingClientRect().bottom : hostTop);
-  var bar = document.getElementById('fcBar');
-  if(bar && bar.style.display === 'flex' && bar.offsetParent){
-    base = Math.max(base, bar.getBoundingClientRect().bottom);
-  }
   chip.style.top = Math.max(8, Math.round(base - hostTop + 8)) + 'px';
   var n = document.querySelector('.shore-chip.shore-n');
   if(n) n.style.top = Math.round(chip.getBoundingClientRect().bottom - hostTop + 8) + 'px';
