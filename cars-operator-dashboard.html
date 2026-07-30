@@ -862,19 +862,15 @@
       </div>
     </section>
 
-    <!-- PICKUP-SPOT SCREEN — the live conditions board, scaled into a 16:9 frame -->
-    <section aria-label="Pickup-spot screen">
-      <div class="sec-h"><h2>Pickup-spot screen</h2><p>The big-screen conditions board your guests glance at on the way out the door &mdash; live surf, wind, and a scan-to-open QR.</p></div>
-      <div class="card">
-        <a class='lobby-frame' data-guide-screen href='/stay-close-v2?ref=your-rentals&amp;seg=renter&amp;mode=screen' rel='noopener' target='_blank' title='Open the live pickup board'>
-          <img class="lobby-img" src="assets/shot-lobby-screen.jpg" alt="Pickup-spot conditions board: today's beach conditions with a scan-to-open QR code" loading="lazy">
-        </a>
-        <div class="lobby-foot">
-          <p class="lobby-cap">A big-screen conditions board with a scan-to-open QR for your pickup spot or counter.</p>
-          <a class='pl-btn primary' data-guide-screen href='/stay-close-v2?ref=your-rentals&amp;seg=renter&amp;mode=screen' rel='noopener' target='_blank'>Open screen mode <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L9 15"/></svg></a>
-        </div>
-      </div>
-    </section>
+    <!-- PICKUP-SPOT SCREEN — REMOVED 2026-07-30.
+         It previewed a static assets/shot-lobby-screen.jpg (a RESORT lobby board reading
+         "Your Resort" over Kauai's Mahaulepu Beach) and its "Open screen mode" button linked
+         /stay-close-v2?ref=your-rentals&seg=renter&mode=screen — a hardcoded DEMO slug on a
+         module that is hardcoded to Kauai. Measured: passing a real slug AND &island=maui
+         still rendered "OceanSafe . Kauai" with Poipu Beach Park lifeguard flags. That put
+         WRONG-ISLAND SAFETY DATA one click from a Maui fleet's own console, which is exactly
+         what the SELLABLE_ISLANDS gate exists to prevent. Not re-pointable — stay-close-v2
+         would have to become island-aware first. Restore only after that lands. -->
 
     <!-- JOIN / GET STARTED — link to the partner signup page (added 2026-07-22) -->
     <section aria-label="Get your fleet on OceanSafe">
@@ -4259,13 +4255,40 @@ if(DEMO){
     fetch('partner-config/' + slug + '.json', { cache: 'no-store' })
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(cfg){
-        var name = cfg && typeof cfg.name === 'string' ? cfg.name.trim() : '';
-        if(!name) return;
-        var h = document.querySelector('.property h1');
-        if(h) h.textContent = name;
-        document.title = name + ' · OceanSafe Car Fleet Console';
+        if(!cfg) return;
+
+        var name = typeof cfg.name === 'string' ? cfg.name.trim() : '';
+        if(name){
+          var h = document.querySelector('.property h1');
+          if(h) h.textContent = name;
+          document.title = name + ' · OceanSafe Car Fleet Console';
+        }
+
+        // ── Guest-guide links: point them at THIS fleet, on THIS island ──
+        // Every [data-guide-link]/[data-guide-screen] shipped hardcoded to
+        // /stay-close-v2?ref=your-rentals — someone else's DEMO slug, on a module that is
+        // hardcoded to Kauai. Measured 2026-07-30: a real slug AND &island=maui still rendered
+        // "OceanSafe . Kauai" with Poipu Beach Park lifeguard flags. For any non-Kauai fleet
+        // that is wrong-island SAFETY data one click from their own console, and the tile
+        // claiming "on your fleet's own link" was simply untrue.
+        //
+        // data-guide-link  → repointed to /?ref=<slug>&island=<island>, which IS island-aware
+        //                    and renders their co-brand (verified on Maui).
+        // data-guide-screen→ REMOVED. There is no island-aware screen mode to point at, and a
+        //                    button is better absent than confidently wrong. Restore when
+        //                    stay-close-v2 learns about islands.
+        var island = typeof cfg.island === 'string' ? cfg.island.trim().toLowerCase() : '';
+        if(!/^[a-z]{2,20}$/.test(island)) return;   // unknown island → change nothing
+
+        document.querySelectorAll('[data-guide-link]').forEach(function(a){
+          a.setAttribute('href', '/?ref=' + encodeURIComponent(slug) + '&island=' + encodeURIComponent(island));
+        });
+        document.querySelectorAll('[data-guide-screen]').forEach(function(el){
+          var card = el.closest('.qa') || el;
+          (card.parentNode ? card : el).remove();
+        });
       })
-      .catch(function(){ /* keep the generic heading */ });
+      .catch(function(){ /* leave the page exactly as shipped */ });
   }catch(e){ /* keep the generic heading */ }
 })();
 </script>
