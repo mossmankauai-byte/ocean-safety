@@ -162,14 +162,16 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   +'<div class="card lift"><h2>Your page</h2>'
     +'<div class="row"><a class="btn primary" href="'+esc(live)+'" target="_blank" rel="noopener">View your live page ↗</a>'
     +'<button class="btn ghost" id="copylink">Copy page link</button></div></div>'
-  +(isTownAd
-    ? '<div class="card"><h2><span class="t">Your assets</span></h2>'
-      +'<p class="lead">Every asset here already has <b>your</b> QR code built into it. Pick the ones you want, download, and print as many as you like — they’re digital, so reprinting costs you nothing.</p>'
-      +'<div class="assets" id="assetGrid"><span class="dim">Building your assets…</span></div>'
-      +'<div class="hint">Scanning any of them opens the free '+islandName+' beach guide with your business inside'+(isFree?'.':' — and your promotion on their screen.')+'</div></div>'
-    : '<div class="card"><h2>Your QR codes</h2>'
+  // Every segment gets BOTH: the bare tracked QR per placement (what a sign shop or POS asks
+  // for) and the finished printable assets built around those same codes. town_ad keeps assets
+  // only — it has a single placement, so a one-tile QR card next to the assets is just noise.
+  +(isTownAd?'':'<div class="card"><h2>Your QR codes</h2>'
       +'<p class="lead">'+(isOperator?'Print each where guests will see it — in the room, at the lobby, in your welcome email. Every code is tracked so you can tell which spot brings the most scans.':'Print these for your counter, receipts, and signage — each one is tracked.')+'</p>'
       +'<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px">'+qrGrid+'</div></div>')
+  +'<div class="card"><h2>Your assets</h2>'
+    +'<p class="lead">Every asset here already has <b>your</b> QR code built into it. Pick the ones you want, download, and print as many as you like — they’re digital, so reprinting costs you nothing.</p>'
+    +'<div class="assets" id="assetGrid"><span class="dim">Building your assets…</span></div>'
+    +'<div class="hint">Scanning any of them opens the free '+islandName+' beach guide with your '+esc(noun.toLowerCase())+' inside'+(isTownAd&&!isFree?' — and your promotion on their screen.':'.')+'</div></div>'
   +(sells?'<div class="card"><h2>Your items</h2>'
     +'<p class="lead">List what you sell — items show on your page and sell in the app. '+(isFree?('You keep <b>'+keepPct+'</b>; our '+feePct+' only applies when the app sells for you.'):'You keep <b>100%</b> on your plan.')+'</p>'
     +'<div id="itemsList" style="margin-top:12px"><span class="dim">Loading items…</span></div>'
@@ -433,23 +435,53 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
 
   if(window.QRCode){ qrCats.forEach(([cat])=>{ qrWithLogo(qrUrl(cat),240).then(url=>{ const img=document.getElementById("qr-"+cat); const dl=document.getElementById("qrdl-"+cat); if(img)img.src=url; if(dl)dl.href=url; }).catch(()=>{}); }); }
 
-  // ── Town Ad printable assets — every asset is rendered with THIS partner's own QR ──
-  // The QR encodes live?ref=<their slug>, so a scan opens the guide in their co-brand and
-  // fires their promo. Rendered client-side to canvas at print resolution, downloaded as PNG.
-  if(isTownAd){
-    // "bare" is first on purpose: it's the one most partners actually reach for. A POS (Square,
-    // Toast, Clover) takes an image for a receipt or an order screen and wants the code alone;
-    // so does a sign shop laying out its own artwork. 1200px square prints clean at any size —
-    // 4 in at 300dpi, 12 in at 100dpi for a window decal — because a QR is pure black-and-white
-    // geometry with no photo to go soft.
-    const ASSETS=[
-      {key:"bare",    label:"Just the QR code",   w:1200,h:1200, sz:"any size · for your POS", layout:"bare"},
-      {key:"counter", label:"Counter card",       w:1200,h:1800, sz:"4 × 6 in",        layout:"tall"},
-      {key:"tent",    label:"Table tent",         w:1200,h:1800, sz:"4 × 6 in · folds", layout:"tent"},
-      {key:"sticker", label:"Window sticker",     w:900, h:900,  sz:"3 × 3 in",        layout:"square"},
-      {key:"receipt", label:"Receipt footer",     w:750, h:450,  sz:"2.25 in wide",    layout:"strip"},
-      {key:"flyer",   label:"Flyer / menu insert",w:1650,h:2550, sz:"5.5 × 8.5 in",    layout:"tall"}
-    ];
+  // ── Printable assets — every asset is rendered with THIS partner's own QR ──
+  // The QR encodes live?ref=<their slug>&qr=<placement>, so a scan opens the guide in their
+  // co-brand, fires their promo, and attributes to the spot it was printed for. Rendered
+  // client-side to canvas at print resolution, downloaded as PNG.
+  //
+  // Every segment gets a set — an operator with no printable assets was left to make their own
+  // artwork off a bare QR, which is the one job the partner shouldn't have to do.
+  // `cat` MUST be one of that segment's qrCats keys, or the scan lands in an untracked bucket.
+  {
+    // "bare" is first in every set on purpose: it's the one most partners actually reach for.
+    // A POS (Square, Toast, Clover) takes an image for a receipt or an order screen and wants
+    // the code alone; so does a sign shop laying out its own artwork. 1200px square prints clean
+    // at any size — 4 in at 300dpi, 12 in at 100dpi for a window decal — because a QR is pure
+    // black-and-white geometry with no photo to go soft.
+    const BARE_GENERAL={key:"bare", label:"Just the QR code", w:1200,h:1200, sz:"any size · for your own artwork", layout:"bare", cat:"general"};
+    const ASSETS=
+      isTownAd?[
+        {key:"bare",    label:"Just the QR code",   w:1200,h:1200, sz:"any size · for your POS", layout:"bare", cat:"receipt"},
+        {key:"counter", label:"Counter card",       w:1200,h:1800, sz:"4 × 6 in",        layout:"tall",  cat:"receipt"},
+        {key:"tent",    label:"Table tent",         w:1200,h:1800, sz:"4 × 6 in · folds", layout:"tent", cat:"receipt"},
+        {key:"sticker", label:"Window sticker",     w:900, h:900,  sz:"3 × 3 in",        layout:"square",cat:"receipt"},
+        {key:"receipt", label:"Receipt footer",     w:750, h:450,  sz:"2.25 in wide",    layout:"strip",cat:"receipt"},
+        {key:"flyer",   label:"Flyer / menu insert",w:1650,h:2550, sz:"5.5 × 8.5 in",    layout:"tall", cat:"receipt"}
+      ]
+      : seg==="hotel"?[
+        BARE_GENERAL,
+        {key:"room",    label:"In-room card",       w:1200,h:1800, sz:"4 × 6 in",        layout:"tall",  cat:"room"},
+        {key:"tent",    label:"Table tent",         w:1200,h:1800, sz:"4 × 6 in · folds", layout:"tent", cat:"room"},
+        {key:"lobby",   label:"Lobby / front-desk sign", w:1650,h:2550, sz:"5.5 × 8.5 in",layout:"tall", cat:"lobby"},
+        {key:"email",   label:"Welcome-email graphic",   w:1000,h:1000, sz:"square · for email", layout:"square", cat:"welcome_email"},
+        {key:"sticker", label:"Door / window sticker",   w:900, h:900,  sz:"3 × 3 in",   layout:"square",cat:"general"}
+      ]
+      : (seg==="pm"||seg==="timeshare")?[
+        BARE_GENERAL,
+        {key:"unit",    label:"In-unit card",       w:1200,h:1800, sz:"4 × 6 in",        layout:"tall",  cat:"unit"},
+        {key:"tent",    label:"Table tent",         w:1200,h:1800, sz:"4 × 6 in · folds", layout:"tent", cat:"unit"},
+        {key:"email",   label:"Welcome-email graphic",   w:1000,h:1000, sz:"square · for email", layout:"square", cat:"welcome_email"},
+        {key:"sticker", label:"Door / window sticker",   w:900, h:900,  sz:"3 × 3 in",   layout:"square",cat:"general"}
+      ]
+      :[ // retail · rentals & tours · storefront shops — counter, receipt, signage
+        BARE_GENERAL,
+        {key:"counter", label:"Counter card",       w:1200,h:1800, sz:"4 × 6 in",        layout:"tall",  cat:"counter"},
+        {key:"tent",    label:"Table tent",         w:1200,h:1800, sz:"4 × 6 in · folds", layout:"tent", cat:"counter"},
+        {key:"sticker", label:"Window sticker",     w:900, h:900,  sz:"3 × 3 in",        layout:"square",cat:"general"},
+        {key:"receipt", label:"Receipt footer",     w:750, h:450,  sz:"2.25 in wide",    layout:"strip",cat:"receipt"},
+        {key:"flyer",   label:"Flyer / counter insert",w:1650,h:2550, sz:"5.5 × 8.5 in", layout:"tall", cat:"counter"}
+      ];
     const SAND="#FBF8F2", DEEP="#0F3D49", TEAL="#0A8BA8", INK="#16202A", MUTE="#5B6B76", GOLD="#F0B429";
     const brand="#"+(p.primary_hex||"0a8ba8").replace(/^#/,"");
     const F=(w,s)=>w+" "+Math.round(s)+"px Inter,-apple-system,Segoe UI,system-ui,sans-serif";
@@ -474,6 +506,15 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     function drawAsset(spec,qrImg,markImg){
       const c=document.createElement("canvas"); c.width=spec.w; c.height=spec.h;
       const x=c.getContext("2d"), W=spec.w, H=spec.h;
+      // Draw the QR with smoothing OFF. Canvas interpolation softens module edges, and on a
+      // higher-version code (a long slug pushes the version up, shrinking the modules) that blur
+      // plus the 16% centre mark was enough to make the code UNDECODABLE — verified: a
+      // "test-timeshare" slug produced a bare QR that failed OpenCV at every scale from 1200px
+      // down to 160px, while the shorter "test-hotel" slug decoded everywhere. A QR is
+      // black-and-white geometry; nearest-neighbour is both correct and sharper. Never draw the
+      // QR with plain drawImage — use this.
+      const qr=(img,dx,dy,dw,dh)=>{ const s=x.imageSmoothingEnabled; x.imageSmoothingEnabled=false;
+        x.drawImage(img,dx,dy,dw,dh); x.imageSmoothingEnabled=s; };
       x.fillStyle=SAND; x.fillRect(0,0,W,H); x.textBaseline="top";
       // Bare QR — nothing but the code. This is the one a POS wants: Square/Toast/Clover let you
       // drop an image onto a receipt or an order screen, and they want the code alone, not a
@@ -485,11 +526,11 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       if(spec.layout==="bare"){
         x.fillStyle="#fff"; x.fillRect(0,0,W,H);
         const pad=Math.round(W*0.08), q=W-pad*2;
-        x.drawImage(qrImg,pad,pad,q,q);
+        qr(qrImg,pad,pad,q,q);
         return c;
       }
       if(spec.layout==="strip"){                    // receipt: QR left, copy right
-        const pad=H*0.11, q=H-pad*2; x.drawImage(qrImg,pad,pad,q,q);
+        const pad=H*0.11, q=H-pad*2; qr(qrImg,pad,pad,q,q);
         const tx=pad*1.6+q;
         // The strip is only 2.25in wide and the QR takes ~47% of it, leaving ~270px for copy.
         // At the design sizes every line overflowed the canvas and was cut mid-word on a real
@@ -514,7 +555,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
         x.textAlign="center";
         lockup(x,W,H*0.13,W*0.115,W*0.075,markImg,W*0.28);
         const q=W*0.52; x.fillStyle="#fff"; x.fillRect(W/2-q/2-W*0.02,H*0.33,q+W*0.04,q+W*0.04);
-        x.drawImage(qrImg,W/2-q/2,H*0.34,q,q);
+        qr(qrImg,W/2-q/2,H*0.34,q,q);
         x.fillStyle=INK; x.font=F(700,W*0.062); x.fillText("Free beach guide",W/2,H*0.885);
         x.fillStyle=brand; x.font=F(600,W*0.042); x.fillText(p.name.slice(0,30),W/2,H*0.945);
         x.textAlign="left"; return c;
@@ -531,7 +572,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       const q=W*0.56, qy=band+H*0.225;
       x.fillStyle="#fff"; x.shadowColor="rgba(15,61,73,.18)"; x.shadowBlur=W*0.03; x.shadowOffsetY=W*0.012;
       x.fillRect(W/2-q/2-W*0.028,qy-W*0.028,q+W*0.056,q+W*0.056); x.shadowColor="transparent";
-      x.drawImage(qrImg,W/2-q/2,qy,q,q);
+      qr(qrImg,W/2-q/2,qy,q,q);
       x.fillStyle=TEAL; x.font=F(700,W*0.040); x.fillText("Scan with your phone camera",W/2,qy+q+W*0.055);
       const fy=qy+q+W*0.115;
       x.fillStyle=brand; x.font=F(800,W*0.052); x.fillText(p.name.slice(0,28),W/2,fy);
@@ -549,26 +590,26 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     const markReady = new Promise(resolve=>{
       const m=new Image(); m.onload=()=>resolve(m); m.onerror=()=>resolve(null); m.src=OS_MARK;
     });
-    Promise.all([qrWithLogo(qrUrl("receipt"),900), markReady]).then(([url,markImg])=>{
+    // One QR per distinct placement, not one for the whole set: an in-room card and a lobby sign
+    // must carry different ?qr= values or the scan counts land in the wrong bucket and the
+    // "which spot brings the most scans" promise on the QR card above is a lie.
+    const fail=()=>{ const g=document.getElementById("assetGrid");
+      if(g) g.innerHTML='<span class="dim">Couldn’t build your assets — email us and we’ll send them over.</span>'; };
+    const load=src=>new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=src; });
+    const cats=[...new Set(ASSETS.map(a=>a.cat))];
+    Promise.all([Promise.all(cats.map(c=>qrWithLogo(qrUrl(c),1400).then(load))), markReady]).then(([imgs,markImg])=>{
       const grid=document.getElementById("assetGrid"); if(!grid) return;
-      const qrImg=new Image();
-      qrImg.onload=()=>{
-        grid.innerHTML="";
-        ASSETS.forEach(spec=>{
-          let png; try{ png=drawAsset(spec,qrImg,markImg).toDataURL("image/png"); }catch(_){ return; }
-          const d=document.createElement("div"); d.className="asset";
-          d.innerHTML='<div class="thumb"><img alt="'+esc(spec.label)+' with your QR code" src="'+png+'"></div>'
-            +'<div class="nm">'+esc(spec.label)+'</div><div class="sz">'+esc(spec.sz)+'</div>'
-            +'<a class="btn ghost sm" download="'+esc(p.slug)+'-'+spec.key+'.png" href="'+png+'">Download</a>';
-          grid.appendChild(d);
-        });
-      };
-      qrImg.onerror=()=>{ grid.innerHTML='<span class="dim">Couldn’t build your assets — email us and we’ll send them over.</span>'; };
-      qrImg.src=url;
-    }).catch(()=>{
-      const grid=document.getElementById("assetGrid");
-      if(grid) grid.innerHTML='<span class="dim">Couldn’t build your assets — email us and we’ll send them over.</span>';
-    });
+      const qrFor={}; cats.forEach((c,i)=>{ qrFor[c]=imgs[i]; });
+      grid.innerHTML="";
+      ASSETS.forEach(spec=>{
+        let png; try{ png=drawAsset(spec,qrFor[spec.cat],markImg).toDataURL("image/png"); }catch(_){ return; }
+        const d=document.createElement("div"); d.className="asset";
+        d.innerHTML='<div class="thumb"><img alt="'+esc(spec.label)+' with your QR code" src="'+png+'"></div>'
+          +'<div class="nm">'+esc(spec.label)+'</div><div class="sz">'+esc(spec.sz)+'</div>'
+          +'<a class="btn ghost sm" download="'+esc(p.slug)+'-'+spec.key+'.png" href="'+png+'">Download</a>';
+        grid.appendChild(d);
+      });
+    }).catch(fail);
   }
 })();
 </script>
