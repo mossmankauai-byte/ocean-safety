@@ -2015,7 +2015,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 const ISLANDS = {
   kauai: {
     slug:'kauai', name:'Kauaʻi', live:true, defaultSide:'east', sideKey:'os_side',
-    map:{ center:[22.05,-159.50], zoom:10, minZoom:9, maxBounds:null },
+    map:{ center:[22.05,-159.50], zoom:10, minZoom:9, maxBounds:[[21.45,-160.15],[22.65,-158.95]] },
     seaLevel:{ lat:21.9788, lon:-159.3672 },
     geoBox:{ latMin:21.85, latMax:22.25, lonMin:-159.85, lonMax:-159.25 },
     clamp:{ latMin:21.7, latMax:22.4, lonMin:-160.1, lonMax:-159.2 },
@@ -3929,8 +3929,21 @@ async function getCond(b){
 // MAP
 let map,mkrs={},ints=['snorkel','swim'],scored={};
 function initMap(){
-  map=L.map('map',{center:ACTIVE.map.center,zoom:ACTIVE.map.zoom,minZoom:ACTIVE.map.minZoom,zoomSnap:0.5,zoomControl:false,attributionControl:false});
+  map=L.map('map',{center:ACTIVE.map.center,zoom:ACTIVE.map.zoom,minZoom:ACTIVE.map.minZoom,zoomSnap:0.5,maxBoundsViscosity:0.75,zoomControl:false,attributionControl:false});
   if(ACTIVE.map.maxBounds) map.setMaxBounds(ACTIVE.map.maxBounds);
+  // Elastic island edge. maxBoundsViscosity resists the drag itself, but Leaflet still lets a
+  // flick finish — and coast on inertia — outside the box, and leaves it parked there. Wait for
+  // the inertia to settle, then ease the view back in: the guest gets a little give at the edge
+  // and is pulled back to their own island instead of drifting onto a neighbouring one.
+  if(ACTIVE.map.maxBounds){
+    let _edgeT=null;
+    map.on('moveend',function(){
+      clearTimeout(_edgeT);
+      _edgeT=setTimeout(function(){
+        map.panInsideBounds(map.options.maxBounds,{animate:true,duration:.35});
+      },140);
+    });
+  }
   window._streetTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'©OpenStreetMap ©CartoDB',subdomains:'abcd'}).addTo(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri'});
   window._isSat = false;

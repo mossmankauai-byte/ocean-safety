@@ -3608,7 +3608,16 @@ async function getCond(b){
 // MAP
 let map,mkrs={},ints=['snorkel','swim'],scored={};
 function initMap(){
-  map=L.map('map',{center:[22.05,-159.50],zoom:10,minZoom:10,zoomControl:false,attributionControl:false});
+  map=L.map('map',{center:[22.05,-159.50],zoom:10,minZoom:10,zoomControl:false,attributionControl:false,maxBounds:[[21.45,-160.15],[22.65,-158.95]],maxBoundsViscosity:0.75});
+  // Elastic island edge — same rule as the main app: give a little at the boundary, then
+  // ease back inside once the inertia settles, so the co-brand map stays on Kauaʻi.
+  var _edgeT=null;
+  map.on('moveend',function(){
+    clearTimeout(_edgeT);
+    _edgeT=setTimeout(function(){
+      map.panInsideBounds(map.options.maxBounds,{animate:true,duration:.35});
+    },140);
+  });
   window._streetTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'©OpenStreetMap ©CartoDB',subdomains:'abcd'}).addTo(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri'});
   window._isSat = false;
