@@ -4180,5 +4180,40 @@ if(DEMO){
   }); }
 })();
 </script>
+
+<script>
+/* Name the console after the fleet it belongs to.
+   The H1 ships as the generic "Your Fleet" because this file is also Jade's demo. For a
+   REAL fleet, provision-fleet.mjs has already committed partner-config/<slug>.json with
+   {island, name} — the same file the guest guide reads for its co-brand chip — so the
+   name is on disk and the console just wasn't looking at it. Without this, a fleet opens
+   the console we sent them and it is headed "Your Fleet", which reads unfinished.
+
+   Deliberately narrow:
+   • Only runs with an explicit ?ref=/&slug= that isn't 'demo' — a bare or demo load stays
+     the SAMPLE preview, so Jade's demos are untouched.
+   • Only the H1 text changes. gpName() already derives from '.property h1', so the guest
+     preview and every downstream label follow for free.
+   • Any failure (missing file, bad JSON, offline) leaves the generic heading standing.
+     A wrong name is worse than a generic one. */
+(function(){
+  try{
+    var qp = new URLSearchParams(location.search);
+    var slug = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
+    if(!slug || slug === 'demo') return;
+    if(!/^[a-z0-9-]{1,64}$/.test(slug)) return;
+    fetch('partner-config/' + slug + '.json', { cache: 'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cfg){
+        var name = cfg && typeof cfg.name === 'string' ? cfg.name.trim() : '';
+        if(!name) return;
+        var h = document.querySelector('.property h1');
+        if(h) h.textContent = name;
+        document.title = name + ' · OceanSafe Car Fleet Console';
+      })
+      .catch(function(){ /* keep the generic heading */ });
+  }catch(e){ /* keep the generic heading */ }
+})();
+</script>
 </body>
 </html>
