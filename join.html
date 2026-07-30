@@ -636,8 +636,7 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>
           </ul>
 
-          <form class="leadform" id="leadForm" name="join-lead" method="POST" action="/" data-netlify="true" netlify-honeypot="_gotcha" novalidate>
-            <input type="hidden" name="form-name" value="join-lead">
+          <form class="leadform" id="leadForm" name="join-lead" method="POST" novalidate>
             <input type="hidden" name="segment" id="leadSegment" value="Shop">
             <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
             <div class="fld">
@@ -1066,8 +1065,16 @@
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(reposition); }
 
   /* ============ LEAD FORM ============ */
-  /* Wired for Netlify Forms (name="join-lead", data-netlify). Leads appear in the Netlify dashboard;
-     turn on email/Slack notifications there. To use Formspree instead, POST to your form URL below. */
+  /* Posts to the lead-capture edge function, which writes a partner_leads row and emails
+     the notification. This replaced Netlify Forms, which was never enabled on the site —
+     a POST to "/" with form-name=join-lead 404'd exactly like a nonsense form name, so
+     every lead fell through to the mailto branch below and was lost unless the visitor
+     happened to have a mail client AND pressed Send. The mailto is still here, but it is
+     now a genuine last resort rather than the actual delivery path.
+     NOT operator-signup-public — that one provisions (tier + signature + agreement) and
+     excludes the per-unit-priced segments. /join is the price-free "let's talk" door. */
+  var SB_URL = "https://arndnljtmjfsnzcpcuen.supabase.co";
+  var SB_KEY = "sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um";
   var form = document.getElementById("leadForm");
   if(form){
     var success = document.getElementById("formSuccess");
@@ -1089,10 +1096,17 @@
       e.preventDefault();
       if(!form.checkValidity()){ form.reportValidity(); return; }
       if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = "Sending…"; }
-      if(!window.fetch || !window.URLSearchParams){ mailtoFallback(); if(submitBtn){submitBtn.disabled=false;} return; }
-      /* Netlify Forms: url-encoded POST to the site root, form-name carried in the body. Falls back to a prefilled mailto if the POST fails. */
-      var body = new URLSearchParams(new FormData(form)).toString();
-      fetch("/", { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body: body })
+      if(!window.fetch){ mailtoFallback(); if(submitBtn){submitBtn.disabled=false;} return; }
+      /* `current` is the lowercase tab key (shop|hotel|rental|timeshare|cars) — the
+         vocabulary lead-capture validates against. The hidden #leadSegment field carries
+         the human LABEL and is left for the mailto branch. */
+      var payload = { segment: current, name: fv("name"), business: fv("business"),
+        email: fv("email"), phone: fv("phone"), message: fv("message"), _gotcha: fv("_gotcha") };
+      fetch(SB_URL + "/functions/v1/lead-capture", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json", "Authorization":"Bearer " + SB_KEY, "apikey": SB_KEY },
+        body: JSON.stringify(payload)
+      })
         .then(function(r){ if(r.ok){ showSuccess(); } else { mailtoFallback(); } })
         .catch(function(){ mailtoFallback(); })
         .then(function(){ if(submitBtn){ submitBtn.disabled=false; submitBtn.innerHTML='Claim your spot <span class="arr" aria-hidden="true">→</span>'; } });
