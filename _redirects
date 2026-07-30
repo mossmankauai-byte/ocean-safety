@@ -36,6 +36,8 @@
 /@*         /at.html            200
 /creator-terms   /creator-terms.html   200
 /creator    /creator-dash.html  200
+# Partner sets their console password from the link in their email (?t=<dashboard_token>)
+/set-password  /set-password.html  200
 /plan       /plan.html          200
 /api/creator-provision   /.netlify/functions/creator-provision   200
 /api/creator-config      /.netlify/functions/creator-config      200
