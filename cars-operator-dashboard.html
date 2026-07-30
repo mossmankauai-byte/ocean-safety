@@ -568,6 +568,7 @@
   stay light by design — the guest phone mock is always the guest app's own light palette.
   ============ */
 </style>
+<script src="/assets/vendor/qrcode.min.js"></script>
 </head>
 <body class="textured">
 <div class="stage quiet-view">
@@ -1314,6 +1315,50 @@
 <div id="view-segments" hidden>
 
 <style>
+  /* Downloadable code + printable assets. Scoped to #view-segments so nothing here can
+     reach the other tabs. */
+  #view-segments .osqr-wrap{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+  #view-segments .osqr-img{width:190px;height:190px;flex:none;border:1px solid var(--line,#dde5ea);
+    border-radius:14px;background:#fff;display:block}
+  #view-segments .osqr-copy{flex:1;min-width:230px}
+  #view-segments .osqr-url{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.5;
+    word-break:break-all;background:rgba(10,139,168,.06);border:1px solid var(--line,#dde5ea);
+    border-radius:8px;padding:7px 9px;margin:10px 0 12px;display:block}
+  #view-segments .osdl{display:inline-flex;align-items:center;gap:7px;font:600 14px/1 inherit;
+    text-decoration:none;border-radius:10px;padding:11px 16px;cursor:pointer;color:#fff;
+    background:linear-gradient(180deg,#0A8BA8,#0b6f88);border:1px solid transparent}
+  #view-segments .osdl.ghost{background:#fff;color:#16202A;border-color:var(--line,#dde5ea)}
+  #view-segments .osassets{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+    gap:18px;margin-top:6px}
+  #view-segments .osasset{display:flex;flex-direction:column;align-items:center;text-align:center}
+  #view-segments .osasset .th{width:100%;aspect-ratio:1/1;display:flex;align-items:center;
+    justify-content:center;background:rgba(15,61,73,.045);border:1px solid var(--line,#dde5ea);
+    border-radius:12px;padding:9px;overflow:hidden}
+  #view-segments .osasset .th img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;
+    object-fit:contain;border-radius:4px;box-shadow:0 4px 12px -6px rgba(15,61,73,.35)}
+  #view-segments .osasset .nm{font-weight:600;font-size:13px;margin-top:9px;line-height:1.25}
+  #view-segments .osasset .sz{font-size:11.5px;opacity:.7;margin-top:2px}
+  #view-segments .osasset .osdl{margin-top:9px;padding:8px 13px;font-size:13px}
+</style>
+
+<!-- 0 · their own code, downloadable -->
+<section aria-label="Your QR code">
+  <div class="sec-h"><h2>Your QR code</h2><p>One code, yours. Print it, stick it in the glovebox, put it on the booking confirmation &mdash; every scan opens the live beach guide with your fleet carried along, and counts as yours.</p></div>
+  <div class="card">
+    <div class="osqr-wrap">
+      <img id="osQrImg" class="osqr-img" alt="Your OceanSafe QR code">
+      <div class="osqr-copy">
+        <div style="font-weight:600;font-size:14.5px">Scans open your co-branded guide</div>
+        <code class="osqr-url" id="osQrUrl">building your code&hellip;</code>
+        <a class="osdl" id="osQrDl" download>Download PNG</a>
+        <div class="cap" style="margin-top:10px">1200&nbsp;px PNG &mdash; prints clean at any size, from a 1&nbsp;in key-fob tag to a 12&nbsp;in window decal.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<style>
 /* Segments & funnels — scoped visuals, prefix tsf- (frame tokens only, no donor dark-theme colors) */
 .tsf-qrgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 @media(max-width:780px){.tsf-qrgrid{grid-template-columns:1fr}}
@@ -1406,6 +1451,15 @@
     <div class="v">79 <small>tours booked this sample month</small></div>
     <div id="tsSessionFunnel"></div>
     <div class="cap">Every tap routes through your affiliate link &mdash; you keep the commission on every booking.</div>
+  </div>
+</section>
+
+
+<!-- 4 · printable assets, each carrying their code -->
+<section aria-label="Printable assets">
+  <div class="sec-h"><h2>Print-ready assets</h2><p>The same kit we give hotels, built around <b>your</b> code. Download, print as many as you like &mdash; they&rsquo;re digital, so reprinting costs nothing.</p></div>
+  <div class="card">
+    <div class="osassets" id="osAssetGrid"><span class="cap">Building your assets&hellip;</span></div>
   </div>
 </section>
 
@@ -4213,6 +4267,223 @@ if(DEMO){
       })
       .catch(function(){ /* keep the generic heading */ });
   }catch(e){ /* keep the generic heading */ }
+})();
+</script>
+
+<script>
+/* ── Vehicles & codes: the fleet's own QR + the printable asset kit ───────────────────────
+   Ported from d.html (the partner dashboard) so the two stay one implementation. Three
+   things are DIFFERENT here and each was verified against a code we already shipped:
+
+   1. URL SHAPE. The fleet codes point at the APP ROOT with an island:
+        https://oceansafety.app/?ref=<slug>&island=<island>&qr=fleet
+      NOT d.html's /p/<slug>. Decoded from the three PNGs already sent to Kihei Rent A Car
+      (kihei-qr-booking/in_car/key_fob.png) — that is the shipped contract, not a guess.
+      Copying d.html's qrUrl() here would have produced a code pointing at a page that
+      does not exist for this segment.
+
+   2. ONE code, not one per placement — a fleet asked for a single code it can put anywhere.
+      It is qr=in_car, NOT a new value: seed_partner_qr() (migration 0034) creates exactly
+      booking / in_car / key_fob for this segment, and a cat with no qr_codes row scans into an
+      untracked bucket. in_car is also what every line of copy in this console already calls it.
+
+   3. slug + island come from ?ref= and partner-config/<slug>.json — the same file the H1
+      already reads. No config, or a demo load, falls back to the demo slug so Jade's
+      preview still shows a working code.                                                */
+(function(){
+  if(!window.QRCode) return;
+  var qp   = new URLSearchParams(location.search);
+  var slug = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
+  if(!/^[a-z0-9-]{1,64}$/.test(slug)) slug = 'demo';
+
+  var OS_MARK = "/assets/oceansafe-favicon.png";
+  var MARK_FRAC = 0.16;   // measured cliff — see d.html. Do not raise without re-decoding.
+
+  function qrWithLogo(url, size){
+    return new Promise(function(resolve, reject){
+      QRCode.toDataURL(url, {margin:1, width:size, errorCorrectionLevel:"H"}, function(e, qr){
+        if(e) return reject(e);
+        var base = new Image();
+        base.onload = function(){
+          var c = document.createElement("canvas"); c.width = c.height = size;
+          var x = c.getContext("2d");
+          x.imageSmoothingEnabled = false;
+          x.drawImage(base, 0, 0, size, size);
+          var mark = new Image();
+          mark.onload = function(){
+            var sz = Math.round(size*MARK_FRAC), o = Math.round((size-sz)/2), pad = Math.round(sz*0.14);
+            x.fillStyle = "#fff";
+            x.beginPath();
+            if(x.roundRect) x.roundRect(o-pad, o-pad, sz+pad*2, sz+pad*2, Math.round(sz*0.26));
+            else x.rect(o-pad, o-pad, sz+pad*2, sz+pad*2);
+            x.fill();
+            x.imageSmoothingEnabled = true;      // the logo IS a photo — smooth this one
+            x.drawImage(mark, o, o, sz, sz);
+            resolve(c.toDataURL("image/png"));
+          };
+          mark.onerror = function(){ resolve(qr); };   // no logo beats no code
+          mark.src = OS_MARK;
+        };
+        base.onerror = function(){ reject(new Error("qr render failed")); };
+        base.src = qr;
+      });
+    });
+  }
+
+  var ISLAND_LABEL = {kauai:["Kauaʻi","Kauaʻi"], maui:["Maui","Maui"],
+                      oahu:["Oʻahu","Oʻahu"], hawaii:["Hawaiʻi Island","Hawaiʻi"]};
+
+  function fleetName(){
+    var h = document.querySelector('.property h1');
+    var n = h ? h.textContent.trim() : '';
+    return n && n.toLowerCase() !== 'your fleet' ? n : 'Your Fleet';
+  }
+
+  // Same six layouts as the hotel kit, labelled for a car fleet — a hotel's "in-room card"
+  // means nothing in a glovebox. All six carry the one code.
+  var ASSETS = [
+    {key:"bare",     label:"Just the QR code",  w:1200, h:1200, sz:"any size · for your own artwork", layout:"bare"},
+    {key:"glovebox", label:"Glovebox card",     w:1200, h:1800, sz:"4 × 6 in",           layout:"tall"},
+    {key:"tent",     label:"Counter tent",      w:1200, h:1800, sz:"4 × 6 in · folds", layout:"tent"},
+    {key:"keyfob",   label:"Key-fob / hang tag",w:900,  h:900,  sz:"3 × 3 in",           layout:"square"},
+    {key:"confirm",  label:"Booking confirmation strip", w:750, h:450, sz:"2.25 in wide",     layout:"strip"},
+    {key:"counter",  label:"Counter sign",      w:1650, h:2550, sz:"5.5 × 8.5 in",       layout:"tall"}
+  ];
+
+  var SAND="#FBF8F2", DEEP="#0F3D49", TEAL="#0A8BA8", INK="#16202A", MUTE="#5B6B76", GOLD="#F0B429";
+  function F(w,s){ return w+" "+Math.round(s)+"px Inter,-apple-system,Segoe UI,system-ui,sans-serif"; }
+  function wave(x,cx,cy,w,col){ x.strokeStyle=col; x.lineWidth=w*0.075; x.lineCap="round"; x.beginPath();
+    for(var i=0;i<=w;i+=1){ var yy=cy+Math.sin((i/w)*Math.PI*3)*(w*0.055); i?x.lineTo(cx+i-w/2,yy):x.moveTo(cx+i-w/2,yy); } x.stroke(); }
+  function lockup(x,W,cy,iconSize,fontPx,markImg,waveFallbackW){
+    if(!markImg){ wave(x,W/2,cy+iconSize*0.34,waveFallbackW,GOLD); return; }
+    x.font=F(800,fontPx);
+    var t="OceanSafe", tw=x.measureText(t).width, gap=iconSize*0.30;
+    var sx=(W-(iconSize+gap+tw))/2, _ta=x.textAlign, _tb=x.textBaseline;
+    x.drawImage(markImg,sx,cy-iconSize/2,iconSize,iconSize);
+    x.textAlign="left"; x.textBaseline="middle"; x.fillStyle="#fff";
+    x.fillText(t,sx+iconSize+gap,cy);
+    x.textAlign=_ta; x.textBaseline=_tb;
+  }
+
+  function drawAsset(spec, qrImg, markImg, name, islandName, islandShort){
+    var c=document.createElement("canvas"); c.width=spec.w; c.height=spec.h;
+    var x=c.getContext("2d"), W=spec.w, H=spec.h;
+    // Smoothing OFF for the QR only — interpolation softens the modules and can cost the scan.
+    var qr=function(img,dx,dy,dw,dh){ var sm=x.imageSmoothingEnabled; x.imageSmoothingEnabled=false;
+      x.drawImage(img,dx,dy,dw,dh); x.imageSmoothingEnabled=sm; };
+    x.fillStyle=SAND; x.fillRect(0,0,W,H); x.textBaseline="top";
+
+    if(spec.layout==="bare"){
+      x.fillStyle="#fff"; x.fillRect(0,0,W,H);
+      var p0=Math.round(W*0.08);
+      qr(qrImg,p0,p0,W-p0*2,W-p0*2);
+      return c;
+    }
+    if(spec.layout==="strip"){
+      var pad=H*0.11, q0=H-pad*2; qr(qrImg,pad,pad,q0,q0);
+      var tx=pad*1.6+q0, maxW=W-tx-pad*0.6;
+      var fit=function(t,weight,px){ var sB=px; while(sB>8){ x.font=F(weight,sB); if(x.measureText(t).width<=maxW) break; sB-=1; } return sB; };
+      var line=function(t,weight,px,y,fill){ fit(t,weight,px); x.fillStyle=fill; x.fillText(t,tx,y); };
+      var hs=fit("Free "+islandName+" beach guide",700,H*0.125);
+      line("Free "+islandName+" beach guide",700,hs,pad+H*0.02,INK);
+      line("Scan: today’s surf, wind, and",400,Math.min(H*0.093,hs*0.74),pad+H*0.24,MUTE);
+      line("which beaches are calm.",400,Math.min(H*0.093,hs*0.74),pad+H*0.37,MUTE);
+      line(name.slice(0,26),700,Math.min(H*0.10,hs*0.8),pad+H*0.58,TEAL);
+      return c;
+    }
+    if(spec.layout==="square"){
+      x.fillStyle=DEEP; x.fillRect(0,0,W,H*0.26);
+      x.textAlign="center";
+      lockup(x,W,H*0.13,W*0.115,W*0.075,markImg,W*0.28);
+      var qs=W*0.52; x.fillStyle="#fff"; x.fillRect(W/2-qs/2-W*0.02,H*0.33,qs+W*0.04,qs+W*0.04);
+      qr(qrImg,W/2-qs/2,H*0.34,qs,qs);
+      x.fillStyle=INK; x.font=F(700,W*0.062); x.fillText("Free beach guide",W/2,H*0.885);
+      x.fillStyle=TEAL; x.font=F(600,W*0.042); x.fillText(name.slice(0,30),W/2,H*0.945);
+      x.textAlign="left"; return c;
+    }
+    var band=H*0.145; x.fillStyle=DEEP; x.fillRect(0,0,W,band);
+    x.textAlign="center";
+    lockup(x,W,band*0.5,W*0.085,W*0.062,markImg,W*0.20);
+    x.fillStyle=INK; x.font=F(800,W*0.075); x.fillText("Free "+islandShort,W/2,band+H*0.045);
+    x.fillText("beach guide",W/2,band+H*0.088);
+    x.fillStyle=MUTE; x.font=F(400,W*0.038);
+    x.fillText("Today’s surf, wind, and which",W/2,band+H*0.142);
+    x.fillText("beaches are calm right now.",W/2,band+H*0.172);
+    var q=W*0.56, qy=band+H*0.225;
+    x.fillStyle="#fff"; x.shadowColor="rgba(15,61,73,.18)"; x.shadowBlur=W*0.03; x.shadowOffsetY=W*0.012;
+    x.fillRect(W/2-q/2-W*0.028,qy-W*0.028,q+W*0.056,q+W*0.056); x.shadowColor="transparent";
+    qr(qrImg,W/2-q/2,qy,q,q);
+    x.fillStyle=TEAL; x.font=F(700,W*0.040); x.fillText("Scan with your phone camera",W/2,qy+q+W*0.055);
+    var fy=qy+q+W*0.115;
+    x.fillStyle=TEAL; x.font=F(800,W*0.052); x.fillText(name.slice(0,28),W/2,fy);
+    x.fillStyle=MUTE; x.font=F(400,W*0.032); x.fillText("oceansafety.app",W/2,fy+W*0.068);
+    if(spec.layout==="tent"){
+      x.strokeStyle="#C9D4DA"; x.lineWidth=2; x.setLineDash([12,10]);
+      x.beginPath(); x.moveTo(0,H*0.5); x.lineTo(W,H*0.5); x.stroke(); x.setLineDash([]);
+      x.fillStyle="#9AA9B2"; x.font=F(400,W*0.026); x.fillText("fold here",W/2,H*0.5+W*0.012);
+    }
+    x.textAlign="left"; return c;
+  }
+
+  function esc(t){ return String(t==null?"":t).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  function fail(){
+    var g=document.getElementById("osAssetGrid");
+    if(g) g.innerHTML='<span class="cap">Couldn’t build your assets — email us and we’ll send them over.</span>';
+  }
+
+  function build(island){
+    var lab = ISLAND_LABEL[island] || ISLAND_LABEL.kauai;
+    var islandName = lab[0], islandShort = lab[1];
+    var name = fleetName();
+    var url = "https://oceansafety.app/?ref=" + encodeURIComponent(slug) +
+              "&island=" + encodeURIComponent(island) + "&qr=in_car";
+
+    var u = document.getElementById("osQrUrl"); if(u) u.textContent = url;
+
+    // The on-screen code and the code baked into the assets are ONE render at 1400px:
+    // the card downsamples it, every asset downsamples it. Never upscale a QR.
+    var markReady = new Promise(function(res){
+      var m=new Image(); m.onload=function(){res(m);}; m.onerror=function(){res(null);}; m.src=OS_MARK;
+    });
+
+    qrWithLogo(url, 1400).then(function(dataUrl){
+      var img = document.getElementById("osQrImg");
+      var dl  = document.getElementById("osQrDl");
+      if(img) img.src = dataUrl;
+      if(dl){ dl.href = dataUrl; dl.setAttribute("download", slug + "-oceansafe-qr.png"); }
+
+      return Promise.all([
+        new Promise(function(res,rej){ var i=new Image(); i.onload=function(){res(i);}; i.onerror=rej; i.src=dataUrl; }),
+        markReady
+      ]);
+    }).then(function(pair){
+      var qrImg = pair[0], markImg = pair[1];
+      var grid = document.getElementById("osAssetGrid"); if(!grid) return;
+      grid.innerHTML = "";
+      ASSETS.forEach(function(spec){
+        var png;
+        try { png = drawAsset(spec, qrImg, markImg, name, islandName, islandShort).toDataURL("image/png"); }
+        catch(_){ return; }
+        var d = document.createElement("div"); d.className = "osasset";
+        d.innerHTML = '<div class="th"><img alt="' + esc(spec.label) + ' with your QR code" src="' + png + '"></div>'
+          + '<div class="nm">' + esc(spec.label) + '</div><div class="sz">' + esc(spec.sz) + '</div>'
+          + '<a class="osdl ghost" download="' + esc(slug) + '-' + spec.key + '.png" href="' + png + '">Download</a>';
+        grid.appendChild(d);
+      });
+    }).catch(fail);
+  }
+
+  // Island decides the headline and the &island= param, so resolve it before drawing anything.
+  // A missing/failed config falls back to kauai rather than blocking the whole kit.
+  if(slug === 'demo'){ build('kauai'); }
+  else{
+    fetch('partner-config/' + slug + '.json', {cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cfg){ build(cfg && cfg.island ? String(cfg.island) : 'kauai'); })
+      .catch(function(){ build('kauai'); });
+  }
 })();
 </script>
 </body>
