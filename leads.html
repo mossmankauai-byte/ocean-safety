@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f4c5c">
+<link rel="icon" href="https://oceansafety.app/favicon.ico">
+<title>Partner leads — OceanSafe</title>
+<!--
+  Internal lead board for /join submissions (partner_leads via the leads-admin edge fn).
+
+  WHY THIS EXISTS: partner_leads is RLS-locked with zero policies, so leads are invisible
+  without SQL, and this project has NO email sender (no RESEND_API_KEY, no custom SMTP —
+  Supabase's built-in mailer is 2/hour and not a production sender). Nothing can be pushed
+  to Nick, so the board is the delivery mechanism. If a Resend key is ever set, the
+  notification in lead-capture starts firing on its own and this stays useful anyway.
+
+  Built from scratch rather than forked from the golden console frame: there is no pinned
+  golden ref for a lead board, and forking a 370KB segment console for a list of leads
+  would import seven tabs of irrelevant operator UI. Palette tokens are copied from
+  join.html so it still reads as OceanSafe.
+
+  The token is held in localStorage only. It is the admin secret — treat this URL as private.
+-->
+<style>
+  :root{
+    --ocean:#0f4c5c; --aqua:#0a8ba8; --gold:#c9a84c; --gold-soft:#ffe6a6;
+    --ink:#0d1b22; --paper:#f5f7f8; --muted:#4f5f69; --line:#dbe3e7; --card:#fff;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --ink:#eaf2f5; --paper:#0b171d; --muted:#9fb3bd; --line:#1f3540; --card:#11222b; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+  header{background:var(--ocean);color:#fff;padding:18px 20px}
+  .wrap{max-width:940px;margin:0 auto}
+  .brand{font-weight:800;font-size:20px;letter-spacing:-.01em}
+  .brand span{color:var(--gold-soft)}
+  .sub{opacity:.85;font-size:14px;margin-top:2px}
+  main{padding:20px;max-width:940px;margin:0 auto}
+  .counts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:6px 13px;font-size:13px;font-weight:600}
+  .pill b{color:var(--aqua)}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+  button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid var(--line);
+    background:var(--card);color:var(--ink);padding:8px 14px;font-weight:600}
+  button:hover{border-color:var(--aqua)}
+  button.primary{background:var(--aqua);border-color:var(--aqua);color:#fff}
+  button[aria-pressed="true"]{background:var(--ocean);border-color:var(--ocean);color:#fff}
+  input,textarea{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);
+    border-radius:9px;background:var(--card);color:var(--ink)}
+  .lead{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px;margin-bottom:12px}
+  .lead.contacted{border-left:4px solid var(--gold)}
+  .lead.new{border-left:4px solid var(--aqua)}
+  .top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+  .biz{font-weight:800;font-size:17px}
+  .seg{display:inline-block;background:var(--ocean);color:#fff;border-radius:999px;
+    padding:2px 10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .when{color:var(--muted);font-size:13px}
+  .meta{margin:8px 0 0;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+  .meta a{color:var(--aqua)}
+  .msg{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:9px;
+    white-space:pre-wrap;font-size:15px}
+  .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .acts button{padding:7px 12px;font-size:14px}
+  .note{margin-top:10px}
+  .empty{text-align:center;color:var(--muted);padding:48px 20px}
+  .err{background:#fdecec;border:1px solid #f5b5b5;color:#8a1c1c;padding:12px 14px;
+    border-radius:9px;margin-bottom:14px}
+  @media (prefers-color-scheme:dark){ .err{background:#3a1414;border-color:#7d2b2b;color:#ffc9c9} }
+  .gate{max-width:420px;margin:56px auto;padding:0 20px}
+  .gate p{color:var(--muted);font-size:14px}
+  @media (max-width:380px){
+    main{padding:14px} .lead{padding:13px} .biz{font-size:16px}
+  }
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="brand">Ocean<span>Safe</span></div>
+  <div class="sub">Partner leads from /join</div>
+</div></header>
+
+<div id="gate" class="gate" hidden>
+  <h2>Admin token</h2>
+  <p>Paste the leads admin token. It's stored in this browser only.</p>
+  <div id="gateErr" class="err" hidden></div>
+  <input id="tok" type="password" autocomplete="off" placeholder="token" aria-label="Admin token">
+  <p><button class="primary" id="tokGo" style="width:100%;margin-top:10px">Open board</button></p>
+</div>
+
+<main id="app" hidden>
+  <div id="err" class="err" hidden></div>
+  <div class="counts" id="counts"></div>
+  <div class="bar">
+    <button class="primary" id="refresh">Refresh</button>
+    <button id="showAll" aria-pressed="false">Show worked &amp; closed</button>
+    <button id="signout" style="margin-left:auto">Forget token</button>
+  </div>
+  <div id="list"></div>
+</main>
+
+<script>
+(function(){
+  var FN = "https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/leads-admin";
+  var KEY = "os_leads_token";
+  var tok = null, showAll = false;
+  var $ = function(id){ return document.getElementById(id); };
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  function when(iso){
+    var d = new Date(iso), ms = Date.now() - d.getTime(), h = ms/3600000;
+    if(h < 1) return Math.max(1,Math.round(ms/60000)) + "m ago";
+    if(h < 24) return Math.round(h) + "h ago";
+    if(h < 24*7) return Math.round(h/24) + "d ago";
+    return d.toLocaleDateString();
+  }
+
+  function api(body){
+    body.secret = tok;
+    return fetch(FN,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(body)}).then(function(r){
+        return r.json().then(function(j){
+          if(!r.ok) throw new Error(j.error || ("HTTP " + r.status));
+          return j; }); });
+  }
+
+  function showErr(m){ var e=$("err"); e.textContent=m; e.hidden=false; }
+
+  function render(d){
+    $("err").hidden = true;
+    var bs = d.byStatus||{}, sg = d.bySegment||{};
+    var pills = [];
+    pills.push('<span class="pill">Total <b>'+(d.total||0)+'</b></span>');
+    ["new","contacted","won","lost","spam"].forEach(function(s){
+      if(bs[s]) pills.push('<span class="pill">'+s+' <b>'+bs[s]+'</b></span>'); });
+    Object.keys(sg).sort().forEach(function(s){
+      pills.push('<span class="pill">'+esc(s)+' <b>'+sg[s]+'</b></span>'); });
+    $("counts").innerHTML = pills.join("");
+
+    var L = d.leads||[];
+    if(!L.length){
+      $("list").innerHTML = '<div class="empty"><p><b>No open leads.</b></p><p>'+
+        (showAll ? "Nothing here yet." : "Nothing waiting on you. Toggle above to see closed ones.")+
+        '</p></div>';
+      return;
+    }
+    $("list").innerHTML = L.map(function(l){
+      var subject = encodeURIComponent("OceanSafe — "+(l.business||""));
+      return '<article class="lead '+esc(l.status)+'" data-id="'+esc(l.id)+'">'+
+        '<div class="top"><div><span class="seg">'+esc(l.segment)+'</span> '+
+          '<span class="biz">'+esc(l.business)+'</span></div>'+
+          '<span class="when">'+esc(when(l.created_at))+' · '+esc(l.status)+'</span></div>'+
+        '<p class="meta">'+esc(l.name)+
+          ' · <a href="mailto:'+esc(l.email)+'?subject='+subject+'">'+esc(l.email)+'</a>'+
+          (l.phone ? ' · <a href="tel:'+esc(l.phone.replace(/[^0-9+]/g,""))+'">'+esc(l.phone)+'</a>' : '')+
+          (l.island ? ' · '+esc(l.island) : '')+'</p>'+
+        (l.message ? '<div class="msg">'+esc(l.message)+'</div>' : '')+
+        '<div class="note"><textarea rows="2" placeholder="Notes…" data-note>'+esc(l.notes||"")+'</textarea></div>'+
+        '<div class="acts">'+
+          '<button data-act="contacted">Mark contacted</button>'+
+          '<button data-act="won">Won</button>'+
+          '<button data-act="lost">Lost</button>'+
+          '<button data-act="spam">Spam</button>'+
+          '<button data-act="note">Save note</button>'+
+        '</div></article>'; }).join("");
+  }
+
+  function load(){
+    api({action:"list", all:showAll}).then(render).catch(function(e){
+      if(/unauthorized/i.test(e.message)){ signout("That token was rejected."); }
+      else showErr(e.message); });
+  }
+
+  $("list").addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-act]"); if(!b) return;
+    var card = b.closest(".lead"), id = card.dataset.id, act = b.dataset.act;
+    b.disabled = true;
+    var body = act === "note"
+      ? {action:"update", id:id, notes:card.querySelector("[data-note]").value}
+      : {action:"update", id:id, status:act};
+    api(body).then(load).catch(function(e){ showErr(e.message); b.disabled=false; });
+  });
+
+  $("refresh").addEventListener("click", load);
+  $("showAll").addEventListener("click", function(){
+    showAll = !showAll; this.setAttribute("aria-pressed", String(showAll));
+    this.textContent = showAll ? "Show only open" : "Show worked & closed";
+    load(); });
+  $("signout").addEventListener("click", function(){ signout(); });
+
+  function signout(msg){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    tok = null; $("app").hidden = true; $("gate").hidden = false;
+    if(msg){ var g=$("gateErr"); g.textContent=msg; g.hidden=false; }
+  }
+
+  function start(t){
+    tok = t;
+    try{ localStorage.setItem(KEY, t); }catch(e){}
+    $("gate").hidden = true; $("app").hidden = false;
+    load();
+  }
+
+  $("tokGo").addEventListener("click", function(){
+    var v = $("tok").value.trim(); if(v) start(v); });
+  $("tok").addEventListener("keydown", function(e){ if(e.key==="Enter") $("tokGo").click(); });
+
+  var saved = null;
+  try{ saved = localStorage.getItem(KEY); }catch(e){}
+  if(saved){ start(saved); } else { $("gate").hidden = false; }
+})();
+</script>
+</body>
+</html>
