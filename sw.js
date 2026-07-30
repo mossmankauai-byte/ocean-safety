@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v232-2026-07-30-rainbar-bottom-dock';
+const CACHE_VERSION = 'v233-2026-07-30-console-login';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -172,7 +172,7 @@ if (workbox) {
   workbox.routing.registerRoute(
     ({ url }) => url.origin === self.location.origin && (
       /^\/d\//.test(url.pathname) ||
-      /^\/(jade[a-z-]*|sales|hotel-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo)\.html$/.test(url.pathname)),
+      /^\/(jade[a-z-]*|sales|hotel-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo|set-password)\.html$/.test(url.pathname)),
     new workbox.strategies.NetworkFirst({
       cacheName: "jade-pages",
       networkTimeoutSeconds: 4,
