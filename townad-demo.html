@@ -129,11 +129,11 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   const ISLAND_LABEL={kauai:["Kauaʻi","Kauaʻi"],maui:["Maui","Maui"],oahu:["Oʻahu","Oʻahu"],hawaii:["Hawaiʻi Island","Hawaiʻi"]};
   const [islandName,islandShort]=ISLAND_LABEL[p.island]||ISLAND_LABEL.kauai;
   // Islands that have a /assets/shot-promo-<island>.png capture. Gated so a missing shot can't
-  // render a broken image. Hawaiʻi Island's capture landed 2026-07-28 with its go-live.
+  // render a broken image; Hawaiʻi has none yet (not live). Add a key when its capture lands.
   // MUST be declared up here, above the root.innerHTML build: that build calls promoCard() ->
   // phonePreview(), and `const` is not hoisted — declaring it next to phonePreview put it in the
   // temporal dead zone at call time and threw ReferenceError, killing the whole town_ad dashboard.
-  const PROMO_SHOT_ISLANDS = { kauai:1, maui:1, oahu:1, hawaii:1 };
+  const PROMO_SHOT_ISLANDS = { kauai:1, maui:1, oahu:1 };
   // Town-filter labels for the "Your pin" card. Up HERE with the other island constants for the
   // same reason PROMO_SHOT_ISLANDS is: the root.innerHTML build calls pinCard() long before this
   // point in the file, and `const` is not hoisted — declaring it next to pinCard() puts it in the
@@ -476,6 +476,10 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     function drawAsset(spec,qrImg,markImg){
       const c=document.createElement("canvas"); c.width=spec.w; c.height=spec.h;
       const x=c.getContext("2d"), W=spec.w, H=spec.h;
+      // Draw the QR with smoothing OFF — canvas interpolation softens module edges and can make
+      // a higher-version code (long slug) undecodable. Mirrors d.html; keep the two in step.
+      const qr=(img,dx,dy,dw,dh)=>{ const sm=x.imageSmoothingEnabled; x.imageSmoothingEnabled=false;
+        x.drawImage(img,dx,dy,dw,dh); x.imageSmoothingEnabled=sm; };
       x.fillStyle=SAND; x.fillRect(0,0,W,H); x.textBaseline="top";
       // Bare QR — nothing but the code. This is the one a POS wants: Square/Toast/Clover let you
       // drop an image onto a receipt or an order screen, and they want the code alone, not a
@@ -487,11 +491,11 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       if(spec.layout==="bare"){
         x.fillStyle="#fff"; x.fillRect(0,0,W,H);
         const pad=Math.round(W*0.08), q=W-pad*2;
-        x.drawImage(qrImg,pad,pad,q,q);
+        qr(qrImg,pad,pad,q,q);
         return c;
       }
       if(spec.layout==="strip"){                    // receipt: QR left, copy right
-        const pad=H*0.11, q=H-pad*2; x.drawImage(qrImg,pad,pad,q,q);
+        const pad=H*0.11, q=H-pad*2; qr(qrImg,pad,pad,q,q);
         const tx=pad*1.6+q;
         // The strip is only 2.25in wide and the QR takes ~47% of it, leaving ~270px for copy.
         // At the design sizes every line overflowed the canvas and was cut mid-word on a real
@@ -516,7 +520,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
         x.textAlign="center";
         lockup(x,W,H*0.13,W*0.115,W*0.075,markImg,W*0.28);
         const q=W*0.52; x.fillStyle="#fff"; x.fillRect(W/2-q/2-W*0.02,H*0.33,q+W*0.04,q+W*0.04);
-        x.drawImage(qrImg,W/2-q/2,H*0.34,q,q);
+        qr(qrImg,W/2-q/2,H*0.34,q,q);
         x.fillStyle=INK; x.font=F(700,W*0.062); x.fillText("Free beach guide",W/2,H*0.885);
         x.fillStyle=brand; x.font=F(600,W*0.042); x.fillText(p.name.slice(0,30),W/2,H*0.945);
         x.textAlign="left"; return c;
@@ -533,7 +537,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       const q=W*0.56, qy=band+H*0.225;
       x.fillStyle="#fff"; x.shadowColor="rgba(15,61,73,.18)"; x.shadowBlur=W*0.03; x.shadowOffsetY=W*0.012;
       x.fillRect(W/2-q/2-W*0.028,qy-W*0.028,q+W*0.056,q+W*0.056); x.shadowColor="transparent";
-      x.drawImage(qrImg,W/2-q/2,qy,q,q);
+      qr(qrImg,W/2-q/2,qy,q,q);
       x.fillStyle=TEAL; x.font=F(700,W*0.040); x.fillText("Scan with your phone camera",W/2,qy+q+W*0.055);
       const fy=qy+q+W*0.115;
       x.fillStyle=brand; x.font=F(800,W*0.052); x.fillText(p.name.slice(0,28),W/2,fy);
@@ -551,7 +555,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     const markReady = new Promise(resolve=>{
       const m=new Image(); m.onload=()=>resolve(m); m.onerror=()=>resolve(null); m.src=OS_MARK;
     });
-    Promise.all([qrWithLogo(qrUrl("receipt"),900), markReady]).then(([url,markImg])=>{
+    Promise.all([qrWithLogo(qrUrl("receipt"),1400), markReady]).then(([url,markImg])=>{
       const grid=document.getElementById("assetGrid"); if(!grid) return;
       const qrImg=new Image();
       qrImg.onload=()=>{
