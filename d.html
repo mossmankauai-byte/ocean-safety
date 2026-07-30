@@ -73,6 +73,13 @@
   .lbl{display:block;font-size:12.5px;font-weight:600;color:var(--mute);margin-bottom:4px}
   #promoTitle,#promoStart,#promoEnd,#promoExp,#promoFile{width:100%;font-size:14px;padding:9px 11px;border:1px solid #D5DCE2;border-radius:9px;background:#fff;color:inherit}
   #promoFile{padding:8px;background:oklch(0.975 0.006 84)}
+  /* logo card — reuses the promo form's input styling so the two match */
+  #logoFile{width:100%;font-size:14px;padding:8px;border:1px solid #D5DCE2;border-radius:9px;background:oklch(0.975 0.006 84);color:inherit}
+  .logoprev{width:104px;height:104px;flex:0 0 auto;border:1px dashed #D5DCE2;border-radius:12px;background:#fff;
+    display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;padding:8px;overflow:hidden}
+  .logoprev img{max-width:100%;max-height:100%;object-fit:contain}
+  #logoMsg.err{color:oklch(0.52 0.17 27)}
+  #logoMsg.ok{color:oklch(0.45 0.1 168)}
   #promoMsg.err{color:oklch(0.52 0.17 27)}
   #promoMsg.ok{color:oklch(0.45 0.1 168)}
   #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--deep);color:#fff;font-size:13px;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 10px 30px -12px oklch(0.3 0.05 220 / .5)}
@@ -162,6 +169,22 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   +'<div class="card lift"><h2>Your page</h2>'
     +'<div class="row"><a class="btn primary" href="'+esc(live)+'" target="_blank" rel="noopener">View your live page ↗</a>'
     +'<button class="btn ghost" id="copylink">Copy page link</button></div></div>'
+  // Logo. partners.logo_url and the public `logos` bucket existed from the start, but nothing
+  // ever wrote to them — so every operator's co-brand fell back to a text name. Placed above
+  // the assets on purpose: the assets are built around the logo, so you set it first.
+  +'<div class="card"><h2>Your logo</h2>'
+    +'<p class="lead">Add your logo and it appears on your guest page. PNG or JPG, up to 2 MB — a PNG with a transparent background looks best.</p>'
+    +'<div class="row" style="align-items:center;gap:14px;margin-top:12px">'
+      +'<div id="logoPrev" class="logoprev" aria-live="polite"><span class="dim">No logo yet</span></div>'
+      +'<div style="flex:1;min-width:190px">'
+        +'<input id="logoFile" type="file" accept="image/png,image/jpeg">'
+        +'<div class="row" style="margin-top:10px;gap:10px">'
+          +'<button class="btn gold" id="logoSave" type="button">Upload logo</button>'
+          +'<button class="btn ghost sm" id="logoClear" type="button" style="display:none">Remove</button>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div id="logoMsg" class="hint" style="margin-top:8px"></div></div>'
   // Every segment gets BOTH: the bare tracked QR per placement (what a sign shop or POS asks
   // for) and the finished printable assets built around those same codes. town_ad keeps assets
   // only — it has a single placement, so a one-tile QR card next to the assets is just noise.
@@ -293,6 +316,62 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       +'</div></div>';
   }
   document.getElementById("copylink")?.addEventListener("click",()=>window.copy(live));
+
+  // ── logo upload ──
+  // Same auth model as the promo form: the dashboard token is the only credential, and every
+  // rule (size, type, magic numbers) is enforced again in partner-logo. SVG is refused
+  // server-side on purpose — the bucket is public, and an SVG is an executable document.
+  (function(){
+    const LOGO_FN="https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-logo";
+    const $l=id=>document.getElementById(id);
+    const prev=$l("logoPrev"), fileEl=$l("logoFile"), saveBtn=$l("logoSave"),
+          clearBtn=$l("logoClear"), msg=$l("logoMsg");
+    if(!prev||!fileEl||!saveBtn) return;
+
+    function say(t,cls){ msg.textContent=t||""; msg.className="hint"+(cls?" "+cls:""); }
+    function paint(url){
+      if(url){
+        prev.innerHTML='<img alt="Your logo">';
+        prev.querySelector("img").src=url;
+        clearBtn.style.display="";
+      } else {
+        prev.innerHTML='<span class="dim">No logo yet</span>';
+        clearBtn.style.display="none";
+      }
+    }
+    function call(body){
+      return fetch(LOGO_FN,{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(Object.assign({token:token},body))})
+        .then(r=>r.json().then(j=>{ if(!r.ok) throw new Error(j.error||"Something went wrong."); return j; }));
+    }
+
+    call({action:"get"}).then(j=>paint(j.logo_url)).catch(()=>{});
+
+    saveBtn.addEventListener("click",function(){
+      const f=fileEl.files&&fileEl.files[0];
+      if(!f) return say("Choose a PNG or JPG first.","err");
+      // Checked here for a fast, friendly message; re-checked server-side regardless.
+      if(f.size>2*1024*1024) return say("That logo is "+(f.size/1048576).toFixed(1)+" MB. Please keep it under 2 MB.","err");
+      saveBtn.disabled=true; say("Uploading…");
+      const fr=new FileReader();
+      fr.onerror=function(){ saveBtn.disabled=false; say("Couldn’t read that file — try again.","err"); };
+      fr.onload=function(){
+        call({action:"set",dataUrl:String(fr.result)})
+          .then(j=>{ paint(j.logo_url); fileEl.value=""; say("Logo saved — it’s on your guest page now.","ok"); })
+          .catch(e=>say(e.message,"err"))
+          .then(()=>{ saveBtn.disabled=false; });
+      };
+      fr.readAsDataURL(f);
+    });
+
+    clearBtn.addEventListener("click",function(){
+      clearBtn.disabled=true; say("Removing…");
+      call({action:"clear"})
+        .then(()=>{ paint(null); say("Logo removed.","ok"); })
+        .catch(e=>say(e.message,"err"))
+        .then(()=>{ clearBtn.disabled=false; });
+    });
+  })();
 
   // ── self-serve promotion (town_ad) ──
   // The partner uploads their own image/PDF and picks the hours; partner-promo validates and
