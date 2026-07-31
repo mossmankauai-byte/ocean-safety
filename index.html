@@ -1290,6 +1290,8 @@ a{text-decoration:none;color:inherit}
 .mkpin svg.pinSh{width:36px;height:46px;display:block}
 .mkpin .pinIco{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:20px;height:20px;color:#fff;display:flex;align-items:center;justify-content:center}
 .mkpin .pinIco svg{width:18px;height:18px;display:block}
+.mkw.mk-pulse .mkpin{animation:mkPulse .9s ease 2}
+@keyframes mkPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.32)}}
 .mkr{width:42px;height:42px;border-radius:50%;border:3px solid #aaa;overflow:hidden;background:var(--ocean-lt);box-shadow:0 2px 6px rgba(0,0,0,.25);position:relative}
 .mkr.green{border-color:var(--safe)}
 .mkr.yellow{border-color:var(--warn)}
@@ -4992,6 +4994,19 @@ function mkActIcon(a){
     className:'',iconSize:[120,60],iconAnchor:[60,20]
   });
 }
+
+// TOUR MARKER — teardrop pin in the tour's own accent colour with its glyph. Tours ship no PNG
+// asset, so this uses the SVG-generated pin path (the same shape mkHikeIcon falls back to).
+// data-glyph="tour" keeps it clusterable and, unlike "danger", never exempts it from declutter.
+function mkTourIcon(t){
+  const col = t.color || '#0f4c5c';
+  const pinShape = `<svg class="pinSh" viewBox="0 0 36 46" xmlns="http://www.w3.org/2000/svg"><path d="M18 1 C9 1 2 8 2 17 C2 26 18 45 18 45 C18 45 34 26 34 17 C34 8 27 1 18 1 Z" fill="${col}" stroke="white" stroke-width="2"/></svg>`;
+  const glyph = `<div class="pinIco" style="font-size:15px;font-weight:700;line-height:1">${t.icon || '★'}</div>`;
+  return L.divIcon({
+    html:`<div class="mkw" data-glyph="tour"><div class="mkpin">${pinShape}${glyph}</div><div class="mklbl">${t.n || t.title}</div></div>`,
+    className:'',iconSize:[120,72],iconAnchor:[60,46]
+  });
+}
 let hikeMkrs={}, actMkrs={};
 function renderHikes(){
   Object.values(hikeMkrs).forEach(m=>m.remove());hikeMkrs={};
@@ -5001,6 +5016,61 @@ function renderHikes(){
     mk.on('click',()=>openHikeSheet(hk.id));
     hikeMkrs[hk.id]=mk;
   });
+}
+
+// ── TOUR LOCATION PINS ──────────────────────────────────────────────────────
+// Drops a pin at each tour's departure/meeting point when the Tours tab is active, so a guest
+// can see where every listed tour actually starts. Tours without coordinates (e.g. an island
+// whose data/<slug>.js tours predate this field) are simply skipped — no pin, no error.
+let tourMkrs={};
+function renderTours(){
+  Object.values(tourMkrs).forEach(m=>m.remove()); tourMkrs={};
+  if(window._activeTab !== 'tours') return;
+  (TOURS_LIBRARY||[]).forEach(t=>{
+    if(typeof t.lat!=='number' || typeof t.lon!=='number') return;
+    const mk=L.marker([t.lat,t.lon],{icon:mkTourIcon(t),zIndexOffset:200}).addTo(map);
+    mk.on('click',()=>{ if(typeof openToursSheet==='function') openToursSheet(); scrollToTourCard(t.id); });
+    tourMkrs[t.id]=mk;
+  });
+}
+// Pan/zoom the map to a tour's pin and pulse it. The Tours sheet covers most of the map, so the
+// card's location chip closes the sheet first (closeToursAndFly) — this is the reveal.
+function flyToTour(id){
+  const t=(TOURS_LIBRARY||[]).find(x=>x.id===id);
+  if(!t || typeof t.lat!=='number' || typeof map==='undefined' || !map) return;
+  const z=Math.max(map.getZoom(), 12.5);
+  // A smooth flyTo runs on requestAnimationFrame, which the browser pauses for a hidden tab and
+  // which reduced-motion users opt out of — either way it can strand the map partway. Land
+  // instantly in those cases; animate otherwise.
+  const instant = document.hidden || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  try{ if(instant) map.setView([t.lat,t.lon], z, {animate:false}); else map.flyTo([t.lat,t.lon], z, {duration:.6}); }
+  catch(e){ try{ map.setView([t.lat,t.lon], z, {animate:false}); }catch(_){} }
+  const mk=tourMkrs[id], w=mk&&mk._icon&&mk._icon.querySelector('.mkw');
+  if(w){ w.classList.remove('mk-pulse'); void w.offsetWidth; w.classList.add('mk-pulse');
+    setTimeout(()=>{ try{ w.classList.remove('mk-pulse'); }catch(e){} }, 2000); }
+}
+// From a tour card: hide the sheet so the map is visible, then fly to the pin.
+function closeToursAndFly(id){ if(typeof closeSheet==='function') closeSheet(); flyToTour(id); }
+// Scroll the open Tours sheet to a given tour's card (used when a map pin is tapped).
+function scrollToTourCard(id){
+  try{
+    const el=document.getElementById('tourcard-'+id), sc=document.getElementById('sc');
+    if(!el || !sc) return;
+    requestAnimationFrame(()=>{
+      const top = el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 8;
+      sc.scrollTo({top:Math.max(0,top), behavior:'smooth'});
+    });
+  }catch(e){}
+}
+// Location chip for a tour card: shows where it departs and, when the tour has coordinates,
+// taps through to the map pin. Returns '' for tours with no `place`.
+function _tourLocRow(t){
+  if(!t || !t.place) return '';
+  const pin='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 21s-7-6.3-7-11a7 7 0 0 1 14 0c0 4.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+  const tappable = (typeof t.lat==='number' && typeof t.lon==='number');
+  const cta = tappable ? ' · <span style="text-decoration:underline">See on map</span>' : '';
+  const attr = tappable ? `onclick="event.stopPropagation();closeToursAndFly('${t.id}')" style="cursor:pointer;"` : 'style="cursor:default;"';
+  return `<div ${attr} class="tour-loc" style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:10.5px;color:var(--ocean);font-weight:600">${pin}<span>${t.place}${cta}</span></div>`;
 }
 let mktMkrs={};
 function renderMarkets(){
@@ -5184,6 +5254,7 @@ let TOURS_LIBRARY = [
     subtitle: '5 hours · From $215 · ★ 5.0',
     icon: '◌',
     color: '#0f4c5c',
+    n: 'Nā Pali Snorkel', lat: 21.9026, lon: -159.5892, place: 'Departs Port Allen Harbor · ʻEleʻele',
     when: 'Best on calm water with low swell',
     rules: [
       { if: RULES.brown(),       level:'no',    reason:'Brown water advisory — try Waimea Canyon instead' },
@@ -5199,6 +5270,7 @@ let TOURS_LIBRARY = [
     subtitle: '1 hour · From $336 · ★ 4.8 (433)',
     icon: '✈',
     color: '#5a4217',
+    n: 'Helicopter Tour', lat: 21.9760, lon: -159.3410, place: 'Departs Līhuʻe Airport heliport',
     when: 'Best on clear, dry, low-wind days',
     rules: [
       { if: RULES.windAbove(28),   level:'no',    reason:'Too windy — flights typically grounded' },
@@ -5216,6 +5288,7 @@ let TOURS_LIBRARY = [
     subtitle: '7 hours · From $190 · ★ 4.6',
     icon: '△',
     color: '#a16207',
+    n: 'Waimea Canyon', lat: 22.0700, lon: -159.6613, place: 'Waimea Canyon · West Side',
     when: 'Best when ocean is rough or there is brown water',
     rules: [
       { if: RULES.brown(),         level:'yes',   reason:'Brown water today — perfect day to skip the ocean' },
@@ -5230,6 +5303,7 @@ let TOURS_LIBRARY = [
     subtitle: '3.5 hours · From $179 · ★ 4.5 (947)',
     icon: '✦',
     color: '#7a6e4d',
+    n: 'Luau Kalamaku', lat: 21.9690, lon: -159.4032, place: 'Kilohana Plantation · Puhi',
     when: 'Evening cultural experience, covered amphitheater',
     rules: [
       { if: RULES.hourBetween(14,16), level:'yes',   reason:'Tonight at 5 PM — book by 3 PM for pickup' },
@@ -5243,6 +5317,7 @@ let TOURS_LIBRARY = [
     subtitle: '4–5 hours · From $119 · ★ 4.9 (223)',
     icon: '~',
     color: '#16a34a',
+    n: 'Wailua Kayak', lat: 22.0466, lon: -159.3390, place: 'Wailua River Marina · Kapaʻa',
     when: 'Family-friendly · Calm river paddling',
     rules: [
       { if: RULES.rainActive(0.4),                       level:'no',    reason:'Heavy rain — trail to falls gets dangerously muddy' },
@@ -5257,6 +5332,7 @@ let TOURS_LIBRARY = [
     subtitle: '1.5 hours · From $114 · ★ 4.9 (69)',
     icon: '⤳',
     color: '#e07856',
+    n: 'Sunset Cruise', lat: 21.9012, lon: -159.5915, place: 'Departs Port Allen Harbor · ʻEleʻele',
     when: 'Best when wind and swell are low',
     rules: [
       { if: RULES.bigSurf(6),         level:'no',    reason:'Too rough — boat may cancel sunset run' },
@@ -5273,6 +5349,7 @@ let TOURS_LIBRARY = [
     subtitle: '3.5 hours · From $169 · ★ 5.0 (14)',
     icon: '⟶',
     color: '#7c3a05',
+    n: 'Kōloa Zipline', lat: 21.9072, lon: -159.4690, place: 'Kōloa · South Shore',
     when: 'Sunny side · Great when surf is rough',
     rules: [
       { if: RULES.windAbove(28),                  level:'no',    reason:'Too windy — ziplines pause in high wind' },
@@ -5287,6 +5364,7 @@ let TOURS_LIBRARY = [
     subtitle: '3 hours · From $106 · ★ 4.6 (60)',
     icon: '❀',
     color: '#365314',
+    n: 'Allerton Garden', lat: 21.8990, lon: -159.5030, place: 'Lāwaʻi · South Shore',
     when: 'Cultural · Mostly sheltered · Great rainy-day pick',
     rules: [
       { if: c => c.brown || c.es > 6,             level:'yes',   reason:'Skip the ocean today — gardens are at their best when rinsed by rain' },
@@ -5842,7 +5920,7 @@ function renderToursSheetContent(){
   const askDay = (useForecast && _selectedDayIdx > 0) ? FORECAST[_selectedDayIdx].dayName : 'today';
 
   const featuredCard = `
-    <div class="poi-hero" style="background:linear-gradient(135deg,${featured.color},#1a7a8a)">
+    <div class="poi-hero" id="tourcard-${featured.id}" style="background:linear-gradient(135deg,${featured.color},#1a7a8a)">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">${featured.icon}</div>
       <div>
         <div class="poi-hero-name" style="color:#fff">${dateLabel} Top Pick</div>
@@ -5853,6 +5931,7 @@ function renderToursSheetContent(){
       <span style="font-size:14px;flex-shrink:0">✓</span>
       <span><strong>Why ${useForecast && _selectedDayIdx > 0 ? 'this day' : 'now'}:</strong> ${featuredMatch.reason}</span>
     </div>
+    ${_tourLocRow(featured)}
     <div style="margin-top:12px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;min-height:170px">
       <div data-gyg-href="https://widget.getyourguide.com/default/availability.frame" data-gyg-tour-id="${featured.id}" data-gyg-locale-code="en-US" data-gyg-currency="USD" data-gyg-widget="availability" data-gyg-variant="horizontal" data-gyg-partner-id="${_gygPid()}"${_gygCmpAttr()}><span style="display:none">Powered by GetYourGuide</span></div>
     </div>
@@ -5876,12 +5955,13 @@ function renderToursSheetContent(){
         else if(m.level === 'maybe') badge.text = `Caution ${FORECAST[_selectedDayIdx].dayName}`;
       }
       return `
-        <div style="margin-top:14px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">
+        <div id="tourcard-${t.id}" style="margin-top:14px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">
           <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:6px">
             <div style="flex:1;min-width:0">
               <div style="font-weight:700;color:var(--ink);font-size:13px;line-height:1.3">${t.icon} ${t.title}</div>
               <div style="font-size:10px;color:var(--mute);margin-top:2px">${t.subtitle}</div>
               <div style="font-size:10px;color:var(--mute);margin-top:1px;font-style:italic">${t.when}</div>
+              ${_tourLocRow(t)}
             </div>
             <div style="background:${badge.bg};color:${badge.color};font-size:9px;font-weight:700;padding:3px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;flex-shrink:0">${badge.text}</div>
           </div>
@@ -6411,6 +6491,7 @@ function declutterMarks(){
     try{ if(typeof coffeeMkrs!=='undefined') regs.push(coffeeMkrs); }catch(e){}
     try{ if(typeof drinkMkrs!=='undefined') regs.push(drinkMkrs); }catch(e){}
     try{ if(typeof stayMkrs!=='undefined') regs.push(stayMkrs); }catch(e){}
+    try{ if(typeof tourMkrs!=='undefined') regs.push(tourMkrs); }catch(e){}
     regs.forEach(function(reg){ _declutterReg(reg, flat); });
   }catch(e){}
 }
@@ -7901,6 +7982,7 @@ function wireTabs(){
         if(typeof closeSubtabMenu === 'function') closeSubtabMenu();
         if(typeof frameIsland === 'function') frameIsland(true);  // Layer 9: reframe the ACTIVE island, not a Kauaʻi-hardcoded center
         closeSheet();   // clear any stale ?item route + document.title from a previously open detail sheet
+        if(typeof tourMkrs!=='undefined'){ Object.values(tourMkrs).forEach(m=>m.remove()); tourMkrs={}; }  // no stray tour pins under the Plan sheet
         if(window.OSA) OSA.tab('activities');
         if(typeof openPlanSheet==='function'){ openPlanSheet(); }
         return;
@@ -7910,8 +7992,19 @@ function wireTabs(){
         el.classList.add('active');
         const sbt=document.getElementById('subtabs'); if(sbt){ sbt.innerHTML=''; sbt.classList.remove('on'); }
         if(typeof closeSubtabMenu === 'function') closeSubtabMenu();
+        window._activeTab = 'tours';               // Tours is now a real map-state tab so its pins paint
+        document.body.dataset.tab = 'tours';
         if(typeof frameIsland === 'function') frameIsland(true);
         closeSheet();
+        // Clear the prior tab's markers (each render self-clears since _activeTab!=='its tab'), drop
+        // no rip-channel or swell layer here, then paint the tour-location pins over a clean map.
+        renderMap(); renderHikes(); renderActs(); renderStays(); renderMarkets();
+        renderFoods(); renderGroceries(); renderGas(); renderCrafts(); renderCoffee(); renderDrinks();
+        Object.values(chMkrs||{}).forEach(m=>m.remove()); chMkrs={};
+        renderTours();
+        try{ declutterMarks(); }catch(e){}
+        if(typeof renderSwellLayer==='function') renderSwellLayer();
+        if(typeof renderZones==='function') renderZones();
         if(window.OSA) OSA.tab('tours');
         if(typeof openToursSheet==='function'){ openToursSheet(); }
         return;
@@ -7923,6 +8016,7 @@ function wireTabs(){
         if(typeof closeSubtabMenu === 'function') closeSubtabMenu();
         if(typeof frameIsland === 'function') frameIsland(true);  // Layer 9: reframe the ACTIVE island, not a Kauaʻi-hardcoded center
         closeSheet();
+        if(typeof tourMkrs!=='undefined'){ Object.values(tourMkrs).forEach(m=>m.remove()); tourMkrs={}; }  // no stray tour pins under the Shop sheet
         if(window.OSA) OSA.tab('activities');
         if(typeof openStoreSheet==='function'){ openStoreSheet(); }
         return;
@@ -7950,6 +8044,7 @@ function wireTabs(){
       renderCrafts();
       renderCoffee();
       renderDrinks();
+      renderTours();   // clears tour pins when leaving the Tours tab (no-op elsewhere)
       // renderMap() above already ran the declutter pass, but it ran BEFORE these POI
       // registries were torn down and repainted — so the fresh pins came out unthinned.
       // Re-run it here, after every registry exists.
@@ -8930,6 +9025,7 @@ async function rescore(){
   renderCrafts();
   renderCoffee();
   renderDrinks();
+  renderTours();   // keeps tour pins in sync on a live-data rescore while the Tours tab is open
   // Boot paints POI pins after renderMap()'s declutter pass, so thin them once here too —
   // otherwise the first screen shows an unthinned pile until the user pans or zooms.
   try{ declutterMarks(); }catch(e){}
