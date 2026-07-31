@@ -58,3 +58,11 @@
   X-Robots-Tag: noindex, nofollow
 /sales
   X-Robots-Tag: noindex, nofollow
+
+# Sales-dashboard payloads — allow cross-origin fetch so the unlock gate can fall
+# back between oceansafety.app and the ocean-safety.netlify.app mirror when one is
+# blocked by a filtering network (eero/Zscaler). Public encrypted blobs; no creds. 2026-07-31.
+/sales.bin
+  Access-Control-Allow-Origin: *
+/jade-sales.bin
+  Access-Control-Allow-Origin: *
