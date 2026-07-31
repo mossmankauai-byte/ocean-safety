@@ -2148,7 +2148,7 @@ const ISLANDS = {
   },
   hawaii: {
     // live:false mirrors index.html's gate — flip only with the same human sign-off.
-    slug:'hawaii', name:'Hawaiʻi Island', live:true, defaultSide:'kona', sideKey:'os_side_hawaii',
+    slug:'hawaii', name:'Hawaiʻi', live:true, defaultSide:'kona', sideKey:'os_side_hawaii',
     map:{ center:[19.60,-155.50], zoom:9, minZoom:8, maxBounds:[[18.40,-156.50],[20.75,-154.40]] },
     seaLevel:{ lat:19.64, lon:-155.99 },
     geoBox:{ latMin:18.85, latMax:20.30, lonMin:-156.15, lonMax:-154.75 },
@@ -2350,7 +2350,7 @@ const SAFETY_INFO={
   kauai:{island:'Kauaʻi',county:'County of Kauaʻi',agency:'Kauaʻi Ocean Safety Bureau and Kauaʻi Fire Department',agencyShort:'Kauaʻi Ocean Safety Bureau',phone:'(808) 241-4984'},
   oahu:{island:'Oʻahu',county:'City &amp; County of Honolulu',agency:'Honolulu Ocean Safety and the Honolulu Fire Department',agencyShort:'Honolulu Ocean Safety',phone:'(808) 723-7863'},
   maui:{island:'Maui',county:'County of Maui',agency:'Maui Ocean Safety and the Maui Fire Department',agencyShort:'Maui Ocean Safety',phone:'(808) 270-7561'},
-  hawaii:{island:'Hawaiʻi Island',county:'County of Hawaiʻi',agency:'the Hawaiʻi Fire Department (Ocean Safety)',agencyShort:'Hawaiʻi Fire Department',phone:''}
+  hawaii:{island:'Hawaiʻi',county:'County of Hawaiʻi',agency:'the Hawaiʻi Fire Department (Ocean Safety)',agencyShort:'Hawaiʻi Fire Department',phone:''}
 };
 function _si(){ return SAFETY_INFO[(ACTIVE&&ACTIVE.slug)||'kauai']||SAFETY_INFO.kauai; }
 function safetyFooterSuffix(){ var s=_si(); return s.phone?(' · <b>'+s.agencyShort+':</b> '+s.phone):''; }

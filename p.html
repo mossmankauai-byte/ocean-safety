@@ -64,7 +64,7 @@ const slug=(m?m[1]:new URLSearchParams(location.search).get("slug")||"").toLower
   // ISLANDS.hawaii.live went true — before that a Big Island partner's own co-brand page sent
   // their guests to /go/kauai under the label "See today's Kauaʻi beach-safety report", i.e. the
   // wrong island's beaches, rips and weather under that partner's brand.
-  const LIVE_ISLANDS={kauai:"Kauaʻi",maui:"Maui",oahu:"Oʻahu",hawaii:"Hawaiʻi Island"};
+  const LIVE_ISLANDS={kauai:"Kauaʻi",maui:"Maui",oahu:"Oʻahu",hawaii:"Hawaiʻi"};
   const island=LIVE_ISLANDS[p.island]?p.island:"kauai";
   const tag = seg==="hotel"?"Your resort’s beach-safety guide"
             : seg==="timeshare"?"Your club’s beach-safety guide"

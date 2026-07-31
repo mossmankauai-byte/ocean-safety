@@ -112,7 +112,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   // Island label for the printable assets. get_partner_dashboard projects partners.island
   // (migration 0024); older rows default to kauai. islandShort keeps the canvas headline
   // from overflowing — "Hawaiʻi Island" is too long for the tent/flyer band.
-  const ISLAND_LABEL={kauai:["Kauaʻi","Kauaʻi"],maui:["Maui","Maui"],oahu:["Oʻahu","Oʻahu"],hawaii:["Hawaiʻi Island","Hawaiʻi"]};
+  const ISLAND_LABEL={kauai:["Kauaʻi","Kauaʻi"],maui:["Maui","Maui"],oahu:["Oʻahu","Oʻahu"],hawaii:["Hawaiʻi","Hawaiʻi"]};
   const [islandName,islandShort]=ISLAND_LABEL[p.island]||ISLAND_LABEL.kauai;
   // Islands that have a /assets/shot-promo-<island>.png capture. Gated so a missing shot can't
   // render a broken image. Hawaiʻi Island's capture landed 2026-07-28 with its go-live.
