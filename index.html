@@ -7860,7 +7860,9 @@ function applyPartnerMode(){
   // Star/Town bag icon on the Shop tab handled further down (window._partnerSeg).
   var plan=document.querySelector('#tabs .tab[data-tab="activities"]');
   var toursTab=document.querySelector('#tabs .tab[data-tab="tours"]');
-  var _cr=false; try{ _cr=(typeof _activeRefSlug==='function' && String(_activeRefSlug()||'').indexOf('cr-')===0); }catch(e){}
+  // A creator link is either a per-creator slug (cr-<handle>) or the pooled/generic
+  // 'creators' ref (?ref=creators[&u=<slug>]) — both funnel to Tours (their commission), no Shop.
+  var _cr=false; try{ if(typeof _activeRefSlug==='function'){ var _rs=String(_activeRefSlug()||''); _cr=(_rs==='creators'||_rs.indexOf('cr-')===0); } }catch(e){}
   // Plan now shows on EVERY island (2026-07-28). `aff` still gates Shop below, but the
   // Plan/Tours swap keys only on real affiliate mode + creator refs — non-sellable islands
   // (Oʻahu/Maui/Hawaiʻi Island) get Plan like Kauaʻi. The Kauaʻi-only walk/bike data is
@@ -7872,7 +7874,7 @@ function applyPartnerMode(){
   // Creator links drop the Shop tab entirely — creator traffic funnels to Tours (their commission),
   // not the Amazon shop. Organic loads DROP Shop too (2026-07-18): Tours owns the organic commerce
   // slot. Shop shows only for a RETAIL partner ref (its whole value) or an explicit ?mode=shop preview.
-  var isCreator=false; try{ isCreator=(typeof _activeRefSlug==='function' && String(_activeRefSlug()||'').indexOf('cr-')===0); }catch(e){}
+  var isCreator=_cr;  // same creator-ref test as above (per-creator cr-* OR pooled 'creators')
   var wantShop=(window._partnerSeg==='retail'); try{ if(new URLSearchParams(location.search).get('mode')==='shop') wantShop=true; }catch(e){}
   if(shopTab){ shopTab.style.display = (aff || isCreator || !wantShop) ? 'none' : '';
     var si=shopTab.querySelector('.tab-ico');
