@@ -301,7 +301,7 @@
 
     <div class="math" id="mathStrip">
       A family of four books a <b>$500</b> boat tour through your link → <b>$20</b> to you.
-      <span class="sub">Half the commission GetYourGuide pays, on every booking, from every follower, all season. Your split grows to 60% once you pass 25 bookings in a quarter.</span>
+      <span class="sub">Half the commission GetYourGuide pays, on every booking, from every follower, all season. The same even split at your first booking and at your five hundredth.</span>
     </div>
   </div>
 </section>
@@ -350,7 +350,7 @@
       <div class="big">50%<span> of the commission</span></div>
       <div class="tag">Half the commission on every tour your followers book — split 50/50 with you, not "up to."</div>
       <ul class="checks">
-        <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Your split grows to 60% once you pass 25 bookings in a quarter</li>
+        <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>The same 50/50 split on your first booking and your five hundredth — no tiers to climb</li>
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Lifetime attribution — your link keeps credit on return visits, not a 24-hour cookie</li>
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>Paid monthly — $25 minimum, smaller balances roll over</li>
         <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg></span>No exclusivity, no posting minimums, cancel anytime</li>
@@ -472,7 +472,7 @@
     <span class="kicker">Program rules</span>
     <h2>The fine print, kept short.</h2>
     <ul class="fine" style="margin-top:18px;list-style:disc">
-      <li>You earn 50% of the commission GetYourGuide pays on tours booked through the app by visitors who arrived on your link — an even split — rising to 60% after 25 bookings in a quarter. Booking data comes from GetYourGuide's partner reporting and posts to your dashboard monthly.</li>
+      <li>You earn 50% of the commission GetYourGuide pays on tours booked through the app by visitors who arrived on your link — an even split, at every volume, with no tiers or thresholds. Booking data comes from GetYourGuide's partner reporting and posts to your dashboard monthly.</li>
       <li>Payouts are sent to your PayPal, monthly, $25 minimum (smaller balances roll over). You’re an independent contractor responsible for your own taxes; if your annual earnings cross the IRS reporting threshold you’ll receive the appropriate 1099 form.</li>
       <li>Disclose commissioned or incentivized posts with #ad. Don't make safety claims in your own voice — point to the app's live data instead.</li>
       <li>OceanSafe covers Kauaʻi, Oʻahu, and Maui. Please don't present it as covering other islands.</li>
@@ -575,7 +575,7 @@
 
     var base = { name:name, email:email, paypal:paypal, handle:handle, clean:clean,
                  platform:$('cf-platform').value, island:$('cf-island').value,
-                 agreedTerms:'creator-terms-2026-07-18',   // checkbox is required; record the version
+                 agreedTerms:'creator-terms-2026-07-31',   // checkbox is required; record the version
                  ts:new Date().toISOString() };
 
     // 1) Auto-provision: register this creator's own telemetry slug + dashboard key,
@@ -665,7 +665,7 @@
     { sel:'#mathStrip', title:'What a booking is worth',
       body:'Real example: a $500 family boat tour pays you $20. Beach days add up — most visiting families book more than one tour.' },
     { sel:'#rateCard', title:'An even split, no asterisks',
-      body:'Half the commission on every tour — a 60% split once you’re past 25 bookings a quarter. Paid monthly. No exclusivity and no posting quotas.' },
+      body:'Half the commission on every tour, at every volume — no tiers to climb and no threshold to hit. Paid monthly. No exclusivity and no posting quotas.' },
     { center:true, last:true, title:'Claim your link',
       body:'The form takes a minute and your link, QR and dashboard appear instantly — nothing to wait for.' }
   ];
