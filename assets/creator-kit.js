@@ -33,14 +33,33 @@
   // code into their own artwork, a sponsor deck, or a printer's template.
   // Print sizes are inches at 300dpi; the two screen sizes are the native
   // Instagram/TikTok canvases, which is where a creator's audience actually is.
+  // `photo` picks a background shot; those tiles put the photo in a top band
+  // under a scrim and keep the code on a solid field below. A code laid over a
+  // photograph stops scanning — the quiet zone has to be solid — so the photo is
+  // never behind the code itself.
   var ASSETS = [
     { key: "bare",    label: "Just the QR code",  w: 1200, h: 1200, sz: "any size · for your own artwork", layout: "bare",   print: true  },
+    { key: "square4", label: "Square card",       w: 1200, h: 1200, sz: "4 × 4 in",                        layout: "sq4",    print: true  },
     { key: "card",    label: "Hand-out card",     w: 1200, h: 1800, sz: "4 × 6 in",                        layout: "tall",   print: true  },
     { key: "sticker", label: "Sticker",           w: 900,  h: 900,  sz: "3 × 3 in",                        layout: "square", print: true  },
     { key: "flyer",   label: "Flyer / poster",    w: 1650, h: 2550, sz: "5.5 × 8.5 in",                    layout: "tall",   print: true  },
     { key: "story",   label: "Story graphic",     w: 1080, h: 1920, sz: "1080 × 1920 · for Stories",       layout: "story",  print: false },
-    { key: "feed",    label: "Feed square",       w: 1080, h: 1080, sz: "1080 × 1080 · for a post or bio", layout: "feed",   print: false }
+    { key: "feed",    label: "Feed square",       w: 1080, h: 1080, sz: "1080 × 1080 · for a post or bio", layout: "feed",   print: false },
+    // photo-backed variants
+    { key: "card-photo",  label: "Hand-out card · photo", w: 1200, h: 1800, sz: "4 × 6 in",                  layout: "tall",  print: true,  photo: "coast" },
+    { key: "square4-photo", label: "Square card · photo", w: 1200, h: 1200, sz: "4 × 4 in",                  layout: "sq4",   print: true,  photo: "bay"   },
+    { key: "story-photo", label: "Story graphic · photo", w: 1080, h: 1920, sz: "1080 × 1920 · for Stories", layout: "story", print: false, photo: "coast" },
+    { key: "feed-photo",  label: "Feed square · photo",   w: 1080, h: 1080, sz: "1080 × 1080 · for a post",  layout: "feed",  print: false, photo: "mauka" }
   ];
+
+  // Already-cleared in-house shots. Deliberately a fixed short list rather than
+  // anything pulled at render time — the photo rules are no-credit-no-photo, and
+  // an asset a creator prints must not depend on a licence we can't point to.
+  var PHOTOS = {
+    coast: "/assets/join-hero.jpg",
+    mauka: "/assets/join-hero-mauka.jpg",
+    bay:   "/assets/sc-hero.jpg"
+  };
 
   // Download sizes offered for the code on its own. 600px is the floor that
   // still prints a 2-inch code at 300dpi; below that it's a screen asset only.
@@ -156,6 +175,158 @@
     return URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   }
 
+  function gifBlobUrl(bytes) {
+    return URL.createObjectURL(new Blob([bytes], { type: "image/gif" }));
+  }
+
+  // ── animated QR (GIF) ──────────────────────────────────────────────────────
+  // A creator asked for a moving code to drop into their own edit. GIF, not
+  // WebM/MP4: it drops straight into CapCut/Premiere/Canva and previews inline
+  // in a DM, which an MP4 with no audio track does not reliably do.
+  //
+  // THE RULE: the code itself is byte-identical in every frame. The animation is
+  // a gold bracket travelling the OUTER border, entirely inside the quiet zone's
+  // outer margin — it never overlaps a module. Anything that animates the code
+  // (draw-on, pulse, scale) produces frames that don't scan, and a creator has no
+  // way to know which frame a viewer's camera caught. Every frame is verified by
+  // decoding, not by eye.
+  //
+  // No encoder library is available, so GIF89a + LZW is written by hand below.
+  // The palette is 4 colours, which keeps the LZW minimum code size at 2 and the
+  // files at a few KB.
+  var GIF_PALETTE = [[255,255,255],[0,0,0],[240,180,41],[10,139,168]]; // white, black, gold, teal
+  var PAL_WHITE = 0, PAL_BLACK = 1, PAL_GOLD = 2;
+
+  function lzwEncode(indices, minCodeSize) {
+    var clear = 1 << minCodeSize, eoi = clear + 1;
+    var dict = new Map(), next = eoi + 1, codeSize = minCodeSize + 1;
+    var out = [], cur = 0, bits = 0;
+    function emit(code) {
+      cur |= code << bits; bits += codeSize;
+      while (bits >= 8) { out.push(cur & 0xff); cur >>= 8; bits -= 8; }
+    }
+    function reset() {
+      dict.clear(); next = eoi + 1; codeSize = minCodeSize + 1;
+    }
+    emit(clear); reset();
+    var prefix = String(indices[0]);
+    for (var i = 1; i < indices.length; i++) {
+      var k = indices[i], key = prefix + "," + k;
+      if (dict.has(key)) { prefix = key; continue; }
+      emit(prefix.indexOf(",") === -1 ? Number(prefix) : dict.get(prefix));
+      dict.set(key, next++);
+      if (next > (1 << codeSize)) {
+        if (codeSize < 12) codeSize++;
+        else { emit(clear); reset(); }
+      }
+      prefix = String(k);
+    }
+    emit(prefix.indexOf(",") === -1 ? Number(prefix) : dict.get(prefix));
+    emit(eoi);
+    if (bits > 0) out.push(cur & 0xff);
+    return out;
+  }
+
+  // Frames are palette-index arrays, all the same W×H.
+  function buildGif(frames, W, H, delayCs) {
+    var b = [];
+    var push = function () { for (var i = 0; i < arguments.length; i++) b.push(arguments[i] & 0xff); };
+    var short = function (n) { push(n & 0xff, (n >> 8) & 0xff); };
+    "GIF89a".split("").forEach(function (c) { b.push(c.charCodeAt(0)); });
+    short(W); short(H);
+    push(0x91, 0, 0);                                  // GCT present, 4 entries
+    GIF_PALETTE.forEach(function (c) { push(c[0], c[1], c[2]); });
+    // Netscape looping extension — loop forever
+    push(0x21, 0xff, 0x0b);
+    "NETSCAPE2.0".split("").forEach(function (c) { b.push(c.charCodeAt(0)); });
+    push(0x03, 0x01, 0x00, 0x00, 0x00);
+    frames.forEach(function (idx) {
+      push(0x21, 0xf9, 0x04, 0x04); short(delayCs); push(0x00, 0x00);  // no transparency
+      push(0x2c); short(0); short(0); short(W); short(H); push(0x00);
+      push(2);                                          // LZW minimum code size
+      var data = lzwEncode(idx, 2);
+      for (var i = 0; i < data.length; i += 255) {
+        var chunk = data.slice(i, i + 255);
+        push(chunk.length);
+        chunk.forEach(function (v) { b.push(v); });
+      }
+      push(0x00);
+    });
+    push(0x3b);
+    return new Uint8Array(b);
+  }
+
+  // size is the GIF's pixel size. Kept modest (default 480) because a GIF is a
+  // screen asset — for print the PNG and SVG are the right formats.
+  function qrGif(url, size, frameCount) {
+    size = size || 480;
+    frameCount = frameCount || 16;
+    return qrPng(url, size).then(function (src) {
+      return new Promise(function (resolve, reject) {
+        var im = new Image();
+        im.onload = function () {
+         try {
+          var c = document.createElement("canvas");
+          c.width = c.height = size;
+          var x = c.getContext("2d");
+          // Quantise the rendered code ONCE, then reuse those pixels for every
+          // frame — that is what guarantees the code is identical throughout.
+          x.fillStyle = "#fff"; x.fillRect(0, 0, size, size);
+          x.imageSmoothingEnabled = false;
+          // Inset the code so the travelling bracket rides in clean white space
+          // instead of crowding the modules. qrPng renders only a 1-module
+          // margin, which leaves the code nearly edge-to-edge; the bracket then
+          // sits right on the finder patterns and reads as damage even though it
+          // still decodes. The inset is a whole number of device pixels so the
+          // nearest-neighbour draw stays on the pixel grid.
+          var inset = Math.round(size * 0.07);
+          var inner = size - inset * 2;
+          x.drawImage(im, inset, inset, inner, inner);
+          var px = x.getImageData(0, 0, size, size).data;
+          var base = new Uint8Array(size * size);
+          for (var i = 0, p = 0; i < base.length; i++, p += 4) {
+            // Nearest of the 4 palette entries; the code is effectively 2-colour
+            // plus the gold/teal of the centre mark.
+            var r = px[p], g = px[p + 1], bl = px[p + 2], best = 0, bd = Infinity;
+            for (var q = 0; q < GIF_PALETTE.length; q++) {
+              var dr = r - GIF_PALETTE[q][0], dg = g - GIF_PALETTE[q][1], db = bl - GIF_PALETTE[q][2];
+              var d = dr * dr + dg * dg + db * db;
+              if (d < bd) { bd = d; best = q; }
+            }
+            base[i] = best;
+          }
+          // The bracket rides the outermost band only, inside the 7% inset above,
+          // so it is guaranteed clear of every module.
+          var band = Math.max(3, Math.round(size * 0.022));
+          var runLen = Math.round(size * 0.32);
+          var per = size * 4;                                   // perimeter in px steps
+          var frames = [];
+          for (var f = 0; f < frameCount; f++) {
+            var fr = base.slice();
+            var start = Math.round((f / frameCount) * per);
+            for (var s = 0; s < runLen; s++) {
+              var t = (start + s) % per, px2, py2;
+              if (t < size)            { px2 = t;                 py2 = 0; }
+              else if (t < size * 2)   { px2 = size - 1;          py2 = t - size; }
+              else if (t < size * 3)   { px2 = size - 1 - (t - size * 2); py2 = size - 1; }
+              else                     { px2 = 0;                 py2 = size - 1 - (t - size * 3); }
+              for (var w = 0; w < band; w++) {
+                var ax = Math.min(size - 1, Math.max(0, px2 + (py2 === 0 ? 0 : py2 === size - 1 ? 0 : (px2 === 0 ? w : -w))));
+                var ay = Math.min(size - 1, Math.max(0, py2 + (py2 === 0 ? w : py2 === size - 1 ? -w : 0)));
+                fr[ay * size + ax] = PAL_GOLD;
+              }
+            }
+            frames.push(fr);
+          }
+          resolve(buildGif(frames, size, size, 6));       // 6 centiseconds ≈ 16 fps
+         } catch (err) { reject(err); }   // a throw in onload would otherwise hang the promise forever
+        };
+        im.onerror = function () { reject(new Error("qr render failed")); };
+        im.src = src;
+      });
+    });
+  }
+
   // ── asset canvas ───────────────────────────────────────────────────────────
   function wave(x, cx, cy, w, col) {
     x.strokeStyle = col; x.lineWidth = w * 0.075; x.lineCap = "round";
@@ -179,7 +350,26 @@
     x.textAlign = ta; x.textBaseline = tb;
   }
 
-  function drawAsset(spec, qrImg, mark, handle) {
+  // Cover-crop a landscape shot into a band and fade it into the tile's base
+  // colour. The source photos are all ~16:9, so a portrait tile would letterbox
+  // if we fitted rather than cropped.
+  function photoBand(x, img, W, h, fadeTo) {
+    var s = Math.max(W / img.width, h / img.height);
+    var dw = img.width * s, dh = img.height * s;
+    x.save();
+    x.beginPath(); x.rect(0, 0, W, h); x.clip();
+    x.drawImage(img, (W - dw) / 2, (h - dh) / 2, dw, dh);
+    // Scrim: dark enough at the top for white type to hold, solid at the bottom
+    // so the band meets the field with no seam.
+    var g = x.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, "rgba(10,45,55,.62)");
+    g.addColorStop(0.55, "rgba(10,45,55,.42)");
+    g.addColorStop(1, fadeTo);
+    x.fillStyle = g; x.fillRect(0, 0, W, h);
+    x.restore();
+  }
+
+  function drawAsset(spec, qrImg, mark, handle, photo) {
     var c = document.createElement("canvas");
     c.width = spec.w; c.height = spec.h;
     var x = c.getContext("2d"), W = spec.w, H = spec.h;
@@ -206,6 +396,58 @@
       var pad = Math.round(W * 0.08);
       qr(qrImg, pad, pad, W - pad * 2, W - pad * 2);
       return c;
+    }
+
+    // 4 × 4 in square card. Its own layout rather than a resized sticker: the
+    // sticker devotes 26% of its height to a band and crops the copy to two short
+    // lines, which at 4 in leaves a lot of dead paper.
+    if (spec.layout === "sq4") {
+      // The photo band is kept tight: at 0.34 the code was clamped to ~25% of a
+      // 4 in card — a 1 in code, technically scannable but weak on the page and
+      // a waste of the card. The photo variant also drops the subtitle, since the
+      // shot already sets the scene, which buys the code another ~70px.
+      var pband = photo ? H * 0.26 : H * 0.155;
+      if (photo) photoBand(x, photo, W, pband, "rgba(251,248,242,1)");
+      else { x.fillStyle = DEEP; x.fillRect(0, 0, W, pband); }
+      x.textAlign = "center";
+      lockup(x, W, pband * (photo ? 0.42 : 0.5), W * 0.088, W * 0.064, mark);
+
+      var maxW4 = W * 0.86;
+      var fit4 = function (t, weight, px) {
+        var s = px;
+        while (s > 10) { x.font = F(weight, s); if (x.measureText(t).width <= maxW4) break; s -= 1; }
+        return s;
+      };
+      var y4 = pband + H * 0.045;
+      var hf4 = fit4("Free Hawaiʻi beach guide", 800, W * 0.070);
+      x.fillStyle = INK; x.font = F(800, hf4);
+      x.fillText("Free Hawaiʻi beach guide", W / 2, y4);
+      y4 += hf4 * 1.25;
+      if (!photo) {
+        var sf4 = fit4("Today’s surf, wind, and which beaches are calm.", 400, W * 0.034);
+        x.fillStyle = MUTE; x.font = F(400, sf4);
+        x.fillText("Today’s surf, wind, and which beaches are calm.", W / 2, y4);
+        y4 += sf4 * 1.7;
+      } else {
+        y4 += W * 0.018;
+      }
+
+      var scan4 = W * 0.036, hand4 = W * 0.050;
+      var foot4 = scan4 * 1.6 + hand4 * 1.5 + W * 0.055;
+      var q4 = Math.min(W * 0.50, H - y4 - foot4 - W * 0.03);
+      x.fillStyle = "#fff";
+      x.shadowColor = "rgba(15,61,73,.16)"; x.shadowBlur = W * 0.025; x.shadowOffsetY = W * 0.01;
+      x.fillRect(W / 2 - q4 / 2 - W * 0.022, y4 - W * 0.022, q4 + W * 0.044, q4 + W * 0.044);
+      x.shadowColor = "transparent";
+      qr(qrImg, W / 2 - q4 / 2, y4, q4, q4);
+      y4 += q4 + W * 0.045;
+      x.fillStyle = TEAL; x.font = F(700, scan4);
+      x.fillText("Scan with your phone camera", W / 2, y4); y4 += scan4 * 1.6;
+      x.fillStyle = TEAL; x.font = F(800, fit4(at, 800, hand4));
+      x.fillText(at, W / 2, y4); y4 += hand4 * 1.35;
+      x.fillStyle = MUTE; x.font = F(400, W * 0.030);
+      x.fillText("oceansafety.app", W / 2, y4);
+      x.textAlign = "left"; return c;
     }
 
     if (spec.layout === "square") {                     // sticker
@@ -236,6 +478,9 @@
       var g = x.createLinearGradient(0, 0, 0, H);
       g.addColorStop(0, DEEP); g.addColorStop(1, "#093039");
       x.fillStyle = g; x.fillRect(0, 0, W, H);
+      // Photo variant: the shot fills the top of the tile and fades into the same
+      // deep field, so the code below still sits on solid colour.
+      if (photo) photoBand(x, photo, W, H * (story ? 0.46 : 0.40), "rgba(15,61,73,1)");
       x.textAlign = "center";
 
       // Shrink a line until it fits the canvas — a long word or a wider font
@@ -301,10 +546,11 @@
     }
 
     // tall — hand-out card + flyer
-    var band = H * 0.145;
-    x.fillStyle = DEEP; x.fillRect(0, 0, W, band);
+    var band = photo ? H * 0.26 : H * 0.145;
+    if (photo) photoBand(x, photo, W, band, "rgba(251,248,242,1)");
+    else { x.fillStyle = DEEP; x.fillRect(0, 0, W, band); }
     x.textAlign = "center";
-    lockup(x, W, band * 0.5, W * 0.085, W * 0.062, mark);
+    lockup(x, W, band * (photo ? 0.34 : 0.5), W * 0.085, W * 0.062, mark);
     x.fillStyle = INK; x.font = F(800, W * 0.075);
     x.fillText("Free Hawaiʻi", W / 2, band + H * 0.045);
     x.fillText("beach guide", W / 2, band + H * 0.088);
@@ -330,6 +576,24 @@
   // ── public: render every asset for one creator ─────────────────────────────
   // Resolves [{spec, png}] in ASSETS order, skipping any single asset that
   // throws rather than losing the whole set to one bad layout.
+  // Photos resolve to null on failure rather than rejecting: a missing shot must
+  // cost the creator that one photo tile, never the whole kit.
+  function loadPhotos() {
+    var keys = Object.keys(PHOTOS);
+    return Promise.all(keys.map(function (k) {
+      return new Promise(function (res) {
+        var im = new Image();
+        im.onload = function () { res(im); };
+        im.onerror = function () { res(null); };
+        im.src = PHOTOS[k];
+      });
+    })).then(function (imgs) {
+      var map = {};
+      keys.forEach(function (k, i) { map[k] = imgs[i]; });
+      return map;
+    });
+  }
+
   function renderAssets(link, handle) {
     return Promise.all([
       qrPng(link, MASTER).then(function (src) {
@@ -340,13 +604,17 @@
           im.src = src;
         });
       }),
-      markImage()
+      markImage(),
+      loadPhotos()
     ]).then(function (r) {
-      var qrImg = r[0], mark = r[1], out = [];
+      var qrImg = r[0], mark = r[1], photos = r[2], out = [];
       ASSETS.forEach(function (spec) {
+        // Skip a photo tile whose shot didn't load — better absent than broken.
+        var ph = spec.photo ? photos[spec.photo] : null;
+        if (spec.photo && !ph) return;
         try {
-          out.push({ spec: spec, png: drawAsset(spec, qrImg, mark, handle).toDataURL("image/png") });
-        } catch (_) { /* one bad asset must not cost the creator the other five */ }
+          out.push({ spec: spec, png: drawAsset(spec, qrImg, mark, handle, ph).toDataURL("image/png") });
+        } catch (_) { /* one bad asset must not cost the creator the others */ }
       });
       return out;
     });
@@ -357,7 +625,9 @@
     PNG_SIZES: PNG_SIZES,
     qrPng: qrPng,
     qrSvg: qrSvg,
+    qrGif: qrGif,
     svgBlobUrl: svgBlobUrl,
+    gifBlobUrl: gifBlobUrl,
     renderAssets: renderAssets
   };
 })(window);

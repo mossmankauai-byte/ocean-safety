@@ -268,7 +268,10 @@
   }).join('') +
     '<div class="f" id="f-svg"><div class="nm">SVG vector</div>' +
     '<div class="note">Scales to any size with no soft edges — the one to hand a print shop.</div>' +
-    '<span class="dim" id="fb-svg">…</span></div>';
+    '<span class="dim" id="fb-svg">…</span></div>' +
+    '<div class="f" id="f-gif"><div class="nm">Animated GIF</div>' +
+    '<div class="note">480 × 480 · the code with a moving border, for your own edits. Scannable in every frame.</div>' +
+    '<span class="dim" id="fb-gif">…</span></div>';
   $('fmtGrid').innerHTML = cells;
 
   var dl = function(id, href, name){
@@ -285,6 +288,11 @@
   K.qrSvg(link)
     .then(function(svg){ dl('svg', K.svgBlobUrl(svg), fname + '.svg'); })
     .catch(function(){ var el = $('fb-svg'); if(el) el.textContent = 'unavailable'; });
+  // Last, and never blocking: the GIF is the slowest thing on the page (16 frames
+  // LZW-encoded in JS) and is the one format nobody is stuck without.
+  K.qrGif(link, 480, 16)
+    .then(function(gif){ dl('gif', K.gifBlobUrl(gif), fname + '-animated.gif'); })
+    .catch(function(){ var el = $('fb-gif'); if(el) el.textContent = 'unavailable'; });
 
   // ── artwork ─────────────────────────────────────────────────────────────
   K.renderAssets(link, handle).then(function(list){

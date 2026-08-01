@@ -520,7 +520,10 @@
           '<span class="dim" id="fb-' + s.key + '">…</span></div>';
       }).join('') +
         '<div class="f"><div class="nm">SVG vector</div><div class="note">Scales to any size with no ' +
-        'soft edges — the one to hand a print shop.</div><span class="dim" id="fb-svg">…</span></div>';
+        'soft edges — the one to hand a print shop.</div><span class="dim" id="fb-svg">…</span></div>' +
+        '<div class="f"><div class="nm">Animated GIF</div><div class="note">480 × 480 · the code with a ' +
+        'moving border, for your own edits. Scannable in every frame.</div>' +
+        '<span class="dim" id="fb-gif">…</span></div>';
 
       var dl = function(id, href, name){
         var slot = $('fb-' + id); if(!slot) return;
@@ -536,6 +539,11 @@
       K.qrSvg(link)
         .then(function(svg){ dl('svg', K.svgBlobUrl(svg), fname + '.svg'); })
         .catch(function(){ var el = $('fb-svg'); if(el) el.textContent = 'unavailable'; });
+      // Slowest of the five (16 frames LZW-encoded in JS) — kept last so it can
+      // never hold up the formats a creator is more likely to want.
+      K.qrGif(link, 480, 16)
+        .then(function(gif){ dl('gif', K.gifBlobUrl(gif), fname + '-animated.gif'); })
+        .catch(function(){ var el = $('fb-gif'); if(el) el.textContent = 'unavailable'; });
 
       K.renderAssets(link, display).then(function(list){
         if(!list.length) throw new Error('no assets');
