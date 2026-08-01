@@ -161,6 +161,12 @@
   .qr-wrap .qtxt{flex:1;min-width:200px;font-size:14px;color:var(--muted)}
   .kit-row{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
   .kit-row .btn{flex:1;min-width:180px;font-size:15px;padding:13px 18px}
+  /* The dashboard is where creators set their PayPal and watch bookings land, so it gets
+     the whole row and a heavier weight than the print button rather than splitting it. */
+  .kit-row.primary{margin-top:20px}
+  .kit-row.primary .btn{flex:1 0 100%;font-size:18px;font-weight:800;padding:17px 22px;
+    box-shadow:0 12px 30px rgba(10,139,168,.36)}
+  .dash-hint{margin:9px 0 0;font-size:13.5px;color:var(--muted);text-align:center}
   .btn.ghost{background:var(--card);color:var(--accent);border:1px solid var(--accent);box-shadow:none}
   .caps{margin-top:24px}
   .caps h4{font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
@@ -366,14 +372,6 @@
       <h3>Join OceanSafe Creators</h3>
       <p class="fhint">Free. Your handle becomes your tracking code.</p>
 
-      <!-- Netlify Forms registration (static copy so the build detects it) -->
-      <form name="creator-signup" data-netlify="true" netlify-honeypot="mahalo-field" hidden>
-        <input type="text" name="name"><input type="email" name="email">
-        <input type="text" name="handle"><input type="text" name="platform">
-        <input type="text" name="island"><input type="text" name="slug">
-        <input type="text" name="mahalo-field">
-      </form>
-
       <form id="claimForm" autocomplete="on">
         <div class="ftwo">
           <div class="frow">
@@ -437,8 +435,12 @@
         <div class="qtxt"><b>Your QR code.</b> Long-press (or right-click) to save the image. It opens the free guide with your code attached — put it anywhere your audience looks.</div>
       </div>
 
-      <div class="kit-row np">
+      <div class="kit-row primary np">
         <a class="btn" id="dashLink" href="#">Open your dashboard <span class="ar" aria-hidden="true">→</span></a>
+      </div>
+      <p class="dash-hint np">Add your PayPal, watch your clicks and bookings, and grab your island links.</p>
+
+      <div class="kit-row np">
         <button type="button" class="btn ghost" onclick="window.print()">Print / save kit as PDF</button>
       </div>
 
@@ -497,6 +499,9 @@
 <script>
 (function(){
   var APP = 'https://oceansafety.app';
+  // Lead recording — same publishable pair /join uses; the function is the write gate.
+  var SB_URL = 'https://arndnljtmjfsnzcpcuen.supabase.co';
+  var SB_KEY = 'sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um';
   var $ = function(id){ return document.getElementById(id); };
 
   function cleanHandle(h){
@@ -583,14 +588,24 @@
         : Object.assign({}, base, { mode:'pooled', slug:'cr-'+clean });
       try { localStorage.setItem('osc_kit', JSON.stringify(rec)); } catch(e){}
 
-      // 2) Record the human details for payouts (Netlify Forms). Independent of
-      //    provisioning; on failure we surface a mailto so a signup is never lost.
-      var body = new URLSearchParams({ 'form-name':'creator-signup', name:name, email:email,
-        handle:handle, platform:rec.platform, island:rec.island, slug:rec.slug,
-        mode:rec.mode }).toString();
-      fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:body })
+      // 2) Record the signup as a lead so it lands on /leads with every other segment.
+      //    This was a Netlify Forms POST to `/` until 2026-07-31 — Netlify Forms was never
+      //    enabled on this site, so it 404'd on every signup since launch. Same root cause
+      //    as the /join form; same fix: the Supabase lead-capture function.
+      //    Independent of provisioning: when mode==='creator' the worker already holds the
+      //    creator's name/email/PayPal, so a failure here costs Nick a notification, not the
+      //    payout details — only the pooled path needs the creator to reach out.
+      fetch(SB_URL + '/functions/v1/lead-capture', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + SB_KEY, 'apikey': SB_KEY },
+        body: JSON.stringify({ segment:'creator', name:name, business:'@' + clean, email:email,
+          message:'Creator signup · handle @' + clean + ' · platform ' + rec.platform +
+                  ' · island ' + rec.island + ' · slug ' + rec.slug + ' · mode ' + rec.mode +
+                  ' · PayPal ' + (paypal || 'not given yet') })
+      })
         .then(function(r){ if(!r.ok) throw 0; })
         .catch(function(){
+          if(rec.mode === 'creator') return;   // worker has their payout details — don't alarm them
           err.innerHTML = 'Your kit is ready below — but our signup recorder didn’t respond, so please also send a quick note to ' +
             '<a href="mailto:nick@oceansafety.app?subject=' + encodeURIComponent('Creator signup: @' + clean) +
             '&body=' + encodeURIComponent('Name: ' + name + '\nHandle: ' + handle + '\nEmail: ' + email + '\nPayPal: ' + paypal + '\nPlatform: ' + rec.platform + '\nIsland: ' + rec.island) +
