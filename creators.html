@@ -7,7 +7,12 @@
 <meta property="og:title" content="OceanSafe Creators — earn 50% of the tour commission">
 <meta property="og:description" content="Share the free beach-safety guide, earn half the commission on every tour booked through your link. Claim your link in one minute.">
 <meta property="og:image" content="https://oceansafety.app/assets/shot-app-kauai.jpg">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A8BA8'/%3E%3Cpath d='M6 41c6 0 6-8 12-8s6 8 12 8 6-8 12-8 6 8 12 8' fill='none' stroke='%23FFC64B' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0f4c5c">
 <style>
   :root{
     --accent:#0A8BA8; --deep:#0c4a58; --deep2:#0a7a94;
@@ -648,7 +653,9 @@
 /* ============ GUIDED TOUR (lifted from the operator console engine) ============ */
 (function(){
   var KEY = 'osc_tour_done';
-  var LOGO = (document.querySelector('link[rel="icon"]')||{}).href || '';
+  // The real app icon, not the page favicon: the tour card renders it at 52px and a
+  // 16px favicon reads as a smudge there. Same mark the visitor sees on their home screen.
+  var LOGO = '/icons/pwa-192.png';
 
   var STEPS = [
     { center:true, title:'Sixty seconds, four stops',

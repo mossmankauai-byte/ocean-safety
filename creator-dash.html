@@ -4,7 +4,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Your OceanSafe Creator Dashboard</title>
 <meta name="robots" content="noindex">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A8BA8'/%3E%3Cpath d='M6 41c6 0 6-8 12-8s6 8 12 8 6-8 12-8 6 8 12 8' fill='none' stroke='%23FFC64B' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0f4c5c">
 <style>
   :root{
     --accent:#0A8BA8; --deep:#0c4a58; --deep2:#0a7a94;
@@ -157,6 +162,17 @@
 
 <main>
   <div class="wrap">
+
+    <!-- The two numbers a creator actually opens this page for. Same source as the
+         breakdown further down (creators-earnings.json) — one fetch fills both. -->
+    <div class="card" id="payHeadCard">
+      <h2>Your bookings &amp; pay</h2>
+      <div class="stat-row">
+        <div class="stat"><div class="n" id="phBookings">—</div><div class="l">Bookings credited</div></div>
+        <div class="stat"><div class="n" id="phPay">—</div><div class="l">Your commission</div></div>
+      </div>
+      <p class="hint" id="phNote">Reconciled monthly against GetYourGuide's report.</p>
+    </div>
 
     <div class="card" id="statsCard">
       <h2>Link activity — last 30 days</h2>
@@ -470,11 +486,22 @@
       });
 
     // ---- earnings ----
+    // Zero is a real answer here, not an error: a creator with no bookings yet should see
+    // 0 and $0, not a dash that reads as "we lost your numbers".
+    function money(n){ return '$' + (Math.round(Number(n||0)*100)/100).toFixed(2).replace(/\.00$/, ''); }
+    function headline(e){
+      $('phBookings').textContent = e ? (e.bookings||0) : '0';
+      $('phPay').textContent      = e ? money(e.commission) : '$0';
+      $('phNote').textContent     = e
+        ? ((e.status || 'accruing') + (e.updated ? ' · updated ' + e.updated : ''))
+        : 'Nothing posted yet. Bookings are reconciled monthly against GetYourGuide’s report, then paid to your PayPal once you pass $25.';
+    }
     fetch('/creators-earnings.json', { cache:'no-store' })
       .then(function(r){ if(!r.ok) throw 0; return r.json(); })
       .then(function(all){
         var e = all && all[earnKey];
         var body = $('earnBody');
+        headline(e);
         if(!e){
           body.innerHTML = '<div class="state">No bookings posted yet. Commission is reconciled monthly — your first line appears after the first full month with a booking.</div>';
           return;
@@ -487,6 +514,7 @@
           (e.updated ? '<p class="hint" style="margin-top:10px">Last updated ' + e.updated + '</p>' : '');
       })
       .catch(function(){
+        headline(null);
         $('earnBody').innerHTML = '<div class="state">No bookings posted yet. Commission is reconciled monthly — your first line appears after the first full month with a booking.</div>';
       });
   }
@@ -630,7 +658,9 @@
 /* ============ FIRST-VISIT MINI TOUR ============ */
 (function(){
   var KEY = 'oscd_tour_done';
-  var LOGO = (document.querySelector('link[rel="icon"]')||{}).href || '';
+  // The real app icon, not the page favicon: the tour card renders it at 52px and a
+  // 16px favicon reads as a smudge there. Same mark the visitor sees on their home screen.
+  var LOGO = '/icons/pwa-192.png';
   var STEPS = [
     { center:true, title:'Your dashboard, in three stops',
       body:'Everything here is yours: what your link is doing, what it’s earned, and the link itself. Thirty seconds.' },
