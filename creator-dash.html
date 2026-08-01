@@ -10,6 +10,8 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="theme-color" content="#0f4c5c">
+<script src="/assets/vendor/qrcode.min.js"></script>
+<script src="/assets/creator-kit.js"></script>
 <style>
   :root{
     --accent:#0A8BA8; --deep:#0c4a58; --deep2:#0a7a94;
@@ -67,6 +69,24 @@
   .qr-row{display:flex;gap:18px;align-items:center;margin-top:16px;flex-wrap:wrap}
   .qr-row img{width:120px;height:120px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:6px}
   .qr-row p{flex:1;min-width:200px;font-size:13.5px;color:var(--muted)}
+
+  /* QR formats + printable artwork (engine: /assets/creator-kit.js) */
+  .fmt{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
+  .fmt .f{border:1px solid var(--line);border-radius:12px;padding:13px;text-align:center}
+  .fmt .f .nm{font-weight:700;font-size:14px;margin-bottom:2px}
+  .fmt .f .note{color:var(--muted2);font-size:11.5px;line-height:1.4;margin-bottom:10px;min-height:32px}
+  .agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px}
+  .asset{text-align:center}
+  .asset .thumb{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px;
+    display:flex;align-items:center;justify-content:center;min-height:150px;margin-bottom:8px}
+  .asset .thumb img{max-width:100%;max-height:150px;display:block}
+  .asset .nm{font-weight:700;font-size:13.5px}
+  .asset .sz{color:var(--muted2);font-size:11.5px;margin-bottom:8px}
+  .minibtn{display:inline-block;border:1px solid var(--accent);color:var(--accent);
+    border-radius:9px;padding:7px 11px;font-size:12.5px;font-weight:600;text-decoration:none}
+  .dim{color:var(--muted2);font-size:13px}
+  .asset-foot{margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line);
+    font-size:13px;color:var(--muted)}
 
   #islandLinks{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
   .ilk-intro{font-size:13px;color:var(--muted);line-height:1.55}
@@ -324,12 +344,21 @@
       </div>
       <div class="qr-row">
         <img id="dhQr" src="" alt="Your personal OceanSafe QR code">
-        <p>Long-press (or right-click) to save. Need the print kit — rate card, rules, PDF? It lives on the <a href="/creators.html">creators page</a> on this device.</p>
+        <p>Long-press (or right-click) to save. Need it bigger, as a vector, or on ready-made artwork? That’s all in your <a id="printLinkInline" href="/creator-print">print kit</a>.</p>
       </div>
       <div id="islandLinks" style="display:none">
         <p class="ilk-intro">You’ve set up more than one island. The link above works everywhere — these point straight at a single island, so post the matching one with that island’s content.</p>
         <div id="islandLinkRows"></div>
       </div>
+    </div>
+
+    <div class="card" id="assetCard">
+      <h2>Your QR &amp; artwork</h2>
+      <p class="hint">Every one of these already has your link in it. Grab the code on its own in the size you need, or take a finished piece straight to a printer.</p>
+      <div class="fmt" id="fmtGrid"><span class="dim">Building your codes…</span></div>
+      <div class="agrid" id="assetGrid" style="margin-top:18px"><span class="dim">Building your artwork…</span></div>
+      <p class="asset-foot">Want it all on one page you can print — code, link and the posting rules?
+        <a id="printLink" href="/creator-print">Open your print kit</a>.</p>
     </div>
 
     <div class="card" id="editCard" style="display:none">
@@ -432,7 +461,74 @@
     $('dhHandle').textContent = '@' + display;
     var link = mode === 'creator' ? (APP + '/@' + display) : (APP + '/?ref=creators&u=' + uParam);
     $('dhLink').value = link;
-    $('dhQr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=2&data=' + encodeURIComponent(link);
+
+    // ── QR + printable artwork ────────────────────────────────────────────
+    // Rendered locally by /assets/creator-kit.js, not fetched from
+    // api.qrserver.com as this used to be. Three reasons that mattered: the
+    // third-party code carried no OceanSafe mark, it topped out at 360px
+    // (below print resolution — a 2 in code at 300dpi needs 600), and it put
+    // every creator's link through someone else's server to get it.
+    (function(){
+      var K = window.OSCreatorKit;
+      var fmt = $('fmtGrid'), grid = $('assetGrid');
+      // Own escaper: the page's esc() is declared inside the island-links
+      // function below, so it isn't in scope here.
+      var esc = function(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+      var kitQs = mode === 'creator' ? ('?c=' + encodeURIComponent(cParam))
+                                     : ('?u=' + encodeURIComponent(uParam));
+      $('printLink').href = '/creator-print' + kitQs;
+      $('printLinkInline').href = '/creator-print' + kitQs;
+
+      if(!K || !window.QRCode){
+        $('dhQr').alt = 'QR code unavailable';
+        fmt.innerHTML = '<span class="dim">Couldn’t build your codes — reload the page.</span>';
+        grid.innerHTML = '<span class="dim">Couldn’t build your artwork — reload the page.</span>';
+        return;
+      }
+
+      K.qrPng(link, 720).then(function(src){ $('dhQr').src = src; }).catch(function(){});
+
+      var fname = 'oceansafe-' + display + '-qr';
+      fmt.innerHTML = K.PNG_SIZES.map(function(s){
+        return '<div class="f"><div class="nm">' + esc(s.label) + ' PNG</div>' +
+          '<div class="note">' + s.px + ' × ' + s.px + ' px<br>' + esc(s.note) + '</div>' +
+          '<span class="dim" id="fb-' + s.key + '">…</span></div>';
+      }).join('') +
+        '<div class="f"><div class="nm">SVG vector</div><div class="note">Scales to any size with no ' +
+        'soft edges — the one to hand a print shop.</div><span class="dim" id="fb-svg">…</span></div>';
+
+      var dl = function(id, href, name){
+        var slot = $('fb-' + id); if(!slot) return;
+        var a = document.createElement('a');
+        a.className = 'minibtn'; a.href = href; a.download = name; a.textContent = 'Download';
+        slot.parentNode.replaceChild(a, slot);
+      };
+      K.PNG_SIZES.forEach(function(s){
+        K.qrPng(link, s.px)
+          .then(function(src){ dl(s.key, src, fname + '-' + s.px + '.png'); })
+          .catch(function(){ var el = $('fb-' + s.key); if(el) el.textContent = 'unavailable'; });
+      });
+      K.qrSvg(link)
+        .then(function(svg){ dl('svg', K.svgBlobUrl(svg), fname + '.svg'); })
+        .catch(function(){ var el = $('fb-svg'); if(el) el.textContent = 'unavailable'; });
+
+      K.renderAssets(link, display).then(function(list){
+        if(!list.length) throw new Error('no assets');
+        grid.innerHTML = '';
+        list.forEach(function(a){
+          var d = document.createElement('div');
+          d.className = 'asset';
+          d.innerHTML = '<div class="thumb"><img alt="' + esc(a.spec.label) + ' with your QR code" src="' + a.png + '"></div>' +
+            '<div class="nm">' + esc(a.spec.label) + '</div>' +
+            '<div class="sz">' + esc(a.spec.sz) + '</div>' +
+            '<a class="minibtn" download="oceansafe-' + esc(display) + '-' + esc(a.spec.key) + '.png" href="' + a.png + '">Download</a>';
+          grid.appendChild(d);
+        });
+      }).catch(function(){
+        grid.innerHTML = '<span class="dim">Couldn’t build your artwork — reload the page, or email us and we’ll send it over.</span>';
+      });
+    })();
 
     // ---- per-island links (creator mode only) ----
     // Read the creator's config ONCE and share it with the customize editor below.

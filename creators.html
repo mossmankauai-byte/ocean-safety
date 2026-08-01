@@ -446,8 +446,10 @@
       <p class="dash-hint np">Add your PayPal, watch your clicks and bookings, and grab your island links.</p>
 
       <div class="kit-row np">
-        <button type="button" class="btn ghost" onclick="window.print()">Print / save kit as PDF</button>
+        <a class="btn ghost" id="printKitLink" href="/creator-print">Get your print kit &amp; artwork</a>
+        <button type="button" class="btn ghost" onclick="window.print()">Print this page</button>
       </div>
+      <p class="dash-hint np">The print kit has your code in every size plus vector, and ready-made cards, stickers and posters. It opens on any device — bookmark it.</p>
 
       <div class="caps">
         <h4>Caption starters <span class="np" style="font-weight:400;text-transform:none;letter-spacing:0">(tap to copy)</span></h4>
@@ -501,6 +503,8 @@
   </div>
 </footer>
 
+<script src="/assets/vendor/qrcode.min.js"></script>
+<script src="/assets/creator-kit.js"></script>
 <script>
 (function(){
   var APP = 'https://oceansafety.app';
@@ -525,17 +529,34 @@
       ? '/creator-dash.html?u=' + rec.clean
       : '/creator-dash.html?c=' + rec.slug + '&k=' + rec.key;
   }
-  function qrFor(rec){
-    return 'https://api.qrserver.com/v1/create-qr-code/?size=480x480&margin=2&data=' +
-      encodeURIComponent(linkFor(rec));
+  // Print kit lives at its own route so it survives a change of device — this
+  // page's kit is restored from localStorage, which is why it used to be "on
+  // this device" only.
+  function printFor(rec){
+    return rec.mode === 'pooled'
+      ? '/creator-print?u=' + rec.clean
+      : '/creator-print?c=' + rec.slug;
   }
 
   function showKit(rec){
     $('kitHandle').textContent = '@' + rec.clean;
     $('kitLink').value = linkFor(rec);
-    $('kitQr').src = qrFor(rec);
     $('dashLink').href = dashFor(rec);
+    $('printKitLink').href = printFor(rec);
     $('kit').classList.add('on');
+
+    // Render the code locally rather than through api.qrserver.com, which is
+    // where this used to come from: that returned an unbranded 480px PNG —
+    // below print resolution — and routed every creator's link through a third
+    // party to get it. Same engine the dashboard and print kit use.
+    var img = $('kitQr');
+    if(window.OSCreatorKit && window.QRCode){
+      window.OSCreatorKit.qrPng(linkFor(rec), 720)
+        .then(function(src){ img.src = src; })
+        .catch(function(){ img.alt = 'QR code unavailable — open your print kit'; });
+    } else {
+      img.alt = 'QR code unavailable — open your print kit';
+    }
   }
 
   // Outreach links carry ?island= — pre-select the prospect's home island and dress the

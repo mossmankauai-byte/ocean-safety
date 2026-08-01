@@ -35,6 +35,10 @@
 /creators   /creators.html      200
 /@*         /at.html            200
 /creator-terms   /creator-terms.html   200
+# Print kit: QR in every size + SVG, ready-made artwork, and a one-sheet to print.
+# A real route on purpose — the kit on /creators is restored from localStorage, so it
+# only ever existed on the device the creator signed up with.
+/creator-print   /creator-print.html   200
 /creator    /creator-dash.html  200
 # Partner sets their console password from the link in their email (?t=<dashboard_token>)
 /set-password  /set-password.html  200

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your OceanSafe Print Kit</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0f4c5c">
+<script src="/assets/vendor/qrcode.min.js"></script>
+<style>
+  :root{
+    --accent:#0A8BA8; --deep:#0c4a58; --ink:#16202A; --bg:#F5F7F9; --card:#fff;
+    --line:#E2E8ED; --muted:#56636e; --muted2:#7A8794; --sun:#F5B301; --tint:#E8F4F7;
+    --shadow:0 1px 2px rgba(16,32,42,.04),0 8px 24px rgba(16,32,42,.06);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--ink:#e9f1f4; --bg:#0e1519; --card:#15212a; --line:#26343d;
+      --muted:#a4b4be; --muted2:#82929c; --tint:#123039;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:26px 18px 60px}
+  .wm{font-weight:800;font-size:20px;letter-spacing:-.01em}
+  .wm i{font-style:normal;color:var(--sun)}
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+  .top .back{margin-left:auto;font-size:13.5px;color:var(--accent);text-decoration:none;font-weight:600}
+  h1{font-size:25px;line-height:1.2;margin:0 0 6px;letter-spacing:-.015em}
+  .sub{color:var(--muted);font-size:14.5px;margin:0 0 22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow)}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+    margin:0 0 12px;font-weight:700}
+  .hint{color:var(--muted);font-size:13.5px;margin:-4px 0 14px}
+  .linkbox{display:flex;gap:8px;flex-wrap:wrap}
+  .linkbox input{flex:1;min-width:220px;font:14px ui-monospace,SFMono-Regular,Menlo,monospace;
+    padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px 16px;
+    font-size:14.5px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  .btn.sm{padding:8px 12px;font-size:13px}
+  /* QR formats */
+  .fmt{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .fmt .f{border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .fmt .f .nm{font-weight:700;font-size:14.5px;margin-bottom:2px}
+  .fmt .f .note{color:var(--muted2);font-size:12px;line-height:1.4;margin-bottom:10px;min-height:34px}
+  .qrpreview{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+  .qrpreview img{width:150px;height:150px;border-radius:10px;border:1px solid var(--line);
+    background:#fff;padding:8px}
+  .qrpreview p{flex:1;min-width:210px;font-size:13.5px;color:var(--muted);margin:0}
+  /* assets */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+  .asset{text-align:center}
+  .thumb{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;
+    display:flex;align-items:center;justify-content:center;min-height:170px;margin-bottom:8px}
+  .thumb img{max-width:100%;max-height:170px;display:block}
+  .asset .nm{font-weight:700;font-size:14px}
+  .asset .sz{color:var(--muted2);font-size:12px;margin-bottom:8px}
+  .dim{color:var(--muted2);font-size:13.5px}
+  .rules{font-size:13.5px;color:var(--muted);margin:0;padding-left:18px}
+  .rules li{margin:5px 0}
+
+  /* ── the printed sheet ────────────────────────────────────────────────────
+     Everything on screen is hidden; one clean page comes out. The sheet is
+     built from its own markup (.sheet) rather than restyling the screen cards,
+     because a print layout and a dashboard layout want genuinely different
+     things and sharing them is how print geometry rots. */
+  .sheet{display:none}
+  @media print{
+    @page{margin:14mm}
+    body{background:#fff;color:#000}
+    .wrap>*{display:none!important}
+    .wrap{max-width:none;padding:0}
+    .sheet{display:block!important}
+    .sheet .sh-head{display:flex;align-items:center;gap:10px;
+      border-bottom:2px solid #0F3D49;padding-bottom:10px;margin-bottom:26px}
+    .sheet .sh-head .wm{font-size:22px;color:#0F3D49}
+    .sheet .sh-head .sh-url{margin-left:auto;font-size:12px;color:#555}
+    .sheet h3{font-size:26px;margin:0 0 4px;color:#0F3D49}
+    .sheet .sh-hand{font-size:17px;color:#0A8BA8;font-weight:700;margin:0 0 22px}
+    .sheet .sh-qr{display:block;width:78mm;height:78mm;margin:0 auto 10px}
+    .sheet .sh-scan{text-align:center;font-size:14px;font-weight:700;color:#0F3D49;margin:0 0 6px}
+    .sheet .sh-link{text-align:center;font:13px ui-monospace,Menlo,monospace;color:#333;
+      margin:0 0 26px;word-break:break-all}
+    .sheet .sh-rules{border-top:1px solid #ccc;padding-top:14px;font-size:12.5px;color:#333}
+    .sheet .sh-rules b{color:#0F3D49}
+    .sheet .sh-rules ul{margin:6px 0 0;padding-left:18px}
+    .sheet .sh-rules li{margin:4px 0}
+    .sheet .sh-foot{margin-top:20px;font-size:11px;color:#777;text-align:center}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <span class="wm">Ocean<i>Safe</i></span>
+    <a class="back" id="backLink" href="/creator">← Back to your dashboard</a>
+  </div>
+
+  <div id="main">
+    <h1>Your print kit</h1>
+    <p class="sub" id="subLine">Your QR code and ready-made artwork — download what you need, or print this page as a one-sheet.</p>
+
+    <div class="card">
+      <h2>Your link</h2>
+      <div class="linkbox">
+        <input id="pkLink" readonly value="" aria-label="Your personal link">
+        <button type="button" class="btn ghost" id="copyBtn">Copy</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Your QR code</h2>
+      <div class="qrpreview">
+        <img id="pkQr" src="" alt="Your personal OceanSafe QR code">
+        <p>Every download below is the same code — it opens the free guide with your link attached. Pick the size that matches what you're printing, or take the SVG to a print shop.</p>
+      </div>
+      <div class="fmt" id="fmtGrid"><span class="dim">Building your codes…</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Ready-made artwork</h2>
+      <p class="hint">Each one already has your code in it. Download, then print or post.</p>
+      <div class="grid" id="assetGrid"><span class="dim">Building your artwork…</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Print this page</h2>
+      <p class="hint">One clean sheet: your code big enough to scan across a room, your link, and the rules. Prints to paper or saves as a PDF.</p>
+      <button type="button" class="btn" onclick="window.print()">Print / save as PDF</button>
+    </div>
+
+    <div class="card">
+      <h2>The rules, kept short</h2>
+      <ul class="rules">
+        <li>Always disclose a paid post with <b>#ad</b>.</li>
+        <li>Never say a specific beach or day is "safe" in your own words. Link the app and let the live data say it.</li>
+        <li>Don't put the code on anything that implies OceanSafe endorses a business you're working with.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- the printed sheet — hidden on screen, built by JS -->
+<div class="sheet" id="sheet" aria-hidden="true">
+  <div class="sh-head">
+    <span class="wm">Ocean<i>Safe</i></span>
+    <span class="sh-url">Creator kit · oceansafety.app</span>
+  </div>
+  <h3>Free Hawaiʻi beach guide</h3>
+  <p class="sh-hand" id="shHandle">@handle</p>
+  <img class="sh-qr" id="shQr" src="" alt="">
+  <p class="sh-scan">Scan with your phone camera</p>
+  <p class="sh-link" id="shLink"></p>
+  <div class="sh-rules">
+    <b>Posting rules</b>
+    <ul>
+      <li>Always disclose a paid post with #ad.</li>
+      <li>Never state that a specific beach or day is "safe" in your own words — link the app and let the live data do the talking.</li>
+      <li>Don't imply OceanSafe endorses a business you're working with.</li>
+    </ul>
+  </div>
+  <p class="sh-foot">oceansafety.app · your dashboard lives at oceansafety.app/creator</p>
+</div>
+
+<script src="/assets/creator-kit.js"></script>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var APP = 'https://oceansafety.app';
+  var esc = function(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+
+  // Same two link shapes the dashboard understands, so /creator and
+  // /creator-print can be reached with an identical query string:
+  //   ?c=cr-<handle>&k=<key>  — the creator's own registered slug
+  //   ?u=<handle>             — pooled unit on the shared 'creators' slug
+  // No key is needed here: this page reads nothing private, it only renders
+  // artwork from a link the creator already hands out in public.
+  var qs = new URLSearchParams(location.search);
+  var cParam = String(qs.get('c')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,32);
+  var uParam = String(qs.get('u')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,16);
+
+  // Fall back to the saved kit, same key the dashboard writes. This is a
+  // convenience only — the URL is the reliable path, which is the whole reason
+  // this page exists as a real route instead of a localStorage-gated section.
+  if(!cParam && !uParam){
+    try{
+      var saved = JSON.parse(localStorage.getItem('osc_kit') || 'null');
+      if(saved){
+        if(saved.mode === 'pooled') uParam = saved.clean;
+        else if(saved.slug) cParam = saved.slug;
+      }
+    }catch(e){}
+  }
+
+  var mode = cParam ? 'creator' : (uParam ? 'pooled' : null);
+  if(!mode){
+    $('main').innerHTML = '<div class="card"><h2>No creator code in this link</h2>' +
+      '<p class="hint">Open your print kit from the link on your ' +
+      '<a href="/creator">dashboard</a>, so it carries your code.</p></div>';
+    return;
+  }
+
+  var handle = mode === 'creator' ? cParam.replace(/^cr-/,'') : uParam;
+  var link   = mode === 'creator' ? (APP + '/@' + handle)
+                                  : (APP + '/?ref=creators&u=' + uParam);
+  var dash   = mode === 'creator' ? ('/creator?c=' + encodeURIComponent(cParam))
+                                  : ('/creator?u=' + encodeURIComponent(uParam));
+
+  $('pkLink').value = link;
+  $('backLink').href = dash;
+  $('subLine').textContent = 'Everything below carries @' + handle +
+    "'s link. Download what you need, or print this page as a one-sheet.";
+  $('shHandle').textContent = '@' + handle;
+  $('shLink').textContent = link.replace(/^https:\/\//,'');
+
+  $('copyBtn').addEventListener('click', function(){
+    var el = $('pkLink'); el.select(); el.setSelectionRange(0, 99999);
+    var done = function(){ $('copyBtn').textContent = 'Copied';
+      setTimeout(function(){ $('copyBtn').textContent = 'Copy'; }, 1600); };
+    if(navigator.clipboard) navigator.clipboard.writeText(link).then(done, done);
+    else { try{ document.execCommand('copy'); done(); }catch(e){} }
+  });
+
+  var K = window.OSCreatorKit;
+  if(!K || !window.QRCode){
+    $('fmtGrid').innerHTML = '<span class="dim">Couldn’t build your codes — reload the page, or email us and we’ll send them over.</span>';
+    $('assetGrid').innerHTML = '<span class="dim">Couldn’t build your artwork — reload the page.</span>';
+    return;
+  }
+
+  // ── preview + the printed sheet's code ──────────────────────────────────
+  // The sheet prints at 78mm; at 300dpi that's ~920px, so render 1200 and let
+  // it downsample. Printing an upscaled code is how you get a sheet that looks
+  // right on screen and won't scan off the paper.
+  K.qrPng(link, 1200).then(function(src){
+    $('pkQr').src = src;
+    $('shQr').src = src;
+  }).catch(function(){});
+
+  // ── downloadable formats ────────────────────────────────────────────────
+  var fname = 'oceansafe-' + handle + '-qr';
+  var cells = K.PNG_SIZES.map(function(s){
+    return '<div class="f" id="f-' + s.key + '"><div class="nm">' + esc(s.label) + ' PNG</div>' +
+      '<div class="note">' + esc(s.px) + ' × ' + esc(s.px) + ' px<br>' + esc(s.note) + '</div>' +
+      '<span class="dim" id="fb-' + s.key + '">…</span></div>';
+  }).join('') +
+    '<div class="f" id="f-svg"><div class="nm">SVG vector</div>' +
+    '<div class="note">Scales to any size with no soft edges — the one to hand a print shop.</div>' +
+    '<span class="dim" id="fb-svg">…</span></div>';
+  $('fmtGrid').innerHTML = cells;
+
+  var dl = function(id, href, name){
+    var slot = $('fb-' + id); if(!slot) return;
+    var a = document.createElement('a');
+    a.className = 'btn ghost sm'; a.href = href; a.download = name; a.textContent = 'Download';
+    slot.replaceWith(a);
+  };
+  K.PNG_SIZES.forEach(function(s){
+    K.qrPng(link, s.px)
+      .then(function(src){ dl(s.key, src, fname + '-' + s.px + '.png'); })
+      .catch(function(){ var el = $('fb-' + s.key); if(el) el.textContent = 'unavailable'; });
+  });
+  K.qrSvg(link)
+    .then(function(svg){ dl('svg', K.svgBlobUrl(svg), fname + '.svg'); })
+    .catch(function(){ var el = $('fb-svg'); if(el) el.textContent = 'unavailable'; });
+
+  // ── artwork ─────────────────────────────────────────────────────────────
+  K.renderAssets(link, handle).then(function(list){
+    var g = $('assetGrid');
+    if(!list.length){ g.innerHTML = '<span class="dim">Couldn’t build your artwork — reload the page.</span>'; return; }
+    g.innerHTML = '';
+    list.forEach(function(a){
+      var d = document.createElement('div');
+      d.className = 'asset';
+      d.innerHTML = '<div class="thumb"><img alt="' + esc(a.spec.label) + ' with your QR code" src="' + a.png + '"></div>' +
+        '<div class="nm">' + esc(a.spec.label) + '</div>' +
+        '<div class="sz">' + esc(a.spec.sz) + '</div>' +
+        '<a class="btn ghost sm" download="oceansafe-' + esc(handle) + '-' + esc(a.spec.key) + '.png" href="' + a.png + '">Download</a>';
+      g.appendChild(d);
+    });
+  }).catch(function(){
+    $('assetGrid').innerHTML = '<span class="dim">Couldn’t build your artwork — reload the page, or email us and we’ll send it over.</span>';
+  });
+})();
+</script>
+</body></html>

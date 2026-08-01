@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v243-2026-07-31-creator-dash-tabs';
+const CACHE_VERSION = 'v244-2026-07-31-creator-print-kit';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -169,9 +169,23 @@ if (workbox) {
   // /d/* -> /d.html with a 200, so the pathname the SW actually sees is /d/<token> and a
   // "\.html$" pattern never fires. A partner's dashboard shows their QR codes, their plan and
   // their prices — a stale one hands them last week's artwork and last week's pricing.
+  //
+  // The creator surfaces are matched by PREFIX for the same reason as /d/, and it is not
+  // hypothetical: _redirects maps /creator -> /creator-dash.html and /creator-print ->
+  // /creator-print.html, so the pathname the SW sees is /creator and /creator-print. The
+  // "creator-dash\.html$" alternation below only ever fired for someone who typed the .html
+  // URL directly — every creator arriving at the canonical /creator was being served by the
+  // app-shell SWR, i.e. the previous build. /^\/creator/ covers /creator, /creator-print,
+  // /creators(.html) and /creator-terms in one.
+  //
+  // creator-kit.js is named explicitly because it is a `script`, and the app-shell route
+  // below catches scripts too: a creator on a stale copy of the kit gets last week's QR
+  // and artwork geometry with no visible sign anything is wrong.
   workbox.routing.registerRoute(
     ({ url }) => url.origin === self.location.origin && (
       /^\/d\//.test(url.pathname) ||
+      /^\/creator/.test(url.pathname) ||
+      url.pathname === '/assets/creator-kit.js' ||
       /^\/(jade[a-z-]*|sales|hotel-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo|set-password|creators|creator-dash)\.html$/.test(url.pathname)),
     new workbox.strategies.NetworkFirst({
       cacheName: "jade-pages",
