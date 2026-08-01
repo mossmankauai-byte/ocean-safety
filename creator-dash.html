@@ -756,10 +756,10 @@
       });
 
     // ---- dashboard key rotation ----
-    // The worker route ships separately (it needs a Cloudflare deploy, not a Netlify one).
-    // Flip this to true in the same change that deploys `POST /creator-rotate`, or the
-    // button offers a reset the API can't perform.
-    var ROTATE_LIVE = false;
+    // POST /creator-rotate went live on the worker 2026-07-31 (version 215e0f58), verified
+    // end to end: old key 403s, new key 200s, and the rotation stamp lands on its own KV key
+    // so it can't clobber the payout audit trail.
+    var ROTATE_LIVE = true;
     if(ROTATE_LIVE && mode === 'creator' && key){
       $('resetBox').style.display = 'block';
       $('resetKeyBtn').addEventListener('click', function(){
