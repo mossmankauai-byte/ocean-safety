@@ -79,6 +79,74 @@
   .earn-line:last-of-type{border-bottom:none}
   .earn-line b{font-variant-numeric:tabular-nums}
 
+  /* Three tabs instead of nine stacked cards — a creator lands on the money and reaches
+     the rest in one tap, rather than scrolling past performance to find their link. */
+  .tabs{display:flex;gap:6px;margin:18px 0 2px;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:5px;box-shadow:var(--shadow)}
+  .tab{flex:1;appearance:none;border:0;background:none;font:inherit;font-size:14px;font-weight:700;
+    color:var(--muted);cursor:pointer;padding:10px 8px;border-radius:9px;white-space:nowrap;
+    transition:background .16s,color .16s}
+  .tab:hover{color:var(--ink)}
+  .tab.on{background:var(--accent);color:#fff}
+  .tab:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+  .pane{display:none}
+  .pane.on{display:block}
+  @media(max-width:400px){.tab{font-size:13px;padding:10px 4px}}
+
+  /* "as of" stamp — a number with no time on it can't be trusted or acted on. */
+  .asof{margin-top:10px;font-size:12px;color:var(--muted2);font-variant-numeric:tabular-nums}
+
+  /* Monthly statement. A creator has to be able to answer "what did you pay me in June?" */
+  .stmt{width:100%;border-collapse:collapse;margin-top:16px;font-size:14px}
+  .stmt th{text-align:left;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted2);padding:0 10px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+  .stmt th:last-child,.stmt td:last-child{padding-right:0}
+  .stmt th.r,.stmt td.r{text-align:right}
+  .stmt td{padding:11px 10px 11px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;
+    white-space:nowrap}
+  /* Phones: gross tour value is context, not the creator's number — drop it before the
+     columns start colliding, and keep what they're owed. */
+  @media(max-width:520px){
+    .stmt .gross{display:none}
+    .stmt{font-size:13.5px}
+    .stmt td,.stmt th{padding-right:8px}
+    .stmt .per{white-space:normal}      /* "June 2026" may wrap; the pill may not */
+    .pill .pon{display:none}            /* drop the paid-on date, keep the state */
+  }
+  .stmt tr:last-child td{border-bottom:none}
+  .stmt td b{font-weight:800}
+  .stmt .per{font-weight:700}
+  .pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.03em;border-radius:999px;
+    padding:3px 9px;white-space:nowrap}
+  .pill.paid{background:#e4f5ec;color:#0f6b3d}
+  .pill.pend{background:var(--tint);color:var(--muted)}
+  @media (prefers-color-scheme:dark){.pill.paid{background:#123529;color:#7fd3a6}}
+  .stmt-wrap{overflow-x:auto}
+
+  /* Payout readiness — the terms require a W-9 before the first payout and the dashboard
+     never said so. A checklist with a visible finish line beats a silent blocker. */
+  .rdy{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .rdy-row{display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border-bottom:1px solid var(--line)}
+  .rdy-row:last-child{border-bottom:none}
+  .rdy-ic{flex:0 0 auto;width:19px;height:19px;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-size:12px;font-weight:800;margin-top:1px}
+  .rdy-ic.on{background:#1AA67A;color:#fff}
+  .rdy-ic.off{background:var(--line);color:var(--muted2)}
+  .rdy-tx{font-size:14px;line-height:1.5}
+  .rdy-tx b{font-weight:700}
+  .rdy-tx span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+
+  /* Day-one state. Every creator sees this until their first visitor, so it is the
+     dashboard's real first impression — make it a next step, not five cards of zeros. */
+  .chk{margin-top:16px;counter-reset:s}
+  .chk-row{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .chk-row:last-child{border-bottom:none}
+  .chk-n{flex:0 0 auto;width:23px;height:23px;border-radius:50%;background:var(--tint);color:var(--accent);
+    font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .chk-tx{font-size:14px;line-height:1.5}
+  .chk-tx b{font-weight:700}
+  .chk-tx span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+
 
   .terms{font-size:13px;color:var(--muted);line-height:1.6;margin-top:10px}
   footer{padding:26px 0 46px;text-align:center;color:var(--muted2);font-size:13px}
@@ -163,16 +231,54 @@
 <main>
   <div class="wrap">
 
-    <!-- The two numbers a creator actually opens this page for. Same source as the
-         breakdown further down (creators-earnings.json) — one fetch fills both. -->
-    <div class="card" id="payHeadCard">
+    <!-- Day one, before any visitor arrives, this is the whole dashboard. Shown only
+         while there is nothing to report; hidden the moment activity or earnings exist. -->
+    <div class="card" id="startCard" style="display:none">
+      <h2>You're set up — here's how the first booking happens</h2>
+      <p class="hint">Nothing to report yet. These three steps are the whole job.</p>
+      <div class="chk">
+        <div class="chk-row"><div class="chk-n">1</div><div class="chk-tx"><b>Put your link where your audience is</b>
+          <span>Bio, story link, video description. It's on the <b>Your link</b> tab, with a QR for print.</span></div></div>
+        <div class="chk-row"><div class="chk-n">2</div><div class="chk-tx"><b>Post about it, and mark it #ad</b>
+          <span>Point people at the Tours tab — that's where a booking can actually happen.</span></div></div>
+        <div class="chk-row"><div class="chk-n">3</div><div class="chk-tx"><b>Add your PayPal so a payout has somewhere to land</b>
+          <span>On this tab under <b>Getting paid</b>. Now, or any time before your first payout.</span></div></div>
+      </div>
+    </div>
+
+    <div class="tabs" id="dashTabs" role="tablist" aria-label="Dashboard sections">
+      <button type="button" class="tab on" role="tab" aria-selected="true"  data-pane="pane-earn">Earnings</button>
+      <button type="button" class="tab"    role="tab" aria-selected="false" data-pane="pane-perf">Performance</button>
+      <button type="button" class="tab"    role="tab" aria-selected="false" data-pane="pane-link">Your link</button>
+    </div>
+
+    <section class="pane on" id="pane-earn" role="tabpanel">
+
+    <div class="card" id="earnCard">
       <h2>Your bookings &amp; pay</h2>
-      <div class="stat-row">
+      <div class="stat-row" style="grid-template-columns:repeat(2,1fr)">
         <div class="stat"><div class="n" id="phBookings">—</div><div class="l">Bookings credited</div></div>
         <div class="stat"><div class="n" id="phPay">—</div><div class="l">Your commission</div></div>
       </div>
       <p class="hint" id="phNote">Reconciled monthly against GetYourGuide's report.</p>
+      <div id="earnBody"></div>
+      <div class="rdy" id="rdyBox"></div>
     </div>
+
+    <div class="card" id="payCard">
+      <h2>Getting paid</h2>
+      <div id="payState"></div>
+      <p class="terms">We send your commission to <b>PayPal</b> — no bank account needed on your end. Don’t have PayPal yet? It’s free at <a href="https://www.paypal.com/" target="_blank" rel="noopener">paypal.com</a>. Use the same email above.</p>
+    </div>
+
+    <div class="card">
+      <h2>Payout terms</h2>
+      <p class="terms">50% of the commission on every tour — an even split at every volume, with no tiers or thresholds. Sent to your PayPal once your balance passes $25; smaller balances roll over. You’re an independent contractor responsible for your own taxes. Questions or payout details: <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a>.</p>
+    </div>
+
+    </section>
+
+    <section class="pane" id="pane-perf" role="tabpanel">
 
     <div class="card" id="statsCard">
       <h2>Link activity — last 30 days</h2>
@@ -185,6 +291,7 @@
       <div class="delta flat" id="stDelta"></div>
       <div class="chart" id="chart" aria-label="Daily activity, last 14 days"></div>
       <div class="chart-lbl"><span>14 days ago</span><span>today</span></div>
+      <p class="asof" id="stAsOf"></p>
       <div class="state" id="statsState" style="display:none"></div>
     </div>
 
@@ -205,11 +312,9 @@
       <div id="insightBody"></div>
     </div>
 
-    <div class="card" id="earnCard">
-      <h2>Bookings &amp; commission</h2>
-      <p class="hint">Reconciled monthly against GetYourGuide's partner report, then posted here and paid out ($25 minimum, smaller balances roll over).</p>
-      <div id="earnBody"></div>
-    </div>
+    </section>
+
+    <section class="pane" id="pane-link" role="tabpanel">
 
     <div class="card" id="kitCard">
       <h2>Your link &amp; QR</h2>
@@ -259,16 +364,7 @@
       <p class="ed-status" id="edStatus"></p>
     </div>
 
-    <div class="card" id="payCard">
-      <h2>Getting paid</h2>
-      <div id="payState"></div>
-      <p class="terms">We send your commission to <b>PayPal</b> — no bank account needed on your end. Don’t have PayPal yet? It’s free at <a href="https://www.paypal.com/" target="_blank" rel="noopener">paypal.com</a>. Use the same email above.</p>
-    </div>
-
-    <div class="card">
-      <h2>Payout terms</h2>
-      <p class="terms">50% of the commission on every tour — an even split at every volume, with no tiers or thresholds. Sent to your PayPal once your balance passes $25; smaller balances roll over. You’re an independent contractor responsible for your own taxes. Questions or payout details: <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a>.</p>
-    </div>
+    </section>
 
   </div>
 </main>
@@ -284,6 +380,25 @@
 (function(){
   var API  = 'https://concierge-guide-api.oceansafe-hi.workers.dev';
   var APP  = 'https://oceansafety.app';
+
+  // ---- tabs ----
+  // Exposed as _showPane because the guided tour has to be able to reveal the pane a
+  // highlighted card lives in — otherwise it spotlights an element with display:none.
+  window._showPane = function(id){
+    var panes = document.querySelectorAll('.pane');
+    for(var i=0;i<panes.length;i++) panes[i].classList.toggle('on', panes[i].id === id);
+    var tabs = document.querySelectorAll('#dashTabs .tab');
+    for(var j=0;j<tabs.length;j++){
+      var on = tabs[j].getAttribute('data-pane') === id;
+      tabs[j].classList.toggle('on', on);
+      tabs[j].setAttribute('aria-selected', on ? 'true' : 'false');
+    }
+  };
+  document.getElementById('dashTabs').addEventListener('click', function(e){
+    var b = e.target.closest('.tab'); if(!b) return;
+    window._showPane(b.getAttribute('data-pane'));
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
   var $ = function(id){ return document.getElementById(id); };
 
   var qs = new URLSearchParams(location.search);
@@ -347,6 +462,7 @@
       }
 
       function renderSet(paypal){
+        _ppOnFile = paypal; renderReady();   // payout readiness mirrors this
         el.innerHTML = chip('#1AA67A', 'PayPal on file')
           + '<div style="background:var(--tint);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 0">'
           + '<div style="font-weight:800;font-size:15px;margin-bottom:4px">You’re set up</div>'
@@ -355,6 +471,7 @@
         $('ppEdit').addEventListener('click', function(e){ e.preventDefault(); renderForm(paypal); });
       }
       function renderForm(current){
+        _ppOnFile = null; renderReady();
         el.innerHTML = chip('var(--muted2)', 'Not set up yet')
           + '<div style="background:var(--tint);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 0">'
           + '<div style="font-weight:800;font-size:15px;margin-bottom:4px">Add your PayPal email</div>'
@@ -426,6 +543,12 @@
         var sum = function(a){ return a.reduce(function(x,y){ return x+y; },0); };
         var t30 = sum(days), t7 = sum(days.slice(0,7)), prev7 = sum(days.slice(7,14));
         $('st30').textContent = t30; $('st7').textContent = t7; $('stToday').textContent = days[0]||0;
+        // Stamp the read. A count with no time on it can't be judged or acted on, and it
+        // hides the case where the page was left open for a day.
+        var stamp = new Date();
+        $('stAsOf').textContent = 'As of ' + stamp.toLocaleString([], { month:'short', day:'numeric',
+          hour:'numeric', minute:'2-digit' }) + ' · Hawaiʻi time on this device';
+        window._markActivity(t30 > 0);
         var d = $('stDelta');
         if(prev7 === 0 && t7 === 0){ d.textContent = 'No activity yet — share your link and this chart wakes up.'; }
         else if(prev7 === 0){ d.textContent = '▲ New this week'; d.className='delta up'; }
@@ -483,40 +606,107 @@
         var s = $('statsState'); s.style.display = 'block';
         s.textContent = 'Live stats aren’t reachable right now. If you just signed up, tracking activates within a day — check back tomorrow. Your link works and counts either way.';
         $('st30').textContent = '·'; $('st7').textContent = '·'; $('stToday').textContent = '·';
+        // Unknown, not zero — so the day-one card stays hidden rather than telling a creator
+        // with real traffic that they have none.
+        window._markActivity(true);
       });
 
     // ---- earnings ----
     // Zero is a real answer here, not an error: a creator with no bookings yet should see
     // 0 and $0, not a dash that reads as "we lost your numbers".
-    function money(n){ return '$' + (Math.round(Number(n||0)*100)/100).toFixed(2).replace(/\.00$/, ''); }
+    var PAYOUT_MIN = 25;
+    // Grouped thousands, cents only when there are cents: $1,940 and $77.60, never $1940.
+    function money(n){
+      var v = Math.round(Number(n||0)*100)/100;
+      return '$' + v.toLocaleString('en-US', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
+    }
+    function esc2(x){ return String(x==null?'':x).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+    // creators-earnings.json carries a single current snapshot per creator. `history` is
+    // OPTIONAL and newer: [{period,bookings,gross,commission,paid,paid_on}], newest first.
+    // Without it we show the snapshot as the one open period, so old files still render.
+    function periods(e){
+      if(!e) return [];
+      if(Array.isArray(e.history) && e.history.length) return e.history;
+      return [{ period:e.period || 'Current period', bookings:e.bookings, gross:e.gross,
+                commission:e.commission, paid:false }];
+    }
+    function statement(e){
+      var rows = periods(e);
+      if(!rows.length) return '';
+      return '<div class="stmt-wrap"><table class="stmt"><thead><tr>' +
+        '<th>Period</th><th class="r">Bookings</th><th class="r gross">Gross</th>' +
+        '<th class="r">Your share</th><th class="r">Status</th></tr></thead><tbody>' +
+        rows.map(function(r){
+          var paid = !!r.paid;
+          return '<tr><td class="per">' + esc2(r.period || '—') + '</td>' +
+            '<td class="r">' + (r.bookings||0) + '</td>' +
+            '<td class="r gross">' + money(r.gross) + '</td>' +
+            '<td class="r"><b>' + money(r.commission) + '</b></td>' +
+            '<td class="r"><span class="pill ' + (paid ? 'paid' : 'pend') + '">' +
+              (paid ? ('Paid' + (r.paid_on ? '<span class="pon"> ' + esc2(r.paid_on) + '</span>' : '')) : 'Pending') + '</span></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+
+    // Payout readiness. The terms require a W-9 before the first payout and this page never
+    // said so, which turns a missing form into an unexplained silence after a creator earns.
+    var _earn = null, _earnKnown = false, _ppOnFile = null;
+    function row(on, title, sub){
+      // SVG check, never a glyph — a text tick renders as a different shape on every
+      // platform and as an emoji on some.
+      var tick = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" '
+        + 'stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="M5 12.5 10 17l9-10"/></svg>';
+      return '<div class="rdy-row"><div class="rdy-ic ' + (on?'on':'off') + '" aria-hidden="true">' +
+        (on ? tick : '') + '</div><div class="rdy-tx"><b>' + title + '</b><span>' + sub + '</span></div></div>';
+    }
+    function renderReady(){
+      var box = $('rdyBox'); if(!box) return;
+      var earned = _earn ? Number(_earn.commission||0) : 0;
+      var over = earned >= PAYOUT_MIN;
+      box.innerHTML =
+        row(!!_ppOnFile, 'PayPal on file',
+            _ppOnFile ? 'We pay to ' + esc2(_ppOnFile) + '.'
+              : (mode === 'creator'
+                  ? 'Add it under Getting paid — a payout needs somewhere to land.'
+                  : 'Email <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a> with your PayPal address.')) +
+        row(false, 'W-9 on file',
+            'Required before your first payout, and a 1099-NEC issues if you pass $600 in a year. ' +
+            'Email <a href="mailto:nick@oceansafety.app">nick@oceansafety.app</a> to start it.') +
+        row(over, '$' + PAYOUT_MIN + ' payout minimum',
+            over ? 'You’re over the minimum — this pays out with the next monthly run.'
+                 : money(earned) + ' of $' + PAYOUT_MIN + '. Smaller balances roll over, never expire.');
+    }
+
+    // The day-one card replaces a screen of zeros with a next step. Only shown once BOTH
+    // signals are known and both are empty — never flashed at a creator who does have data.
+    var _hasActivity = null;
+    window._markActivity = function(v){ _hasActivity = !!v; maybeStart(); };
+    function maybeStart(){
+      if(_hasActivity === null || !_earnKnown) return;
+      var nothing = !_hasActivity && !(_earn && Number(_earn.bookings||0) > 0);
+      $('startCard').style.display = nothing ? 'block' : 'none';
+    }
+
     function headline(e){
       $('phBookings').textContent = e ? (e.bookings||0) : '0';
       $('phPay').textContent      = e ? money(e.commission) : '$0';
       $('phNote').textContent     = e
         ? ((e.status || 'accruing') + (e.updated ? ' · updated ' + e.updated : ''))
-        : 'Nothing posted yet. Bookings are reconciled monthly against GetYourGuide’s report, then paid to your PayPal once you pass $25.';
+        : 'Nothing posted yet. Bookings are reconciled monthly against GetYourGuide’s report, then paid to your PayPal once you pass $' + PAYOUT_MIN + '.';
+    }
+    function renderEarn(e){
+      _earn = e || null; _earnKnown = true;
+      headline(e);
+      $('earnBody').innerHTML = e
+        ? statement(e)
+        : '<div class="state">No bookings posted yet. Commission is reconciled monthly — your first line appears after the first full month with a booking.</div>';
+      renderReady();
+      maybeStart();
     }
     fetch('/creators-earnings.json', { cache:'no-store' })
       .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-      .then(function(all){
-        var e = all && all[earnKey];
-        var body = $('earnBody');
-        headline(e);
-        if(!e){
-          body.innerHTML = '<div class="state">No bookings posted yet. Commission is reconciled monthly — your first line appears after the first full month with a booking.</div>';
-          return;
-        }
-        body.innerHTML =
-          '<div class="earn-line"><span>Tour bookings credited</span><b>' + (e.bookings||0) + '</b></div>' +
-          '<div class="earn-line"><span>Gross tour value</span><b>$' + (e.gross||0) + '</b></div>' +
-          '<div class="earn-line"><span>Your commission</span><b>$' + (e.commission||0) + '</b></div>' +
-          '<div class="earn-line"><span>Status</span><b>' + (e.status||'accruing') + '</b></div>' +
-          (e.updated ? '<p class="hint" style="margin-top:10px">Last updated ' + e.updated + '</p>' : '');
-      })
-      .catch(function(){
-        headline(null);
-        $('earnBody').innerHTML = '<div class="state">No bookings posted yet. Commission is reconciled monthly — your first line appears after the first full month with a booking.</div>';
-      });
+      .then(function(all){ renderEarn(all && all[earnKey]); })
+      .catch(function(){ renderEarn(null); });
   }
 
   $('copyBtn') && $('copyBtn').addEventListener('click', function(){
@@ -663,11 +853,11 @@
   var LOGO = '/icons/pwa-192.png';
   var STEPS = [
     { center:true, title:'Your dashboard, in three stops',
-      body:'Everything here is yours: what your link is doing, what it’s earned, and the link itself. Thirty seconds.' },
+      body:'Three tabs: what you’ve earned, what your link is doing, and the link itself. Thirty seconds.' },
+    { sel:'#earnCard', title:'Bookings post monthly',
+      body:'Tour bookings are reconciled against GetYourGuide’s report once a month, then your commission lands here and pays out at $25+. The checklist under it is everything we need to pay you.' },
     { sel:'#statsCard', title:'Live activity',
       body:'Opens and taps from your visitors, updated as they happen. <b>Today’s bar is gold.</b> If it’s flat, post the link somewhere new and watch it move.' },
-    { sel:'#earnCard', title:'Bookings post monthly',
-      body:'Tour bookings are reconciled against GetYourGuide’s report once a month, then your commission lands here and pays out at $25+.' },
     { sel:'#kitCard', last:true, title:'Your link never expires',
       body:'Copy it, re-save the QR, or grab the full kit on the creators page. That’s the whole system — go post something.' }
   ];
@@ -727,6 +917,10 @@
     setTimeout(function(){
       curEl = document.querySelector(s.sel);
       if(!curEl){ (idx < STEPS.length-1) ? setStep(idx+1) : end(true); return; }
+      // The card may live in a tab that isn't showing — reveal it, or the spotlight lands
+      // on a display:none element and the tour highlights nothing.
+      var pane = curEl.closest ? curEl.closest('.pane') : null;
+      if(pane && !pane.classList.contains('on') && window._showPane) window._showPane(pane.id);
       hi.classList.remove('off');
       curEl.scrollIntoView({block:'center'});
       setTimeout(position, 250);
