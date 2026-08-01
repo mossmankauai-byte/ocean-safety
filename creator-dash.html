@@ -10,6 +10,10 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="theme-color" content="#0f4c5c">
+<!-- The dashboard key rides in the query string, so the URL itself is the credential.
+     strict-origin sends only the origin off-site — never the path or the key — instead of
+     trusting each browser's default. Pinned 2026-07-31. -->
+<meta name="referrer" content="strict-origin">
 <script src="/assets/vendor/qrcode.min.js"></script>
 <script src="/assets/creator-kit.js"></script>
 <style>
@@ -288,7 +292,7 @@
     <div class="card" id="payCard">
       <h2>Getting paid</h2>
       <div id="payState"></div>
-      <p class="terms">We send your commission to <b>PayPal</b> — no bank account needed on your end. Don’t have PayPal yet? It’s free at <a href="https://www.paypal.com/" target="_blank" rel="noopener">paypal.com</a>. Use the same email above.</p>
+      <p class="terms">We send your commission to <b>PayPal</b> — no bank account needed on your end. Don’t have PayPal yet? It’s free at <a href="https://www.paypal.com/" target="_blank" rel="noopener noreferrer">paypal.com</a>. Use the same email above.</p>
     </div>
 
     <div class="card">
@@ -346,6 +350,14 @@
         <img id="dhQr" src="" alt="Your personal OceanSafe QR code">
         <p>Long-press (or right-click) to save. Need it bigger, as a vector, or on ready-made artwork? That’s all in your <a id="printLinkInline" href="/creator-print">print kit</a>.</p>
       </div>
+      <div id="resetBox" style="display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:16px">
+        <div style="font-weight:800;font-size:14px">Shared this page by mistake?</div>
+        <p class="hint" style="margin-top:4px">The address bar of this page is your key. Resetting issues a new
+          one and makes every copy of the old link stop working — your public link and QR are untouched.</p>
+        <button type="button" class="copybtn" id="resetKeyBtn" style="margin-top:10px">Reset my dashboard access</button>
+        <p class="ed-status" id="resetStatus"></p>
+      </div>
+
       <div id="islandLinks" style="display:none">
         <p class="ilk-intro">You’ve set up more than one island. The link above works everywhere — these point straight at a single island, so post the matching one with that island’s content.</p>
         <div id="islandLinkRows"></div>
@@ -437,6 +449,18 @@
   var cParam = String(qs.get('c')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,32);
   var uParam = String(qs.get('u')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,16);
   var key    = qs.get('k') || '';
+
+  // A slug WITHOUT a key: recover the key from the kit saved on this device. The print kit's
+  // "back to your dashboard" link is keyless by design, and this is what makes that work
+  // rather than silently dropping the creator into the keyless view. It also means fewer
+  // links have to carry the key at all — localStorage is origin-scoped, a URL is not.
+  // Only ever used when the saved kit is for THIS slug.
+  if(cParam && !key){
+    try {
+      var mine = JSON.parse(localStorage.getItem('osc_kit') || 'null');
+      if(mine && mine.slug === cParam && mine.key) key = mine.key;
+    } catch(e){}
+  }
 
   // Recover from the saved kit if the URL carried nothing.
   if(!cParam && !uParam){
@@ -566,13 +590,22 @@
           + '<a href="#" id="ppEdit">Change</a></div></div>';
         $('ppEdit').addEventListener('click', function(e){ e.preventDefault(); renderForm(paypal); });
       }
+      // `current` is the address already on file, if any. Changing it requires typing it —
+      // the API enforces that too, so this is a prompt for a real check, not a client-side
+      // gate. Adding a FIRST address asks for nothing extra; there is nothing to protect yet.
       function renderForm(current){
         _ppOnFile = null; renderReady();
-        el.innerHTML = chip('var(--muted2)', 'Not set up yet')
+        var changing = !!current;
+        el.innerHTML = chip('var(--muted2)', changing ? 'Changing your payout address' : 'Not set up yet')
           + '<div style="background:var(--tint);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 0">'
-          + '<div style="font-weight:800;font-size:15px;margin-bottom:4px">Add your PayPal email</div>'
-          + '<div style="font-size:13.5px;color:var(--muted);line-height:1.5;margin-bottom:10px">This is where we send your commission — no bank account needed.</div>'
-          + '<div class="linkbox"><input id="ppInput" type="email" placeholder="you@paypal.com" value="' + esc(current || '') + '" aria-label="Your PayPal email">'
+          + '<div style="font-weight:800;font-size:15px;margin-bottom:4px">' + (changing ? 'Change your PayPal email' : 'Add your PayPal email') + '</div>'
+          + '<div style="font-size:13.5px;color:var(--muted);line-height:1.5;margin-bottom:10px">'
+            + (changing ? 'Confirm the address on file, then enter the new one.'
+                        : 'This is where we send your commission — no bank account needed.') + '</div>'
+          + (changing
+              ? '<div class="linkbox" style="margin-bottom:8px"><input id="ppCur" type="email" placeholder="current address on file" aria-label="The PayPal email currently on file"></div>'
+              : '')
+          + '<div class="linkbox"><input id="ppInput" type="email" placeholder="' + (changing ? 'new@paypal.com' : 'you@paypal.com') + '" aria-label="Your PayPal email">'
           + '<button type="button" class="copybtn" id="ppSave">Save</button></div>'
           + '<p class="ed-status" id="ppStatus"></p></div>';
         $('ppSave').addEventListener('click', savePaypal);
@@ -580,13 +613,20 @@
       }
       function savePaypal(){
         var v = $('ppInput').value.trim(), st = $('ppStatus');
+        var curEl = $('ppCur'), cur = curEl ? curEl.value.trim() : '';
         if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ st.className = 'ed-status err'; st.textContent = 'That doesn’t look like an email — check and try again.'; return; }
+        if(curEl && !cur){ st.className = 'ed-status err'; st.textContent = 'Enter the address currently on file to confirm this change.'; return; }
         var b = $('ppSave'); b.disabled = true; b.textContent = 'Saving…';
         fetch(API + '/creator-payout', { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ slug:cParam, key:key, paypal:v }) })
+          body: JSON.stringify({ slug:cParam, key:key, paypal:v, current:cur }) })
           .then(function(r){ return r.json(); })
           .then(function(d){ if(d && d.ok){ renderSet(d.paypal || v); } else { throw new Error((d && d.reason) || 'failed'); } })
-          .catch(function(){ b.disabled = false; b.textContent = 'Save'; st.className = 'ed-status err'; st.textContent = 'Didn’t save — check your connection and retry.'; });
+          .catch(function(e){
+            b.disabled = false; b.textContent = 'Save'; st.className = 'ed-status err';
+            st.textContent = (e && e.message === 'confirm_current')
+              ? 'That isn’t the address we have on file. Check it, or email nick@oceansafety.app.'
+              : 'Didn’t save — check your connection and retry.';
+          });
       }
 
       fetch(API + '/creator-payout?c=' + encodeURIComponent(cParam) + '&k=' + encodeURIComponent(key))
@@ -706,6 +746,42 @@
         // with real traffic that they have none.
         window._markActivity(true);
       });
+
+    // ---- dashboard key rotation ----
+    // The worker route ships separately (it needs a Cloudflare deploy, not a Netlify one).
+    // Flip this to true in the same change that deploys `POST /creator-rotate`, or the
+    // button offers a reset the API can't perform.
+    var ROTATE_LIVE = false;
+    if(ROTATE_LIVE && mode === 'creator' && key){
+      $('resetBox').style.display = 'block';
+      $('resetKeyBtn').addEventListener('click', function(){
+        var b = this, st = $('resetStatus');
+        if(!confirm('Reset your dashboard access?\n\nThe link you have open now will stop working. Bookmark or re-save the new one.')) return;
+        b.disabled = true; b.textContent = 'Resetting…';
+        fetch(API + '/creator-rotate', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ slug:cParam, key:key }) })
+          .then(function(r){ return r.json(); })
+          .then(function(d){
+            if(!d || !d.ok || !d.key) throw new Error((d && d.reason) || 'failed');
+            // Update the saved kit first, THEN the address bar — a creator who closes the tab
+            // mid-rotation must still be able to get back in from the creators page.
+            try {
+              var kit = JSON.parse(localStorage.getItem('osc_kit') || 'null');
+              if(kit && kit.slug === cParam){ kit.key = d.key; localStorage.setItem('osc_kit', JSON.stringify(kit)); }
+            } catch(e){}
+            history.replaceState(null, '', '/creator-dash.html?c=' + encodeURIComponent(cParam) + '&k=' + encodeURIComponent(d.key));
+            key = d.key;
+            b.disabled = false; b.textContent = 'Reset my dashboard access';
+            st.className = 'ed-status ok';
+            st.textContent = 'Done — this page now has your new key. Any older link is dead. Re-bookmark this page.';
+          })
+          .catch(function(){
+            b.disabled = false; b.textContent = 'Reset my dashboard access';
+            st.className = 'ed-status err';
+            st.textContent = 'Couldn’t reset just now. Try again, or email nick@oceansafety.app.';
+          });
+      });
+    }
 
     // ---- earnings ----
     // Zero is a real answer here, not an error: a creator with no bookings yet should see

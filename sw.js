@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v244-2026-07-31-creator-print-kit';
+const CACHE_VERSION = 'v245-2026-07-31-creator-key-hardening';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -186,7 +186,7 @@ if (workbox) {
       /^\/d\//.test(url.pathname) ||
       /^\/creator/.test(url.pathname) ||
       url.pathname === '/assets/creator-kit.js' ||
-      /^\/(jade[a-z-]*|sales|hotel-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo|set-password|creators|creator-dash)\.html$/.test(url.pathname)),
+      /^\/(jade[a-z-]*|sales|hotel-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)),
     new workbox.strategies.NetworkFirst({
       cacheName: "jade-pages",
       networkTimeoutSeconds: 4,

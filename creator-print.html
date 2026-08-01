@@ -10,6 +10,9 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="theme-color" content="#0f4c5c">
+<!-- This page can be reached with the dashboard's query string, so pin the policy the
+     dashboard pins: only the origin ever leaves with an off-site request. -->
+<meta name="referrer" content="strict-origin">
 <script src="/assets/vendor/qrcode.min.js"></script>
 <style>
   :root{
@@ -187,6 +190,16 @@
   var qs = new URLSearchParams(location.search);
   var cParam = String(qs.get('c')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,32);
   var uParam = String(qs.get('u')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,16);
+
+  // Drop the dashboard key from the address bar. This page genuinely doesn't read it (see
+  // above) — but arriving from the dashboard carries it here, and this is the page a creator
+  // is most likely to leave open on a shared screen, hand to a printer, or screenshot for a
+  // designer. A credential that isn't needed shouldn't sit in a URL that gets passed around.
+  if(qs.has('k')){
+    qs.delete('k');
+    var q = qs.toString();
+    history.replaceState(null, '', location.pathname + (q ? '?' + q : ''));
+  }
 
   // Fall back to the saved kit, same key the dashboard writes. This is a
   // convenience only — the URL is the reliable path, which is the whole reason
