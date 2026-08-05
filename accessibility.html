@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f4c5c">
+<title>Accessibility — Ocean Safe</title>
+<meta name="description" content="What works today in the Ocean Safe beach-safety app, where it falls short, and how to tell us when something blocks access to a safety verdict. WCAG 2.1 AA is the target, not a conformance claim.">
+<link rel="canonical" href="https://oceansafety.app/accessibility">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Accessibility — Ocean Safe">
+<meta property="og:description" content="What works today, where we fall short, and how to reach us. WCAG 2.1 AA is the target, not a conformance claim.">
+<meta property="og:url" content="https://oceansafety.app/accessibility">
+<meta property="og:image" content="https://oceansafety.app/icons/og-image.png">
+<meta property="og:site_name" content="Ocean Safe">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"Ocean Safe","url":"https://oceansafety.app/","@id":"https://oceansafety.app/#org","logo":"https://oceansafety.app/icons/og-image.png"},{"@type":"WebSite","name":"Ocean Safe","url":"https://oceansafety.app/","publisher":{"@id":"https://oceansafety.app/#org"}},{"@type":"WebPage","name":"Accessibility","url":"https://oceansafety.app/accessibility","dateModified":"2026-08-05","publisher":{"@id":"https://oceansafety.app/#org"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://oceansafety.app/"},{"@type":"ListItem","position":2,"name":"Accessibility","item":"https://oceansafety.app/accessibility"}]}}]}</script>
+<style>
+:root{--ocean:#0f4c5c;--gold:#c9a84c;--warm:#f5ecd7;--ink:#1c1c1c;--mute:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--warm);line-height:1.62;-webkit-font-smoothing:antialiased}
+a{color:var(--ocean)}
+.wrap{max-width:680px;margin:0 auto;padding:0 18px 64px}
+header.top{display:flex;align-items:center;gap:9px;padding:16px 0 10px}
+header.top a{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ocean);font-weight:700}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--ocean);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px}
+.brand{font-size:15px}.brand small{display:block;font-size:10.5px;font-weight:600;color:var(--mute);letter-spacing:.04em;text-transform:uppercase}
+nav.crumb{font-size:12.5px;color:var(--mute);padding:4px 0 12px}
+nav.crumb a{color:var(--mute);text-decoration:none}
+h1{font-size:27px;line-height:1.18;margin:8px 0 4px;letter-spacing:-.01em}
+.eff{font-size:12.5px;color:var(--mute);font-weight:600;letter-spacing:.02em;margin-bottom:12px}
+.intro{font-size:16px;color:#33403f;margin-bottom:6px}
+section{margin-top:26px}
+h2{font-size:19px;margin-bottom:9px;letter-spacing:-.01em;padding-top:6px;border-top:1px solid var(--border)}
+ul{margin:6px 0 0 2px;padding-left:18px}
+li{font-size:15px;color:#33403f;margin-bottom:7px}
+p{font-size:15px;color:#33403f;margin-bottom:9px}
+strong,b{color:var(--ink)}
+.callout{margin:14px 0;padding:13px 15px;background:#fff;border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:10px;font-size:14.5px;color:#33403f}
+.cta{display:block;background:var(--ocean);color:#fff;text-align:center;text-decoration:none;font-weight:700;font-size:16px;border-radius:14px;padding:15px;margin-top:28px;box-shadow:0 8px 22px rgba(15,76,92,.22)}
+footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--mute)}
+footer a{color:var(--mute)}
+.addr{margin-top:10px;font-size:13.5px;color:#33403f}
+.skip{position:absolute;left:-9999px;top:0;background:var(--ocean);color:#fff;padding:10px 14px;border-radius:0 0 10px 0;font-weight:700;font-size:14px;text-decoration:none;z-index:10}
+.skip:focus{left:0}
+a:focus-visible,.skip:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+<header class="top"><a href="/"><span class="logo">≈</span><span class="brand">Ocean Safe<small>Kauaʻi Visitor Guide</small></span></a></header>
+<nav class="crumb"><a href="/">Home</a> &rsaquo; Accessibility</nav>
+
+<main id="main">
+<h1>Accessibility</h1>
+<p class="eff">Last reviewed 5 August 2026</p>
+
+<p class="intro">The people most likely to need a beach-safety app are often the people least well served by one. So this page is written the way we'd want to read it: what works, what doesn't, and no claims we can't back.</p>
+
+<section>
+<h2>What we're aiming at</h2>
+<p>WCAG 2.1 Level AA. That's the target, not a claim of conformance. We haven't had a full independent audit, so anyone telling you this app is "WCAG compliant" is guessing. When we've been audited, this page will say so and give the date.</p>
+</section>
+
+<section>
+<h2>What works today</h2>
+<ul>
+<li>Text scales with your browser or phone's text-size setting.</li>
+<li>Beach names, conditions, and ratings are real text in the page, not baked into images.</li>
+<li>The safety notice can be reached by keyboard and is exposed as a labeled region.</li>
+<li>A conditions rating always carries a word — Calm, Moderate, Rough, Big surf — so you never have to read a color to get the verdict.</li>
+</ul>
+</section>
+
+<section>
+<h2>Where we fall short</h2>
+<p>Plainly, so you can plan around it:</p>
+<ul>
+<li><b>The map is the weak spot.</b> Panning, zooming, and tapping pins is hard or impossible with a screen reader or by keyboard alone. Map pins are also colored by hazard, and that color has no text beside it. Every beach on the map is also in the beach list, which is text — use the list. Hazard pins are a separate layer and are not fully mirrored there.</li>
+<li><b>The swell and rain overlays are visual only.</b> The conditions text underneath carries the same verdict in words.</li>
+<li><b>Two images in the app render with no alt text</b> — a beach photo and a partner logo. Both are decorative next to text that carries the same information, but they should be labeled and they aren't yet.</li>
+<li><b>We have not run a contrast audit.</b> The palette was chosen for outdoor legibility, not measured against WCAG ratios. Treat contrast as unverified until this page says otherwise.</li>
+</ul>
+<div class="callout">We are not going to install an accessibility overlay widget. Practitioners who do this work have been clear that overlays tend to make things worse, and an overlay would break the offline-first design this app depends on.</div>
+</section>
+
+<section>
+<h2>Tell us</h2>
+<p>If something is unusable, we want to know — especially anything touching a safety verdict. That's a bug, not a feature request, and we'll treat it that way.</p>
+<p class="addr"><a href="mailto:aloha@oceansafety.app"><b>aloha@oceansafety.app</b></a></p>
+<p>We're a small team, so we won't promise you a number of days. What we will promise is order: anything blocking access to safety information goes to the front of the line.</p>
+<p class="addr">Tropical Agronomics LLC dba OceanSafe<br>4489 Panihi Rd, Kapaʻa, HI 96746</p>
+</section>
+</main>
+
+<a class="cta" href="/">Open the app</a>
+
+<footer><p><a href="/">Open the app</a> &middot; <a href="/about">About</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/?safety=1">Safety Notice</a> &middot; <a href="/today/">Beach conditions</a> &middot; <a href="/best/">Best of Kauaʻi</a></p></footer>
+</div>
+</body>
+</html>
