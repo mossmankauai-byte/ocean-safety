@@ -1620,6 +1620,9 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .mkcoffee{width:36px;height:36px;border-radius:50%;background:#f3e9e0;border:2px solid #6f4e37;color:#4a3527;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.18);box-sizing:border-box}
 .mkcoffee svg{width:18px;height:18px;display:block}
 .leaflet-marker-icon .mkcoffee{margin:0 !important}
+.mkvenue{width:38px;height:38px;border-radius:50%;background:#0f4c5c;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);box-sizing:border-box}
+.mkvenue svg{width:19px;height:19px;display:block}
+.leaflet-marker-icon .mkvenue{margin:0 !important}
 
 #locHelpOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:none}
 #locHelpOverlay.on{display:block}
@@ -3382,7 +3385,21 @@ let FMARKETS=[
      'sunrise papayas',
      'local honey',
      'macadamia nut products',
-     'dog biscuits made with Kauaʻi produce']}
+     'dog biscuits made with Kauaʻi produce']},
+  // Inside Coconut Marketplace — see VENUES below; venue:'coconut_marketplace' pulls this
+  // off its own pin and folds it into the venue's single fixed pin.
+  {id:'fm_coconut_mktpl',name:"Coconut Marketplace Farmers' Market",n:'Coconut Mkt',r:'East Side',
+   lat:22.0544,lon:-159.3287,
+   address:'Coconut Marketplace, 4-484 Kūhiō Hwy, Kapaʻa, HI 96746',
+   day:2,days:[2,4],start_min:9*60,end_min:13*60,
+   tip:'Held in the front parking lot at Coconut Marketplace. Small but central — easy stop if you are staying in the Kapaʻa/Wailua corridor.',
+   parking:'Free in the Coconut Marketplace lot.',
+   vendors:[],
+   look_for:['tropical fruit',
+     'local produce',
+     'flowers',
+     'baked goods'],
+   venue:'coconut_marketplace'}
 ];
 
 
@@ -3478,7 +3495,37 @@ let FOODS=[
   {id:'hukilau_lanai',website:'https://www.hukilaukauai.com',phone:'(808) 822-0600',name:'Hukilau Lanai',n:'Hukilau Lanai',r:'East Side',lat:22.05456,lon:-159.32709,type:'local seafood / dinner',price:'$$',hours:'Dinner Mon-Sat 5-9 PM; closed Sun',tip:'Open-air seafood dinner spot tucked inside the Kauai Coast Resort in Wailua. The fish comes from local fishermen and the menu leans on Kauai-grown ingredients. Live music most evenings; reserve ahead in busy season.',tags:['dinner','seafood','live music']},
   {id:'dukes_kauai',website:'https://www.dukeskauai.com',name:'Duke\'s Kauai',n:'Duke\'s',r:'Lihue',lat:21.96179,lon:-159.34937,type:'steak & seafood / beachfront',price:'$$',hours:'Mon-Sat 11 AM-9:30 PM, Sun from 9 AM',tip:'Beachfront landmark right on Kalapaki Beach in Nawiliwili. The downstairs Barefoot Bar is casual and walk-in only; the coconut shrimp and Hula Pie are the classics. Upstairs dining takes reservations.',tags:['beachfront','dinner','lunch','landmark']},
   {id:'kountry_kitchen',website:'https://www.kountrystylekitchen.com',phone:'(808) 822-3511',name:'Kountry Kitchen',n:'Kountry Kitchen',r:'East Side',lat:22.07844,lon:-159.31583,type:'breakfast / brunch',price:'$$',hours:'7 AM-1 PM; closed Tue-Wed',tip:'Kapaa breakfast institution running since 1975. Order the plate-sized macadamia nut pancakes with house coconut syrup or the kalua pork eggs Benedict. Lines build by mid morning, so go early.',tags:['breakfast','brunch','local favorite']},
-  {id:'hanalei_bread_company',website:'https://www.hanaleibreadco.com',name:'Hanalei Bread Company',n:'Hanalei Bread Co.',r:'North Shore',lat:22.20265,lon:-159.49637,type:'organic bakery / breakfast cafe',price:'$$',hours:'Daily 7 AM-12:30 PM; kitchen closes at noon',tip:'Organic bakery and coffee house in the heart of Hanalei town with bread and pastries baked daily. Breakfast sandwiches and avocado toast are the go-to orders. Mornings only, so do not plan on lunch.',tags:['bakery','breakfast','coffee']}
+  {id:'hanalei_bread_company',website:'https://www.hanaleibreadco.com',name:'Hanalei Bread Company',n:'Hanalei Bread Co.',r:'North Shore',lat:22.20265,lon:-159.49637,type:'organic bakery / breakfast cafe',price:'$$',hours:'Daily 7 AM-12:30 PM; kitchen closes at noon',tip:'Organic bakery and coffee house in the heart of Hanalei town with bread and pastries baked daily. Breakfast sandwiches and avocado toast are the go-to orders. Mornings only, so do not plan on lunch.',tags:['bakery','breakfast','coffee']},
+  // COCONUT MARKETPLACE — see VENUES below. venue:'coconut_marketplace' pulls each of these
+  // off its own map pin; they are reached through the venue's single fixed pin instead.
+  // NO `hours` ON ANY COCONUT MARKETPLACE VENDOR (here, in DRINKS, or in LOCAL_CRAFTS) until
+  // per-tenant hours are actually sourced. The sheets render '—' for a missing value, which is
+  // honest; a placeholder like "Daily, hours vary" asserts a schedule nobody verified, and it
+  // also reads as "unknown → assume open" to _planOpenFor. Leave the key off.
+  {id:'cm_bobby_vs',name:"Bobby V's Italian Restaurant & Pizzeria",n:"Bobby V's",r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'italian / pizza',price:'$$',
+   tip:'Italian plates and pizza at Coconut Marketplace — sit-down dinner option in the Kapaʻa/Wailua corridor.',
+   tags:['italian','pizza','dinner'],venue:'coconut_marketplace'},
+  {id:'cm_chicken_in_a_barrel',name:'Chicken in a Barrel',n:'Chicken Barrel',r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'bbq / plate lunch',price:'$',
+   tip:'Counter-service barrel-smoked chicken and ribs. Order at the window, eat at the courtyard tables.',
+   tags:['bbq','plate_lunch','takeout'],venue:'coconut_marketplace'},
+  {id:'cm_coconut_thai_chinese',name:'Coconut Thai & Chinese Cuisine',n:'Coconut Thai',r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'thai / chinese',price:'$$',
+   tip:'Thai and Chinese menu under one roof at Coconut Marketplace. Curries, noodles, and plate portions.',
+   tags:['thai','chinese','dinner'],venue:'coconut_marketplace'},
+  {id:'cm_hibiscus_sweet',name:'Hibiscus Sweet',n:'Hibiscus Sweet',r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'desserts & sweets',price:'$',
+   tip:'Desserts and sweets stop inside Coconut Marketplace — easy after-dinner walk from the courtyard.',
+   tags:['dessert','sweet','snack'],venue:'coconut_marketplace'},
+  {id:'cm_island_country_deli',name:'Island Country Markets – Deli & Coffee',n:'Island Country',r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'deli & coffee',price:'$',
+   tip:'Deli sandwiches, coffee, smoothies, and açaí bowls in the market at Coconut Marketplace. Quickest grab-and-go on site.',
+   tags:['deli','coffee','sandwiches','smoothie','acai'],venue:'coconut_marketplace'},
+  {id:'cm_jojos_shave_ice',name:"Jojo's Shave Ice",n:"Jojo's Shave",r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'shave ice',price:'$',
+   tip:'Hawaiian shave ice at Coconut Marketplace. Ask for snow cap or ice cream on the bottom.',
+   tags:['dessert','sweet','kid_friendly'],venue:'coconut_marketplace'}
 ];
 
 // GROCERY STORES — basics for vacation rentals
@@ -3582,7 +3629,28 @@ let LOCAL_CRAFTS=[
   {id:'kilohana_plantation',phone:'(808) 245-5608',website:'https://kilohanakauai.com',name:'Kilohana Plantation Shops',n:'Kilohana',r:'Lihue',lat:21.9716,lon:-159.39,
    type:'craft shops + railway',hours:'10am–9pm daily',
    tip:'Restored 1936 plantation estate with a dozen artisan shops (jewelry, fabric, koa wood). Train tour of the grounds runs four times daily. Same site as the Lūʻau Kalamaku.',
-   tags:['crafts','jewelry','wood','train','lihue']}
+   tags:['crafts','jewelry','wood','train','lihue']},
+  // COCONUT MARKETPLACE — see VENUES below; folded into the venue's single fixed pin.
+  {id:'cm_auntie_lyndas',name:"Auntie Lynda's Treasures",n:"Auntie Lynda's",r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'gifts',
+   tip:'Local gift shop inside Coconut Marketplace — souvenirs, jewelry, and small Kauaʻi-made pieces.',
+   tags:['gifts'],venue:'coconut_marketplace'},
+  {id:'cm_kauai_handmade',name:'Kauai Handmade',n:'Kauai Handmade',r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'handmade crafts',
+   tip:'Handmade local crafts at Coconut Marketplace. Good stop for something actually made on-island.',
+   tags:['crafts','handmade'],venue:'coconut_marketplace'},
+  {id:'cm_kauai_pottery',name:'Kauai Pottery',n:'Kauai Pottery',r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'pottery & ceramics',
+   tip:'Pottery and ceramics at Coconut Marketplace. Ask about shipping before you buy anything breakable.',
+   tags:['crafts','pottery'],venue:'coconut_marketplace'},
+  {id:'cm_hawaiian_artisans',name:'Hawaiian Artisans',n:'Hawaiian Artisans',r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'crafts & gifts',
+   tip:'Hawaiian-made crafts and gifts inside Coconut Marketplace.',
+   tags:['crafts','gifts'],venue:'coconut_marketplace'},
+  {id:'cm_elephant_walk',name:'Elephant Walk Gift Gallery & Boutique',n:'Elephant Walk',r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'gifts & gallery',
+   tip:'Gift gallery and boutique at Coconut Marketplace — art, home pieces, and apparel under one roof.',
+   tags:['gifts','gallery'],venue:'coconut_marketplace'}
 ];
 
 let GROCERIES=[
@@ -3678,8 +3746,50 @@ let DRINKS=[
    tags:['coffee','farm','tasting','tour','kalaheo']}
 ,
   {id:'koloa_rum_tasting_room',website:'https://koloarum.com',phone:'(808) 246-8900',name:'Koloa Rum Company Tasting Room',n:'Koloa Rum',r:'Lihue',lat:21.97114,lon:-159.39158,type:'rum distillery tasting room',price:'$',hours:'Mon-Sat 11 AM-4 PM; closed Sun',tip:'Kauai-made rum tastings at the historic Kilohana Plantation just west of Lihue. Free guided tastings run about every hour; book online since walk-ins are not guaranteed. Must be 21+ with photo ID.',tags:['rum','tasting','21+']},
-  {id:'lava_lava_beach_club',website:'https://www.lavalavabeachclub.com/kauai',phone:'(808) 241-5282',name:'Lava Lava Beach Club',n:'Lava Lava',r:'East Side',lat:22.05196,lon:-159.32898,type:'beachfront bar & grill',price:'$$',hours:'Daily 7-11 AM and 12-9 PM; happy hour 3-5 PM',tip:'Toes-in-the-sand bar and restaurant on the beach at Kauai Shores in Wailua, with tables set right on the sand. Happy hour 3 to 5 PM and live music into the evening. No reservations; waits run 20 to 30 minutes on busy nights.',tags:['beachfront','cocktails','happy hour','live music']}
+  {id:'lava_lava_beach_club',website:'https://www.lavalavabeachclub.com/kauai',phone:'(808) 241-5282',name:'Lava Lava Beach Club',n:'Lava Lava',r:'East Side',lat:22.05196,lon:-159.32898,type:'beachfront bar & grill',price:'$$',hours:'Daily 7-11 AM and 12-9 PM; happy hour 3-5 PM',tip:'Toes-in-the-sand bar and restaurant on the beach at Kauai Shores in Wailua, with tables set right on the sand. Happy hour 3 to 5 PM and live music into the evening. No reservations; waits run 20 to 30 minutes on busy nights.',tags:['beachfront','cocktails','happy hour','live music']},
+  // COCONUT MARKETPLACE — see VENUES below; folded into the venue's single fixed pin.
+  // A bar belongs in DRINKS, not FOODS (cf. Tahiti Nui, RumFire) — the Drinks subtab is
+  // where a visitor looks for it, and it is what puts the venue pin on that subtab's map.
+  {id:'cm_bvs_bourbon_ale',name:"BV's Bourbon & Ale House",n:"BV's Bourbon",r:'East Side',lat:22.0544,lon:-159.3287,
+   type:'bar / pub',price:'$$',
+   tip:'Bourbon list, draft beer, and pub food at Coconut Marketplace — the sit-down bar on site.',
+   tags:['bar','pub'],venue:'coconut_marketplace'}
 ];
+
+// VENUES — one physical location that houses multiple separate businesses across Town
+// categories (Food, Drinks, Farmers, Crafts). Tag any FOODS / DRINKS / FMARKETS /
+// LOCAL_CRAFTS entry with venue:'<id>' and it is pulled off that category's own map pin
+// (see the _venueCovers guards in render*()) and folded into one fixed venue pin instead.
+// Reusable for the next multi-vendor plaza — not a one-off for Coconut Marketplace.
+//
+// `subs` is the CONTRACT for where the pin shows, and it is explicit on purpose. Inferring it
+// from "which arrays happen to hold a tagged vendor" silently drops a whole subtab the day a
+// category has no vendor in it. Declare the subtabs; never derive them.
+let VENUES=[
+  {id:'coconut_marketplace',name:'Coconut Marketplace',n:'Coconut Mktpl',r:'East Side',
+   lat:22.0544,lon:-159.3287,
+   address:'4-484 Kūhiō Hwy, Kapaʻa, HI 96746',
+   subs:['food','drinks','farmers','crafts']}
+];
+
+// True when a venue pin stands in for this vendor on the given Town subtab — the vendor is then
+// pulled off its own pin/row and reached through the venue sheet instead. A vendor tagged to a
+// venue whose `subs` does NOT cover the subtab (the tag-driven Coffee subtab, where no venue pin
+// paints) still renders normally, so nothing can vanish with nothing standing in for it.
+const _venueCovers = (venueId, sub) => !!venueId && (typeof VENUES !== 'undefined') &&
+  VENUES.some(v => v.id === venueId && (v.subs||[]).includes(sub));
+
+// The category arrays a venue can hold vendors in, keyed by the Town subtab that renders each
+// one. Mirrors TOWN_SUB_SRC so a venue row dispatches to the sheet for the array the vendor
+// actually lives in.
+function venueCategoryArrays(){
+  return [
+    {sub:'food',    arr:(typeof FOODS!=='undefined'?FOODS:[]),               open:'openFoodSheet',   kind:'food',   label:'Food'},
+    {sub:'drinks',  arr:(typeof DRINKS!=='undefined'?DRINKS:[]),             open:'openDrinkSheet',  kind:'drink',  label:'Drinks'},
+    {sub:'farmers', arr:(typeof FMARKETS!=='undefined'?FMARKETS:[]),         open:'openMarketSheet', kind:'market', label:'Farmers market'},
+    {sub:'crafts',  arr:(typeof LOCAL_CRAFTS!=='undefined'?LOCAL_CRAFTS:[]), open:'openCraftSheet',  kind:'craft',  label:'Crafts'}
+  ];
+}
 
 // Add channel_ids to beaches
 B.find(b=>b.id==='kee').channels=['kee_exit','tunnels_channel'];
@@ -4148,7 +4258,8 @@ const KBG_SAVED_KIND_META = {
   drink:   {arr: DRINKS,       open: 'openDrinkSheet',    label: 'Drinks',  color: '#4f46e5'},
   walk:    {arr: WALKS,        open: 'openPlanInfo',      label: 'Walk',    color: '#4a7c59'},
   bike:    {arr: PLAN_BIKE,    open: 'openPlanInfo',      label: 'Bike',    color: '#16a34a'},
-  wspoi:   {arr: WS_DISTRICT_POIS, open: 'openWsPoiDirections', label: 'Waikīkī', color: '#0f4c5c'}
+  wspoi:   {arr: WS_DISTRICT_POIS, open: 'openWsPoiDirections', label: 'Waikīkī', color: '#0f4c5c'},
+  venue:   {arr: VENUES,       open: 'openVenueSheet',    label: 'Venue',   color: '#0f4c5c'}
 };
 
 // Walk saved keys and drop any whose kind:id no longer resolves to a real item.
@@ -5101,7 +5212,10 @@ function renderMarkets(){
   const day = now.getDay();
   const min = now.getHours()*60 + now.getMinutes();
   FMARKETS.forEach(m=>{
-    const isOpen = (m.day === day) && (min >= m.start_min) && (min <= m.end_min);
+    if(_venueCovers(m.venue, 'farmers')) return;   // reached through the venue's single pin instead
+    // Most markets run one day a week (`day`); a few run several (`days`). Read both or the
+    // pin greys out on a day the market is actually open.
+    const isOpen = (m.days || [m.day]).includes(day) && (min >= m.start_min) && (min <= m.end_min);
     const mk = L.marker([m.lat,m.lon],{icon:mkMarketIcon(m, isOpen),zIndexOffset:isOpen ? 500 : 100}).addTo(map);
     mk.on('click',()=>openMarketSheet(m.id));
     mktMkrs[m.id]=mk;
@@ -5113,7 +5227,10 @@ function openMarketSheet(id){
   const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const fmtTime=(mins)=>{const h=Math.floor(mins/60),mm=mins%60;const ap=h>=12?'PM':'AM';const h12=h%12||12;return `${h12}:${mm.toString().padStart(2,'0')} ${ap}`;};
   const now=new Date();
-  const isOpen = now.getDay()===m.day && (now.getHours()*60+now.getMinutes()) >= m.start_min && (now.getHours()*60+now.getMinutes()) <= m.end_min;
+  // Most markets run one day a week (`day`); a few run several (`days`). Both the Open-now
+  // badge and the Day cell read this, so the sheet can't claim closed on a day it lists.
+  const marketDays = m.days || [m.day];
+  const isOpen = marketDays.includes(now.getDay()) && (now.getHours()*60+now.getMinutes()) >= m.start_min && (now.getHours()*60+now.getMinutes()) <= m.end_min;
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
     ${_placementBadge(m)}<div class="poi-hero" style="background:${heroBg(heroPhoto(m), 'linear-gradient(135deg,#16a34a,#84cc16)')};color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">🧺</div>${heartButton('market', m.id)}
@@ -5121,7 +5238,7 @@ function openMarketSheet(id){
     </div>
     ${isOpen ? '<div style="background:#dcfce7;border-left:3px solid #16a34a;padding:10px 14px;margin-bottom:12px;border-radius:8px;color:#15803d;font-weight:600;font-size:14px"><span class="open-dot" style="margin-right:6px"></span>Open now until '+fmtTime(m.end_min)+'</div>' : ''}
     <div class="poi-grid">
-      <div class="poi-cell"><div class="poi-cell-l">Day</div><div class="poi-cell-v">${days[m.day]}</div></div>
+      <div class="poi-cell"><div class="poi-cell-l">Day</div><div class="poi-cell-v">${marketDays.map(d=>days[d]).join(' & ')}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v">${fmtTime(m.start_min)} – ${fmtTime(m.end_min)}</div></div>
       <div class="poi-cell" style="grid-column:1/-1"><div class="poi-cell-l">Address</div><div class="poi-cell-v" style="font-size:12px">${m.address}</div></div>
     </div>
@@ -5690,10 +5807,16 @@ function _planAfternoon(slots){
 }
 function buildPlanDay(){
   var area=_planArea, c=getDayConditions(_planDay), slots=[];
-  var drList=DRINKS.filter(function(x){return x.r===area && _planOpenFor(x,'morning');}); if(!drList.length) drList=DRINKS.filter(function(x){return x.r===area;});
+  // Plan schedules a day, so it draws only from places whose hours are known. Venue vendors
+  // (Coconut Marketplace) have no sourced per-tenant hours, and _planOpenFor's deliberate
+  // "unknown hours → true" fallback would let all of them clear every daypart — putting a
+  // shave-ice window in the Evening meal slot and a bourbon bar in the 9 AM drink slot once
+  // Shuffle is on. They stay fully reachable on Town through the venue pin.
+  var PFOODS=FOODS.filter(function(x){return !x.venue;}), PDRINKS=DRINKS.filter(function(x){return !x.venue;});
+  var drList=PDRINKS.filter(function(x){return x.r===area && _planOpenFor(x,'morning');}); if(!drList.length) drList=PDRINKS.filter(function(x){return x.r===area;});
   var morn=null, mornKind='drink';
-  if(_planIsKauai() && area==='North Shore'){ var tri=_planById(FOODS,'trilogy_coffee'); if(tri){ morn=tri; mornKind='food'; } } // Trilogy Coffee lives in FOODS — save as 'food' so the heart resolves
-  if(!morn){ morn=_planChoose(_planSavedFirst(drList,'drink'))||drList[0]||DRINKS[0]; mornKind='drink'; }
+  if(_planIsKauai() && area==='North Shore'){ var tri=_planById(PFOODS,'trilogy_coffee'); if(tri){ morn=tri; mornKind='food'; } } // Trilogy Coffee lives in FOODS — save as 'food' so the heart resolves
+  if(!morn){ morn=_planChoose(_planSavedFirst(drList,'drink'))||drList[0]||PDRINKS[0]; mornKind='drink'; }
   if(morn) slots.push({when:'Morning',kind:mornKind,ref:morn});
   var outlook=_planDayOutlook();
   if(_planIsKauai() && area==='West Side'){
@@ -5711,14 +5834,14 @@ function buildPlanDay(){
     if(good.length) slots.push({when:'Late morning',kind:'beach',ref:_planChoose(good)});
     else { var w=_planLandPick(area); slots.push(w?{when:'Late morning',kind:w.kind,ref:w.ref}:{when:'Late morning',kind:'unknown'}); }
   }
-  var lfList=FOODS.filter(function(x){return x.r===area && _planOpenFor(x,'lunch');}); if(!lfList.length) lfList=FOODS.filter(function(x){return x.r===area;});
+  var lfList=PFOODS.filter(function(x){return x.r===area && _planOpenFor(x,'lunch');}); if(!lfList.length) lfList=PFOODS.filter(function(x){return x.r===area;});
   var lf=_planChoose(_planSavedFirst(lfList,'food')); if(lf) slots.push({when:'Lunch',kind:'food',ref:lf});
   if(_planTours){ var t=pickFeaturedTour(c); if(t) slots.push({when:'Afternoon',kind:'tour',ref:t}); else slots.push(_planAfternoon(slots)); }
   else slots.push(_planAfternoon(slots));
   var usedFood=slots.filter(function(s){return s.kind==='food';}).map(function(s){return s.ref.id;});
-  var dfList=FOODS.filter(function(x){return x.r===area && usedFood.indexOf(x.id)<0 && _planOpenFor(x,'dinner');});
-  if(!dfList.length) dfList=FOODS.filter(function(x){return x.r===area && _planOpenFor(x,'dinner');}); // relax "exclude lunch spot" BEFORE the open-for-dinner rule, so a lunch-only place never wins
-  if(!dfList.length) dfList=FOODS.filter(function(x){return x.r===area && usedFood.indexOf(x.id)<0;});
+  var dfList=PFOODS.filter(function(x){return x.r===area && usedFood.indexOf(x.id)<0 && _planOpenFor(x,'dinner');});
+  if(!dfList.length) dfList=PFOODS.filter(function(x){return x.r===area && _planOpenFor(x,'dinner');}); // relax "exclude lunch spot" BEFORE the open-for-dinner rule, so a lunch-only place never wins
+  if(!dfList.length) dfList=PFOODS.filter(function(x){return x.r===area && usedFood.indexOf(x.id)<0;});
   var df=_planChoose(_planSavedFirst(dfList,'food')); if(df) slots.push({when:'Evening',kind:'food',ref:df});
   return slots;
 }
@@ -5812,8 +5935,8 @@ function planSwap(idx){
   _planPickSlot=idx;
   var s=_planSlots[idx], kind=s.kind, area=_planArea, opts=[];
   if(kind==='beach') opts=B.filter(function(b){return b.r===area && !b.warning_only;}).map(function(b){return {kind:'beach',it:b};});
-  else if(kind==='drink'){ var dl=DRINKS.filter(function(x){return x.r===area && _planOpenFor(x,'morning');}); if(!dl.length)dl=DRINKS.filter(function(x){return x.r===area;}); opts=dl.map(function(x){return {kind:'drink',it:x};}); }
-  else if(kind==='food'){ var fpart=(s.when==='Morning')?'morning':(s.when==='Evening')?'dinner':'lunch'; var fl=FOODS.filter(function(x){return x.r===area && _planOpenFor(x,fpart);}); if(!fl.length)fl=FOODS.filter(function(x){return x.r===area;}); opts=fl.map(function(x){return {kind:'food',it:x};}); }
+  else if(kind==='drink'){ var SDRINKS=DRINKS.filter(function(x){return !x.venue;}); var dl=SDRINKS.filter(function(x){return x.r===area && _planOpenFor(x,'morning');}); if(!dl.length)dl=SDRINKS.filter(function(x){return x.r===area;}); opts=dl.map(function(x){return {kind:'drink',it:x};}); }
+  else if(kind==='food'){ var SFOODS=FOODS.filter(function(x){return !x.venue;}); var fpart=(s.when==='Morning')?'morning':(s.when==='Evening')?'dinner':'lunch'; var fl=SFOODS.filter(function(x){return x.r===area && _planOpenFor(x,fpart);}); if(!fl.length)fl=SFOODS.filter(function(x){return x.r===area;}); opts=fl.map(function(x){return {kind:'food',it:x};}); }
   else if(kind==='walk'||kind==='bike') opts=WALKS.filter(function(x){return x.r===area;}).map(function(x){return {kind:'walk',it:x};}).concat(PLAN_BIKE.filter(function(x){return x.r===area;}).map(function(x){return {kind:'bike',it:x};}));
   else if(kind==='hike') opts=_planWestHikes().map(function(h){return {kind:'hike',it:h};});
   else { renderPlanDay(); return; }
@@ -6091,6 +6214,7 @@ function renderFoods(){
   Object.values(foodMkrs).forEach(m=>m.remove()); foodMkrs={};
   if(window._activeTab !== 'shopping' || window._activeSub !== 'food') return;
   FOODS.forEach(f=>{
+    if(_venueCovers(f.venue, 'food')) return;   // reached through the venue's single pin instead
     const mk = L.marker([f.lat,f.lon],{icon:mkFoodIcon(f)}).addTo(map);
     mk.on('click',()=>openFoodSheet(f.id));
     foodMkrs[f.id] = mk;
@@ -6131,6 +6255,7 @@ function renderCrafts(){
   Object.values(craftMkrs).forEach(m=>m.remove()); craftMkrs={};
   if(window._activeTab !== 'shopping' || window._activeSub !== 'crafts') return;
   LOCAL_CRAFTS.forEach(c=>{
+    if(_venueCovers(c.venue, 'crafts')) return;   // reached through the venue's single pin instead
     const mk = L.marker([c.lat,c.lon],{icon:mkCraftIcon(c)}).addTo(map);
     mk.on('click',()=>openCraftSheet(c.id));
     craftMkrs[c.id] = mk;
@@ -6150,21 +6275,21 @@ function renderCoffee(){
   // array it lives in (FOODS, LOCAL_CRAFTS, or DRINKS). The click opener matches its
   // home array so the detail sheet stays correct.
   if(typeof FOODS !== 'undefined'){
-    FOODS.filter(f => hasTag(f, 'coffee')).forEach(f=>{
+    FOODS.filter(f => hasTag(f, 'coffee') && !_venueCovers(f.venue, 'coffee')).forEach(f=>{
       const mk = L.marker([f.lat,f.lon],{icon:mkCoffeeIcon(f)}).addTo(map);
       mk.on('click',()=>openFoodSheet(f.id));
       coffeeMkrs['food_' + f.id] = mk;
     });
   }
   if(typeof LOCAL_CRAFTS !== 'undefined'){
-    LOCAL_CRAFTS.filter(c => hasTag(c, 'coffee')).forEach(c=>{
+    LOCAL_CRAFTS.filter(c => hasTag(c, 'coffee') && !_venueCovers(c.venue, 'coffee')).forEach(c=>{
       const mk = L.marker([c.lat,c.lon],{icon:mkCoffeeIcon(c)}).addTo(map);
       mk.on('click',()=>openCraftSheet(c.id));
       coffeeMkrs['craft_' + c.id] = mk;
     });
   }
   if(typeof DRINKS !== 'undefined'){
-    DRINKS.filter(d => hasTag(d, 'coffee')).forEach(d=>{
+    DRINKS.filter(d => hasTag(d, 'coffee') && !_venueCovers(d.venue, 'coffee')).forEach(d=>{
       const mk = L.marker([d.lat,d.lon],{icon:mkCoffeeIcon(d)}).addTo(map);
       mk.on('click',()=>openDrinkSheet(d.id));
       coffeeMkrs['drink_' + d.id] = mk;
@@ -6188,10 +6313,69 @@ function renderDrinks(){
   Object.values(drinkMkrs).forEach(m=>m.remove()); drinkMkrs={};
   if(window._activeTab !== 'shopping' || window._activeSub !== 'drinks') return;
   DRINKS.forEach(d=>{
+    if(_venueCovers(d.venue, 'drinks')) return;   // reached through the venue's single pin instead
     const mk = L.marker([d.lat,d.lon],{icon:mkDrinkIcon(d)}).addTo(map);
     mk.on('click',()=>openDrinkSheet(d.id));
     drinkMkrs[d.id] = mk;
   });
+}
+// VENUE PIN — one fixed marker for a multi-vendor location (see VENUES above). It behaves
+// unlike every category pin on purpose: exactly one icon per venue, on each subtab the venue's
+// `subs` names, at every zoom. venueMkrs is deliberately NOT one of declutterMarks' registries,
+// so the pin structurally cannot be merged into a "+N" or split back into per-vendor pins —
+// there is no clustering logic to get wrong. Tapping it opens the vendor list, grouped by
+// category, in the same sheet Town already uses.
+function mkVenueIcon(v){
+  return L.divIcon({
+    html:`<div class="mkw"><div class="mkvenue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-6h6v6"/></svg></div><div class="mklbl">${v.n||v.name}</div></div>`,
+    className:'',iconSize:[140,60],iconAnchor:[70,20]
+  });
+}
+let venueMkrs={};
+function renderVenues(){
+  // Clear BEFORE any early return, or switching off a venue subtab and back leaves ghosts.
+  Object.values(venueMkrs).forEach(m=>m.remove()); venueMkrs={};
+  if(window._activeTab !== 'shopping' || typeof VENUES === 'undefined') return;
+  const sub = window._activeSub || 'food';
+  VENUES.forEach(v=>{
+    if(!(v.subs||[]).includes(sub)) return;
+    const mk = L.marker([v.lat,v.lon],{icon:mkVenueIcon(v),zIndexOffset:600}).addTo(map);
+    mk.on('click',()=>openVenueSheet(v.id));
+    venueMkrs[v.id] = mk;
+  });
+}
+function openVenueSheet(id){
+  const v = (typeof VENUES !== 'undefined' ? VENUES : []).find(x=>x.id===id); if(!v) return;
+  // Group by the array each vendor actually lives in, so every row opens the right sheet.
+  const groups = venueCategoryArrays()
+    .map(c => ({label:c.label, open:c.open, kind:c.kind, items:c.arr.filter(x => x.venue === id)}))
+    .filter(g => g.items.length);
+  const total = groups.reduce((n,g)=>n+g.items.length,0);
+  const _sc=document.getElementById('sc'); _sc.style.display=''; _sc.innerHTML=`
+    <div class="poi-hero" style="background:linear-gradient(135deg,var(--ocean),#1a7a8a)">
+      <div class="poi-hero-icon" style="display:flex;align-items:center;justify-content:center"><img src="icons/favicon-32.png" alt="" style="width:26px;height:26px;display:block;border-radius:7px"></div>
+      ${heartButton('venue', v.id)}
+      <div>
+        <div class="poi-hero-name" style="color:#fff">${v.name}</div>
+        <div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${v.r} • ${total} ${total === 1 ? 'business' : 'businesses'} here</div>
+      </div>
+    </div>
+    ${groups.map(g => `
+      <div style="margin:14px 2px 6px;font:700 11px DM Sans,sans-serif;color:var(--ocean);letter-spacing:.06em;text-transform:uppercase">${g.label}</div>
+      ${g.items.map(x => `
+        <div class="town-row" onclick="closeSheet();setTimeout(()=>${g.open}('${x.id}'),320)">
+          ${townThumb(g.kind, x)}
+          <span class="town-row-t"><b>${x.name}</b><span>${_townRowSub(x)}</span></span>
+          ${heartButton(g.kind, x.id)}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="color:var(--mute);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>`).join('')}`).join('')}
+    <div style="font-size:13px;color:var(--mute);margin-top:14px;line-height:1.5"><b>Address:</b> ${v.address}</div>
+    <div class="poi-cta-row">
+      <a href="${dirUrl(v.name, v.lat, v.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
+    </div>
+    ${OS_DISCLAIMER}`;
+  document.getElementById('sheet').classList.add('on', 'sheet-town');
+  document.getElementById('overlay').classList.add('on');
 }
 function openCraftSheet(id){
   const c = LOCAL_CRAFTS.find(x=>x.id===id); if(!c) return;
@@ -6405,7 +6589,10 @@ function ensureDeclutterCSS(){
 // hide any pin whose cluster leader sits within R px → tag the leader "+N" → de-overlap the
 // name pills. The name is read from the rendered .mklbl, so this works unchanged for beach
 // pins and every POI pin (both use the same .mkw/.mklbl markup). Fail-open on any error.
-function _declutterReg(reg, prioFn){
+// `seedRects` pre-occupies the label pass with rectangles belonging to pins that are NOT in this
+// registry and must never be thinned (the venue pin — see declutterMarks). They can push a label
+// aside; they can never be hidden or "+N" badged, because they never enter `items`.
+function _declutterReg(reg, prioFn, seedRects){
   try{
     if(!reg) return;
     const ids=Object.keys(reg), items=[];
@@ -6459,7 +6646,7 @@ function _declutterReg(reg, prioFn){
       else { it.more=0; it.members=[it.mk]; kept.push(it); }
     }
     // "+N" badges on cluster leaders, then a greedy label pass so name pills never overlap.
-    const lblRects=[];
+    const lblRects=(seedRects||[]).slice();
     for(let m=0;m<kept.length;m++){
       const e=kept[m];
       if(e.more){
@@ -6519,7 +6706,22 @@ function declutterMarks(){
     try{ if(typeof drinkMkrs!=='undefined') regs.push(drinkMkrs); }catch(e){}
     try{ if(typeof stayMkrs!=='undefined') regs.push(stayMkrs); }catch(e){}
     try{ if(typeof tourMkrs!=='undefined') regs.push(tourMkrs); }catch(e){}
-    regs.forEach(function(reg){ _declutterReg(reg, flat); });
+    // The venue pin is deliberately NOT a registry here — it must never be hidden or folded into
+    // a "+N" (see renderVenues). But its name pill still occupies pixels, and it draws on top of
+    // everything (zIndexOffset 600, opaque .mklbl), so a neighbour's label placed underneath is
+    // simply lost. On the Food subtab the nearest food pin sits ~167 m away — under 2 px at the
+    // default Kauaʻi zoom. Seed the venue's label rect into each registry's pass so the NEIGHBOUR
+    // yields its label instead: one-way, no clustering power over the venue.
+    const seed=[];
+    try{
+      if(typeof venueMkrs!=='undefined') Object.keys(venueMkrs).forEach(function(k){
+        const mk=venueMkrs[k]; if(!mk||!mk._icon) return;
+        const lbl=mk._icon.querySelector('.mklbl'), nm=(lbl&&lbl.textContent)||'';
+        const p=map.latLngToContainerPoint(mk.getLatLng()), w=Math.max(30,nm.length*6.4+18);
+        seed.push([p.x-w/2,p.y-2,p.x+w/2,p.y+20]);   // same rect model as _declutterReg's label pass
+      });
+    }catch(e){}
+    regs.forEach(function(reg){ _declutterReg(reg, flat, seed); });
   }catch(e){}
 }
 
@@ -7797,15 +7999,19 @@ function beachesFilterCounts(){
   };
 }
 
-// Shopping: counts come from each store category's data array.
+// Shopping: counts come from TOWN_SUB_SRC — the same lists openTownList prints and the render*
+// functions mirror. Counting the raw arrays instead lets the menu say 27 while the sheet shows
+// 21, because the arrays still hold vendors the venue pin has absorbed.
 function shoppingFilterCounts(){
+  const n = (sub) => (typeof TOWN_SUB_SRC !== 'undefined' && TOWN_SUB_SRC[sub]) ? TOWN_SUB_SRC[sub]().length : 0;
   return {
-    grocery: (typeof GROCERIES     !== 'undefined') ? GROCERIES.length     : 0,
-    food:    (typeof FOODS         !== 'undefined') ? FOODS.length         : 0,
-    drinks:  (typeof DRINKS        !== 'undefined') ? DRINKS.length        : 0,
-    farmers: (typeof FMARKETS      !== 'undefined') ? FMARKETS.length      : 0,
-    crafts:  (typeof LOCAL_CRAFTS  !== 'undefined') ? LOCAL_CRAFTS.length  : 0,
-    gas:     (typeof GAS_STATIONS  !== 'undefined') ? GAS_STATIONS.length  : 0
+    grocery: n('grocery'),
+    food:    n('food'),
+    drinks:  n('drinks'),
+    farmers: n('farmers'),
+    crafts:  n('crafts'),
+    gas:     n('gas'),
+    coffee:  n('coffee')
   };
 }
 
@@ -7936,6 +8142,7 @@ function buildSubtabs(tabName){
         renderCoffee();
         renderDrinks();
         renderMarkets();
+        renderVenues();
         // Thin the pins we just painted. declutterMarks only ran from renderMap() (beaches) and
         // on zoomend/moveend, so POI tabs painted un-clustered and only snapped into "+N" groups
         // once the user nudged the map — dense areas (Waikīkī) looked like an unthinned pile.
@@ -8031,7 +8238,7 @@ function wireTabs(){
         // Clear the prior tab's markers (each render self-clears since _activeTab!=='its tab'), drop
         // no rip-channel or swell layer here, then paint the tour-location pins over a clean map.
         renderMap(); renderHikes(); renderActs(); renderStays(); renderMarkets();
-        renderFoods(); renderGroceries(); renderGas(); renderCrafts(); renderCoffee(); renderDrinks();
+        renderFoods(); renderGroceries(); renderGas(); renderCrafts(); renderCoffee(); renderDrinks(); renderVenues();
         Object.values(chMkrs||{}).forEach(m=>m.remove()); chMkrs={};
         renderTours();
         try{ declutterMarks(); }catch(e){}
@@ -8076,6 +8283,7 @@ function wireTabs(){
       renderCrafts();
       renderCoffee();
       renderDrinks();
+      renderVenues();
       renderTours();   // clears tour pins when leaving the Tours tab (no-op elsewhere)
       // renderMap() above already ran the declutter pass, but it ran BEFORE these POI
       // registries were torn down and repainted — so the fresh pins came out unthinned.
@@ -8190,11 +8398,18 @@ function openOutlookSheet(focus){
 // is filtered to. Sources mirror the render* functions below so the list can never disagree
 // with the pins — including coffee, which is tag-driven across three arrays.
 const _townTagged = (arr, tag) => (typeof arr === 'undefined' ? [] : arr.filter(i => Array.isArray(i.tags) && i.tags.includes(tag)));
+// Venue-tagged vendors don't get their own row on a subtab the venue pin covers — the venue's
+// single row stands in for all of them and opens the grouped venue sheet, exactly like the map.
+const _venueRowsFor = (sub) => (typeof VENUES === 'undefined' ? [] : VENUES
+  .filter(v => (v.subs||[]).includes(sub))
+  .map(v => ({x:{id:v.id, name:v.name, r:v.r, lat:v.lat, lon:v.lon, type:'multiple businesses'},
+              open:'openVenueSheet', kind:'venue'})));
+const _townNoVenue = (arr, sub) => (typeof arr === 'undefined' ? [] : arr.filter(x => !_venueCovers(x.venue, sub)));
 const TOWN_SUB_SRC = {
-  food:    () => (typeof FOODS !== 'undefined' ? FOODS : []).map(x => ({x, open:'openFoodSheet', kind:'food'})),
-  drinks:  () => (typeof DRINKS !== 'undefined' ? DRINKS : []).map(x => ({x, open:'openDrinkSheet', kind:'drink'})),
-  farmers: () => (typeof FMARKETS !== 'undefined' ? FMARKETS : []).map(x => ({x, open:'openMarketSheet', kind:'market'})),
-  crafts:  () => (typeof LOCAL_CRAFTS !== 'undefined' ? LOCAL_CRAFTS : []).map(x => ({x, open:'openCraftSheet', kind:'craft'})),
+  food:    () => _townNoVenue(typeof FOODS !== 'undefined' ? FOODS : [], 'food').map(x => ({x, open:'openFoodSheet', kind:'food'})).concat(_venueRowsFor('food')),
+  drinks:  () => _townNoVenue(typeof DRINKS !== 'undefined' ? DRINKS : [], 'drinks').map(x => ({x, open:'openDrinkSheet', kind:'drink'})).concat(_venueRowsFor('drinks')),
+  farmers: () => _townNoVenue(typeof FMARKETS !== 'undefined' ? FMARKETS : [], 'farmers').map(x => ({x, open:'openMarketSheet', kind:'market'})).concat(_venueRowsFor('farmers')),
+  crafts:  () => _townNoVenue(typeof LOCAL_CRAFTS !== 'undefined' ? LOCAL_CRAFTS : [], 'crafts').map(x => ({x, open:'openCraftSheet', kind:'craft'})).concat(_venueRowsFor('crafts')),
   gas:     () => (typeof GAS_STATIONS !== 'undefined' ? GAS_STATIONS : []).map(x => ({x, open:'openGasSheet', kind:'gas'})),
   grocery: () => (typeof GROCERIES !== 'undefined' ? GROCERIES : []).map(x => ({x, open:'openGrocerySheet', kind:'grocery'})),
   coffee:  () => [
@@ -8220,7 +8435,7 @@ function _townRowSub(x){
 // Waikīkī drill-in thumbnails). Phosphor is MIT / no-attribution; these are the unmodified duotone
 // SVGs (viewBox 256, secondary layer at 20% opacity). Icons only for POI *type* — the app's UI
 // icons (tabs, hearts, chevrons, weather) are untouched.
-const PH_FAM={food:'#e07856',coffee:'#b06a33',drinks:'#4f46e5',shave:'#db6f93',bakery:'#c99a2e',grocery:'#1a7a8a',farmers:'#16a34a',crafts:'#a855f7',gas:'#d97706'};
+const PH_FAM={food:'#e07856',coffee:'#b06a33',drinks:'#4f46e5',shave:'#db6f93',bakery:'#c99a2e',grocery:'#1a7a8a',farmers:'#16a34a',crafts:'#a855f7',gas:'#d97706',venue:'#0f4c5c'};
 const PH_ICON={
   food:'<g fill="currentColor"><path d="M208 40v128h-56s0-104 56-128" opacity=".2"/><path d="M72 88V40a8 8 0 0 1 16 0v48a8 8 0 0 1-16 0m144-48v184a8 8 0 0 1-16 0v-48h-48a8 8 0 0 1-8-8a268.8 268.8 0 0 1 7.22-56.88c9.78-40.49 28.32-67.63 53.63-78.47A8 8 0 0 1 216 40m-16 13.9c-32.17 24.57-38.47 84.42-39.7 106.1H200Zm-80.11-15.21a8 8 0 1 0-15.78 2.63L112 88.63a32 32 0 0 1-64 0l7.88-47.31a8 8 0 1 0-15.78-2.63l-8 48A8 8 0 0 0 32 88a48.07 48.07 0 0 0 40 47.32V224a8 8 0 0 0 16 0v-88.68A48.07 48.07 0 0 0 128 88a8 8 0 0 0-.11-1.31Z"/></g>',
   coffee:'<g fill="currentColor"><path d="M208 88v48a88 88 0 0 1-51.3 80H83.3A88 88 0 0 1 32 136V88Z" opacity=".2"/><path d="M80 56V24a8 8 0 0 1 16 0v32a8 8 0 0 1-16 0m40 8a8 8 0 0 0 8-8V24a8 8 0 0 0-16 0v32a8 8 0 0 0 8 8m32 0a8 8 0 0 0 8-8V24a8 8 0 0 0-16 0v32a8 8 0 0 0 8 8m96 56v8a40 40 0 0 1-37.51 39.91a96.6 96.6 0 0 1-27 40.09H208a8 8 0 0 1 0 16H32a8 8 0 0 1 0-16h24.54A96.3 96.3 0 0 1 24 136V88a8 8 0 0 1 8-8h176a40 40 0 0 1 40 40m-48-24H40v40a80.27 80.27 0 0 0 45.12 72h69.76A80.27 80.27 0 0 0 200 136Zm32 24a24 24 0 0 0-16-22.62V136a96 96 0 0 1-1.2 15a24 24 0 0 0 17.2-23Z"/></g>',
@@ -8230,11 +8445,15 @@ const PH_ICON={
   grocery:'<g fill="currentColor"><path d="m224 64l-12.16 66.86A16 16 0 0 1 196.1 144H70.55L56 64Z" opacity=".2"/><path d="M230.14 58.87A8 8 0 0 0 224 56H62.68L56.6 22.57A8 8 0 0 0 48.73 16H24a8 8 0 0 0 0 16h18l25.56 140.29a24 24 0 0 0 5.33 11.27a28 28 0 1 0 44.4 8.44h45.42a27.75 27.75 0 0 0-2.71 12a28 28 0 1 0 28-28H91.17a8 8 0 0 1-7.87-6.57L80.13 152h116a24 24 0 0 0 23.61-19.71l12.16-66.86a8 8 0 0 0-1.76-6.56M104 204a12 12 0 1 1-12-12a12 12 0 0 1 12 12m96 0a12 12 0 1 1-12-12a12 12 0 0 1 12 12m4-74.57a8 8 0 0 1-7.9 6.57H77.22L65.59 72h148.82Z"/></g>',
   farmers:'<g fill="currentColor"><path d="M183.6 151.6C144 192 43.81 223 43.81 223A8 8 0 0 1 33 212.19S64 112 104.4 72.4a56 56 0 0 1 79.2 79.2" opacity=".2"/><path d="M232 64h-28.69l26.35-26.34a8 8 0 0 0-11.32-11.32L192 52.69V24a8 8 0 0 0-16 0v32.57a64 64 0 0 0-77.2 10.12c-40.1 39.39-70.25 133.08-73.19 142.45a16 16 0 0 0 21.26 21.26c9.37-2.94 103.18-33.13 142.47-73.21A64 64 0 0 0 199.43 80H232a8 8 0 0 0 0-16m-54.12 82c-8.94 9.12-21.25 17.8-34.85 25.73l-25.38-25.39a8 8 0 0 0-11.32 11.32l22.09 22.09c-40.87 21.19-86.32 35.42-87 35.63A8 8 0 0 0 40 216a8 8 0 0 0 .59-1.41c.29-.93 28-89.58 64-130.67l33.77 33.77a8 8 0 0 0 11.32-11.32l-33.5-33.49a48 48 0 0 1 61.7 73.12"/></g>',
   crafts:'<g fill="currentColor"><path d="M224 127.17a96.5 96.5 0 0 1-2.39 22.18a24 24 0 0 1-23.4 18.65H152a24 24 0 0 0-24 24a24 24 0 0 1-32 22.61c-37.27-13.17-64-44.8-64-86.61a96 96 0 0 1 95-96c52.84-.53 96.55 42.35 97 95.17" opacity=".2"/><path d="M200.77 53.89A103.27 103.27 0 0 0 128 24h-1.07A104 104 0 0 0 24 128c0 43 26.58 79.06 69.36 94.17A32 32 0 0 0 136 192a16 16 0 0 1 16-16h46.21a31.81 31.81 0 0 0 31.2-24.88a104.4 104.4 0 0 0 2.59-24a103.28 103.28 0 0 0-31.23-73.23m13 93.71a15.89 15.89 0 0 1-15.56 12.4H152a32 32 0 0 0-32 32a16 16 0 0 1-21.31 15.07C62.49 194.3 40 164 40 128a88 88 0 0 1 87.09-88h.9a88.35 88.35 0 0 1 88 87.25a89 89 0 0 1-2.18 20.35ZM140 76a12 12 0 1 1-12-12a12 12 0 0 1 12 12m-44 24a12 12 0 1 1-12-12a12 12 0 0 1 12 12m0 56a12 12 0 1 1-12-12a12 12 0 0 1 12 12m88-56a12 12 0 1 1-12-12a12 12 0 0 1 12 12"/></g>',
-  gas:'<g fill="currentColor"><path d="M168 56v160H56V56a16 16 0 0 1 16-16h80a16 16 0 0 1 16 16" opacity=".2"/><path d="m241 69.66l-19.34-19.32a8 8 0 0 0-11.32 11.32L229.66 81a8 8 0 0 1 2.34 5.63V168a8 8 0 0 1-16 0v-40a24 24 0 0 0-24-24h-16V56a24 24 0 0 0-24-24H72a24 24 0 0 0-24 24v152H32a8 8 0 0 0 0 16h160a8 8 0 0 0 0-16h-16v-88h16a8 8 0 0 1 8 8v40a24 24 0 0 0 48 0V86.63a23.85 23.85 0 0 0-7-16.97M64 208V56a8 8 0 0 1 8-8h80a8 8 0 0 1 8 8v152Zm80-96a8 8 0 0 1-8 8H88a8 8 0 0 1 0-16h48a8 8 0 0 1 8 8"/></g>'
+  gas:'<g fill="currentColor"><path d="M168 56v160H56V56a16 16 0 0 1 16-16h80a16 16 0 0 1 16 16" opacity=".2"/><path d="m241 69.66l-19.34-19.32a8 8 0 0 0-11.32 11.32L229.66 81a8 8 0 0 1 2.34 5.63V168a8 8 0 0 1-16 0v-40a24 24 0 0 0-24-24h-16V56a24 24 0 0 0-24-24H72a24 24 0 0 0-24 24v152H32a8 8 0 0 0 0 16h160a8 8 0 0 0 0-16h-16v-88h16a8 8 0 0 1 8 8v40a24 24 0 0 0 48 0V86.63a23.85 23.85 0 0 0-7-16.97M64 208V56a8 8 0 0 1 8-8h80a8 8 0 0 1 8 8v152Zm80-96a8 8 0 0 1-8 8H88a8 8 0 0 1 0-16h48a8 8 0 0 1 8 8"/></g>',
+  // Venue rows use the same building glyph as the .mkvenue map pin (scaled from its 24-box to
+  // this 256 box) so the list row and the pin read as the same thing. Stroked, not Phosphor.
+  venue:'<g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M32 224h192"/><path d="M42.7 224V96L128 32l85.3 64v128"/><path d="M96 224v-64h64v64"/></g>'
 };
 // Resolve a Town POI to an establishment-type key. kind comes from TOWN_SUB_SRC; food/drink refine
 // by type/tags/name so a shave-ice spot gets the cone and a bakery gets the loaf automatically.
 function _townType(kind, x){
+  if(kind==='venue')   return 'venue';
   if(kind==='market')  return 'farmers';
   if(kind==='craft')   return 'crafts';
   if(kind==='gas')     return 'gas';
@@ -9057,6 +9276,7 @@ async function rescore(){
   renderCrafts();
   renderCoffee();
   renderDrinks();
+  renderVenues();
   renderTours();   // keeps tour pins in sync on a live-data rescore while the Tours tab is open
   // Boot paints POI pins after renderMap()'s declutter pass, so thin them once here too —
   // otherwise the first screen shows an unthinned pile until the user pans or zooms.
@@ -9395,7 +9615,7 @@ const IC_PIN = OS_IC('<path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l
 const IC_TRASH = OS_IC('<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>');
 
 const OS_VERDICT_COL = {green:'#16a34a', yellow:'#d97706', red:'#b91c1c', warning:'#b91c1c'};
-const KIND_LABEL = {beach:'Beaches', hike:'Trails', act:'Family', food:'Food', grocery:'Grocery', gas:'Gas', craft:'Crafts', market:'Markets', drink:'Drinks', walk:'Walks', bike:'Bikes'};
+const KIND_LABEL = {beach:'Beaches', hike:'Trails', act:'Family', food:'Food', grocery:'Grocery', gas:'Gas', craft:'Crafts', market:'Markets', drink:'Drinks', walk:'Walks', bike:'Bikes', venue:'Venues'};
 
 function getSavedCards(){
   cleanOrphanedSaves();
@@ -10619,7 +10839,7 @@ if(window._partnerCfgReady && window._partnerCfgReady.then){
 // BOOT
 // Attach Kauaʻi's inlined arrays as island #1's full dataset (now that every array exists).
 // (Layer 2 — ported from maui branch.)
-ISLANDS.kauai.data = { beaches:B, channels:CHANNELS, hikes:HIKES, acts:ACTS, stays:STAYS, fmarkets:FMARKETS, foods:FOODS, food_trucks:FOOD_TRUCKS, gas_stations:GAS_STATIONS, local_crafts:LOCAL_CRAFTS, groceries:GROCERIES, drinks:DRINKS, tours:TOURS_LIBRARY };
+ISLANDS.kauai.data = { beaches:B, channels:CHANNELS, hikes:HIKES, acts:ACTS, stays:STAYS, fmarkets:FMARKETS, foods:FOODS, food_trucks:FOOD_TRUCKS, gas_stations:GAS_STATIONS, local_crafts:LOCAL_CRAFTS, groceries:GROCERIES, drinks:DRINKS, tours:TOURS_LIBRARY, venues:VENUES };
 
 // Re-point the global arrays at a NON-Kauaʻi island's dataset. Never called for Kauaʻi
 // (the boot gate below skips it), so Kauaʻi's bindings are never reassigned.
@@ -10761,11 +10981,13 @@ function repointIslandGlobals(d){
   // Pre-compute all replacements (pure, cannot throw) — commit only once all are known-good.
   var _B=d.beaches, _CH=d.channels||[], _HI=d.hikes||[], _AC=d.acts||[], _ST=d.stays||[],
       _FM=d.fmarkets||[], _FO=d.foods||[], _FT=d.food_trucks||[], _GS=d.gas_stations||[],
-      _LC=d.local_crafts||[], _GR=d.groceries||[], _DR=d.drinks||[], _TO=d.tours||[];
+      _LC=d.local_crafts||[], _GR=d.groceries||[], _DR=d.drinks||[], _TO=d.tours||[],
+      _VE=d.venues||[];   // no island file declares venues yet — defaulting to [] keeps Kauaʻi's off other islands
   var _OL=[{key:'all',label:'All',r:null}].concat((ACTIVE.regions||[]).map(function(rg){ return {key:rg.key,label:rg.label,r:rg.r}; }));
   // Commit — synchronous, no awaits between assignments, so it cannot be interrupted partway.
   B=_B; CHANNELS=_CH; HIKES=_HI; ACTS=_AC; STAYS=_ST; FMARKETS=_FM; FOODS=_FO;
   FOOD_TRUCKS=_FT; GAS_STATIONS=_GS; LOCAL_CRAFTS=_LC; GROCERIES=_GR; DRINKS=_DR; TOURS_LIBRARY=_TO;
+  VENUES=_VE;
   OUTLOOK_REGIONS=_OL;
 }
 
