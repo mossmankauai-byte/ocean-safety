@@ -1453,6 +1453,9 @@ a{text-decoration:none;color:inherit}
 .shore-v{font-weight:700}
 .shore-drop{display:none;width:11px;height:11px;color:#92400e;flex:none}
 .shore-chip.has-brown .shore-drop{display:block}
+/* margin-left is set by layoutOutlookChip(): it slides the N chip left when it shares
+   a row with the right-hand map controls (rain / satellite / swell badge). It rides
+   margin, not transform — transform is transitioned here and would animate/fight. */
 .shore-n{top:236px;left:50%;transform:translateX(-50%)}
 .shore-n:active{transform:translateX(-50%) scale(.97)}
 /* N over the north ocean; E/S/W docked in the south ocean band (below the
@@ -5671,7 +5674,27 @@ function layoutOutlookChip(){
            : (st && st.getBoundingClientRect().height > 0 ? st.getBoundingClientRect().bottom : hostTop);
   chip.style.top = Math.max(8, Math.round(base - hostTop + 8)) + 'px';
   var n = document.querySelector('.shore-chip.shore-n');
-  if(n) n.style.top = Math.round(chip.getBoundingClientRect().bottom - hostTop + 8) + 'px';
+  if(!n) return;
+  n.style.top = Math.round(chip.getBoundingClientRect().bottom - hostTop + 8) + 'px';
+  // The N chip is map-centered; the swell badge + rain/satellite toggles sit in a
+  // fixed right-hand column. On narrow phones the two land on the same row and the
+  // badge clips the chip's right edge — slide the chip left just enough to clear it.
+  // Measured from the UNTRANSFORMED layout box (offsetLeft/Width) — reading
+  // getBoundingClientRect() here returns the mid-transition position and makes the
+  // offset flap between 0 and its target on every relayout.
+  var np = n.offsetParent || host, hb = np.getBoundingClientRect(), nw = n.offsetWidth;
+  var cur = parseFloat(n.style.marginLeft) || 0;              // undo last run's shift
+  var cx = hb.left + n.offsetLeft - cur;                      // chip centre, page coords
+  var nL = cx - nw/2, nR = cx + nw/2;
+  var nT = hb.top + n.offsetTop, nB = nT + n.offsetHeight;
+  var dx = 0;
+  ['#os-swell-badge','#rainToggle','#satToggle'].forEach(function(sel){
+    var c = document.querySelector(sel); if(!c) return;
+    var cb = c.getBoundingClientRect(); if(!cb.width) return;
+    if(nB <= cb.top || nT >= cb.bottom) return;               // different rows — no clash
+    dx = Math.max(dx, Math.round(nR - cb.left + 10));
+  });
+  n.style.marginLeft = -Math.max(0, Math.min(dx, Math.round(nL - hb.left - 8))) + 'px';
 }
 addEventListener('resize', function(){ requestAnimationFrame(layoutOutlookChip); });
 // The header stack grows asynchronously (weather chips, 7-DAY strip, offline
