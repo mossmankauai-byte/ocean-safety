@@ -3410,7 +3410,20 @@ let FMARKETS=[
      'local produce',
      'flowers',
      'baked goods'],
-   venue:'coconut_marketplace'}
+   venue:'coconut_marketplace'},
+  // KUKUIʻULA VILLAGE — see VENUES below; folded into the venue's single fixed pin.
+  {id:'fm_kauai_culinary_market',name:'Kauai Culinary Market',n:'Culinary Mkt',r:'South Shore',
+   lat:21.8839,lon:-159.4696,
+   address:'The Shops at Kukuiʻula, 2829 Ala Kalanikaumaka St, Poʻipū, HI 96756',
+   day:3,days:[3],start_min:15*60+30,end_min:18*60,
+   tip:'Weekly culinary market at the Shops at Kukuiʻula — local farmers and artisans alongside on-site chef demos.',
+   parking:'Free in the Shops at Kukuiʻula lot.',
+   vendors:[],
+   look_for:['local produce',
+     'prepared food',
+     'chef demos',
+     'baked goods'],
+   venue:'kukuiula_village'}
 ];
 
 
@@ -3492,7 +3505,7 @@ let FOODS=[
   {id:'merrimans_kauai',phone:'(808) 742-8385',website:'https://merrimanshawaii.com',name:"Merriman's Fish House",n:"Merriman's",r:'South Shore',lat:21.883493,lon:-159.46971,
    type:'farm-to-table',price:'$$$$',hours:"5pm–8:30pm daily",
    tip:'Peter Merriman\u2019s upstairs fish house in the Shops at Kukuiʻula. Sustainable local seafood. The downstairs Gourmet Pizza is the casual sister option without reservations.',
-   tags:['farm_to_table','date_night','reservations','seafood'],reservations:true,restRid:'76544'},
+   tags:['farm_to_table','date_night','reservations','seafood'],reservations:true,restRid:'76544',venue:'kukuiula_village'},
   {id:'wranglers_steakhouse',phone:'(808) 338-1218',name:"Wrangler's Steakhouse",n:'Wranglers',r:'West Side',lat:21.9573,lon:-159.6685,
    type:'steakhouse / local',price:'$$',hours:"Mon–Fri 11am–8:30pm, closed Sat–Sun",
    tip:'Paniolo-style steakhouse in old Waimea town; the kau-kau-tin plate lunch and the steaks are local favorites. Hours change seasonally — call ahead.',
@@ -3502,7 +3515,7 @@ let FOODS=[
    tip:'Hanapēpē sushi and Japanese comfort food; the West Side’s go-to dinner, especially on Friday Art Night. Reservations recommended.',
    tags:['japanese','dinner','hanapepe','sushi'],reservations:true}
 ,
-  {id:'eating_house_1849',phone:'(808) 742-5000',name:'Eating House 1849',n:'Eating House',r:'South Shore',lat:21.88393,lon:-159.46981,type:'Hawaiian plantation cuisine / fine dining',price:'$$$',hours:'Open nightly 5-9 PM',tip:'Roy Yamaguchi\'s plantation-cuisine restaurant at The Shops at Kukuiula in Poipu. Dinner only, and it fills most nights, so reserve ahead.',tags:['dinner','fine dining','reservations']},
+  {id:'eating_house_1849',phone:'(808) 742-5000',name:'Eating House 1849',n:'Eating House',r:'South Shore',lat:21.88393,lon:-159.46981,type:'Hawaiian plantation cuisine / fine dining',price:'$$$',hours:'Open nightly 5-9 PM',tip:'Roy Yamaguchi\'s plantation-cuisine restaurant at The Shops at Kukuiula in Poipu. Dinner only, and it fills most nights, so reserve ahead.',tags:['dinner','fine dining','reservations'],venue:'kukuiula_village'},
   {id:'hukilau_lanai',website:'https://www.hukilaukauai.com',phone:'(808) 822-0600',name:'Hukilau Lanai',n:'Hukilau Lanai',r:'East Side',lat:22.05456,lon:-159.32709,type:'local seafood / dinner',price:'$$',hours:'Dinner Mon-Sat 5-9 PM; closed Sun',tip:'Open-air seafood dinner spot tucked inside the Kauai Coast Resort in Wailua. The fish comes from local fishermen and the menu leans on Kauai-grown ingredients. Live music most evenings; reserve ahead in busy season.',tags:['dinner','seafood','live music']},
   {id:'dukes_kauai',website:'https://www.dukeskauai.com',name:'Duke\'s Kauai',n:'Duke\'s',r:'Lihue',lat:21.96179,lon:-159.34937,type:'steak & seafood / beachfront',price:'$$',hours:'Mon-Sat 11 AM-9:30 PM, Sun from 9 AM',tip:'Beachfront landmark right on Kalapaki Beach in Nawiliwili. The downstairs Barefoot Bar is casual and walk-in only; the coconut shrimp and Hula Pie are the classics. Upstairs dining takes reservations.',tags:['beachfront','dinner','lunch','landmark']},
   {id:'kountry_kitchen',website:'https://www.kountrystylekitchen.com',phone:'(808) 822-3511',name:'Kountry Kitchen',n:'Kountry Kitchen',r:'East Side',lat:22.07844,lon:-159.31583,type:'breakfast / brunch',price:'$$',hours:'7 AM-1 PM; closed Tue-Wed',tip:'Kapaa breakfast institution running since 1975. Order the plate-sized macadamia nut pancakes with house coconut syrup or the kalua pork eggs Benedict. Lines build by mid morning, so go early.',tags:['breakfast','brunch','local favorite']},
@@ -3536,7 +3549,32 @@ let FOODS=[
   {id:'cm_jojos_shave_ice',name:"Jojo's Shave Ice",n:"Jojo's Shave",r:'East Side',lat:22.0544,lon:-159.3287,
    type:'shave ice',price:'$',
    tip:'Hawaiian shave ice at Coconut Marketplace. Ask for snow cap or ice cream on the bottom.',
-   tags:['dessert','sweet','kid_friendly'],venue:'coconut_marketplace'}
+   tags:['dessert','sweet','kid_friendly'],venue:'coconut_marketplace'},
+  // KUKUIʻULA VILLAGE — see VENUES below; folded into the venue's single fixed pin.
+  {id:'kv_bubba_burgers',name:'Bubba Burgers',n:'Bubba Burgers',r:'South Shore',lat:21.8839,lon:-159.4696,
+   type:'burgers',price:'$$',
+   tip:'Kauaʻi grass-fed beef burgers plus chicken, fish, and vegan options at the Shops at Kukuiʻula.',
+   tags:['burgers','casual','lunch','dinner'],venue:'kukuiula_village'},
+  {id:'kv_savage_shrimp',name:'Savage Shrimp',n:'Savage Shrimp',r:'South Shore',lat:21.8839,lon:-159.4696,
+   type:'garlic shrimp / shrimp truck style',price:'$$',
+   tip:'Garlic shrimp, fried shrimp, and shrimp or fish tacos at the Shops at Kukuiʻula.',
+   tags:['shrimp','plate_lunch','takeout'],venue:'kukuiula_village'},
+  {id:'kv_scotty_browns',name:'Scotty Browns Hawaii',n:'Scotty Browns',r:'South Shore',lat:21.8839,lon:-159.4696,
+   type:'comfort food',price:'$$',
+   tip:'Globally-inspired comfort food with a contemporary twist using local ingredients, at the Shops at Kukuiʻula.',
+   tags:['comfort_food','lunch','dinner'],venue:'kukuiula_village'},
+  {id:'kv_kauai_diner_koloa',name:'Kauai Diner Koloa',n:'Kauai Diner',r:'South Shore',lat:21.8839,lon:-159.4696,
+   type:'diner / ramen / seafood',price:'$$',
+   tip:'French toast, sandwiches, ramen, seafood, fried rice, and noodles at the Shops at Kukuiʻula.',
+   tags:['diner','ramen','breakfast','lunch'],venue:'kukuiula_village'},
+  {id:'kv_table_at_poipu',name:'Table at Poipu',n:'Table at Poipu',r:'South Shore',lat:21.8839,lon:-159.4696,
+   type:'pop-up / chef-curated',price:'$$$',
+   tip:'Pop-up restaurant concept featuring chef-curated dishes at the Shops at Kukuiʻula. Concept and hours rotate — check ahead.',
+   tags:['pop_up','dinner'],venue:'kukuiula_village'},
+  {id:'kv_lapperts_kukuiula',name:"Lappert's Hawaii",n:"Lappert's",r:'South Shore',lat:21.8839,lon:-159.4696,
+   type:'ice cream / coffee',price:'$',
+   tip:'Handmade artisan ice cream, gelato, sorbets, pastries, and micro-roasted coffee at the Shops at Kukuiʻula.',
+   tags:['ice_cream','dessert','coffee','kid_friendly'],venue:'kukuiula_village'}
 ];
 
 // GROCERY STORES — basics for vacation rentals
@@ -3661,7 +3699,22 @@ let LOCAL_CRAFTS=[
   {id:'cm_elephant_walk',name:'Elephant Walk Gift Gallery & Boutique',n:'Elephant Walk',r:'East Side',lat:22.0544,lon:-159.3287,
    type:'gifts & gallery',
    tip:'Gift gallery and boutique at Coconut Marketplace — art, home pieces, and apparel under one roof.',
-   tags:['gifts','gallery'],venue:'coconut_marketplace'}
+   tags:['gifts','gallery'],venue:'coconut_marketplace'},
+  // KUKUIʻULA VILLAGE — see VENUES below; folded into the venue's single fixed pin. Deliberately
+  // excluded: the apparel/surf/swim chains (lululemon, Tommy Bahama, Reyn Spooner, Crazy Shirts,
+  // Cariloha, etc.) and Longs Drugs/CVS — shops, not local crafts.
+  {id:'kv_martin_macarthur',name:'Martin & MacArthur',n:'Martin & MacArthur',r:'South Shore',lat:21.8839,lon:-159.4696,
+   type:'koa woodworking',
+   tip:'Koa wood watches, bands, and Hawaiian craftsmanship at the Shops at Kukuiʻula.',
+   tags:['crafts','wood','jewelry'],venue:'kukuiula_village'},
+  {id:'kv_latitudes_gallery',name:'Latitudes Gallery',n:'Latitudes',r:'South Shore',lat:21.8839,lon:-159.4696,
+   type:'fine art photography',
+   tip:'Fine art photography by local Kauaʻi artists at the Shops at Kukuiʻula.',
+   tags:['art','gallery','photography'],venue:'kukuiula_village'},
+  {id:'kv_salt_and_sea',name:'Salt + Sea',n:'Salt + Sea',r:'South Shore',lat:21.8839,lon:-159.4696,
+   type:'local artist goods',
+   tip:'Curated collection of local island artist goods at the Shops at Kukuiʻula.',
+   tags:['crafts','gifts','local'],venue:'kukuiula_village'}
 ];
 
 let GROCERIES=[
@@ -3730,7 +3783,7 @@ let DRINKS=[
   {id:'anakes_juice_bar',name:'Anake’s Juice Bar',n:'Anake’s',r:'South Shore',lat:21.8832,lon:-159.4718,
    type:'açaí & juice',price:'$$',hours:'8am–4pm daily',
    tip:'Creative açaí and dragonfruit bowls plus fresh juices, tucked inside Kukuiʻula Market in Poʻipū.',
-   tags:['acai','juice','dragonfruit','poipu']},
+   tags:['acai','juice','dragonfruit','poipu'],venue:'kukuiula_village'},
   {id:'gs_juicebar',name:'G’s Juicebar',n:'G’s Juicebar',r:'West Side',lat:21.9573,lon:-159.6685,
    type:'açaí & smoothies',price:'$$',hours:'Daytime daily',
    tip:'Brazilian-style açaí bowls and smoothies with generous portions, next to the Waimea Theater on the West Side.',
@@ -3780,6 +3833,10 @@ let VENUES=[
   {id:'coconut_marketplace',name:'Coconut Marketplace',n:'Coconut Mktpl',r:'East Side',
    lat:22.0544,lon:-159.3287,
    address:'4-484 Kūhiō Hwy, Kapaʻa, HI 96746',
+   subs:['food','drinks','farmers','crafts']},
+  {id:'kukuiula_village',name:"The Shops at Kukuiʻula",n:'Kukuiʻula Village',r:'South Shore',
+   lat:21.8839,lon:-159.4696,
+   address:'2829 Ala Kalanikaumaka St, Poʻipū, HI 96756',
    subs:['food','drinks','farmers','crafts']}
 ];
 
