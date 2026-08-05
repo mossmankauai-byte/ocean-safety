@@ -1620,8 +1620,14 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .mkcoffee{width:36px;height:36px;border-radius:50%;background:#f3e9e0;border:2px solid #6f4e37;color:#4a3527;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.18);box-sizing:border-box}
 .mkcoffee svg{width:18px;height:18px;display:block}
 .leaflet-marker-icon .mkcoffee{margin:0 !important}
-.mkvenue{width:38px;height:38px;border-radius:50%;background:#0f4c5c;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);box-sizing:border-box}
-.mkvenue svg{width:19px;height:19px;display:block}
+/* Venue pin is deliberately NOT a disc. Every category pin (food/gas/craft/coffee) is a circle,
+   so a rounded square reads as a different CLASS of thing — a place holding many businesses,
+   not one more shop. The offset plate behind it says "more than one" before the +N is read. */
+.mkvenue{position:relative;width:38px;height:38px;border-radius:11px;background:#0f4c5c;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);box-sizing:border-box}
+.mkvenue svg{width:21px;height:21px;display:block}
+.mkvenue-wrap{position:relative}
+.mkvenue-wrap::before{content:'';position:absolute;top:3px;left:3px;width:38px;height:38px;border-radius:11px;background:#0f4c5c;opacity:.32;box-sizing:border-box}
+.leaflet-marker-icon .mkvenue-wrap{margin:0 !important}
 .leaflet-marker-icon .mkvenue{margin:0 !important}
 
 #locHelpOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:none}
@@ -6325,9 +6331,20 @@ function renderDrinks(){
 // so the pin structurally cannot be merged into a "+N" or split back into per-vendor pins —
 // there is no clustering logic to get wrong. Tapping it opens the vendor list, grouped by
 // category, in the same sheet Town already uses.
-function mkVenueIcon(v){
+// How many of this venue's vendors the CURRENT subtab folds into the pin. Shown as the same
+// "+N" badge declutter uses, so a guest reads it the same way: more places here than one pin.
+function venueSubCount(v, sub){
+  const c = venueCategoryArrays().find(c => c.sub === sub);
+  return c ? c.arr.filter(x => x.venue === v.id).length : 0;
+}
+// A row of awnings, not a single storefront — the glyph itself should say "several shops".
+// PH_ICON.venue is a hand-mirrored copy of these paths in a 256 box (heavier relative stroke, so
+// it reads right at row size). They are NOT shared — change both, or the pin and its list row drift.
+const VENUE_GLYPH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 4.5 5h15L21 9.5"/><path d="M3 9.5a2.2 2.2 0 0 0 4.5 0 2.2 2.2 0 0 0 4.5 0 2.2 2.2 0 0 0 4.5 0 2.2 2.2 0 0 0 4.5 0"/><path d="M4.8 12v8h14.4v-8"/></svg>';
+function mkVenueIcon(v, more){
+  const badge = more > 1 ? `<span class="mk-more">+${more}</span>` : '';
   return L.divIcon({
-    html:`<div class="mkw"><div class="mkvenue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-6h6v6"/></svg></div><div class="mklbl">${v.n||v.name}</div></div>`,
+    html:`<div class="mkw"><div class="mkvenue-wrap"><div class="mkvenue">${VENUE_GLYPH}</div>${badge}</div><div class="mklbl">${v.n||v.name}</div></div>`,
     className:'',iconSize:[140,60],iconAnchor:[70,20]
   });
 }
@@ -6336,10 +6353,11 @@ function renderVenues(){
   // Clear BEFORE any early return, or switching off a venue subtab and back leaves ghosts.
   Object.values(venueMkrs).forEach(m=>m.remove()); venueMkrs={};
   if(window._activeTab !== 'shopping' || typeof VENUES === 'undefined') return;
+  ensureDeclutterCSS();   // the "+N" badge borrows declutter's style, injected lazily
   const sub = window._activeSub || 'food';
   VENUES.forEach(v=>{
     if(!(v.subs||[]).includes(sub)) return;
-    const mk = L.marker([v.lat,v.lon],{icon:mkVenueIcon(v),zIndexOffset:600}).addTo(map);
+    const mk = L.marker([v.lat,v.lon],{icon:mkVenueIcon(v, venueSubCount(v, sub)),zIndexOffset:600}).addTo(map);
     mk.on('click',()=>openVenueSheet(v.id));
     venueMkrs[v.id] = mk;
   });
@@ -8446,9 +8464,9 @@ const PH_ICON={
   farmers:'<g fill="currentColor"><path d="M183.6 151.6C144 192 43.81 223 43.81 223A8 8 0 0 1 33 212.19S64 112 104.4 72.4a56 56 0 0 1 79.2 79.2" opacity=".2"/><path d="M232 64h-28.69l26.35-26.34a8 8 0 0 0-11.32-11.32L192 52.69V24a8 8 0 0 0-16 0v32.57a64 64 0 0 0-77.2 10.12c-40.1 39.39-70.25 133.08-73.19 142.45a16 16 0 0 0 21.26 21.26c9.37-2.94 103.18-33.13 142.47-73.21A64 64 0 0 0 199.43 80H232a8 8 0 0 0 0-16m-54.12 82c-8.94 9.12-21.25 17.8-34.85 25.73l-25.38-25.39a8 8 0 0 0-11.32 11.32l22.09 22.09c-40.87 21.19-86.32 35.42-87 35.63A8 8 0 0 0 40 216a8 8 0 0 0 .59-1.41c.29-.93 28-89.58 64-130.67l33.77 33.77a8 8 0 0 0 11.32-11.32l-33.5-33.49a48 48 0 0 1 61.7 73.12"/></g>',
   crafts:'<g fill="currentColor"><path d="M224 127.17a96.5 96.5 0 0 1-2.39 22.18a24 24 0 0 1-23.4 18.65H152a24 24 0 0 0-24 24a24 24 0 0 1-32 22.61c-37.27-13.17-64-44.8-64-86.61a96 96 0 0 1 95-96c52.84-.53 96.55 42.35 97 95.17" opacity=".2"/><path d="M200.77 53.89A103.27 103.27 0 0 0 128 24h-1.07A104 104 0 0 0 24 128c0 43 26.58 79.06 69.36 94.17A32 32 0 0 0 136 192a16 16 0 0 1 16-16h46.21a31.81 31.81 0 0 0 31.2-24.88a104.4 104.4 0 0 0 2.59-24a103.28 103.28 0 0 0-31.23-73.23m13 93.71a15.89 15.89 0 0 1-15.56 12.4H152a32 32 0 0 0-32 32a16 16 0 0 1-21.31 15.07C62.49 194.3 40 164 40 128a88 88 0 0 1 87.09-88h.9a88.35 88.35 0 0 1 88 87.25a89 89 0 0 1-2.18 20.35ZM140 76a12 12 0 1 1-12-12a12 12 0 0 1 12 12m-44 24a12 12 0 1 1-12-12a12 12 0 0 1 12 12m0 56a12 12 0 1 1-12-12a12 12 0 0 1 12 12m88-56a12 12 0 1 1-12-12a12 12 0 0 1 12 12"/></g>',
   gas:'<g fill="currentColor"><path d="M168 56v160H56V56a16 16 0 0 1 16-16h80a16 16 0 0 1 16 16" opacity=".2"/><path d="m241 69.66l-19.34-19.32a8 8 0 0 0-11.32 11.32L229.66 81a8 8 0 0 1 2.34 5.63V168a8 8 0 0 1-16 0v-40a24 24 0 0 0-24-24h-16V56a24 24 0 0 0-24-24H72a24 24 0 0 0-24 24v152H32a8 8 0 0 0 0 16h160a8 8 0 0 0 0-16h-16v-88h16a8 8 0 0 1 8 8v40a24 24 0 0 0 48 0V86.63a23.85 23.85 0 0 0-7-16.97M64 208V56a8 8 0 0 1 8-8h80a8 8 0 0 1 8 8v152Zm80-96a8 8 0 0 1-8 8H88a8 8 0 0 1 0-16h48a8 8 0 0 1 8 8"/></g>',
-  // Venue rows use the same building glyph as the .mkvenue map pin (scaled from its 24-box to
+  // Venue rows use the same awning-row glyph as the .mkvenue map pin (scaled from its 24-box to
   // this 256 box) so the list row and the pin read as the same thing. Stroked, not Phosphor.
-  venue:'<g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M32 224h192"/><path d="M42.7 224V96L128 32l85.3 64v128"/><path d="M96 224v-64h64v64"/></g>'
+  venue:'<g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M32 101.3 48 53.3h160l16 48"/><path d="M32 101.3a23.5 23.5 0 0 0 48 0 23.5 23.5 0 0 0 48 0 23.5 23.5 0 0 0 48 0 23.5 23.5 0 0 0 48 0"/><path d="M51.2 128v85.3h153.6V128"/></g>'
 };
 // Resolve a Town POI to an establishment-type key. kind comes from TOWN_SUB_SRC; food/drink refine
 // by type/tags/name so a shave-ice spot gets the cone and a bakery gets the loaf automatically.
