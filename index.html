@@ -3502,7 +3502,7 @@ let FOODS=[
    type:'pacific rim / sunset',price:'$$$',hours:'5pm–9pm daily',
    tip:'Most famous sunset view on Kauaʻi — oceanfront in Lawaʻi. Book a 6 PM table 30+ days out in summer. Macadamia-crusted mahi is the move.',
    tags:['sunset','date_night','oceanfront','reservations','indoor'],reservations:true,restRid:'14856'},
-  {id:'merrimans_kauai',phone:'(808) 742-8385',website:'https://merrimanshawaii.com',name:"Merriman's Fish House",n:"Merriman's",r:'South Shore',lat:21.883493,lon:-159.46971,
+  {id:'merrimans_kauai',photo:'https://live.staticflickr.com/65535/48493879092_b0ee4bb328_b.jpg',photo_credit:'Haydn Blackey / CC BY-SA 2.0',phone:'(808) 742-8385',website:'https://merrimanshawaii.com',name:"Merriman's Fish House",n:"Merriman's",r:'South Shore',lat:21.883493,lon:-159.46971,
    type:'farm-to-table',price:'$$$$',hours:"5pm–8:30pm daily",
    tip:'Peter Merriman\u2019s upstairs fish house in the Shops at Kukuiʻula. Sustainable local seafood. The downstairs Gourmet Pizza is the casual sister option without reservations.',
    tags:['farm_to_table','date_night','reservations','seafood'],reservations:true,restRid:'76544',venue:'kukuiula_village'},
@@ -6583,6 +6583,7 @@ function openFoodSheet(id){
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">🍽</div>${heartButton('food', f.id)}
       <div><div class="poi-hero-name" style="color:#fff">${f.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${f.r} • ${f.type}</div></div>
     </div>
+    ${photoCreditLine(f)}
     <div class="poi-grid">
       <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${f.price||'—'}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${f.hours||'—'}</div></div>
