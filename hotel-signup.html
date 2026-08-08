@@ -168,6 +168,11 @@ const TYPE=(new URLSearchParams(location.search).get("type")||"hotel").toLowerCa
 // only authority — this just stops every signup silently defaulting to kauai, which would let a
 // Maui business through the island gate and mint Kauaʻi-labelled assets for them.
 const ISLAND=(new URLSearchParams(location.search).get("island")||"kauai").toLowerCase();
+// ── TEST PAY-GATE BYPASS ── ?test=1 routes a PAID pick through the free, no-charge path so the
+// flow can be walked without a real Square charge. Real visitors (no param) pay normally.
+// To restore full charging: delete this const, the banner just below, and the bypass block in submit.
+const TEST_BYPASS=new URLSearchParams(location.search).has("test");
+if(TEST_BYPASS){var _tb=document.createElement("div");_tb.textContent="TEST MODE — Square pay gate bypassed · paid routes as free (no charge)";_tb.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#a8862f;color:#fff;font:700 12px/1.35 system-ui;padding:6px 12px;text-align:center";document.body.prepend(_tb);}
 const T={
   hotel:{h1:"Put your hotel on the beach-safety guide your guests already open.",
     sub:"Set it up yourself in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. Start free.",
@@ -282,7 +287,13 @@ $("hexText").addEventListener("input",()=>{const v=$("hexText").value.trim();if(
 function showErr(m){const e=$("err");e.textContent=m;e.classList.add("show");}
 $("f").addEventListener("submit",async e=>{
   e.preventDefault(); $("err").classList.remove("show");
-  const tier=document.querySelector('input[name=tier]:checked').value;
+  let tier=document.querySelector('input[name=tier]:checked').value;
+  // TEST bypass: send a paid pick to the server AS FREE so no Square object is minted and no
+  // redirect happens. online_shop has no free tier, so there's nothing to route it to.
+  if(TEST_BYPASS && tier==="paid"){
+    if(TYPE==="onlineshop") return showErr("TEST MODE: pay gate bypassed. Online Shop is paid-only ($100/mo) — no free tier to route through, so nothing provisions without a charge.");
+    tier="free";
+  }
   const name=$("name").value.trim(), email=$("email").value.trim(), sig=$("sig").value.trim();
   if(!name) return showErr("Please enter your property name.");
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr("Please enter a valid email.");
