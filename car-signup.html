@@ -264,6 +264,10 @@
   var $=function(id){return document.getElementById(id);};
   var DATA=null, _admin="", _email="", _cars=0, _island="kauai", PAID=false;
   var SEGS=["renter","exchange","owner"];
+  // ── TEST PAY-GATE BYPASS ── ?test=1 makes "Start paid billing" skip the real Square charge
+  // (the fleet is already live on the free plan from step 1). Real visitors are unaffected.
+  var TEST_BYPASS=new URLSearchParams(location.search).has("test");
+  if(TEST_BYPASS){var _tb=document.createElement("div");_tb.textContent="TEST MODE — Square pay gate bypassed · billing button won't charge";_tb.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#a8862f;color:#fff;font:700 12px/1.35 system-ui;padding:6px 12px;text-align:center";document.body.prepend(_tb);}
   function setMsg(t,c){ var m=$("msg"); m.textContent=t; m.className="msg "+(c||""); }
 
   $("go").onclick=function(){
@@ -308,6 +312,7 @@
 
   $("startBill").onclick=function(){
     var b=$("startBill"), m=$("billMsg"); b.disabled=true; b.textContent="Starting…"; m.textContent="";
+    if(TEST_BYPASS){ b.style.display="none"; m.style.color="var(--green-d)"; m.innerHTML="&#10003; TEST MODE — pay gate bypassed. No Square charge. Production would bill $"+(_cars*5).toLocaleString()+"/mo. Fleet is already live on the free plan."; unlockTour(); return; }
     fetch("/api/car-upgrade",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin:_admin,slug:DATA.slug,key:DATA.key,name:DATA.resort,email:_email,cars:_cars,island:_island})})
       .then(function(r){return r.json();})
       .then(function(j){
