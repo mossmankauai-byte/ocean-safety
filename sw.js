@@ -186,7 +186,7 @@ if (workbox) {
       /^\/d\//.test(url.pathname) ||
       /^\/creator/.test(url.pathname) ||
       url.pathname === '/assets/creator-kit.js' ||
-      /^\/(jade[a-z-]*|sales|hotel-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)),
+      /^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)),
     new workbox.strategies.NetworkFirst({
       cacheName: "jade-pages",
       networkTimeoutSeconds: 4,
