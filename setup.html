@@ -137,9 +137,10 @@ function welcome(){
 }
 function chooser(){
   $("stage").innerHTML='<div class="card"><h1>Preview the hotel onboarding</h1>'+
-    '<p class="say">This is exactly what a hotel walks through after they start. Pick a plan to preview it.</p>'+
-    '<button class="btn" style="margin-top:18px" onclick="pick(\'free\')">Free plan — preview →</button>'+
-    '<button class="btn grey" style="margin-top:10px" onclick="pick(\'paid\')">Paid plan · $649/mo — preview →</button>'+
+    '<p class="say">This is exactly what a hotel walks through after they start.</p>'+
+    /* Hotels are PAID, one flat tier (ruled by Nick 2026-08-05) — there is no free hotel plan
+       to preview, and the server now rejects a free hotel signup outright. */
+    '<button class="btn" style="margin-top:18px" onclick="pick(\'paid\')">Preview the hotel plan · $649/mo →</button>'+
     '<p class="muted center" style="margin-top:12px">Demo — nothing here is real.</p></div>';
 }
 function pick(plan){ S.plan=plan; S.monthly_cents=plan==='paid'?64900:0; STEP=0; render(); }
@@ -257,4 +258,6 @@ function go(n){ STEP=n; render(); }
   STEP=0; render();
 })();
 </script>
+
+<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="a1a7b085-e29e-4494-9d1e-6d2655ac5006" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiYTFhN2IwODUtZTI5ZS00NDk0LTlkMWUtNmQyNjU1YWM1MDA2IiwiYWNjb3VudF9pZCI6IjY5Yjc4Zjc1YzdjYTZlMTQ3ZjRjZjRjZSIsImRlcGxveV9pZCI6IjZhNzhmMGI1MWZhNmU2MDAwODkyMWExZiIsImlzc3VlciI6Im5mc2VydmVyIn0.WSLNae4R_hgpHcTlidr9SXRuhvhKGBIVAvWUrynZtLM"></script>
 </body></html>
