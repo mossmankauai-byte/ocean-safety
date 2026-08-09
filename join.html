@@ -369,6 +369,7 @@
   @media (prefers-reduced-motion:reduce){.stickybar{transition:none}.btn,.tile,.shot,.stepcard,.tile--feature .ft-media{transition:none}}
 </style>
 <noscript><style>.reveal{opacity:1!important;transform:none!important}.segglide{display:none}</style></noscript>
+<style>.form-err{color:#b3261e;font-weight:700;margin:.4rem 0 0}.jcheck{display:flex;gap:.55rem;align-items:flex-start;font-weight:600;line-height:1.45;cursor:pointer}.jcheck input{margin-top:.25rem;flex:none}#jTs{min-height:65px}.keyline{margin-top:.9rem}.keybox{width:100%;font:600 13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:.55rem .6rem;border:1px solid rgba(0,0,0,.18);border-radius:8px;margin:.45rem 0 .5rem;background:#fff}</style>
 </head>
 <body>
 
@@ -458,7 +459,7 @@
 <section class="proof" aria-label="Why partners join">
   <div class="wrap">
     <div class="stat reveal"><div class="n">First<span class="u">.</span></div><div class="l">The app visitors check before they get in the water</div></div>
-    <div class="stat reveal d1"><div class="n">Days</div><div class="l">Live in days, not weeks — we build your page while your printed QR cards ship</div></div>
+    <div class="stat reveal d1"><div class="n">Minutes</div><div class="l">Live in minutes &mdash; your page publishes the moment you finish, and your printed QR cards ship after</div></div>
     <div class="stat reveal d2"><div class="n">Daily</div><div class="l">A fresh Kauaʻi ocean-safety report, branded to you</div></div>
     <div class="stat reveal d3"><div class="n">Yours</div><div class="l">One partner per category, per beach area — the local safety name visitors see first</div></div>
   </div>
@@ -543,11 +544,11 @@
       <div class="stepcard reveal">
         <div class="num">STEP 01</div>
         <h3>Claim your spot</h3>
-        <p>Tell us about your business — two minutes, no call required. We'll confirm your category is still open in your area.</p>
+        <p>Tell us about your business &mdash; two minutes, no call required. Your page publishes as soon as you finish.</p>
       </div>
       <div class="stepcard reveal d1">
         <div class="num">STEP 02</div>
-        <h3>We build your page</h3>
+        <h3>Your page goes live</h3>
         <p>Your co-branded page goes live with daily conditions, and your printed QR card kit ships to your door.</p>
       </div>
       <div class="stepcard reveal d2">
@@ -589,7 +590,7 @@
     <div class="sec-head sec-head--snug reveal">
       <p class="eyebrow">The deal</p>
       <h2 data-swap="offer-head">Simple terms. Claim your spot today.</h2>
-      <p>Pricing is set per business type. Tell us about your place and we'll get you live — most partners are up within the same week.</p>
+      <p>Start free and you're live right away &mdash; no call, nothing to wait on. Paid plans are set per business type, whenever you want one.</p>
       <div class="offer-seg reveal d1">
         <span class="seglabel-d" id="seglabelD">I run a…</span>
         <div class="segbar segbar--light" role="radiogroup" aria-labelledby="seglabelD" id="segbarOffer">
@@ -624,8 +625,8 @@
         <div class="glass-card">
           <span class="gc-tag" data-swap="card-tag">Retail shop · Kauaʻi</span>
           <div class="gc-price">
-            <span class="amt" data-swap="card-amt">Let's talk</span>
-            <span class="per" data-swap="card-per">priced per shop</span>
+            <span class="amt" data-swap="card-amt">Free to start</span>
+            <span class="per" data-swap="card-per">no card needed</span>
           </div>
           <p class="gc-line" data-swap="card-line">We set pricing to fit your business — tell us about your shop and we'll walk you through the plan that fits.</p>
 
@@ -636,40 +637,45 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>
           </ul>
 
-          <form class="leadform" id="leadForm" name="join-lead" method="POST" novalidate>
-            <input type="hidden" name="segment" id="leadSegment" value="Shop">
-            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+          <form class="leadform" id="joinForm" novalidate>
             <div class="fld">
-              <label for="leadName">Your name <span class="req" aria-hidden="true">*</span></label>
-              <input id="leadName" name="name" type="text" autocomplete="name" placeholder="First and last name" required>
+              <label for="jBiz">Business name <span class="req" aria-hidden="true">*</span></label>
+              <input id="jBiz" type="text" autocomplete="organization" placeholder="Your business name" required>
             </div>
             <div class="fld">
-              <label for="leadBiz">Business name <span class="req" aria-hidden="true">*</span></label>
-              <input id="leadBiz" name="business" type="text" autocomplete="organization" placeholder="Your business name" required>
+              <label for="jEmail">Email <span class="req" aria-hidden="true">*</span></label>
+              <input id="jEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@business.com" required>
             </div>
-            <div class="fld">
-              <label for="leadEmail">Email <span class="req" aria-hidden="true">*</span></label>
-              <input id="leadEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@business.com" required>
+            <div class="fld" id="jIslandWrap">
+              <label for="jIsland">Island <span class="req" aria-hidden="true">*</span></label>
+              <select id="jIsland">
+                <option value="kauai">Kaua&#699;i</option>
+                <option value="maui">Maui</option>
+                <option value="oahu">O&#699;ahu</option>
+                <option value="hawaii">Hawai&#699;i</option>
+              </select>
             </div>
-            <div class="fld">
-              <label for="leadPhone">Phone</label>
-              <input id="leadPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(808) 555-0123">
+            <div class="fld" id="jUnitsWrap" hidden>
+              <label for="jUnits"><span id="jUnitsLabel">Rooms</span> <span class="req" aria-hidden="true">*</span></label>
+              <input id="jUnits" type="number" min="1" step="1" inputmode="numeric" placeholder="How many?">
             </div>
-            <div class="fld fld--full">
-              <label for="leadMsg">Anything we should know? <span style="font-weight:600;color:var(--muted)">(optional)</span></label>
-              <textarea id="leadMsg" name="message" placeholder="Beach area, number of units, questions…"></textarea>
+            <div class="fld" id="jSigWrap">
+              <label for="jSig">Type your full name to sign <span class="req" aria-hidden="true">*</span></label>
+              <input id="jSig" type="text" autocomplete="name" placeholder="First and last name">
             </div>
+            <div class="fld fld--full" id="jAgreeWrap">
+              <label class="jcheck" for="jAgree"><input type="checkbox" id="jAgree"> I&#39;m authorised to sign up this business and I agree to the partner terms.</label>
+            </div>
+            <div class="fld fld--full" id="jTsWrap"><div id="jTs"></div></div>
+            <p class="form-err" id="jErr" role="alert" hidden></p>
             <div class="form-cta">
-              <button class="btn btn--solid" type="submit" id="primaryCta">Claim your spot <span class="arr" aria-hidden="true">→</span></button>
-              <a class="btn btn--ghost" id="secondaryCta" href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20shop%20partner%20%E2%80%94%20claim%20our%20spot" data-swap-href="secondary" data-swap="secondary-label">Claim your spot ↗</a>
+              <button class="btn btn--solid" type="submit" id="primaryCta">Start free <span class="arr" aria-hidden="true">&#8594;</span></button>
+              <a class="btn btn--ghost" id="secondaryCta" href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner%20%E2%80%94%20question" data-swap-href="secondary">Rather talk first? &#8599;</a>
             </div>
-            <p class="gc-note" data-swap="card-note">No pressure and no contract — your co-branded page and printed QR cards come with it. Tell us about your place and we'll get you live.</p>
-            <p class="form-note">We'll reply within one business day. Prefer email? Write us at <a href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner%20%E2%80%94%20claim%20our%20spot" id="mailtoFallback">mossmankauai@gmail.com</a>.</p>
+            <p class="gc-note" data-swap="card-note">No contract and no card. Your page is live the moment you finish &mdash; change anything later from your dashboard.</p>
+            <p class="form-note">Questions? Write us at <a href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner">mossmankauai@gmail.com</a>.</p>
           </form>
-          <div class="form-success" id="formSuccess" role="status" aria-live="polite" tabindex="-1">
-            <b>You're on the list.</b>
-            <p>Thanks — we've got your details and we'll be in touch within one business day to get you live. Want to keep going now? <a href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20shop%20partner%20%E2%80%94%20claim%20our%20spot" data-swap-href="primary">Claim your spot ↗</a></p>
-          </div>
+          <div class="form-success" id="formSuccess" role="status" aria-live="polite" tabindex="-1"></div>
         </div>
       </div>
     </div>
@@ -686,11 +692,11 @@
     <div class="faqgrid reveal d1">
       <details class="faq">
         <summary>How fast can I be live?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><p>Most partners go live within the same week. You claim your spot, send us your logo, and we build your co-branded page while your printed QR cards ship to your door.</p></div>
+        <div class="ans"><p>Right away. You fill in the short form on this page and your co-branded page publishes as you finish &mdash; you get the link and your dashboard on the spot. Printed QR cards ship after.</p></div>
       </details>
       <details class="faq">
         <summary>What does it cost?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><p>Pricing is set per business type, so it fits what you actually use. Tell us about your place — shop, hotel, rental, or timeshare — and we'll walk you through the plan that fits. No obligation, and you can cancel anytime. If you sell through an in-app store, Square's card processing is your own cost at cost — we never mark it up.</p></div>
+        <div class="ans"><p>Starting is free &mdash; the co-branded page, live conditions and your dashboard cost nothing, and there is no card at signup. Paid plans are set per business type so they fit what you actually use; tell us about your place and we&#39;ll walk you through the one that fits. No obligation, cancel anytime. </p></div>
       </details>
       <details class="faq">
         <summary>I don't sell products. Is this still worth it?<span class="pm" aria-hidden="true"></span></summary>
@@ -729,7 +735,7 @@
     <div class="fin-body">
       <p class="eyebrow eyebrow--gold">Founding partners · one per category, per beach area</p>
       <h2 data-swap="final-head">Become Kauaʻi's go-to safety partner.</h2>
-      <p>We feature one partner per category — one shop, one hotel, one rental, one timeshare operator — so each name stands out. Claim yours and we'll have you live this week.</p>
+      <p>We feature one partner per category — one shop, one hotel, one rental, one timeshare operator — so each name stands out. Claim yours &mdash; you&#39;ll be live in about a minute.</p>
       <div class="fin-cta">
         <a class="btn btn--gold" id="finalCta" href="#offer">Claim your spot <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn--glass" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">See the demo dashboard ↗</a>
@@ -752,7 +758,7 @@
   <div class="inner">
     <div class="sb-copy">
       <b data-swap="sticky-title">Claim your Kauaʻi spot</b>
-      <span data-swap="sticky-sub">Featured as the local safety partner · live this week</span>
+      <span data-swap="sticky-sub">Featured as the local safety partner · live in minutes</span>
     </div>
     <div class="sb-actions">
       <a class="btn btn--ghost" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">See demo</a>
@@ -858,15 +864,15 @@
       "offer-sub": "Your storefront lives inside the app visitors already trust — featured as the local safety partner all season.",
       "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your own page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>An in-app store, if you want one</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Square\'s card processing is your own cost — we don\'t mark it up</li>',
       "card-tag": "Retail shop · Kauaʻi",
-      "card-amt": "Let's talk",
-      "card-per": "priced per shop",
-      "card-line": "We set pricing to fit your business — tell us about your shop and we'll walk you through the plan that fits.",
-      "card-note": "No pressure and no contract — your co-branded page and printed QR cards come with it. Tell us about your place and we'll get you live.",
+      "card-amt": "Free to start",
+      "card-per": "no card needed",
+      "card-line": "Fill in the form and your page publishes right away &mdash; no call, no waiting on us. Paid plans are set per business type, whenever you want one.",
+      "card-note": "No contract and no card. Your page is live the moment you finish &mdash; change anything later from your dashboard.",
       "card-list": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Printed QR cards, shipped — included</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Optional in-app store</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>',
       "secondary-label": "Try the live app ↗",
       "final-head": "Become Kauaʻi's go-to beach shop.",
       "sticky-title": "Put your shop on the app",
-      "sticky-sub": "Sell to every beachgoer · live this week",
+      "sticky-sub": "Sell to every beachgoer · live in minutes",
       primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20shop%20partner%20%E2%80%94%20claim%20our%20spot",
       secondary: "https://oceansafety.app",
       label: "Shop", announce: "Showing shop partner details and pricing.",
@@ -884,10 +890,10 @@
       "offer-sub": "Be the name guests see when they check conditions — we tailor the package to your rooms, front desk, and welcome book.",
       "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-room &amp; front-desk QR cards, included</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>A concierge touch that earns reviews</li>',
       "card-tag": "Hotel or inn",
-      "card-amt": "Let's talk",
-      "card-per": "priced per property",
-      "card-line": "We tailor the safety amenity to your rooms, front desk, and welcome book — tell us about your property.",
-      "card-note": "No pressure and no contract. Tell us about your hotel and we'll put together the right package.",
+      "card-amt": "Free to start",
+      "card-per": "no card needed",
+      "card-line": "Fill in the form and your page publishes right away &mdash; no call, no waiting on us. Paid plans are set per business type, whenever you want one.",
+      "card-note": "No contract and no card. Your page is live the moment you finish &mdash; change anything later from your dashboard.",
       "card-list": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-room &amp; front-desk QR cards — included</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>A concierge touch that earns reviews</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>',
       "secondary-label": "Try the live app ↗",
       "final-head": "Make safety part of your guest experience.",
@@ -907,18 +913,18 @@
       "feature-p": "oceansafety.app/p/your-rentals — your brand, live Kauaʻi conditions, and a store where guests buy gear and your local picks.",
       "offer-kicker": "For vacation rentals & Airbnb managers",
       "offer-title": "Better reviews, plus a new revenue line.",
-      "offer-sub": "QR cards in every unit, your brand on the safety app, and an in-app store where guests buy — you keep the majority of every sale. Priced per portfolio.",
+      "offer-sub": "QR cards in every unit, your brand on the safety app, and an in-app store where guests buy — you keep the majority of every sale. no card needed.",
       "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>QR cards in every unit + your branded page</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-app store — you keep the majority of every sale</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Fewer worried calls, better reviews</li>',
       "card-tag": "Vacation rentals",
-      "card-amt": "Let's talk",
-      "card-per": "priced per portfolio",
-      "card-line": "Priced to your portfolio — guests shop your in-app store and you keep the majority of every sale.",
-      "card-note": "Priced to your portfolio — tell us how many units you manage and we'll tailor it. No obligation.",
+      "card-amt": "Free to start",
+      "card-per": "no card needed",
+      "card-line": "Fill in the form and your page publishes right away &mdash; no call, no waiting on us. Paid plans are set per business type, whenever you want one.",
+      "card-note": "No contract and no card. Your page is live the moment you finish &mdash; change anything later from your dashboard.",
       "card-list": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>QR cards in every unit — included</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-app store — keep the majority of every sale</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>',
       "secondary-label": "Try the live app ↗",
       "final-head": "Put a local safety partner in every unit.",
       "sticky-title": "Add OceanSafe to your rentals",
-      "sticky-sub": "Better reviews + guest store · priced per portfolio",
+      "sticky-sub": "Better reviews + guest store · no card needed",
       primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20rental%20partner%20%E2%80%94%20let's%20talk",
       secondary: "https://oceansafety.app",
       label: "Rentals", announce: "Showing vacation-rental partner details and pricing.",
@@ -936,15 +942,15 @@
       "offer-sub": "The in-unit guide runs your stay-close offers and routes every qualified lead to your desk. Ask us about the full lead-and-revenue dashboard.",
       "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-room safety guide + stay-close offers in every unit</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Qualified tour &amp; owner-update leads to your desk</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Owners never see a &ldquo;buy&rdquo; pitch — guardrails built in</li>',
       "card-tag": "Timeshare",
-      "card-amt": "Let's talk",
-      "card-per": "priced per room",
-      "card-line": "The in-unit guide runs your stay-close offers and routes every qualified lead to your desk — tell us about your resort and we'll size it.",
-      "card-note": "Includes the safety guide and lead engine, with a full lead-and-revenue dashboard, CRM handoff, and timed campaigns. Tell us about your resort.",
+      "card-amt": "Free to start",
+      "card-per": "no card needed",
+      "card-line": "Fill in the form and your page publishes right away &mdash; no call, no waiting on us. Paid plans are set per business type, whenever you want one.",
+      "card-note": "No contract and no card. Your page is live the moment you finish &mdash; change anything later from your dashboard.",
       "card-list": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-room safety guide + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Stay-close offers — qualified leads to your desk</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>CRM handoff + timed campaigns</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Live lead-and-revenue dashboard</li>',
       "secondary-label": "See the demo ↗",
       "final-head": "Turn every stay into your next tour.",
       "sticky-title": "Put OceanSafe in every unit",
-      "sticky-sub": "Fill your tour calendar · priced per room",
+      "sticky-sub": "Fill your tour calendar · no card needed",
       primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20timeshare%20operator%20%E2%80%94%20let's%20talk",
       secondary: "https://oceansafety.app/stay-close-operator-dashboard.html",
       label: "Timeshare", announce: "Showing timeshare operator details and pricing.",
@@ -958,19 +964,19 @@
       "feature-h": "A co-branded page with your gear",
       "feature-p": "oceansafety.app/p/your-fleet — your name, live daily conditions, and the gear you rent or sell, one tap from the safety guide they already opened.",
       "offer-kicker": "For Turo hosts & car fleets",
-      "offer-title": "Priced per vehicle, not per location.",
+      "offer-title": "no card needed, not per location.",
       "offer-sub": "One code on your booking confirmation, one card in the glovebox. Scales with the fleet — three cars or three hundred.",
       "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Live conditions + beach guide in every car</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your own storefront — gear sells because they can carry it</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Square\'s card processing is your own cost — we don\'t mark it up</li>',
       "card-tag": "Turo host or car fleet",
       "card-amt": "Let\'s talk",
-      "card-per": "priced per vehicle",
-      "card-line": "Priced per vehicle so it scales with the fleet — tell us how many cars you run and we\'ll walk you through it.",
-      "card-note": "There is a free plan with no store and a paid plan with one. No contract either way — tell us the fleet size and we\'ll show you both.",
+      "card-per": "no card needed",
+      "card-line": "Fill in the form and your page publishes right away &mdash; no call, no waiting on us. Paid plans are set per business type, whenever you want one.",
+      "card-note": "No contract and no card. Your page is live the moment you finish &mdash; change anything later from your dashboard.",
       "card-list": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Booking-confirmation, glovebox &amp; key-fob QR codes</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Optional in-app store — you are the merchant of record</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>',
       "secondary-label": "Try the live app \u2197",
       "final-head": "Be the first local business they trust.",
       "sticky-title": "Put OceanSafe in your cars",
-      "sticky-sub": "Priced per vehicle · live this week",
+      "sticky-sub": "no card needed · live in minutes",
       primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20for%20my%20car%20fleet%20%E2%80%94%20let\'s%20talk",
       secondary: "https://oceansafety.app",
       label: "Cars", announce: "Showing car fleet details and pricing.",
@@ -980,7 +986,6 @@
 
   var current = "shop";
   var status = document.getElementById("segStatus");
-  var segField = document.getElementById("leadSegment");
 
   function setSwaps(seg){
     var data = SEG[seg];
@@ -1002,10 +1007,6 @@
     document.querySelectorAll(".seg-store").forEach(function(t){ t.hidden = !data.showStore; });
     document.querySelectorAll(".seg-hotel").forEach(function(t){ t.hidden = !data.showHotel; });
     document.querySelectorAll(".seg-timeshare").forEach(function(t){ t.hidden = !data.showTimeshare; });
-    /* carry the chosen segment into the lead + mailto subject */
-    if(segField) segField.value = data.label;
-    var mf = document.getElementById("mailtoFallback");
-    if(mf) mf.setAttribute("href", data.primary);
   }
 
   /* ---- segment switches (hero + offer kept in sync) ---- */
@@ -1064,54 +1065,162 @@
   window.addEventListener("resize", reposition);
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(reposition); }
 
-  /* ============ LEAD FORM ============ */
-  /* Posts to the lead-capture edge function, which writes a partner_leads row and emails
-     the notification. This replaced Netlify Forms, which was never enabled on the site —
-     a POST to "/" with form-name=join-lead 404'd exactly like a nonsense form name, so
-     every lead fell through to the mailto branch below and was lost unless the visitor
-     happened to have a mail client AND pressed Send. The mailto is still here, but it is
-     now a genuine last resort rather than the actual delivery path.
-     NOT operator-signup-public — that one provisions (tier + signature + agreement) and
-     excludes the per-unit-priced segments. /join is the price-free "let's talk" door. */
+  /* ============ SELF-SERVE SIGNUP ============ */
+  /* Replaced the lead form 2026-08-09 (Nick: "just put all signups to this page as self serve").
+     TWO provisioning backbones, because the guest surfaces differ and routing a segment through
+     the wrong one would hand an operator somebody else's console:
+       shop / hotel / rental  ->  Supabase operator-signup-public (tier "free")  ->  /p/<slug>
+       timeshare / cars       ->  worker /api/self-signup                        ->  stay-close / fleet
+     Both provision LIVE on submit and hand back the operator's own links, which we render here.
+     There is NO email step anywhere: this project has no production mailer (RESEND unset), so the
+     old magic-link path stalled at "check your email" and never published the page. */
   var SB_URL = "https://arndnljtmjfsnzcpcuen.supabase.co";
   var SB_KEY = "sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um";
-  var form = document.getElementById("leadForm");
-  if(form){
-    var success = document.getElementById("formSuccess");
-    var submitBtn = document.getElementById("primaryCta");
-    function showSuccess(){
-      form.style.display = "none";
-      if(success){ success.classList.add("show"); success.focus(); }
+  var TS_SITEKEY = "0x4AAAAAAD1KovJ4T8LFTTxL";
+  var ROUTE = {
+    shop:      { kind: "supa",   type: "retail" },
+    hotel:     { kind: "supa",   type: "hotel"  },
+    rental:    { kind: "supa",   type: "rental" },
+    timeshare: { kind: "worker", segment: "timeshare", unit: "Rooms",    hint: "How many rooms?" },
+    cars:      { kind: "worker", segment: "cars",      unit: "Vehicles", hint: "How many vehicles?" }
+  };
+
+  var jForm = document.getElementById("joinForm");
+  if (jForm) {
+    var jOk = document.getElementById("formSuccess");
+    var jBtn = document.getElementById("primaryCta");
+    var jErr = document.getElementById("jErr");
+    var tsId = null;
+
+    /* Turnstile gates the Supabase segments — the server verifies the token there, so the widget
+       is shown only where it is actually enforced rather than as decoration. */
+    function renderTs() {
+      if (tsId !== null || !window.turnstile) return;
+      try { tsId = turnstile.render("#jTs", { sitekey: TS_SITEKEY }); } catch (e) {}
     }
-    function fv(n){ var el = form.elements[n]; return (el && el.value) || ""; }
-    function mailtoFallback(){
-      var seg = SEG[current].label;
-      var lines = "Name: "+fv("name")+"\nBusiness: "+fv("business")+"\nSegment: "+seg
-        +"\nEmail: "+fv("email")+"\nPhone: "+fv("phone")+"\n\n"+fv("message");
-      window.location.href = "mailto:mossmankauai@gmail.com?subject="
-        + encodeURIComponent("OceanSafe partner — "+seg+" — claim our spot")
-        + "&body=" + encodeURIComponent(lines);
+    window.__joinTsLoad = renderTs;
+    renderTs();
+
+    function el(id) { return document.getElementById(id); }
+    function val(id) { var e = el(id); return e ? String(e.value || "").trim() : ""; }
+    function show(id, on) { var e = el(id); if (e) e.hidden = !on; }
+    function fail(msg) {
+      if (jErr) { jErr.textContent = msg; jErr.hidden = false; }
+      busy(false);
+      return false;
     }
-    form.addEventListener("submit", function(e){
+    function busy(on) {
+      if (!jBtn) return;
+      jBtn.disabled = on;
+      jBtn.innerHTML = on ? "Setting up…" : 'Start free <span class="arr" aria-hidden="true">&#8594;</span>';
+    }
+    function reason(r) {
+      return r === "rate_limited" ? "Too many signups from your network today — try again tomorrow."
+        : r === "capacity" ? "Self-serve signup is paused — email us and we'll set you up."
+        : r === "bad_email" ? "Enter a valid email."
+        : r === "bad_name" ? "Enter your business name."
+        : null;
+    }
+
+    /* Field set depends on the backbone: the Supabase path is a signed agreement (e-signature +
+       terms + Turnstile, all server-enforced); the worker path prices off a unit count. */
+    function syncFields() {
+      var r = ROUTE[current] || ROUTE.shop, supa = r.kind === "supa";
+      show("jIslandWrap", supa); show("jSigWrap", supa);
+      show("jAgreeWrap", supa);  show("jTsWrap", supa);
+      show("jUnitsWrap", !supa);
+      if (!supa) {
+        var lab = el("jUnitsLabel"), inp = el("jUnits");
+        if (lab) lab.textContent = r.unit;
+        if (inp) inp.placeholder = r.hint;
+      }
+      if (jErr) jErr.hidden = true;
+    }
+    if (typeof setSwaps === "function") {
+      var _setSwaps = setSwaps;
+      setSwaps = function (k) { _setSwaps(k); syncFields(); };
+    }
+    syncFields();
+
+    function live(j, r) {
+      /* No mailer exists, so this panel IS the credential hand-off — the dashboard link is the
+         only key to the page we just published, and closing the tab loses it. Show it as copyable
+         text (not just an href), say plainly that there is no email backup, and never imply one. */
+      var guest = j.page_url || (j.guest_urls && (j.guest_urls.store || j.guest_urls.renter)) || null;
+      var dash = j.dashboard_url || null;
+      var h = "<b>You're live.</b>";
+      if (guest) h += '<p><b>Your page:</b><br><a href="' + guest + '" target="_blank" rel="noopener">' + guest + "</a></p>";
+      if (dash) {
+        h += '<p><b>Your dashboard</b> \u2014 customise your page and download your printable QR code:<br>' +
+          '<a href="' + dash + '" target="_blank" rel="noopener">Open your dashboard \u2192</a></p>' +
+          '<p class="keyline"><b>Save this link now.</b> It is the only key to your page \u2014 ' +
+          'there is no password and no email copy. If you lose it, email us and we will re-issue it.<br>' +
+          '<input id="jKey" class="keybox" type="text" readonly value="' + dash + '" aria-label="Your dashboard link">' +
+          '<button type="button" class="btn btn--ghost" id="jCopy">Copy link</button></p>';
+      }
+      h += '<p>Questions, or want to talk about a paid plan? ' +
+        '<a href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner">Email us</a> \u2014 a real person answers.</p>';
+      jForm.style.display = "none";
+      if (jOk) {
+        jOk.innerHTML = h;
+        jOk.classList.add("show");
+        jOk.focus();
+        var cp = document.getElementById("jCopy");
+        if (cp) cp.addEventListener("click", function () {
+          var box = document.getElementById("jKey");
+          box.select();
+          var done = function () { cp.textContent = "Copied \u2713"; };
+          if (navigator.clipboard) navigator.clipboard.writeText(box.value).then(done, function () {});
+          else { try { document.execCommand("copy"); done(); } catch (_) {} }
+        });
+      }
+    }
+
+    jForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      if(!form.checkValidity()){ form.reportValidity(); return; }
-      if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = "Sending…"; }
-      if(!window.fetch){ mailtoFallback(); if(submitBtn){submitBtn.disabled=false;} return; }
-      /* `current` is the lowercase tab key (shop|hotel|rental|timeshare|cars) — the
-         vocabulary lead-capture validates against. The hidden #leadSegment field carries
-         the human LABEL and is left for the mailto branch. */
-      var payload = { segment: current, name: fv("name"), business: fv("business"),
-        email: fv("email"), phone: fv("phone"), message: fv("message"), _gotcha: fv("_gotcha") };
-      fetch(SB_URL + "/functions/v1/lead-capture", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json", "Authorization":"Bearer " + SB_KEY, "apikey": SB_KEY },
-        body: JSON.stringify(payload)
-      })
-        .then(function(r){ if(r.ok){ showSuccess(); } else { mailtoFallback(); } })
-        .catch(function(){ mailtoFallback(); })
-        .then(function(){ if(submitBtn){ submitBtn.disabled=false; submitBtn.innerHTML='Claim your spot <span class="arr" aria-hidden="true">→</span>'; } });
+      if (jErr) jErr.hidden = true;
+      var r = ROUTE[current] || ROUTE.shop, supa = r.kind === "supa";
+      var name = val("jBiz"), email = val("jEmail");
+      if (name.length < 2) return fail("Enter your business name.");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail("Enter a valid email.");
+
+      var url, headers, body;
+      if (supa) {
+        var sig = val("jSig");
+        if (!sig) return fail("Type your full name to sign.");
+        if (!el("jAgree").checked) return fail("Please agree to the terms to continue.");
+        var tok = (window.turnstile && tsId !== null) ? turnstile.getResponse(tsId) : null;
+        if (!tok) return fail("Please complete the verification box.");
+        url = SB_URL + "/functions/v1/operator-signup-public";
+        headers = { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "apikey": SB_KEY };
+        body = { name: name, email: email, signatureName: sig, agreed: true, tier: "free",
+                 type: r.type, island: val("jIsland") || "kauai", turnstileToken: tok };
+      } else {
+        var units = parseInt(val("jUnits"), 10);
+        if (!units || units < 1) return fail("Enter how many " + r.unit.toLowerCase() + " you have.");
+        url = "/api/self-signup";
+        headers = { "Content-Type": "application/json" };
+        body = { segment: r.segment, name: name, email: email, units: units };
+      }
+
+      busy(true);
+      /* These functions cold-start in a few seconds; the button says "Setting up…" the whole
+         time rather than timing out early and telling the operator it failed when it didn't. */
+      fetch(url, { method: "POST", headers: headers, body: JSON.stringify(body) })
+        .then(function (res) { return res.json().catch(function () { return {}; })
+          .then(function (j) { return { ok: res.ok, j: j }; }); })
+        .then(function (out) {
+          var j = out.j || {};
+          if (!out.ok || j.ok === false || j.error) {
+            if (window.turnstile && tsId !== null) { try { turnstile.reset(tsId); } catch (_) {} }
+            return fail(j.error || reason(j.reason) || "Something went wrong — please try again.");
+          }
+          live(j, r);
+        })
+        .catch(function () { fail("Couldn't reach the server — please try again."); });
     });
   }
 })();
 </script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;onload=__joinTsLoad" async defer></script>
 </body></html>
