@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v255-2026-08-05-merrimans-photo-food-sheet-credit';
+const CACHE_VERSION = 'v256-2026-08-09-join-self-serve';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -185,6 +185,7 @@ if (workbox) {
     ({ url }) => url.origin === self.location.origin && (
       /^\/d\//.test(url.pathname) ||
       /^\/creator/.test(url.pathname) ||
+      url.pathname === '/join' || url.pathname === '/join.html' ||
       url.pathname === '/assets/creator-kit.js' ||
       /^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)),
     new workbox.strategies.NetworkFirst({
