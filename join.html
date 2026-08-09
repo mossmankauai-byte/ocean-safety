@@ -1094,9 +1094,18 @@
 
     /* Turnstile gates the Supabase segments — the server verifies the token there, so the widget
        is shown only where it is actually enforced rather than as decoration. */
+    var tsBroken = false;
     function renderTs() {
       if (tsId !== null || !window.turnstile) return;
-      try { tsId = turnstile.render("#jTs", { sitekey: TS_SITEKEY }); } catch (e) {}
+      /* error-callback fires for a sitekey that is not valid for the domain being served
+         (Turnstile 110200) — on that host there is no box to complete, so the submit copy has
+         to say something true instead of pointing at a widget that never rendered. */
+      try {
+        tsId = turnstile.render("#jTs", {
+          sitekey: TS_SITEKEY,
+          "error-callback": function () { tsBroken = true; return true; }
+        });
+      } catch (e) { tsBroken = true; }
     }
     window.__joinTsLoad = renderTs;
     renderTs();
@@ -1189,8 +1198,10 @@
         var sig = val("jSig");
         if (!sig) return fail("Type your full name to sign.");
         if (!el("jAgree").checked) return fail("Please agree to the terms to continue.");
-        var tok = (window.turnstile && tsId !== null) ? turnstile.getResponse(tsId) : null;
-        if (!tok) return fail("Please complete the verification box.");
+        var tok = (window.turnstile && tsId !== null && !tsBroken) ? turnstile.getResponse(tsId) : null;
+        if (!tok) return fail(tsBroken || tsId === null
+          ? "The verification step couldn't load on this address — open oceansafety.app/join and try there, or email mossmankauai@gmail.com and we'll set you up."
+          : "Please complete the verification box.");
         url = SB_URL + "/functions/v1/operator-signup-public";
         headers = { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "apikey": SB_KEY };
         body = { name: name, email: email, signatureName: sig, agreed: true, tier: "free",
