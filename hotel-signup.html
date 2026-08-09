@@ -321,7 +321,21 @@ $("f").addEventListener("submit",async e=>{
     const out=await r.json();
     if(!r.ok) throw new Error(out.error||"Something went wrong.");
     if(out.mode==="paid"){ window.location.href=out.url; return; }        // → Square checkout
-    // free → email a magic link that publishes the page on click
+    // free → provisioned LIVE on-page (no email step). Show the live page + dashboard links.
+    if(out.mode==="free_live"){
+      $("f").style.display="none";
+      $("ok").innerHTML="<h2>You're live</h2>"
+        +"<p><b>"+(name||"Your page")+"</b> is on OceanSafe — free, no card, no email to wait on.</p>"
+        +"<p><b>Your guide page:</b><br><a id='livePage' target='_blank' rel='noopener'></a></p>"
+        +"<p><b>Your dashboard</b> — customize your page and download your printable QR code:<br>"
+        +"<a id='liveDash' target='_blank' rel='noopener'>Open your dashboard &rarr;</a></p>"
+        +"<p class='muted'>Bookmark the dashboard link — it's your private key to this page.</p>";
+      var lp=document.getElementById("livePage"); if(lp){ lp.href=out.page_url; lp.textContent=out.page_url; }
+      var ld=document.getElementById("liveDash"); if(ld){ ld.href=out.dashboard_url; }
+      $("ok").classList.add("show");
+      return;
+    }
+    // legacy fallback (server builds before 2026-08-09 returned mode:"free" + a magic link)
     const { error }=await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: CLAIM_URL } });
     if(error) throw new Error(error.message);
     $("f").style.display="none";
