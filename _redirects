@@ -53,6 +53,7 @@
 /api/ts-leads/*  /.netlify/functions/ts-leads/:splat  200
 /api/ts-promos/* /.netlify/functions/ts-promos/:splat 200
 /api/ts-signup   /.netlify/functions/ts-signup   200
+/api/self-signup /.netlify/functions/self-signup 200
 /api/ts-upgrade  /.netlify/functions/ts-upgrade  200
 /onboard         /stay-close-signup.html         200
 
