@@ -369,7 +369,7 @@
   @media (prefers-reduced-motion:reduce){.stickybar{transition:none}.btn,.tile,.shot,.stepcard,.tile--feature .ft-media{transition:none}}
 </style>
 <noscript><style>.reveal{opacity:1!important;transform:none!important}.segglide{display:none}</style></noscript>
-<style>.form-err{color:#b4452f;font-weight:700;margin:.4rem 0 0;grid-column:1/-1}.jcheck{display:flex;gap:.55rem;align-items:flex-start;font-weight:600;line-height:1.45;cursor:pointer}.jcheck input{width:auto;min-width:0;min-height:0;height:auto;padding:0;flex:0 0 auto;margin-top:.25rem;accent-color:var(--aqua)}#jContact{grid-column:1/-1}#jTs{min-height:65px}.keyline{margin-top:.9rem}.keybox{width:100%;font:600 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:.7rem .85rem;border:1px solid var(--line-2);border-radius:var(--r-sm);margin:.45rem 0 .5rem;background:#fff}</style>
+<style>.form-err{color:#b4452f;font-weight:700;margin:.4rem 0 0;grid-column:1/-1}.jcheck{display:flex;gap:.55rem;align-items:flex-start;font-weight:600;line-height:1.45;cursor:pointer}.jcheck input{width:auto;min-width:0;min-height:0;height:auto;padding:0;flex:0 0 auto;margin-top:.25rem;accent-color:var(--aqua)}#jContact{grid-column:1/-1}#jTs{min-height:65px}.opt{font-weight:600;color:var(--muted);font-size:12px}.hexrow{display:flex;gap:.5rem;align-items:center}.hexrow input[type=color]{width:46px;flex:0 0 46px;padding:2px}.jplans{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}@media(max-width:520px){.jplans{grid-template-columns:1fr}}.jplan{display:block;border:1px solid var(--line-2);border-radius:var(--r-sm);padding:.7rem .8rem;cursor:pointer;font-weight:700}.jplan.on{border-color:var(--aqua);box-shadow:0 0 0 2px rgba(10,139,168,.15)}.jplan span{display:block;font-weight:600;font-size:12px;color:var(--muted);margin-top:.2rem}.jplan input{width:auto;min-height:0;margin-right:.4rem}.jprice{grid-column:1/-1;font-weight:700;margin:.2rem 0 0}.segbar{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.segbar::-webkit-scrollbar{display:none}@media(max-width:760px){.segbar{justify-content:flex-start}.segbtn{flex:0 0 auto}}.keyline{margin-top:.9rem}.keybox{width:100%;font:600 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:.7rem .85rem;border:1px solid var(--line-2);border-radius:var(--r-sm);margin:.45rem 0 .5rem;background:#fff}</style>
 </head>
 <body>
 
@@ -433,6 +433,14 @@
           <button class="segbtn" type="button" role="radio" id="seg-cars" aria-checked="false" data-seg="cars" tabindex="-1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11l1.6-4.3A2 2 0 018.5 5.4h7a2 2 0 011.9 1.3L19 11"/><path d="M4 11h16a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4a1 1 0 011-1z"/><path d="M6.5 17v1.6a1 1 0 01-1 1h-1a1 1 0 01-1-1V17M20.5 17v1.6a1 1 0 01-1 1h-1a1 1 0 01-1-1V17"/><circle cx="7" cy="14" r="1"/><circle cx="17" cy="14" r="1"/></svg>
             <span>Cars</span>
+          </button>
+          <button class="segbtn" type="button" role="radio" id="seg-townad" aria-checked="false" data-seg="townad" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.6 7-11a7 7 0 10-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            <span>Town<span class="seglabel-long"> ad</span></span>
+          </button>
+          <button class="segbtn" type="button" role="radio" id="seg-onlineshop" aria-checked="false" data-seg="onlineshop" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l1.2 13H4.8L6 7z"/><path d="M9 7V5.5a3 3 0 016 0V7"/></svg>
+            <span>Online<span class="seglabel-long"> shop</span></span>
           </button>
         </div>
         <span class="sr-only" role="status" aria-live="polite" id="segStatus"></span>
@@ -600,6 +608,8 @@
           <button class="segbtn" type="button" role="radio" aria-checked="false" data-seg="rental" tabindex="-1"><span>Rental<span class="seglabel-long">s</span></span></button>
           <button class="segbtn" type="button" role="radio" aria-checked="false" data-seg="timeshare" tabindex="-1"><span>Timeshare</span></button>
           <button class="segbtn" type="button" role="radio" aria-checked="false" data-seg="cars" tabindex="-1"><span>Cars</span></button>
+          <button class="segbtn" type="button" role="radio" aria-checked="false" data-seg="townad" tabindex="-1"><span>Town<span class="seglabel-long"> ad</span></span></button>
+          <button class="segbtn" type="button" role="radio" aria-checked="false" data-seg="onlineshop" tabindex="-1"><span>Online<span class="seglabel-long"> shop</span></span></button>
         </div>
       </div>
     </div>
@@ -655,6 +665,38 @@
                 <option value="hawaii">Hawai&#699;i</option>
               </select>
             </div>
+            <div class="fld" id="jWebWrap">
+              <label for="jWeb">Website <span class="opt">optional</span></label>
+              <input id="jWeb" type="url" inputmode="url" placeholder="https://your-site.com">
+            </div>
+            <div class="fld" id="jHexWrap">
+              <label for="jHexText">Brand colour <span class="opt">optional</span></label>
+              <span class="hexrow"><input id="jHex" type="color" value="#0f4c5c" aria-label="Pick your brand colour">
+              <input id="jHexText" type="text" maxlength="7" placeholder="#0f4c5c"></span>
+            </div>
+            <div class="fld" id="jCatWrap" hidden>
+              <label for="jCat">What kind of business? <span class="req" aria-hidden="true">*</span></label>
+              <select id="jCat">
+                <option value="food">Restaurant / food</option><option value="drinks">Bar / drinks</option>
+                <option value="coffee">Coffee</option><option value="farmers">Farmers market</option>
+                <option value="crafts">Shop / crafts / gifts</option><option value="grocery">Grocery / market</option>
+                <option value="gas">Gas / convenience</option>
+              </select>
+            </div>
+            <div class="fld" id="jAddrWrap" hidden>
+              <label for="jAddr">Street address <span class="req" aria-hidden="true">*</span></label>
+              <input id="jAddr" type="text" maxlength="200" placeholder="4-1345 Kuhio Hwy, Kapaʻa">
+            </div>
+            <div class="fld fld--full" id="jPlanWrap" hidden>
+              <label>Choose your plan</label>
+              <div class="jplans">
+                <label class="jplan on" id="jPlanFree"><input type="radio" name="jtier" value="free" checked>
+                  <b>Free</b><span>Your listing, map pin, QR and dashboard.</span></label>
+                <label class="jplan" id="jPlanPaid"><input type="radio" name="jtier" value="paid">
+                  <b>$50/mo</b><span>Adds a timed promotion and the full QR set.</span></label>
+              </div>
+            </div>
+            <p class="jprice" id="jPrice" hidden></p>
             <div class="fld" id="jUnitsWrap" hidden>
               <label for="jUnits"><span id="jUnitsLabel">Rooms</span> <span class="req" aria-hidden="true">*</span></label>
               <input id="jUnits" type="number" min="1" step="1" inputmode="numeric" placeholder="How many?">
@@ -668,7 +710,6 @@
             </div>
             <div class="fld fld--full" id="jTsWrap"><div id="jTs"></div></div>
             <p class="form-err" id="jErr" role="alert" hidden></p>
-            <div id="jContact" hidden><p><b>Hotels are on a paid plan.</b> One flat monthly price for the whole property, however many rooms you have &mdash; so we set it up with you rather than through this form. Email <a href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20hotel%20plan">mossmankauai@gmail.com</a> and we&#39;ll confirm the price and get your property running.</p></div>
             <div class="form-cta" id="jCta">
               <button class="btn btn--solid" type="submit" id="primaryCta">Start free <span class="arr" aria-hidden="true">&#8594;</span></button>
               <a class="btn btn--ghost" id="secondaryCta" href="mailto:mossmankauai@gmail.com?subject=OceanSafe%20partner%20%E2%80%94%20question">Rather talk first? &#8599;</a>
@@ -982,6 +1023,66 @@
       secondary: "https://oceansafety.app",
       label: "Cars", announce: "Showing car fleet details and pricing.",
       showStore: true, showHotel: false, showTimeshare: false, showSecondary: true
+    },
+    townad: {
+      "headline": "every visitor checks.",
+      "lede": "Your listing in the beach-safety guide visitors open before they head out — a pin on the Town map, a printable QR for your counter, and a dashboard to make the guide your own.",
+      "what-head": "Be on the map visitors already have open.",
+      "what-sub": "Visitors decide where to eat and shop while they are checking the water. Your pin sits in the Town tab of the app they already trust.",
+      "feature-h": "A co-branded page with your listing",
+      "feature-p": "oceansafety.app/p/your-business — your name, live daily conditions, and a map pin visitors can tap for directions.",
+      "offer-kicker": "For Kauaʻi town businesses",
+      "offer-title": "A pin on the map, not an ad nobody asked for.",
+      "offer-sub": "Your business in the Town tab, with a printable QR for the counter and your own dashboard.",
+      "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your pin in the Town tab</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>A printable QR for your counter</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Live daily conditions on your page</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your own dashboard</li>',
+      "card-tag": "Town listing",
+      "card-amt": "Free to start",
+      "card-per": "no card needed",
+      "card-line": "Free covers your listing, your map pin, your QR and your dashboard. Tours or activities sold through your page are split with us. The paid plan adds a timed promotion and the full QR set.",
+      "card-note": "No contract and no card. Your page is live the moment you finish, and you can change anything later from your dashboard.",
+      "card-list": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your pin in the Town tab</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Print-ready QR for your counter</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>',
+      "secondary-label": "Try the live app ↗",
+      "final-head": "Be the local name on the beach app.",
+      "sticky-title": "Get your business on the map",
+      "sticky-sub": "A pin in the Town tab · live in minutes",
+      primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20town%20listing",
+      secondary: "https://oceansafety.app",
+      label: "Town ad",
+      announce: "Showing town listing details and pricing.",
+      showStore: true,
+      showHotel: false,
+      showTimeshare: false,
+      showSecondary: true
+    },
+    onlineshop: {
+      "headline": "every visitor checks.",
+      "lede": "Sell your products to visitors before they hit the beach — everything in a town listing, plus your storefront running inside the app. We take 0% of your sales.",
+      "what-head": "Your storefront, inside the app they already opened.",
+      "what-sub": "Visitors buy while they are planning the day, not after it. Your products sit one tap from the conditions they came to check.",
+      "feature-h": "A co-branded page with your storefront",
+      "feature-p": "oceansafety.app/p/your-shop — your name, live daily conditions, and your products for sale in one trusted place.",
+      "offer-kicker": "For shops selling online",
+      "offer-title": "Your storefront in the app, and we take none of it.",
+      "offer-sub": "Everything in a town listing, plus your products selling inside the app. Sales are paid into your own Square.",
+      "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your storefront inside the app</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>We take 0% of your sales</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your pin in the Town tab</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>The full printable QR set</li>',
+      "card-tag": "Online shop",
+      "card-amt": "$100",
+      "card-per": "per month",
+      "card-line": "Your storefront in the app, plus the listing, the map pin and the full QR set. We take 0% of your sales — they are paid into your own Square. Billed monthly, cancel anytime.",
+      "card-note": "Billed monthly and you can cancel anytime. Your page is live as soon as your payment goes through.",
+      "card-list": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your storefront inside the app</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>0% taken on your sales</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>',
+      "secondary-label": "Try the live app ↗",
+      "final-head": "Sell to visitors before they reach the sand.",
+      "sticky-title": "Put your shop in the app",
+      "sticky-sub": "0% on your sales · live in minutes",
+      primary: "mailto:mossmankauai@gmail.com?subject=OceanSafe%20online%20shop",
+      secondary: "https://oceansafety.app",
+      label: "Online shop",
+      announce: "Showing online shop details and pricing.",
+      showStore: true,
+      showHotel: false,
+      showTimeshare: false,
+      showSecondary: true
     }
   };
 
@@ -1079,14 +1180,23 @@
   var SB_URL = "https://arndnljtmjfsnzcpcuen.supabase.co";
   var SB_KEY = "sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um";
   var TS_SITEKEY = "0x4AAAAAAD1KovJ4T8LFTTxL";
+  /* tier: "free" = free self-serve · "paid" = paid-only, straight to Square checkout ·
+     "choice" = the operator picks. Paid prices are named here because you cannot ask
+     somebody to pay without showing the price — the rest of the page stays figure-free.
+     Retail and rental paid plans are NOT self-serve (canon), so those stay free-here /
+     email-us, exactly as the old signup page had them. */
   var ROUTE = {
-    shop:      { kind: "supa",   type: "retail" },
-    hotel:     { kind: "contact" },   /* canon 2026-08-05: hotels are PAID, one flat tier —
-                                          no free hotel tier may be offered anywhere */
-    rental:    { kind: "supa",   type: "rental" },
-    timeshare: { kind: "worker", segment: "timeshare", unit: "Rooms",    hint: "How many rooms?" },
-    cars:      { kind: "worker", segment: "cars",      unit: "Vehicles", hint: "How many vehicles?" }
+    shop:       { kind: "supa",   type: "retail",     tier: "free" },
+    hotel:      { kind: "supa",   type: "hotel",      tier: "paid",   price: "$649/mo" },
+    rental:     { kind: "supa",   type: "rental",     tier: "free" },
+    timeshare:  { kind: "worker", segment: "timeshare", unit: "Rooms",    hint: "How many rooms?" },
+    cars:       { kind: "worker", segment: "cars",      unit: "Vehicles", hint: "How many vehicles?" },
+    townad:     { kind: "supa",   type: "townad",     tier: "choice", price: "$50/mo", pin: true },
+    onlineshop: { kind: "supa",   type: "onlineshop", tier: "paid",   price: "$100/mo" }
   };
+  /* hotel-signup.html redirects here with its ?type=, so honour both spellings */
+  var TYPE2SEG = { hotel:"hotel", rental:"rental", retail:"shop", shop:"shop",
+                   townad:"townad", onlineshop:"onlineshop", timeshare:"timeshare", cars:"cars" };
 
   var jForm = document.getElementById("joinForm");
   if (jForm) {
@@ -1114,6 +1224,10 @@
     renderTs();
 
     function el(id) { return document.getElementById(id); }
+    function chosenTier() {
+      var c = document.querySelector('input[name=jtier]:checked');
+      return c ? c.value : "free";
+    }
     function val(id) { var e = el(id); return e ? String(e.value || "").trim() : ""; }
     function show(id, on) { var e = el(id); if (e) e.hidden = !on; }
     function fail(msg) {
@@ -1124,7 +1238,11 @@
     function busy(on) {
       if (!jBtn) return;
       jBtn.disabled = on;
-      jBtn.innerHTML = on ? "Setting up…" : 'Start free <span class="arr" aria-hidden="true">&#8594;</span>';
+      var rr = ROUTE[current] || ROUTE.shop;
+      var paying = rr.tier === "paid" || (rr.tier === "choice" && chosenTier() === "paid");
+      jBtn.innerHTML = on ? "Setting up…"
+        : (paying ? 'Continue to secure payment <span class="arr" aria-hidden="true">&#8594;</span>'
+                  : 'Start free <span class="arr" aria-hidden="true">&#8594;</span>');
     }
     function reason(r) {
       return r === "rate_limited" ? "Too many signups from your network today — try again tomorrow."
@@ -1138,28 +1256,61 @@
        terms + Turnstile, all server-enforced); the worker path prices off a unit count. */
     function syncFields() {
       var r = ROUTE[current] || ROUTE.shop, supa = r.kind === "supa";
-      /* A contact-only segment has no free tier to self-serve, so the whole form is replaced
-         by a note rather than collecting details we would only email about. */
-      var contact = r.kind === "contact";
-      show("jContact", contact);
-      ["jBizWrap","jEmailWrap","jIslandWrap","jUnitsWrap","jSigWrap","jAgreeWrap","jTsWrap","jCta"]
-        .forEach(function (id) { var e = el(id); if (e) e.hidden = contact; });
-      if (contact) { if (jErr) jErr.hidden = true; return; }
       show("jIslandWrap", supa); show("jSigWrap", supa);
       show("jAgreeWrap", supa);  show("jTsWrap", supa);
+      show("jWebWrap", supa);    show("jHexWrap", supa);
       show("jUnitsWrap", !supa);
+      show("jCatWrap", !!r.pin); show("jAddrWrap", !!r.pin);
+      show("jPlanWrap", r.tier === "choice");
+      var paidOnly = r.tier === "paid";
+      show("jPrice", paidOnly);
+      if (paidOnly && el("jPrice")) {
+        el("jPrice").textContent = r.price + " — you'll finish on Square's secure checkout, billed today and monthly after. Cancel anytime.";
+      }
       if (!supa) {
         var lab = el("jUnitsLabel"), inp = el("jUnits");
         if (lab) lab.textContent = r.unit;
         if (inp) inp.placeholder = r.hint;
       }
+      busy(false);
       if (jErr) jErr.hidden = true;
+    }
+    /* the plan cards need the same selected-state treatment the segbar buttons have */
+    Array.prototype.forEach.call(document.querySelectorAll('input[name=jtier]'), function (i) {
+      i.addEventListener("change", function () {
+        var f = el("jPlanFree"), pd = el("jPlanPaid");
+        if (f) f.classList.toggle("on", chosenTier() === "free");
+        if (pd) pd.classList.toggle("on", chosenTier() === "paid");
+        busy(false);
+      });
+    });
+    /* keep the colour swatch and its hex box in step */
+    var hx = el("jHex"), hxT = el("jHexText");
+    if (hx && hxT) {
+      hxT.value = hx.value;
+      hx.addEventListener("input", function () { hxT.value = hx.value; });
+      hxT.addEventListener("input", function () { if (/^#?[0-9a-fA-F]{6}$/.test(hxT.value.trim())) hx.value = "#" + hxT.value.trim().replace(/^#/, ""); });
     }
     if (typeof setSwaps === "function") {
       var _setSwaps = setSwaps;
       setSwaps = function (k) { _setSwaps(k); syncFields(); };
     }
     syncFields();
+
+    /* Deep link. hotel-signup.html now redirects here carrying its ?type=, so /join?type=hotel
+       (and ?seg=cars) must land on the right tab instead of the default Shop tab — otherwise
+       every brochure QR and email link pointing at the old page lands a hotel on a shop form. */
+    (function () {
+      var qp = new URLSearchParams(location.search);
+      var want = TYPE2SEG[String(qp.get("type") || qp.get("seg") || "").toLowerCase()];
+      if (!want || !ROUTE[want]) return;
+      var btn = document.querySelector('#segbar [data-seg="' + want + '"]');
+      if (btn) btn.click();
+      if (qp.get("type")) {
+        var off = document.getElementById("offer");
+        if (off) off.scrollIntoView({ block: "start" });
+      }
+    })();
 
     function live(j, r) {
       /* No mailer exists, so this panel IS the credential hand-off — the dashboard link is the
@@ -1199,7 +1350,6 @@
       e.preventDefault();
       if (jErr) jErr.hidden = true;
       var r = ROUTE[current] || ROUTE.shop, supa = r.kind === "supa";
-      if (r.kind === "contact") return false;
       var name = val("jBiz"), email = val("jEmail");
       if (name.length < 2) return fail("Enter your business name.");
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail("Enter a valid email.");
@@ -1213,10 +1363,16 @@
         if (!tok) return fail(tsBroken || tsId === null
           ? "The verification box didn't load here. Email mossmankauai@gmail.com and we'll set you up by hand."
           : "Please complete the verification box.");
+        var tier = r.tier === "choice" ? chosenTier() : (r.tier || "free");
+        if (r.pin && !val("jAddr")) return fail("Enter your street address — it places your pin on the map.");
         url = SB_URL + "/functions/v1/operator-signup-public";
         headers = { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "apikey": SB_KEY };
-        body = { name: name, email: email, signatureName: sig, agreed: true, tier: "free",
-                 type: r.type, island: val("jIsland") || "kauai", turnstileToken: tok };
+        body = { name: name, email: email, signatureName: sig, agreed: true, tier: tier,
+                 type: r.type, island: val("jIsland") || "kauai", turnstileToken: tok,
+                 website: val("jWeb") || null, hex: val("jHexText") || null };
+        /* The server geocodes the address itself and re-checks the category against its own
+           allowlist — a caller that could post lat/lon could drop a pin on a competitor. */
+        if (r.pin) { body.category = val("jCat"); body.address = val("jAddr"); }
       } else {
         var units = parseInt(val("jUnits"), 10);
         if (!units || units < 1) return fail("Enter how many " + r.unit.toLowerCase() + " you have.");
@@ -1233,6 +1389,8 @@
           .then(function (j) { return { ok: res.ok, j: j }; }); })
         .then(function (out) {
           var j = out.j || {};
+          /* paid → Square hosts the checkout; the webhook flips the draft live afterwards */
+          if (j.mode === "paid" && j.url) { window.location.href = j.url; return; }
           if (!out.ok || j.ok === false || j.error) {
             if (window.turnstile && tsId !== null) { try { turnstile.reset(tsId); } catch (_) {} }
             return fail(j.error || reason(j.reason) || "Something went wrong — please try again.");
