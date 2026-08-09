@@ -175,9 +175,9 @@ const TEST_BYPASS=new URLSearchParams(location.search).has("test");
 if(TEST_BYPASS){var _tb=document.createElement("div");_tb.textContent="TEST MODE — Square pay gate bypassed · paid routes as free (no charge)";_tb.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#a8862f;color:#fff;font:700 12px/1.35 system-ui;padding:6px 12px;text-align:center";document.body.prepend(_tb);}
 const T={
   hotel:{h1:"Put your hotel on the beach-safety guide your guests already open.",
-    sub:"Set it up yourself in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. Start free.",
+    sub:"Set it up in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. One flat monthly price for the whole property.",
     nameLabel:"Property name", namePh:"Kauaʻi Shores Resort",
-    freePr:"<b>$0</b> — the co-branded guide, one featured amenity, and your full analytics. Completely free.",
+    freePr:"",
     paidPr:"<b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. Billed monthly, cancel anytime.", paidSelfServe:true},
   rental:{h1:"Put your rentals & tours inside the guide guests already open.",
     sub:"Your gear, tours, and activities in front of every guest checking the beach — with your own page, QR, and analytics. Free to join.",
@@ -208,7 +208,8 @@ document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Ge
 // Online Shop ($100/mo) is a single paid tier — no free option (the server routes a free
 // online_shop attempt to Town Ad). Town Ad shows BOTH plans since the 2026-07-18
 // restructure: free listing with a 50/50 split on page sales, or $50/mo adding the promo.
-if(TYPE==="onlineshop"){
+// Hotels joined online_shop as paid-only: one flat tier, ruled by Nick 2026-08-05.
+if(TYPE==="onlineshop"||TYPE==="hotel"){
   const pf=$("planFree"); if(pf) pf.style.display="none";
   const chooseLbl=document.querySelector("form#f label.first"); if(chooseLbl) chooseLbl.style.display="none";
   const paidInput=$("planPaid").querySelector("input"); paidInput.checked=true;
@@ -292,6 +293,7 @@ $("f").addEventListener("submit",async e=>{
   // redirect happens. online_shop has no free tier, so there's nothing to route it to.
   if(TEST_BYPASS && tier==="paid"){
     if(TYPE==="onlineshop") return showErr("TEST MODE: pay gate bypassed. Online Shop is paid-only ($100/mo) — no free tier to route through, so nothing provisions without a charge.");
+    if(TYPE==="hotel") return showErr("TEST MODE: pay gate bypassed. Hotels are paid-only ($649/mo flat) — no free tier to route through, so nothing provisions without a charge.");
     tier="free";
   }
   const name=$("name").value.trim(), email=$("email").value.trim(), sig=$("sig").value.trim();
