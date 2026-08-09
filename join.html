@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Become a Kauaʻi Safety Partner — OceanSafe</title>
-<link rel="icon" href="https://oceansafety.app/favicon.ico">
+<link rel="icon" href="/icons/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"><link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="theme-color" content="#0f4c5c">
 <meta name="description" content="Put your shop, hotel, or rental on the beach-safety app every Kauaʻi visitor checks before the water. Live conditions, co-branded QR cards, and an in-app store you earn from.">
 <meta property="og:title" content="Become a Kauaʻi Safety Partner — OceanSafe">
@@ -369,7 +369,7 @@
   @media (prefers-reduced-motion:reduce){.stickybar{transition:none}.btn,.tile,.shot,.stepcard,.tile--feature .ft-media{transition:none}}
 </style>
 <noscript><style>.reveal{opacity:1!important;transform:none!important}.segglide{display:none}</style></noscript>
-<style>.form-err{color:#b3261e;font-weight:700;margin:.4rem 0 0}.jcheck{display:flex;gap:.55rem;align-items:flex-start;font-weight:600;line-height:1.45;cursor:pointer}.jcheck input{margin-top:.25rem;flex:none}#jTs{min-height:65px}.keyline{margin-top:.9rem}.keybox{width:100%;font:600 13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:.55rem .6rem;border:1px solid rgba(0,0,0,.18);border-radius:8px;margin:.45rem 0 .5rem;background:#fff}</style>
+<style>.form-err{color:#b4452f;font-weight:700;margin:.4rem 0 0;grid-column:1/-1}.jcheck{display:flex;gap:.55rem;align-items:flex-start;font-weight:600;line-height:1.45;cursor:pointer}.jcheck input{width:auto;min-width:0;min-height:0;height:auto;padding:0;flex:0 0 auto;margin-top:.25rem;accent-color:var(--aqua)}#jContact{grid-column:1/-1}#jTs{min-height:65px}.keyline{margin-top:.9rem}.keybox{width:100%;font:600 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:.7rem .85rem;border:1px solid var(--line-2);border-radius:var(--r-sm);margin:.45rem 0 .5rem;background:#fff}</style>
 </head>
 <body>
 
@@ -1188,7 +1188,7 @@
         if (cp) cp.addEventListener("click", function () {
           var box = document.getElementById("jKey");
           box.select();
-          var done = function () { cp.textContent = "Copied \u2713"; };
+          var done = function () { cp.textContent = "Copied"; };
           if (navigator.clipboard) navigator.clipboard.writeText(box.value).then(done, function () {});
           else { try { document.execCommand("copy"); done(); } catch (_) {} }
         });
