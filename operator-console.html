@@ -563,7 +563,7 @@
 
       <div class="property">
         <div>
-          <h1>Your Hotel</h1>
+          <h1 id="opName">Your Hotel</h1>
           <div class="meta">slug <code style="font-size:11px;background:var(--sea-tint);padding:1px 5px;border-radius:4px">your-hotel</code> · North Shore · 252 keys · your property only — no cross-hotel comparison</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -706,7 +706,7 @@
       <div class="hm-scrim" aria-hidden="true"></div>
       <div class="hm-inner">
         <div class="hm-copy">
-          <div class="hm-kicker">Your Hotel · co-branded guest guide</div>
+          <div class="hm-kicker" id="opKicker">Your Hotel · co-branded guest guide</div>
           <h2>Your guests&rsquo; beach guide &mdash; safety first, your property woven in.</h2>
           <p>Every guest who scans the in-room QR gets live surf, lifeguard and hazard calls for the island&rsquo;s most-visited beaches &mdash; with your amenities, your picks and your offers carried along. This console is where you shape what they see.</p>
           <a class="hm-cta" data-guide-link href="https://oceansafety.app/?ref=your-hotel" target="_blank" rel="noopener">
@@ -3312,6 +3312,50 @@ if(DEMO){
       })
       .catch(removeAll);
   }catch(e){ try{ removeAll(); }catch(_){} }
+})();
+</script>
+<script>
+/* Render the console AS THE OPERATOR who opened it.
+   Until now "Your Hotel" was hardcoded and nothing ever replaced it, so a real partner —
+   including one who had just paid — always saw the sample console. Identity came only from
+   the static file partner-config/<slug>.json, which exists solely for hand-built partners;
+   every self-serve partner lives in Supabase, so that file 404s and the page stayed generic.
+   Resolve the static file FIRST (it still wins for hand-built partners), then fall back to
+   the public get_partner_page RPC. No slug = the sample console, deliberately unchanged. */
+(function(){
+  var qp = new URLSearchParams(location.search);
+  var slug = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
+  if (!slug || slug === 'demo' || !/^[a-z0-9-]{1,64}$/.test(slug)) return;
+
+  var SB = 'https://arndnljtmjfsnzcpcuen.supabase.co';
+  var PK = 'sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um';
+
+  function paint(name){
+    if (!name) return;
+    var h = document.getElementById('opName');
+    if (h) h.textContent = name;
+    var k = document.getElementById('opKicker');
+    if (k) k.textContent = name + ' \u00b7 co-branded guest guide';
+    /* the title said "(Preview)" even for a paying partner */
+    document.title = name + ' \u00b7 OceanSafe Operator Console';
+  }
+
+  fetch('partner-config/' + slug + '.json', { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(cfg){
+      if (cfg && cfg.name) { paint(cfg.name); return null; }
+      return fetch(SB + '/rest/v1/rpc/get_partner_page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + PK, 'apikey': PK },
+        body: JSON.stringify({ p_slug: slug })
+      }).then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(rows){
+          var row = Array.isArray(rows) ? rows[0] : rows;
+          if (row && row.name) paint(row.name);
+          return null;
+        });
+    })
+    .catch(function(){ /* leave the sample copy in place rather than half-render */ });
 })();
 </script>
 </body>
