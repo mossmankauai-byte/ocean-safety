@@ -83,8 +83,17 @@
   .hero__media video,.hero__media img{width:100%;height:100%;object-fit:cover;object-position:center 44%}
   .hero__scrim{position:absolute;inset:0;z-index:-1;
     background:
-      radial-gradient(118% 84% at 16% 102%, rgba(7,18,24,.80), rgba(7,18,24,0) 56%),
-      linear-gradient(180deg, rgba(13,27,34,.46) 0%, rgba(13,27,34,.10) 24%, rgba(13,27,34,.22) 54%, rgba(7,18,24,.88) 100%);
+      radial-gradient(120% 90% at 14% 100%, rgba(7,18,24,.86), rgba(7,18,24,0) 60%),
+      linear-gradient(95deg, rgba(7,18,24,.80) 0%, rgba(7,18,24,.62) 34%, rgba(7,18,24,.18) 66%, rgba(7,18,24,0) 86%),
+      linear-gradient(180deg, rgba(13,27,34,.52) 0%, rgba(13,27,34,.36) 26%, rgba(13,27,34,.34) 58%, rgba(7,18,24,.90) 100%);
+  }
+  /* On a phone the text spans the full width, so the left-column wash cannot carry it alone. */
+  @media(max-width:760px){
+    .hero__scrim{
+      background:
+        radial-gradient(130% 95% at 20% 100%, rgba(7,18,24,.88), rgba(7,18,24,.10) 70%),
+        linear-gradient(180deg, rgba(7,18,24,.58) 0%, rgba(7,18,24,.52) 30%, rgba(7,18,24,.50) 60%, rgba(7,18,24,.92) 100%);
+    }
   }
   /* subtle top vignette so nav reads on bright frames */
   .hero__scrim::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,18,24,.30),transparent 18%)}
@@ -93,7 +102,7 @@
   .hero h1{
     color:#fff;font-weight:800;letter-spacing:-.028em;line-height:1.02;
     font-size:var(--fs-display);margin:14px 0 0;max-width:15ch;
-    text-shadow:0 2px 36px rgba(7,18,24,.55);
+    text-shadow:0 1px 2px rgba(7,18,24,.55), 0 2px 20px rgba(7,18,24,.38);
   }
   .hero h1 .swap{color:var(--gold-soft);transition:opacity .3s var(--ease)}
   .hero .lede{color:rgba(255,255,255,.93);font-size:clamp(16.5px,1.5vw,20px);max-width:50ch;margin-top:20px;line-height:1.55;text-shadow:0 1px 18px rgba(7,18,24,.6)}
@@ -331,7 +340,7 @@
 
   /* ---------- testimonial / editorial ---------- */
   .quote{max-width:60ch;margin:0 auto;text-align:center}
-  .quote .qmark{font-size:64px;line-height:0;color:var(--gold);font-family:Georgia,serif;display:block;height:30px}
+  .quote .qmark{font-size:64px;line-height:0;color:var(--gold);font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;display:block;height:30px}
   .quote blockquote{font-size:clamp(22px,2.6vw,32px);font-weight:600;letter-spacing:-.012em;line-height:1.34;color:var(--ink);text-wrap:balance}
   .quote cite{display:block;margin-top:20px;font-style:normal;font-size:14.5px;color:var(--muted);font-weight:600}
 
@@ -369,7 +378,7 @@
   @media (prefers-reduced-motion:reduce){.stickybar{transition:none}.btn,.tile,.shot,.stepcard,.tile--feature .ft-media{transition:none}}
 </style>
 <noscript><style>.reveal{opacity:1!important;transform:none!important}.segglide{display:none}</style></noscript>
-<style>.form-err{color:#b4452f;font-weight:700;margin:.4rem 0 0;grid-column:1/-1}.jcheck{display:flex;gap:.55rem;align-items:flex-start;font-weight:600;line-height:1.45;cursor:pointer}.jcheck input{width:auto;min-width:0;min-height:0;height:auto;padding:0;flex:0 0 auto;margin-top:.25rem;accent-color:var(--aqua)}#jContact{grid-column:1/-1}#jTs{min-height:65px}#joinForm [hidden]{display:none!important}.opt{font-weight:600;color:var(--muted);font-size:12px}.hexrow{display:flex;gap:.5rem;align-items:center}.hexrow input[type=color]{width:46px;flex:0 0 46px;padding:2px}.jplans{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}@media(max-width:520px){.jplans{grid-template-columns:1fr}}.jplan{display:block;border:1px solid var(--line-2);border-radius:var(--r-sm);padding:.7rem .8rem;cursor:pointer;font-weight:700}.jplan.on{border-color:var(--aqua);box-shadow:0 0 0 2px rgba(10,139,168,.15)}.jplan span{display:block;font-weight:600;font-size:12px;color:var(--muted);margin-top:.2rem}.jplan input{width:auto;min-height:0;margin-right:.4rem}.jprice{grid-column:1/-1;font-weight:700;margin:.2rem 0 0}.segbar{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.segbar::-webkit-scrollbar{display:none}@media(max-width:760px){.segbar{justify-content:flex-start}.segbtn{flex:0 0 auto}}.keyline{margin-top:.9rem}.keybox{width:100%;font:600 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:.7rem .85rem;border:1px solid var(--line-2);border-radius:var(--r-sm);margin:.45rem 0 .5rem;background:#fff}</style>
+<style>.form-err{color:#b4452f;font-weight:700;margin:.4rem 0 0;grid-column:1/-1}.jcheck{display:flex;gap:.55rem;align-items:flex-start;font-weight:600;line-height:1.45;cursor:pointer}.jcheck input{width:auto;min-width:0;min-height:0;height:auto;padding:0;flex:0 0 auto;margin-top:.25rem;accent-color:var(--aqua)}#jContact{grid-column:1/-1}#jTs{min-height:65px}#joinForm [hidden]{display:none!important}@media(max-width:760px){.navlink.navlink--signin{display:inline-flex;padding:8px 10px;font-size:13px}}.navlink--signin{border:1px solid rgba(255,255,255,.28)}.navlink--signin:hover{background:rgba(255,255,255,.14)}.opt{font-weight:600;color:var(--muted);font-size:12px}.hexrow{display:flex;gap:.5rem;align-items:center}.hexrow input[type=color]{width:46px;flex:0 0 46px;padding:2px}.jplans{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}@media(max-width:520px){.jplans{grid-template-columns:1fr}}.jplan{display:block;border:1px solid var(--line-2);border-radius:var(--r-sm);padding:.7rem .8rem;cursor:pointer;font-weight:700}.jplan.on{border-color:var(--aqua);box-shadow:0 0 0 2px rgba(10,139,168,.15)}.jplan span{display:block;font-weight:600;font-size:12px;color:var(--muted);margin-top:.2rem}.jplan input{width:auto;min-height:0;margin-right:.4rem}.jprice{grid-column:1/-1;font-weight:700;margin:.2rem 0 0}.segbar{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.segbar::-webkit-scrollbar{display:none}@media(max-width:760px){.segbar{justify-content:flex-start}.segbtn{flex:0 0 auto}}.keyline{margin-top:.9rem}.keybox{width:100%;font:600 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:.7rem .85rem;border:1px solid var(--line-2);border-radius:var(--r-sm);margin:.45rem 0 .5rem;background:#fff}</style>
 </head>
 <body>
 
@@ -383,6 +392,7 @@
       <a class="navlink" href="#what">What you get</a>
       <a class="navlink" href="#offer">The deal</a>
       <a class="navlink" href="https://oceansafety.app/portal-demo/dashboard.html" target="_blank" rel="noopener">See a demo</a>
+      <a class="navlink navlink--signin" href="https://oceansafety.app/portal/">Partner sign-in</a>
       <a class="navcta" href="#offer">Claim your spot</a>
     </div>
   </div>
