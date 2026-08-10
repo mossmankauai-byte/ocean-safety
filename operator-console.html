@@ -3329,6 +3329,7 @@ if(DEMO){
 
   var SB = 'https://arndnljtmjfsnzcpcuen.supabase.co';
   var PK = 'sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um';
+  var tries = 0;
 
   function paint(name){
     if (!name) return;
@@ -3336,26 +3337,33 @@ if(DEMO){
     if (h) h.textContent = name;
     var k = document.getElementById('opKicker');
     if (k) k.textContent = name + ' \u00b7 co-branded guest guide';
-    /* the title said "(Preview)" even for a paying partner */
     document.title = name + ' \u00b7 OceanSafe Operator Console';
   }
 
-  fetch('partner-config/' + slug + '.json', { cache: 'no-store' })
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(cfg){
-      if (cfg && cfg.name) { paint(cfg.name); return null; }
-      return fetch(SB + '/rest/v1/rpc/get_partner_page', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + PK, 'apikey': PK },
-        body: JSON.stringify({ p_slug: slug })
-      }).then(function(r){ return r.ok ? r.json() : null; })
-        .then(function(rows){
-          var row = Array.isArray(rows) ? rows[0] : rows;
-          if (row && row.name) paint(row.name);
-          return null;
-        });
-    })
-    .catch(function(){ /* leave the sample copy in place rather than half-render */ });
+  function resolve(){
+    fetch('partner-config/' + slug + '.json', { cache: 'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cfg){
+        if (cfg && cfg.name) { paint(cfg.name); return null; }
+        return fetch(SB + '/rest/v1/rpc/get_partner_page', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + PK, 'apikey': PK },
+          body: JSON.stringify({ p_slug: slug })
+        }).then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(rows){
+            var row = Array.isArray(rows) ? rows[0] : rows;
+            if (row && row.name) { paint(row.name); return null; }
+            /* Square returns the buyer here the instant payment clears, which can beat the
+               subscription.created webhook that flips the draft to live — and get_partner_page
+               only returns LIVE rows. Without this retry a paying operator lands on the sample
+               console purely for being fast. */
+            if (tries < 6) { tries++; setTimeout(resolve, 2000); }
+            return null;
+          });
+      })
+      .catch(function(){ /* leave the sample copy rather than half-render */ });
+  }
+  resolve();
 })();
 </script>
 </body>
