@@ -1216,7 +1216,8 @@
       try {
         tsId = turnstile.render("#jTs", {
           sitekey: TS_SITEKEY,
-          "error-callback": function () { tsBroken = true; return true; }
+          "error-callback": function () { tsBroken = true; return true; },
+          callback: function () { tsBroken = false; }   /* a later success clears an earlier blip */
         });
       } catch (e) { tsBroken = true; }
     }
@@ -1359,7 +1360,7 @@
         var sig = val("jSig");
         if (!sig) return fail("Type your full name to sign.");
         if (!el("jAgree").checked) return fail("Please agree to the terms to continue.");
-        var tok = (window.turnstile && tsId !== null && !tsBroken) ? turnstile.getResponse(tsId) : null;
+        var tok = (window.turnstile && tsId !== null) ? turnstile.getResponse(tsId) : null;
         if (!tok) return fail(tsBroken || tsId === null
           ? "The verification box didn't load here. Email mossmankauai@gmail.com and we'll set you up by hand."
           : "Please complete the verification box.");
