@@ -3471,9 +3471,14 @@ if(DEMO){
    Resolve the static file FIRST (it still wins for hand-built partners), then fall back to
    the public get_partner_page RPC. No slug = the sample console, deliberately unchanged. */
 (function(){
+  /* Paint the operator's own name — but ONLY from the identity the gate verified.
+     Reading ?ref= directly would leak the business name (and document.title) while the console
+     is still locked, which is the exact leak the gate exists to prevent. The gate fires
+     'os-authed' with the verified partner and sets window.OS_SLUG; we wait for that.
+     No ?ref= at all = the un-slugged SAMPLE demo, deliberately left alone. */
   var qp = new URLSearchParams(location.search);
-  var slug = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
-  if (!slug || slug === 'demo' || !/^[a-z0-9-]{1,64}$/.test(slug)) return;
+  var urlSlug = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
+  if (!urlSlug || urlSlug === 'demo' || !/^[a-z0-9-]{1,64}$/.test(urlSlug)) return;
 
   var SB = 'https://arndnljtmjfsnzcpcuen.supabase.co';
   var PK = 'sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um';
@@ -3488,7 +3493,10 @@ if(DEMO){
     document.title = name + ' \u00b7 OceanSafe Operator Console';
   }
 
-  function resolve(){
+  /* Hand-built partners have a static partner-config; self-serve partners exist only in
+     Supabase, which is why they used to render as the sample console. Try both. */
+  function lookup(slug){
+    if (!slug) return;
     fetch('partner-config/' + slug + '.json', { cache: 'no-store' })
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(cfg){
@@ -3501,17 +3509,22 @@ if(DEMO){
           .then(function(rows){
             var row = Array.isArray(rows) ? rows[0] : rows;
             if (row && row.name) { paint(row.name); return null; }
-            /* Square returns the buyer here the instant payment clears, which can beat the
-               subscription.created webhook that flips the draft to live — and get_partner_page
-               only returns LIVE rows. Without this retry a paying operator lands on the sample
-               console purely for being fast. */
-            if (tries < 6) { tries++; setTimeout(resolve, 2000); }
+            /* get_partner_page only returns LIVE rows, and the post-payment redirect can beat
+               the webhook that flips the draft live. */
+            if (tries < 6) { tries++; setTimeout(function(){ lookup(slug); }, 2000); }
             return null;
           });
       })
       .catch(function(){ /* leave the sample copy rather than half-render */ });
   }
-  resolve();
+
+  function start(p){
+    if (p && p.name) { paint(p.name); return; }
+    lookup(window.OS_SLUG || '');   // the VERIFIED slug, never the URL's
+  }
+
+  if (window.OS_AUTH && window.OS_AUTH.partner) start(window.OS_AUTH.partner);
+  else document.addEventListener('os-authed', function(e){ start(e && e.detail); });
 })();
 </script>
 </body>
