@@ -19,6 +19,29 @@
   # Allow large image previews in Search / Discover (thumbnail-size directive; does NOT force indexing).
   X-Robots-Tag: max-image-preview:large
 
+# ── /d/<token> partner dashboard — ENFORCING CSP (2026-08-10) ────────────────
+# This surface is the exception to the report-only policy above, and it earns an
+# enforced policy for one reason: the token in the URL path IS the credential.
+# Unlike index.html, /d/ loads only four origins (measured, not guessed):
+# supabase (REST + Edge Functions + storage), Google Fonts, jsdelivr, self.
+# No tour widgets, no tiles, no telemetry — so there is nothing here to break.
+#
+# The real protection is connect-src: even if the jsdelivr bundle were swapped,
+# the injected code could not POST the dashboard token to an attacker origin.
+# script-src still needs 'unsafe-inline' (1 inline block + 6 on* handlers), so
+# this policy is exfiltration containment, NOT inline-XSS prevention. Removing
+# those handlers would let 'unsafe-inline' drop and close that gap.
+# frame-ancestors 'none': the operator dashboard is never embedded (unlike the
+# guest app, which stays framable above).
+/d/*
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://arndnljtmjfsnzcpcuen.supabase.co; connect-src 'self' https://arndnljtmjfsnzcpcuen.supabase.co
+  X-Robots-Tag: noindex, nofollow
+  Referrer-Policy: no-referrer
+/d.html
+  Content-Security-Policy: default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://arndnljtmjfsnzcpcuen.supabase.co; connect-src 'self' https://arndnljtmjfsnzcpcuen.supabase.co
+  X-Robots-Tag: noindex, nofollow
+  Referrer-Policy: no-referrer
+
 # Keep demo / sample surfaces out of search engines.
 # (More-specific X-Robots-Tag below wins for these paths, so they stay noindex.)
 /demo/*
