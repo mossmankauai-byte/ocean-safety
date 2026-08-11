@@ -715,9 +715,10 @@
               <input id="jSig" type="text" autocomplete="name" placeholder="First and last name">
             </div>
             <div class="fld fld--full" id="jAgreeWrap">
-              <label class="jcheck" for="jAgree"><input type="checkbox" id="jAgree"> I&#39;m authorized to sign up this business and I agree to the partner terms.</label>
+              <label class="jcheck" for="jAgree"><input type="checkbox" id="jAgree"> I&#39;m authorized to sign up this business and I agree to the <a href="/partner-terms" target="_blank" rel="noopener" onclick="event.stopPropagation()">partner terms</a>.</label>
             </div>
             <div class="fld fld--full" id="jTsWrap"><div id="jTs"></div></div>
+            <div class="fld fld--full" id="jTsWWrap" hidden><div id="jTsW"></div></div>
             <p class="form-err" id="jErr" role="alert" hidden></p>
             <div class="form-cta" id="jCta">
               <button class="btn btn--solid" type="submit" id="primaryCta">Start free <span class="arr" aria-hidden="true">&#8594;</span></button>
@@ -1189,6 +1190,11 @@
   var SB_URL = "https://arndnljtmjfsnzcpcuen.supabase.co";
   var SB_KEY = "sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um";
   var TS_SITEKEY = "0x4AAAAAAD1KovJ4T8LFTTxL";
+  /* Separate widget for the worker-backed tabs (timeshare/cars). The Supabase widget's
+     secret exists only as a digest inside Supabase and cannot be read back, so the worker
+     could not have verified against it without rotating — which would have broken the
+     working Supabase path. Two widgets, two secrets, no shared failure. */
+  var TS_SITEKEY_WORKER = "0x4AAAAAAENPr2am32XAdsrE";
   /* tier: "free" = free self-serve · "paid" = paid-only, straight to Square checkout ·
      "choice" = the operator picks. Paid prices are named here because you cannot ask
      somebody to pay without showing the price — the rest of the page stays figure-free.
@@ -1216,19 +1222,27 @@
 
     /* Turnstile gates the Supabase segments — the server verifies the token there, so the widget
        is shown only where it is actually enforced rather than as decoration. */
-    var tsBroken = false;
+    var tsWId = null;
+    var tsBroken = false, tsWBroken = false;
     function renderTs() {
-      if (tsId !== null || !window.turnstile) return;
+      if (!window.turnstile) return;
       /* error-callback fires for a sitekey that is not valid for the domain being served
          (Turnstile 110200) — on that host there is no box to complete, so the submit copy has
          to say something true instead of pointing at a widget that never rendered. */
-      try {
+      if (tsId === null) try {
         tsId = turnstile.render("#jTs", {
           sitekey: TS_SITEKEY,
           "error-callback": function () { tsBroken = true; return true; },
           callback: function () { tsBroken = false; }   /* a later success clears an earlier blip */
         });
       } catch (e) { tsBroken = true; }
+      if (tsWId === null) try {
+        tsWId = turnstile.render("#jTsW", {
+          sitekey: TS_SITEKEY_WORKER,
+          "error-callback": function () { tsWBroken = true; return true; },
+          callback: function () { tsWBroken = false; }
+        });
+      } catch (e) { tsWBroken = true; }
     }
     window.__joinTsLoad = renderTs;
     renderTs();
@@ -1259,6 +1273,7 @@
         : r === "capacity" ? "Self-serve signup is paused — email mossmankauai@gmail.com and we'll set you up."
         : r === "bad_email" ? "Enter a valid email."
         : r === "bad_name" ? "Enter your business name."
+        : r === "captcha" ? "The verification box didn\u2019t check out \u2014 please try it again."
         : null;
     }
 
@@ -1267,7 +1282,7 @@
     function syncFields() {
       var r = ROUTE[current] || ROUTE.shop, supa = r.kind === "supa";
       show("jIslandWrap", supa); show("jSigWrap", supa);
-      show("jAgreeWrap", supa);  show("jTsWrap", supa);
+      show("jAgreeWrap", supa);  show("jTsWrap", supa);  show("jTsWWrap", !supa);
       show("jWebWrap", supa);    show("jHexWrap", supa);
       show("jUnitsWrap", !supa);
       show("jCatWrap", !!r.pin); show("jAddrWrap", !!r.pin);
@@ -1386,9 +1401,15 @@
       } else {
         var units = parseInt(val("jUnits"), 10);
         if (!units || units < 1) return fail("Enter how many " + r.unit.toLowerCase() + " you have.");
+        /* The worker verifies this server-side too — the 3000-slug ceiling it protects is a
+           shared bucket, so an unchallenged script could deny every other operator. */
+        var wtok = (window.turnstile && tsWId !== null) ? turnstile.getResponse(tsWId) : null;
+        if (!wtok) return fail(tsWBroken || tsWId === null
+          ? "The verification box didn't load here. Email mossmankauai@gmail.com and we'll set you up by hand."
+          : "Please complete the verification box.");
         url = "/api/self-signup";
         headers = { "Content-Type": "application/json" };
-        body = { segment: r.segment, name: name, email: email, units: units };
+        body = { segment: r.segment, name: name, email: email, units: units, turnstileToken: wtok };
       }
 
       busy(true);
@@ -1402,7 +1423,7 @@
           /* paid → Square hosts the checkout; the webhook flips the draft live afterwards */
           if (j.mode === "paid" && j.url) { window.location.href = j.url; return; }
           if (!out.ok || j.ok === false || j.error) {
-            if (window.turnstile && tsId !== null) { try { turnstile.reset(tsId); } catch (_) {} }
+            if (window.turnstile) { try { if (tsId !== null) turnstile.reset(tsId); if (tsWId !== null) turnstile.reset(tsWId); } catch (_) {} }
             return fail(j.error || reason(j.reason) || "Something went wrong — please try again.");
           }
           live(j, r);

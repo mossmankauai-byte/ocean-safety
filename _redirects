@@ -38,6 +38,11 @@
 /creators   /creators.html      200
 /@*         /at.html            200
 /creator-terms   /creator-terms.html   200
+# Partner terms (2026-08-11). /join and hotel-signup made operators type a signature agreeing
+# to "the partner terms" while no such page existed anywhere on the site — /terms,
+# /partner-terms, /terms.html and /legal were all 404. This is that page.
+/partner-terms   /partner-terms.html   200
+/partners/terms  /partner-terms.html   301
 # Print kit: QR in every size + SVG, ready-made artwork, and a one-sheet to print.
 # A real route on purpose — the kit on /creators is restored from localStorage, so it
 # only ever existed on the device the creator signed up with.

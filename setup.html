@@ -152,7 +152,7 @@ function checkout(){
     
     '<div class="rrow"><span class="rk">Due today</span><span class="rv">$649.00</span></div></div>'+
     '<p class="muted" style="margin-top:10px">In the live version this is a Square checkout page.</p>'+
-    '<div class="nav"><button class="btn grey" onclick="go(4)">Back</button><button class="btn" onclick="publishPaid()">Start free month →</button></div></div>';
+    '<div class="nav"><button class="btn grey" onclick="go(4)">Back</button><button class="btn" onclick="publishPaid()">Continue to secure payment →</button></div></div>';
 }
 async function publishPaid(){
   const out=await api({action:"publish",hex:S.primary_hex,short:S.short,region:S.region,phone:S.phone,website:S.website,amenities:S.amenities});

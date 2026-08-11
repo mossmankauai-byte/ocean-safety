@@ -15,7 +15,7 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v274-2026-08-10-console-nav';
+const CACHE_VERSION = 'v275-2026-08-11-join-finish';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -186,6 +186,10 @@ if (workbox) {
       /^\/d\//.test(url.pathname) ||
       /^\/creator/.test(url.pathname) ||
       url.pathname === '/join' || url.pathname === '/join.html' ||
+      // CLEAN routes — _redirects rewrites these to .html, but the request URL the service
+      // worker sees is the clean path, so the \.html$ list below never matches them. /join
+      // was already fixed for exactly this reason; these are the same trap.
+      /^\/(set-password|partner-terms|hotel|rental|fleet|townad|timeshare|concierge)$/.test(url.pathname) ||
       url.pathname === '/assets/creator-kit.js' ||
       /^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)),
     new workbox.strategies.NetworkFirst({
