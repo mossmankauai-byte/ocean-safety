@@ -247,17 +247,17 @@ body.dash .card{transition:transform .16s ease,box-shadow .16s ease}
    list below are drawn LIVE from this partner's own promotions on top of it, so
    the preview still updates with their list instead of being a dead picture.
    The map, POI pins, weather header and tab bar are the app's, not a drawing. */
-#gpPromo{padding:0 12px 18px}
-.gp-screen .os-promo-map{position:relative;border-radius:14px;min-height:200px;overflow:hidden;
+#gpPromo,#gpPromoRest{padding:0}
+.gp-screen .os-promo-map{position:relative;overflow:hidden;aspect-ratio:323/700;border-radius:0;margin:-10px 0 0;
   background:#cfe0e6 url("/assets/town-tab.jpg") center top/100% auto no-repeat}
-.gp-screen .os-promo-map--full{min-height:0;aspect-ratio:323/700;border-radius:0;margin:-10px 0 0}
+.gp-screen .os-promo-map--full{}
 .gp-screen .os-promo-tab{position:absolute;top:10px;left:10px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
   background:rgba(255,255,255,.9);color:#0a5a72;border-radius:20px;padding:4px 9px;z-index:2}
 /* ── tapped state: the app's real sheet chrome over a blurred map ── */
 .gp-screen .os-promo-scrim{position:absolute;inset:0;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
   background:rgba(20,34,40,.18)}
 .gp-screen .os-promo-sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;
-  padding:9px 13px 15px;box-shadow:0 -8px 28px rgba(0,0,0,.18)}
+  padding:9px 13px 15px;box-shadow:0 -8px 28px rgba(0,0,0,.18);max-height:62%;overflow:hidden}
 .gp-screen .os-promo-grab{width:34px;height:4px;border-radius:3px;background:#e6dcc4;margin:0 auto 10px}
 .gp-screen .os-promo-h{font-size:15px;font-weight:800;color:#1a1a1a;margin:0 0 3px;letter-spacing:-.01em}
 .gp-screen .os-promo-sub{font-size:10.5px;color:#6b7280;line-height:1.45;margin:0 0 10px}
