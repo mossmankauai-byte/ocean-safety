@@ -81,7 +81,6 @@
           </span></div>
           <div class="gp-grab"></div>
           <div id="gpPromoRest"></div>
-          <div class="os-promo-tabbar" aria-hidden="true"><i>Beaches</i><i>Trails</i><i>Family</i><i class="on">Town</i><i>Stays</i></div>
         </div>
       </div>
     </div>
@@ -261,23 +260,26 @@
     const chips = live.map((p) => `<div class="os-promo-chip">
       <span style="width:16px;height:16px;flex:0 0 auto;color:#0f4c5c">${TAG_SVG}</span>
       <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span class="os-promo-t">${esc(p.title || "Untitled")}</span>${p.ends_at ? `<span class="os-promo-e">Ends ${esc(endsLabel(p.ends_at))}</span>` : ""}</span>
+      <span class="os-promo-go" aria-hidden="true">&rsaquo;</span>
     </div>`).join("");
-    const water = `<svg viewBox="0 0 320 200" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">
-        <path d="M0 128 Q60 108 120 126 T240 120 T320 128 L320 200 L0 200 Z" fill="#bcd9e2" opacity=".6"/>
-        <path d="M0 150 Q80 135 160 148 T320 146 L320 200 L0 200 Z" fill="#a9cfda" opacity=".55"/>
-      </svg>`;
+    /* Both phones sit on the REAL Town-tab screenshot (CSS background on .os-promo-map).
+       Nothing here draws a map — the chip and the sheet are the only things we render,
+       live, from this partner's own list. */
     host.innerHTML = `<div class="os-promo-map">
-      ${water}
-      <span class="os-promo-tab">Offers · preview</span>
+      <div class="os-promo-scrim"></div>
       ${live.length
-        ? `<div class="os-promo-strip">${chips}</div>`
-        : '<div class="os-promo-none">Your live offers appear here,<br>exactly as guests see them.</div>'}
+        ? `<div class="os-promo-sheet">
+             <div class="os-promo-grab"></div>
+             <p class="os-promo-h">Offers from ${esc(partner.name || "your business")}</p>
+             <p class="os-promo-sub">Property offers — separate from the safety report. The ocean call never changes for an offer.</p>
+             <div class="os-promo-strip">${chips}</div>
+           </div>`
+        : '<div class="os-promo-none">No live offers, so nothing opens.<br>Add one above and it appears here.</div>'}
     </div>`;
 
-    /* FULL-SCREEN twin — the Town tab before anyone taps. This is the honest resting
-       state: the app renders ONE small chip (#promoChip) with a count badge, not the
-       list. The green dot mirrors #promoChipNow, which the app shows only when a
-       promo's timed window is currently open. */
+    /* FULL-SCREEN twin — the Town tab before anyone taps. The resting state renders ONE
+       small chip (#promoChip) with a count badge, not the list. The green dot mirrors
+       #promoChipNow, which the app shows only while a promo's timed window is open. */
     const rest = el("gpPromoRest");
     if (!rest) return;
     /* Mirrors index.html _promoInWindow: window_start/window_end are a TIME OF DAY,
@@ -292,16 +294,13 @@
       return a <= b ? (nowMin >= a && nowMin < b) : (nowMin >= a || nowMin < b);
     });
     rest.innerHTML = `<div class="os-promo-map os-promo-map--full">
-      ${water}
-      <span class="os-promo-tab">Town tab</span>
-      <div class="os-promo-shore" aria-hidden="true"><i>North</i><i>East</i><i>South</i><i>West</i></div>
       ${live.length
         ? `<div class="os-promo-restchip" role="img" aria-label="${live.length} offer${live.length === 1 ? "" : "s"} — guests tap this to open your list">
-             <span style="width:19px;height:19px;color:#0f4c5c">${TAG_SVG}</span>
+             <span style="width:17px;height:17px;color:#0f4c5c">${TAG_SVG}</span>
              <span class="os-promo-cnt">${live.length}</span>
              ${anyNow ? '<span class="os-promo-now"></span>' : ""}
            </div>`
-        : '<div class="os-promo-none">No live offers, so guests<br>see no tag at all.</div>'}
+        : '<div class="os-promo-none">No live offers, so guests see no tag at all.</div>'}
     </div>`;
   }
 </script>
