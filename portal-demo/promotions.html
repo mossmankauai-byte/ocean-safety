@@ -68,8 +68,26 @@
        "Ends <date>"); it's a preview, taps don't open anything here. -->
   <div id="guestPromoPreview" style="margin-top:28px">
     <h2 style="margin:0 2px 3px">What guests see</h2>
-    <div class="muted small" style="margin:0 2px 14px">Live offers float over the Town tab in the OceanSafe app — a tap opens your flyer. This preview updates with your list above.</div>
-    <div class="gp-phone">
+    <div class="muted small" style="margin:0 2px 16px">Your offers live on the Town tab of the OceanSafe app. Guests see a small tag on the map; tapping it opens the list, and tapping an offer opens your flyer. Both previews update with your list above.</div>
+    <div class="gp-two">
+    <div class="gp-col">
+      <p class="gp-cap">Full screen<span>What the Town tab looks like</span></p>
+      <div class="gp-phone">
+        <div class="gp-screen">
+          <div class="gp-status"><span>9:41</span><span class="gp-sicons">
+            <svg width="15" height="10" viewBox="0 0 15 10" fill="currentColor" aria-hidden="true"><rect x="0" y="6" width="2.6" height="4" rx="0.8"/><rect x="4" y="4" width="2.6" height="6" rx="0.8"/><rect x="8" y="2" width="2.6" height="8" rx="0.8"/><rect x="12" y="0" width="2.6" height="10" rx="0.8" opacity=".35"/></svg>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M1 3.5a9 9 0 0 1 12 0"/><path d="M3.2 5.9a6 6 0 0 1 7.6 0"/><circle cx="7" cy="8.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+            <svg width="21" height="10" viewBox="0 0 21 10" aria-hidden="true"><rect x="0.5" y="0.5" width="17" height="9" rx="2.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="12" height="6" rx="1.4" fill="currentColor"/><rect x="18.7" y="3" width="1.8" height="4" rx="0.9" fill="currentColor" opacity=".4"/></svg>
+          </span></div>
+          <div class="gp-grab"></div>
+          <div id="gpPromoRest"></div>
+          <div class="os-promo-tabbar" aria-hidden="true"><i>Beaches</i><i>Trails</i><i>Family</i><i class="on">Town</i><i>Stays</i></div>
+        </div>
+      </div>
+    </div>
+    <div class="gp-col">
+      <p class="gp-cap">Zoomed in<span>What opens when they tap it</span></p>
+      <div class="gp-phone">
       <div class="gp-screen">
         <div class="gp-status"><span>9:41</span><span class="gp-sicons">
           <svg width="15" height="10" viewBox="0 0 15 10" fill="currentColor" aria-hidden="true"><rect x="0" y="6" width="2.6" height="4" rx="0.8"/><rect x="4" y="4" width="2.6" height="6" rx="0.8"/><rect x="8" y="2" width="2.6" height="8" rx="0.8"/><rect x="12" y="0" width="2.6" height="10" rx="0.8" opacity=".35"/></svg>
@@ -79,6 +97,8 @@
         <div class="gp-grab"></div>
         <div id="gpPromo"></div>
       </div>
+    </div>
+    </div>
     </div>
   </div>
 </div>
@@ -242,15 +262,46 @@
       <span style="width:16px;height:16px;flex:0 0 auto;color:#0f4c5c">${TAG_SVG}</span>
       <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span class="os-promo-t">${esc(p.title || "Untitled")}</span>${p.ends_at ? `<span class="os-promo-e">Ends ${esc(endsLabel(p.ends_at))}</span>` : ""}</span>
     </div>`).join("");
-    host.innerHTML = `<div class="os-promo-map">
-      <svg viewBox="0 0 320 200" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">
+    const water = `<svg viewBox="0 0 320 200" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">
         <path d="M0 128 Q60 108 120 126 T240 120 T320 128 L320 200 L0 200 Z" fill="#bcd9e2" opacity=".6"/>
         <path d="M0 150 Q80 135 160 148 T320 146 L320 200 L0 200 Z" fill="#a9cfda" opacity=".55"/>
-      </svg>
-      <span class="os-promo-tab">Town tab · preview</span>
+      </svg>`;
+    host.innerHTML = `<div class="os-promo-map">
+      ${water}
+      <span class="os-promo-tab">Offers · preview</span>
       ${live.length
         ? `<div class="os-promo-strip">${chips}</div>`
-        : '<div class="os-promo-none">Your live offers float here,<br>exactly as guests see them.</div>'}
+        : '<div class="os-promo-none">Your live offers appear here,<br>exactly as guests see them.</div>'}
+    </div>`;
+
+    /* FULL-SCREEN twin — the Town tab before anyone taps. This is the honest resting
+       state: the app renders ONE small chip (#promoChip) with a count badge, not the
+       list. The green dot mirrors #promoChipNow, which the app shows only when a
+       promo's timed window is currently open. */
+    const rest = el("gpPromoRest");
+    if (!rest) return;
+    /* Mirrors index.html _promoInWindow: window_start/window_end are a TIME OF DAY,
+       start <= now < end, wrapping across midnight. A window that is merely SET is not
+       the same as a window that is OPEN — showing the dot for the former would promise
+       a "happening now" state the app isn't in. Malformed = never, same as the app. */
+    const mins = (t) => { const m = /^(\d{1,2}):(\d{2})/.exec(String(t || "")); return m ? +m[1] * 60 + +m[2] : null; };
+    const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+    const anyNow = live.some((p) => {
+      const a = mins(p.window_start), b = mins(p.window_end);
+      if (a == null || b == null) return false;
+      return a <= b ? (nowMin >= a && nowMin < b) : (nowMin >= a || nowMin < b);
+    });
+    rest.innerHTML = `<div class="os-promo-map os-promo-map--full">
+      ${water}
+      <span class="os-promo-tab">Town tab</span>
+      <div class="os-promo-shore" aria-hidden="true"><i>North</i><i>East</i><i>South</i><i>West</i></div>
+      ${live.length
+        ? `<div class="os-promo-restchip" role="img" aria-label="${live.length} offer${live.length === 1 ? "" : "s"} — guests tap this to open your list">
+             <span style="width:19px;height:19px;color:#0f4c5c">${TAG_SVG}</span>
+             <span class="os-promo-cnt">${live.length}</span>
+             ${anyNow ? '<span class="os-promo-now"></span>' : ""}
+           </div>`
+        : '<div class="os-promo-none">No live offers, so guests<br>see no tag at all.</div>'}
     </div>`;
   }
 </script>

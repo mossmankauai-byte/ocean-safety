@@ -252,6 +252,37 @@ body.dash .card{transition:transform .16s ease,box-shadow .16s ease}
 .gp-screen .os-promo-e{font-size:10px;color:#6b7682;white-space:nowrap}
 .gp-screen .os-promo-none{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:#5c6b74;padding:20px;line-height:1.5}
 
+/* Two-up: the Town tab AT REST beside the TAPPED state. In the real app the offers
+   are not sitting on the map — a small chip floats there (index.html #promoChip,
+   left:12px bottom:148px, count badge, green dot when a timed window is open) and
+   the list is a pull-up sheet behind a tap (_promoSheetOpen). One phone can only
+   show one of those, so the old single preview implied the offers are permanently
+   on screen. Two phones tell the truth and answer "how big is this, really". */
+.gp-two{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.gp-col{flex:1 1 280px;max-width:330px;min-width:0}
+.gp-col .gp-phone{width:100%}
+.gp-cap{text-align:center;font-size:12.5px;font-weight:800;color:#0f4c5c;margin:0 0 9px;letter-spacing:.01em}
+.gp-cap span{display:block;font-weight:500;color:#6b7280;font-size:11.5px;margin-top:3px;letter-spacing:0}
+/* full-screen phone: taller map + a tab-bar stand-in so it reads as a whole screen */
+.gp-screen .os-promo-map--full{min-height:292px}
+.gp-screen .os-promo-restchip{position:absolute;left:11px;bottom:52px;display:flex;align-items:center;
+  background:rgba(253,242,214,.94);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:9px 10px;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);color:#0f4c5c}
+.gp-screen .os-promo-restchip svg{width:19px;height:19px;display:block}
+.gp-screen .os-promo-cnt{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;
+  background:#0f4c5c;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  border:1.5px solid rgba(253,242,214,.94);box-sizing:border-box;line-height:1}
+.gp-screen .os-promo-now{position:absolute;top:-4px;left:-4px;width:10px;height:10px;border-radius:50%;
+  background:#16a34a;border:1.5px solid rgba(253,242,214,.94);box-sizing:border-box}
+.gp-screen .os-promo-shore{position:absolute;left:11px;right:11px;bottom:12px;display:flex;gap:5px}
+.gp-screen .os-promo-shore i{flex:1;height:22px;border-radius:8px;background:rgba(255,255,255,.72);
+  border:1px solid rgba(15,76,92,.10);font-style:normal;font-size:8.5px;font-weight:700;color:#5c6b74;
+  display:flex;align-items:center;justify-content:center}
+.gp-screen .os-promo-tabbar{display:flex;gap:2px;padding:8px 6px 10px;border-top:1px solid #ede8d6;background:#fff}
+.gp-screen .os-promo-tabbar i{flex:1;font-style:normal;font-size:8.5px;font-weight:700;color:#9aa5ad;text-align:center}
+.gp-screen .os-promo-tabbar i.on{color:#0f4c5c}
+
+
 /* ── sample-data badge + Paid-only lock (added 2026-07-24) ───────────────────
    .samp marks any figure that is demo data, so a prospect is never left guessing
    whether a number is theirs. .lockwrap replaces a Paid-only panel on the Free
