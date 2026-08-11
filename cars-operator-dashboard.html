@@ -569,6 +569,407 @@
   ============ */
 </style>
 <script src="/assets/vendor/qrcode.min.js"></script>
+<style id="os-console-skin">
+/* ══════════════════════════════════════════════════════════════════════════════
+   OceanSafe console skin v2 — full visual overhaul
+   Goals, in the operator's words: easy to use, easy to read the data, easy to navigate.
+
+   Additive only. Injected last in <head>. No markup, no data, no telemetry, no JS.
+   Delete the <style id="os-console-skin"> block to revert a console completely.
+
+   Chart decisions follow the dataviz method: form first, then color, then mark
+   anatomy. The bar charts are single-series ranked magnitude, so they take ONE
+   sequential hue and need no legend — the section title names the measure.
+   No categorical palette is introduced anywhere, so there is none to validate.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ── Surfaces: cool neutral. Brand teal + gold survive untouched as accents. ── */
+  --bg:#f4f6f8;
+  --bg-2:#eceff3;
+  --card:#ffffff;
+  --tint:#f1f5f7;
+
+  --ink:#0f2b36;
+  --ink-2:#3d5a68;
+  --muted:#61798a;
+
+  --line:#dfe5ea;
+  --hair:#e6ebef;
+  --hair-soft:#f0f3f6;
+
+  --sea-tint:#eaf3f6;
+  --gold-tint:#f7f0dc;
+  --sample-bg:#f5efdd;
+
+  --shadow:0 1px 2px rgba(16,40,52,.06);
+  --shadow-raised:0 1px 2px rgba(16,40,52,.06),0 8px 24px -12px rgba(16,40,52,.18);
+  --shadow-sticky:0 1px 0 var(--line),0 6px 16px -10px rgba(16,40,52,.28);
+  --radius:10px;
+  --radius-sm:7px;
+  --maxw:1180px;
+
+  /* ── Type scale. One ratio, so nothing is an arbitrary px value. ── */
+  --t-display:22px;   /* property name */
+  --t-h2:16px;        /* section heading */
+  --t-metric:28px;    /* the number on a stat card */
+  --t-body:13.5px;
+  --t-sm:12px;
+  --t-xs:11px;
+
+  /* ── Spacing rhythm. Sections breathe on one scale, not twelve. ── */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-5:24px; --sp-6:32px; --sp-7:44px;
+
+  /* ── Chart tokens. One sequential hue for magnitude; status stays reserved. ── */
+  --chart-fill:#0e6e8c;
+  --chart-track:#e8edf1;
+  --chart-grid:#eef2f5;
+
+  /* ── Motion: the guest app's curve, so the two products feel related. ── */
+  --ease:cubic-bezier(.16,1,.3,1);
+  --dur-press:.12s;
+  --dur-ui:.2s;
+}
+
+/* ══ TYPOGRAPHY ══════════════════════════════════════════════════════════════
+   One grotesque, whole console. `html body` prefix is deliberate — several of
+   these rules are injected into a <style> at runtime, which lands after this
+   block and would otherwise win on equal specificity. */
+body,
+html body .property h1,html body .sec-h h2,html body .hm-copy h2,
+html body .pl-housepick h3,html body .osdemo-start h4,
+html body .tor-card h4,html body .pf-prop h3,
+html body .tsf-pullquote{
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  font-weight:600;
+  letter-spacing:-.011em;
+}
+/* Some headings are written by JS into inline style attributes. This is the one
+   correct use of !important here — it beats an inline style, not a cascade fight. */
+[style*="Fraunces"]{
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif !important;
+  letter-spacing:-.011em;
+}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-size:var(--t-body);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+html body .property h1{font-size:var(--t-display);line-height:1.22;margin-bottom:2px}
+html body .sec-h h2{font-size:var(--t-h2);line-height:1.3;letter-spacing:-.012em}
+/* Prose gets a measure. Long lines are the quiet reason dashboards feel heavy. */
+.sec-h p,.card .cap,details.meth .body{max-width:68ch}
+
+/* Digits must line up — the single biggest signal that a screen is an instrument
+   rather than a page. The console had explicitly disabled it. */
+.card .v,.stat,.stat *,.bars .row,.bars .val,.advlog td,.advlog th,
+[class*="kpi"],[class*="metric"],[class*="num"],
+table td,table th{
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+}
+
+/* ══ NAVIGATION — top chrome ═════════════════════════════════════════════════
+   The masthead and the view tabs form one dark band across the top of the
+   console, with the active view underlined in gold. Two things this fixes:
+   the tabs used to scroll away (on a long view you lost your place and your
+   way out), and the console had no defined "chrome" — the content area just
+   began, so nothing signalled where the app ended and the data started.
+
+   The band is a FLAT colour, not a gradient, deliberately: the masthead and
+   the tab bar are separate elements, so two angled gradients meet at their
+   boundary and leave a visible seam. Flat also reads more like an instrument. */
+:root{
+  --band:#0e3f4e;
+  --band-ink:#eaf4f7;
+}
+header.top{
+  background:var(--band);
+  margin:0 calc(var(--sp-5) * -1);
+  /* No bottom gap: the tab bar butts directly onto the masthead so the two
+     read as ONE band. Any margin between them shows a strip of page. */
+  padding:var(--sp-4) var(--sp-5) var(--sp-3);
+  color:var(--band-ink);
+}
+header.top .property h1{color:#fff}
+header.top .property,
+header.top .property p,
+header.top .property span{color:rgba(234,244,247,.82)}
+header.top .btn,header.top .pill,header.top .texbtn{
+  background:rgba(255,255,255,.12);
+  border-color:rgba(255,255,255,.24);
+  color:var(--band-ink);
+}
+header.top .btn:hover,header.top .pill:hover,header.top .texbtn:hover{
+  background:rgba(255,255,255,.2);
+}
+.viewtabs{
+  position:sticky;
+  top:0;
+  z-index:40;
+  gap:0;
+  align-items:stretch;
+  margin:0 calc(var(--sp-5) * -1);
+  padding:0 var(--sp-5);
+  background:var(--band);
+  box-shadow:none;
+}
+.viewtabs button{
+  padding:11px 15px 12px;
+  font-size:13.5px;
+  font-weight:600;
+  color:rgba(234,244,247,.72);
+  background:none;
+  border:0;
+  border-radius:0;
+  border-bottom:2.5px solid transparent;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:0;
+  transition:color var(--dur-ui) var(--ease),border-color var(--dur-ui) var(--ease);
+}
+.viewtabs button:hover{color:#fff;border-bottom-color:rgba(255,255,255,.28)}
+.viewtabs button[aria-selected="true"]{
+  color:#fff;
+  background:none;
+  border-bottom-color:var(--gold);
+  box-shadow:none;
+}
+.viewtabs .vb-badge{
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+  background:rgba(255,255,255,.18);
+  color:var(--band-ink);
+}
+.viewtabs .tourbtn{margin-left:auto;align-self:center;border-bottom:0}
+/* The bleed must match .wrap's padding, and .wrap drops to --sp-4 under 560px. */
+@media (max-width:560px){
+  header.top{margin:0 calc(var(--sp-4) * -1);padding-left:var(--sp-4);padding-right:var(--sp-4)}
+  .viewtabs{
+    margin-left:calc(var(--sp-4) * -1);margin-right:calc(var(--sp-4) * -1);
+    padding-left:var(--sp-4);padding-right:var(--sp-4);
+    /* The base sets flex-wrap:wrap, so the tabs stacked into 3 rows on a phone
+       and overflow-x never engaged. One scrolling row instead. */
+    flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
+  }
+  .viewtabs .tourbtn{margin-left:var(--sp-2);flex:none}
+  .viewtabs::-webkit-scrollbar{display:none}
+  .viewtabs button{white-space:nowrap}
+}
+
+/* A visible keyboard ring, defined once. Operator consoles get audited. */
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible,
+summary:focus-visible,input:focus-visible,select:focus-visible{
+  outline:2px solid var(--sea-2);
+  outline-offset:2px;
+  border-radius:4px;
+}
+
+/* ══ SECTION RHYTHM ══════════════════════════════════════════════════════════
+   Every section previously set its own margin. One rhythm makes the page
+   scannable: heading, breath, content, bigger breath. */
+.wrap{max-width:var(--maxw);padding:0 var(--sp-5) var(--sp-7)}
+.wrap > section{margin-top:var(--sp-6)}
+.sec-h{margin-bottom:var(--sp-3)}
+.sec-h p{margin-top:var(--sp-1);font-size:var(--t-sm);color:var(--muted);line-height:1.5}
+.grid{gap:var(--sp-3)}
+
+/* ══ CARDS ═══════════════════════════════════════════════════════════════════ */
+body.textured .card{background-image:none}   /* kill the wave texture in every card corner */
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:var(--sp-4);
+  box-shadow:var(--shadow);
+  transition:box-shadow var(--dur-ui) var(--ease),border-color var(--dur-ui) var(--ease);
+}
+/* Only interactive cards lift. A static metric tile that reacts to the cursor
+   reads as a toy; an actionable one that never reacts reads as dead. */
+.card:is(a,button,[role=button],[onclick],[tabindex]):hover{
+  box-shadow:var(--shadow-raised);
+  border-color:#cfd8de;
+}
+.card .title{
+  font-size:var(--t-xs);
+  font-weight:600;
+  color:var(--muted);
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.card .v{
+  font-size:var(--t-metric);
+  font-weight:650;
+  letter-spacing:-.025em;
+  line-height:1.08;
+  margin:var(--sp-2) 0 0;
+  color:var(--ink);
+}
+.card .v small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}
+.card .cap{font-size:var(--t-sm);color:var(--muted);margin-top:var(--sp-1);line-height:1.45}
+
+/* ══ BAR CHARTS ══════════════════════════════════════════════════════════════
+   Ranked magnitude, one series. Mark anatomy per the dataviz spec: a recessive
+   track so each row reads as a proportion, one sequential hue, and a rounded
+   data-end anchored to the baseline — the bar grows from the axis, so only the
+   free end is rounded. Both ends rounded makes short bars read as pills and
+   overstates small values. */
+.bars{margin-top:var(--sp-3);gap:var(--sp-2)}
+.bars .row{
+  grid-template-columns:92px 1fr 52px;   /* value column widened: 38px clipped 4+ digits */
+  gap:var(--sp-3);
+  font-size:var(--t-sm);
+  min-height:22px;
+}
+.bars.wlab .row{grid-template-columns:126px 1fr 52px}
+/* The track is the row's own background; the bar sits on it. */
+.bars .row > i{
+  height:14px;                            /* thinner mark — 18px read as a slab */
+  border-radius:0 4px 4px 0;
+  background:var(--chart-fill);
+  box-shadow:inset -1px 0 0 rgba(255,255,255,.25);
+  position:relative;
+  transition:filter var(--dur-ui) var(--ease);
+}
+.bars .row:hover > i{filter:brightness(1.08)}
+.bars .row::before{
+  content:"";
+  grid-column:2;
+  grid-row:1;
+  height:14px;
+  align-self:center;
+  border-radius:0 4px 4px 0;
+  background:var(--chart-track);
+}
+.bars .row > i{grid-column:2;grid-row:1;align-self:center}
+/* CHART INTEGRITY — two encoding faults, both visible in the sessions-per-day chart.
+
+   1. The peak bar was filled with var(--gold) — the same color as the "Take the tour"
+      CTA. That makes color encode RANK, and it collides with the brand action color,
+      so "Saturday" and "click me" read as the same category.
+      A darker step of the same hue was the first fix, but the palette validator put
+      it at ΔE 10.4 from the base — under the 15 floor, i.e. hard to pick out even
+      with full color vision, which defeats the emphasis. So the peak is encoded
+      where the eye is already looking instead: its label and value go bold. Color
+      now means one thing, and the emphasis actually survives being looked at.
+   2. The hour columns carried a top-to-bottom gradient fading to near-white. A
+      gradient that encodes nothing makes short columns read as lighter — i.e. as a
+      second variable that does not exist. Flattened. */
+.bars .row > i[style*="--gold"]{background:var(--chart-fill) !important}
+.bars .row:has(> i[style*="--gold"]) .lab,
+.bars .row:has(> i[style*="--gold"]) > :last-child{
+  font-weight:700;
+  color:var(--ink);
+}
+.hours i{
+  background:var(--chart-fill) !important;
+  border-radius:2px 2px 0 0;
+  transition:filter var(--dur-ui) var(--ease);
+}
+.hours:hover i{filter:saturate(.7)}
+.hours i:hover{filter:brightness(1.15) saturate(1)}
+
+.bars .lab{
+  color:var(--ink-2);
+  font-weight:500;
+  font-size:var(--t-sm);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+/* The value is the thing being read — give it ink, and right-align so the
+   digits form a column the eye can run down. */
+.bars .row > :last-child{
+  text-align:right;
+  font-weight:600;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ══ TABLES ══════════════════════════════════════════════════════════════════ */
+.advlog{width:100%;border-collapse:collapse}
+.advlog th{
+  font-size:10.5px;
+  font-weight:600;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  border-bottom:1px solid var(--line);
+  padding:var(--sp-2) 10px;
+  position:sticky;
+  top:54px;                 /* clears the sticky view tabs */
+  background:var(--card);
+  z-index:2;
+}
+.advlog td{
+  padding:9px 10px;
+  border-bottom:1px solid var(--hair-soft);
+  color:var(--ink-2);
+}
+.advlog tr:last-child td{border-bottom:0}
+.advlog tbody tr{transition:background var(--dur-ui) var(--ease)}
+.advlog tbody tr:hover{background:var(--hair-soft)}
+/* Numeric columns right-align. Text left. Mixed alignment is why data tables
+   feel unreadable — the eye has no column to run down. */
+.advlog td:not(:first-child),.advlog th:not(:first-child){text-align:right}
+.advlog td:first-child,.advlog th:first-child{text-align:left}
+
+/* ══ CONTROLS ════════════════════════════════════════════════════════════════ */
+.btn,.pill,.texbtn{
+  border-radius:var(--radius-sm);
+  transition:background var(--dur-ui) var(--ease),
+             border-color var(--dur-ui) var(--ease),
+             color var(--dur-ui) var(--ease),
+             transform var(--dur-press);
+}
+.btn:active,.pill:active,.texbtn:active{transform:scale(.975)}
+
+/* ══ PROGRESSIVE DISCLOSURE ══════════════════════════════════════════════════
+   Methodology notes are secondary by definition — they should be reachable,
+   not competing with the number they explain. */
+details.meth{
+  border-top:1px solid var(--hair);
+  margin-top:var(--sp-3);
+  padding-top:var(--sp-2);
+}
+details.meth summary{
+  cursor:pointer;
+  font-size:var(--t-xs);
+  color:var(--muted);
+  transition:color var(--dur-ui) var(--ease);
+}
+details.meth summary:hover{color:var(--ink-2)}
+details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
+
+/* ══ HERO ════════════════════════════════════════════════════════════════════
+   The marketing hero is 320px of the first screen on the operator's own
+   console. Trimmed so the tabs and the first real content are reachable
+   without scrolling on a laptop. */
+.hm-inner{padding:var(--sp-5) var(--sp-6)}
+.hm-copy h2{font-size:24px;line-height:1.25}
+.hm-copy p{font-size:var(--t-body);margin-top:var(--sp-3)}
+.hm-phones{height:270px}
+.hm-hero{border-radius:var(--radius);margin-top:var(--sp-4)}
+
+@media (prefers-reduced-motion:reduce){
+  .card,.btn,.pill,.texbtn,.viewtabs button,
+  .bars .row > i,.advlog tbody tr,details.meth summary{transition:none}
+  .viewtabs{backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+
+/* Narrow screens: the label/value columns must not squeeze the bar to nothing. */
+@media (max-width:560px){
+  .bars .row,.bars.wlab .row{grid-template-columns:84px 1fr 46px;gap:var(--sp-2)}
+  .wrap{padding-left:var(--sp-4);padding-right:var(--sp-4)}
+  .hm-inner{padding:var(--sp-4)}
+}
+</style>
 </head>
 <body class="textured">
 <script>
@@ -941,53 +1342,6 @@ window.osWhenSlug=function(cb){
     </section>
 
     <!-- QUICK ACTIONS -->
-    <section aria-label="Quick actions">
-      <div class="sec-h"><h2>Shape the guide</h2><p>What your guests get, and where your fleet fits into it &mdash; the data can wait.</p></div>
-      <div class="qa-grid">
-        <button type="button" class="qa" data-goto="stayclose">
-          <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M4 21v-8a8 8 0 0 1 16 0v8"/><path d="M12 5V3"/><path d="M10 3h4"/></svg></span>
-          <b>Your add-on menu</b>
-          <span>Where the guide steers guests when the ocean is the wrong call &mdash; gear, town, trails.</span>
-          <span class="go">Open Stay-Close <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
-        </button>
-        <button type="button" class="qa" data-goto="promos">
-          <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg></span>
-          <b>Drop a promotion</b>
-          <span>A PDF flyer on the offer chip &mdash; set a window and it pops up on guests&rsquo; phones.</span>
-          <span class="go">Open Promotions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
-        </button>
-        <a class='qa' data-guide-link href='/stay-close-v2?ref=your-rentals&amp;seg=renter' rel='noopener' target='_blank'>
-          <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M9.5 5.5c1 .9 4 .9 5 0"/><path d="M11 18.5h2"/></svg></span>
-          <b>Open your live guide</b>
-          <span>See exactly what a guest sees, on your fleet&rsquo;s own link.</span>
-          <span class="go">stay-close-v2.html <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L9 15"/></svg></span>
-        </a>
-        <a class='qa' data-guide-screen href='/stay-close-v2?ref=your-rentals&amp;seg=renter&amp;mode=screen' rel='noopener' target='_blank'>
-          <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></span>
-          <b>Pickup-spot screen</b>
-          <span>A big-screen beach-conditions board for your pickup spot or counter.</span>
-          <span class="go">Open screen mode <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L9 15"/></svg></span>
-        </a>
-        <button type="button" class="qa" data-goto="segments">
-          <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="7" height="7" rx="1.2"/><rect x="15" y="2" width="7" height="7" rx="1.2"/><rect x="2" y="15" width="7" height="7" rx="1.2"/><rect x="15" y="15" width="7" height="7" rx="1.2"/></svg></span>
-          <b>Vehicles &amp; codes</b>
-          <span>Booking, in-car and key-fob QR codes &mdash; each with its own funnel and its own numbers.</span>
-          <span class="go">Open Vehicles &amp; codes <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
-        </button>
-        <button type="button" class="qa" data-goto="desk">
-          <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M2 9h20"/><path d="M6 14h4"/></svg></span>
-          <b>Tours &amp; affiliate</b>
-          <span>The tours you steer guests to &mdash; add your own affiliate link so every booking pays you.</span>
-          <span class="go">Open Tours <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
-        </button>
-        <a class="qa gold" href="assets/OceanSafe-Pilot-Agreement.pdf" target="_blank" rel="noopener" download>
-          <span class="qi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 15h6"/><path d="M9 11h3"/></svg></span>
-          <b>Free-use agreement</b>
-          <span>One page &mdash; no card, no subscription, cancel anytime. Telemetry switches on when it&rsquo;s signed.</span>
-          <span class="go">Download the PDF <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></span>
-        </a>
-      </div>
-    </section>
 
     <!-- FREE vs $5/vehicle — one card, shown in BOTH views (the free view appends its unlock buttons) -->
     <section aria-label="Free plan versus the per-vehicle plan" id="planCompareSec">
@@ -2858,8 +3212,6 @@ window.osWhenSlug=function(cb){
       body:'This is the guide your guests use on the beach — and this is where you shape it: your amenities, your offers, your picks. The data comes later, honestly labeled. Replay anytime with the <b>Tour</b> button up top.' },
     { view:'home', sel:'.hm-hero', title:'Safety first, your fleet woven in',
       body:'Every guest who scans the in-car QR gets live surf, lifeguard and hazard calls for the island’s most-visited beaches — with your fleet carried along. <b>Open your live guide</b> shows you exactly what they see.' },
-    { view:'home', sel:'.qa-grid', title:'Shape it from here',
-      body:'Your add-on menu, your promotions, the live guide itself — and the one-page free-use agreement when you’re ready. These four are worth touching before any chart.' },
     { view:'stayclose', sel:'#mgAdd-ons', title:'Your add-on menu',
       body:'When the ocean is the wrong call, the guide steers guests to what you rent instead — cooler, chairs, snorkel sets. Edits save as a draft in this browser; <b>Export config</b> sends the menu into your app build.' },
     { view:'stayclose', sel:'#gpAmCard', title:'Watch it as a guest',
