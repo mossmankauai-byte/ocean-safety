@@ -28,15 +28,75 @@
 
   <div class="card hide" id="editor" style="margin-top:14px">
     <h2 id="edTitle">Add promotion</h2>
+    <!-- TWO TABS, not one form with a trip-stage row. Weather and time of day are
+         both "here, now" ideas: a guest who hasn't flown yet is in another timezone,
+         and the Hawaiʻi forecast for their trip doesn't exist. Rather than disable
+         those rows for pre-arrival, the tab simply never renders them, so the broken
+         combination is unreachable instead of merely discouraged.
+         Same table, same columns. The tab decides what shows and what it writes. -->
+    <div class="tabrow" id="stageTabs" role="tablist" aria-label="When this offer runs">
+      <button type="button" class="tabbtn on" role="tab" aria-selected="true"  data-stage="on-island">On island</button>
+      <button type="button" class="tabbtn"    role="tab" aria-selected="false" data-stage="pre-arrival">Pre-arrival</button>
+    </div>
+    <div class="hint" id="stageHint" style="margin:0 0 12px">Shows while the guest is here on the island.</div>
     <label class="f" for="title">Title</label>
     <input id="title" placeholder="20% off snorkel rentals this week">
-    <div class="row2">
-      <div><label class="f" for="starts">Starts</label><input id="starts" type="date"></div>
-      <div><label class="f" for="ends">Ends</label><input id="ends" type="date"></div>
+    <div id="secDetail" class="hide">
+      <label class="f" for="detail">One-line detail</label>
+      <input id="detail" placeholder="Arranged before you land, driver meets you at baggage claim">
+      <div class="hint">One sentence. This is a card on a phone, not a flyer.</div>
     </div>
-    <label class="f" for="pdf">PDF flyer</label>
-    <input id="pdf" type="file" accept="application/pdf">
-    <div class="hint" id="pdfHint">PDF only. Leave empty when editing to keep the current file.</div>
+    <div class="row2">
+      <div><label class="f" for="starts"><span id="lblStarts">Starts</span></label><input id="starts" type="date"></div>
+      <div><label class="f" for="ends"><span id="lblEnds">Ends</span></label><input id="ends" type="date"></div>
+    </div>
+    <div id="secPdf">
+      <label class="f" for="pdf">PDF flyer</label>
+      <input id="pdf" type="file" accept="application/pdf">
+      <div class="hint" id="pdfHint">PDF only. Leave empty when editing to keep the current file.</div>
+    </div>
+    <!-- Pre-arrival only. A PDF is the wrong artifact for someone reading this on a
+         phone five days out, so that tab uses the one-line detail instead. -->
+    <div id="secPre" class="hide" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+      <label class="chk" id="aheadChk" style="display:inline-flex"><input type="checkbox" id="bookAhead"> Book ahead of time</label>
+      <div class="hint" style="margin:6px 0 14px">Adds a small badge to the guest's card. Use it when the front desk needs notice.</div>
+      <label class="f" for="requestTo">Where requests go</label>
+      <input id="requestTo" placeholder="frontdesk@yourhotel.com, (808) 555-0100, or a booking link">
+      <div class="hint">Front-desk email, a phone number, or your booking page. Leave it empty to use the property default. Without one, a guest taps the offer and nothing happens.</div>
+    </div>
+    <!-- Context pills. They tell the app WHEN this is worth surfacing, not just when it's
+         valid. Nothing selected in a row = no constraint (stored as an empty array),
+         which is why "Any weather" / "All day" are the resting state rather than a
+         stored value. Weather and time filter the guest app; audience does not,
+         because the app has no idea who the guest is. Audience is operator-facing only. -->
+    <div class="pillsec" id="secPills" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+      <label class="f">Weather</label>
+      <div class="hint" style="margin:0 0 8px">The app already knows the day's conditions. Pick the ones this fits.</div>
+      <div class="pillrow" id="fitWx">
+        <button type="button" class="pill" data-any="1" aria-pressed="true">Any weather</button>
+        <button type="button" class="pill" data-v="rain" aria-pressed="false">Rainy</button>
+        <button type="button" class="pill" data-v="clear" aria-pressed="false">Hot and clear</button>
+        <button type="button" class="pill" data-v="surf" aria-pressed="false">High surf or ocean closed</button>
+        <button type="button" class="pill" data-v="wind" aria-pressed="false">Windy</button>
+      </div>
+      <label class="f">Best time of day</label>
+      <div class="hint" style="margin:0 0 8px">Pick when this is worth recommending.</div>
+      <div class="pillrow" id="fitTime">
+        <button type="button" class="pill" data-any="1" aria-pressed="true">All day</button>
+        <button type="button" class="pill" data-v="morning" aria-pressed="false">Morning</button>
+        <button type="button" class="pill" data-v="midday" aria-pressed="false">Midday</button>
+        <button type="button" class="pill" data-v="evening" aria-pressed="false">Evening</button>
+      </div>
+      <label class="f">Who it fits</label>
+      <div class="hint" style="margin:0 0 8px">For your own staff and reports. Guests aren't sorted by this. The app never asks who they are.</div>
+      <div class="pillrow" id="fitWho">
+        <button type="button" class="pill" data-v="families" aria-pressed="false">Families with kids</button>
+        <button type="button" class="pill" data-v="couples" aria-pressed="false">Couples</button>
+        <button type="button" class="pill" data-v="groups" aria-pressed="false">Groups</button>
+        <button type="button" class="pill" data-v="solo" aria-pressed="false">Solo</button>
+      </div>
+      <div class="hint" id="fitSummary" style="margin:0"></div>
+    </div>
     <label class="chk on" id="liveChk" style="margin-top:14px;display:inline-flex"><input type="checkbox" id="live" checked> Live (show it now)</label>
     <div id="msg" class="msg hide" role="status" aria-live="assertive"></div>
     <div style="display:flex;gap:10px;margin-top:14px">
@@ -69,6 +129,9 @@
     el("save").addEventListener("click", save);
     el("del").addEventListener("click", remove);
     el("live").addEventListener("change", () => el("liveChk").classList.toggle("on", el("live").checked));
+    el("bookAhead").addEventListener("change", () => el("aheadChk").classList.toggle("on", el("bookAhead").checked));
+    wireFitPills();
+    wireStageTabs();
     load();
   })();
 
@@ -89,6 +152,102 @@
     $$("[data-edit]").forEach((b) => b.addEventListener("click", () => openEditor(b.dataset.edit)));
   }
 
+  // ── Trip-stage tabs ─────────────────────────────────────────────────────────
+  // The tab IS the trip_stage value. Nothing else sets it, so the form can never
+  // hold a combination the guest app has no sensible answer for (a pre-arrival
+  // offer tagged "high surf", say, judged against an island the guest hasn't
+  // reached). Note starts_at/ends_at mean different things per tab and the labels
+  // say so: on island they bound when the offer RUNS, pre-arrival they bound how
+  // far ahead of the trip to show it.
+  let stage = "on-island";
+  function wireStageTabs() {
+    const row = el("stageTabs");
+    if (!row) return;
+    row.addEventListener("click", (e) => {
+      const b = e.target.closest(".tabbtn");
+      if (b && row.contains(b)) setStage(b.dataset.stage);
+    });
+    setStage("on-island");
+  }
+  function setStage(s) {
+    stage = (s === "pre-arrival") ? "pre-arrival" : "on-island";
+    const pre = stage === "pre-arrival";
+    $$(".tabbtn", el("stageTabs")).forEach((b) => {
+      const on = b.dataset.stage === stage;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    // Pre-arrival hides the flyer upload and the whole pill block, and shows the
+    // one-line detail plus where a request should go.
+    el("secDetail").classList.toggle("hide", !pre);
+    el("secPre").classList.toggle("hide", !pre);
+    el("secPdf").classList.toggle("hide", pre);
+    el("secPills").classList.toggle("hide", pre);
+    el("lblStarts").textContent = pre ? "Show from" : "Starts";
+    el("lblEnds").textContent   = pre ? "Until"     : "Ends";
+    el("stageHint").textContent = pre
+      ? "Shows before the guest arrives, and stops on its own once they land."
+      : "Shows while the guest is here on the island.";
+  }
+  // ── Context pills ───────────────────────────────────────────────────────────
+  // One row per axis. A row with an "Any"/"All day" pill treats it as exclusive:
+  // picking it clears the specifics, picking a specific clears it, and emptying
+  // the specifics falls back to it. The stored value for that resting state is an
+  // EMPTY ARRAY, not the word "any". No constraint is the absence of one, and a
+  // stored "any" would have to be special-cased everywhere it's read.
+  const FIT_ROWS = { fitWx: "fit_weather", fitTime: "fit_time", fitWho: "fit_audience" };
+  function wireFitPills() {
+    Object.keys(FIT_ROWS).forEach((rowId) => {
+      const row = el(rowId);
+      if (!row) return;
+      row.addEventListener("click", (e) => {
+        const b = e.target.closest(".pill");
+        if (!b || !row.contains(b)) return;
+        const anyBtn = row.querySelector("[data-any]");
+        const press = (n, on) => n.setAttribute("aria-pressed", on ? "true" : "false");
+        if (b === anyBtn) {
+          $$(".pill", row).forEach((n) => press(n, false));
+          press(b, true);
+        } else {
+          press(b, b.getAttribute("aria-pressed") !== "true");
+          if (anyBtn) {
+            press(anyBtn, false);
+            if (!row.querySelector('[data-v][aria-pressed="true"]')) press(anyBtn, true);
+          }
+        }
+        renderFitSummary();
+      });
+    });
+    renderFitSummary();
+  }
+  function fitGet(rowId) {
+    const row = el(rowId);
+    if (!row) return [];
+    return Array.from(row.querySelectorAll('[data-v][aria-pressed="true"]')).map((n) => n.dataset.v);
+  }
+  function fitSet(rowId, vals) {
+    const row = el(rowId);
+    if (!row) return;
+    const list = Array.isArray(vals) ? vals : [];
+    let n = 0;
+    $$(".pill", row).forEach((b) => {
+      const on = !!b.dataset.v && list.indexOf(b.dataset.v) !== -1;
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      if (on) n++;
+    });
+    const anyBtn = row.querySelector("[data-any]");
+    if (anyBtn && !n) anyBtn.setAttribute("aria-pressed", "true");
+  }
+  function fitLabels(rowId) {
+    const row = el(rowId);
+    return row ? Array.from(row.querySelectorAll('[aria-pressed="true"]')).map((n) => n.textContent.trim()) : [];
+  }
+  function renderFitSummary() {
+    const who = fitLabels("fitWho");
+    el("fitSummary").textContent = "Recommend when: " + fitLabels("fitWx").join(", ")
+      + " · " + fitLabels("fitTime").join(", ") + " · " + (who.length ? who.join(", ") : "anyone");
+  }
+
   function openEditor(id) {
     editingId = id;
     const p = id ? promos.find((x) => x.id === id) : null;
@@ -99,9 +258,32 @@
     el("starts").value = p?.starts_at || "";
     el("ends").value = p?.ends_at || "";
     el("pdf").value = "";
+    fitSet("fitWx", p?.fit_weather);
+    fitSet("fitTime", p?.fit_time);
+    fitSet("fitWho", p?.fit_audience);
+    renderFitSummary();
+    // A stored 'any' opens on the On island tab: it is the older, unstaged shape,
+    // and that tab is the one whose fields can all still be edited safely.
+    setStage(p?.trip_stage === "pre-arrival" ? "pre-arrival" : "on-island");
+    el("detail").value = p?.detail || "";
+    el("requestTo").value = p?.request_to || "";
+    el("bookAhead").checked = !!p?.book_ahead;
+    el("aheadChk").classList.toggle("on", !!p?.book_ahead);
     el("live").checked = p ? p.status === "live" : true;
     el("liveChk").classList.toggle("on", el("live").checked);
     el("editor").classList.remove("hide");
+    // Bring the form clear of the sticky header. At phone width that header
+    // wraps to two rows and covers the top of the editor, which put the
+    // trip-stage tabs underneath it: a tap landed on the header instead of
+    // the tab. Measured rather than hard-coded, because the header height
+    // changes with the viewport.
+    try {
+      // Centre the tab row rather than aligning the editor to a computed
+      // offset: scrollTo(top) gets clamped on a short page, which left the
+      // tabs stranded under the header. block:"center" cannot be clamped to
+      // a position that hides them.
+      (el("stageTabs") || el("editor")).scrollIntoView({ block: "center", behavior: "smooth" });
+    } catch (e) {}
     el("editor").scrollIntoView({ behavior: "smooth", block: "start" });
   }
   function closeEditor() { el("editor").classList.add("hide"); editingId = null; }
@@ -117,14 +299,53 @@
         if (file.type !== "application/pdf") throw new Error("That's not a PDF.");
         pdf_url = await uploadToBucket("promos", partner.id, file);
       }
-      if (!pdf_url) throw new Error("Upload a PDF flyer.");
+      const pre = stage === "pre-arrival";
+      const detail = el("detail").value.trim();
+      // An offer has to carry SOMETHING to show. On island that is a flyer; before
+      // arrival it is the one-line detail, because a guest several timezones out is
+      // not going to open a PDF to read about an airport transfer.
+      if (!pre && !pdf_url) throw new Error("Upload a PDF flyer.");
+      if (pre && !detail) throw new Error("Add the one-line detail. It's what the guest actually reads.");
       const row = {
         partner_id: partner.id, title, pdf_url,
         starts_at: el("starts").value || null, ends_at: el("ends").value || null,
         status: el("live").checked ? "live" : "draft",
+        trip_stage: stage,
+        detail: detail || null,
+        book_ahead: pre ? el("bookAhead").checked : false,
+        request_to: pre ? (el("requestTo").value.trim() || null) : null,
+        // Weather and time of day are meaningless before the guest lands, so the
+        // pre-arrival tab writes the empty arrays rather than whatever the hidden
+        // pills happen to be holding from a previous edit.
+        fit_weather: pre ? [] : fitGet("fitWx"),
+        fit_time:    pre ? [] : fitGet("fitTime"),
+        fit_audience: pre ? [] : fitGet("fitWho"),
       };
-      const q = editingId ? sb.from("promotions").update(row).eq("id", editingId) : sb.from("promotions").insert(row);
-      const { error } = await q;
+      const write = (r) => editingId ? sb.from("promotions").update(r).eq("id", editingId) : sb.from("promotions").insert(r);
+      let { error } = await write(row);
+      // Unknown column: this deployment predates the fit columns
+      // (portal-demo/migrations/2026-08-12-promo-fit.sql not applied yet).
+      // The two codes are NOT interchangeable and both are needed: PostgREST
+      // rejects an unknown column against its schema cache before the query
+      // reaches Postgres, so a WRITE returns PGRST204 and only a READ ever
+      // returns Postgres' own 42703. Verified against the live API.
+      // Save the promotion anyway rather than failing a title-only edit, and
+      // say plainly that the context pills were the part that didn't save.
+      if (error && (error.code === "PGRST204" || error.code === "42703")) {
+        // A PRE-ARRIVAL offer cannot degrade. Strip the new columns and what is left
+        // is an undated on-island flyer with no flyer: worse than not saving, because
+        // the operator would believe it went live. Fail loudly instead.
+        if (pre) throw new Error("Pre-arrival offers aren't switched on for your account yet. Nothing was saved.");
+        const bare = Object.assign({}, row);
+        delete bare.fit_weather; delete bare.fit_time; delete bare.fit_audience;
+        delete bare.trip_stage; delete bare.detail; delete bare.book_ahead; delete bare.request_to;
+        ({ error } = await write(bare));
+        // Editor stays OPEN so the warning is visible: #msg lives inside it.
+        if (!error) {
+          load();
+          return toast(el("msg"), "info", "Saved, but the weather, time and audience pills didn't. That part isn't switched on for your account yet.");
+        }
+      }
       if (error) throw error;
       closeEditor(); load();
     } catch (e) { toast(el("msg"), "err", errText(e.message || e)); }

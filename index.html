@@ -2444,6 +2444,18 @@ function resolveIsland(){
   try { var s = localStorage.getItem('os_island'); if(s && ISLANDS[s] && ISLANDS[s].live) return s; } catch(e){}
   return 'kauai';
 }
+// Did this session actually SAY which island, or did it fall through to the Kauaʻi
+// default? The three sources above are all deliberate: a ?island= param, a /go/<slug>
+// path, or an island this device chose earlier. Anything else is a guess.
+// A partner link with no island in it is the guess case, and it is why a Maui hotel's
+// pre-arrival link used to boot as Kauaʻi and then have its whole config discarded by
+// the C-3 binding check. See _cobrandIslandRescue.
+function _islandSignalExplicit(){
+  try { var p = new URLSearchParams(location.search).get('island'); if(p && ISLANDS[p] && ISLANDS[p].live) return true; } catch(e){}
+  try { var m = location.pathname.match(/^\/(?:go\/)?([a-z]+)\/?$/); if(m && ISLANDS[m[1]] && ISLANDS[m[1]].live) return true; } catch(e){}
+  try { var s = localStorage.getItem('os_island'); if(s && ISLANDS[s] && ISLANDS[s].live) return true; } catch(e){}
+  return false;
+}
 let ACTIVE = ISLANDS[resolveIsland()] || ISLANDS.kauai;
 try { window.ACTIVE = ACTIVE; window.ISLANDS = ISLANDS; } catch(e){}
 // The boot splash (#loader) is static markup that reads "Kauaʻi" — it is the first thing painted
@@ -4694,6 +4706,33 @@ async function fetchLive(){
           let s72 = 0;
           for(let i = bestIdx - 71; i <= bestIdx; i++){ s72 += (typeof hp[i] === 'number' ? hp[i] : 0); }
           LIVE.rain72 = Math.round(s72 * 10) / 10;
+        }
+        // WET DAYLIGHT HOURS. The single definition of "a rainy day" for anything that
+        // recommends an indoor alternative (the amenity panel's rain state, and promo
+        // offers tagged 'rain'). Both used to carry their own threshold: the amenity
+        // panel wanted >=5mm of daily total, the promo filter wanted >=2mm or a 60%
+        // chance. Between those two a guest saw a rainy-day offer next to a panel that
+        // called the day calm.
+        //
+        // Daily TOTAL is the wrong quantity: one 6mm downpour at 2am clears by breakfast,
+        // and Hawaii's usual pattern is many light hours. Duration is what decides whether
+        // a guest gives up on the beach, so count HOURS instead of millimetres.
+        //   window    08:00 to 18:00 local, the ten hours a guest would actually be out
+        //   wet hour  >= 0.5mm, the same NOAA trace cutoff rain_state already uses
+        //   rainy day >= 6 of those 10, i.e. more than half the usable day
+        // Times from Open-Meteo are already local (timezone=Pacific/Honolulu), so the
+        // hour can be read off the string without constructing a Date.
+        const _today = String(ht[bestIdx] || '').slice(0, 10);
+        if(_today){
+          let wet = 0;
+          for(let i = 0; i < ht.length; i++){
+            const t = String(ht[i] || '');
+            if(t.slice(0, 10) !== _today) continue;
+            const hr = parseInt(t.slice(11, 13), 10);
+            if(!(hr >= 8 && hr < 18)) continue;
+            if((typeof hp[i] === 'number' ? hp[i] : 0) >= 0.5) wet++;
+          }
+          LIVE.wet_hours_today = wet;
         }
       }
     } else {
@@ -9392,6 +9431,9 @@ async function rescore(){
   // Boot paints POI pins after renderMap()'s declutter pass, so thin them once here too —
   // otherwise the first screen shows an unthinned pile until the user pans or zooms.
   try{ declutterMarks(); }catch(e){}
+  // Promo offers are filtered on the weather and the hour, so they go stale the same
+  // way the pins do. This is the only place that knows conditions just changed.
+  try{ _promoMaybeRerender(); }catch(e){}
   // Update header weather strip from live or snapshot data
   const D = (typeof LIVE !== 'undefined' && LIVE) ? LIVE : SNAP;
   if(D){
@@ -10135,6 +10177,50 @@ window._partnerCfg = null;
 // the free tier; the worker stamps preview:true on every mint). Paid previews
 // simply omit the plan key.
 function _planPaid(){ var c = window._partnerCfg; return !c || c.plan !== 'free'; }
+// ── Trip stage ──────────────────────────────────────────────────────────────
+// Where the guest is in their trip, read from the device clock alone. No
+// geolocation prompt, no coordinates stored, nothing sent anywhere. Background
+// geofencing does not exist on the web, so this is the whole mechanism.
+//
+// Hawaiʻi is UTC-10 year round and does not observe DST, so the offset is a stable
+// tell: getTimezoneOffset() returns 600 here, and no mainland zone returns 600 in
+// either season. The IANA name is only a secondary check, because some devices
+// report Pacific/Johnston or US/Hawaii for the same zone.
+//
+// Three states, and the third is the one a naive read gets wrong:
+//   pre-arrival     not on Hawaiʻi time, and never has been on this device
+//   on-island       on Hawaiʻi time
+//   post-departure  not on Hawaiʻi time, but WAS earlier
+// Pre-arrival and post-departure are the same instantaneous signal. Memory is the
+// only thing that separates them, so the first on-island reading is stamped and
+// never cleared. Without that stamp a guest who flew home reads as a brand new
+// pre-arrival guest, and the property's numbers inflate.
+//
+// Known limits, accepted rather than worked around:
+//   - "Set time zone automatically" needs location services. A guest with it off
+//     never flips, and stays pre-arrival for the whole trip.
+//   - A guest already in Hawaiʻi before check-in (arrived early, inter-island, or
+//     a resident booking a night) reads on-island from the first open and never
+//     sees a pre-arrival offer.
+// Both need real location to fix, which costs more trust than this feature is worth.
+function _onHawaiiTime(){
+  try {
+    if(new Date().getTimezoneOffset() === 600) return true;
+    var z = (Intl.DateTimeFormat().resolvedOptions().timeZone) || '';
+    return z === 'Pacific/Honolulu' || z === 'Pacific/Johnston' || z === 'US/Hawaii';
+  } catch(e){ return false; }
+}
+function _tripStage(){
+  try {
+    if(_onHawaiiTime()){
+      try { if(!localStorage.getItem('os_arrived')) localStorage.setItem('os_arrived', new Date().toISOString()); } catch(e){}
+      return 'on-island';
+    }
+    var seen = null;
+    try { seen = localStorage.getItem('os_arrived'); } catch(e){}
+    return seen ? 'post-departure' : 'pre-arrival';
+  } catch(e){ return 'on-island'; }   // unreadable clock → behave exactly as the app does today
+}
 function _activeRefSlug(){
   try {
     const params = new URLSearchParams(location.search);
@@ -10513,10 +10599,8 @@ function _tourDeskCard(){
 //                 is unknown, not a red flag).
 //   brown_water — c.brown, the per-beach flag getCond() sets via bw(b,c)
 //                 (airport rain OR live USGS discharge).
-//   rain        — today's daily rainfall >= 5 mm: FORECAST[0].precip (true mm),
-//                 a heavy-rain gate consistent with Stay-Close's intent;
-//                 falls back to c.rain/10 (c.rain is mm×10 per the bw() units
-//                 convention) when FORECAST hasn't arrived.
+//   rain        : a rainy DAY, not a rainy moment. _isRainyDay(), i.e. 6 or more
+//                 wet hours inside 08:00-18:00. See LIVE.wet_hours_today.
 //   always      — (or a missing/empty showWhen) renders regardless.
 // Unrecognized showWhen values never match — a config typo hides the amenity
 // rather than showing a conditional offer unconditionally.
@@ -10526,11 +10610,22 @@ function _amenityCondStates(b, r, c){
   if((b && b.warning_only) || (r && r.status === 'warning') ||
      (r && r.status === 'hidden' && HAZARD_REASONS.indexOf(r.reason) >= 0)) states.push('red_flag');
   if(c && c.brown) states.push('brown_water');
-  const mm = (typeof FORECAST !== 'undefined' && Array.isArray(FORECAST) && FORECAST[0] && typeof FORECAST[0].precip === 'number')
-    ? FORECAST[0].precip
-    : ((c && typeof c.rain === 'number') ? c.rain / 10 : 0);
-  if(mm >= 5) states.push('rain');
+  // Strict true: an unknown day (=== null, forecast not in yet) is not a rainy one.
+  if(_isRainyDay() === true) states.push('rain');
   return states;
+}
+// THE definition of a rainy day, shared by the amenity panel above and the promo
+// fit filter below so the two can never contradict each other on one screen.
+// Parameters and the reasoning behind them live at LIVE.wet_hours_today in fetchLive.
+// Returns true / false / null, where null means the hourly forecast has not landed.
+// null is deliberately NOT false: "we don't know yet" and "it is dry" lead to
+// different choices, and every caller has to say which one it wants.
+function _isRainyDay(){
+  try {
+    if(typeof LIVE === 'undefined' || !LIVE) return null;
+    if(typeof LIVE.wet_hours_today !== 'number') return null;
+    return LIVE.wet_hours_today >= 6;
+  } catch(e){ return null; }
 }
 // Tap → amenity_tap event. The condition that showed the offer rides in the
 // existing 64-char label slot as "name|condition" (name clipped to 48 so the
@@ -10538,6 +10633,17 @@ function _amenityCondStates(b, r, c){
 // chosen over adding a new event field because the worker's promo_tap
 // label-map pattern handles it with zero schema change. Fires on expand only
 // (not collapse), so one open = one tap.
+// The conversion event. amenity_tap only says a guest opened the offer; without
+// this the funnel goes dark exactly where it starts being worth money, so a
+// property could never be shown a rate rather than a count of curious taps.
+function _amenityAsk(idx, channel){
+  try {
+    const list = (window._partnerCfg && window._partnerCfg.amenities) || [];
+    const a = list[idx];
+    const nm = String((a && a.name) || '').replace(/\|/g,'/').slice(0, 48);
+    if(nm) _partnerTrack('amenity_request', nm + '|' + channel);
+  } catch(e){}
+}
 function _amenityTap(btn, idx, cond){
   try {
     const body = document.getElementById('amenityBody' + idx);
@@ -10545,12 +10651,21 @@ function _amenityTap(btn, idx, cond){
     const open = body.style.display !== 'none';
     body.style.display = open ? 'none' : '';
     btn.setAttribute('aria-expanded', open ? 'false' : 'true');
-    if(!open){
-      const list = (window._partnerCfg && window._partnerCfg.amenities) || [];
-      const a = list[idx];
-      const nm = String((a && a.name) || '').replace(/\|/g,'/').slice(0, 48);
-      if(nm) _partnerTrack('amenity_tap', nm + '|' + (cond || 'calm'));
-    }
+    if(!open) _amenityTrackView(idx, cond);
+  } catch(e){}
+}
+// "amenity_tap" means the guest SAW the offer's detail, however it came open.
+// The first row now renders expanded, so if this only fired on a real tap the
+// top offer, the one that takes most of the requests, would report zero views
+// against real amenity_request events, and its conversion rate would be infinite.
+// One panel build = one view for the auto-opened row, which is the same contract
+// every other row has.
+function _amenityTrackView(idx, cond){
+  try {
+    const list = (window._partnerCfg && window._partnerCfg.amenities) || [];
+    const a = list[idx];
+    const nm = String((a && a.name) || '').replace(/\|/g,'/').slice(0, 48);
+    if(nm) _partnerTrack('amenity_tap', nm + '|' + (cond || 'calm'));
   } catch(e){}
 }
 // Renders the "Provided by <hotel>" panel from plain strings only (see the
@@ -10564,35 +10679,69 @@ function _amenityPanel(states){
   if(!_planPaid()) list = list.slice(0, 1);
   if(!list.length) return '';
   states = Array.isArray(states) ? states : [];
-  const primary = states[0] || 'calm';
+  const stage = _tripStage();
+  const primary = (stage === 'pre-arrival') ? 'prearrival' : (states[0] || 'calm');
   const rows = list.map((a, i) => ({ a, i }))
     .filter(x => {
       if(!x.a || !x.a.name) return false;
+      // Trip stage, same contract as the offer rail: no stage field = the whole trip.
+      const want = (typeof x.a.stage === 'string') ? x.a.stage : 'any';
+      if(stage === 'post-departure') return false;
+      if(want !== 'any' && want !== stage) return false;
       const sw = String(x.a.showWhen || 'always');
+      // Before they land, "rainy day" and "red flag" describe an island the guest is
+      // not standing on, and the forecast for their trip does not exist yet. Only
+      // unconditional entries survive pre-arrival.
+      if(stage === 'pre-arrival') return sw === 'always';
       return sw === 'always' || states.indexOf(sw) >= 0;
     });
   if(!rows.length) return '';
   const CTX = {
-    red_flag: 'The ocean is the wrong call right now — these are on the property.',
+    red_flag: 'The ocean is the wrong call right now. These are on the property.',
     brown_water: 'With runoff in the water today, these are on the property.',
-    rain: 'A good rainy-day list — all on the property.',
-    calm: 'On the property, whenever you want a break from the beach.'
+    rain: 'A good rainy-day list, all on the property.',
+    calm: 'On the property, whenever you want a break from the beach.',
+    prearrival: 'Worth sorting out before you fly. The front desk confirms the details.'
   };
-  const body = rows.map(x => {
+  const body = rows.map((x, ri) => {
     const a = x.a;
+    // First offer opens by default. Everything below is collapsed, so a guest who
+    // never taps sees no photo, no detail and no action at all: the whole offer
+    // was one tap behind a chevron that reads as an accordion, not an offer.
+    const openFirst = ri === 0;
     const price = a.price ? `<span style="flex-shrink:0;font-size:12px;font-weight:700;color:var(--ocean,#0f4c5c)">${_pesc(a.price)}</span>` : '';
     const detail = a.detail ? `<div style="font-size:11.5px;color:var(--mute);line-height:1.45">${_pesc(a.detail)}</div>` : '';
+    // Optional photo, shown only once the row is expanded so the collapsed list
+    // stays compact. Vetted the same way promo flyers are: an https:// URL or an
+    // image data: URI, nothing else. A poisoned config must not be able to point
+    // this at another scheme.
+    const photoOK = a.image && (/^https:\/\//i.test(a.image) || /^data:image\/(png|jpe?g|webp);/i.test(a.image));
+    const photo = photoOK ? `<img src="${_pesc(a.image)}" alt="" loading="lazy" style="display:block;width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;background:var(--warm)">` : '';
     const hours = a.hours ? `<div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mute);margin-top:${a.detail ? '4px' : '0'}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><polyline points="12 7.5 12 12 15 14"/></svg><span>Open ${_pesc(a.hours)}</span></div>` : '';
     const digits = String(a.phone == null ? '' : a.phone).replace(/[^+0-9]/g,'');
-    const phone = a.phone ? `<a href="tel:${_pesc(digits)}" onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ocean,#0f4c5c);text-decoration:none;margin-top:${(a.detail||a.hours) ? '4px' : '0'}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>Call ${_pesc(a.phone)}</span></a>` : '';
-    return `<button type="button" onclick="_amenityTap(this,${x.i},'${primary}')" aria-expanded="false" style="display:block;width:100%;min-height:44px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-top:8px;cursor:pointer;text-align:left;font-family:inherit">
+    // The offer's actual conversion step. This used to be an 11.5px text link, which
+    // is the same visual weight as the detail copy above it and reads as a label
+    // rather than an action. Text is the primary because a pre-arrival guest is
+    // usually several timezones away, where placing a call is the harder ask; the
+    // call stays as a secondary for anyone already on property.
+    // Still no price and no checkout: both paths open a conversation with the desk.
+    // sms: takes the body as a QUERY (?body=), per RFC 5724. It was "&body=" with no
+    // preceding "?", which Android/Chrome parse as part of the phone number: the
+    // message silently vanished on the platform this button matters most on.
+    const askBody = encodeURIComponent('Aloha, I would like to ask about: ' + String(a.name || ''));
+    const phone = a.phone ? `<span style="display:flex;gap:8px;margin-top:10px">
+        <a href="sms:${_pesc(digits)}?body=${askBody}" onclick="event.stopPropagation();_amenityAsk(${x.i},'text')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 14px;background:var(--ocean,#0f4c5c);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span>Ask the front desk</span></a>
+        <a href="tel:${_pesc(digits)}" onclick="event.stopPropagation();_amenityAsk(${x.i},'call')" aria-label="Call ${_pesc(a.phone)}" style="display:flex;align-items:center;justify-content:center;min-width:52px;min-height:44px;border:1.5px solid var(--ocean,#0f4c5c);border-radius:10px;color:var(--ocean,#0f4c5c);text-decoration:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+      </span>` : '';
+    return `<button type="button" onclick="_amenityTap(this,${x.i},'${primary}')" aria-expanded="${openFirst ? 'true' : 'false'}" style="display:block;width:100%;min-height:44px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-top:8px;cursor:pointer;text-align:left;font-family:inherit">
       <span style="display:flex;align-items:center;gap:10px">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 21h18"/><path d="M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>
         <span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink)">${_pesc(a.name)}</span>
         ${price}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
       </span>
-      <span id="amenityBody${x.i}" style="display:none;padding:8px 2px 2px 25px">
+      <span id="amenityBody${x.i}" style="${openFirst ? '' : 'display:none;'}padding:8px 2px 2px 25px">
+        ${photo}
         ${detail}
         ${hours}
         ${phone}
@@ -10600,13 +10749,16 @@ function _amenityPanel(states){
       </span>
     </button>`;
   }).join('');
+  // Row 0 renders expanded, so log the view the way a tap would. Deferred one tick
+  // so it lands after the caller has actually inserted this markup.
+  if(rows.length){ const _first = rows[0].i; setTimeout(() => _amenityTrackView(_first, primary), 0); }
   return `<div style="margin:10px 0 4px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">
     <div style="display:flex;align-items:center;gap:8px">
       <div style="font-weight:700;font-size:13px;color:var(--ink)">${_planPaid() ? 'Provided by ' + _pesc(_demoName(cfg.name || 'Your Resort')) : 'On the property'}</div>
       <span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);background:#fff;border:1px solid var(--border);border-radius:999px;padding:2px 7px">Property offer</span>
       ${_previewTag()}
     </div>
-    <div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">${CTX[primary] || CTX.calm} Separate from the safety report above — the ocean call never changes for an offer.</div>
+    <div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">${CTX[primary] || CTX.calm} Separate from the safety report above. The ocean call never changes for an offer.</div>
     ${body}
   </div>`;
 }
@@ -10644,22 +10796,31 @@ function _promoOpen(idx){
 // here: the app never learns who the guest is, so audience is operator-facing
 // only and must never silently filter what a guest sees.
 // Thresholds mirror the ones the safety UI already uses for its own chips, so
-// an offer tagged "rainy" appears on the days the app itself calls rainy.
+// an offer tagged "rainy" appears on the days the app itself calls rainy. Rain
+// specifically goes through _isRainyDay(), the SAME call the amenity panel makes.
+//
+// Returns null for "conditions are not ready", which makes the weather gate stand
+// down entirely rather than judge the day on placeholder numbers. That distinction
+// has to be explicit: getRegionConditions() NEVER returns null or throws. When the
+// fetch has not landed it hands back a SNAP fallback (precip 0, cloud 30, wind 14).
+// Reading that as truth tagged every cold start 'clear', which hid the rainy-day
+// offers and showed the sunny ones, on a day nobody had measured yet.
 function _promoWxTags(){
   try {
+    // surfDataStale() is the app's own "the feeds have not landed" signal, the same
+    // one the hazard verdict uses to refuse to render a call.
+    if(typeof surfDataStale === 'function' && surfDataStale()) return null;
     const c = getIslandConditions();
     if(!c) return null;
+    const rainy = _isRainyDay();
+    if(rainy === null) return null;   // no hourly forecast yet = no weather opinion
     const t = [];
-    // c.precip is daily mm (forecast); c.rain is mm×10 (live/snap). Same
-    // units convention as the rain chip at _condChips.
-    const mm = (typeof c.precip === 'number') ? c.precip : (typeof c.rain === 'number') ? c.rain / 10 : 0;
-    const wet = mm >= 2 || (typeof c.precip_chance === 'number' && c.precip_chance >= 60);
-    if(wet) t.push('rain');
+    if(rainy) t.push('rain');
     // surf_unknown means the marine feed failed; an unknown surf is not a big
     // surf, so it must not tag 'surf'.
     if(!c.surf_unknown && typeof c.es === 'number' && c.es >= 6) t.push('surf');
     if(typeof c.wind === 'number' && c.wind >= 20) t.push('wind');
-    if(!wet && typeof c.cloud === 'number' && c.cloud < 40) t.push('clear');
+    if(!rainy && typeof c.cloud === 'number' && c.cloud < 40) t.push('clear');
     return t;
   } catch(e){ return null; } // conditions unreadable = don't gate on weather at all
 }
@@ -10667,7 +10828,20 @@ function _promoTimeTag(now){
   const h = (now || new Date()).getHours();
   return h < 11 ? 'morning' : h < 16 ? 'midday' : 'evening';
 }
-function _promoFitOK(p, wxTags, timeTag){
+function _promoFitOK(p, wxTags, timeTag, stage){
+  // TRIP STAGE runs first, because it decides whether the other two axes mean
+  // anything at all. An offer with no stage is 'any' and runs the whole trip.
+  const want = (p && typeof p.stage === 'string') ? p.stage : 'any';
+  // The trip is over. Showing a departed guest a room upgrade is the case that
+  // inflates a property's numbers with taps that can never convert.
+  if(stage === 'post-departure') return false;
+  if(want !== 'any' && want !== stage) return false;
+  // A pre-arrival guest is several timezones away, and the Hawaiʻi forecast for
+  // their trip does not exist yet. Weather and time of day are both "here, now"
+  // ideas, so NEITHER is applied before they land. The portal's pre-arrival tab
+  // never writes them, but a hand-edited config must not be able to hide an offer
+  // behind a mainland clock either.
+  if(stage === 'pre-arrival') return true;
   const f = p && p.fit;
   if(!f || typeof f !== 'object') return true;
   const wx = Array.isArray(f.wx) ? f.wx : [];
@@ -10678,6 +10852,28 @@ function _promoFitOK(p, wxTags, timeTag){
   if(tm.length && tm.indexOf(timeTag) === -1) return false;
   return true;
 }
+// Everything the fit filter reads, flattened to one comparable string. 'wx?' is a
+// real state, distinct from 'no tags': it means conditions were not ready, and it
+// must re-render once they are.
+function _promoFitSig(){
+  const w = _promoWxTags();
+  return (w === null ? 'wx?' : w.slice().sort().join('+')) + '|' + _promoTimeTag(new Date())
+    + '|' + _tripStage();   // the flip to on-island has to repaint the rail too
+}
+// Called from rescore(). The offer rail was rendered exactly once, at the moment the
+// partner config resolved, which on a cold start is BEFORE the weather arrives, so
+// it judged the day on SNAP placeholders and never looked again. It also never
+// noticed the clock rolling from morning into midday during a long session.
+// Trip stage as a body attribute, so CSS can place the offer chip differently
+// before the guest lands without any JS reaching into style properties.
+function _promoStampTrip(stage){
+  try { document.body.setAttribute('data-trip', stage || _tripStage()); } catch(e){}
+}
+function _promoMaybeRerender(){
+  if(!window._partnerCfg) return;
+  if(_promoFitSig() === window._promoRenderSig) return;
+  _renderPartnerPromos(window._partnerCfg);
+}
 function _renderPartnerPromos(cfg){
   // Free plan: no promotion surfaces at all — no chip, no sheet, regardless
   // of what the config carries. (cfg is already window._partnerCfg here.)
@@ -10687,6 +10883,9 @@ function _renderPartnerPromos(cfg){
   const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
   promos.forEach(p => {
     if(!p || typeof p.pdf !== 'string') return;
+    // Already vetted on an earlier pass. Without this guard a re-render would mint
+    // a second blob URL for every data: flyer and never revoke the first.
+    if(p._pdfUrl) return;
     // Only a real PDF may become a flyer: a data:application/pdf URL, or an
     // https:// link. Rejects data:text/html and javascript: (blob would
     // inherit our origin and run as the app — stored-XSS via a poisoned config).
@@ -10694,18 +10893,31 @@ function _renderPartnerPromos(cfg){
       try { fetch(p.pdf).then(r => r.blob()).then(b => { p._pdfUrl = URL.createObjectURL(b); }).catch(function(){}); } catch(e){}
     } else if(/^https:\/\//i.test(p.pdf)){ p._pdfUrl = p.pdf; }
   });
-  const _wxTags = _promoWxTags(), _tTag = _promoTimeTag(now);
+  const _wxTags = _promoWxTags(), _tTag = _promoTimeTag(now), _stage = _tripStage();
   const live = promos.map((p, i) => ({ p, i }))
     .filter(x => x.p && x.p.title && !(x.p.expires && String(x.p.expires).slice(0,10) < todayStr))
-    .filter(x => _promoFitOK(x.p, _wxTags, _tTag));
+    .filter(x => _promoFitOK(x.p, _wxTags, _tTag, _stage));
+  // Remember what this render was based on, so _promoMaybeRerender can tell a real
+  // change from a routine rescore.
+  window._promoRenderSig = _promoFitSig();
+  _promoStampTrip(_stage);
+  window._promoLive = live;
+  // This function is re-entrant: conditions and the hour both move under it, so it
+  // tears its own chip down and rebuilds rather than bailing when one exists.
+  // Dropping to zero live offers has to remove the chip too, or a cleared-out rail
+  // keeps a count badge over an empty sheet.
+  const _old = document.getElementById('promoChip');
+  if(_old && _old.parentNode) _old.parentNode.removeChild(_old);
   if(!live.length) return;
   // Timed-window pop-up rides this same vetted `live` list (fires ~7s out; all
-  // suppression rules live in _promoPopSchedule below). Purely additive — the
-  // chip + sheet render exactly as before.
-  try { _promoPopSchedule(live); } catch(e){}
+  // suppression rules live in _promoPopSchedule below). ONE-SHOT: scheduling it on
+  // every rescore would re-pop the sheet at the guest all afternoon.
+  if(!window._promoPopScheduled){
+    window._promoPopScheduled = true;
+    try { _promoPopSchedule(live); } catch(e){}
+  }
   const subbar = document.getElementById('subtabs');
-  if(!subbar || document.getElementById('promoChip')) return;
-  window._promoLive = live;
+  if(!subbar) return;
   if(!document.getElementById('partnerPromoStyle')){
     const st = document.createElement('style');
     st.id = 'partnerPromoStyle';
@@ -10714,8 +10926,12 @@ function _renderPartnerPromos(cfg){
     // keeps it one band above the shore chips (bottom:96px) and clear of the
     // bottom tab bar. Town-only via body[data-tab="shopping"]; the display:none →
     // flex flip restarts the one-shot pop each time the user enters Town.
+    // Town-only WHILE ON ISLAND: that is where a guest is already in a shopping
+    // frame of mind. A PRE-ARRIVAL guest has no such tab. They land on the map and
+    // the offers are the only thing on the screen meant for them, so the chip shows
+    // on every tab until they arrive. body[data-trip] is stamped by _promoStampTrip.
     st.textContent = '#promoChip{display:none}'
-      + 'body[data-tab="shopping"] #promoChip{position:absolute;left:12px;bottom:148px;z-index:545;display:flex;align-items:center;background:rgba(253,242,214,.94);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:9px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s,box-shadow .18s;font-family:\'DM Sans\',sans-serif;animation:promoChipPop .45s ease-out 1}'
+      + 'body[data-tab="shopping"] #promoChip,body[data-trip="pre-arrival"] #promoChip{position:absolute;left:12px;bottom:148px;z-index:545;display:flex;align-items:center;background:rgba(253,242,214,.94);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:9px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s,box-shadow .18s;font-family:\'DM Sans\',sans-serif;animation:promoChipPop .45s ease-out 1}'
       + '#promoChip:active{transform:scale(.97)}'
       + '#promoChip:hover{box-shadow:0 6px 16px rgba(0,0,0,.18)}'
       + '@keyframes promoChipPop{0%{transform:scale(.8);opacity:0}65%{transform:scale(1.07);opacity:1}100%{transform:scale(1)}}'
@@ -10740,6 +10956,43 @@ function _renderPartnerPromos(cfg){
 // are all pre-wired (and every tab switch closeSheet()s it). Tapping an offer goes
 // through the EXISTING _promoOpen (promo_tap telemetry + vetted _pdfUrl) — this sheet
 // is only a picker, it never touches p.pdf itself.
+// Turn the operator's request destination into one safe, tappable action.
+// `request_to` is free text somebody typed into the portal: a front-desk email, a
+// phone number, or their own booking-engine URL. It is vetted the same way promo
+// flyers are, https:// ONLY for links, so a poisoned config cannot smuggle a
+// javascript: or data: URL into an href on our origin.
+//
+// Deliberately still no price and no checkout on our side. Every path here opens a
+// conversation with the property, who quote the live rate. A hotel's own booking
+// engine is theirs to run; we never promise a completion we cannot provision.
+function _promoRequestAction(p, i){
+  try {
+    const s = String((p && p.request_to) || '').trim();
+    if(!s) return '';
+    const subj = encodeURIComponent('Aloha, I would like to ask about: ' + String((p && p.title) || ''));
+    let href = '', label = '', ch = '';
+    if(/^https:\/\//i.test(s)){ href = s; label = 'Request this'; ch = 'url'; }
+    else if(s.indexOf('@') > 0){ href = 'mailto:' + s + '?subject=' + subj; label = 'Email the front desk'; ch = 'email'; }
+    else {
+      const d = s.replace(/[^+0-9]/g, '');
+      if(d.length >= 7){ href = 'tel:' + d; label = 'Call the front desk'; ch = 'call'; }
+    }
+    if(!href) return '';   // unparseable destination → no dead button, just no button
+    const ext = ch === 'url' ? ' target="_blank" rel="noopener noreferrer"' : '';
+    return `<a href="${_pesc(href)}"${ext} onclick="event.stopPropagation();_promoRequestTrack(${i},'${ch}')" style="display:flex;align-items:center;justify-content:center;min-height:44px;margin-top:11px;padding:0 14px;background:var(--ocean,#0f4c5c);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">${label}</a>`;
+  } catch(e){ return ''; }
+}
+// The conversion event for the offer rail, matching _amenityAsk's contract: the
+// index is passed rather than the title so no operator-typed string is ever
+// interpolated into an inline handler.
+function _promoRequestTrack(idx, channel){
+  try {
+    const list = (window._partnerCfg && window._partnerCfg.promotions) || [];
+    const p = list[idx];
+    const nm = String((p && p.title) || '').replace(/\|/g,'/').slice(0, 48);
+    if(nm) _partnerTrack('promo_request', nm + '|' + channel);
+  } catch(e){}
+}
 function _promoSheetOpen(){
   if(!_planPaid()) return; // free plan: no promo sheet, even if a chip somehow exists
   const live = window._promoLive || [];
@@ -10748,22 +11001,35 @@ function _promoSheetOpen(){
   const tagSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
   const rows = live.map(x => {
     const ends = x.p.expires ? `<span style="display:block;font-size:11px;color:var(--mute);margin-top:2px">Ends ${_pesc(_promoEndsLabel(x.p.expires))}</span>` : '';
+    // A pre-arrival offer is a text card, not a flyer: one line a guest reads on a
+    // phone in another timezone. A PDF is the wrong artifact that far out, so detail
+    // and pdf are independent and an offer may carry either.
+    const detail = x.p.detail ? `<span style="display:block;font-size:12px;color:var(--mute);line-height:1.45;margin-top:3px">${_pesc(x.p.detail)}</span>` : '';
+    // Sentence case, never the caps it was dictated in.
+    const badge = x.p.book_ahead ? `<span style="display:inline-block;font-size:10px;font-weight:700;color:var(--ocean,#0f4c5c);background:rgba(15,76,92,.08);border-radius:999px;padding:2px 8px;margin-top:5px">Book ahead of time</span>` : '';
     const hasPdf = typeof x.p.pdf === 'string' && x.p.pdf;
-    const tag = hasPdf ? 'button' : 'div';
-    const attrs = hasPdf ? `type="button" onclick="_promoOpen(${x.i})"` : 'role="note"';
     const chev = hasPdf ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>' : '';
-    return `<${tag} ${attrs} style="display:flex;align-items:center;gap:11px;width:100%;min-height:52px;padding:12px;background:#fff;border:1px solid var(--border);border-radius:12px;${hasPdf ? 'cursor:pointer;' : 'cursor:default;'}text-align:left;font-family:inherit">
+    // The head is a real button ONLY when there is a flyer to open. The request
+    // action below is an anchor, so the head cannot also be a button wrapping it:
+    // an <a> inside a <button> is invalid and breaks keyboard and screen readers.
+    const headTag = hasPdf ? 'button' : 'div';
+    const headAttrs = hasPdf ? `type="button" onclick="_promoOpen(${x.i})"` : 'role="note"';
+    const head = `<${headTag} ${headAttrs} style="display:flex;align-items:flex-start;gap:11px;width:100%;min-height:44px;padding:0;background:none;border:0;${hasPdf ? 'cursor:pointer;' : 'cursor:default;'}text-align:left;font-family:inherit">
       ${tagSvg}
-      <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700;color:var(--ink);line-height:1.3">${_pesc(x.p.title)}</span>${ends}</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700;color:var(--ink);line-height:1.3">${_pesc(x.p.title)}</span>${detail}${badge}${ends}</span>
       ${chev}
-    </${tag}>`;
+    </${headTag}>`;
+    // Where the tap goes. Without this a pre-arrival card is decoration: the guest
+    // reads about an airport transfer and has no way to ask for one.
+    const req = _promoRequestAction(x.p, x.i);
+    return `<div style="display:flex;flex-direction:column;width:100%;padding:12px;background:#fff;border:1px solid var(--border);border-radius:12px">${head}${req}</div>`;
   }).join('');
   const sc = document.getElementById('sc');
   sc.style.display = '';
   sc.innerHTML = `
     <div style="padding:6px 2px 0">
       <div style="font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:600;color:var(--ink)">Offers from ${_pesc(name)}</div>
-      <div style="font-size:12px;color:var(--mute);margin-top:3px;line-height:1.4">Property offers — separate from the safety report. The ocean call never changes for an offer.</div>
+      <div style="font-size:12px;color:var(--mute);margin-top:3px;line-height:1.4">Property offers, separate from the safety report. The ocean call never changes for an offer.</div>
     </div>
     <div aria-label="Offers from ${_pesc(name)}" style="display:flex;flex-direction:column;gap:8px;margin-top:12px">${rows}</div>`;
   document.getElementById('sheet').classList.add('on');
@@ -10915,6 +11181,48 @@ window._partnerSeg = null;
     .catch(function(){});
 }catch(e){} })();
 
+// ── Live promotions bridge ──────────────────────────────────────────────────
+// The missing half of the promotions feature. The portal wrote offers to the
+// `promotions` table; the app read window._partnerCfg.promotions out of a committed
+// JSON file; nothing joined the two. An operator could fill in the entire form,
+// including the weather and time pills, and no guest would ever see the result.
+//
+// The committed /partner-config/<slug>.json stays the baseline. When the slug
+// belongs to a property that manages its own offers in the portal, the table is
+// the truth and REPLACES that baseline list.
+//
+// Replace, not merge: an operator who deletes an offer expects it gone. Merging
+// would leave the committed copy on screen forever, which is the "we took that
+// down weeks ago" phone call.
+//
+// managed:false (the slug has no portal account) leaves the committed config
+// alone, so demo and hand-built configs behave exactly as they do today. So does
+// any failure: a 404 from an un-migrated database, an offline device, bad JSON.
+// The offer rail degrading to its committed baseline is always survivable; going
+// blank because a fetch failed is not.
+function _promoFetchLive(slug){
+  try {
+    if(!slug || !window.fetch) return;
+    fetch('https://arndnljtmjfsnzcpcuen.supabase.co/rest/v1/rpc/get_partner_promotions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json',
+               'apikey':'sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um',
+               'Authorization':'Bearer sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um'},
+      body: JSON.stringify({p_slug: slug})
+    }).then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if(!d || d.managed !== true || !Array.isArray(d.promotions)) return;
+        if(!window._partnerCfg) return;
+        window._partnerCfg.promotions = d.promotions;
+        // The last render was based on the committed list, so it is stale by
+        // definition. Clearing the signature forces a full rebuild rather than
+        // letting _promoMaybeRerender decide nothing changed.
+        window._promoRenderSig = null;
+        try { _renderPartnerPromos(window._partnerCfg); } catch(e){}
+      })
+      .catch(function(){});
+  } catch(e){}
+}
 // C-3 fail-closed co-brand island binding: an explicitly-bound partner config must match the
 // ACTIVE island; a legacy config with NO island field is honored ONLY on Kauaʻi (the sole
 // populated island today) and dropped on every other island. This prevents a Kauaʻi hotel's
@@ -10930,6 +11238,35 @@ function _cobrandIslandOK(cfg){
   var isl=cfg&&cfg.island;
   if(isl) return isl===a;   // explicit binding → must match (fail closed on mismatch)
   return a==='kauai';       // legacy fieldless cfg → honored only on Kauaʻi
+}
+// The rescue for the ONE case the check above gets wrong: nobody said which island,
+// we defaulted to Kauaʻi, and the partner is bound to a different one. Today that
+// silently drops every Maui / Oʻahu / Hawaiʻi Island partner link that does not carry
+// the island in its URL, which is the failure mode a hotel would report as "your app
+// doesn't know who we are".
+//
+// The fix is a reload, not a live swap: ACTIVE, the beach table B, and every scored
+// pin are bound at parse time, so re-pointing ACTIVE now would leave a Kauaʻi dataset
+// under a Maui header, the mixed-island hazard view. Re-entering with ?island= lets
+// the normal boot path do it correctly.
+//
+// Fires only when the island was a GUESS. An explicit ?island=, a /go/<slug> path, or
+// a remembered os_island all mean the guest or the link already chose, and the
+// fail-closed drop stands. sessionStorage guards against a redirect loop if the
+// config's island is somehow unreachable.
+function _cobrandIslandRescue(cfg){
+  try {
+    var want = cfg && cfg.island;
+    if(!want || !ISLANDS[want] || !ISLANDS[want].live) return false;
+    if(want === ((window.ACTIVE&&ACTIVE.slug)||'kauai')) return false;
+    if(_islandSignalExplicit()) return false;
+    if(sessionStorage.getItem('os_island_rescued')) return false;
+    sessionStorage.setItem('os_island_rescued', want);
+    var u = new URL(location.href);
+    u.searchParams.set('island', want);
+    location.replace(u.toString());   // replace, so Back does not bounce into the loop
+    return true;
+  } catch(e){ return false; }
 }
 window._partnerCfgReady = (function(){
   const slug = _activeRefSlug();
@@ -10952,7 +11289,10 @@ window._partnerCfgReady = (function(){
         if(_cobrandIslandOK(cfg)){
           window._partnerCfg = cfg;
           try { _renderPartnerPromos(cfg); } catch(e){}
-        } else {
+          try { _promoFetchLive(slug); } catch(e){}
+        } else if(!_cobrandIslandRescue(cfg)){
+          // Rescue declined (explicit island signal, or nothing to rescue to) → the
+          // C-3 drop stands exactly as before.
           try { console.warn('[co-brand] dropped partner cfg (island mismatch): cfg.island=', cfg.island, 'ACTIVE=', (window.ACTIVE&&ACTIVE.slug)); } catch(_){}
         }
       }
