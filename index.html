@@ -10897,6 +10897,17 @@ function _renderPartnerPromos(cfg){
   const live = promos.map((p, i) => ({ p, i }))
     .filter(x => x.p && x.p.title && !(x.p.expires && String(x.p.expires).slice(0,10) < todayStr))
     .filter(x => _promoFitOK(x.p, _wxTags, _tTag, _stage));
+  // Before the guest lands, a pre-arrival offer outranks an every-day one. The chip
+  // shows a single primary card, and an "any" offer that happens to sit first in the
+  // list was burying the one thing that is only actionable NOW: a transfer or a table
+  // has to be booked ahead, a happy hour cannot be attended from the mainland.
+  // Stable, and only reorders while stage is pre-arrival: `i` is the original index.
+  if(_stage === 'pre-arrival'){
+    live.sort((a, b) => {
+      const ap = (a.p.stage === 'pre-arrival') ? 0 : 1, bp = (b.p.stage === 'pre-arrival') ? 0 : 1;
+      return ap !== bp ? ap - bp : a.i - b.i;
+    });
+  }
   // Remember what this render was based on, so _promoMaybeRerender can tell a real
   // change from a routine rescore.
   window._promoRenderSig = _promoFitSig();
