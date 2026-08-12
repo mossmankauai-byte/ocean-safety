@@ -49,6 +49,40 @@
     <label class="f" for="pdf">PDF flyer</label>
     <input id="pdf" type="file" accept="application/pdf">
     <div class="hint" id="pdfHint">PDF only. Leave empty when editing to keep the current file.</div>
+    <!-- Context pills. They tell the app WHEN this is worth surfacing, not just when it's
+         valid. Nothing selected in a row = no constraint (stored as an empty array),
+         which is why "Any weather" / "All day" are the resting state rather than a
+         stored value. Weather and time filter the guest app; audience does not,
+         because the app has no idea who the guest is. Audience is operator-facing only. -->
+    <div class="pillsec" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+      <label class="f">Weather</label>
+      <div class="hint" style="margin:0 0 8px">The app already knows the day's conditions. Pick the ones this fits.</div>
+      <div class="pillrow" id="fitWx">
+        <button type="button" class="pill" data-any="1" aria-pressed="true">Any weather</button>
+        <button type="button" class="pill" data-v="rain" aria-pressed="false">Rainy</button>
+        <button type="button" class="pill" data-v="clear" aria-pressed="false">Hot and clear</button>
+        <button type="button" class="pill" data-v="surf" aria-pressed="false">High surf or ocean closed</button>
+        <button type="button" class="pill" data-v="wind" aria-pressed="false">Windy</button>
+      </div>
+      <label class="f">Best time of day</label>
+      <div class="hint" style="margin:0 0 8px">Pick when this is worth recommending.</div>
+      <div class="pillrow" id="fitTime">
+        <button type="button" class="pill" data-any="1" aria-pressed="true">All day</button>
+        <button type="button" class="pill" data-v="morning" aria-pressed="false">Morning</button>
+        <button type="button" class="pill" data-v="midday" aria-pressed="false">Midday</button>
+        <button type="button" class="pill" data-v="evening" aria-pressed="false">Evening</button>
+      </div>
+      <label class="f">Who it fits</label>
+      <div class="hint" style="margin:0 0 8px">For your own staff and reports. Guests aren't sorted by this. The app never asks who they are.</div>
+      <div class="pillrow" id="fitWho">
+        <button type="button" class="pill" data-v="families" aria-pressed="false">Families with kids</button>
+        <button type="button" class="pill" data-v="couples" aria-pressed="false">Couples</button>
+        <button type="button" class="pill" data-v="groups" aria-pressed="false">Groups</button>
+        <button type="button" class="pill" data-v="solo" aria-pressed="false">Solo</button>
+      </div>
+      <div class="hint" id="fitSummary" style="margin:0"></div>
+      <div class="hint" style="margin-top:6px">We connect these settings to your in-app offers for you. Setting them here doesn't move them across on its own yet.</div>
+    </div>
     <label class="chk on" id="liveChk" style="margin-top:14px;display:inline-flex"><input type="checkbox" id="live" checked> Live (show it now)</label>
     <div id="msg" class="msg hide"></div>
     <div style="display:flex;gap:10px;margin-top:14px">
@@ -130,6 +164,7 @@
     el("save").addEventListener("click", save);
     el("del").addEventListener("click", remove);
     el("live").addEventListener("change", () => el("liveChk").classList.toggle("on", el("live").checked));
+    wireFitPills();
     // drag-drop upload card: click opens the form; a dropped PDF lands in it.
     // (openEditor clears the file input, so the drop assigns AFTER opening.)
     const drop = el("dropCard");
@@ -187,6 +222,65 @@
     $$("[data-edit]").forEach((b) => b.addEventListener("click", () => openEditor(b.dataset.edit)));
   }
 
+  // ── Context pills ───────────────────────────────────────────────────────────
+  // One row per axis. A row with an "Any"/"All day" pill treats it as exclusive:
+  // picking it clears the specifics, picking a specific clears it, and emptying
+  // the specifics falls back to it. The stored value for that resting state is an
+  // EMPTY ARRAY, not the word "any". No constraint is the absence of one, and a
+  // stored "any" would have to be special-cased everywhere it's read.
+  const FIT_ROWS = { fitWx: "fit_weather", fitTime: "fit_time", fitWho: "fit_audience" };
+  function wireFitPills() {
+    Object.keys(FIT_ROWS).forEach((rowId) => {
+      const row = el(rowId);
+      if (!row) return;
+      row.addEventListener("click", (e) => {
+        const b = e.target.closest(".pill");
+        if (!b || !row.contains(b)) return;
+        const anyBtn = row.querySelector("[data-any]");
+        const press = (n, on) => n.setAttribute("aria-pressed", on ? "true" : "false");
+        if (b === anyBtn) {
+          $$(".pill", row).forEach((n) => press(n, false));
+          press(b, true);
+        } else {
+          press(b, b.getAttribute("aria-pressed") !== "true");
+          if (anyBtn) {
+            press(anyBtn, false);
+            if (!row.querySelector('[data-v][aria-pressed="true"]')) press(anyBtn, true);
+          }
+        }
+        renderFitSummary();
+      });
+    });
+    renderFitSummary();
+  }
+  function fitGet(rowId) {
+    const row = el(rowId);
+    if (!row) return [];
+    return Array.from(row.querySelectorAll('[data-v][aria-pressed="true"]')).map((n) => n.dataset.v);
+  }
+  function fitSet(rowId, vals) {
+    const row = el(rowId);
+    if (!row) return;
+    const list = Array.isArray(vals) ? vals : [];
+    let n = 0;
+    $$(".pill", row).forEach((b) => {
+      const on = !!b.dataset.v && list.indexOf(b.dataset.v) !== -1;
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      if (on) n++;
+    });
+    const anyBtn = row.querySelector("[data-any]");
+    if (anyBtn && !n) anyBtn.setAttribute("aria-pressed", "true");
+  }
+  function fitLabels(rowId) {
+    const row = el(rowId);
+    return row ? Array.from(row.querySelectorAll('[aria-pressed="true"]')).map((n) => n.textContent.trim()) : [];
+  }
+  function renderFitSummary() {
+    const who = fitLabels("fitWho");
+    el("fitSummary").textContent = "Recommend when: " + fitLabels("fitWx").join(", ")
+      + " · " + fitLabels("fitTime").join(", ") + " · " + (who.length ? who.join(", ") : "anyone");
+  }
+
   function openEditor(id) {
     editingId = id;
     const p = id ? promos.find((x) => x.id === id) : null;
@@ -197,6 +291,10 @@
     el("starts").value = p?.starts_at || "";
     el("ends").value = p?.ends_at || "";
     el("pdf").value = "";
+    fitSet("fitWx", p?.fit_weather);
+    fitSet("fitTime", p?.fit_time);
+    fitSet("fitWho", p?.fit_audience);
+    renderFitSummary();
     el("live").checked = p ? p.status === "live" : true;
     el("liveChk").classList.toggle("on", el("live").checked);
     el("editor").classList.remove("hide");
@@ -220,9 +318,28 @@
         partner_id: partner.id, title, pdf_url,
         starts_at: el("starts").value || null, ends_at: el("ends").value || null,
         status: el("live").checked ? "live" : "draft",
+        fit_weather: fitGet("fitWx"), fit_time: fitGet("fitTime"), fit_audience: fitGet("fitWho"),
       };
-      const q = editingId ? sb.from("promotions").update(row).eq("id", editingId) : sb.from("promotions").insert(row);
-      const { error } = await q;
+      const write = (r) => editingId ? sb.from("promotions").update(r).eq("id", editingId) : sb.from("promotions").insert(r);
+      let { error } = await write(row);
+      // Unknown column: this deployment predates the fit columns
+      // (portal-demo/migrations/2026-08-12-promo-fit.sql not applied yet).
+      // The two codes are NOT interchangeable and both are needed: PostgREST
+      // rejects an unknown column against its schema cache before the query
+      // reaches Postgres, so a WRITE returns PGRST204 and only a READ ever
+      // returns Postgres' own 42703. Verified against the live API.
+      // Save the promotion anyway rather than failing a title-only edit, and
+      // say plainly that the context pills were the part that didn't save.
+      if (error && (error.code === "PGRST204" || error.code === "42703")) {
+        const bare = Object.assign({}, row);
+        delete bare.fit_weather; delete bare.fit_time; delete bare.fit_audience;
+        ({ error } = await write(bare));
+        // Editor stays OPEN so the warning is visible: #msg lives inside it.
+        if (!error) {
+          load();
+          return toast(el("msg"), "info", "Saved, but the weather, time and audience pills didn't. That part isn't switched on for your account yet.");
+        }
+      }
       if (error) throw error;
       closeEditor(); load();
     } catch (e) { toast(el("msg"), "err", errText(e.message || e)); }

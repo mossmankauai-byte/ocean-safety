@@ -58,6 +58,12 @@ textarea{min-height:74px;resize:vertical}
 .chk{display:flex;align-items:center;gap:6px;font-size:13px;border:1.5px solid var(--line);border-radius:20px;padding:6px 12px;cursor:pointer;user-select:none}
 .chk input{width:auto}
 .chk.on{border-color:var(--ocean);background:#eef6f9;color:var(--ocean)}
+/* context pills. Same shape as .chk, no checkbox. State lives on aria-pressed
+   so the button reads correctly to a screen reader with no extra markup. */
+.pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.pill{font:inherit;font-size:13px;background:#fff;color:var(--ink);border:1.5px solid var(--line);
+  border-radius:22px;padding:6px 14px;cursor:pointer;user-select:none;min-height:44px}
+.pill[aria-pressed="true"]{border-color:var(--ocean);background:#eef6f9;color:var(--ocean);font-weight:700}
 
 /* buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:11px;padding:11px 16px;

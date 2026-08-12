@@ -31,7 +31,9 @@
     {
       "title": "Spa morning — off-peak pricing before 11am",
       "expires": "2030-12-31",
-      "pdf": "https://ocean-safety.netlify.app/assets/flyers/spa-morning.pdf"
+      "pdf": "https://ocean-safety.netlify.app/assets/flyers/spa-morning.pdf",
+      "_fit_note": "Only this offer carries fit, so the demo always has at least one chip no matter the hour. who is stored but never filters. The app doesn't know who the guest is.",
+      "fit": { "wx": ["rain"], "time": ["morning"], "who": ["couples"] }
     },
     {
       "title": "Expired example — must never render",

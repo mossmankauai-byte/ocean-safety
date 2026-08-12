@@ -10636,6 +10636,48 @@ function _promoOpen(idx){
     if(p._pdfUrl) window.open(p._pdfUrl, '_blank', 'noopener');
   } catch(e){}
 }
+// ── Promotion fit: which offers are worth surfacing right now ───────────────
+// promotions[] entries may carry fit:{wx:[],time:[],who:[]}. This is the operator's
+// answer to "when is this worth recommending", separate from the date window
+// (when it is VALID) and the timed window (when it is happening).
+// An EMPTY or absent list means no constraint. `who` is deliberately unused
+// here: the app never learns who the guest is, so audience is operator-facing
+// only and must never silently filter what a guest sees.
+// Thresholds mirror the ones the safety UI already uses for its own chips, so
+// an offer tagged "rainy" appears on the days the app itself calls rainy.
+function _promoWxTags(){
+  try {
+    const c = getIslandConditions();
+    if(!c) return null;
+    const t = [];
+    // c.precip is daily mm (forecast); c.rain is mm×10 (live/snap). Same
+    // units convention as the rain chip at _condChips.
+    const mm = (typeof c.precip === 'number') ? c.precip : (typeof c.rain === 'number') ? c.rain / 10 : 0;
+    const wet = mm >= 2 || (typeof c.precip_chance === 'number' && c.precip_chance >= 60);
+    if(wet) t.push('rain');
+    // surf_unknown means the marine feed failed; an unknown surf is not a big
+    // surf, so it must not tag 'surf'.
+    if(!c.surf_unknown && typeof c.es === 'number' && c.es >= 6) t.push('surf');
+    if(typeof c.wind === 'number' && c.wind >= 20) t.push('wind');
+    if(!wet && typeof c.cloud === 'number' && c.cloud < 40) t.push('clear');
+    return t;
+  } catch(e){ return null; } // conditions unreadable = don't gate on weather at all
+}
+function _promoTimeTag(now){
+  const h = (now || new Date()).getHours();
+  return h < 11 ? 'morning' : h < 16 ? 'midday' : 'evening';
+}
+function _promoFitOK(p, wxTags, timeTag){
+  const f = p && p.fit;
+  if(!f || typeof f !== 'object') return true;
+  const wx = Array.isArray(f.wx) ? f.wx : [];
+  const tm = Array.isArray(f.time) ? f.time : [];
+  // A failed conditions read (wxTags === null) leaves weather-tagged offers
+  // visible. Hiding an offer needs positive evidence the day is wrong for it.
+  if(wx.length && wxTags && !wx.some(v => wxTags.indexOf(v) !== -1)) return false;
+  if(tm.length && tm.indexOf(timeTag) === -1) return false;
+  return true;
+}
 function _renderPartnerPromos(cfg){
   // Free plan: no promotion surfaces at all — no chip, no sheet, regardless
   // of what the config carries. (cfg is already window._partnerCfg here.)
@@ -10652,8 +10694,10 @@ function _renderPartnerPromos(cfg){
       try { fetch(p.pdf).then(r => r.blob()).then(b => { p._pdfUrl = URL.createObjectURL(b); }).catch(function(){}); } catch(e){}
     } else if(/^https:\/\//i.test(p.pdf)){ p._pdfUrl = p.pdf; }
   });
+  const _wxTags = _promoWxTags(), _tTag = _promoTimeTag(now);
   const live = promos.map((p, i) => ({ p, i }))
-    .filter(x => x.p && x.p.title && !(x.p.expires && String(x.p.expires).slice(0,10) < todayStr));
+    .filter(x => x.p && x.p.title && !(x.p.expires && String(x.p.expires).slice(0,10) < todayStr))
+    .filter(x => _promoFitOK(x.p, _wxTags, _tTag));
   if(!live.length) return;
   // Timed-window pop-up rides this same vetted `live` list (fires ~7s out; all
   // suppression rules live in _promoPopSchedule below). Purely additive — the
