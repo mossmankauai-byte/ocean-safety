@@ -1275,7 +1275,7 @@ a{text-decoration:none;color:inherit}
 }
 
 /* PILLS */
-#pills{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px 10px;margin:8px 8px 0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:22px;box-shadow:0 3px 14px rgba(0,0,0,.12);border:1px solid rgba(15,76,92,.1);flex-shrink:0;position:relative;z-index:550}
+#pills{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px 10px;margin:8px 8px 0;background:rgba(255,255,255,.96);border-radius:22px;box-shadow:0 3px 14px rgba(0,0,0,.12);border:1px solid rgba(15,76,92,.1);flex-shrink:0;position:relative;z-index:550}
 #pills::-webkit-scrollbar{display:none}
 .pill{display:flex;align-items:center;gap:5px;padding:0 12px 0 5px;height:32px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;flex-shrink:0;border:1.5px solid var(--border);color:var(--mute);transition:all .15s}
 .pill .pill-ico{width:24px;height:24px;flex-shrink:0;display:block;border-radius:50%}
@@ -1325,7 +1325,7 @@ a{text-decoration:none;color:inherit}
    so they read clearly against any photo or generative bg behind them. */
 /* Premium status badge — was a saturated green/orange oval. Now: cream glass pill
    with a pulsing condition-colored dot + Fraunces italic label, in the brand voice. */
-.stbadge{position:absolute;top:12px;left:12px;padding:6px 12px 6px 9px;border-radius:999px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:13px;font-weight:600;background:rgba(253,242,214,.94);color:var(--ocean);border:1.5px solid rgba(15,76,92,.20);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 3px 10px rgba(0,0,0,.18);z-index:4;display:inline-flex;align-items:center;gap:7px;line-height:1.1;letter-spacing:.01em}
+.stbadge{position:absolute;top:12px;left:12px;padding:6px 12px 6px 9px;border-radius:999px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:13px;font-weight:600;background:rgba(253,242,214,.94);color:var(--ocean);border:1.5px solid rgba(15,76,92,.20);box-shadow:0 3px 10px rgba(0,0,0,.18);z-index:4;display:inline-flex;align-items:center;gap:7px;line-height:1.1;letter-spacing:.01em}
 .stbadge::before{content:'';width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#9ca3af;box-shadow:0 0 0 3px rgba(156,163,175,.18);animation:stbadgePulse 2s ease-in-out infinite}
 .stbadge.green{border-color:#4a7c4e;color:#345b37}
 .stbadge.green::before{background:#4a7c4e;box-shadow:0 0 0 3px rgba(74,124,78,.22)}
@@ -1342,7 +1342,7 @@ a{text-decoration:none;color:inherit}
    as .stbadge, gold accent. States a fact only (the hotel's pick) — never a
    safety claim and never alters the verdict. Paid + featured only (see
    _housePickBadge); free / non-featured renders nothing. */
-.housepick-badge{position:absolute;left:14px;bottom:82px;z-index:4;max-width:calc(100% - 28px);display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.01em;line-height:1.15;color:#7c5717;background:rgba(253,242,214,.96);border:1.5px solid #c89132;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 3px 10px rgba(0,0,0,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.housepick-badge{position:absolute;left:14px;bottom:82px;z-index:4;max-width:calc(100% - 28px);display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.01em;line-height:1.15;color:#7c5717;background:rgba(253,242,214,.96);border:1.5px solid #c89132;box-shadow:0 3px 10px rgba(0,0,0,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* no intent chips on this beach -> drop the badge down to where the chips would sit */
 .hero:not(:has(.ibs-hero)) .housepick-badge{bottom:52px}
 .housepick-badge svg{flex-shrink:0}
@@ -1359,14 +1359,14 @@ a{text-decoration:none;color:inherit}
    row scrolls horizontally on narrow screens without wrapping the layout. */
 .ibs-hero{position:absolute;left:14px;right:14px;bottom:48px;display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:2px 0;z-index:3}
 .ibs-hero::-webkit-scrollbar{display:none}
-.ib-hero{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 5px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(253,242,214,.94);color:var(--ocean);border:1.5px solid rgba(15,76,92,.20);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);white-space:nowrap;box-shadow:0 2px 8px rgba(15,76,92,.18)}
+.ib-hero{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 5px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(253,242,214,.94);color:var(--ocean);border:1.5px solid rgba(15,76,92,.20);white-space:nowrap;box-shadow:0 2px 8px rgba(15,76,92,.18)}
 .ib-hero.green{border-color:#4a7c4e;color:#345b37}
 .ib-hero.amber{border-color:#c89132;color:#7c5717}
 .ib-hero.red{border-color:#a13d3d;color:#7b2828}
 .ib-hero img.glyph{width:24px;height:24px;display:block;border-radius:50%;flex-shrink:0;object-fit:contain}
 .ib-hero .glyph-text{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:currentColor;color:#fdf2d6;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:700;font-size:11px;flex-shrink:0}
 /* Hero caution badge — compact bottom-right corner pill that doesn't overlap the title or intent chips */
-.hero-caution-band{position:absolute;right:14px;bottom:14px;z-index:4;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;max-width:48%;color:#fdf2d6;font-size:11px;font-weight:700;line-height:1.25;background:rgba(200,145,50,.96);border:1px solid rgba(253,242,214,.30);box-shadow:0 4px 14px rgba(0,0,0,.40);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-caution-band{position:absolute;right:14px;bottom:14px;z-index:4;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;max-width:48%;color:#fdf2d6;font-size:11px;font-weight:700;line-height:1.25;background:rgba(200,145,50,.96);border:1px solid rgba(253,242,214,.30);box-shadow:0 4px 14px rgba(0,0,0,.40);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hero-caution-band.red{background:rgba(161,61,61,.96)}
 .hero-caution-band svg{width:13px;height:13px;flex-shrink:0}
 .hero-caution-band b{font-weight:800;letter-spacing:.01em}
@@ -1437,7 +1437,7 @@ a{text-decoration:none;color:inherit}
 
 /* top:220px clears the subtab row (row bottom measures 212px at both 430px and 1280px
    viewports — was 160px, which overlapped the pills by ~13px). */
-.live-now-chip{position:absolute;top:220px;left:12px;z-index:550;background:rgba(253,242,214,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:6px 11px;display:flex;gap:7px;align-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s, box-shadow .18s;font-family:'DM Sans',sans-serif;max-width:calc(100% - 80px)}
+.live-now-chip{position:absolute;top:220px;left:12px;z-index:550;background:rgba(253,242,214,.94);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:6px 11px;display:flex;gap:7px;align-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s, box-shadow .18s;font-family:'DM Sans',sans-serif;max-width:calc(100% - 80px)}
 .live-now-chip:active{transform:scale(.97)}
 .live-now-chip:hover{box-shadow:0 6px 16px rgba(0,0,0,.18)}
 .live-now-label{color:#8a6b0a;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:9px;white-space:nowrap}
@@ -1446,13 +1446,13 @@ a{text-decoration:none;color:inherit}
 .live-now-listic{color:var(--ocean);flex-shrink:0;opacity:.8}
 .live-now-chip.has-advisory{background:rgba(208,59,59,.96);border-color:rgba(208,59,59,.96)}
 .live-now-chip.has-advisory .live-now-label,.live-now-chip.has-advisory .live-now-val,.live-now-chip.has-advisory .live-now-listic,.live-now-chip.has-advisory .live-now-chev{color:#fff}
-.saved-chip{position:absolute;top:215px;right:12px;z-index:700;background:rgba(253,242,214,.96);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1.5px solid var(--gold);border-radius:999px;padding:6px 12px;display:flex;gap:6px;align-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);font-family:'DM Sans',sans-serif;color:var(--ocean);transition:transform .15s, box-shadow .18s}
+.saved-chip{position:absolute;top:215px;right:12px;z-index:700;background:rgba(253,242,214,.96);border:1.5px solid var(--gold);border-radius:999px;padding:6px 12px;display:flex;gap:6px;align-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);font-family:'DM Sans',sans-serif;color:var(--ocean);transition:transform .15s, box-shadow .18s}
 .saved-chip:active{transform:scale(.96)}
 /* SHORE CHIPS — per-side surf + status floating over the map, one per coast (N/E/S/W).
    Same cream-glass recipe as .live-now-chip. Dot color is load-bearing status (good/ok/poor);
    slate dot + em dash = conditions unavailable (fail-safe — never renders the 99 sentinel).
    Droplet appears only when a beach on that shore trips the brown-water trigger. */
-.shore-chip{position:absolute;z-index:540;display:flex;align-items:center;gap:6px;background:rgba(253,242,214,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(15,76,92,.15);border-radius:999px;padding:5px 11px;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.12);transition:transform .16s cubic-bezier(0.23,1,0.32,1),box-shadow .2s;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--ocean);letter-spacing:.02em;line-height:1}
+.shore-chip{position:absolute;z-index:540;display:flex;align-items:center;gap:6px;background:rgba(253,242,214,.94);border:1px solid rgba(15,76,92,.15);border-radius:999px;padding:5px 11px;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.12);transition:transform .16s cubic-bezier(0.23,1,0.32,1),box-shadow .2s;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--ocean);letter-spacing:.02em;line-height:1}
 .shore-chip:active{transform:scale(.97)}
 .shore-chip:focus-visible{outline:2px solid var(--ocean);outline-offset:2px}
 @media (hover:hover) and (pointer:fine){.shore-chip:hover{box-shadow:0 4px 10px rgba(0,0,0,.16)}}
@@ -1591,7 +1591,7 @@ a{text-decoration:none;color:inherit}
 #rainToggle:hover{transform:scale(1.05)}
 #rainToggle svg{width:22px;height:22px}
 #rainToggle.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
-#fcBar{position:absolute;bottom:127px;left:50%;transform:translateX(-50%);z-index:700;display:none;flex-direction:column;align-items:center;gap:5px;background:rgba(8,40,50,.9);color:#eaf6f8;padding:6px 11px 7px;border-radius:16px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 120px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.fcBar-row{display:flex;align-items:center;gap:8px}.fc-legend{display:flex;align-items:center;gap:6px;line-height:1}.fc-lg-lbl{font-size:9px;font-weight:700;letter-spacing:.03em;opacity:.9;text-transform:uppercase}.fc-lg-end{font-weight:600;opacity:.6}.fc-lg-grad{width:90px;height:7px;border-radius:4px;background:linear-gradient(90deg,#a0e77b,#34c759,#ffcc00,#ff9500,#ff3b30);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}.fc-lg-drop{color:#eaf6f8;opacity:.92;flex-shrink:0;margin-right:1px}
+#fcBar{position:absolute;bottom:127px;left:50%;transform:translateX(-50%);z-index:700;display:none;flex-direction:column;align-items:center;gap:5px;background:rgba(8,40,50,.9);color:#eaf6f8;padding:6px 11px 7px;border-radius:16px;box-shadow:0 3px 12px rgba(0,0,0,.32);font-family:'DM Sans',sans-serif;font-size:12px;max-width:calc(100% - 120px)}.fcBar-row{display:flex;align-items:center;gap:8px}.fc-legend{display:flex;align-items:center;gap:6px;line-height:1}.fc-lg-lbl{font-size:9px;font-weight:700;letter-spacing:.03em;opacity:.9;text-transform:uppercase}.fc-lg-end{font-weight:600;opacity:.6}.fc-lg-grad{width:90px;height:7px;border-radius:4px;background:linear-gradient(90deg,#a0e77b,#34c759,#ffcc00,#ff9500,#ff3b30);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}.fc-lg-drop{color:#eaf6f8;opacity:.92;flex-shrink:0;margin-right:1px}
 #fcBar #fcTime{font-weight:600;min-width:56px;white-space:nowrap;flex-shrink:0}
 #fcBar input[type=range]{width:140px;min-width:64px;max-width:42vw;accent-color:#ff9500;cursor:pointer}
 #fcBar .fc-cap{opacity:.8;font-size:10.5px;white-space:nowrap;flex-shrink:0}
@@ -10669,7 +10669,7 @@ function _renderPartnerPromos(cfg){
     // bottom tab bar. Town-only via body[data-tab="shopping"]; the display:none →
     // flex flip restarts the one-shot pop each time the user enters Town.
     st.textContent = '#promoChip{display:none}'
-      + 'body[data-tab="shopping"] #promoChip{position:absolute;left:12px;bottom:148px;z-index:545;display:flex;align-items:center;background:rgba(253,242,214,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:9px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s,box-shadow .18s;font-family:\'DM Sans\',sans-serif;animation:promoChipPop .45s ease-out 1}'
+      + 'body[data-tab="shopping"] #promoChip{position:absolute;left:12px;bottom:148px;z-index:545;display:flex;align-items:center;background:rgba(253,242,214,.94);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:9px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s,box-shadow .18s;font-family:\'DM Sans\',sans-serif;animation:promoChipPop .45s ease-out 1}'
       + '#promoChip:active{transform:scale(.97)}'
       + '#promoChip:hover{box-shadow:0 6px 16px rgba(0,0,0,.18)}'
       + '@keyframes promoChipPop{0%{transform:scale(.8);opacity:0}65%{transform:scale(1.07);opacity:1}100%{transform:scale(1)}}'
@@ -11335,7 +11335,7 @@ function updateFreshnessIndicator(){
   bar.id = 'demoToggleBar';
   bar.setAttribute('role','group');
   bar.setAttribute('aria-label','Demo: switch between the free and paid plan');
-  bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:1200;display:flex;align-items:center;gap:2px;background:rgba(253,242,214,.97);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1.5px solid rgba(200,145,50,.55);border-radius:999px;padding:5px;font-family:"DM Sans",sans-serif';
+  bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:1200;display:flex;align-items:center;gap:2px;background:rgba(253,242,214,.97);border:1.5px solid rgba(200,145,50,.55);border-radius:999px;padding:5px;font-family:"DM Sans",sans-serif';
   var pvLabel = document.createElement('span');
   pvLabel.className = 'demoTogLabel';
   pvLabel.setAttribute('aria-hidden','true');
