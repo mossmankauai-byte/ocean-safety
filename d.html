@@ -166,7 +166,10 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     : isTownAd?[["receipt","Counter & receipt QR"]]
     : [["counter","Counter card"],["receipt","Receipt"],["general","Your signage"]];
   const qrUrl=cat=>live+"?ref="+encodeURIComponent(p.slug)+"&qr="+cat;
-  const sells = seg==="retail"||seg==="rental"||(!isOperator && !isTownAd);   // segments that list store items
+  // Segments that list store items HERE. retail is excluded as of 2026-08-11: a retail shop's
+  // items now live in the shop console (portal-shop), and two item editors writing the same
+  // products table is one too many. The console card above is their route to it.
+  const sells = seg==="rental"||(!isOperator && !isTownAd && seg!=="retail");
   const keepPct = seg==="retail"?"97%":seg==="rental"?"87.3%":"90%";
   const feePct  = seg==="retail"?"3%":seg==="rental"?"12.7%":"10%";
   const FN="https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-items";
@@ -185,6 +188,16 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   +'<div class="card lift"><h2>Your page</h2>'
     +'<div class="row"><a class="btn primary" href="'+esc(live)+'" target="_blank" rel="noopener">View your live page ↗</a>'
     +'<button class="btn ghost" id="copylink">Copy page link</button></div></div>'
+  // Retail shops get the real shop console — products, inventory, sales, promotions —
+  // not this QR-and-logo page. This card is the handoff: the console is behind Supabase
+  // auth (RLS reads partners by owner), so it can't be opened by dashboard token. Signing
+  // in with the signup email runs claim_my_partner(), which adopts the row. Kept ABOVE the
+  // logo and QR cards on purpose — the console is now the shop's home, this page is the
+  // print drawer.
+  +(seg==="retail"?'<div class="card lift"><h2>Your shop console</h2>'
+    +'<p class="lead">Your products, stock counts, orders and sales all live in your console — add an item and it’s on your page the same minute.</p>'
+    +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+SITE+'/portal-shop/dashboard.html" target="_blank" rel="noopener">Open my shop console ↗</a></div>'
+    +'<div class="hint">Sign in with the email address on your account and it opens straight to your shop. Keep this page bookmarked for your QR codes and printables.</div></div>':'')
   // Logo. partners.logo_url and the public `logos` bucket existed from the start, but nothing
   // ever wrote to them — so every operator's co-brand fell back to a text name. Placed above
   // the assets on purpose: the assets are built around the logo, so you set it first.
