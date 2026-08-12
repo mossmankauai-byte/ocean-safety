@@ -384,7 +384,6 @@
       // a position that hides them.
       (el("stageTabs") || el("editor")).scrollIntoView({ block: "center", behavior: "smooth" });
     } catch (e) {}
-    el("editor").scrollIntoView({ behavior: "smooth", block: "start" });
   }
   function closeEditor() { el("editor").classList.add("hide"); editingId = null; }
 
