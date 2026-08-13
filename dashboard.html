@@ -1233,9 +1233,14 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var doc  = document.documentElement;
   var qp   = new URLSearchParams(location.search);
   var wants = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
+  // ?t=<dashboard_token> is the welcome email's door. It carries its own identity, so it does
+  // not need ?ref= alongside it, and it must be checked BEFORE the demo bail-out below or a
+  // token-only link would open the un-slugged sample instead of the operator's own console.
+  var tok = (qp.get('t') || '').trim().toLowerCase();
+  if(!/^[a-f0-9]{16,64}$/.test(tok)) tok = '';
 
   // The un-slugged / explicit demo path stays open and stays SAMPLE.
-  if(!wants || wants === 'demo'){ window.OS_AUTH = null; return; }
+  if(!tok && (!wants || wants === 'demo')){ window.OS_AUTH = null; return; }
 
   function stored(){ try{ return JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){ return null; } }
   function save(s,p){ try{ localStorage.setItem(KEY, JSON.stringify({session:s, partner:p})); }catch(e){} }
@@ -1270,7 +1275,28 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   }
 
   var have = stored();
-  if(have && have.session){
+  if(tok){
+    // Straight in from the email. Spend the token for a real session, then take it out of the
+    // address bar so a shared screenshot or a browser-history entry does not carry it around.
+    // The console asks about a password once they are inside; it is never demanded at the door.
+    post({action:'token', token:tok}).then(function(r){
+      if(r.ok && r.j.ok && r.j.session){
+        save(r.j.session, r.j.partner);
+        window.OS_FIRST_TOKEN = tok;   // the password pop-up authorises with this same token
+        try{ qp.delete('t'); var q = qp.toString();
+             history.replaceState(null, '', location.pathname + (q ? '?' + q : '') + location.hash); }catch(e){}
+        apply(r.j.partner, r.j.session);
+      } else if(have && have.session){
+        // A dead or rotated token on a device that is already signed in should not sign them
+        // out of their own console.
+        apply(have.partner, have.session);
+      } else {
+        lock('That link has expired. Sign in with your email and password.');
+      }
+    }).catch(function(){
+      if(have && have.session) apply(have.partner, have.session); else lock('');
+    });
+  } else if(have && have.session){
     // Re-validate on EVERY load rather than trusting the cached copy: it re-reads the tier from
     // the database, so an upgrade or a cancellation lands on next open instead of whenever the
     // cache happens to expire.
@@ -5442,6 +5468,90 @@ if(DEMO){
 })();
 </script>
 
+<style>
+  .ospw-scrim{position:fixed;inset:0;z-index:100001;background:rgba(11,26,34,.55);
+    display:flex;align-items:center;justify-content:center;padding:18px}
+  .ospw-card{width:min(420px,100%);background:var(--card);color:var(--ink);border-radius:16px;
+    padding:24px 22px 18px;box-shadow:0 18px 50px rgba(9,26,34,.4)}
+  .ospw-card h4{margin:0 0 6px;font-size:18px;font-family:'Fraunces',Georgia,serif;font-weight:500;letter-spacing:-.01em}
+  .ospw-card p{margin:0 0 14px;font-size:13px;line-height:1.55;color:var(--ink-2)}
+  .ospw-card label{display:block;font-size:11px;font-weight:800;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .ospw-card input{width:100%;font:inherit;font-size:15px;padding:11px 12px;border-radius:10px;
+    border:1px solid rgba(11,60,76,.28);background:#fff;color:#12222b}
+  .ospw-card input:focus{outline:2px solid #0A8BA8;outline-offset:1px;border-color:transparent}
+  .ospw-msg{min-height:18px;font-size:12.5px;line-height:1.4;margin:7px 0 0}
+  .ospw-msg.err{color:#b3261e} .ospw-msg.ok{color:#1b7a4b}
+  .ospw-foot{display:flex;gap:10px;align-items:center;margin-top:14px}
+  .ospw-foot button{appearance:none;font:inherit;font-weight:700;font-size:14px;padding:11px 16px;
+    border-radius:999px;cursor:pointer;border:0}
+  .ospw-set{background:#0f4c5c;color:#fff}
+  .ospw-set[disabled]{opacity:.6;cursor:default}
+  .ospw-skip{background:none;border:1px solid rgba(11,60,76,.28);color:var(--ink-2)}
+</style>
+<script>
+/* ============ FIRST VISIT FROM THE EMAIL: OFFER A PASSWORD ============
+   The welcome email lands the operator in their console signed in (?t=<dashboard_token>,
+   spent by the gate above). This is where the password gets asked for — as an offer, once,
+   AFTER they can see their own console, rather than as a wall in front of it.
+
+   Shown only when the gate actually spent a token this load, so a returning operator who
+   signs in normally is never asked again. "No thanks" costs them nothing: the email link
+   keeps working, which is exactly what the dialog says.                                   */
+(function(){
+  var FN = "https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-auth";
+  document.addEventListener('os-authed', function(ev){
+    var token = window.OS_FIRST_TOKEN;
+    if(!token) return;                       // not an email arrival — nothing to offer
+    var p = (ev && ev.detail) || {};
+    var askedKey = 'os_pw_asked_' + (p.slug || 'operator');
+    try{ if(localStorage.getItem(askedKey)) return; }catch(e){}
+
+    var scrim = document.createElement('div');
+    scrim.className = 'ospw-scrim';
+    scrim.innerHTML = '<div class="ospw-card" role="dialog" aria-modal="true" aria-labelledby="ospwH">'
+      + '<h4 id="ospwH">Want a password?</h4>'
+      + '<p>Set one now and you can sign in from any device with your email. '
+      + 'If you would rather not, nothing changes: the link in your welcome email keeps working.</p>'
+      + '<label for="ospwIn">New password</label>'
+      + '<input id="ospwIn" type="password" autocomplete="new-password" placeholder="At least 10 characters">'
+      + '<p class="ospw-msg" id="ospwMsg" role="alert" aria-live="polite"></p>'
+      + '<div class="ospw-foot"><button type="button" class="ospw-set" id="ospwSet">Set my password</button>'
+      + '<button type="button" class="ospw-skip" id="ospwSkip">No thanks</button></div></div>';
+    document.body.appendChild(scrim);
+    var inp = scrim.querySelector('#ospwIn'), msg = scrim.querySelector('#ospwMsg'),
+        setB = scrim.querySelector('#ospwSet');
+    setTimeout(function(){ inp.focus(); }, 80);
+
+    // Remember only that we ASKED. Whether they said yes or no, we never ask twice.
+    function done(){ try{ localStorage.setItem(askedKey,'1'); }catch(e){} scrim.remove(); }
+    function say(t, cls){ msg.textContent = t; msg.className = 'ospw-msg' + (cls ? ' ' + cls : ''); }
+    scrim.querySelector('#ospwSkip').addEventListener('click', done);
+    document.addEventListener('keydown', function esc(e){
+      if(e.key === 'Escape' && document.body.contains(scrim)){ done(); document.removeEventListener('keydown', esc); }
+    });
+    setB.addEventListener('click', function(){
+      var pw = inp.value || '';
+      // Length is enforced again server-side; this is only for a faster message.
+      if(pw.length < 10){ say('Use at least 10 characters.', 'err'); inp.focus(); return; }
+      setB.disabled = true; say('Saving…');
+      fetch(FN, {method:'POST', headers:{'Content-Type':'application/json'},
+                 body: JSON.stringify({action:'set', token: token, password: pw})})
+        .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+        .then(function(r){
+          setB.disabled = false;
+          if(!(r.ok && r.j.ok)){ say(r.j.error || 'That didn’t work — try again.', 'err'); return; }
+          // `set` mints a fresh session; keep the console on the newest one.
+          if(r.j.session){ try{ localStorage.setItem('os_console_session',
+              JSON.stringify({session:r.j.session, partner:r.j.partner})); }catch(e){} }
+          say('Password set. You can sign in with it from now on.', 'ok');
+          setTimeout(done, 1300);
+        })
+        .catch(function(){ setB.disabled = false; say('That didn’t work — try again.', 'err'); });
+    });
+  });
+})();
+</script>
 <script>
 /* Apply the segment before first paint. Everything here is a string swap or a tab
    visibility flip; no segment gets a feature another one lacks. */
