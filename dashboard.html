@@ -91,12 +91,25 @@ window.OS_SEGMENTS = {
   }
 };
 
-/* Segment comes from the route (_redirects rewrites /hotel -> ?seg=hotel), not from
-   anything an operator can usefully retype. An unknown value falls back to pm rather
-   than rendering an empty shell. */
+/* Segment comes from the route, not from anything an operator can usefully retype. An
+   unknown value falls back to pm rather than rendering an empty shell.
+
+   ⚠ The ?seg= the _redirects file appends NEVER ARRIVES. Those rules are 200 rewrites, so
+   the browser URL stays /hotel and location.search is empty — every route fell through to
+   the pm fallback, and a hotel opening /hotel got the property-manager dashboard. Measured
+   live 2026-08-13: /hotel, /timeshare, /concierge and /fleet all reported data-seg="pm".
+   Only /rental looked right, and only because pm is what it maps to anyway.
+   So read the PATH first, which is the thing that actually survives a rewrite, and keep the
+   query as the fallback for a direct /dashboard.html?seg=… hit. Keep PATH_SEG in lockstep
+   with _redirects: a route here with no rule there sends the operator to a 404. */
 (function(){
+  var PATH_SEG = { hotel:'hotel', timeshare:'timeshare', rental:'pm', concierge:'concierge', fleet:'cars' };
   try{
     var q = new URLSearchParams(location.search).get('seg') || '';
+    if(!window.OS_SEGMENTS[q]){
+      var seg1 = (location.pathname.split('/')[1] || '').toLowerCase();
+      if(PATH_SEG[seg1]) q = PATH_SEG[seg1];
+    }
     if(!window.OS_SEGMENTS[q]) q = 'pm';
     window.OS_SEG = q;
     window.OS_SEGCFG = window.OS_SEGMENTS[q];
