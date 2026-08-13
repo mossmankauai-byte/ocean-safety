@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta name="theme-color" content="#0f4c5c">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>OceanSafe · Rentals Operator Console (Preview)</title>
 <meta name="description" content="Operator console for OceanSafe Stay-Close: track guest activity, promotions, and revenue for your rental property." />
@@ -9,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap">
 <style>
+.bico{width:1em;height:1em;vertical-align:-.12em;margin-right:.25em;flex:none}
   /* ============ SCHEME: "LOBBY" — warm paper · deep-teal ink · gold accents (2026-07-09) ============
      Every color flows from the :root tokens below. Alternate schemes ("Sandbar", "Reef")
      are parked in the comment block at the END of this style element — same token names,
@@ -1736,7 +1738,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           <p>Curate the beaches, trails, food &amp; shops your QR-branded app recommends.</p>
         </div>
         <p class="pl-intro">
-          Set each place to <b>★ Featured</b> (your house picks, surfaced first), <b>✓ Listed</b> (in the app as normal),
+          Set each place to <b>Featured</b> (your house picks, surfaced first), <b>Listed</b> (in the app as normal),
           or hide it from your branded build. To start safe, <b>hazardous spots come pre-set to ⊘ Not recommended</b> — list them
           only if you mean to. Your choices export as a config file applied to <b>your</b> co-branded app only —
           they never change anyone else's. Nothing here is live guest data.
@@ -2053,13 +2055,13 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 
   function segHTML(cat,it){
     var cur = st(cat,it.id), haz = !!it.h;
-    var offLabel = haz ? '⊘ Not&nbsp;rec.' : '✕ Hide';
+    var offLabel = haz ? '<svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>Not&nbsp;rec.' : '<svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>Hide';
     function b(s,label){
       var extra = (s==='off' && haz) ? ' haz' : '';
       return '<button type="button" class="'+extra.trim()+'" data-s="'+s+'" aria-pressed="'+(cur===s)+'">'+label+'</button>';
     }
     return '<div class="seg" data-cat="'+cat+'" data-id="'+esc(it.id)+'" data-haz="'+(haz?1:0)+'">'+
-      b('feature','★ Feature')+ b('show','✓ Listed')+ b('off',offLabel)+'</div>';
+      b('feature','<svg class="bico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.6l2.85 6.03 6.4.83-4.72 4.5 1.22 6.44L12 17.3l-5.75 3.1 1.22-6.44-4.72-4.5 6.4-.83z"/></svg>Feature')+ b('show','<svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Listed')+ b('off',offLabel)+'</div>';
   }
   function rowHTML(cat,it){
     var cur = st(cat,it.id), haz=!!it.h;
@@ -2067,7 +2069,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var sub = [];
     if(it.lg==='full_time') sub.push('<span class="lg-tag full">Lifeguard · daily</span>');
     else if(it.lg==='seasonal_active') sub.push('<span class="lg-tag seas">Lifeguard · seasonal</span>');
-    if(haz) sub.push('<span class="haz-tag" title="'+esc(it.why||'')+'">⚠ Hazard-locked</span>');
+    if(haz) sub.push('<span class="haz-tag" title="'+esc(it.why||'')+'"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18.5A2 2 0 0 0 3.5 21.5h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>Hazard-locked</span>');
     return '<div class="'+cls+'" data-cat="'+cat+'" data-id="'+esc(it.id)+'" data-name="'+esc(it.n).toLowerCase()+'">'+
       '<div class="nm"><b>'+esc(it.n)+'</b>'+(sub.length?'<span class="sub">'+sub.join('')+'</span>':'')+'</div>'+
       segHTML(cat,it)+'</div>';
@@ -2160,7 +2162,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     a.download = 'places-'+SLUG+'.json';
     document.body.appendChild(a); a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },100);
-    var btn=this, t=btn.textContent; btn.textContent='Downloaded ✓';
+    var btn=this, t=btn.textContent; btn.textContent='Downloaded';
     setTimeout(function(){ btn.textContent=t; }, 1600);
   });
 
@@ -3170,7 +3172,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       link.download = cfg.key+'-'+SLUG+'.json';
       document.body.appendChild(link); link.click();
       setTimeout(function(){ URL.revokeObjectURL(link.href); link.remove(); }, 100);
-      var btn = this, t = btn.textContent; btn.textContent = 'Downloaded ✓';
+      var btn = this, t = btn.textContent; btn.textContent = 'Downloaded';
       setTimeout(function(){ btn.textContent = t; }, 1600);
     });
     render();
@@ -3528,7 +3530,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     a.download = 'promotions-' + SLUG + '.json';
     document.body.appendChild(a); a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 100);
-    var btn = this, t = btn.textContent; btn.textContent = 'Downloaded ✓';
+    var btn = this, t = btn.textContent; btn.textContent = 'Downloaded';
     setTimeout(function(){ btn.textContent = t; }, 1600);
   });
 
