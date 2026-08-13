@@ -91,25 +91,12 @@ window.OS_SEGMENTS = {
   }
 };
 
-/* Segment comes from the route, not from anything an operator can usefully retype. An
-   unknown value falls back to pm rather than rendering an empty shell.
-
-   ⚠ The ?seg= the _redirects file appends NEVER ARRIVES. Those rules are 200 rewrites, so
-   the browser URL stays /hotel and location.search is empty — every route fell through to
-   the pm fallback, and a hotel opening /hotel got the property-manager dashboard. Measured
-   live 2026-08-13: /hotel, /timeshare, /concierge and /fleet all reported data-seg="pm".
-   Only /rental looked right, and only because pm is what it maps to anyway.
-   So read the PATH first, which is the thing that actually survives a rewrite, and keep the
-   query as the fallback for a direct /dashboard.html?seg=… hit. Keep PATH_SEG in lockstep
-   with _redirects: a route here with no rule there sends the operator to a 404. */
+/* Segment comes from the route (_redirects rewrites /hotel -> ?seg=hotel), not from
+   anything an operator can usefully retype. An unknown value falls back to pm rather
+   than rendering an empty shell. */
 (function(){
-  var PATH_SEG = { hotel:'hotel', timeshare:'timeshare', rental:'pm', concierge:'concierge', fleet:'cars' };
   try{
     var q = new URLSearchParams(location.search).get('seg') || '';
-    if(!window.OS_SEGMENTS[q]){
-      var seg1 = (location.pathname.split('/')[1] || '').toLowerCase();
-      if(PATH_SEG[seg1]) q = PATH_SEG[seg1];
-    }
     if(!window.OS_SEGMENTS[q]) q = 'pm';
     window.OS_SEG = q;
     window.OS_SEGCFG = window.OS_SEGMENTS[q];
@@ -367,6 +354,21 @@ window.OS_SEGMENTS = {
      instead and let that rule paint them gold on its own. */
   #pwHours i.pw-peak{--chart-fill:var(--gold)}
   #pwPeaks .row i.pw-on{--chart-fill:var(--gold);background:var(--gold)}
+
+  /* ============ AMENITY EDITOR ============ */
+  .am-fold{display:block}
+  .am-fold>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:8px 2px}
+  .am-fold>summary::-webkit-details-marker{display:none}
+  .am-fold>summary::after{content:"";width:6px;height:6px;flex:none;margin-left:auto;
+    border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
+    transform:rotate(-45deg);transition:transform .15s}
+  .am-fold[open]>summary::after{transform:rotate(45deg)}
+  .am-nophoto{width:34px;height:34px;border-radius:6px;flex:none;background:var(--hair-soft)}
+  .am-edit{padding:4px 2px 14px}
+  .am-edit input{font:inherit;font-size:13px;color:var(--ink);background:var(--card);
+    border:1px solid var(--hair);border-radius:8px;padding:8px 10px;width:100%}
+  .am-edit input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
+  .am-e-del{margin-left:auto}
 
   /* ============ COLLAPSED LIST ROWS ============ */
   .pm-fold{display:block;padding:0}
@@ -3403,6 +3405,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var LOCK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   var PDF_SVG_SM = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+  // The same five the demand graph and the promotion form use.
+  var AM_CATS = [['dining','Restaurant'],['tours','Tours'],['rentals','Rentals'],['spa','Spa'],['upgrades','Room upgrades']];
   function manager(cfg){
     var LS = 'os_'+cfg.key+'_'+SLUG, items = null;
     try{ items = JSON.parse(localStorage.getItem(LS)); }catch(e){}
@@ -3421,8 +3425,30 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           ? '<a class="am-pdf" href="'+it.pdf+'" target="_blank" rel="noopener" '
             + 'title="'+esc(it.pdfName||'PDF')+'">' + PDF_SVG_SM + esc(it.pdfName||'PDF') + '</a>'
           : '';
-        return '<div class="mg-row">'+(it.photo ? '<img class="am-thumb" src="'+it.photo+'" alt="">' : '')+'<div class="mg-nm"><b>'+esc(it.a)+'</b>'+extra+pdfLink+
-               '</div><button type="button" class="mg-x" data-i="'+i+'" title="Remove">&times;</button></div>';
+        var catLab = (AM_CATS.filter(function(c){ return c[0]===it.cat; })[0]||['',''])[1];
+        return '<details class="mg-row am-fold">' +
+          '<summary>' + (it.photo ? '<img class="am-thumb" src="'+it.photo+'" alt="">' : '<span class="am-nophoto"></span>') +
+            '<div class="mg-nm"><b>'+esc(it.a)+'</b>'+extra+pdfLink+'</div>' +
+            (catLab ? '<span class="pm-sum-chip alt">'+catLab+'</span>' : '') +
+          '</summary>' +
+          '<div class="am-edit" data-i="'+i+'">' +
+            '<label class="pm-f"><span>Name</span><input class="am-e-a" data-i="'+i+'" value="'+esc(it.a)+'" maxlength="60"></label>' +
+            '<label class="pm-f"><span>Detail</span><input class="am-e-b" data-i="'+i+'" value="'+esc(it.b||'')+'" maxlength="90"></label>' +
+            '<label class="pm-f"><span>Phone</span><input class="am-e-phone" data-i="'+i+'" value="'+esc(it.phone||'')+'" inputmode="tel"></label>' +
+            '<label class="pm-f"><span>Hours</span><input class="am-e-hours" data-i="'+i+'" value="'+esc(it.hours||'')+'"></label>' +
+            '<label class="pm-f"><span>Website</span><input class="am-e-site" data-i="'+i+'" value="'+esc(it.site||'')+'" inputmode="url" placeholder="https://"></label>' +
+            '<div class="pm-f"><span>What is it?</span><div class="cat-pick am-e-cat" data-i="'+i+'">' +
+              AM_CATS.map(function(c){ return '<button type="button" class="cat-b" data-cat="'+c[0]+'"'+
+                (it.cat===c[0] ? ' aria-pressed="true"' : '')+'>'+c[1]+'</button>'; }).join('') +
+            '</div></div>' +
+            '<div class="am-extras">' +
+              '<label class="am-file"><input type="file" class="am-e-photo" data-i="'+i+'" accept="image/png,image/jpeg,image/webp" hidden>' +
+                '<span>' + (it.photo ? 'Replace photo' : 'Add a photo') + '</span></label>' +
+              '<div class="am-dz am-e-pdf" data-i="'+i+'" role="button" tabindex="0">' +
+                (it.pdfName ? esc(it.pdfName) : 'Drag a PDF here, or tap to choose') + '</div>' +
+              '<button type="button" class="pl-btn am-e-del" data-i="'+i+'">Remove</button>' +
+            '</div>' +
+          '</div></details>';
       }).join('') : '<div class="mg-empty">Nothing yet — add your first below.</div>';
       if(FREE && items.length > 1){
         el.innerHTML += '<div class="mg-row mg-locked" id="amLockedRow">'+LOCK_SVG+
@@ -3462,6 +3488,57 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     window.addEventListener('os:amenities-changed', function(){
       try{ var raw = JSON.parse(localStorage.getItem(LS)); if(Array.isArray(raw)){ items = raw; render(); } }catch(e){}
     });
+    var listEl2 = document.getElementById(cfg.ids.list);
+    var FIELD = {'am-e-a':'a','am-e-b':'b','am-e-phone':'phone','am-e-hours':'hours','am-e-site':'site'};
+    listEl2.addEventListener('input', function(e){
+      for(var cls in FIELD){
+        if(e.target.classList.contains(cls)){
+          var it = items[+e.target.dataset.i]; if(!it) return;
+          it[FIELD[cls]] = e.target.value;
+          save();
+          // Repaint only the summary, so the field the operator is typing in keeps focus.
+          var sum = e.target.closest('details').querySelector('.mg-nm b');
+          if(sum && FIELD[cls] === 'a') sum.textContent = e.target.value || 'Untitled';
+          return;
+        }
+      }
+    });
+    listEl2.addEventListener('click', function(e){
+      var cb = e.target.closest('.am-e-cat .cat-b');
+      if(cb){
+        var ci = +cb.closest('.am-e-cat').dataset.i;
+        if(items[ci]){
+          // tapping the active one clears it: not every amenity is one of the five
+          items[ci].cat = (items[ci].cat === cb.dataset.cat) ? '' : cb.dataset.cat;
+          save(); render();
+        }
+        return;
+      }
+      var del = e.target.closest('.am-e-del');
+      if(del){ items.splice(+del.dataset.i, 1); save(); render(); return; }
+      var pdz = e.target.closest('.am-e-pdf');
+      if(pdz){
+        var pi = +pdz.dataset.i;
+        var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'application/pdf';
+        fi.addEventListener('change', function(){
+          var f = this.files && this.files[0]; if(!f) return;
+          var r = new FileReader();
+          r.onload = function(){ items[pi].pdf = r.result; items[pi].pdfName = f.name; save(); render(); };
+          r.readAsDataURL(f);
+        });
+        fi.click();
+        return;
+      }
+    });
+    listEl2.addEventListener('change', function(e){
+      if(!e.target.classList.contains('am-e-photo')) return;
+      var i2 = +e.target.dataset.i, f = e.target.files && e.target.files[0];
+      if(!f || !/^image\//.test(f.type)) return;
+      var r = new FileReader();
+      r.onload = function(){ items[i2].photo = r.result; save(); render(); };
+      r.readAsDataURL(f);
+    });
+
     document.getElementById(cfg.ids.add).addEventListener('click', add);
     [cfg.ids.a, cfg.ids.b, cfg.ids.phone, cfg.ids.hours].forEach(function(id){
       var el = id && document.getElementById(id);
