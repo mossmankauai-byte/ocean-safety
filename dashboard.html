@@ -3407,7 +3407,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var LS = 'os_'+cfg.key+'_'+SLUG, items = null;
     try{ items = JSON.parse(localStorage.getItem(LS)); }catch(e){}
     // seeds → items; back-compat so old {a,b} drafts still load, carrying optional phone/hours.
-    function seedItems(){ return cfg.seeds.map(function(x){ return {a:x[0], b:x[1]||'', phone:x[2]||'', hours:x[3]||''}; }); }
+    function seedItems(){ return cfg.seeds.map(function(x){ return {a:x[0], b:x[1]||'', phone:x[2]||'', hours:x[3]||'', photo:x[4]||''}; }); }
     if(!Array.isArray(items)) items = seedItems();
     items = items.map(function(it){ it = it || {}; return {a:it.a||'', b:it.b||'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'', photo:it.photo||'', pdf:it.pdf||'', pdfName:it.pdfName||''}; });
     function save(){ try{ localStorage.setItem(LS, JSON.stringify(items)); }catch(e){} }
@@ -3580,11 +3580,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   manager({ key:'amenities', exportKey:'amenities',
     ids:{list:'amList', a:'amA', b:'amB', phone:'amPhone', hours:'amHours', site:'amSite', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
     seeds:[
-      ['Spa treatments','Lobby level · massage, facials, day passes','(808) 555-0142','9a–7p daily'],
-      ['On-site dining','Oceanview restaurant + poolside grill','(808) 555-0155','7a–9p'],
-      ['Pool bar','Cocktails, shave ice & light bites','',''],
-      ['Cabana rental','Full-day shade with towel service','(808) 555-0170','8a–5p'],
-      ['Gift shop','Sundries, beach wear & local goods','','']
+      ['Spa treatments','Lobby level · massage, facials, day passes','(808) 555-0142','9a–7p daily','assets/amenity/spa.jpg'],
+      ['On-site dining','Oceanview restaurant + poolside grill','(808) 555-0155','7a–9p','assets/amenity/dining.jpg'],
+      ['Pool bar','Cocktails, shave ice & light bites','','','assets/amenity/poolbar.jpg'],
+      ['Cabana rental','Full-day shade with towel service','(808) 555-0170','8a–5p','assets/amenity/cabana.jpg'],
+      ['Gift shop','Sundries, beach wear & local goods','','','assets/amenity/shop.jpg']
     ],
     // Export in the shared amenity contract {name,detail,price,phone,hours,showWhen} the guest app reads.
     toExport:function(it){ return {name:it.a, detail:it.b, price:'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'', photo:it.photo||'', pdf:it.pdf||'', showWhen:'always'}; },
