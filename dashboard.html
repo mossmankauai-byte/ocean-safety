@@ -397,6 +397,16 @@ window.OS_SEGMENTS = {
   .pm-gopen-row{margin-top:10px}
   .pm-gopen-cta{display:block;text-align:center;font-size:12.5px;font-weight:700;
     color:var(--on-sea);background:var(--sea);border-radius:9px;padding:9px 12px;text-decoration:none}
+  /* The promo mock is the same phone as Stay-Close, scaled to the card column. */
+  .pm-phone{width:100%;margin:6px 0 0}
+  .pm-screen{padding:30px 10px 14px;min-height:150px}
+  .pm-town-cap{font-size:9px;font-weight:800;letter-spacing:.07em;color:var(--mute);margin:2px 2px 7px}
+  /* The rows around the chip: the rest of the Town rail, muted so the offer reads
+     as the thing that pops. */
+  .pm-skel{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);
+    border-radius:10px;padding:10px 12px;margin:6px 0}
+  .pm-skel i{width:15px;height:15px;border-radius:5px;background:var(--border);flex:none}
+  .pm-skel b{height:9px;border-radius:5px;background:var(--border);flex:1;max-width:65%}
 
   /* ============ LIST ROW BITS ============ */
   /* The category chip on a collapsed Stay-Close row. */
@@ -3799,10 +3809,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
      app's own offer sheet — title, the flyer or photo, the one-line detail, then the
      action. The action is a request to the front desk, never a checkout: no offer may
      promise self-serve completion. */
-  function guestOpenHTML(p){
-    var art = p.thumb
-      ? '<img src="' + p.thumb + '" alt="" class="pm-gopen-img">'
-      : '<div class="pm-gopen-img pm-gopen-ph">' + PDF_SVG_BIG + '</div>';
+  function guestOpenHTML(p, i){
+    p._i = i;
+    // The flyer's first page renders in here via the same pdf.js pass that draws
+    // the editor thumbnail; until it lands (or if it fails) the doc glyph holds.
+    var art = '<div class="pm-gopen-img pm-gopen-ph pm-gopen-art" data-i="' + p._i + '">' + PDF_SVG_BIG + '</div>';
     var detail = p.detail ? '<div class="pm-gopen-d">' + esc(p.detail) + '</div>' : '';
     var stageNote = p.trip_stage === 'pre-arrival'
       ? '<div class="pm-gopen-badge">Book ahead of time</div>' : '';
@@ -3867,10 +3878,15 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
             '<div class="pm-fileline">'+PDF_SVG+'<b title="'+esc(p.fileName)+'">'+esc(p.fileName)+'</b><span>· '+size+(p.added ? ' · added '+esc(endsLabel(p.added)) : '')+'</span></div>' +
           '</div>' +
           '<div>' +
-            '<div class="pm-mock-lab">1 &middot; In the Town tab</div>' +
-            '<div class="pm-guest">' + guestCardHTML(p.title, p.expires, i) + '</div>' +
-            '<div class="pm-mock-lab" style="margin-top:12px">2 &middot; When they tap it</div>' +
-            '<div class="pm-guest">' + guestOpenHTML(p) + '</div>' +
+            '<div class="pm-mock-lab">What your guests see</div>' +
+            '<div class="gp-phone pm-phone"><div class="gp-screen pm-screen">' +
+              '<div class="pm-town-cap">TOWN &middot; NEAR YOU</div>' +
+              '<div class="pm-skel"><i></i><b></b></div>' +
+              guestCardHTML(p.title, p.expires, i) +
+              '<div class="pm-skel"><i></i><b></b></div>' +
+              '<div class="pm-town-cap" style="margin-top:12px">WHEN THEY TAP IT</div>' +
+              guestOpenHTML(p, i) +
+            '</div></div>' +
           '</div>' +
           '<button type="button" class="mg-x pm-x" data-x="'+i+'" title="Remove this promotion">&times;</button>' +
         '</div>';
@@ -3914,6 +3930,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   }
   function renderThumbs(){
     if(!listEl || !window.pdfjsLib) return;   // lib not here yet — its onload re-runs this
+    listEl.querySelectorAll('.pm-gopen-art[data-i]').forEach(function(c){
+      var p = items[+c.dataset.i]; if(!p) return;
+      var src = p.dataUrl || p.src; if(!src) return;
+      drawThumb(c, src);
+    });
     listEl.querySelectorAll('.pm-thumb[data-i]').forEach(function(c){
       if(c.dataset.done) return;
       var p = items[+c.dataset.i]; if(!p) return;
@@ -3970,6 +3991,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       // live-update the guest mock without a re-render (keeps the input focused)
       var mock = t.closest('.pm-card').querySelector('.pm-gcard .tx b');
       if(mock) mock.textContent = t.value || 'Untitled offer';
+      var got = t.closest('.pm-card').querySelector('.pm-gopen-t');
+      if(got) got.textContent = t.value || 'Untitled offer';
       save();
     }
   });
