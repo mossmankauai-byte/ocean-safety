@@ -1010,7 +1010,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       .mg-row.mg-locked{color:var(--muted);background:var(--bg-2);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;border-bottom:0}
       .lockcard-btns{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
       .lockcard-btns .pl-btn{text-decoration:none;display:inline-flex;align-items:center;gap:7px}
-      /* ---- Free vs $8/room comparison table (Home, BOTH views) ---- */
+      /* ---- Free vs paid comparison table (Home, BOTH views) ---- */
       #planCompare .pc-tr{display:grid;grid-template-columns:minmax(82px,.8fr) 1fr 1.35fr;gap:10px;padding:9px 2px;border-bottom:1px solid var(--hair-soft);align-items:start;font-size:12.5px}
       #planCompare .pc-tr:last-child{border-bottom:0}
       #planCompare .pc-tr > b{font-weight:600;color:var(--ink)}
@@ -1139,11 +1139,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 
     <!-- QUICK ACTIONS -->
 
-    <!-- FREE vs $8/room — one card, shown in BOTH views (the free view appends its unlock buttons) -->
-    <section aria-label="Free plan versus the $829/mo plan" id="planCompareSec">
-      <div class="sec-h"><h2>Free vs the $829/mo plan</h2><p>Guide and safety are never gated on either tier &mdash; the paid plan adds the weather-swap, the presentation push and promotions.</p></div>
+    <!-- FREE vs PAID — one card, shown in BOTH views (the free view appends its unlock buttons) -->
+    <section aria-label="Free plan versus the paid plan" id="planCompareSec" style="display:none" data-price-scrub="PRICE-SCRUB-2026-08-13">
+      <div class="sec-h"><h2>Free vs the paid plan</h2><p>Guide and safety are never gated on either tier &mdash; the paid plan adds the weather-swap, the presentation push and promotions.</p></div>
       <div class="card" id="planCompare">
-        <div class="pc-tr pc-head"><span></span><span class="pc-cell">Free &middot; rev-share</span><span class="pc-cell pc-paid">Paid &middot; $829/mo</span></div>
+        <div class="pc-tr pc-head"><span></span><span class="pc-cell">Free &middot; rev-share</span><span class="pc-cell pc-paid"></span></div>
         <div class="pc-tr"><b>Branding</b><span class="pc-cell">OceanSafe</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your name, logo, colors &amp; photos</span></div>
         <div class="pc-tr"><b>Amenities</b><span class="pc-cell">1 featured</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Unlimited, with contact info</span></div>
         <div class="pc-tr"><b>Weather-swap</b><span class="pc-cell pc-dash">1 amenity shown</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Full swap + presentation push on trigger days</span></div>
@@ -1151,8 +1151,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         <div class="pc-tr"><b>Front-desk board</b><span class="pc-cell">Generic + QR</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Branded + rotating offers</span></div>
         <div class="pc-tr"><b>Guest analytics</b><span class="pc-cell"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything &mdash; same as free</span></div>
         <div class="pc-tr"><b>Multi-resort portfolio view</b><span class="pc-cell pc-dash">&mdash;</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Available (ask us)</span></div>
-        <div class="pc-tr"><b>Price</b><span class="pc-cell pc-strong">Free &mdash; 50/50 tours + 12.7% store</span><span class="pc-cell pc-paid pc-strong">$829/mo</span></div>
-        <div class="mg-foot" id="pcFoot"><span class="cap"><b>$829/mo</b> &mdash; keep 100% of tour &amp; store sales. Free tier: 50/50 tour split + 12.7% of store, no monthly. Leads and the desk stay free on both tiers.</span><span style="flex:1"></span></div>
+        <div class="pc-tr"><b>Price</b><span class="pc-cell pc-strong">Free</span><span class="pc-cell pc-paid pc-strong"></span></div>
+        <div class="mg-foot" id="pcFoot"><span class="cap">Keep 100% of tour &amp; store sales on the paid tier. Leads and the desk stay free.</span><span style="flex:1"></span></div>
       </div>
     </section>
 
@@ -1176,7 +1176,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           </div>
         </div>
         <div class="lockcard-btns"><a class="pl-btn primary" href="mailto:aloha@oceansafety.app?subject=Link%20my%20properties">Link my resorts</a></div>
-        <div class="note"><b>$829/mo per property</b> &mdash; ask us about multi-property pricing.</div>
+        <div class="note"><b>Per property</b> &mdash; ask us about multi-property pricing.</div>
       </div>
     </section>
 
@@ -1517,7 +1517,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         <td>1 on-property amenity shown in the swap</td>
       </tr>
       <tr>
-        <td class="tsw-plan">Paid · $829/mo</td>
+        <td class="tsw-plan">Paid</td>
         <td>Full amenity weather-swap plus a presentation push on trigger days</td>
       </tr>
     </table>
@@ -2965,7 +2965,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       }).join('') : '<div class="mg-empty">Nothing yet — add your first below.</div>';
       if(FREE && items.length > 1){
         el.innerHTML += '<div class="mg-row mg-locked" id="amLockedRow">'+LOCK_SVG+
-          '<div class="mg-nm"><b style="color:var(--ink-2)">Unlock unlimited amenities — part of the $829/mo plan</b>'+
+          '<div class="mg-nm"><b style="color:var(--ink-2)">Unlock unlimited amenities — part of the paid plan</b>'+
           '<span>'+(items.length-1)+' more saved in this draft; guests see the first until you unlock.</span></div></div>';
       }
       if(FREE){
@@ -3402,7 +3402,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
    renders the free-forever tier honestly — safety and every analytics tile stay
    fully ungated; the two paid surfaces (co-brand + Promotions) show as locked,
    with the demo's own Sample numbers doing the persuading. No trial language:
-   the free tier is free forever, paid is an $829/mo unlock. */
+   the free tier is free forever, paid is the paid-tier unlock. */
 (function(){
   if(window.OS_PLAN !== 'free') return;
   var LOCK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
@@ -3414,7 +3414,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var unlockHref = 'mailto:aloha@oceansafety.app?subject=' + encodeURIComponent('Unlock my OceanSafe guide');
   var btnsHTML = '<div class="lockcard-btns">' +
     '<a class="pl-btn" href="' + previewHref + '" target="_blank" rel="noopener">Preview my branded guide</a>' +
-    '<a class="pl-btn primary" href="' + unlockHref + '">Unlock everything — $829/mo</a></div>';
+    '<a class="pl-btn primary" href="' + unlockHref + '">Unlock everything</a></div>';
 
   /* ---- header: subtle plan chip (free view only — paid shows nothing) ---- */
   var ms = document.querySelector('.modeswitch');
@@ -3432,18 +3432,18 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var heroH = document.querySelector('.hm-copy h2');
   if(heroH) heroH.textContent = 'Your guests’ beach guide — upgrade to weave your resort in.';
   var heroP = document.querySelector('.hm-copy p');
-  if(heroP) heroP.textContent = 'Every guest who scans the in-unit QR gets live surf, lifeguard and hazard calls for the island’s most-visited beaches — free, forever. On the free plan the guide carries OceanSafe branding and your first amenity; the $829/mo plan weaves your name, your offers, the weather-swap and your full amenity menu in.';
+  if(heroP) heroP.textContent = 'Every guest who scans the in-unit QR gets live surf, lifeguard and hazard calls for the island’s most-visited beaches — free, forever. On the free plan the guide carries OceanSafe branding and your first amenity; the paid plan weaves your name, your offers, the weather-swap and your full amenity menu in.';
 
   /* ---- HOME quick action: lock badge on “Drop a promotion” ---- */
   var promoQaTitle = document.querySelector('.qa[data-goto="promos"] b');
   if(promoQaTitle) promoQaTitle.insertAdjacentHTML('beforeend', ' <span class="plan-lock">' + LOCK + 'Locked</span>');
 
-  /* ---- HOME: the Free-vs-$8/room table is static (both views) — the free view adds its buttons ---- */
+  /* ---- HOME: the Free-vs-paid table is static (both views) — the free view adds its buttons ---- */
   var pcFoot = document.getElementById('pcFoot');
   if(pcFoot){
     pcFoot.insertAdjacentHTML('beforeend',
       '<a class="pl-btn" href="' + previewHref + '" target="_blank" rel="noopener">Preview my branded guide</a>' +
-      '<a class="pl-btn primary" href="' + unlockHref + '">Unlock — $829/mo</a>');
+      '<a class="pl-btn primary" href="' + unlockHref + '">Unlock</a>');
   }
 
   /* ---- PROMOTIONS: the locked panel — the conversion engine ---- */
@@ -3482,7 +3482,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var promosSec = document.querySelector('#view-promos section');
   if(promosSec){
     var headP = promosSec.querySelector('.sec-h p');
-    if(headP) headP.textContent = 'Timed pop-ups and the offer chip in your guide’s Town tab — part of the $829/mo plan.';
+    if(headP) headP.textContent = 'Timed pop-ups and the offer chip in your guide’s Town tab — part of the paid plan.';
     // The two headline unlocks — timed pop-up promotions + full co-branding.
     var CLOCKTAG = '<svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="6.2"/><path d="M9 5.6V9l2.2 1.4"/><g transform="translate(12 12) scale(.62)" stroke-width="2.9"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></g></svg>';
     var BRAND = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.2"/><circle cx="7.6" cy="8.6" r="1.7"/><path d="M12.2 7.8h5.6"/><path d="M12.2 10.4h3.6"/><path d="M6 15.6h12"/></svg>';
@@ -3514,7 +3514,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   if(dz){
     dz.setAttribute('aria-disabled', 'true');
     dz.tabIndex = -1;
-    dz.innerHTML = LOCK_BIG + '<b>Promotions are part of the $829/mo plan</b>' +
+    dz.innerHTML = LOCK_BIG + '<b>Promotions are part of the paid plan</b>' +
       '<span>Drag-and-drop flyers with timed pop-up windows — they switch on the day you unlock.</span>';
   }
   var vbP = document.getElementById('vbPromos');
@@ -4264,7 +4264,7 @@ function mount(PS){
       '<div class="card">' +
         '<p style="margin:2px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.6;max-width:70ch">Every property, one portfolio dashboard — adoption, demand and promotions across the whole group, with per-property drill-down. Each property keeps its own guide and QR; we provision the group when you sign — nothing to configure — and the portfolio view appears in this console.</p>' +
         '<div class="lockcard-btns"><a class="pl-btn primary" href="mailto:aloha@oceansafety.app?subject=Link%20my%20properties">Link my properties</a></div>' +
-        '<div class="note"><b>$829/mo per property</b> — ask us about multi-property pricing.</div>' +
+        '<div class="note"><b>Per property</b> &mdash; ask us about multi-property pricing.</div>' +
       '</div></section>';
 
   var root = document.getElementById('view-portfolio');

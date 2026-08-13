@@ -26,12 +26,12 @@ const DEMO_PARTNER = { id: "demo", name: "Your Shop (demo)", slug: "your-shop", 
   status: "live", stripe_charges_enabled: true, stripe_payouts_enabled: true, stripe_onboarded_at: "2026-06-01", platform_fee_bps: 1270, amazon_tag: "oceansafety-20", fulfillment_mode: "both" };
 
 // ── plan gate: Free vs Paid ──────────────────────────────────────────────────
-// Canonical concierge/3rd-party model: Free = $0/mo, OceanSafe takes 12.7% of
-// store sales (shop keeps 87.3%) + 50/50 on tour commissions. Paid = $829/mo,
+// Canonical concierge/3rd-party model: Free tier, with a revenue share on
+// store sales + tour commissions. Paid tier,
 // shop keeps 100% of both AND unlocks visitor analytics + promotions.
 // So analytics and promotions are PAID-ONLY — on Free they render locked, never
 // as data. Demo/sales calls can flip with ?plan=paid to show a prospect both.
-const PLAN_PAID_PRICE = "$829/mo";
+const PLAN_PAID_PRICE = "Pricing on request";
 // DEFAULTS DIFFER BY MODE, on purpose:
 //   demo  -> "paid". Every OceanSafe demo shows the FULL product (same as the
 //            operator consoles, whose isFree is only true on an explicit

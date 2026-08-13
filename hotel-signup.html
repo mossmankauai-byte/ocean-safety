@@ -104,12 +104,12 @@
       <label class="plan on" id="planFree">
         <input type="radio" name="tier" value="free" checked>
         <b>Free</b>
-        <span class="pr" id="freePr"><b>$0</b> — the co-branded guide, one featured amenity, and your full analytics. Completely free.</span>
+        <span class="pr" id="freePr">The co-branded guide, one featured amenity, and your full analytics. Completely free.</span>
       </label>
       <label class="plan" id="planPaid">
         <input type="radio" name="tier" value="paid">
         <b>Paid</b>
-        <span class="pr" id="paidPr"><b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. Billed monthly, cancel anytime.</span>
+        <span class="pr" id="paidPr">Everything, plus promotions and unlimited amenities. Pricing on request.</span>
       </label>
     </div>
 
@@ -178,36 +178,36 @@ const T={
     sub:"Set it up in two minutes — a co-branded conditions guide for every guest, an in-room QR, and your own analytics. One flat monthly price for the whole property.",
     nameLabel:"Property name", namePh:"Kauaʻi Shores Resort",
     freePr:"",
-    paidPr:"<b>$649</b>/mo flat — everything, plus promotions and unlimited amenities. Billed monthly, cancel anytime.", paidSelfServe:true},
+    paidPr:"Everything, plus promotions and unlimited amenities. Pricing on request.", paidSelfServe:false},
   rental:{h1:"Put your rentals & tours inside the guide guests already open.",
     sub:"Your gear, tours, and activities in front of every guest checking the beach — with your own page, QR, and analytics. Free to join.",
     nameLabel:"Business name", namePh:"Hanalei Beach Rentals",
-    freePr:"<b>$0</b> to join — we split tour commissions 50/50 and take 12.7% on store sales. You keep 87.3%.",
-    paidPr:"<b>$350</b>/mo — keep 100% of every sale, plus promotions and the full data layer. We set this up with you personally.", paidSelfServe:false},
+    freePr:"Free to join — your page, QR and analytics, with tour and store sales handled for you.",
+    paidPr:"Keep 100% of every sale, plus promotions and the full data layer. We set this up with you personally. Pricing on request.", paidSelfServe:false},
   retail:{h1:"Put your store on the guide visitors open before the water.",
     sub:"Your storefront inside the beach-safety app, a QR on every receipt and counter, and demand analytics tied to the weather. Start free.",
     nameLabel:"Store name", namePh:"Poipu Beach Store",
-    freePr:"<b>$0</b>/mo — we take 3% only on what the app sells for you. You keep 97%.",
-    paidPr:"<b>$500</b>/store/mo — 0% on sales, plus the full data layer. We set this up with you personally.", paidSelfServe:false},
+    freePr:"Free — your storefront and analytics, with a small share only on what the app sells for you.",
+    paidPr:"0% on sales, plus the full data layer. We set this up with you personally. Pricing on request.", paidSelfServe:false},
   townad:{h1:"Get your business in front of every visitor checking the beach.",
     sub:"Your listing in the free beach-safety guide, a printable QR for your counter, and a dashboard to make the guide your own. Start free — set up in two minutes.",
     nameLabel:"Business name", namePh:"Your Beach Grill",
-    freePr:"<b>$0</b> — your listing, your co-branded guide page, a printable QR, and your dashboard. Sell tours or activities through your page and we split 50/50, paid into your own Square.",
-    paidPr:"<b>$50</b>/mo — everything in free, plus a timed promotion that pops on guests' phones, the full QR set, and full analytics. Billed monthly, cancel anytime.", paidSelfServe:true},
+    freePr:"Free — your listing, your co-branded guide page, a printable QR, and your dashboard. Sell tours or activities through your page, paid into your own Square.",
+    paidPr:"Everything in free, plus a timed promotion that pops on guests' phones, the full QR set, and full analytics. Pricing on request.", paidSelfServe:false},
   onlineshop:{h1:"Sell your products to visitors before they hit the beach.",
     sub:"Everything in a Town Ad — your listing, a printable QR, a timed promotion — plus your products selling right inside the app. We take 0% of your sales.",
     nameLabel:"Shop name", namePh:"Your Surf & Gift Co.",
-    freePr:"", paidPr:"<b>$100</b>/mo — your storefront in the app, plus the listing, QR and timed promotion. We take <b>0%</b> of your sales. Billed monthly, cancel anytime.", paidSelfServe:true}
+    freePr:"", paidPr:"Your storefront in the app, plus the listing, QR and timed promotion. We take <b>0%</b> of your sales. Pricing on request.", paidSelfServe:false}
 };
 const TC=T[TYPE]||T.hotel;
 $("heroH1").textContent=TC.h1; $("heroSub").textContent=TC.sub;
 $("nameLabel").innerHTML=TC.nameLabel+' <span class="req">*</span>'; $("name").placeholder=TC.namePh;
 $("freePr").innerHTML=TC.freePr; $("paidPr").innerHTML=TC.paidPr;
-document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":TYPE==="townad"?"Get your business on OceanSafe — free":TYPE==="onlineshop"?"Sell your products on OceanSafe — $100/mo":"Get your store on OceanSafe");
+document.title=(TYPE==="hotel"?"Get your hotel on OceanSafe":TYPE==="rental"?"Get your rentals & tours on OceanSafe":TYPE==="townad"?"Get your business on OceanSafe — free":TYPE==="onlineshop"?"Sell your products on OceanSafe":"Get your store on OceanSafe");
 
-// Online Shop ($100/mo) is a single paid tier — no free option (the server routes a free
+// Online Shop is a single paid tier — no free option (the server routes a free
 // online_shop attempt to Town Ad). Town Ad shows BOTH plans since the 2026-07-18
-// restructure: free listing with a 50/50 split on page sales, or $50/mo adding the promo.
+// restructure: free listing with a revenue split on page sales, or a paid tier adding the promo.
 // Hotels joined online_shop as paid-only: one flat tier, ruled by Nick 2026-08-05.
 if(TYPE==="onlineshop"||TYPE==="hotel"){
   const pf=$("planFree"); if(pf) pf.style.display="none";
@@ -250,8 +250,8 @@ if(TYPE==="townad"||TYPE==="onlineshop"){
     townad:[
       "Free: your business listed in the guide visitors open before the beach",
       "Free: a printable QR for your counter and receipts, opening the free guide",
-      "Free: sell tours & activities through your page — paid into your own Square, split 50/50",
-      "Paid $50/mo adds: a timed promotion for guests who scan your QR, the full QR set, and full analytics"
+      "Free: sell tours & activities through your page — paid into your own Square",
+      "Paid adds: a timed promotion for guests who scan your QR, the full QR set, and full analytics"
     ],
     onlineshop:[
       "Your products selling right inside the app",
@@ -292,8 +292,8 @@ $("f").addEventListener("submit",async e=>{
   // TEST bypass: send a paid pick to the server AS FREE so no Square object is minted and no
   // redirect happens. online_shop has no free tier, so there's nothing to route it to.
   if(TEST_BYPASS && tier==="paid"){
-    if(TYPE==="onlineshop") return showErr("TEST MODE: pay gate bypassed. Online Shop is paid-only ($100/mo) — no free tier to route through, so nothing provisions without a charge.");
-    if(TYPE==="hotel") return showErr("TEST MODE: pay gate bypassed. Hotels are paid-only ($649/mo flat) — no free tier to route through, so nothing provisions without a charge.");
+    if(TYPE==="onlineshop") return showErr("TEST MODE: pay gate bypassed. Online Shop is paid-only — no free tier to route through, so nothing provisions without a charge.");
+    if(TYPE==="hotel") return showErr("TEST MODE: pay gate bypassed. Hotels are paid-only — no free tier to route through, so nothing provisions without a charge.");
     tier="free";
   }
   const name=$("name").value.trim(), email=$("email").value.trim(), sig=$("sig").value.trim();
@@ -301,8 +301,11 @@ $("f").addEventListener("submit",async e=>{
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr("Please enter a valid email.");
   if(!sig) return showErr("Please type your full name to sign.");
   if(!$("agree").checked) return showErr("Please agree to the terms to continue.");
-  if(tier==="paid" && !TC.paidSelfServe){
-    return showErr("The paid plan for your business is set up personally — email nick@oceansafety.app and we'll have you live this week. Or start free now and upgrade later.");
+  // PRICE-SCRUB-2026-08-13: pricing is off every page while we show the app, so no self-serve
+  // checkout may run — a card must never be charged an amount the signer was not shown.
+  // Revert this block (and restore the paidPr copy above) to turn paid signup back on.
+  if(tier==="paid"){
+    return showErr("Paid plans are set up with us directly right now — email nick@oceansafety.app and we'll have you live this week. Or start free now and upgrade later.");
   }
   let tsToken=null;
   if(tsOn){ tsToken=window.turnstile?turnstile.getResponse(window.__tsid):null;

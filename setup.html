@@ -131,7 +131,7 @@ function welcome(){
   const paid=S.plan==='paid';
   $("stage").innerHTML='<div class="card"><h1>Welcome, '+esc(S.name)+' 👋</h1>'+
     '<p class="say">We built your OceanSafe page. Let’s make it yours — 4 quick steps, about 2 minutes'+(paid?', then a quick checkout':'')+'.</p>'+
-    '<span class="free"'+(paid?' style="background:#E6F1FB;color:#0C447C"':'')+'>'+(paid?'$649/mo · billed today':'Free · no card, no fees')+'</span>'+guestPreview()+
+    '<span class="free"'+(paid?' style="background:#E6F1FB;color:#0C447C"':'')+'>'+(paid?'Paid plan · billed today':'Free · no card, no fees')+'</span>'+guestPreview()+
     '<button class="btn" onclick="go(1)">Let’s set it up →</button>'+
     '<p class="muted center" style="margin-top:10px">You can change anything later from your dashboard.</p></div>';
 }
@@ -140,15 +140,15 @@ function chooser(){
     '<p class="say">This is exactly what a hotel walks through after they start.</p>'+
     /* Hotels are PAID, one flat tier (ruled by Nick 2026-08-05) — there is no free hotel plan
        to preview, and the server now rejects a free hotel signup outright. */
-    '<button class="btn" style="margin-top:18px" onclick="pick(\'paid\')">Preview the hotel plan · $649/mo →</button>'+
+    '<button class="btn" style="margin-top:18px" onclick="pick(\'paid\')">Preview the hotel plan →</button>'+
     '<p class="muted center" style="margin-top:12px">Demo — nothing here is real.</p></div>';
 }
 function pick(plan){ S.plan=plan; S.monthly_cents=plan==='paid'?64900:0; STEP=0; render(); }
 function checkout(){
   $("stage").innerHTML='<div class="card">'+progress()+'<div class="stepn">Checkout</div>'+
     '<h1>Secure checkout</h1>'+
-    '<div class="why"><b>$649/mo</b> — one flat price for the whole property, billed today and monthly after. Card handled by Square; cancel anytime.</div>'+
-    '<div class="recap"><div class="rrow"><span class="rk">OceanSafe Hotel</span><span class="rv">$649/mo</span></div>'+
+    '<div class="why"><b>One flat price</b> — for the whole property, billed today and monthly after. Card handled by Square; cancel anytime.</div>'+
+    '<div class="recap"><div class="rrow"><span class="rk">OceanSafe Hotel</span><span class="rv">Paid plan</span></div>'+
     
     '<div class="rrow"><span class="rk">Due today</span><span class="rv">$649.00</span></div></div>'+
     '<p class="muted" style="margin-top:10px">In the live version this is a Square checkout page.</p>'+
@@ -203,12 +203,12 @@ function publishStep(){
   const am=(S.amenities||[]).length?S.amenities.join(", "):"—";
   const paid=S.plan==='paid';
   shell(paid?"Review, then check out":"Ready to go live?",
-    '<div class="why">'+(paid?'Next you’ll check out — $649/mo, one flat price for the whole property, billed today. ':'Publishing makes your page live for guests right away. ')+'You can edit anything later.</div>'+
+    '<div class="why">'+(paid?'Next you’ll check out — one flat price for the whole property, billed today. ':'Publishing makes your page live for guests right away. ')+'You can edit anything later.</div>'+
     guestPreview()+
     '<div class="recap"><div class="rrow"><span class="rk">Name</span><span class="rv">'+esc(S.name)+'</span></div>'+
     '<div class="rrow"><span class="rk">Area</span><span class="rv">'+esc(S.region||"—")+'</span></div>'+
     '<div class="rrow"><span class="rk">Amenities</span><span class="rv">'+esc(am)+'</span></div>'+
-    '<div class="rrow"><span class="rk">Plan</span><span class="rv">'+(paid?'$649/mo · billed today':'Free')+'</span></div></div>'+
+    '<div class="rrow"><span class="rk">Plan</span><span class="rv">'+(paid?'Paid plan · billed today':'Free')+'</span></div></div>'+
     '<div id="pubErr"></div>',
     paid?'checkout()':'publish()', paid?'Continue to checkout →':'Publish my page — go live');
 }
@@ -222,7 +222,7 @@ async function publish(){
 }
 function renderLive(){
   $("stage").innerHTML='<div class="card center"><h1>You’re live 🎉</h1>'+
-    '<p class="say">Your guests can open your beach-safety guide now.</p>'+(S.plan==='paid'?'<span class="free" style="background:#E6F1FB;color:#0C447C">$649/mo · billed today · active</span>':'')+guestPreview()+
+    '<p class="say">Your guests can open your beach-safety guide now.</p>'+(S.plan==='paid'?'<span class="free" style="background:#E6F1FB;color:#0C447C">Paid plan · billed today · active</span>':'')+guestPreview()+
     '<div style="text-align:left"><p class="muted" style="margin-top:4px">Your guest page:</p>'+
     '<div class="linkrow"><span class="u">'+esc(S.page_url)+'</span><button class="btn grey sm" onclick="copyText(\''+esc(S.page_url)+'\')">Copy</button></div>'+
     '<p class="muted" style="margin-top:12px">Your dashboard — where you manage everything:</p>'+

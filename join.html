@@ -693,7 +693,7 @@
                 <label class="jplan on" id="jPlanFree"><input type="radio" name="jtier" value="free" checked>
                   <b>Free</b><span>Your listing, map pin, QR and dashboard.</span></label>
                 <label class="jplan" id="jPlanPaid"><input type="radio" name="jtier" value="paid">
-                  <b>$50/mo</b><span>Adds a timed promotion and the full QR set.</span></label>
+                  <b>Paid plan</b><span>Adds a timed promotion and the full QR set.</span></label>
               </div>
             </div>
             <p class="jprice" id="jPrice" hidden></p>
@@ -1197,12 +1197,12 @@
      email-us, exactly as the old signup page had them. */
   var ROUTE = {
     shop:       { kind: "supa",   type: "retail",     tier: "free" },
-    hotel:      { kind: "supa",   type: "hotel",      tier: "paid",   price: "$649/mo" },
+    hotel:      { kind: "supa",   type: "hotel",      tier: "paid",   price: "Pricing on request" },
     rental:     { kind: "supa",   type: "rental",     tier: "free" },
     timeshare:  { kind: "worker", segment: "timeshare", unit: "Rooms",    hint: "How many rooms?" },
     cars:       { kind: "worker", segment: "cars",      unit: "Vehicles", hint: "How many vehicles?" },
-    townad:     { kind: "supa",   type: "townad",     tier: "choice", price: "$50/mo", pin: true },
-    onlineshop: { kind: "supa",   type: "onlineshop", tier: "paid",   price: "$100/mo" }
+    townad:     { kind: "supa",   type: "townad",     tier: "choice", price: "Pricing on request", pin: true },
+    onlineshop: { kind: "supa",   type: "onlineshop", tier: "paid",   price: "Pricing on request" }
   };
   /* hotel-signup.html redirects here with its ?type=, so honour both spellings */
   var TYPE2SEG = { hotel:"hotel", rental:"rental", retail:"shop", shop:"shop",

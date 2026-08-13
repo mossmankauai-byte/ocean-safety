@@ -26,18 +26,18 @@ const DEMO_PARTNER = { id: "demo", name: "Your Shop (demo)", slug: "your-shop", 
   status: "live", stripe_charges_enabled: true, stripe_payouts_enabled: true, stripe_onboarded_at: "2026-06-01", amazon_tag: "oceansafety-20", fulfillment_mode: "both" };
 
 // ── plan gate: Free vs Paid ──────────────────────────────────────────────────
-// Canonical RETAIL SHOP model (Nick, 2026-07-24): Free = $0/mo, 50/50 split on
-// tour commissions only. Paid = $500/mo FLAT — covers BOTH the shop (products)
+// Canonical RETAIL SHOP model (Nick, 2026-07-24): Free tier, revenue split on
+// tour commissions only. Paid tier is FLAT — covers BOTH the shop (products)
 // and rentals, shop keeps 100% of store sales AND 100% of tour commissions,
 // and unlocks visitor analytics + promotions.
 // So analytics and promotions are PAID-ONLY — on Free they render locked, never
 // as data. Demo/sales calls can flip with ?plan=paid to show a prospect both.
-const PLAN_PAID_PRICE = "$500/mo flat";
+const PLAN_PAID_PRICE = "Pricing on request";
 // RETAIL BUILD (Nick, 2026-08-11): a free retail shop gets the REAL console, not a
 // locked shell — products, inventory, sales, promotions all open. Per-feature gating
 // comes later, so nothing here renders locked. What varies by partner is the PLAN LINE
 // they read, and that comes from their own row (see planLabel), never from a hardcode:
-// asserting a plan the partner row doesn't hold is what put a $500/mo claim in front of
+// asserting a plan the partner row doesn't hold is what put a wrong-price claim in front of
 // a shop that was never billed.
 window.OCEANSAFE_PLAN = "open";
 window.isPaid = function () { return true; };

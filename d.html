@@ -138,22 +138,22 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   const noun = seg==="hotel"?"Hotel" : seg==="timeshare"?"Club" : seg==="pm"?"Property" : seg==="rental"?"Business" : seg==="retail"?"Store" : seg==="cars"?"Fleet" : isTownAd?"Business" : "Shop";
   const planTerms = isTownAd
     ? (isFree
-        ? "Town Ad — Free. Your listing, your printable QR, and this dashboard. Sell tours or activities through your page and we split those 50/50, paid into your own Square."
-        : "Town Ad, $50/mo flat. Your listing, printable QRs, a timed promotion, and this dashboard. Billed monthly through Square, cancel anytime. No cut of what you sell at the register.")
+        ? "Town Ad — Free. Your listing, your printable QR, and this dashboard. Sell tours or activities through your page and paid into your own Square."
+        : "Town Ad, paid plan. Your listing, printable QRs, a timed promotion, and this dashboard. Billed monthly through Square, cancel anytime. No cut of what you sell at the register.")
     : isOperator
     ? (isFree
-        ? (seg==="retail" ? "OceanSafe for Retail — Free. $0/mo; OceanSafe takes 3% only on app sales (you keep 97%). Your page, QR codes, and analytics included."
-          : seg==="rental" ? "OceanSafe for Rentals & Tours — Free to join. Tour commissions split 50/50; 12.7% on store sales (you keep 87.3%). Your page, QR codes, and analytics included."
+        ? (seg==="retail" ? "OceanSafe for Retail — Free. Your page, QR codes, and analytics included."
+          : seg==="rental" ? "OceanSafe for Rentals & Tours — Free to join. Your page, QR codes, and analytics included."
           // Cars free tier: the storefront IS the paid gate for this segment, so free
-          // deliberately has no store. Tour commissions split 50/50. Says nothing about the
+          // deliberately has no store. Tour commissions are revenue-shared. Says nothing about the
           // paid tier's tour split — that has never been ruled, so it stays unstated.
-          : seg==="cars" ? "OceanSafe for Car Fleets — Free. Your co-branded guide, your QR codes, and your analytics at no cost. Tour commissions split 50/50, paid into your own Square. The storefront comes with the paid plan."
+          : seg==="cars" ? "OceanSafe for Car Fleets — Free. Your co-branded guide, your QR codes, and your analytics at no cost. Tour commissions are paid into your own Square. The storefront comes with the paid plan."
           : "OceanSafe for "+(seg==="hotel"?"Hotels":"Operators")+" — Free. The co-branded guide, your QR codes, and your analytics at no cost.")
         // Cars are priced PER VEHICLE, so the flat-rate "no per-room" line below would be a
         // false description of their own bill.
-        : seg==="cars" ? "$"+Math.round((p.monthly_cents||0)/100)+"/mo — $5 per vehicle across your fleet. Adds your storefront, so guests can buy or rent gear straight from your guide, paid into your own Square."
+        : seg==="cars" ? "Paid plan — priced per vehicle across your fleet. Adds your storefront, so guests can buy or rent gear straight from your guide, paid into your own Square."
         : "$"+Math.round((p.monthly_cents||0)/100)+"/mo flat — the whole property: all co-branding, promotions, and unlimited amenities. No per-room, no per-booking.")
-    : "Storefront — Free: $0/mo + 3% only on in-app sales (you keep 97%) · or $500/store/mo with 0%. Square's card processing (~3.3% + 30¢) is your own cost as merchant of record — we don't mark it up.";
+    : "Storefront — Free, or the paid plan with 0% on sales. Square's card processing (~3.3% + 30¢) is your own cost as merchant of record — we don't mark it up.";
   const renews = (isOperator || isTownAd) && isFree ? null : renewal(p.paid_at);
   const ams=(Array.isArray(p.amenities)?p.amenities:[]).map(a=>a&&a.name?a.name:a).filter(Boolean);
   const qrCats = seg==="hotel"?[["room","In-room card"],["lobby","Lobby / front desk"],["welcome_email","Welcome email"],["general","Your own signage"]]
@@ -247,12 +247,12 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   +'<div class="card"><h2>Your plan</h2><div class="kv"><span class="k">Plan</span><span>'+esc(planTerms)+'</span>'
     +(renews?'<span class="k">Renews</span><span>'+esc(renews)+'</span>':'')+'</div>'
     +((isOperator||isTownAd)&&isFree?'<div class="hint">Free, no card. Upgrade to unlock the sections below whenever you’re ready.</div>':'<div class="hint">We’ll email you before any renewal, no surprises.</div>')+'</div>'
-  // 2026-07-18 restructure: free town_ad sees the promo card LOCKED (the $50/mo headline
+  // 2026-07-18 restructure: free town_ad sees the promo card LOCKED (the paid-plan headline
   // feature — partner-promo enforces the same gate server-side) plus the connect-Square
-  // card that carries the free tier's 50/50 selling pitch. Paid sees the live promo form.
+  // card that carries the free tier's selling pitch. Paid sees the live promo form.
   +(isTownAd ? pinCard()
       +(isFree
-        ? lockCard("Your promotion","A timed offer that pops on the phone of every guest who scans your QR — upload an image or PDF, pick the hours, it goes live. Part of the $50/mo plan.",true)
+        ? lockCard("Your promotion","A timed offer that pops on the phone of every guest who scans your QR — upload an image or PDF, pick the hours, it goes live. Part of the paid plan.",true)
         : promoCard())
       +sellCard()
     : lockCard("Promotions","Timed, condition-triggered offers on the guide your guests already open — the spa when the surf’s up, the right item on the right day.",isFree)
@@ -263,7 +263,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     +'<div class="empty">Your QR codes are already tracked by placement; the counts turn on when analytics goes live — we’ll email you. Nothing to set up.</div></div>'
   +'<div class="card"><h2>Questions?</h2><p class="lead">Email or text us — a real person. <a href="mailto:'+NICK+'">'+NICK+'</a></p>'
     +'<div class="hint">Reply to any email to change anything, or to cancel.</div></div>';
-  // Both town_ad tiers can sell through their page on the 50/50 split, but it needs the
+  // Both town_ad tiers can sell through their page on the revenue split, but it needs the
   // portal (Supabase auth + Square OAuth) — this no-login dashboard can't connect Square.
   // Shown unconditionally: get_partner_dashboard doesn't project square_merchant_id, and
   // widening that RPC for a nag isn't worth the drift risk (see 0029's warning).
