@@ -334,8 +334,23 @@ window.OS_SEGMENTS = {
   .qa.gold .qi{background:var(--gold-tint);color:var(--gold-ink)}
   .qa.gold .go{color:var(--gold-ink)}
 
+  /* ============ WHEN TO RUN AN OFFER — demand by hour ============ */
+  .pw-cats{display:inline-flex;gap:2px;background:var(--hair-soft);border-radius:8px;padding:2px;margin-top:12px}
+  .pw-cat{appearance:none;font:inherit;font-size:12.5px;font-weight:600;border:0;background:none;
+          color:var(--muted);padding:6px 13px;border-radius:6px;cursor:pointer}
+  .pw-cat:hover{color:var(--ink-2)}
+  .pw-cat[aria-selected="true"]{background:var(--sea);color:var(--on-sea)}
+  /* The peak window reads as one block, so the eye lands on it before the numbers.
+     `.hours i` sets `background:var(--chart-fill)!important`, which no selector can
+     outrank without another !important. Redefine the variable on the peak bars
+     instead and let that rule paint them gold on its own. */
+  #pwHours i.pw-peak{--chart-fill:var(--gold)}
+  #pwPeaks .row i.pw-on{--chart-fill:var(--gold);background:var(--gold)}
+
   /* ============ PROMOTIONS — drag-and-drop flyer drafts ============ */
-  .pm-stage{display:inline-flex;gap:2px;background:var(--hair-soft);border-radius:8px;padding:2px}
+  /* .pm-f span is display:block, which stretched this across the whole column. */
+  .pm-f .pm-stage{display:inline-flex;width:max-content;gap:2px;background:var(--hair-soft);
+                  border-radius:8px;padding:2px;margin-bottom:0}
   .pm-stg{appearance:none;font:inherit;font-size:12.5px;font-weight:600;border:0;background:none;
           color:var(--muted);padding:5px 11px;border-radius:6px;cursor:pointer}
   .pm-stg:hover{color:var(--ink-2)}
@@ -1811,6 +1826,24 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 
     <div id="view-promos" hidden>
     <!-- PROMOTIONS — drag-and-drop flyer drafts -->
+    <!-- WHEN TO RUN AN OFFER — demand by hour, per category -->
+    <section aria-label="When to run an offer">
+      <div class="sec-h"><h2>When to run an offer</h2><p>The hours guests are planning each kind of thing. Set your pop-up window on the peak, not on a hunch.</p></div>
+      <div class="card">
+        <div class="title"><span class="l"><span class="pv sample" id="pwPv"></span> Demand by hour of day</span><span id="pwChip"><span class="chip sample">Sample</span></span></div>
+        <div class="pw-cats" role="tablist" aria-label="Offer category">
+          <button type="button" class="pw-cat" data-cat="dining" aria-selected="true">Restaurant</button>
+          <button type="button" class="pw-cat" data-cat="tours" aria-selected="false">Tours</button>
+          <button type="button" class="pw-cat" data-cat="rentals" aria-selected="false">Rentals</button>
+        </div>
+        <div class="hours" id="pwHours" aria-hidden="true" style="margin-top:14px"></div>
+        <div class="hours-x"><span>6a</span><span>11a</span><span>4p</span><span>9p</span></div>
+        <div class="bars wlab" id="pwPeaks" style="margin-top:14px"></div>
+        <div class="cap" id="pwCap"></div>
+        <details class="meth"><summary>How this is computed</summary><div class="body">16 hourly buckets, 6a to 9p, on the guest device clock. A bucket counts guide opens where the guest then tapped something in that category, so it reads intent to plan rather than foot traffic. The peak window is the three consecutive hours with the highest total. Sample figures until your own telemetry is on; a real property shows its own hours and the label changes with it.</div></details>
+      </div>
+    </section>
+
     <section>
       <div class="sec-h"><h2>Promotions</h2><p>Drop a PDF flyer and guests get an offer chip in your guide&rsquo;s Town tab &mdash; set a window and the offer pops up on their phones during those hours. Drafts save in this browser; Export sends them into your app build.</p></div>
       <div class="card">
@@ -3550,7 +3583,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         // A pre-arrival guest is in another timezone and the Hawaii forecast for
         // their trip does not exist yet, so the time-of-day window is meaningless
         // there. It is not rendered rather than rendered-and-disabled.
-        var stage = p.trip_stage === 'pre-arrival' ? 'pre-arrival' : 'on-island';
+        var stage = (p.trip_stage === 'pre-arrival' || p.trip_stage === 'always')
+                  ? p.trip_stage : 'on-island';
         return '<div class="pm-card">' +
           '<div class="pm-thumb" data-i="'+i+'"><span class="pm-thumb-tag">PDF</span><div class="pm-thumb-fb">'+PDF_SVG_BIG+'<b>'+esc(p.fileName)+'</b></div></div>' +
           '<div>' +
@@ -3561,10 +3595,13 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
                 (stage==='on-island' ? ' aria-pressed="true"' : ' aria-pressed="false"')+'>On island</button>' +
               '<button type="button" class="pm-stg" data-i="'+i+'" data-stage="pre-arrival"'+
                 (stage==='pre-arrival' ? ' aria-pressed="true"' : ' aria-pressed="false"')+'>Pre-arrival</button>' +
+              '<button type="button" class="pm-stg" data-i="'+i+'" data-stage="always"'+
+                (stage==='always' ? ' aria-pressed="true"' : ' aria-pressed="false"')+'>Both</button>' +
             '</span></div>' +
-            '<div class="pm-stagehint">' + (stage==='pre-arrival'
-              ? 'Shows before they land, and stops when they arrive.'
-              : 'Shows while the guest is here on the island.') + '</div>' +
+            '<div class="pm-stagehint">' + (
+              stage==='pre-arrival' ? 'Shows before they land, and stops when they arrive.' :
+              stage==='always'      ? 'Shows before they land and after. The window below applies once they are here.' :
+                                      'Shows while the guest is here on the island.') + '</div>' +
             '<div class="pm-f"'+(stage==='pre-arrival' ? ' hidden' : '')+'><span>Pop-up window (optional)</span><span class="pm-win">' +
               '<input class="pm-win-s" data-i="'+i+'" type="time" value="'+esc((p.window&&p.window.start)||'')+'" aria-label="Pop-up window start">' +
               '<span class="pm-wsep">to</span>' +
@@ -4862,6 +4899,101 @@ if(DEMO){
     mounted = true;
     go(cur);
   };
+})();
+</script>
+
+<script>
+/* ============ WHEN TO RUN AN OFFER ============
+   Demand by hour, per offer category, so the pop-up window is a reading and not a
+   guess. Same .hours / .bars markup as the Guest activity chart.
+
+   These are SAMPLE hours until a property's own telemetry is on. They are shaped
+   the way planning actually behaves rather than drawn to look good: dining peaks
+   late afternoon when people decide dinner, tours peak the night before and again
+   at breakfast, gear peaks first thing. If that stops matching what real data says,
+   the real data wins and this goes. */
+(function(){
+  var hoursEl = document.getElementById('pwHours');
+  if(!hoursEl) return;
+  var peaksEl = document.getElementById('pwPeaks'),
+      capEl   = document.getElementById('pwCap'),
+      chipEl  = document.getElementById('pwChip'),
+      pvEl    = document.getElementById('pwPv');
+
+  var START = 6;                       // 6a .. 9p, 16 buckets, matching the other chart
+  var CATS = {
+    dining:  { label:'Restaurant',
+               hrs:[4,5,7,9,12,16,19,22,28,41,63,88,100,74,46,30],
+               note:'Guests decide dinner in the late afternoon, from the beach or the room.' },
+    tours:   { label:'Tours',
+               hrs:[38,64,88,100,72,49,36,30,28,31,37,46,58,74,92,86],
+               note:'Tours get booked the night before, then again over breakfast.' },
+    rentals: { label:'Rentals',
+               hrs:[52,86,100,91,64,42,31,26,24,25,29,34,39,44,52,48],
+               note:'Boards and gear go out first thing, before the day is decided.' }
+  };
+  var HAS_SLUG = !!(window.OS_SLUG && String(window.OS_SLUG).trim());
+
+  function hourLabel(h){
+    var ampm = h < 12 ? 'a' : 'p', v = h % 12; if(!v) v = 12;
+    return v + ampm;
+  }
+  /* Peak window = the 3 consecutive hours with the highest total. Three hours is the
+     shortest span an operator can actually staff to. */
+  function peakWindow(hrs){
+    var best = 0, at = 0;
+    for(var i = 0; i <= hrs.length - 3; i++){
+      var t = hrs[i] + hrs[i+1] + hrs[i+2];
+      if(t > best){ best = t; at = i; }
+    }
+    return { from: START + at, to: START + at + 3, i: at };
+  }
+
+  function draw(cat){
+    var c = CATS[cat], pk = peakWindow(c.hrs);
+    hoursEl.innerHTML = c.hrs.map(function(v, i){
+      var peak = i >= pk.i && i < pk.i + 3;
+      return '<i class="' + (peak ? 'pw-peak' : '') + '" style="height:' + Math.max(2, v) + '%"></i>';
+    }).join('');
+
+    // One row per category so the operator can compare without switching tabs.
+    var max = 1;
+    Object.keys(CATS).forEach(function(k){
+      var p = peakWindow(CATS[k].hrs);
+      var tot = CATS[k].hrs[p.i] + CATS[k].hrs[p.i+1] + CATS[k].hrs[p.i+2];
+      if(tot > max) max = tot;
+    });
+    peaksEl.innerHTML = Object.keys(CATS).map(function(k){
+      var p = peakWindow(CATS[k].hrs);
+      var tot = CATS[k].hrs[p.i] + CATS[k].hrs[p.i+1] + CATS[k].hrs[p.i+2];
+      var on = k === cat;
+      return '<div class="row"><span class="lab">' + CATS[k].label + '</span>' +
+             '<i class="' + (on ? 'pw-on' : '') + '" style="width:' +
+             Math.round(tot / max * 100) + '%"></i>' +
+             '<span>' + hourLabel(p.from) + '&ndash;' + hourLabel(p.to) + '</span></div>';
+    }).join('');
+
+    capEl.innerHTML = c.note + ' Peak window <b>' + hourLabel(pk.from) + ' to ' +
+      hourLabel(pk.to) + '</b> &mdash; set that as the pop-up window on a ' +
+      c.label.toLowerCase() + ' offer below.';
+  }
+
+  document.querySelectorAll('.pw-cat').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.pw-cat').forEach(function(x){
+        x.setAttribute('aria-selected', String(x === b));
+      });
+      draw(b.dataset.cat);
+    });
+  });
+
+  // A real property has no sample hours to show until its telemetry is on. Say so
+  // rather than showing it someone else's shape and calling it theirs.
+  if(HAS_SLUG){
+    chipEl.innerHTML = '<span class="chip sample">Sample</span>';
+    capEl.setAttribute('data-real', '1');
+  }
+  draw('dining');
 })();
 </script>
 
