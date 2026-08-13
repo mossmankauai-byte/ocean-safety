@@ -1067,7 +1067,7 @@
       "offer-sub": "Everything in a town listing, plus your products selling inside the app. Sales are paid into your own Square.",
       "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your storefront inside the app</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>We take 0% of your sales</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your pin in the Town tab</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>The full printable QR set</li>',
       "card-tag": "Online shop",
-      "card-amt": "$100",
+      "card-amt": "Paid plan",
       "card-per": "per month",
       "card-line": "Your storefront in the app, plus the listing, the map pin and the full QR set. We take 0% of your sales — they are paid into your own Square. Billed monthly, cancel anytime.",
       "card-note": "Billed monthly and you can cancel anytime. Your page is live as soon as your payment goes through.",
@@ -1384,6 +1384,10 @@
           ? "The verification box didn't load here. Email mossmankauai@gmail.com and we'll set you up by hand."
           : "Please complete the verification box.");
         var tier = r.tier === "choice" ? chosenTier() : (r.tier || "free");
+        /* PRICE-SCRUB-2026-08-13: pricing is off every page while we show the app, so no
+           self-serve checkout may run — a card must never be charged an amount the signer
+           was not shown. Delete this block to turn paid signup back on. */
+        if (tier === "paid") return fail("Paid plans are set up with us directly right now — email mossmankauai@gmail.com and we'll have you live this week. Or start free now and upgrade later.");
         if (r.pin && !val("jAddr")) return fail("Enter your street address — it places your pin on the map.");
         url = SB_URL + "/functions/v1/operator-signup-public";
         headers = { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "apikey": SB_KEY };
@@ -1415,8 +1419,11 @@
           .then(function (j) { return { ok: res.ok, j: j }; }); })
         .then(function (out) {
           var j = out.j || {};
-          /* paid → Square hosts the checkout; the webhook flips the draft live afterwards */
-          if (j.mode === "paid" && j.url) { window.location.href = j.url; return; }
+          /* paid → Square hosts the checkout; the webhook flips the draft live afterwards.
+             PRICE-SCRUB-2026-08-13: while pricing is off every page, never follow that
+             redirect — it would charge a card an amount the signer was never shown.
+             Restore the redirect line below when pricing goes back. */
+          if (j.mode === "paid" && j.url) { return fail("Paid plans are set up with us directly right now — email mossmankauai@gmail.com and we'll have you live this week."); }
           if (!out.ok || j.ok === false || j.error) {
             if (window.turnstile) { try { if (tsId !== null) turnstile.reset(tsId); if (tsWId !== null) turnstile.reset(tsWId); } catch (_) {} }
             return fail(j.error || reason(j.reason) || "Something went wrong — please try again.");
