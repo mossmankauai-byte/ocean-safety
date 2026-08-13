@@ -18,7 +18,7 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const CACHE_VERSION = 'v298-2026-08-13-promo-phone-mock';
+const CACHE_VERSION = 'v299-2026-08-13-phone-mock-plus-no-auto-tour';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
