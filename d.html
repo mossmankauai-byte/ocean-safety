@@ -170,8 +170,6 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   // items now live in the shop console (portal-shop), and two item editors writing the same
   // products table is one too many. The console card above is their route to it.
   const sells = seg==="rental"||(!isOperator && !isTownAd && seg!=="retail");
-  const keepPct = seg==="retail"?"97%":seg==="rental"?"87.3%":"90%";
-  const feePct  = seg==="retail"?"3%":seg==="rental"?"12.7%":"10%";
   const FN="https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-items";
   const money2=c=>"$"+(c/100).toFixed(2);
   document.title=p.name+" · OceanSafe dashboard";
@@ -225,7 +223,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     +'<div class="assets" id="assetGrid"><span class="dim">Building your assets…</span></div>'
     +'<div class="hint">Scanning any of them opens the free '+islandName+' beach guide with your '+esc(noun.toLowerCase())+' inside'+(isTownAd&&!isFree?' — and your promotion on their screen.':'.')+'</div></div>'
   +(sells?'<div class="card"><h2>Your items</h2>'
-    +'<p class="lead">List what you sell — items show on your page and sell in the app. '+(isFree?('You keep <b>'+keepPct+'</b>; our '+feePct+' only applies when the app sells for you.'):'You keep <b>100%</b> on your plan.')+'</p>'
+    +'<p class="lead">List what you sell — items show on your page and sell in the app. '+(isFree?'A revenue share applies only when the app sells for you.':'You keep <b>100%</b> on your plan.')+'</p>'
     +'<div id="itemsList" style="margin-top:12px"><span class="dim">Loading items…</span></div>'
     +'<div class="row" style="margin-top:12px;align-items:stretch">'
     +'<input id="itTitle" placeholder="Item name (e.g. Reef-safe sunscreen)" maxlength="80" style="flex:2;min-width:170px;font-size:14px;padding:9px 11px;border:1px solid #D5DCE2;border-radius:9px">'
@@ -233,7 +231,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     +'<button class="btn primary" id="itAdd">Add item</button></div>'
     +'<div class="hint" id="itMsg">Changes are live on your page the moment you add them.</div></div>':'')
   +(!isOperator && !isTownAd?'<div class="card"><h2>Need more cards?</h2><p class="lead">Cards walk out the door — reorder anytime.</p>'
-    +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+ml("More cards for "+p.name,"Hi OceanSafe team, "+p.name+" needs 200 more cards ($100). Ship to:")+'">Reorder 200 cards — $100 ↗</a></div></div>':'')
+    +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+ml("More cards for "+p.name,"Hi OceanSafe team, "+p.name+" needs 200 more cards. Ship to:")+'">Reorder 200 cards ↗</a></div></div>':'')
   +'<div class="card"><h2>What’s live</h2><div class="kv">'
     +'<span class="k">'+esc(noun)+'</span><span>'+esc(p.name)+'</span>'
     +(p.short?'<span class="k">Tagline</span><span>'+esc(p.short)+'</span>':'')
