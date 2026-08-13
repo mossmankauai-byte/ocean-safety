@@ -222,7 +222,7 @@ function affiliateLink(asin, tag) {
 }
 
 // ── first-open guided tour ───────────────────────────────────────────────────
-// Ported from operator-console.html's tour engine, restyled light (portal.css).
+// Ported from hotel's tour engine, restyled light (portal.css).
 // Pages call osPortalTour({ key, steps, button, auto, delay }):
 //   key    localStorage flag — set when the tour finishes (or is skipped)
 //   steps  [{ center:true, title, body } or { sel:"#id", title, body }]

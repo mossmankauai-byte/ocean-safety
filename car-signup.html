@@ -298,7 +298,7 @@
     // The worker's /ts-signup hands back the TIMESHARE console (rooms, owner sessions,
     // RCI/II) — wrong surface for a car fleet. Re-point at the car-fleet console, which
     // shares the same ?ref&key contract. Portal is shared across segments already.
-    var dash = String(j.dashboard_url||"").replace("/stay-close-operator-dashboard.html", "/fleet");
+    var dash = String(j.dashboard_url||"").replace("/timeshare", "/fleet");
     $("lPortal").textContent=j.portal_url; $("lDash").textContent=dash;
     SEGS.forEach(function(seg){
       var box=$("qr-"+seg); box.innerHTML="";
