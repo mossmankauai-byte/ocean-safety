@@ -106,7 +106,7 @@ window.OS_SEGMENTS = {
 </script>
 <style>
   /* A segment that has no free tier never renders a free column, rather than
-     rendering one that is disabled. Hotels are $649/mo flat, one tier.
+     rendering one that is disabled. Hotels are one flat tier.
      The #planCompare rules below carry an id, so these have to as well or they lose
      the cascade to them. */
   html[data-nofree] #planCompare .pc-cell:not(.pc-paid){display:none}
@@ -1786,11 +1786,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     <p class="cap" style="margin-top:2px">A high-surf or brown-water morning used to mean guests scatter. The guide reads the same live ocean feed that powers the safety verdict, and on a no-swim day its top card flips from a beach recommendation to what's open on-property — your spa, your pool, your 2pm snorkel tour. The safety call never changes for an offer; the offer just moves to the front when the water closes.</p>
     <table class="tsw-table">
       <tr>
-        <td class="tsw-plan">Free · $0/unit</td>
+        <td class="tsw-plan" data-os="freeHead">Free · $0/unit</td>
         <td>1 on-property amenity shown in the swap</td>
       </tr>
       <tr>
-        <td class="tsw-plan">Paid · $10/unit/mo</td>
+        <td class="tsw-plan" data-os="paidHead">Paid · $10/unit/mo</td>
         <td>Full amenity weather-swap plus a presentation push on trigger days</td>
       </tr>
     </table>
@@ -3295,7 +3295,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       }).join('') : '<div class="mg-empty">Nothing yet — add your first below.</div>';
       if(FREE && items.length > 1){
         el.innerHTML += '<div class="mg-row mg-locked" id="amLockedRow">'+LOCK_SVG+
-          '<div class="mg-nm"><b style="color:var(--ink-2)">Unlock unlimited amenities — part of the $10/unit plan</b>'+
+          '<div class="mg-nm"><b style="color:var(--ink-2)">Unlock unlimited amenities — part of the ' + (window.OS_SEGCFG&&window.OS_SEGCFG.paidPrice||'$10/unit/mo') + ' plan</b>'+
           '<span>'+(items.length-1)+' more saved in this draft; guests see the first until you unlock.</span></div></div>';
       }
       if(FREE){
@@ -3744,7 +3744,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var unlockHref = 'mailto:aloha@oceansafety.app?subject=' + encodeURIComponent('Unlock my OceanSafe guide');
   var btnsHTML = '<div class="lockcard-btns">' +
     '<a class="pl-btn" href="' + previewHref + '" target="_blank" rel="noopener">Preview my branded guide</a>' +
-    '<a class="pl-btn primary" href="' + unlockHref + '">Unlock everything — $10/unit/mo</a></div>';
+    '<a class="pl-btn primary" href="' + unlockHref + '">Unlock everything: ' + (window.OS_SEGCFG&&window.OS_SEGCFG.paidPrice||'$10/unit/mo') + '</a></div>';
 
   /* ---- header: subtle plan chip (free view only — paid shows nothing) ---- */
   var ms = document.querySelector('.modeswitch');
@@ -3773,7 +3773,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   if(pcFoot){
     pcFoot.insertAdjacentHTML('beforeend',
       '<a class="pl-btn" href="' + previewHref + '" target="_blank" rel="noopener">Preview my branded guide</a>' +
-      '<a class="pl-btn primary" href="' + unlockHref + '">Unlock — $10/unit/mo</a>');
+      '<a class="pl-btn primary" href="' + unlockHref + '">Unlock: ' + (window.OS_SEGCFG&&window.OS_SEGCFG.paidPrice||'$10/unit/mo') + '</a>');
   }
 
   /* ---- PROMOTIONS: the locked panel — the conversion engine ---- */
@@ -3812,7 +3812,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var promosSec = document.querySelector('#view-promos section');
   if(promosSec){
     var headP = promosSec.querySelector('.sec-h p');
-    if(headP) headP.textContent = 'Timed pop-ups and the offer chip in your guide’s Town tab — part of the $10/unit plan.';
+    if(headP) headP.textContent = 'Timed pop-ups and the offer chip in your guide’s Town tab — part of the ' + (window.OS_SEGCFG&&window.OS_SEGCFG.paidPrice||'$10/unit/mo') + ' plan.';
     // The two headline unlocks — timed pop-up promotions + full co-branding.
     var CLOCKTAG = '<svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="6.2"/><path d="M9 5.6V9l2.2 1.4"/><g transform="translate(12 12) scale(.62)" stroke-width="2.9"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></g></svg>';
     var BRAND = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.2"/><circle cx="7.6" cy="8.6" r="1.7"/><path d="M12.2 7.8h5.6"/><path d="M12.2 10.4h3.6"/><path d="M6 15.6h12"/></svg>';
@@ -3844,7 +3844,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   if(dz){
     dz.setAttribute('aria-disabled', 'true');
     dz.tabIndex = -1;
-    dz.innerHTML = LOCK_BIG + '<b>Promotions are part of the $10/unit plan</b>' +
+    dz.innerHTML = LOCK_BIG + '<b>Promotions are part of the ' + (window.OS_SEGCFG&&window.OS_SEGCFG.paidPrice||'$10/unit/mo') + ' plan</b>' +
       '<span>Drag-and-drop flyers with timed pop-up windows — they switch on the day you unlock.</span>';
   }
   var vbP = document.getElementById('vbPromos');
@@ -4594,7 +4594,7 @@ function mount(PS){
       '<div class="card">' +
         '<p style="margin:2px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.6;max-width:70ch">Every property, one portfolio dashboard — adoption, demand and promotions across the whole group, with per-property drill-down. Each property keeps its own guide and QR; we provision the group when you sign — nothing to configure — and the portfolio view appears in this console.</p>' +
         '<div class="lockcard-btns"><a class="pl-btn primary" href="mailto:aloha@oceansafety.app?subject=Link%20my%20properties">Link my properties</a></div>' +
-        '<div class="note"><b>$10/unit/mo per property</b> — ask us about portfolio pricing.</div>' +
+        '<div class="note">' + (window.OS_SEGCFG&&window.OS_SEGCFG.paidPrice||'$10/unit/mo') + ' per property, ask us about portfolio pricing.</div>' +
       '</div></section>';
 
   var root = document.getElementById('view-portfolio');
@@ -4844,8 +4844,13 @@ if(DEMO){
   function apply(){
     var C = window.OS_SEGCFG; if(!C) return;
     var d = document;
-    function setText(k, v){ var n = d.querySelector('[data-os="'+k+'"]'); if(n && v!=null) n.textContent = v; }
-    function setHTML(k, v){ var n = d.querySelector('[data-os="'+k+'"]'); if(n && v!=null) n.innerHTML = v; }
+    /* querySelectorAll, not querySelector: the plan price appears in both the compare
+       card and the second plan table, and only setting the first left the other one
+       showing the donor segment's price. */
+    function setText(k, v){ if(v==null) return;
+      d.querySelectorAll('[data-os="'+k+'"]').forEach(function(n){ n.textContent = v; }); }
+    function setHTML(k, v){ if(v==null) return;
+      d.querySelectorAll('[data-os="'+k+'"]').forEach(function(n){ n.innerHTML = v; }); }
 
     setText('h1', C.h1);
     setText('kicker', C.h1 + ' · co-branded guest guide');
