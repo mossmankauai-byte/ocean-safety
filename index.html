@@ -6604,16 +6604,27 @@ function openRoadmapSheet(){
     if(!sec || !sec.items || !sec.items.length) return '';
     return `<div class="slbl" style="margin-top:18px;color:var(--ocean)">${sec.label||''}</div><div>${sec.items.map(renderItem).join('')}</div>`;
   };
+  // When the guest arrived from a partner QR and that partner has content loaded,
+  // the three generic sections are replaced by their promotions / shop / amenities.
+  const px = typeof getPartnerExtras === 'function' ? getPartnerExtras() : null;
+  const sections = px
+    ? renderSection({label:'Promotions', items:px.promos})
+      + renderSection({label:'Shop', items:px.shop})
+      + renderSection({label:'Amenities', items:px.amenities})
+    : renderSection(BRAND_SHEET.sectionA)
+      + renderSection(BRAND_SHEET.sectionB)
+      + renderSection(BRAND_SHEET.sectionC);
+  const blurb = px
+    ? `Guest extras from <b>${px.name}</b>. Ocean conditions and beach ratings are independent and never sponsored.`
+    : 'A free public-good app for visitors to make safer ocean decisions. Built in Hawaiʻi. Updated continuously.';
   _sc.innerHTML=`
     <div class="poi-hero" style="background:linear-gradient(135deg,var(--ocean),#1a7a8a);color:#fff">
       <div class="poi-hero-icon" style="color:#fff;font-size:24px">⊕</div>
       <div><div class="poi-hero-name" style="color:#fff">Kauaʻi Beach Guide</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">About this app</div></div>
     </div>
-    <div class="poi-local-tip" style="margin-top:12px"><span style="font-size:14px;flex-shrink:0">◈</span><span>A free public-good app for visitors to make safer ocean decisions. Built in Hawaiʻi. Updated continuously.</span></div>
-    ${renderSection(BRAND_SHEET.sectionA)}
-    ${renderSection(BRAND_SHEET.sectionB)}
-    ${renderSection(BRAND_SHEET.sectionC)}
-    <div style="margin-top:18px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:10px;font-size:11px;line-height:1.5;color:var(--mute)">
+    <div class="poi-local-tip" style="margin-top:12px"><span style="font-size:14px;flex-shrink:0">◈</span><span>${blurb}</span></div>
+    ${sections}
+    <div style="margin-top:18px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:10px;font-size:11px;line-height:1.5;color:var(--mute);${px?'display:none':''}">
       <strong style="color:var(--ink)">Want to partner?</strong> Local businesses, hotels, and visitor centers — get featured. <a href="mailto:nick@oceansafety.app" style="color:var(--ocean);font-weight:600">Get in touch</a>.
     </div>`;
   document.getElementById('sheet').classList.add('on');
@@ -10096,8 +10107,46 @@ const PARTNER_NAMES = {
   kapaabeach: 'Kapaa Beach Shop',
   theiso: 'The ISO',
   hanaleitrading: 'Hanalei Trading Co.',
-  kayakhanalei: 'Kayak Hanalei'
+  kayakhanalei: 'Kayak Hanalei',
+  demo: 'Demo Resort'
 };
+
+// ── Per-partner guest extras (brand-icon sheet) ──
+// Keyed by the same slug as ?ref=. When a guest scans a partner QR, tapping the
+// brand icon shows that partner's promotions, shop items, and listed amenities
+// instead of the generic about-this-app sections. Unknown/absent slug → generic.
+// Item shape: { t: title, d: detail }
+// Add real partner entries here as operators send their content. Nothing is
+// invented. An empty or missing section simply doesn't render.
+const PARTNER_CONTENT = {
+  // Worked example. Reachable at /?ref=demo for showing operators what they get.
+  demo: {
+    promos: [
+      {t:'Welcome mai tai', d:'Show this screen at the lobby bar, 4pm to 6pm daily.'},
+      {t:'20% off snorkel rental', d:'Beach hut, next to the north pool.'}
+    ],
+    shop: [
+      {t:'Reef-safe sunscreen', d:'$18. Sundries shop, lobby level.'},
+      {t:'Beach towel rental', d:'$5/day. Towel hut by the pool.'}
+    ],
+    amenities: [
+      {t:'Pools', d:'Two heated pools, 7am to 10pm.'},
+      {t:'Beach gear', d:'Chairs and umbrellas, complimentary for guests.'},
+      {t:'Front desk', d:'Dial 0 from any room phone.'}
+    ]
+  }
+};
+
+// Resolve this session's partner extras, if the guest arrived from a known QR.
+function getPartnerExtras(){
+  try {
+    const slug = localStorage.getItem('referrer');
+    if(!slug) return null;
+    const c = PARTNER_CONTENT[slug];
+    if(!c) return null;
+    return Object.assign({name: PARTNER_NAMES[slug] || slug}, c);
+  } catch(e){ return null; }
+}
 
 function showWelcomeChip(partnerName){
   const bar = document.getElementById('topbar');
