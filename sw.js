@@ -15,7 +15,9 @@
 // Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
-const CACHE_VERSION = 'v285-2026-08-13-price-scrub';
+// Both the price scrub and the dashboard merge claimed v285 on the same day.
+// Resolved forward, never backward: a backward bump is the stale-build trap.
+const CACHE_VERSION = 'v286-2026-08-13-dashboard-merge';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -191,7 +193,10 @@ if (workbox) {
       // was already fixed for exactly this reason; these are the same trap.
       /^\/(set-password|partner-terms|hotel|rental|fleet|townad|timeshare|concierge)$/.test(url.pathname) ||
       url.pathname === '/assets/creator-kit.js' ||
-      /^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|stay-close-operator-dashboard|rentals-operator-dashboard|cars-operator-dashboard|analytics-console|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)),
+      (/^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|dashboard|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)
+       // OD-12: operators are given the CLEAN routes, whose pathname has no .html,
+       // so they used to fall through to the stale-while-revalidate catch-all.
+       || /^\/(hotel|timeshare|rental|concierge|fleet)$/.test(url.pathname))),
     new workbox.strategies.NetworkFirst({
       cacheName: "jade-pages",
       networkTimeoutSeconds: 4,
