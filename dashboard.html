@@ -21,10 +21,10 @@ window.OS_SEGMENTS = {
     guideHref:'https://oceansafety.app/?ref=your-hotel',
     dlPrefix:'OceanSafe-Dashboard-',
     freeTier:false,
-    planAria:'The $649 plan', planH2:'What the $649 plan includes',
+    planAria:'The $649 plan', planH2:'What your plan includes',
     freeHead:'', paidHead:'$649/mo',
     freePrice:'', paidPrice:'$649/mo flat',
-    pcFoot:'<b>$649/mo flat</b> — one tier, everything above. No free hotel tier.',
+    pcFoot:'<b>$649/mo flat</b> — one tier, everything above.',
     portfolioNote:'<b>$649/mo</b> — per property; ask us about volume pricing.',
     tabs:['home','stayclose','promos','guests','places','shop']
   },
@@ -34,11 +34,11 @@ window.OS_SEGMENTS = {
     showMeta:true, previewNoun:'property', lobbyTitle:'lobby board',
     guideHref:'/stay-close-v2?ref=your-resort&seg=renter',
     dlPrefix:'OceanSafe-Stay-Close-',
-    freeTier:true,
-    planAria:'Free plan versus the $8/room plan', planH2:'Free vs the $8/room plan',
-    freeHead:'Free · $0/room', paidHead:'Paid · $8/room/mo',
-    freePrice:'Free — $0/room', paidPrice:'$8/room/mo',
-    pcFoot:'<b>$8/room/mo</b> — one paid tier, everything above. The free guide is free forever.',
+    freeTier:false,
+    planAria:'The $8/room plan', planH2:'What your plan includes',
+    freeHead:'', paidHead:'$8/room/mo',
+    freePrice:'', paidPrice:'$8/room/mo',
+    pcFoot:'<b>$8/room/mo</b> — one tier, everything above.',
     portfolioNote:'<b>$8/room/mo</b> — per room across the whole group.',
     tabs:['home','stayclose','promos','guests','places','segments','desk','shop'],
     segmentsLabel:'Segments &amp; funnels', deskLabel:'Operate the desk', deskKind:'salesdesk'
@@ -49,11 +49,11 @@ window.OS_SEGMENTS = {
     showMeta:false, previewNoun:'property', lobbyTitle:'lobby board',
     guideHref:'/stay-close-v2?ref=your-rentals&seg=renter',
     dlPrefix:'OceanSafe-Rentals-',
-    freeTier:true,
-    planAria:'Free plan versus the per-unit plan', planH2:'Free vs the per-unit plan',
-    freeHead:'Free · $0/unit', paidHead:'Paid · $10/unit/mo',
-    freePrice:'Free — $0/unit', paidPrice:'$10/unit/mo',
-    pcFoot:'<b>$10/unit/mo</b> — one paid tier, everything above. The free guide is free forever; leads stay free on both tiers.',
+    freeTier:false,
+    planAria:'The per-unit plan', planH2:'What your plan includes',
+    freeHead:'', paidHead:'$10/unit/mo',
+    freePrice:'', paidPrice:'$10/unit/mo',
+    pcFoot:'<b>$10/unit/mo</b> — one tier, everything above. Leads are included.',
     portfolioNote:'<b>$10/unit/mo</b> — per-unit across the whole portfolio; ask us about volume pricing.',
     tabs:['home','stayclose','promos','guests','places','desk','shop'],
     deskLabel:'Tours', deskKind:'affiliate'
@@ -64,11 +64,11 @@ window.OS_SEGMENTS = {
     showMeta:false, previewNoun:'property', lobbyTitle:'lobby board',
     guideHref:'/stay-close-v2?ref=your-desk&seg=renter',
     dlPrefix:'OceanSafe-Concierge-',
-    freeTier:true,
-    planAria:'Free plan versus the $350/mo plan', planH2:'Free vs the $350/mo plan',
-    freeHead:'Free · rev-share', paidHead:'Paid · $350/mo',
-    freePrice:'Free — 50/50 tours + 12.7% store', paidPrice:'$350/mo flat',
-    pcFoot:'<b>$350/mo</b> — no revenue share on this desk. The free tier is 50/50 on tours plus 12.7% on the store.',
+    freeTier:false,
+    planAria:'The $350/mo plan', planH2:'What your plan includes',
+    freeHead:'', paidHead:'$350/mo',
+    freePrice:'', paidPrice:'$350/mo flat',
+    pcFoot:'<b>$350/mo</b> — one tier, everything above. No revenue share on this desk.',
     portfolioNote:'<b>$350/mo</b> — per desk.',
     tabs:['home','stayclose','promos','guests','places','desk','shop'],
     deskLabel:'Tours', deskKind:'affiliate'
@@ -79,11 +79,11 @@ window.OS_SEGMENTS = {
     showMeta:false, previewNoun:'fleet', lobbyTitle:'pickup board',
     guideHref:'/stay-close-v2?ref=your-fleet&seg=renter',
     dlPrefix:'OceanSafe-Fleet-',
-    freeTier:true,
-    planAria:'Free plan versus the per-car plan', planH2:'Free vs the per-car plan',
-    freeHead:'Free · $0/car', paidHead:'Paid · $5/car/mo',
-    freePrice:'Free — $0/car', paidPrice:'$5/car/mo',
-    pcFoot:'<b>$5/car/mo</b> — one paid tier, everything above. The store is the piece you only get on it.',
+    freeTier:false,
+    planAria:'The per-car plan', planH2:'What your plan includes',
+    freeHead:'', paidHead:'$5/car/mo',
+    freePrice:'', paidPrice:'$5/car/mo',
+    pcFoot:'<b>$5/car/mo</b> — one tier, everything above. The store is included.',
     portfolioNote:'<b>$5/car/mo</b> — per car across the whole fleet.',
     tabs:['home','stayclose','promos','guests','places','desk','shop'],
     deskLabel:'Tours', deskKind:'affiliate'
@@ -106,7 +106,7 @@ window.OS_SEGMENTS = {
 </script>
 <style>
   /* A segment that has no free tier never renders a free column, rather than
-     rendering one that is disabled. Hotels are one flat tier.
+     rendering one that is disabled. Every segment shows one tier.
      The #planCompare rules below carry an id, so these have to as well or they lose
      the cascade to them. */
   html[data-nofree] #planCompare .pc-cell:not(.pc-paid){display:none}
@@ -1405,17 +1405,17 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 
     <!-- FREE vs $10/unit — one card, shown in BOTH views (the free view appends its unlock buttons) -->
     <section aria-label="Free plan versus the per-unit plan" id="planCompareSec" data-os="planSec">
-      <div class="sec-h"><h2 data-os="planH2">Free vs the per-unit plan</h2><p>Guide and safety are never gated on either tier &mdash; the paid plan adds the weather-swap, the presentation push and promotions.</p></div>
+      <div class="sec-h"><h2 data-os="planH2">What your plan includes</h2><p>Guide and safety are never gated. Your plan adds the weather-swap, the presentation push and promotions.</p></div>
       <div class="card" id="planCompare">
-        <div class="pc-tr pc-head"><span></span><span class="pc-cell" data-os="freeHead">Free &middot; $0/unit</span><span class="pc-cell pc-paid" data-os="paidHead">Paid &middot; $10/unit/mo</span></div>
+        <div class="pc-tr pc-head"><span></span><span class="pc-cell" data-os="freeHead"></span><span class="pc-cell pc-paid" data-os="paidHead">Paid &middot; $10/unit/mo</span></div>
         <div class="pc-tr"><b>Branding</b><span class="pc-cell">OceanSafe</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your name, logo, colors &amp; photos</span></div>
         <div class="pc-tr"><b>Amenities</b><span class="pc-cell">1 featured</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Unlimited, with contact info</span></div>
         <div class="pc-tr"><b>Weather-swap</b><span class="pc-cell pc-dash">1 amenity shown</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Full swap + presentation push on trigger days</span></div>
         <div class="pc-tr"><b>Promotions</b><span class="pc-cell pc-dash">&mdash;</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Timed pop-ups + offer chip</span></div>
         <div class="pc-tr"><b>Front-desk board</b><span class="pc-cell">Generic + QR</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Branded + rotating offers</span></div>
-        <div class="pc-tr"><b>Guest analytics</b><span class="pc-cell"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything &mdash; same as free</span></div>
+        <div class="pc-tr"><b>Guest analytics</b><span class="pc-cell"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Everything</span></div>
         <div class="pc-tr"><b>Multi-property portfolio view</b><span class="pc-cell pc-dash">&mdash;</span><span class="pc-cell pc-paid"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Available (ask us)</span></div>
-        <div class="pc-tr"><b>Price</b><span class="pc-cell pc-strong" data-os="freePrice">Free &mdash; $0/unit</span><span class="pc-cell pc-paid pc-strong" data-os="paidPrice">$10/unit/mo</span></div>
+        <div class="pc-tr"><b>Price</b><span class="pc-cell pc-strong" data-os="freePrice"></span><span class="pc-cell pc-paid pc-strong" data-os="paidPrice">$10/unit/mo</span></div>
         <div class="mg-foot" id="pcFoot"><span class="cap" data-os="pcFoot"></span><span style="flex:1"></span></div>
       </div>
     </section>
@@ -1460,7 +1460,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 
     <!-- JOIN / GET STARTED — link to the partner signup page (added 2026-07-22) -->
     <section aria-label="Get your rentals on OceanSafe">
-      <div class="sec-h"><h2>Get your rentals on OceanSafe</h2><p>Free to start &mdash; a co-branded safety guide live in every unit the day you sign.</p></div>
+      <div class="sec-h"><h2>Get your rentals on OceanSafe</h2><p>A co-branded safety guide live in every unit the day you sign.</p></div>
       <div class="card" style="text-align:center">
         <p style="margin:2px 0 0;font-size:13.5px;line-height:1.6">Tell us about your properties and we&rsquo;ll set you up &mdash; no card, cancel anytime.</p>
         <div class="lockcard-btns" style="justify-content:center;margin-top:14px"><a class="pl-btn primary" href="/join" rel="noopener">Join OceanSafe &mdash; get started <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a></div>
@@ -1786,7 +1786,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     <p class="cap" style="margin-top:2px">A high-surf or brown-water morning used to mean guests scatter. The guide reads the same live ocean feed that powers the safety verdict, and on a no-swim day its top card flips from a beach recommendation to what's open on-property — your spa, your pool, your 2pm snorkel tour. The safety call never changes for an offer; the offer just moves to the front when the water closes.</p>
     <table class="tsw-table">
       <tr>
-        <td class="tsw-plan" data-os="freeHead">Free · $0/unit</td>
+        <td class="tsw-plan" data-os="freeHead"></td>
         <td>1 on-property amenity shown in the swap</td>
       </tr>
       <tr>
