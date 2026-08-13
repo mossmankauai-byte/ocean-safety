@@ -343,6 +343,10 @@ window.OS_SEGMENTS = {
   .pw-fold>summary b{font-size:14.5px;color:var(--ink)}
   .pw-fold>summary span{font-size:12.5px;color:var(--muted);line-height:1.5}
   .pw-body{margin-top:14px}
+  /* A shape, not a chart: enough to see the peak before opening the full read. */
+  .pw-mini{display:inline-flex;align-items:flex-end;gap:2px;height:18px;flex:none}
+  .pw-mini i{width:3px;border-radius:1px;background:var(--sea-2);min-height:2px}
+  .pw-mini i.on{background:var(--gold)}
   .pw-cats{display:inline-flex;gap:2px;background:var(--hair-soft);border-radius:8px;padding:2px;margin-top:12px}
   .pw-cat{appearance:none;font:inherit;font-size:12.5px;font-weight:600;border:0;background:none;
           color:var(--muted);padding:6px 13px;border-radius:6px;cursor:pointer}
@@ -379,6 +383,20 @@ window.OS_SEGMENTS = {
   /* A closed <details> hides its children through a UA rule, which any author rule
      outranks. .pm-f sets display:block, so the fields stayed visible while closed. */
   .am-more:not([open])>*:not(summary){display:none}
+
+  /* ============ THE OPENED OFFER, AS A GUEST SEES IT ============ */
+  .pm-gopen{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:12px}
+  .pm-gopen-t{font-size:13.5px;font-weight:800;color:var(--ink);line-height:1.35}
+  .pm-gopen-badge{display:inline-block;margin-top:6px;font-size:10px;font-weight:800;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--gold-ink);
+    background:var(--gold-tint);border-radius:999px;padding:3px 9px}
+  .pm-gopen-img{display:block;width:100%;height:104px;object-fit:cover;border-radius:9px;margin-top:9px}
+  .pm-gopen-ph{display:flex;align-items:center;justify-content:center;color:var(--muted);
+    background:var(--hair-soft)}
+  .pm-gopen-d{font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:8px}
+  .pm-gopen-row{margin-top:10px}
+  .pm-gopen-cta{display:block;text-align:center;font-size:12.5px;font-weight:700;
+    color:var(--on-sea);background:var(--sea);border-radius:9px;padding:9px 12px;text-decoration:none}
 
   /* ============ LIST ROW BITS ============ */
   /* The category chip on a collapsed Stay-Close row. */
@@ -1903,7 +1921,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     <!-- WHEN TO RUN AN OFFER — demand by hour, per category -->
     <section aria-label="When to run an offer">
       <details class="card pw-fold">
-        <summary><b>When to run an offer</b><span>The hours guests are planning each kind of thing. Open it to set your pop-up window on the peak.</span></summary>
+        <summary><b>When to run an offer</b><span class="pw-mini" id="pwMini" aria-hidden="true"></span><span>Peak hours for each kind of offer. Open for the full read.</span></summary>
         <div class="pw-body">
         <div class="title"><span class="l"><span class="pv sample" id="pwPv"></span> Demand by hour of day</span><span id="pwChip"><span class="chip sample">Sample</span></span></div>
         <div class="pw-cats" role="tablist" aria-label="Offer category">
@@ -3411,7 +3429,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var LS = 'os_'+cfg.key+'_'+SLUG, items = null;
     try{ items = JSON.parse(localStorage.getItem(LS)); }catch(e){}
     // seeds → items; back-compat so old {a,b} drafts still load, carrying optional phone/hours.
-    function seedItems(){ return cfg.seeds.map(function(x){ return {a:x[0], b:x[1]||'', phone:x[2]||'', hours:x[3]||'', photo:x[4]||''}; }); }
+    function seedItems(){ return cfg.seeds.map(function(x){ return {a:x[0], b:x[1]||'', phone:x[2]||'', hours:x[3]||'', photo:x[4]||'', cat:x[5]||''}; }); }
     if(!Array.isArray(items)) items = seedItems();
     items = items.map(function(it){ it = it || {}; return {a:it.a||'', b:it.b||'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'', photo:it.photo||'', pdf:it.pdf||'', pdfName:it.pdfName||''}; });
     function save(){ try{ localStorage.setItem(LS, JSON.stringify(items)); }catch(e){} }
@@ -3578,9 +3596,36 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     rain: 'A good rainy-day list — all on the property.',
     calm: 'On the property, whenever you want a break from the beach.'
   };
+  /* Which categories a condition actually pushes people toward. The ocean call is
+     never changed by any of this; it only reorders what is offered alongside it. */
+  var GP_FIT = {
+    red_flag:    ['spa','dining','upgrades'],
+    brown_water: ['spa','dining','upgrades'],
+    rain:        ['spa','dining','upgrades'],
+    calm:        ['tours','rentals','dining']
+  };
+  var GP_WHY = {
+    red_flag:    'Suggested while the ocean is closed',
+    brown_water: 'Suggested while the water is brown',
+    rain:        'Suggested for a rainy day',
+    calm:        'Suggested on a calm day'
+  };
+  /* The first amenity whose category fits today. Untagged amenities never win the
+     slot, so a menu nobody has tagged simply shows no suggestion rather than a
+     wrong one. */
+  function gpSuggested(items){
+    var order = GP_FIT[gpCond] || GP_FIT.calm;
+    for(var k = 0; k < order.length; k++){
+      for(var j = 0; j < items.length; j++){
+        if(items[j] && items[j].cat === order[k]) return j;
+      }
+    }
+    return -1;
+  }
   var gpCond = 'calm';
   var gpItems = { amenities: [] };
   function gpAmenityHTML(items){
+    var sugg = gpSuggested(items);
     if(!items.length) return '<div class="gp-empty">Add an amenity above and watch it appear here.</div>';
     var rows = items.map(function(it, i){
       // Expanded body, same contract + order as the guest app _amenityPanel (index.html):
@@ -3595,8 +3640,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       var fallback = it.phone ? '' : '<div style="font-size:11px;color:var(--mute);margin-top:'+((it.b||it.hours) ? '4px' : '0')+'">Ask at the front desk to book or check today&rsquo;s availability.</div>';
       return '<button type="button" class="gp-it" data-gpam="'+i+'" aria-expanded="false" style="display:block;width:100%;min-height:44px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-top:8px;cursor:pointer;text-align:left;font-family:inherit;animation-delay:'+(80+i*40)+'ms">'+
         '<span style="display:flex;align-items:center;gap:10px">'+
-          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ocean)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 21h18"/><path d="M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>'+
-          '<span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink)">'+esc(it.a)+'</span>'+
+          (it.photo ? '<img src="'+it.photo+'" alt="" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex-shrink:0">' : '') +
+          (it.photo ? '' : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ocean)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 21h18"/><path d="M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>') +
+          '<span style="flex:1;min-width:0">' +
+            '<span style="display:block;font-size:13px;font-weight:700;color:var(--ink)">'+esc(it.a)+'</span>' +
+            (i === sugg ? '<span style="display:block;font-size:10.5px;font-weight:700;color:var(--ocean);margin-top:1px">'+GP_WHY[gpCond]+'</span>' : '') +
+          '</span>'+
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>'+
         '</span>'+
         '<span class="gp-abody" style="display:none;padding:8px 2px 2px 25px">'+detail+hours+phone+fallback+'</span>'+
@@ -3660,11 +3709,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   manager({ key:'amenities', exportKey:'amenities',
     ids:{list:'amList', a:'amA', b:'amB', phone:'amPhone', hours:'amHours', site:'amSite', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
     seeds:[
-      ['Spa treatments','Lobby level · massage, facials, day passes','(808) 555-0142','9a–7p daily','assets/amenity/spa.jpg'],
-      ['On-site dining','Oceanview restaurant + poolside grill','(808) 555-0155','7a–9p','assets/amenity/dining.jpg'],
-      ['Pool bar','Cocktails, shave ice & light bites','','','assets/amenity/poolbar.jpg'],
-      ['Cabana rental','Full-day shade with towel service','(808) 555-0170','8a–5p','assets/amenity/cabana.jpg'],
-      ['Gift shop','Sundries, beach wear & local goods','','','assets/amenity/shop.jpg']
+      ['Spa treatments','Lobby level · massage, facials, day passes','(808) 555-0142','9a–7p daily','assets/amenity/spa.jpg','spa'],
+      ['On-site dining','Oceanview restaurant + poolside grill','(808) 555-0155','7a–9p','assets/amenity/dining.jpg','dining'],
+      ['Pool bar','Cocktails, shave ice & light bites','','','assets/amenity/poolbar.jpg','dining'],
+      ['Cabana rental','Full-day shade with towel service','(808) 555-0170','8a–5p','assets/amenity/cabana.jpg','rentals'],
+      ['Gift shop','Sundries, beach wear & local goods','','','assets/amenity/shop.jpg','rentals']
     ],
     // Export in the shared amenity contract {name,detail,price,phone,hours,showWhen} the guest app reads.
     toExport:function(it){ return {name:it.a, detail:it.b, price:'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'', photo:it.photo||'', pdf:it.pdf||'', showWhen:'always'}; },
@@ -3746,6 +3795,27 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       '<span class="tx"><b>' + esc(title) + '</b>' + ends + '</span>' +
       (tappable ? CHEV_SVG : '') + '</'+tag+'>';
   }
+  /* The second place a guest meets the offer: the card a tap opens. Mirrors the guest
+     app's own offer sheet — title, the flyer or photo, the one-line detail, then the
+     action. The action is a request to the front desk, never a checkout: no offer may
+     promise self-serve completion. */
+  function guestOpenHTML(p){
+    var art = p.thumb
+      ? '<img src="' + p.thumb + '" alt="" class="pm-gopen-img">'
+      : '<div class="pm-gopen-img pm-gopen-ph">' + PDF_SVG_BIG + '</div>';
+    var detail = p.detail ? '<div class="pm-gopen-d">' + esc(p.detail) + '</div>' : '';
+    var stageNote = p.trip_stage === 'pre-arrival'
+      ? '<div class="pm-gopen-badge">Book ahead of time</div>' : '';
+    var action = p.url
+      ? '<a class="pm-gopen-cta" href="' + esc(p.url) + '" target="_blank" rel="noopener">Open the offer</a>'
+      : '<span class="pm-gopen-cta">Ask the front desk</span>';
+    return '<div class="pm-gopen">' +
+      '<div class="pm-gopen-t">' + esc(p.title || 'Untitled offer') + '</div>' +
+      stageNote + art + detail +
+      '<div class="pm-gopen-row">' + action + '</div>' +
+    '</div>';
+  }
+
   var PDF_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>';
   var PDF_SVG_BIG = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>';
 
@@ -3772,6 +3842,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
               CATS_LIST.map(function(c){ return '<button type="button" class="cat-b" data-cat="'+c[0]+'"'+
                 (p.cat===c[0] ? ' aria-pressed="true"' : '')+'>'+c[1]+'</button>'; }).join('') +
             '</div></div>' +
+            '<label class="pm-f"><span>One line guests read when they tap it</span><input class="pm-detail" data-i="'+i+'" maxlength="110" value="'+esc(p.detail||'')+'"></label>' +
             '<label class="pm-f"><span>Link (optional) — where the offer button sends them</span><input class="pm-url" data-i="'+i+'" type="url" inputmode="url" placeholder="https://" value="'+esc(p.url||'')+'"></label>' +
             (p.url ? '<div class="pm-taps">' + TAP_SVG + '<b>' + (p.taps||0) + '</b> tap' + ((p.taps||0)===1?'':'s') +
                      '<span>' + (HAS_SLUG ? 'measured, last 30 days' : 'sample — your own taps appear once telemetry is on') + '</span></div>' : '') +
@@ -3795,7 +3866,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
             '<div class="pm-winhint"'+(stage==='pre-arrival' ? ' hidden' : '')+'>During this window the offer pops up on guests&rsquo; phones — once per visit, never over safety info. Leave blank for a chip-only offer.</div>' +
             '<div class="pm-fileline">'+PDF_SVG+'<b title="'+esc(p.fileName)+'">'+esc(p.fileName)+'</b><span>· '+size+(p.added ? ' · added '+esc(endsLabel(p.added)) : '')+'</span></div>' +
           '</div>' +
-          '<div><div class="pm-mock-lab">What your guests see</div><div class="pm-guest">' + guestCardHTML(p.title, p.expires, i) + '</div></div>' +
+          '<div>' +
+            '<div class="pm-mock-lab">1 &middot; In the Town tab</div>' +
+            '<div class="pm-guest">' + guestCardHTML(p.title, p.expires, i) + '</div>' +
+            '<div class="pm-mock-lab" style="margin-top:12px">2 &middot; When they tap it</div>' +
+            '<div class="pm-guest">' + guestOpenHTML(p) + '</div>' +
+          '</div>' +
           '<button type="button" class="mg-x pm-x" data-x="'+i+'" title="Remove this promotion">&times;</button>' +
         '</div>';
       }).join('');
@@ -3899,6 +3975,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   });
   listEl.addEventListener('change', function(e){
     var t = e.target;
+    if(t.classList.contains('pm-detail')){
+      items[+t.dataset.i].detail = t.value; save();
+      var g = t.closest('.pm-card').querySelector('.pm-gopen-d');
+      if(g) g.textContent = t.value; else render();
+      return;
+    }
     if(t.classList.contains('pm-url')){
       // Stored as typed. The guest app is what decides whether to render a button,
       // so a half-typed URL here never reaches a guest.
@@ -5201,6 +5283,19 @@ if(DEMO){
     chipEl.innerHTML = '<span class="chip sample">Sample</span>';
     capEl.setAttribute('data-real', '1');
   }
+  // The collapsed summary carries the same shape at 3px a bar.
+  var mini = document.getElementById('pwMini');
+  function drawMini(cat){
+    if(!mini) return;
+    var c = CATS[cat], pk = peakWindow(c.hrs);
+    mini.innerHTML = c.hrs.map(function(v, i){
+      var on = i >= pk.i && i < pk.i + 3;
+      return '<i class="' + (on ? 'on' : '') + '" style="height:' + Math.max(2, Math.round(v*0.18)) + 'px"></i>';
+    }).join('');
+  }
+  var _draw = draw;
+  draw = function(cat){ _draw(cat); drawMini(cat); };
+
   draw('dining');
 })();
 </script>
