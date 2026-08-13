@@ -369,6 +369,16 @@ window.OS_SEGMENTS = {
     border:1px solid var(--hair);border-radius:8px;padding:8px 10px;width:100%}
   .am-edit input:focus{outline:2px solid var(--sea-2);outline-offset:0;border-color:var(--sea-2)}
   .am-e-del{margin-left:auto}
+  /* Name and detail are what a quick edit touches. The rest folds away. */
+  .am-more{margin-top:2px}
+  .am-more>summary{cursor:pointer;list-style:none;font-size:11.5px;font-weight:700;
+    color:var(--sea);padding:6px 2px;display:inline-flex;align-items:center;gap:5px}
+  .am-more>summary::-webkit-details-marker{display:none}
+  .am-more>summary::before{content:"+";font-size:13px;line-height:1}
+  .am-more[open]>summary::before{content:"2"}
+  /* A closed <details> hides its children through a UA rule, which any author rule
+     outranks. .pm-f sets display:block, so the fields stayed visible while closed. */
+  .am-more:not([open])>*:not(summary){display:none}
 
   /* ============ COLLAPSED LIST ROWS ============ */
   .pm-fold{display:block;padding:0}
@@ -3434,13 +3444,16 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           '<div class="am-edit" data-i="'+i+'">' +
             '<label class="pm-f"><span>Name</span><input class="am-e-a" data-i="'+i+'" value="'+esc(it.a)+'" maxlength="60"></label>' +
             '<label class="pm-f"><span>Detail</span><input class="am-e-b" data-i="'+i+'" value="'+esc(it.b||'')+'" maxlength="90"></label>' +
-            '<label class="pm-f"><span>Phone</span><input class="am-e-phone" data-i="'+i+'" value="'+esc(it.phone||'')+'" inputmode="tel"></label>' +
-            '<label class="pm-f"><span>Hours</span><input class="am-e-hours" data-i="'+i+'" value="'+esc(it.hours||'')+'"></label>' +
-            '<label class="pm-f"><span>Website</span><input class="am-e-site" data-i="'+i+'" value="'+esc(it.site||'')+'" inputmode="url" placeholder="https://"></label>' +
             '<div class="pm-f"><span>What is it?</span><div class="cat-pick am-e-cat" data-i="'+i+'">' +
               AM_CATS.map(function(c){ return '<button type="button" class="cat-b" data-cat="'+c[0]+'"'+
                 (it.cat===c[0] ? ' aria-pressed="true"' : '')+'>'+c[1]+'</button>'; }).join('') +
             '</div></div>' +
+            '<details class="am-more">' +
+              '<summary>Contact info</summary>' +
+              '<label class="pm-f"><span>Phone</span><input class="am-e-phone" data-i="'+i+'" value="'+esc(it.phone||'')+'" inputmode="tel"></label>' +
+              '<label class="pm-f"><span>Hours</span><input class="am-e-hours" data-i="'+i+'" value="'+esc(it.hours||'')+'"></label>' +
+              '<label class="pm-f"><span>Website</span><input class="am-e-site" data-i="'+i+'" value="'+esc(it.site||'')+'" inputmode="url" placeholder="https://"></label>' +
+            '</details>' +
             '<div class="am-extras">' +
               '<label class="am-file"><input type="file" class="am-e-photo" data-i="'+i+'" accept="image/png,image/jpeg,image/webp" hidden>' +
                 '<span>' + (it.photo ? 'Replace photo' : 'Add a photo') + '</span></label>' +
