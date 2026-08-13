@@ -335,6 +335,14 @@ window.OS_SEGMENTS = {
   .qa.gold .go{color:var(--gold-ink)}
 
   /* ============ WHEN TO RUN AN OFFER — demand by hour ============ */
+  .pw-fold>summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+  .pw-fold>summary::-webkit-details-marker{display:none}
+  .pw-fold>summary::before{content:"";width:7px;height:7px;flex:none;border-right:2px solid var(--muted);
+    border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
+  .pw-fold[open]>summary::before{transform:rotate(45deg)}
+  .pw-fold>summary b{font-size:14.5px;color:var(--ink)}
+  .pw-fold>summary span{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .pw-body{margin-top:14px}
   .pw-cats{display:inline-flex;gap:2px;background:var(--hair-soft);border-radius:8px;padding:2px;margin-top:12px}
   .pw-cat{appearance:none;font:inherit;font-size:12.5px;font-weight:600;border:0;background:none;
           color:var(--muted);padding:6px 13px;border-radius:6px;cursor:pointer}
@@ -346,6 +354,48 @@ window.OS_SEGMENTS = {
      instead and let that rule paint them gold on its own. */
   #pwHours i.pw-peak{--chart-fill:var(--gold)}
   #pwPeaks .row i.pw-on{--chart-fill:var(--gold);background:var(--gold)}
+
+  /* ============ COLLAPSED LIST ROWS ============ */
+  .pm-fold{display:block;padding:0}
+  .pm-fold>summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;align-items:center;
+    gap:9px;padding:11px 2px}
+  .pm-fold>summary::-webkit-details-marker{display:none}
+  .pm-fold>summary::before{content:"";width:6px;height:6px;flex:none;border-right:2px solid var(--muted);
+    border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s}
+  .pm-fold[open]>summary::before{transform:rotate(45deg)}
+  .pm-fold>summary b{font-size:13.5px;color:var(--ink)}
+  .pm-sum-chip{font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;
+    background:var(--sea-tint);color:var(--sea)}
+  .pm-sum-chip.alt{background:var(--hair-soft);color:var(--muted)}
+  .pm-sum-ends{font-size:11.5px;color:var(--muted);margin-left:auto}
+  .pm-cardin{display:grid;grid-template-columns:96px 1fr 1fr;gap:14px;padding:2px 0 14px}
+  @media(max-width:820px){.pm-cardin{grid-template-columns:1fr}}
+  .am-pdf{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+    color:var(--sea);text-decoration:none}
+  .am-pdf:hover{text-decoration:underline}
+
+  /* ============ CATEGORY BUBBLES ============ */
+  .cat-lab{font-size:11.5px;font-weight:600;color:var(--ink-2);margin:12px 2px 6px}
+  .cat-pick{display:flex;flex-wrap:wrap;gap:6px}
+  .cat-b{appearance:none;font:inherit;font-size:12px;font-weight:600;cursor:pointer;
+    color:var(--muted);background:var(--card);border:1px solid var(--hair);border-radius:999px;padding:5px 12px}
+  .cat-b:hover{border-color:var(--sea-2);color:var(--ink-2)}
+  .cat-b[aria-pressed="true"]{background:var(--sea);border-color:var(--sea);color:var(--on-sea)}
+  .pm-cat{margin-bottom:9px}
+
+  /* ============ AMENITY EXTRAS — photo, PDF, publish-as-promotion ============ */
+  .am-extras{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+  .am-file{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--sea);
+    border:1px solid var(--hair);border-radius:8px;padding:7px 12px;cursor:pointer;background:var(--card)}
+  .am-file:hover{border-color:var(--sea-2)}
+  .am-dz{flex:1;min-width:200px;font-size:12.5px;color:var(--muted);border:1px dashed var(--hair);
+    border-radius:8px;padding:7px 12px;cursor:pointer;background:var(--card)}
+  .am-dz:hover,.am-dz.on{border-color:var(--sea-2);color:var(--ink-2)}
+  .am-topromo{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+  .am-err{margin-top:8px;font-size:12.5px;color:var(--bad)}
+  .am-thumb{width:34px;height:34px;border-radius:6px;object-fit:cover;flex:none}
+  .pm-taps{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);margin:2px 2px 9px}
+  .pm-taps span{color:var(--muted);font-size:11.5px}
 
   /* ============ PROMOTIONS — drag-and-drop flyer drafts ============ */
   /* .pm-f span is display:block, which stretched this across the whole column. */
@@ -1680,6 +1730,14 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           <input id="amB" placeholder="Detail (optional) — e.g. lobby level, day passes" autocomplete="off">
           <button class="pl-btn primary" id="amAdd">Add amenity</button>
         </div>
+        <div class="cat-lab">What is it?</div>
+        <div class="cat-pick" id="amCat" role="group" aria-label="What is it"><button type="button" class="cat-b" data-cat="dining">Restaurant</button><button type="button" class="cat-b" data-cat="tours">Tours</button><button type="button" class="cat-b" data-cat="rentals">Rentals</button><button type="button" class="cat-b" data-cat="spa">Spa</button><button type="button" class="cat-b" data-cat="upgrades">Room upgrades</button></div>
+        <div class="am-extras">
+          <label class="am-file"><input type="file" id="amPhoto" accept="image/png,image/jpeg,image/webp" hidden><span id="amPhotoLab">Add a photo</span></label>
+          <div class="am-dz" id="amPdf" role="button" tabindex="0" aria-label="Drag a PDF here, or press Enter to choose one"><span id="amPdfLab">Drag a PDF here, or tap to choose</span></div>
+          <label class="am-topromo"><input type="checkbox" id="amAlsoPromo"><span>Also add it as a promotion</span></label>
+        </div>
+        <div class="am-err" id="amErr" hidden></div>
         <button type="button" class="mg-more" id="amMore" aria-expanded="false" aria-controls="amContact">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           Contact info
@@ -1687,6 +1745,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         <div class="mg-contact" id="amContact" hidden>
           <input id="amPhone" placeholder="Phone (optional) — e.g. (808) 555-0142" autocomplete="off" inputmode="tel">
           <input id="amHours" placeholder="Hours (optional) — e.g. 9a–7p daily" autocomplete="off">
+          <input id="amSite" placeholder="Website (optional) — e.g. https://yourspa.com" autocomplete="off" inputmode="url">
         </div>
         <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Export config</button></div>
       </div>
@@ -1828,20 +1887,24 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     <!-- PROMOTIONS — drag-and-drop flyer drafts -->
     <!-- WHEN TO RUN AN OFFER — demand by hour, per category -->
     <section aria-label="When to run an offer">
-      <div class="sec-h"><h2>When to run an offer</h2><p>The hours guests are planning each kind of thing. Set your pop-up window on the peak, not on a hunch.</p></div>
-      <div class="card">
+      <details class="card pw-fold">
+        <summary><b>When to run an offer</b><span>The hours guests are planning each kind of thing. Open it to set your pop-up window on the peak.</span></summary>
+        <div class="pw-body">
         <div class="title"><span class="l"><span class="pv sample" id="pwPv"></span> Demand by hour of day</span><span id="pwChip"><span class="chip sample">Sample</span></span></div>
         <div class="pw-cats" role="tablist" aria-label="Offer category">
           <button type="button" class="pw-cat" data-cat="dining" aria-selected="true">Restaurant</button>
           <button type="button" class="pw-cat" data-cat="tours" aria-selected="false">Tours</button>
           <button type="button" class="pw-cat" data-cat="rentals" aria-selected="false">Rentals</button>
+          <button type="button" class="pw-cat" data-cat="spa" aria-selected="false">Spa</button>
+          <button type="button" class="pw-cat" data-cat="upgrades" aria-selected="false">Room upgrades</button>
         </div>
         <div class="hours" id="pwHours" aria-hidden="true" style="margin-top:14px"></div>
         <div class="hours-x"><span>6a</span><span>11a</span><span>4p</span><span>9p</span></div>
         <div class="bars wlab" id="pwPeaks" style="margin-top:14px"></div>
         <div class="cap" id="pwCap"></div>
         <details class="meth"><summary>How this is computed</summary><div class="body">16 hourly buckets, 6a to 9p, on the guest device clock. A bucket counts guide opens where the guest then tapped something in that category, so it reads intent to plan rather than foot traffic. The peak window is the three consecutive hours with the highest total. Sample figures until your own telemetry is on; a real property shows its own hours and the label changes with it.</div></details>
-      </div>
+        </div>
+      </details>
     </section>
 
     <section>
@@ -2328,6 +2391,14 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   }
 
   // ---- interactions (event delegation) ----
+  // An amenity can publish itself as a promotion. Re-read the store when it does.
+  window.addEventListener('os:promos-changed', function(){
+    try{
+      var raw = JSON.parse(localStorage.getItem(LS));
+      if(Array.isArray(raw)){ items = raw; render(); }
+    }catch(e){}
+  });
+
   listEl.addEventListener('click', function(e){
     var segBtn = e.target.closest('.seg button');
     if(segBtn){
@@ -3318,13 +3389,14 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var FREE = window.OS_PLAN === 'free';
   var LOCK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  var PDF_SVG_SM = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
   function manager(cfg){
     var LS = 'os_'+cfg.key+'_'+SLUG, items = null;
     try{ items = JSON.parse(localStorage.getItem(LS)); }catch(e){}
     // seeds → items; back-compat so old {a,b} drafts still load, carrying optional phone/hours.
     function seedItems(){ return cfg.seeds.map(function(x){ return {a:x[0], b:x[1]||'', phone:x[2]||'', hours:x[3]||''}; }); }
     if(!Array.isArray(items)) items = seedItems();
-    items = items.map(function(it){ it = it || {}; return {a:it.a||'', b:it.b||'', phone:it.phone||'', hours:it.hours||''}; });
+    items = items.map(function(it){ it = it || {}; return {a:it.a||'', b:it.b||'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'', photo:it.photo||'', pdf:it.pdf||'', pdfName:it.pdfName||''}; });
     function save(){ try{ localStorage.setItem(LS, JSON.stringify(items)); }catch(e){} }
     function render(){
       var el = document.getElementById(cfg.ids.list);
@@ -3332,7 +3404,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       var vis = FREE ? items.slice(0,1) : items;
       el.innerHTML = vis.length ? vis.map(function(it,i){
         var extra = (it.b?'<span>'+esc(it.b)+'</span>':'')+(it.hours?'<span>Open '+esc(it.hours)+'</span>':'')+(it.phone?'<span>Call '+esc(it.phone)+'</span>':'');
-        return '<div class="mg-row"><div class="mg-nm"><b>'+esc(it.a)+'</b>'+extra+
+        var pdfLink = it.pdf
+          ? '<a class="am-pdf" href="'+it.pdf+'" target="_blank" rel="noopener" '
+            + 'title="'+esc(it.pdfName||'PDF')+'">' + PDF_SVG_SM + esc(it.pdfName||'PDF') + '</a>'
+          : '';
+        return '<div class="mg-row">'+(it.photo ? '<img class="am-thumb" src="'+it.photo+'" alt="">' : '')+'<div class="mg-nm"><b>'+esc(it.a)+'</b>'+extra+pdfLink+
                '</div><button type="button" class="mg-x" data-i="'+i+'" title="Remove">&times;</button></div>';
       }).join('') : '<div class="mg-empty">Nothing yet — add your first below.</div>';
       if(FREE && items.length > 1){
@@ -3365,9 +3441,14 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       var va = a.value.trim(); if(!va) { a.focus(); return; }
       var ph = cfg.ids.phone && document.getElementById(cfg.ids.phone);
       var hr = cfg.ids.hours && document.getElementById(cfg.ids.hours);
-      items.push({a:va, b:b.value.trim(), phone:ph?ph.value.trim():'', hours:hr?hr.value.trim():''});
-      a.value=''; b.value=''; if(ph) ph.value=''; if(hr) hr.value=''; a.focus(); render();
+      var st = cfg.ids.site && document.getElementById(cfg.ids.site);
+      items.push({a:va, b:b.value.trim(), phone:ph?ph.value.trim():'', hours:hr?hr.value.trim():'', site:st?st.value.trim():''});
+      a.value=''; b.value=''; if(ph) ph.value=''; if(hr) hr.value=''; if(st) st.value=''; a.focus(); render();
     }
+    // A photo or a category can land after the first render, so repaint on demand.
+    window.addEventListener('os:amenities-changed', function(){
+      try{ var raw = JSON.parse(localStorage.getItem(LS)); if(Array.isArray(raw)){ items = raw; render(); } }catch(e){}
+    });
     document.getElementById(cfg.ids.add).addEventListener('click', add);
     [cfg.ids.a, cfg.ids.b, cfg.ids.phone, cfg.ids.hours].forEach(function(id){
       var el = id && document.getElementById(id);
@@ -3484,7 +3565,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   if(scTab) scTab.addEventListener('click', function(){ setTimeout(gpPop, 40); });
 
   manager({ key:'amenities', exportKey:'amenities',
-    ids:{list:'amList', a:'amA', b:'amB', phone:'amPhone', hours:'amHours', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
+    ids:{list:'amList', a:'amA', b:'amB', phone:'amPhone', hours:'amHours', site:'amSite', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
     seeds:[
       ['Spa treatments','Lobby level · massage, facials, day passes','(808) 555-0142','9a–7p daily'],
       ['On-site dining','Oceanview restaurant + poolside grill','(808) 555-0155','7a–9p'],
@@ -3493,7 +3574,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       ['Gift shop','Sundries, beach wear & local goods','','']
     ],
     // Export in the shared amenity contract {name,detail,price,phone,hours,showWhen} the guest app reads.
-    toExport:function(it){ return {name:it.a, detail:it.b, price:'', phone:it.phone||'', hours:it.hours||'', showWhen:'always'}; },
+    toExport:function(it){ return {name:it.a, detail:it.b, price:'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'', photo:it.photo||'', pdf:it.pdf||'', showWhen:'always'}; },
     onChange:function(items){ gpItems.amenities = items; gpRender(); } });
 })();
 </script>
@@ -3558,6 +3639,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   function fmtSize(n){ return n >= 1048576 ? (n/1048576).toFixed(1)+' MB' : Math.max(1, Math.round(n/1024))+' KB'; }
 
   // The guest promo card — mirrors index.html _promoSheetOpen row anatomy: tag SVG + title + "Ends <date>" (+ chevron when tappable).
+  // Same five the demand graph uses, so a tagged offer lines up with its peak hours.
+  var CATS_LIST = [['dining','Restaurant'],['tours','Tours'],['rentals','Rentals'],['spa','Spa'],['upgrades','Room upgrades']];
+  var TAP_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V6a2 2 0 1 1 4 0v9"/><path d="M13 11a2 2 0 1 1 4 0v4a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5v-2a2 2 0 1 1 4 0"/></svg>';
   var TAG_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f4c5c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
   var CHEV_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>';
   function guestCardHTML(title, expires, idx){
@@ -3585,11 +3669,27 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         // there. It is not rendered rather than rendered-and-disabled.
         var stage = (p.trip_stage === 'pre-arrival' || p.trip_stage === 'always')
                   ? p.trip_stage : 'on-island';
-        return '<div class="pm-card">' +
+        var stageLab = stage==='pre-arrival' ? 'Pre-arrival' : stage==='always' ? 'Both' : 'On island';
+        var catLab = (CATS_LIST.filter(function(c){ return c[0]===p.cat; })[0]||['',''])[1];
+        return '<details class="pm-card pm-fold">' +
+          '<summary><b>' + esc(p.title || 'Untitled offer') + '</b>' +
+            '<span class="pm-sum-chip">' + stageLab + '</span>' +
+            (catLab ? '<span class="pm-sum-chip alt">' + catLab + '</span>' : '') +
+            (p.expires ? '<span class="pm-sum-ends">Ends ' + esc(endsLabel(p.expires)) + '</span>' : '') +
+          '</summary>' +
+          '<div class="pm-cardin">' +
           '<div class="pm-thumb" data-i="'+i+'"><span class="pm-thumb-tag">PDF</span><div class="pm-thumb-fb">'+PDF_SVG_BIG+'<b>'+esc(p.fileName)+'</b></div></div>' +
           '<div>' +
             '<label class="pm-f"><span>Title guests see</span><input class="pm-title" data-i="'+i+'" maxlength="80" value="'+esc(p.title)+'"></label>' +
             '<label class="pm-f"><span>Ends (optional — expired offers never show)</span><input class="pm-date" data-i="'+i+'" type="date" value="'+esc(p.expires||'')+'"></label>' +
+            '<div class="pm-f"><span>What is it?</span>' +
+            '<div class="cat-pick pm-cat" data-i="'+i+'" role="group" aria-label="What is it">' +
+              CATS_LIST.map(function(c){ return '<button type="button" class="cat-b" data-cat="'+c[0]+'"'+
+                (p.cat===c[0] ? ' aria-pressed="true"' : '')+'>'+c[1]+'</button>'; }).join('') +
+            '</div></div>' +
+            '<label class="pm-f"><span>Link (optional) — where the offer button sends them</span><input class="pm-url" data-i="'+i+'" type="url" inputmode="url" placeholder="https://" value="'+esc(p.url||'')+'"></label>' +
+            (p.url ? '<div class="pm-taps">' + TAP_SVG + '<b>' + (p.taps||0) + '</b> tap' + ((p.taps||0)===1?'':'s') +
+                     '<span>' + (HAS_SLUG ? 'measured, last 30 days' : 'sample — your own taps appear once telemetry is on') + '</span></div>' : '') +
             '<div class="pm-f pm-stagef"><span>When guests see it</span><span class="pm-stage">' +
               '<button type="button" class="pm-stg" data-i="'+i+'" data-stage="on-island"'+
                 (stage==='on-island' ? ' aria-pressed="true"' : ' aria-pressed="false"')+'>On island</button>' +
@@ -3612,7 +3712,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           '</div>' +
           '<div><div class="pm-mock-lab">What your guests see</div><div class="pm-guest">' + guestCardHTML(p.title, p.expires, i) + '</div></div>' +
           '<button type="button" class="mg-x pm-x" data-x="'+i+'" title="Remove this promotion">&times;</button>' +
-        '</div>';
+        '</div></details>';
       }).join('');
     }
     countEl.textContent = items.length;
@@ -3714,6 +3814,13 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   });
   listEl.addEventListener('change', function(e){
     var t = e.target;
+    if(t.classList.contains('pm-url')){
+      // Stored as typed. The guest app is what decides whether to render a button,
+      // so a half-typed URL here never reaches a guest.
+      items[+t.dataset.i].url = t.value.trim(); save();
+      // the tap readout only exists once there is a link, so redraw the card
+      render(); return;
+    }
     if(t.classList.contains('pm-date')){
       var i = +t.dataset.i; if(!items[i]) return;
       items[i].expires = t.value; save(); render();
@@ -3729,6 +3836,16 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     }
   });
   listEl.addEventListener('click', function(e){
+    var cb = e.target.closest('.pm-cat .cat-b');
+    if(cb){
+      var ci = +cb.closest('.pm-cat').dataset.i;
+      if(items[ci]){
+        // tapping the active one clears it: not every offer is one of the five
+        items[ci].cat = (items[ci].cat === cb.dataset.cat) ? '' : cb.dataset.cat;
+        save(); render();
+      }
+      return;
+    }
     var stg = e.target.closest('.pm-stg');
     if(stg){
       var si = +stg.dataset.i;
@@ -4930,7 +5047,13 @@ if(DEMO){
                note:'Tours get booked the night before, then again over breakfast.' },
     rentals: { label:'Rentals',
                hrs:[52,86,100,91,64,42,31,26,24,25,29,34,39,44,52,48],
-               note:'Boards and gear go out first thing, before the day is decided.' }
+               note:'Boards and gear go out first thing, before the day is decided.' },
+    spa:     { label:'Spa',
+               hrs:[16,24,33,44,58,72,86,100,92,74,55,40,32,30,34,31],
+               note:'Treatments get booked mid-morning, once the day has a shape.' },
+    upgrades:{ label:'Room upgrades',
+               hrs:[30,42,55,48,36,28,24,22,26,34,46,60,74,88,100,82],
+               note:'Upgrades get considered after the beach and the night before, when the room is on their mind.' }
   };
   var HAS_SLUG = !!(window.OS_SLUG && String(window.OS_SLUG).trim());
 
@@ -4994,6 +5117,126 @@ if(DEMO){
     capEl.setAttribute('data-real', '1');
   }
   draw('dining');
+})();
+</script>
+
+<script>
+/* ============ AMENITY EXTRAS ============
+   A photo, a PDF, and a checkbox that publishes the same thing as a promotion so it
+   does not have to be typed twice. The amenity manager owns its own store; this
+   attaches to the add row rather than reaching inside it. */
+(function(){
+  var photoIn = document.getElementById('amPhoto'),
+      photoLab= document.getElementById('amPhotoLab'),
+      dz      = document.getElementById('amPdf'),
+      dzLab   = document.getElementById('amPdfLab'),
+      alsoBox = document.getElementById('amAlsoPromo'),
+      errEl   = document.getElementById('amErr'),
+      addBtn  = document.getElementById('amAdd'),
+      aIn     = document.getElementById('amA'),
+      bIn     = document.getElementById('amB');
+  if(!addBtn || !dz) return;
+
+  var IMG_MAX = 1 * 1024 * 1024;      // a menu thumbnail, not a gallery shot
+  var PDF_MAX = 4 * 1024 * 1024;      // same cap the promotions drop zone uses
+  var pending = { photo:'', pdf:'', pdfName:'' };
+
+  function err(msg){
+    errEl.textContent = msg; errEl.hidden = false;
+    clearTimeout(err._t); err._t = setTimeout(function(){ errEl.hidden = true; }, 7000);
+  }
+  function read(file, cb){
+    var r = new FileReader();
+    r.onload = function(){ cb(r.result); };
+    r.onerror = function(){ err('That file could not be read. Try another.'); };
+    r.readAsDataURL(file);
+  }
+
+  document.querySelectorAll('#amCat .cat-b').forEach(function(b){
+    b.addEventListener('click', function(){
+      var was = b.getAttribute('aria-pressed') === 'true';
+      document.querySelectorAll('#amCat .cat-b').forEach(function(x){ x.removeAttribute('aria-pressed'); });
+      if(!was) b.setAttribute('aria-pressed','true');
+    });
+  });
+
+  photoIn.addEventListener('change', function(){
+    var f = this.files && this.files[0]; if(!f) return;
+    if(!/^image\//.test(f.type)) return err('That needs to be a PNG, JPG or WebP.');
+    if(f.size > IMG_MAX) return err('That photo is over 1 MB. A smaller one keeps the menu quick to load.');
+    read(f, function(d){ pending.photo = d; photoLab.textContent = 'Photo attached'; });
+  });
+
+  function takePdf(f){
+    if(!f) return;
+    if(f.type !== 'application/pdf' && !/\.pdf$/i.test(f.name)) return err('PDF only.');
+    if(f.size > PDF_MAX) return err('That PDF is over 4 MB.');
+    read(f, function(d){ pending.pdf = d; pending.pdfName = f.name; dzLab.textContent = f.name + ' attached'; });
+  }
+  dz.addEventListener('click', function(){
+    var i = document.createElement('input'); i.type = 'file'; i.accept = 'application/pdf';
+    i.addEventListener('change', function(){ takePdf(this.files && this.files[0]); });
+    i.click();
+  });
+  dz.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); dz.click(); } });
+  ['dragenter','dragover'].forEach(function(ev){
+    dz.addEventListener(ev, function(e){ e.preventDefault(); dz.classList.add('on'); });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    dz.addEventListener(ev, function(e){ e.preventDefault(); dz.classList.remove('on'); });
+  });
+  dz.addEventListener('drop', function(e){ takePdf(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]); });
+
+  /* The amenity manager's own click handler runs first and pushes the plain item.
+     This runs after, attaches whatever was staged, and optionally mirrors it into
+     the promotions draft so the same offer is not typed twice. */
+  addBtn.addEventListener('click', function(){
+    var cat = (document.querySelector('#amCat .cat-b[aria-pressed="true"]') || {dataset:{}}).dataset.cat || '';
+    setTimeout(function(){
+      var SLUG = (window.OS_SLUG || (document.querySelector('.property code')||{}).textContent || 'your-rentals').trim();
+      var KEY = 'os_amenities_' + SLUG;
+      try{
+        var arr = JSON.parse(localStorage.getItem(KEY)) || [];
+        var last = arr[arr.length - 1];
+        // The manager has already cleared the inputs, so the name comes back off the
+        // store rather than off the field. Reading the field here always got ''.
+        var name = last ? (last.a || '') : '';
+        if(last && (pending.photo || pending.pdf || cat)){
+          last.photo = pending.photo; last.pdf = pending.pdf; last.pdfName = pending.pdfName;
+          if(cat) last.cat = cat;
+          localStorage.setItem(KEY, JSON.stringify(arr));
+          // b · the manager rendered before the file finished reading, so repaint.
+          window.dispatchEvent(new CustomEvent('os:amenities-changed'));
+        }
+      }catch(e){}
+
+      if(alsoBox.checked && name){
+        try{
+          var PK = 'os_promos_' + SLUG;
+          var promos = JSON.parse(localStorage.getItem(PK)) || [];
+          promos.push({
+            title: name,
+            fileName: pending.pdfName || (name + '.pdf'),
+            dataUrl: pending.pdf || '',
+            expires: '',
+            trip_stage: 'on-island',
+            cat: cat,
+            added: new Date().toISOString().slice(0,10),
+            fromAmenity: true
+          });
+          localStorage.setItem(PK, JSON.stringify(promos));
+          // The promotions module renders from its own store on load, so tell it to re-read.
+          window.dispatchEvent(new CustomEvent('os:promos-changed'));
+        }catch(e){ err('The promotion could not be saved as a draft — the flyer may be too large.'); }
+      }
+
+      pending = { photo:'', pdf:'', pdfName:'' };
+      document.querySelectorAll('#amCat .cat-b').forEach(function(x){ x.removeAttribute('aria-pressed'); });
+      photoLab.textContent = 'Add a photo';
+      dzLab.textContent = 'Drag a PDF here, or tap to choose';
+      alsoBox.checked = false;
+    }, 0);
+  });
 })();
 </script>
 
