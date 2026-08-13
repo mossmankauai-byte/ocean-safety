@@ -452,7 +452,7 @@
     el("mCount").textContent = `${paidThisMonth.length} paid order${paidThisMonth.length === 1 ? "" : "s"}`;
     el("mPayout").textContent = money(Math.round(cents * payoutRate()));
 
-    // plan-aware payout labelling — Free splits tour commissions 50/50, Paid keeps 100%.
+    // plan-aware payout labelling — Free shares tour commissions, Paid keeps 100%.
     el("payoutPctLbl").textContent = `(${payoutPct()})`;
     el("payoutNote").textContent = "you keep 100% — card processing via your Square, at cost";
     if (window.OCEANSAFE_DEMO) {

@@ -34,7 +34,7 @@
   <!-- stat cards -->
   <div class="grid four" style="gap:12px">
     <div class="card"><div class="lbl">Sales this month <span id="sampSales"></span></div><div class="big" id="mSales">—</div><div class="muted small" id="mCount">0 orders</div></div>
-    <div class="card"><div class="lbl">Your payout <span id="payoutPctLbl">(87.3%)</span></div><div class="big" id="mPayout" style="color:var(--green)">—</div><div class="muted small" id="payoutNote">after OceanSafe's 12.7% (card processing via your Square, at cost)</div></div>
+    <div class="card"><div class="lbl">Your payout <span id="payoutPctLbl"></span></div><div class="big" id="mPayout" style="color:var(--green)">—</div><div class="muted small" id="payoutNote">after OceanSafe's share (card processing via your Square, at cost)</div></div>
     <div class="card"><div class="lbl">Avg order</div><div class="big" id="mAvg">—</div><div class="muted small">per paid order</div></div>
     <div class="card"><div class="lbl">All-time orders</div><div class="big" id="mAll">—</div><div class="muted small">paid, lifetime</div></div>
   </div>
@@ -92,11 +92,11 @@
     el("mAvg").textContent = paidMonth.length ? money(Math.round(cents / paidMonth.length)) : "—";
     el("mAll").textContent = paid.length;
 
-    // plan-aware payout labelling — Free keeps 87.3%, Paid keeps all of it.
+    // plan-aware payout labelling — Free keeps its agreed share, Paid keeps all of it.
     el("payoutPctLbl").textContent = `(${payoutPct()})`;
     el("payoutNote").textContent = isPaid()
       ? "you keep 100% on the Paid plan — card processing via your Square, at cost"
-      : `after OceanSafe's ${feePct()} (card processing via your Square, at cost)`;
+      : `after OceanSafe's share (card processing via your Square, at cost)`;
     el("planChip").innerHTML = `<span class="planchip ${isPaid() ? "paid" : "free"}">${isPaid() ? "Paid plan" : "Free plan"}</span>`;
     if (window.OCEANSAFE_DEMO) {
       el("sampBar").innerHTML = `<div class="sampbar"><b>Sample data</b> — these orders and totals are a demo shop, not a real one. Your own numbers replace them the moment your first order comes in.</div>`;

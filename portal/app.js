@@ -47,10 +47,10 @@ window.OCEANSAFE_PLAN = (function () {
   try { return localStorage.getItem("os_portal_plan") || fallback; } catch (e) { return fallback; }
 })();
 window.isPaid = function () { return window.OCEANSAFE_PLAN === "paid"; };
-// Store take: Free 12.7% (payout 87.3%) · Paid 0% (payout 100%).
+// Store take: a revenue share on Free; nothing on Paid (payout 100%).
 window.payoutRate = function () { return window.isPaid() ? 1 : 0.873; };
-window.payoutPct  = function () { return window.isPaid() ? "100%" : "87.3%"; };
-window.feePct     = function () { return window.isPaid() ? "0%" : "12.7%"; };
+window.payoutPct  = function () { return window.isPaid() ? "100%" : "your agreed share"; };
+window.feePct     = function () { return window.isPaid() ? "0%" : "the agreed share"; };
 // Renders in place of a Paid-only panel when the shop is on Free.
 window.lockedPanel = function (what, why) {
   return `<div class="lockwrap">
@@ -58,7 +58,7 @@ window.lockedPanel = function (what, why) {
     <div class="lockt">${what} — part of the Paid plan</div>
     <div class="locks">${why} Your storefront, orders, inventory and payouts stay free — this is the part that comes with the ${PLAN_PAID_PRICE} plan.</div>
     <a class="btn primary" href="mailto:nick@oceansafety.app?subject=Upgrade%20to%20Paid%20—%20OceanSafe">Upgrade to Paid — ${PLAN_PAID_PRICE} ↗</a>
-    <div class="lockn">On Paid you also keep <b>100%</b> of store sales and <b>100%</b> of tour commissions instead of 87.3% / 50%.</div>
+    <div class="lockn">On Paid you also keep <b>100%</b> of store sales and <b>100%</b> of tour commissions instead of a revenue share.</div>
   </div>`;
 };
 // One-line "this is sample data" badge — only ever shown in demo mode.
