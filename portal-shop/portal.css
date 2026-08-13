@@ -14,7 +14,7 @@ a{color:var(--ocean)}
 
 /* top bar */
 .bar{display:flex;align-items:center;gap:10px;padding:13px 18px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-.bar img{width:26px;height:26px;border-radius:7px}
+.bar img{width:30px;height:30px;border-radius:7px}
 .bar b{font-size:15px}
 .bar .crumb{font-size:13px;color:var(--mute)}
 .bar .sp{margin-left:auto}
@@ -335,3 +335,48 @@ body.dash .card{transition:transform .16s ease,box-shadow .16s ease}
 .tabbtn{font:inherit;font-size:13px;font-weight:600;background:none;color:var(--mute);border:0;
   border-bottom:2px solid transparent;padding:9px 14px;min-height:44px;cursor:pointer}
 .tabbtn.on{color:var(--ocean);border-bottom-color:var(--ocean)}
+
+/* ── brand icon in the header + the brand modal behind it ──────────────────────
+   Brand is NOT a nav tab (Nick, 2026-08-13). It is a clickable icon sitting beside
+   the OceanSafe mark, and it opens a modal where the operator sets their own icon,
+   their colour, and their basic business info. Mounted by app.js on every page, so
+   this block is the only place the look is defined. */
+.brandbtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+  padding:0;border:1.5px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;color:var(--mute);flex:0 0 auto}
+.brandbtn:hover{border-color:var(--ocean);color:var(--ocean)}
+.brandbtn img{width:100%;height:100%;border-radius:7px;object-fit:cover}
+.brandbtn svg{width:17px;height:17px}
+
+.osb-scrim{position:fixed;inset:0;background:rgba(12,32,40,.44);z-index:60;
+  display:none;align-items:flex-start;justify-content:center;padding:18px;overflow:auto}
+.osb-scrim.on{display:flex}
+.osb-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  width:100%;max-width:520px;margin:auto;padding:18px}
+.osb-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.osb-top h2{margin:0;flex:1}
+.osb-x{appearance:none;border:0;background:none;font:inherit;font-size:20px;line-height:1;
+  color:var(--mute);cursor:pointer;min-width:44px;min-height:44px}
+.osb-prev{display:flex;align-items:center;justify-content:center;width:66px;height:66px;
+  border:1.5px dashed var(--line);border-radius:12px;background:#fafcfc;color:var(--mute);
+  font-size:11px;text-align:center;overflow:hidden;flex:0 0 auto}
+.osb-prev img{width:100%;height:100%;object-fit:cover}
+.osb-logorow{display:flex;align-items:center;gap:12px;margin-top:6px}
+.osb-logorow > div:not(.osb-prev){flex:1;min-width:0}
+.osb-hexrow{display:flex;align-items:center;gap:10px}
+.osb-hexrow input[type=color]{width:46px;height:44px;padding:2px;flex:0 0 auto}
+.osb-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+@media(max-width:480px){.osb-card{padding:15px}.osb-foot .btn{flex:1}}
+
+/* ── printable assets grid (assets.html) ─────────────────────────────────────── */
+.assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:16px;margin-top:14px}
+.asset{text-align:center}
+.asset .ashot{border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px;
+  display:flex;align-items:center;justify-content:center;min-height:210px}
+.asset .ashot img{max-width:100%;max-height:190px;width:auto;height:auto;display:block}
+.asset .nm{font-weight:700;font-size:13px;margin-top:7px}
+.asset .sz{font-size:11.5px;color:var(--mute);margin-bottom:6px}
+.qrset{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px}
+.qrtile{text-align:center}
+.qrtile img{width:118px;height:118px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.qrtile .nm{font-weight:600;font-size:13px;margin:6px 0}
+.btn.sm{padding:8px 13px;font-size:12.5px;min-height:44px}

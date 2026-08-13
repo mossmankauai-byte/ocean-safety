@@ -214,7 +214,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
   // ever wrote to them — so every operator's co-brand fell back to a text name. Placed above
   // the assets on purpose: the assets are built around the logo, so you set it first.
   +'<div class="card"><h2>Your logo</h2>'
-    +'<p class="lead">Add your logo and it appears on your guest page. PNG or JPG, up to 2 MB — a PNG with a transparent background looks best.</p>'
+    +'<p class="lead">Add your logo and it appears on your guest page, and on your shop card in the app. PNG or JPG, up to 2 MB. A PNG with a transparent background looks best.</p>'
     +'<div class="row" style="align-items:center;gap:14px;margin-top:12px">'
       +'<div id="logoPrev" class="logoprev" aria-live="polite"><span class="dim">No logo yet</span></div>'
       +'<div style="flex:1;min-width:190px">'
@@ -398,7 +398,7 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
       fr.onerror=function(){ saveBtn.disabled=false; say("Couldn’t read that file — try again.","err"); };
       fr.onload=function(){
         call({action:"set",dataUrl:String(fr.result)})
-          .then(j=>{ paint(j.logo_url); fileEl.value=""; say("Logo saved — it’s on your guest page now.","ok"); })
+          .then(j=>{ paint(j.logo_url); fileEl.value=""; say("Logo saved. It is on your guest page now.","ok"); })
           .catch(e=>say(e.message,"err"))
           .then(()=>{ saveBtn.disabled=false; });
       };
