@@ -198,6 +198,18 @@ function renewal(paid){const d=paid?new Date(paid):null;if(!d||isNaN(d))return n
     +'<p class="lead">Your products, stock counts, orders and sales all live in your console — add an item and it’s on your page the same minute.</p>'
     +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+SITE+'/portal-shop/dashboard.html" target="_blank" rel="noopener">Open my shop console ↗</a></div>'
     +'<div class="hint">Sign in with the email address on your account and it opens straight to your shop. Keep this page bookmarked for your QR codes and printables.</div></div>':'')
+  // Rentals & tours get the rentals console (/rental) — bookings, promotions, guest activity.
+  // Nothing on this page linked to it, so a rental that signed up landed here and had no route
+  // to their own console at all. That console is gated by partner-auth (a PASSWORD, not this
+  // token), and `set-password.html?t=` is the only surface that can mint one — it is authed by
+  // the dashboard_token, and its CONSOLE map already sends rental to /rental afterwards. So the
+  // primary button is the password link, not /rental: sending them straight to the console
+  // would land them on a sign-in box for a password nobody ever gave them.
+  +(seg==="rental"?'<div class="card lift"><h2>Your rentals console</h2>'
+    +'<p class="lead">Bookings, promotions and guest activity live in your console. It opens with a password you pick once — this dashboard link is what proves it&rsquo;s you.</p>'
+    +'<div class="row" style="margin-top:12px"><a class="btn primary" href="'+SITE+'/set-password?t='+encodeURIComponent(token)+'" target="_blank" rel="noopener">Set my console password ↗</a>'
+    +'<a class="btn ghost" href="'+SITE+'/rental" target="_blank" rel="noopener">Open my console</a></div>'
+    +'<div class="hint">Already set one? Use Open my console and sign in. Keep this page bookmarked for your QR codes and printables.</div></div>':'')
   // Logo. partners.logo_url and the public `logos` bucket existed from the start, but nothing
   // ever wrote to them — so every operator's co-brand fell back to a text name. Placed above
   // the assets on purpose: the assets are built around the logo, so you set it first.
