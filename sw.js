@@ -17,7 +17,7 @@
 
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
-const CACHE_VERSION = 'v287-2026-08-13-dashboard-price-cell';
+const CACHE_VERSION = 'v288-2026-08-13-promo-trip-stage';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 

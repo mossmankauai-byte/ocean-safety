@@ -335,6 +335,14 @@ window.OS_SEGMENTS = {
   .qa.gold .go{color:var(--gold-ink)}
 
   /* ============ PROMOTIONS — drag-and-drop flyer drafts ============ */
+  .pm-stage{display:inline-flex;gap:2px;background:var(--hair-soft);border-radius:8px;padding:2px}
+  .pm-stg{appearance:none;font:inherit;font-size:12.5px;font-weight:600;border:0;background:none;
+          color:var(--muted);padding:5px 11px;border-radius:6px;cursor:pointer}
+  .pm-stg:hover{color:var(--ink-2)}
+  .pm-stg[aria-pressed="true"]{background:var(--sea);color:var(--on-sea)}
+  .pm-stagehint{font-size:11.5px;color:var(--muted);margin:4px 2px 8px;line-height:1.45}
+  /* .pm-f sets display, which beats the bare [hidden] attribute. */
+  .pm-f[hidden],.pm-winhint[hidden]{display:none}
   .dz{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:34px 18px;
     border:2px dashed #cfc09d;border-radius:14px;background:var(--bg);color:var(--ink-2);cursor:pointer;
     transition:border-color .15s,background .15s}
@@ -2063,7 +2071,6 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
             <button role="tab" aria-selected="false" data-shop="sales">Sales</button>
             <button role="tab" aria-selected="false" data-shop="products">Products</button>
             <button role="tab" aria-selected="false" data-shop="inventory">Inventory</button>
-            <button role="tab" aria-selected="false" data-shop="promotions">Promotions</button>
             <a class="shop-pop" id="shopPop" href="/portal-demo/dashboard.html?plan=paid" target="_blank" rel="noopener">Open in its own tab &#8599;</a>
           </div>
           <div class="shopframe">
@@ -3540,17 +3547,30 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     } else {
       listEl.innerHTML = items.map(function(p, i){
         var size = p.dataUrl ? fmtSize(Math.round(p.dataUrl.length * 3 / 4)) : (p.sample ? 'sample flyer' : 'PDF flyer');
+        // A pre-arrival guest is in another timezone and the Hawaii forecast for
+        // their trip does not exist yet, so the time-of-day window is meaningless
+        // there. It is not rendered rather than rendered-and-disabled.
+        var stage = p.trip_stage === 'pre-arrival' ? 'pre-arrival' : 'on-island';
         return '<div class="pm-card">' +
           '<div class="pm-thumb" data-i="'+i+'"><span class="pm-thumb-tag">PDF</span><div class="pm-thumb-fb">'+PDF_SVG_BIG+'<b>'+esc(p.fileName)+'</b></div></div>' +
           '<div>' +
             '<label class="pm-f"><span>Title guests see</span><input class="pm-title" data-i="'+i+'" maxlength="80" value="'+esc(p.title)+'"></label>' +
             '<label class="pm-f"><span>Ends (optional — expired offers never show)</span><input class="pm-date" data-i="'+i+'" type="date" value="'+esc(p.expires||'')+'"></label>' +
-            '<div class="pm-f"><span>Pop-up window (optional)</span><span class="pm-win">' +
+            '<div class="pm-f pm-stagef"><span>When guests see it</span><span class="pm-stage">' +
+              '<button type="button" class="pm-stg" data-i="'+i+'" data-stage="on-island"'+
+                (stage==='on-island' ? ' aria-pressed="true"' : ' aria-pressed="false"')+'>On island</button>' +
+              '<button type="button" class="pm-stg" data-i="'+i+'" data-stage="pre-arrival"'+
+                (stage==='pre-arrival' ? ' aria-pressed="true"' : ' aria-pressed="false"')+'>Pre-arrival</button>' +
+            '</span></div>' +
+            '<div class="pm-stagehint">' + (stage==='pre-arrival'
+              ? 'Shows before they land, and stops when they arrive.'
+              : 'Shows while the guest is here on the island.') + '</div>' +
+            '<div class="pm-f"'+(stage==='pre-arrival' ? ' hidden' : '')+'><span>Pop-up window (optional)</span><span class="pm-win">' +
               '<input class="pm-win-s" data-i="'+i+'" type="time" value="'+esc((p.window&&p.window.start)||'')+'" aria-label="Pop-up window start">' +
               '<span class="pm-wsep">to</span>' +
               '<input class="pm-win-e" data-i="'+i+'" type="time" value="'+esc((p.window&&p.window.end)||'')+'" aria-label="Pop-up window end">' +
             '</span></div>' +
-            '<div class="pm-winhint">During this window the offer pops up on guests&rsquo; phones — once per visit, never over safety info. Leave blank for a chip-only offer.</div>' +
+            '<div class="pm-winhint"'+(stage==='pre-arrival' ? ' hidden' : '')+'>During this window the offer pops up on guests&rsquo; phones — once per visit, never over safety info. Leave blank for a chip-only offer.</div>' +
             '<div class="pm-fileline">'+PDF_SVG+'<b title="'+esc(p.fileName)+'">'+esc(p.fileName)+'</b><span>· '+size+(p.added ? ' · added '+esc(endsLabel(p.added)) : '')+'</span></div>' +
           '</div>' +
           '<div><div class="pm-mock-lab">What your guests see</div><div class="pm-guest">' + guestCardHTML(p.title, p.expires, i) + '</div></div>' +
@@ -3672,6 +3692,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     }
   });
   listEl.addEventListener('click', function(e){
+    var stg = e.target.closest('.pm-stg');
+    if(stg){
+      var si = +stg.dataset.i;
+      if(items[si]){ items[si].trip_stage = stg.dataset.stage; save(); render(); }
+      return;
+    }
     var x = e.target.closest('[data-x]');
     if(x){ items.splice(+x.dataset.x, 1); save(); render(); return; }
     var open = e.target.closest('[data-pmopen]');
