@@ -18,7 +18,7 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const CACHE_VERSION = 'v300-2026-08-13-union-token-door-phone-mock';
+const CACHE_VERSION = 'v301-2026-08-18-hotel-free-tier';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -194,7 +194,7 @@ if (workbox) {
       // was already fixed for exactly this reason; these are the same trap.
       /^\/(set-password|partner-terms|hotel|rental|fleet|townad|timeshare|concierge)$/.test(url.pathname) ||
       url.pathname === '/assets/creator-kit.js' ||
-      (/^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|dashboard|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)
+      (/^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|dashboard|setup|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)
        // OD-12: operators are given the CLEAN routes, whose pathname has no .html,
        // so they used to fall through to the stale-while-revalidate catch-all.
        || /^\/(hotel|timeshare|rental|concierge|fleet)$/.test(url.pathname))),

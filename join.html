@@ -704,9 +704,9 @@
               <label>Choose your plan</label>
               <div class="jplans">
                 <label class="jplan on" id="jPlanFree"><input type="radio" name="jtier" value="free" checked>
-                  <b>Free</b><span>Your listing, map pin, QR and dashboard.</span></label>
+                  <b>Free</b><span data-swap="plan-free">Your listing, map pin, QR and dashboard.</span></label>
                 <label class="jplan" id="jPlanPaid"><input type="radio" name="jtier" value="paid">
-                  <b>Paid plan</b><span>Adds a timed promotion and the full QR set.</span></label>
+                  <b>Paid plan</b><span data-swap="plan-paid">Adds a timed promotion and the full QR set.</span></label>
               </div>
             </div>
             <p class="jprice" id="jPrice" hidden></p>
@@ -946,10 +946,12 @@
       "offer-sub": "Be the name guests see when they check conditions — we tailor the package to your rooms, front desk, and welcome book.",
       "offer-bullets": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-room &amp; front-desk QR cards, included</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>A concierge touch that earns reviews</li>',
       "card-tag": "Hotel or inn",
-      "card-amt": "Paid plan",
-      "card-per": "one flat monthly price",
-      "card-line": "Hotels are on a paid plan &mdash; one flat monthly price for the whole property, however many rooms you have. Email us and we'll get you set up.",
-      "card-note": "No long contract. We'll confirm the price and have your co-branded page, in-room cards and dashboard running for you.",
+      "card-amt": "Free to start",
+      "card-per": "no card needed",
+      "card-line": "Free covers your page, your QR cards, the guide and your analytics, live as soon as you finish the form. Free shows one amenity; the paid plan adds promotions, unlimited amenities and your branding on the guide, one flat price for the whole property.",
+      "card-note": "No card and no install to start free. Move up whenever you want promotions and unlimited amenities.",
+      "plan-free": "Your page, QR cards, the guide and your analytics. Live as soon as you finish.",
+      "plan-paid": "Adds promotions, unlimited amenities and your branding on the guide.",
       "card-list": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>In-room &amp; front-desk QR cards — included</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>A concierge touch that earns reviews</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>',
       "secondary-label": "Try the live app ↗",
       "final-head": "Make safety part of your guest experience.",
@@ -1053,6 +1055,8 @@
       "card-amt": "Free to start",
       "card-per": "no card needed",
       "card-line": "Free covers your listing, your map pin, your QR and your dashboard. Tours or activities sold through your page are split with us. The paid plan adds a timed promotion and the full QR set.",
+      "plan-free": "Your listing, map pin, QR and dashboard.",
+      "plan-paid": "Adds a timed promotion and the full QR set.",
       "card-note": "No contract and no card. Your page is live the moment you finish, and you can change anything later from your dashboard.",
       "card-list": '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Your pin in the Town tab</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Co-branded page + live daily conditions</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Print-ready QR for your counter</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Private dashboard &amp; analytics</li>',
       "secondary-label": "Try the live app ↗",
@@ -1190,7 +1194,7 @@
      TWO provisioning backbones, because the guest surfaces differ and routing a segment through
      the wrong one would hand an operator somebody else's console:
        shop / rental          ->  Supabase operator-signup-public (tier "free")  ->  /p/<slug>
-       hotel                  ->  contact only (canon 2026-08-05: hotels are PAID, one tier)
+       hotel                  ->  Supabase operator-signup-public (free OR paid)  ->  /p/<slug>
        timeshare / cars       ->  worker /api/self-signup                        ->  stay-close / fleet
      Both provision LIVE on submit and hand back the operator's own links, which we render here.
      There is NO email step anywhere: this project has no production mailer (RESEND unset), so the
@@ -1210,7 +1214,7 @@
      email-us, exactly as the old signup page had them. */
   var ROUTE = {
     shop:       { kind: "supa",   type: "retail",     tier: "free" },
-    hotel:      { kind: "supa",   type: "hotel",      tier: "paid",   price: "Pricing on request" },
+    hotel:      { kind: "supa",   type: "hotel",      tier: "choice", price: "Pricing on request" },
     rental:     { kind: "supa",   type: "rental",     tier: "free" },
     timeshare:  { kind: "worker", segment: "timeshare", unit: "Rooms",    hint: "How many rooms?" },
     cars:       { kind: "worker", segment: "cars",      unit: "Vehicles", hint: "How many vehicles?" },
@@ -1416,7 +1420,7 @@
         /* PRICE-SCRUB-2026-08-13: pricing is off every page while we show the app, so no
            self-serve checkout may run — a card must never be charged an amount the signer
            was not shown. Delete this block to turn paid signup back on. */
-        if (tier === "paid") return fail("Paid plans are set up with us directly right now — email mossmankauai@gmail.com and we'll have you live this week. Or start free now and upgrade later.");
+        if (tier === "paid") return fail("Paid plans are set up with us directly right now. Email mossmankauai@gmail.com and we'll have you live this week, or start free now and upgrade whenever you want.");
         if (r.pin && !val("jAddr")) return fail("Enter your street address — it places your pin on the map.");
         url = SB_URL + "/functions/v1/operator-signup-public";
         headers = { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "apikey": SB_KEY };
@@ -1452,7 +1456,7 @@
              PRICE-SCRUB-2026-08-13: while pricing is off every page, never follow that
              redirect — it would charge a card an amount the signer was never shown.
              Restore the redirect line below when pricing goes back. */
-          if (j.mode === "paid" && j.url) { return fail("Paid plans are set up with us directly right now — email mossmankauai@gmail.com and we'll have you live this week."); }
+          if (j.mode === "paid" && j.url) { return fail("Paid plans are set up with us directly right now. Email mossmankauai@gmail.com and we'll have you live this week."); }
           if (!out.ok || j.ok === false || j.error) {
             if (window.turnstile) { try { if (tsId !== null) turnstile.reset(tsId); if (tsWId !== null) turnstile.reset(tsWId); } catch (_) {} }
             return fail(j.error || reason(j.reason) || "Something went wrong — please try again.");

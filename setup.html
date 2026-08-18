@@ -99,8 +99,8 @@ async function api(body){
     body:JSON.stringify(body)});
   return r.json();
 }
-let DEMO_P={name:"Hanalei Bay Resort",slug:"hanalei-bay-resort",primary_hex:"14524a",short:"North Shore, Kauaʻi",region:"Hanalei",phone:"",website:"https://hanaleibayresort.com",amenities:[],status:"draft",
-  page_url:"https://oceansafety.app/p/hanalei-bay-resort",dashboard_url:"https://oceansafety.app/d/demo"};
+let DEMO_P={name:"Your Resort",slug:"your-resort",primary_hex:"14524a",short:"North Shore, Kauaʻi",region:"Hanalei",phone:"",website:"",amenities:[],status:"draft",
+  page_url:"https://oceansafety.app/p/your-resort",dashboard_url:"https://oceansafety.app/d/demo"};
 function demoApi(b){
   if(b.action==="get") return Promise.resolve({ok:true,partner:{...DEMO_P}});
   if(b.action==="publish"){ Object.assign(DEMO_P,{primary_hex:(b.hex||"").replace(/^#/,"")||DEMO_P.primary_hex,short:b.short,region:b.region,phone:b.phone,website:b.website,amenities:b.amenities,status:"live"});
@@ -140,9 +140,10 @@ function welcome(){
 function chooser(){
   $("stage").innerHTML='<div class="card"><h1>Preview the hotel onboarding</h1>'+
     '<p class="say">This is exactly what a hotel walks through after they start.</p>'+
-    /* Hotels are PAID, one flat tier (ruled by Nick 2026-08-05) — there is no free hotel plan
-       to preview, and the server now rejects a free hotel signup outright. */
-    '<button class="btn" style="margin-top:18px" onclick="pick(\'paid\')">Preview the hotel plan →</button>'+
+    /* Hotels can start FREE again (ruled by Nick 2026-08-18), so the preview offers both
+       doors exactly as /join does. The 2026-08-05 paid-only ruling is reversed. */
+    '<button class="btn" style="margin-top:18px" onclick="pick(\'free\')">Preview the free plan →</button>'+
+    '<button class="btn grey" style="margin-top:10px" onclick="pick(\'paid\')">Preview the paid plan →</button>'+
     '<p class="muted center" style="margin-top:12px">Demo — nothing here is real.</p></div>';
 }
 function pick(plan){ S.plan=plan; S.monthly_cents=plan==='paid'?64900:0; STEP=0; render(); }

@@ -21,11 +21,16 @@ window.OS_SEGMENTS = {
     showMeta:true, previewNoun:'property', lobbyTitle:'lobby board',
     guideHref:'https://oceansafety.app/?ref=your-hotel',
     dlPrefix:'OceanSafe-Dashboard-',
-    freeTier:false,
-    planAria:'What the plan includes', planH2:'What your plan includes',
-    freeHead:'', paidHead:'The paid plan',
-    freePrice:'', paidPrice:'The paid plan',
-    pcFoot:'One tier, everything above. Pricing on request.',
+    /* Hotels have a free tier again (Nick, 2026-08-18). Left false, data-nofree strips the
+       free column out of the plan table, so the console would describe a paid-only product
+       to an operator who just signed up free. The table itself is still hidden by the
+       2026-08-13 price scrub, so this is correct-when-restored, not a visible fix today.
+       The other four segments are untouched. */
+    freeTier:true,
+    planAria:'Free plan versus the paid plan', planH2:'What your plan includes',
+    freeHead:'Free', paidHead:'The paid plan',
+    freePrice:'Free', paidPrice:'Pricing on request',
+    pcFoot:'Free shows one amenity. Pricing on request for the paid plan.',
     portfolioNote:'Pricing on request.',
     tabs:['home','stayclose','promos','guests','places','shop']
   },
@@ -107,7 +112,8 @@ window.OS_SEGMENTS = {
 </script>
 <style>
   /* A segment that has no free tier never renders a free column, rather than
-     rendering one that is disabled. Every segment shows one tier.
+     rendering one that is disabled. Hotels carry both tiers again as of 2026-08-18;
+     the other four segments are still single-tier.
      The #planCompare rules below carry an id, so these have to as well or they lose
      the cascade to them. */
   html[data-nofree] #planCompare .pc-cell:not(.pc-paid){display:none}
@@ -1604,10 +1610,10 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 
     <!-- JOIN / GET STARTED — link to the partner signup page (added 2026-07-22) -->
     <section aria-label="Get on OceanSafe">
-      <div class="sec-h"><h2>Get your rentals on OceanSafe</h2><p>A co-branded safety guide live the day you sign.</p></div>
+      <div class="sec-h"><h2 data-os="joinH2">Get your rentals on OceanSafe</h2><p>A co-branded safety guide live the day you sign.</p></div>
       <div class="card" style="text-align:center">
         <p style="margin:2px 0 0;font-size:13.5px;line-height:1.6">Tell us about your properties and we&rsquo;ll set you up &mdash; no card, cancel anytime.</p>
-        <div class="lockcard-btns" style="justify-content:center;margin-top:14px"><a class="pl-btn primary" href="/hotel-signup" rel="noopener">Talk to us about joining <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a></div>
+        <div class="lockcard-btns" style="justify-content:center;margin-top:14px"><a class="pl-btn primary" href="/join" rel="noopener">Talk to us about joining <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a></div>
       </div>
     </section>
 
@@ -4136,8 +4142,14 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var LOCK_BIG = '<svg class="dz-ic" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 
   var slug = window.OS_SLUG || '';
-  // The minted preview IS the branded-guide renderer — ?ref=<slug> when live, demo-rental in the demo.
-  var previewHref = 'stay-close-v2.html?ref=' + encodeURIComponent(slug || 'demo-rental') + '&seg=renter';
+  var SEGC = window.OS_SEGCFG || {};
+  // The minted preview IS the branded-guide renderer. Each segment declares where its own
+  // guide lives: hotels render in the main app (/?ref=), the rest in Stay Close. Hardcoding
+  // the Stay Close renter URL previewed a hotel's guide in renter mode (caught 2026-08-18).
+  var previewHref = slug
+    ? (SEGC.guideHref || 'stay-close-v2.html?ref=demo-rental&seg=renter')
+        .replace(/ref=[^&]*/, 'ref=' + encodeURIComponent(slug))
+    : (SEGC.guideHref || 'stay-close-v2.html?ref=demo-rental&seg=renter');
   var unlockHref = 'mailto:aloha@oceansafety.app?subject=' + encodeURIComponent('Unlock my OceanSafe guide');
   var btnsHTML = '<div class="lockcard-btns">' +
     '<a class="pl-btn" href="' + previewHref + '" target="_blank" rel="noopener">Preview my branded guide</a>' +
@@ -4157,9 +4169,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var kick = document.querySelector('.hm-kicker');
   if(kick) kick.textContent = 'OceanSafe guest guide · free plan';
   var heroH = document.querySelector('.hm-copy h2');
-  if(heroH) heroH.textContent = 'Your guests’ beach guide — upgrade to weave your rentals in.';
+  if(heroH) heroH.textContent = 'Your guests’ beach guide. Upgrade to weave your brand in.';
   var heroP = document.querySelector('.hm-copy p');
-  if(heroP) heroP.textContent = 'Every guest who scans the in-unit QR gets live surf, lifeguard and hazard calls for the island’s most-visited beaches — free, forever. On the free plan the guide carries OceanSafe branding and your first amenity; the paid plan weaves your name, your offers, the weather-swap and your full amenity menu in.';
+  if(heroP) heroP.textContent = 'Every guest who scans your QR gets live surf, lifeguard and hazard calls for the island’s most-visited beaches, free, forever. On the free plan the guide carries OceanSafe branding and your first amenity; the paid plan weaves your name, your offers, the weather-swap and your full amenity menu in.';
 
   /* ---- HOME quick action: lock badge on “Drop a promotion” ---- */
   var promoQaTitle = document.querySelector('.qa[data-goto="promos"] b');

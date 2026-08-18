@@ -1,6 +1,9 @@
 # One signup page: hotel-signup.html is retired into /join (2026-08-09).
 # force (!) because the .html file still exists in the repo; ?type= is forwarded.
 /hotel-signup.html   /join   301!
+# The pretty-URL twin served the old paid-only form at 200 while /join offered free
+# (caught 2026-08-18). Retiring the .html spelling alone left two doors disagreeing.
+/hotel-signup        /join   301!
 # OceanSafe shop co-brand pages — clean URLs (rewrite, address bar stays /p/<shop>)
 /p/demo         /p/demo.html           200
 
