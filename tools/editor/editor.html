@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OceanSafe Editor</title>
+<link rel="icon" href="/assets/oceansafe-favicon.png">
+<style>
+  :root{
+    --sea-900:#0a2731; --sea-800:#0d3241; --sea-700:#0f3b48; --sea-600:#134a5b;
+    --line:#1c5568; --line-soft:#17475a;
+    --foam:#e6f4f8; --steel:#8fb3c1; --steel-dim:#5f92a8;
+    --cyan:#7fd0e0; --sea:#46a6c8; --deep:#0a6e8c;
+    --gold:#c9a84c; --green:#2fb88a; --sand:#e0913f; --risk:#b4452f;
+    --r:8px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    display:grid;grid-template-columns:1fr 430px;background:var(--sea-900);color:var(--foam);
+    font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  button,select,input,textarea{font:inherit;color:inherit}
+  ::selection{background:rgba(127,208,224,.3)}
+
+  /* ---------- chrome ---------- */
+  .bar{
+    display:flex;gap:8px;align-items:center;padding:9px 12px;background:var(--sea-800);
+    border-bottom:1px solid var(--line);flex-wrap:wrap
+  }
+  .brand{display:flex;align-items:center;gap:8px;padding-right:6px;margin-right:2px;border-right:1px solid var(--line)}
+  .brand img{width:22px;height:22px;border-radius:5px;display:block}
+  .brand b{font-size:13px;letter-spacing:.01em;white-space:nowrap}
+  .brand span{color:var(--steel-dim);font-size:10px;letter-spacing:.09em;text-transform:uppercase}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);
+    border-radius:var(--r);background:var(--sea-700);cursor:pointer;white-space:nowrap;
+    transition:border-color .12s, background .12s
+  }
+  .btn:hover{border-color:var(--sea);background:var(--sea-600)}
+  .btn:active{transform:translateY(1px)}
+  .btn svg{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .btn.on{background:var(--deep);border-color:var(--cyan);color:#fff}
+  .btn.go{background:var(--deep);border-color:var(--deep);color:#fff;font-weight:600}
+  .btn.go:hover{background:#0c81a4;border-color:#0c81a4}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.sm{padding:3px 8px;font-size:12px;border-radius:6px}
+
+  input[type=text],select{
+    padding:6px 9px;border:1px solid var(--line);border-radius:var(--r);
+    background:var(--sea-900);min-width:0
+  }
+  select{font-weight:600}
+  input[type=text]:focus,select:focus{outline:none;border-color:var(--sea)}
+  input::placeholder{color:var(--steel-dim)}
+
+  .seg{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .seg button{border:0;background:var(--sea-700);padding:6px 9px;cursor:pointer;color:var(--steel)}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button.on{background:var(--deep);color:#fff}
+  .grow{flex:1}
+  .cost{font:11px/1 ui-monospace,Menlo,monospace;color:var(--steel-dim);white-space:nowrap}
+
+  /* ---------- stage ---------- */
+  .stage{display:flex;flex-direction:column;min-width:0}
+  .canvas{
+    flex:1;min-height:0;display:flex;justify-content:center;padding:0;overflow:auto;
+    background:
+      radial-gradient(1200px 500px at 50% -10%, rgba(70,166,200,.13), transparent 60%),
+      var(--sea-900);
+  }
+  .frame{
+    position:relative;background:#fff;width:100%;height:100%;
+    transition:width .18s ease, box-shadow .18s ease
+  }
+  .frame.device{
+    width:390px;height:calc(100% - 24px);margin:12px 0;border-radius:14px;
+    box-shadow:0 10px 40px rgba(0,0,0,.5), 0 0 0 1px var(--line);overflow:hidden
+  }
+  .frame.tablet{width:834px}
+  iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+  .picking-veil{
+    position:absolute;inset:0;pointer-events:none;border:2px solid var(--cyan);
+    box-shadow:inset 0 0 0 9999px rgba(10,110,140,.05);display:none
+  }
+  body.picking .picking-veil{display:block}
+
+  /* ---------- panel ---------- */
+  .panel{display:flex;flex-direction:column;background:var(--sea-800);border-left:1px solid var(--line);min-width:0}
+
+  .sel{padding:10px 14px;border-bottom:1px solid var(--line);background:var(--sea-700)}
+  .sel .empty{color:var(--steel-dim);font-size:12.5px}
+  .sel .who{font:600 12px/1.4 ui-monospace,Menlo,monospace;color:var(--cyan);word-break:break-all}
+  .sel .where{font:11px/1.5 ui-monospace,Menlo,monospace;color:var(--steel-dim);margin-top:2px;word-break:break-all}
+  .crumbs{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;align-items:center}
+  .crumbs .lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel-dim);margin-right:2px}
+  .crumb{
+    font:11px/1 ui-monospace,Menlo,monospace;padding:3px 6px;border-radius:5px;cursor:pointer;
+    background:var(--sea-900);border:1px solid var(--line-soft);color:var(--steel)
+  }
+  .crumb:hover{border-color:var(--cyan);color:var(--foam)}
+
+  .tabs{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--line);background:var(--sea-800)}
+  .tabs button{
+    border:0;background:none;border-bottom:2px solid transparent;padding:9px 8px;cursor:pointer;
+    color:var(--steel-dim);font-size:13px
+  }
+  .tabs button.on{color:var(--cyan);border-bottom-color:var(--cyan);font-weight:600}
+
+  .feed{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:9px}
+  .feed::-webkit-scrollbar{width:9px}
+  .feed::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
+
+  .msg{border:1px solid var(--line);border-radius:var(--r);padding:9px 11px;font-size:13px;word-break:break-word}
+  .msg .who{
+    font:600 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--steel-dim);margin-bottom:5px
+  }
+  .msg.you{background:var(--sea-600);border-color:var(--line-soft)}
+  .msg.claude{background:var(--sea-700)}
+  .msg .body{white-space:pre-wrap}
+  .tool{font:11px/1.6 ui-monospace,Menlo,monospace;color:var(--steel-dim);margin-top:3px}
+  .tool.ok{color:var(--green)}
+  .tool.bad{color:var(--sand)}
+
+  .card{border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:var(--r);
+    padding:9px 11px;background:var(--sea-700);font-size:12.5px}
+  .card h4{margin:0 0 5px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
+  .card ul{margin:0;padding-left:16px}
+  .card li{margin:2px 0;color:var(--steel)}
+
+  .entry{border:1px solid var(--line);border-left:3px solid var(--green);border-radius:var(--r);
+    padding:8px 10px;background:var(--sea-700);font-size:12.5px}
+  .entry.bad{border-left-color:var(--risk)}
+  .entry.rev{border-left-color:var(--steel-dim)}
+  .entry.note{border-left-color:var(--gold);background:rgba(201,168,76,.06)}
+  .acct{display:flex;align-items:center;gap:6px;font:11px/1 ui-monospace,Menlo,monospace}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--risk);flex:none}
+  .dot.ok{background:var(--green)}
+  dialog{border:1px solid var(--line);border-radius:10px;background:var(--sea-900);color:inherit;
+    padding:18px 20px;max-width:440px;box-shadow:0 18px 60px rgba(0,0,0,.5)}
+  dialog::backdrop{background:rgba(4,20,26,.62)}
+  dialog h3{margin:0 0 8px;font-size:15px}
+  dialog p{margin:0 0 10px;color:var(--steel);font-size:13px;line-height:1.5}
+  dialog code{display:block;background:var(--deep-900,#04141a);border:1px solid var(--line);
+    border-radius:6px;padding:8px 10px;margin:0 0 12px;font:12px/1.5 ui-monospace,Menlo,monospace;
+    color:var(--cyan);user-select:all}
+  dialog .row{display:flex;gap:8px;align-items:center}
+  .entry .who{font:11px/1 ui-monospace,Menlo,monospace;color:var(--gold);margin-top:4px}
+  .entry .req{font-weight:600}
+  .entry .sum{color:var(--steel);margin-top:2px}
+  .entry .meta{font:11px/1.5 ui-monospace,Menlo,monospace;color:var(--steel-dim);margin-top:4px}
+  .entry .acts{display:flex;gap:6px;margin-top:6px}
+  pre.diff{
+    margin:7px 0 0;padding:8px;background:var(--sea-900);border:1px solid var(--line);border-radius:6px;
+    font:11px/1.5 ui-monospace,Menlo,monospace;overflow:auto;max-height:280px;white-space:pre
+  }
+  pre.diff .a{color:var(--green)} pre.diff .d{color:#e98a76} pre.diff .h{color:var(--steel-dim)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px 0}
+  .chip{
+    font-size:11.5px;padding:4px 8px;border-radius:20px;cursor:pointer;
+    background:var(--sea-700);border:1px solid var(--line);color:var(--steel)
+  }
+  .chip:hover{border-color:var(--cyan);color:var(--foam)}
+
+  .compose{border-top:1px solid var(--line);padding:9px 12px 11px;display:flex;flex-direction:column;gap:8px;background:var(--sea-800)}
+  textarea{
+    width:100%;min-height:76px;resize:vertical;padding:9px;border:1px solid var(--line);
+    border-radius:var(--r);background:var(--sea-900)
+  }
+  textarea:focus{outline:none;border-color:var(--sea)}
+  .row{display:flex;gap:7px;align-items:center}
+  .hint{color:var(--steel-dim);font-size:11px}
+  kbd{
+    font:10px/1 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-bottom-width:2px;
+    border-radius:4px;padding:2px 4px;color:var(--steel)
+  }
+  .spin{width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--cyan);
+    border-radius:50%;animation:sp .7s linear infinite;display:inline-block;vertical-align:-2px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .toast{
+    position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+    background:var(--sea-600);border:1px solid var(--cyan);color:var(--foam);padding:8px 14px;
+    border-radius:20px;font-size:12.5px;transition:.2s;z-index:9;box-shadow:0 6px 24px rgba(0,0,0,.45)
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="bar">
+    <div class="brand">
+      <img src="/assets/oceansafe-favicon.png" alt="">
+      <div><b>OceanSafe Editor</b><br><span>local only</span></div>
+    </div>
+
+    <select id="surface" style="flex:0 1 210px"></select>
+    <input type="text" id="path" list="pages" placeholder="or any other page" style="flex:1 1 150px;max-width:220px">
+    <datalist id="pages"></datalist>
+    <button class="btn" id="open">Open</button>
+
+    <span class="grow"></span>
+
+    <div class="seg" id="vp">
+      <button data-w="device" title="Phone 390px">Phone</button>
+      <button data-w="tablet" title="Tablet 834px">Tablet</button>
+      <button data-w="full" class="on" title="Fill the pane">Full</button>
+    </div>
+    <button class="btn" id="pick">
+      <svg viewBox="0 0 24 24"><path d="M3 3l7.5 18 2.2-7.3L20 11.5z"/></svg>
+      Select element
+    </button>
+    <button class="btn" id="reload" title="Reload preview">
+      <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
+    </button>
+    <button class="btn" id="acct"><span class="dot" id="acctDot"></span><span id="acctTxt">Claude</span></button>
+    <span class="cost" id="whoami"></span>
+    <span class="cost" id="spend"></span>
+  </div>
+
+  <div class="canvas">
+    <div class="frame" id="frame">
+      <iframe id="preview" title="Preview"></iframe>
+      <div class="picking-veil"></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="sel" id="sel"></div>
+
+  <div class="tabs">
+    <button id="tabChat" class="on">Chat</button>
+    <button id="tabLog">Work log</button>
+    <span class="grow"></span>
+    <button id="newThread" title="Forget this thread's context and start fresh">New thread</button>
+    <button id="handoff" title="Save the work and write the handoff. Nothing deploys.">Save and send</button>
+    <button id="rollback" title="Undo the whole session, back to where this branch started">Roll back</button>
+  </div>
+
+  <div class="feed" id="feed"></div>
+
+  <div class="chips" id="chips"></div>
+  <div class="compose">
+    <textarea id="msg" placeholder="What should change here?"></textarea>
+    <div class="row">
+      <button class="btn go" id="send">Send to Claude</button>
+      <button class="btn" id="note" title="Leave a comment on this element. Nothing runs.">Add note</button>
+      <button class="btn" id="stop" style="display:none">Stop</button>
+      <span class="grow"></span>
+      <span class="hint"><kbd>⌘↵</kbd> send &nbsp; <kbd>esc</kbd> cancel pick</span>
+    </div>
+  </div>
+</div>
+
+<dialog id="acctDlg">
+  <h3>Link your Claude</h3>
+  <p id="acctBody"></p>
+  <code id="acctCmd">claude login</code>
+  <div class="row">
+    <button class="btn go" id="acctRecheck">Check again</button>
+    <button class="btn" id="acctClose">Close</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id)
+const preview = $('preview')
+
+let picking = false, selection = null, sessionId = null, tab = 'chat'
+let busy = false, jobId = null, spend = 0
+
+const QUICK = [
+  'Make this bigger and easier to tap on a phone',
+  'Tighten this copy, keep the meaning',
+  'Match this to the OceanSafe palette',
+  'Fix the spacing around this',
+  'Hide this on mobile only',
+  'Explain what this element does, change nothing',
+]
+
+// The picked element's own page wins: the preview may have navigated itself
+// away from whatever the box says.
+const targetPath = () => selection?.page || openPath()
+const openPath = () => {
+  let v = $('path').value.trim() || '/index.html'
+  if (!v.startsWith('/')) v = '/' + v
+  return v
+}
+
+function toast(text){
+  const t = $('toast'); t.textContent = text; t.classList.add('show')
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2600)
+}
+
+function load(){
+  const p = openPath()
+  selection = null; showSelection()
+  preview.src = p + (p.includes('?') ? '&' : '?') + '__edit=1&_=' + Date.now()
+  setPicking(false)
+}
+
+function setPicking(on){
+  picking = on
+  document.body.classList.toggle('picking', on)
+  $('pick').classList.toggle('on', on)
+  $('pick').lastChild.textContent = on ? ' Picking, esc to cancel' : ' Select element'
+  preview.contentWindow?.postMessage({source:'osed-shell', kind:'setActive', active:on}, '*')
+}
+
+function showSelection(){
+  const el = $('sel')
+  if (!selection){
+    el.innerHTML = `<div class="empty">Nothing selected. Hit <b>Select element</b>, then click a region.
+      Without a selection Claude treats your message as a whole-page request.</div>`
+    return
+  }
+  const where = selection.line
+    ? `${selection.file || targetPath()} : ${selection.line}`
+    : `${selection.file || targetPath()} · line not resolved, Claude will grep for it`
+  el.innerHTML =
+    `<div class="who">${selection.label}</div>` +
+    `<div class="where">${where}</div>` +
+    `<div class="crumbs"><span class="lbl">widen</span></div>`
+  const crumbs = el.querySelector('.crumbs')
+  ;(selection.chain || []).slice(1, 6).forEach((label, i) => {
+    const b = document.createElement('span')
+    b.className = 'crumb'
+    b.textContent = label
+    b.title = 'Select this ancestor instead'
+    b.onclick = () => preview.contentWindow.postMessage(
+      {source:'osed-shell', kind:'climb', steps: i + 1}, '*')
+    crumbs.appendChild(b)
+  })
+  if (!(selection.chain || []).length) crumbs.remove()
+}
+
+// ---------- inspector messages ----------
+window.addEventListener('message', async e => {
+  const m = e.data
+  if (!m || m.source !== 'osed') return
+  if (m.kind === 'ready' && picking) setPicking(true)
+  if (m.kind === 'mode'){ picking = m.active; $('pick').classList.toggle('on', m.active)
+    document.body.classList.toggle('picking', m.active) }
+  if (m.kind === 'clear'){ selection = null; showSelection() }
+  if (m.kind === 'pick'){
+    setPicking(false)
+    selection = {...m, line:null}
+    showSelection()
+    const q = new URLSearchParams({path: targetPath(), elementId: m.elementId || '', snippet: m.snippet || ''})
+    try{
+      const r = await fetch('/__editor/source?' + q).then(r => r.json())
+      selection.line = r.line; selection.file = r.file
+    }catch{}
+    showSelection()
+    $('msg').focus()
+  }
+})
+
+// ---------- feed ----------
+function el(tag, cls, html){
+  const d = document.createElement(tag)
+  if (cls) d.className = cls
+  if (html != null) d.innerHTML = html
+  $('feed').appendChild(d)
+  $('feed').scrollTop = $('feed').scrollHeight
+  return d
+}
+const esc = s => String(s == null ? '' : s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
+
+function bubble(cls, who, text){
+  const d = el('div', 'msg ' + cls, `<div class="who">${esc(who)}</div>`)
+  const body = document.createElement('div')
+  body.className = 'body'
+  body.textContent = text
+  d.appendChild(body)
+  return body
+}
+
+function colorDiff(text){
+  return esc(text).split('\n').map(l =>
+    l.startsWith('+') ? `<span class="a">${l}</span>` :
+    l.startsWith('-') ? `<span class="d">${l}</span>` :
+    l.startsWith('@') || l.startsWith('=') ? `<span class="h">${l}</span>` : l
+  ).join('\n')
+}
+
+// Downstream copies go stale silently. Surface the ripple items the moment the
+// source file changes, per RIPPLE-CHECKLIST.md.
+const RIPPLE = {
+  'index.html': [
+    'Bump CACHE_VERSION in sw.js in the same commit, with today\'s date',
+    'Mirror into p/demo.html if this touches shared UI',
+    'Backport to kauai-beach-guide + the 1hotel template, then run SYNC.command for the 26 co-brand files',
+    'If it shows in screenshots, refresh brochure mockups and the Jade dashboard thumbs',
+    'Verify on ocean-safety.netlify.app, never the apex',
+  ],
+}
+function rippleFor(files){
+  const items = []
+  for (const f of files || []) for (const [k, list] of Object.entries(RIPPLE)) if (f === k) items.push(...list)
+  return items
+}
+
+async function renderLog(){
+  const rows = await fetch('/__editor/log').then(r => r.json()).catch(() => [])
+  $('feed').innerHTML = ''
+  if (!rows.length){ el('div', 'hint', 'Nothing yet. Every edit and note lands here, newest first, and commits with your branch.'); return }
+  for (const r of rows.slice().reverse()){
+    const cls = r.kind === 'note' ? 'note' : r.request === '(revert)' ? 'rev' : (r.ok ? '' : 'bad')
+    const d = el('div', 'entry ' + cls,
+      `<div class="req">${esc(r.request)}</div>` +
+      `<div class="sum">${esc(r.summary)}</div>` +
+      `<div class="meta">${new Date(r.ts).toLocaleString()} · ${esc(r.target)}${r.line ? ':' + r.line : ''}` +
+      `${(r.filesChanged || []).length ? ' · ' + esc(r.filesChanged.join(', ')) : ''}</div>` +
+      (r.author ? `<div class="who">${r.kind === 'note' ? 'note from ' : ''}${esc(r.author)}</div>` : ''))
+    if (r.backup){
+      const acts = document.createElement('div')
+      acts.className = 'acts'
+      const dbtn = document.createElement('button')
+      dbtn.className = 'btn sm'; dbtn.textContent = 'Show diff'
+      let pre = null
+      dbtn.onclick = async () => {
+        if (pre){ pre.remove(); pre = null; dbtn.textContent = 'Show diff'; return }
+        const q = new URLSearchParams({backup: r.backup, path: '/' + r.target})
+        const res = await fetch('/__editor/diff?' + q).then(x => x.json())
+        pre = document.createElement('pre')
+        pre.className = 'diff'
+        pre.innerHTML = colorDiff(res.diff || res.error || '')
+        d.appendChild(pre)
+        dbtn.textContent = 'Hide diff'
+      }
+      const rbtn = document.createElement('button')
+      rbtn.className = 'btn sm'; rbtn.textContent = 'Revert'
+      rbtn.onclick = async () => {
+        rbtn.disabled = true
+        await fetch('/__editor/revert', {method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({backup: r.backup, targetPath: '/' + r.target})})
+        toast('Reverted ' + r.target); load(); renderLog()
+      }
+      acts.append(dbtn, rbtn)
+      d.appendChild(acts)
+    }
+  }
+}
+
+function setTab(which){
+  tab = which
+  $('tabChat').classList.toggle('on', which === 'chat')
+  $('tabLog').classList.toggle('on', which === 'log')
+  $('feed').innerHTML = ''
+  if (which === 'log') renderLog()
+}
+
+// ---------- send ----------
+async function send(){
+  const message = $('msg').value.trim()
+  if (!message || busy) return
+  if (tab !== 'chat') setTab('chat')
+  busy = true
+  $('send').disabled = true
+  $('stop').style.display = ''
+  bubble('you', selection ? selection.label : 'whole page', message)
+  $('msg').value = ''
+
+  const res = await fetch('/__editor/chat', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      targetPath: targetPath(),
+      selector: selection?.selector || '',
+      elementId: selection?.elementId || '',
+      snippet: selection?.snippet || '',
+      message, sessionId,
+    })
+  }).then(r => r.json())
+
+  if (res.error){
+    bubble('claude', 'error', res.error)
+    return finish()
+  }
+  sessionId = res.sessionId
+  jobId = res.jobId
+
+  const out = bubble('claude', 'claude', '')
+  const status = document.createElement('div')
+  status.className = 'tool'
+  status.innerHTML = '<span class="spin"></span> working'
+  out.parentElement.appendChild(status)
+
+  const es = new EventSource('/__editor/stream/' + res.jobId)
+  es.onmessage = ev => {
+    const {type, data} = JSON.parse(ev.data)
+    if (type === 'text') out.textContent += data
+    else if (type === 'tool'){
+      const t = document.createElement('div')
+      t.className = 'tool'
+      t.textContent = '· ' + data
+      out.parentElement.insertBefore(t, status)
+    }
+    else if (type === 'cost'){
+      spend += (data.usd || 0)
+      $('spend').textContent = `session $${spend.toFixed(3)}`
+    }
+    else if (type === 'done'){
+      es.close()
+      status.remove()
+      const files = data.filesChanged || []
+      const note = document.createElement('div')
+      note.className = 'tool ' + (files.length ? 'ok' : 'bad')
+      note.textContent = files.length
+        ? '✓ ' + files.join(', ') + ' · preview reloaded'
+        : '· no files changed'
+      out.parentElement.appendChild(note)
+
+      const ripple = rippleFor(files)
+      if (ripple.length){
+        el('div', 'card', `<h4>Before this ships</h4><ul>${ripple.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`)
+      }
+      if (files.length){
+        const keep = selection
+        load()
+        selection = keep; showSelection()
+        toast('Updated ' + files.join(', '))
+      }
+      finish()
+    }
+    $('feed').scrollTop = $('feed').scrollHeight
+  }
+  es.onerror = () => { es.close(); finish() }
+}
+
+function finish(){
+  busy = false; jobId = null
+  $('send').disabled = false
+  $('stop').style.display = 'none'
+}
+
+// ---------- wiring ----------
+$('open').onclick = load
+$('reload').onclick = load
+$('pick').onclick = () => setPicking(!picking)
+$('send').onclick = send
+$('stop').onclick = async () => {
+  if (!jobId) return
+  await fetch('/__editor/stop', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({jobId})})
+  toast('Stopped')
+}
+$('newThread').onclick = () => { sessionId = null; setTab('chat'); toast('New thread. Claude has no prior context.') }
+$('tabChat').onclick = () => setTab('chat')
+$('tabLog').onclick = () => setTab('log')
+$('path').addEventListener('change', load)
+$('path').addEventListener('keydown', e => { if (e.key === 'Enter') load() })
+$('msg').addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') send() })
+
+// ---------- notes ----------
+// A note is a comment for whoever reviews the branch. It never calls Claude.
+async function addNote(){
+  const text = $('msg').value.trim()
+  if (!text) return toast('Type the note first')
+  const r = await fetch('/__editor/note', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      note: text,
+      targetPath: $('path').value || '/index.html',
+      selector: selection?.selector || '',
+      line: selection?.line || null,
+    }),
+  }).then(x => x.json()).catch(() => null)
+  if (!r || r.error) return toast('Note failed')
+  $('msg').value = ''
+  toast('Note saved to the work log')
+  if (tab === 'log') renderLog()
+}
+$('note').onclick = addNote
+
+// ---------- linking a Claude account ----------
+// The sign-in itself is a terminal flow. This tells you where you stand and
+// hands you the exact command, rather than failing on the first send.
+async function refreshAcct(){
+  const st = await fetch('/__editor/claude-status').then(r => r.json()).catch(() => null)
+  if (!st) return
+  $('acctDot').classList.toggle('ok', !!st.signedIn)
+  $('acctTxt').textContent = st.signedIn ? 'Claude linked' : 'Link Claude'
+  $('acct').title = st.how + (st.version ? ' · ' + st.version : '')
+  $('acctBody').textContent = st.signedIn
+    ? st.how + '. Edits you send run on this account, and each one costs a few cents.'
+    : st.installed
+      ? 'Claude Code is installed but not signed in. Run this in a terminal, then check again.'
+      : 'Claude Code is not installed. Install it, sign in, then check again.'
+  $('acctCmd').textContent = st.installed ? 'claude login' : 'npm install -g @anthropic-ai/claude-code'
+  return st
+}
+$('acct').onclick = async () => { await refreshAcct(); $('acctDlg').showModal() }
+$('acctClose').onclick = () => $('acctDlg').close()
+$('acctRecheck').onclick = async () => {
+  const st = await refreshAcct()
+  if (st?.signedIn){ $('acctDlg').close(); toast('Claude linked') }
+}
+refreshAcct()
+
+// ---------- handoff ----------
+// Save the work and write the handoff doc. Nothing deploys, nothing is pushed.
+$('handoff').onclick = async () => {
+  const b = $('handoff')
+  b.disabled = true; b.textContent = 'Saving...'
+  const r = await fetch('/__editor/handoff', {method:'POST'}).then(x => x.json()).catch(() => null)
+  b.disabled = false; b.textContent = 'Save and send'
+  if (!r) return toast('Save failed')
+  if (!r.ok) return toast(r.error || 'Save failed')
+  toast(`Saved. ${r.edits} edits and ${r.notes} notes across ${r.files} files, written to ${r.doc}`)
+  renderLog()
+}
+
+// ---------- the safety net ----------
+$('rollback').onclick = async () => {
+  if (!confirm('Undo every edit this session and put the branch back where it started?')) return
+  const r = await fetch('/__editor/rollback', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({confirm: true}),
+  }).then(x => x.json()).catch(() => null)
+  if (!r?.ok) return toast(r?.error || 'Roll back failed')
+  toast('Rolled back to ' + r.at)
+  load(); renderLog()
+}
+
+fetch('/__editor/who').then(r => r.json()).then(w => {
+  $('whoami').textContent = w.author + ' · ' + w.branch
+  $('whoami').title = 'Work log: ' + w.log
+}).catch(() => {})
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') setPicking(false)
+  if (e.key === 'e' && (e.metaKey || e.ctrlKey)){ e.preventDefault(); setPicking(!picking) }
+})
+
+$('vp').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return
+  ;[...$('vp').children].forEach(x => x.classList.toggle('on', x === b))
+  const f = $('frame')
+  f.className = 'frame' + (b.dataset.w === 'device' ? ' device'
+    : b.dataset.w === 'tablet' ? ' device tablet' : '')
+}
+
+QUICK.forEach(q => {
+  const c = document.createElement('span')
+  c.className = 'chip'; c.textContent = q
+  c.onclick = () => { $('msg').value = q; $('msg').focus() }
+  $('chips').appendChild(c)
+})
+
+// The dropdown is the guest app and the dashboards. The text box beside it still
+// reaches the other 230 pages when something genuinely needs it.
+fetch('/__editor/surfaces').then(r => r.json()).then(list => {
+  const groups = []
+  for (const s of list){
+    let g = groups.find(x => x.name === s.group)
+    if (!g) groups.push(g = { name: s.group, items: [] })
+    g.items.push(s)
+  }
+  $('surface').innerHTML = groups.map(g =>
+    `<optgroup label="${esc(g.name)}">` +
+    g.items.map(s => `<option value="${esc(s.path)}">${esc(s.label)}</option>`).join('') +
+    `</optgroup>`).join('')
+  $('surface').value = '/index.html'
+}).catch(() => {})
+
+$('surface').onchange = () => {
+  $('path').value = $('surface').value
+  load()
+}
+$('path').addEventListener('change', () => {
+  const hit = [...$('surface').options].some(o => o.value === $('path').value)
+  if (!hit) $('surface').selectedIndex = -1
+})
+
+fetch('/__editor/pages').then(r => r.json()).then(list => {
+  $('pages').innerHTML = list.map(p => `<option value="${p}">`).join('')
+}).catch(() => {})
+
+$('path').value = '/index.html'
+load()
+showSelection()
+</script>
+</body>
+</html>

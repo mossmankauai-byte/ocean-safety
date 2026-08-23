@@ -1,0 +1,3 @@
+# Local working files. The worklog/ directory is committed on purpose.
+.backups/
+history.jsonl
