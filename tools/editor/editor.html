@@ -48,11 +48,12 @@
   .btn:disabled{opacity:.45;cursor:not-allowed}
   .btn.sm{padding:3px 8px;font-size:12px;border-radius:6px}
 
-  input[type=text]{
+  input[type=text],select{
     padding:6px 9px;border:1px solid var(--line);border-radius:var(--r);
     background:var(--sea-900);min-width:0
   }
-  input[type=text]:focus{outline:none;border-color:var(--sea)}
+  select{font-weight:600}
+  input[type=text]:focus,select:focus{outline:none;border-color:var(--sea)}
   input::placeholder{color:var(--steel-dim)}
 
   .seg{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
@@ -186,7 +187,8 @@
       <div><b>OceanSafe Editor</b><br><span>local only</span></div>
     </div>
 
-    <input type="text" id="path" list="pages" placeholder="Search any page, e.g. best/hanalei" style="flex:1 1 200px;max-width:280px">
+    <select id="surface" style="flex:0 1 210px"></select>
+    <input type="text" id="path" list="pages" placeholder="or any other page" style="flex:1 1 150px;max-width:220px">
     <datalist id="pages"></datalist>
     <button class="btn" id="open">Open</button>
 
@@ -576,6 +578,31 @@ QUICK.forEach(q => {
   c.className = 'chip'; c.textContent = q
   c.onclick = () => { $('msg').value = q; $('msg').focus() }
   $('chips').appendChild(c)
+})
+
+// The dropdown is the guest app and the dashboards. The text box beside it still
+// reaches the other 230 pages when something genuinely needs it.
+fetch('/__editor/surfaces').then(r => r.json()).then(list => {
+  const groups = []
+  for (const s of list){
+    let g = groups.find(x => x.name === s.group)
+    if (!g) groups.push(g = { name: s.group, items: [] })
+    g.items.push(s)
+  }
+  $('surface').innerHTML = groups.map(g =>
+    `<optgroup label="${esc(g.name)}">` +
+    g.items.map(s => `<option value="${esc(s.path)}">${esc(s.label)}</option>`).join('') +
+    `</optgroup>`).join('')
+  $('surface').value = '/index.html'
+}).catch(() => {})
+
+$('surface').onchange = () => {
+  $('path').value = $('surface').value
+  load()
+}
+$('path').addEventListener('change', () => {
+  const hit = [...$('surface').options].some(o => o.value === $('path').value)
+  if (!hit) $('surface').selectedIndex = -1
 })
 
 fetch('/__editor/pages').then(r => r.json()).then(list => {

@@ -64,6 +64,24 @@ const jobs = new Map()   // jobId -> { events[], done, listeners[], child }
 const locks = new Set()  // target files with a run in flight
 const SKIP_DIRS = new Set(['tools', 'node_modules', 'icons', 'assets', '.git', '.claude'])
 
+// The surfaces worth editing: the guest app and the operator dashboards. The site
+// also holds ~230 SEO, brochure and sales pages. They are not design work, and a
+// picker full of them buries the ten pages anyone actually opens.
+const SURFACES = [
+  { group: 'Guest app',  path: '/index.html',              label: 'Guest app' },
+  { group: 'Guest app',  path: '/plan.html',               label: 'Plan tab' },
+  { group: 'Guest app',  path: '/stay-close-v2.html',      label: 'Co-branded guest guide' },
+  { group: 'Guest app',  path: '/jp.html',                 label: 'Guest app, Japanese' },
+  { group: 'Dashboard',  path: '/dashboard.html?seg=hotel',     label: 'Hotel' },
+  { group: 'Dashboard',  path: '/dashboard.html?seg=timeshare', label: 'Timeshare' },
+  { group: 'Dashboard',  path: '/dashboard.html?seg=pm',        label: 'Rentals' },
+  { group: 'Dashboard',  path: '/dashboard.html?seg=concierge', label: 'Concierge' },
+  { group: 'Dashboard',  path: '/dashboard.html?seg=cars',      label: 'Fleet' },
+  { group: 'Partner',    path: '/d.html',                  label: 'Partner home' },
+  { group: 'Partner',    path: '/p.html',                  label: 'Partner live page' },
+  { group: 'Partner',    path: '/creator-dash.html',       label: 'Creator dashboard' },
+]
+
 const send = (res, code, body, type = 'application/json') => {
   res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' })
   res.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body))
@@ -221,7 +239,12 @@ const server = http.createServer(async (req, res) => {
     return send(res, 200, await fsp.readFile(path.join(HERE, 'inspect.js')), MIME['.js'])
   }
 
-  // Every editable page on the site, so the picker is not a hand-kept list.
+  // The picker: the surfaces above, filtered to what this checkout actually has.
+  if (p === '/__editor/surfaces') {
+    return send(res, 200, SURFACES.filter(x => resolveFile(x.path)))
+  }
+
+  // Everything else on the site, for the rare edit outside the main surfaces.
   if (p === '/__editor/pages') {
     const out = []
     const walk = dir => {
