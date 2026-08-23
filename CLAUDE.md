@@ -29,14 +29,17 @@ read at an offset around the hit.
   period, a comma, a colon, or two sentences.
 - No emoji as an interface icon. Inline SVG.
 
-## Claims that are not yours to invent
+## Scope
 
-- **Never write or change a price.** Pricing lives in the standards tree and
-  changes often. If a request needs a number, say so and stop.
+Anything on this branch is fair game, pricing included. Prices, tiers and plan
+framing are being reworked, so the old numbers are not canon and are not worth
+preserving. Change what the request asks you to change.
+
+Two things still hold, because they are factual rather than commercial:
+
 - Islands are Kaua'i, Maui, O'ahu and Hawai'i Island. No others.
 - No efficacy or impact claim. There is no defensible OceanSafe number for
-  drownings, rescues or incidents prevented.
-- Never describe a hotel's free tier as a trial.
+  drownings, rescues or incidents prevented, so do not write one.
 
 ## After an edit to index.html
 
@@ -46,5 +49,6 @@ the change never reaches a guest. The editor lists this for you under
 
 ## Deploying
 
-You do not. Edits stay on the branch. The repo owner runs the ship gate and
-deploys. Say what you changed in one sentence and stop.
+You do not. Edits stay on the branch, and the repo owner runs the ship gate
+before anything reaches a real page. That review is what makes the wide scope
+above safe. Say what you changed in one sentence and stop.

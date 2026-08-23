@@ -164,7 +164,7 @@ async function runJob({ jobId, targetFile, relFile, prompt, sessionId, isNewSess
     '-p', prompt,
     '--output-format', 'stream-json',
     '--verbose',
-    '--allowedTools', 'Read', 'Edit', 'Grep', 'Glob',
+    '--allowedTools', 'Read', 'Edit', 'Write', 'MultiEdit', 'Grep', 'Glob',
     isNewSession ? '--session-id' : '--resume', sessionId,
   ]
 

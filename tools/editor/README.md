@@ -37,6 +37,10 @@ shared over the network, and nobody points a tunnel at localhost.
   notes, their requests and their diffs all arrive together in the pull request.
 - Every entry is stamped with `git config user.name`, so a shared branch is never ambiguous.
 - The reviewer runs the ship gate before anything deploys. That has not changed.
+- A collaborator has full run of the branch. `CLAUDE.md` at the repo root is the
+  brief their Claude loads on every run: how the single-file pages are built, edit
+  surgically, no em dashes, and never deploy. Edit that file to change the rules
+  for everyone at once.
 
 ## What's in the panel
 
