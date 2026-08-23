@@ -42,6 +42,14 @@
   X-Robots-Tag: noindex, nofollow
   Referrer-Policy: no-referrer
 
+# The review tool: an internal notes surface, not a page for visitors.
+/review.html
+  X-Robots-Tag: noindex, nofollow
+  Referrer-Policy: no-referrer
+/review
+  X-Robots-Tag: noindex, nofollow
+  Referrer-Policy: no-referrer
+
 # Keep demo / sample surfaces out of search engines.
 # (More-specific X-Robots-Tag below wins for these paths, so they stay noindex.)
 /demo/*

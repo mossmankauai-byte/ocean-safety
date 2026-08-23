@@ -116,6 +116,7 @@
 # --- Operator Dashboard: one file, five segments (merged 2026-08-13) ---
 # The clean routes are what operators were given and what is printed on cards.
 # They do not change; only the file behind them did.
+/review     /review.html                    200
 /hotel      /dashboard.html?seg=hotel       200
 /timeshare  /dashboard.html?seg=timeshare   200
 /rental     /dashboard.html?seg=pm          200
