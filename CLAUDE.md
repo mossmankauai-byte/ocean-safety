@@ -49,6 +49,8 @@ the change never reaches a guest. The editor lists this for you under
 
 ## Deploying
 
-You do not. Edits stay on the branch, and the repo owner runs the ship gate
-before anything reaches a real page. That review is what makes the wide scope
-above safe. Say what you changed in one sentence and stop.
+You do not, and neither does the editor. Edits stay on the branch. A session ends
+with a handoff document, the owner agrees the changes, and only then does a
+separate pass apply and ship them. That, plus a one-line rollback to
+`editor-restore/<branch>`, is what makes the wide scope above safe. Say what you
+changed in one sentence and stop.

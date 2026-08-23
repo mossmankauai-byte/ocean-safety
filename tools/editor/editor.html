@@ -136,6 +136,18 @@
   .entry.bad{border-left-color:var(--risk)}
   .entry.rev{border-left-color:var(--steel-dim)}
   .entry.note{border-left-color:var(--gold);background:rgba(201,168,76,.06)}
+  .acct{display:flex;align-items:center;gap:6px;font:11px/1 ui-monospace,Menlo,monospace}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--risk);flex:none}
+  .dot.ok{background:var(--green)}
+  dialog{border:1px solid var(--line);border-radius:10px;background:var(--sea-900);color:inherit;
+    padding:18px 20px;max-width:440px;box-shadow:0 18px 60px rgba(0,0,0,.5)}
+  dialog::backdrop{background:rgba(4,20,26,.62)}
+  dialog h3{margin:0 0 8px;font-size:15px}
+  dialog p{margin:0 0 10px;color:var(--steel);font-size:13px;line-height:1.5}
+  dialog code{display:block;background:var(--deep-900,#04141a);border:1px solid var(--line);
+    border-radius:6px;padding:8px 10px;margin:0 0 12px;font:12px/1.5 ui-monospace,Menlo,monospace;
+    color:var(--cyan);user-select:all}
+  dialog .row{display:flex;gap:8px;align-items:center}
   .entry .who{font:11px/1 ui-monospace,Menlo,monospace;color:var(--gold);margin-top:4px}
   .entry .req{font-weight:600}
   .entry .sum{color:var(--steel);margin-top:2px}
@@ -206,6 +218,7 @@
     <button class="btn" id="reload" title="Reload preview">
       <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
     </button>
+    <button class="btn" id="acct"><span class="dot" id="acctDot"></span><span id="acctTxt">Claude</span></button>
     <span class="cost" id="whoami"></span>
     <span class="cost" id="spend"></span>
   </div>
@@ -226,6 +239,8 @@
     <button id="tabLog">Work log</button>
     <span class="grow"></span>
     <button id="newThread" title="Forget this thread's context and start fresh">New thread</button>
+    <button id="handoff" title="Save the work and write the handoff. Nothing deploys.">Save and send</button>
+    <button id="rollback" title="Undo the whole session, back to where this branch started">Roll back</button>
   </div>
 
   <div class="feed" id="feed"></div>
@@ -242,6 +257,16 @@
     </div>
   </div>
 </div>
+
+<dialog id="acctDlg">
+  <h3>Link your Claude</h3>
+  <p id="acctBody"></p>
+  <code id="acctCmd">claude login</code>
+  <div class="row">
+    <button class="btn go" id="acctRecheck">Check again</button>
+    <button class="btn" id="acctClose">Close</button>
+  </div>
+</dialog>
 
 <div class="toast" id="toast"></div>
 
@@ -555,6 +580,56 @@ async function addNote(){
   if (tab === 'log') renderLog()
 }
 $('note').onclick = addNote
+
+// ---------- linking a Claude account ----------
+// The sign-in itself is a terminal flow. This tells you where you stand and
+// hands you the exact command, rather than failing on the first send.
+async function refreshAcct(){
+  const st = await fetch('/__editor/claude-status').then(r => r.json()).catch(() => null)
+  if (!st) return
+  $('acctDot').classList.toggle('ok', !!st.signedIn)
+  $('acctTxt').textContent = st.signedIn ? 'Claude linked' : 'Link Claude'
+  $('acct').title = st.how + (st.version ? ' · ' + st.version : '')
+  $('acctBody').textContent = st.signedIn
+    ? st.how + '. Edits you send run on this account, and each one costs a few cents.'
+    : st.installed
+      ? 'Claude Code is installed but not signed in. Run this in a terminal, then check again.'
+      : 'Claude Code is not installed. Install it, sign in, then check again.'
+  $('acctCmd').textContent = st.installed ? 'claude login' : 'npm install -g @anthropic-ai/claude-code'
+  return st
+}
+$('acct').onclick = async () => { await refreshAcct(); $('acctDlg').showModal() }
+$('acctClose').onclick = () => $('acctDlg').close()
+$('acctRecheck').onclick = async () => {
+  const st = await refreshAcct()
+  if (st?.signedIn){ $('acctDlg').close(); toast('Claude linked') }
+}
+refreshAcct()
+
+// ---------- handoff ----------
+// Save the work and write the handoff doc. Nothing deploys, nothing is pushed.
+$('handoff').onclick = async () => {
+  const b = $('handoff')
+  b.disabled = true; b.textContent = 'Saving...'
+  const r = await fetch('/__editor/handoff', {method:'POST'}).then(x => x.json()).catch(() => null)
+  b.disabled = false; b.textContent = 'Save and send'
+  if (!r) return toast('Save failed')
+  if (!r.ok) return toast(r.error || 'Save failed')
+  toast(`Saved. ${r.edits} edits and ${r.notes} notes across ${r.files} files, written to ${r.doc}`)
+  renderLog()
+}
+
+// ---------- the safety net ----------
+$('rollback').onclick = async () => {
+  if (!confirm('Undo every edit this session and put the branch back where it started?')) return
+  const r = await fetch('/__editor/rollback', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({confirm: true}),
+  }).then(x => x.json()).catch(() => null)
+  if (!r?.ok) return toast(r?.error || 'Roll back failed')
+  toast('Rolled back to ' + r.at)
+  load(); renderLog()
+}
 
 fetch('/__editor/who').then(r => r.json()).then(w => {
   $('whoami').textContent = w.author + ' · ' + w.branch

@@ -55,6 +55,26 @@ shared over the network, and nobody points a tunnel at localhost.
 - **New thread** drops Claude's context when you switch to an unrelated change. **Stop** kills
   a run in flight. The session's spend sits in the top right.
 
+## Ending a session
+
+**Save and send** commits the work and the log, then writes
+`tools/editor/handoff/<branch>-<stamp>.md`: what changed, every note, the diff stat,
+the prompt to hand Fable 5 once the changes are agreed, and the rollback line.
+It does not push and it does not deploy.
+
+**Roll back** puts the branch back where the session started, in one click. The
+restore point is the tag `editor-restore/<branch>`, moved to HEAD each time the
+server starts from a clean tree, so rolling back undoes this session and not the
+work that came before it. Single files can still be reverted one at a time from the
+Work log.
+
+## Linking a Claude account
+
+The **Claude** button in the header says whether this machine has a Claude Code
+account the editor can run on, and hands over the sign-in command if not. Signing
+in is a terminal flow, so the button reports and instructs rather than pretending
+to do it in the page. Each send runs on that account.
+
 ## Notes
 
 - Every run snapshots the target file into `.backups/` first. Revert restores it.

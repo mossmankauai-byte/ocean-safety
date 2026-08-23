@@ -13,6 +13,7 @@ import path from 'node:path'
 import crypto from 'node:crypto'
 import { spawn, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import os from 'node:os'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(HERE, '..', '..')
@@ -101,6 +102,158 @@ function resolveFile(urlPath) {
   if (!abs.startsWith(ROOT)) return null
   if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) abs = path.join(abs, 'index.html')
   return fs.existsSync(abs) ? abs : null
+}
+
+// --- claude account ---------------------------------------------------------
+// Presence only. This reads whether a credential exists, never what it is.
+function claudeStatus() {
+  const which = spawnSync('which', ['claude'], { encoding: 'utf8' })
+  if (which.status !== 0) {
+    return { installed: false, signedIn: false, how: 'Claude Code is not installed on this machine.' }
+  }
+  const version = (spawnSync('claude', ['--version'], { encoding: 'utf8' }).stdout || '').trim()
+
+  if (process.env.ANTHROPIC_API_KEY) {
+    return { installed: true, signedIn: true, version, how: 'API key from the environment' }
+  }
+  if (process.platform === 'darwin') {
+    const kc = spawnSync('security',
+      ['find-generic-password', '-s', 'Claude Code-credentials'], { encoding: 'utf8' })
+    if (kc.status === 0) return { installed: true, signedIn: true, version, how: 'Signed in, keychain' }
+  }
+  if (fs.existsSync(path.join(os.homedir(), '.claude', '.credentials.json'))) {
+    return { installed: true, signedIn: true, version, how: 'Signed in' }
+  }
+  return { installed: true, signedIn: false, version, how: 'Installed, but not signed in yet.' }
+}
+
+// --- handoff ----------------------------------------------------------------
+// Nothing here goes live. A session ends by saving the work on the branch and
+// writing a handoff: what changed, what was noted, the prompt to hand Fable 5
+// once the changes are agreed, and the one line that undoes all of it.
+function gitRun(...a) {
+  const r = spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' })
+  return { ok: r.status === 0, out: ((r.stdout || '') + (r.stderr || '')).trim() }
+}
+
+const RESTORE_TAG = 'editor-restore/' + BRANCH.replace(/[\/\\]/g, '-')
+const HANDOFF_DIR = path.join(HERE, 'handoff')
+
+// The safety net. A tag marking where the branch stood when this session began,
+// so the session can be undone whole without touching work that was already
+// accepted. It moves to HEAD at startup, but only from a clean tree: if there
+// are uncommitted changes the old point is still the honest one.
+function setRestorePoint() {
+  const at = gitRun('rev-parse', RESTORE_TAG)
+  if (at.ok) return at.out
+  const head = gitRun('rev-parse', 'HEAD').out
+  gitRun('tag', '-f', RESTORE_TAG, head)
+  return head
+}
+
+function initRestorePoint() {
+  const dirty = gitRun('status', '--porcelain').out
+  const head = gitRun('rev-parse', 'HEAD').out
+  if (!dirty) gitRun('tag', '-f', RESTORE_TAG, head)
+  return setRestorePoint()
+}
+
+async function handoff() {
+  let log = []
+  try {
+    log = (await fsp.readFile(HISTORY, 'utf8')).trim().split('\n').filter(Boolean).map(l => JSON.parse(l))
+  } catch {}
+  const edits = log.filter(n => n.kind === 'edit' && n.ok)
+  const notes = log.filter(n => n.kind === 'note')
+  const restore = setRestorePoint()
+
+  gitRun('add', '-A')
+  if (!gitRun('diff', '--cached', '--name-only').out) {
+    return { ok: false, error: 'Nothing to save. No files have changed.' }
+  }
+
+  const commit = gitRun('-c', `user.name=${AUTHOR}`, 'commit', '-m',
+    `${BRANCH}: ${edits.length} edits, ${notes.length} notes`,
+    '-m', `From the click-to-edit editor. Nothing deployed.`)
+  if (!commit.ok) return { ok: false, error: commit.out }
+
+  const files = gitRun('diff', '--name-only', restore, 'HEAD').out.split('\n').filter(Boolean)
+  const stat = gitRun('diff', '--stat', restore, 'HEAD').out
+  const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')
+  const rel = path.join('tools', 'editor', 'handoff', `${BRANCH.replace(/[\/\\]/g, '-')}-${stamp}.md`)
+
+  const doc = [
+    `# Editor session: ${BRANCH}`,
+    ``,
+    `${AUTHOR} · ${new Date().toLocaleString()} · ${edits.length} edits, ${notes.length} notes`,
+    `Nothing has been deployed. Everything below lives on this branch only.`,
+    ``,
+    `## Roll back`,
+    ``,
+    `Undoes the whole session, every edit, in one line:`,
+    ``,
+    '```bash',
+    `git -C ${ROOT} reset --hard ${RESTORE_TAG}`,
+    '```',
+    ``,
+    `Restore point: \`${restore.slice(0, 12)}\`. Single files can also be reverted one at a time`,
+    `from the Work log tab.`,
+    ``,
+    `## Files changed`,
+    ``,
+    files.length ? '```\n' + stat + '\n```' : '_none_',
+    ``,
+    `## What was asked for`,
+    ``,
+    ...(edits.length ? edits.map(e => `- **${e.target}${e.line ? ':' + e.line : ''}** ${e.request}\n  - ${e.summary}`) : ['_no edits_']),
+    ``,
+    `## Notes`,
+    ``,
+    ...(notes.length ? notes.map(n => `- **${n.target}${n.line ? ':' + n.line : ''}** ${n.request}`) : ['_no notes_']),
+    ``,
+    `## Once these changes are agreed`,
+    ``,
+    `Paste this to Fable 5 in the repo:`,
+    ``,
+    '```',
+    `Review branch ${BRANCH} against ${RESTORE_TAG}. It is editor work from ${AUTHOR},`,
+    `${edits.length} edits across ${files.length} file${files.length === 1 ? '' : 's'}, none of it deployed.`,
+    ``,
+    `1. Read the diff and confirm each change matches what was asked for above.`,
+    `2. Flag anything that touched shared code rather than the one element,`,
+    `   anything in dashboard.html outside OS_SEGMENTS, and any em dash.`,
+    `3. If index.html changed, bump CACHE_VERSION in sw.js.`,
+    `4. Report what is safe to ship and what is not. Do not deploy.`,
+    '```',
+    ``,
+    `Then, in order:`,
+    ``,
+    '```bash',
+    `/code-review high`,
+    '```',
+    ``,
+    '```bash',
+    `python3 ~/.claude/oceansafe-standards/checks/oscheck.py <file> --segment <segment> --paid|--free`,
+    '```',
+    ``,
+    `The ship gate is the last word. On HOLD, fix the blockers before anything moves.`,
+    ``,
+  ].join('\n')
+
+  await fsp.mkdir(HANDOFF_DIR, { recursive: true })
+  await fsp.writeFile(path.join(ROOT, rel), doc)
+  gitRun('add', rel)
+  gitRun('-c', `user.name=${AUTHOR}`, 'commit', '-m', `handoff: ${BRANCH} ${stamp}`)
+
+  return { ok: true, doc: rel, restore: RESTORE_TAG, files: files.length, edits: edits.length, notes: notes.length }
+}
+
+async function rollback() {
+  const at = gitRun('rev-parse', RESTORE_TAG)
+  if (!at.ok) return { ok: false, error: 'No restore point on this branch yet.' }
+  const r = gitRun('reset', '--hard', RESTORE_TAG)
+  if (!r.ok) return { ok: false, error: r.out }
+  return { ok: true, at: at.out.slice(0, 12) }
 }
 
 // --- source anchoring -------------------------------------------------------
@@ -279,6 +432,22 @@ const server = http.createServer(async (req, res) => {
     return send(res, 404, { error: 'no such job' })
   }
 
+  if (p === '/__editor/claude-status') {
+    return send(res, 200, claudeStatus())
+  }
+
+  if (p === '/__editor/handoff' && req.method === 'POST') {
+    try { return send(res, 200, await handoff()) }
+    catch (e) { return send(res, 500, { ok: false, error: String(e.message || e) }) }
+  }
+
+  if (p === '/__editor/rollback' && req.method === 'POST') {
+    const body = await readBody(req)
+    if (!body.confirm) return send(res, 400, { ok: false, error: 'not confirmed' })
+    try { return send(res, 200, await rollback()) }
+    catch (e) { return send(res, 500, { ok: false, error: String(e.message || e) }) }
+  }
+
   // Who is driving, shown in the shell so a shared branch is never ambiguous.
   if (p === '/__editor/who') {
     return send(res, 200, { author: AUTHOR, branch: BRANCH, log: path.relative(ROOT, HISTORY) })
@@ -428,4 +597,5 @@ server.listen(PORT, () => {
   console.log(`serving ${ROOT}`)
   console.log(`branch  ${BRANCH}  ·  ${AUTHOR}`)
   console.log(`worklog ${path.relative(ROOT, HISTORY)}  (commit it with your changes)`)
+  console.log(`restore ${RESTORE_TAG} at ${initRestorePoint().slice(0, 12)}  ·  nothing here deploys`)
 })
