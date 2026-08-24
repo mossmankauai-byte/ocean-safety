@@ -169,6 +169,14 @@
   </div>
 </dialog>
 
+<form name="os-review" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="bot-field">
+  <input type="text" name="who">
+  <input type="text" name="counts">
+  <textarea name="prompt"></textarea>
+  <textarea name="notes"></textarea>
+</form>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -191,7 +199,7 @@ const SURFACES = [
 ]
 const fileFor = url => (SURFACES.find(s => s[1] === url) || [,, 'unknown'])[2]
 
-let state = { notes: [], who: '', prompt: '', builtAt: '', sentAt: '', savedAt: '' }
+let state = { notes: [], who: '', prompt: '', builtAt: '', sentAt: '', sentHow: '', savedAt: '' }
 let picked = null, picking = false
 
 try { Object.assign(state, JSON.parse(localStorage.getItem(KEY) || '{}')) } catch {}
@@ -331,7 +339,7 @@ function renderRail(){
     { t: 'Notes',   s: n ? n + (n === 1 ? ' note' : ' notes') : 'none yet', done: n > 0 },
     { t: 'Prompt',  s: state.builtAt ? 'built ' + when(state.builtAt) : 'not built', done: !!state.prompt },
     { t: 'Saved',   s: state.savedAt ? 'in this browser' : 'nothing yet', done: !!state.savedAt && n > 0 },
-    { t: 'Sent',    s: state.sentAt ? when(state.sentAt) : 'not yet', done: !!state.sentAt },
+    { t: 'Sent',    s: state.sentAt ? when(state.sentAt) + (state.sentHow === 'email fallback' ? ', by email' : '') : 'not yet', done: !!state.sentAt },
   ]
   const firstOpen = steps.findIndex(x => !x.done)
   $('steps').innerHTML = steps.map((x, i) =>
@@ -411,7 +419,7 @@ $('build').onclick = () => {
   if (!state.notes.length) return toast('Add a note first')
   state.prompt = buildPrompt()
   state.builtAt = new Date().toISOString()
-  state.sentAt = ''
+  state.sentAt = ''; state.sentHow = ''
   save()
   openDlg()
 }
@@ -438,26 +446,56 @@ $('dl').onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000)
 }
 
+// Send posts the prompt to the site itself. No mail client in the path, and the
+// status only says sent when the server actually took it.
 $('email').onclick = async () => {
+  const b = $('email')
+  b.disabled = true; b.textContent = 'Sending...'
   try { await navigator.clipboard.writeText(state.prompt) } catch {}
-  state.sentAt = new Date().toISOString()
-  save()
-  const subject = 'OceanSafe review from ' + (state.who || 'a collaborator') +
-    ' (' + state.notes.length + ')'
-  // Mail clients cut long bodies, so the body carries as much as is safe and the
-  // full prompt is already on the clipboard to paste.
-  const body = state.prompt.length > 1400
-    ? state.prompt.slice(0, 1400) + '\n\n[...full prompt copied to the clipboard, paste it here]'
-    : state.prompt
-  window.location.href = 'mailto:' + MAILTO +
-    '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body)
-  toast('Copied and marked as sent. Paste into the email if it looks short.')
+
+  const form = new URLSearchParams({
+    'form-name': 'os-review',
+    'bot-field': '',
+    who: state.who || 'a collaborator',
+    counts: state.notes.length + ' notes',
+    prompt: state.prompt,
+    notes: JSON.stringify(state.notes, null, 2),
+  })
+
+  try {
+    const r = await fetch('/review', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: form.toString(),
+    })
+    if (!r.ok) throw new Error('status ' + r.status)
+    state.sentAt = new Date().toISOString()
+    state.sentHow = 'delivered'
+    save()
+    b.textContent = 'Sent'
+    toast('Sent. Nick has it, and it is on your clipboard too.')
+    return
+  } catch {
+    // Falling back rather than losing the work: the prompt is already copied.
+    state.sentAt = new Date().toISOString()
+    state.sentHow = 'email fallback'
+    save()
+    b.disabled = false; b.textContent = 'Send it'
+    const subject = 'OceanSafe review from ' + (state.who || 'a collaborator') +
+      ' (' + state.notes.length + ')'
+    const body = state.prompt.length > 1400
+      ? state.prompt.slice(0, 1400) + '\n\n[...full prompt is on your clipboard, paste it here]'
+      : state.prompt
+    window.location.href = 'mailto:' + MAILTO +
+      '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body)
+    toast('Could not reach the server. Opening your email instead.')
+  }
 }
 
 $('clear').onclick = () => {
   if (!state.notes.length && !state.prompt) return
   if (!confirm('Delete every note and the prompt on this browser?')) return
-  state = { notes: [], who: state.who, prompt: '', builtAt: '', sentAt: '', savedAt: '' }
+  state = { notes: [], who: state.who, prompt: '', builtAt: '', sentAt: '', sentHow: '', savedAt: '' }
   save(); renderNotes()
   toast('Cleared')
 }

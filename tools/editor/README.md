@@ -75,6 +75,27 @@ account the editor can run on, and hands over the sign-in command if not. Signin
 in is a terminal flow, so the button reports and instructs rather than pretending
 to do it in the page. Each send runs on that account.
 
+## The hosted review tool
+
+`/review` on the live site is the no-install door: someone opens the link, clicks a
+region, writes what should change, hits **Build the prompt**, then **Send it**. No
+clone, no terminal, no Claude account.
+
+Sending posts to Netlify Forms, so it does not depend on their mail client. If the
+post fails the page falls back to opening an email, and the status rail says which
+happened. To read what has come in:
+
+```bash
+node tools/review-inbox.mjs          # new since last time
+node tools/review-inbox.mjs --all    # everything Netlify still holds
+node tools/review-inbox.mjs --seen   # mark the shown ones handled
+```
+
+It uses the Netlify token already on this machine, so there is no key to store. The
+prompt that arrives carries the requests grouped by file, the element and selector
+for each, and the rules the change has to survive. Review it, edit it, then apply
+it on a branch.
+
 ## Notes
 
 - Every run snapshots the target file into `.backups/` first. Revert restores it.
