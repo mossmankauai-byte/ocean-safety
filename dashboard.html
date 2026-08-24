@@ -96,12 +96,19 @@ window.OS_SEGMENTS = {
   }
 };
 
-/* Segment comes from the route (_redirects rewrites /hotel -> ?seg=hotel), not from
-   anything an operator can usefully retype. An unknown value falls back to pm rather
-   than rendering an empty shell. */
+/* Segment comes from the route, not from anything an operator can usefully retype.
+   A Netlify 200 rewrite keeps the browser on /hotel, so the ?seg= it points at never
+   reaches location.search: the path is the reliable signal and the query is the
+   fallback for a direct dashboard.html?seg= hit. An unknown value falls back to pm
+   rather than rendering an empty shell. */
 (function(){
+  /* Two routes are named for the operator rather than the segment key. */
+  var ALIAS = { rental:'pm', fleet:'cars' };
   try{
-    var q = new URLSearchParams(location.search).get('seg') || '';
+    var slug = location.pathname.replace(/^\/|\/$/g, '').toLowerCase();
+    slug = ALIAS[slug] || slug;
+    var q = window.OS_SEGMENTS[slug] ? slug
+          : (new URLSearchParams(location.search).get('seg') || '');
     if(!window.OS_SEGMENTS[q]) q = 'pm';
     window.OS_SEG = q;
     window.OS_SEGCFG = window.OS_SEGMENTS[q];
