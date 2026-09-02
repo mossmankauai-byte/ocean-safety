@@ -96,12 +96,30 @@ window.OS_SEGMENTS = {
   }
 };
 
-/* Segment comes from the route (_redirects rewrites /hotel -> ?seg=hotel), not from
-   anything an operator can usefully retype. An unknown value falls back to pm rather
-   than rendering an empty shell. */
+/* Segment comes from the route, not from anything an operator can usefully retype.
+   An unknown value falls back to pm rather than rendering an empty shell.
+
+   READ THE PATHNAME FIRST. _redirects maps the operator routes with a 200 rewrite
+   (/hotel -> /dashboard.html?seg=hotel). A 200 rewrite serves the target file's bytes
+   at the ORIGINAL url and does NOT put the target's query string on the browser url,
+   so location.search never carried seg= and every route silently fell through to pm:
+   a hotel signing in at /hotel was greeted with "Your Rentals". Measured on all five
+   routes 2026-09-01. The route table below is the authority; ?seg= stays as the
+   fallback so /dashboard.html?seg=<x> keeps working for the demo and portal copies.
+   Keep this map in step with the operator rules in _redirects.
+
+   Keyed on the BARE route word, never "/word": the gate reads a leading-slash route
+   as a link to another segment's surface, and a lookup table is not a link. Bare keys
+   keep that check honest instead of loosening it. */
+window.OS_ROUTE_SEG = {
+  hotel:'hotel', timeshare:'timeshare', rental:'pm',
+  concierge:'concierge', fleet:'cars'
+};
 (function(){
   try{
-    var q = new URLSearchParams(location.search).get('seg') || '';
+    var path = String(location.pathname || '').toLowerCase().replace(/^\/+|\/+$/g,'');
+    var q = (Object.prototype.hasOwnProperty.call(window.OS_ROUTE_SEG, path) ? window.OS_ROUTE_SEG[path] : '')
+            || new URLSearchParams(location.search).get('seg') || '';
     if(!window.OS_SEGMENTS[q]) q = 'pm';
     window.OS_SEG = q;
     window.OS_SEGCFG = window.OS_SEGMENTS[q];

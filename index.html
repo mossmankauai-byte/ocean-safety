@@ -11352,11 +11352,35 @@ window._partnerCfgReady = (function(){
   // minted config (KV pcfg:<slug>, written by the Jade mint page). Both
   // fetches share the one 20s abort envelope. Both missing → resolved null →
   // every partner surface inert, exactly as before the fallback existed.
+  // Third fallback: a partner who was provisioned through signup has NEITHER a committed
+  // file NOR a minted KV config, because no signup path writes one. cfg then resolved null,
+  // the block below was skipped, and _promoFetchLive never ran, so their promotions were
+  // never fetched and no guest ever saw an offer they had saved. Nine of eleven live
+  // partners were in that state (measured 2026-09-01). get_partner_page is the public,
+  // live-only lookup; we synthesise the MINIMUM config from it. island is the load-bearing
+  // field: it keeps the C-3 island guard below working unchanged, so a Kauaʻi partner's
+  // offers still cannot render on a Maui session. Name, logo and brand colours are
+  // deliberately NOT carried over, so this fixes the offer path without also switching on
+  // a co-brand surface those partners have never had.
+  const _synthCfg = () => fetch('https://arndnljtmjfsnzcpcuen.supabase.co/rest/v1/rpc/get_partner_page', {
+      method:'POST',
+      headers:{'Content-Type':'application/json',
+               'apikey':'sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um',
+               'Authorization':'Bearer sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um'},
+      body: JSON.stringify({p_slug: slug}), signal: opts.signal
+    }).then(r => (r.ok ? r.json() : null))
+      .then(rows => {
+        const p = Array.isArray(rows) ? rows[0] : (rows && rows.slug ? rows : null);
+        return (p && p.island) ? { slug: p.slug, island: p.island, promotions: [], _synth: true } : null;
+      })
+      .catch(() => null);
+
   return fetch('/partner-config/' + slug + '.json', opts)
     .then(r => (r.ok ? r.json() : Promise.reject(new Error('no committed config'))))
     .catch(() => fetch('https://concierge-guide-api.oceansafe-hi.workers.dev/cfg/' + slug, opts)
       .then(r => (r.ok ? r.json() : null))
       .catch(() => null))
+    .then(cfg => (cfg && typeof cfg === 'object' && !Array.isArray(cfg)) ? cfg : _synthCfg())
     .then(cfg => {
       if(timer) clearTimeout(timer);
       if(cfg && typeof cfg === 'object' && !Array.isArray(cfg)){
