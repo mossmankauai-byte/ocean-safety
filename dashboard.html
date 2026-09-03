@@ -3137,7 +3137,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       return acc;
     }
 
-    fetch(API + '/api/dashboard/' + encodeURIComponent(slug) + '?period=' + period)
+    fetch(API + '/api/dashboard/' + encodeURIComponent(slug) + '?period=' + period + (window.OS_KEY ? '&key=' + encodeURIComponent(window.OS_KEY) : ''))
       .then(function(res){ if(!res.ok) throw new Error('http ' + res.status); return res.json(); })
       .then(function(data){
         var cur = sumRolls(data.days);
@@ -5086,7 +5086,7 @@ if(DEMO){
   var API = 'https://concierge-guide-api.oceansafe-hi.workers.dev';
   try{ var apiQ = new URLSearchParams(location.search).get('api'); if(apiQ) API = apiQ.replace(/\/+$/,''); }catch(e){}
   Promise.all(g.props.map(function(p){
-    return fetch(API+'/api/dashboard/'+encodeURIComponent(p.slug)+'?period='+WINDOW_DAYS)
+    return fetch(API+'/api/dashboard/'+encodeURIComponent(p.slug)+'?period='+WINDOW_DAYS+(p.key?('&key='+encodeURIComponent(p.key)):''))
       .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
       .then(function(d){ return liveP(p, mergeFullRolls(d.days)); })
       .catch(function(){ return liveP(p, null); });
