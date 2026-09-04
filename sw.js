@@ -18,7 +18,7 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const CACHE_VERSION = 'v301-2026-08-18-hotel-free-tier';
+const CACHE_VERSION = 'v302-2026-09-04-basemap-no-key';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -57,9 +57,9 @@ if (workbox) {
     })
   );
 
-  // CartoDB / Stamen / other tile providers (defensive — catches future tile swaps)
+  // CartoDB / Esri / other tile providers (defensive, catches future tile swaps)
   workbox.routing.registerRoute(
-    /^https:\/\/[a-d]?\.?(basemaps\.cartocdn|tile\.openstreetmap|tiles\.stadiamaps)\.[a-z]+\//,
+    /^https:\/\/([a-d]?\.?(basemaps\.cartocdn|tile\.openstreetmap|tiles\.stadiamaps)\.[a-z]+|server\.arcgisonline\.com)\//,
     new workbox.strategies.CacheFirst({
       cacheName: 'map-tiles',
       plugins: [

@@ -3930,6 +3930,20 @@ async function getCond(b){
 
 // MAP
 let map,mkrs={},ints=['snorkel','swim'],scored={};
+// Basemap. CARTO Voyager began requiring an API key in 2026 and now serves a watermarked
+// "API KEY REQUIRED" tile without one. Paste a key below to restore Voyager; left empty we
+// use Esri World Topo, which needs no key and is the same host as the satellite layer.
+window.OS_CARTO_KEY = '';
+function osBasemap(extra){
+  var o = Object.assign({maxZoom:19}, extra||{});
+  if (window.OS_CARTO_KEY){
+    o.attribution = '\u00a9OpenStreetMap \u00a9CartoDB'; o.subdomains = 'abcd';
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=' + window.OS_CARTO_KEY, o);
+  }
+  o.attribution = 'Esri'; delete o.subdomains; delete o.className;
+  return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', o);
+}
+
 function initMap(){
   map=L.map('map',{center:ACTIVE.map.center,zoom:ACTIVE.map.zoom,minZoom:ACTIVE.map.minZoom,zoomSnap:0.5,maxBoundsViscosity:0.75,zoomControl:false,attributionControl:false});
   if(ACTIVE.map.maxBounds) map.setMaxBounds(ACTIVE.map.maxBounds);
@@ -3946,7 +3960,7 @@ function initMap(){
       },140);
     });
   }
-  window._streetTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'©OpenStreetMap ©CartoDB',subdomains:'abcd'}).addTo(map);
+  window._streetTile = osBasemap().addTo(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri'});
   window._isSat = false;
 
@@ -5597,7 +5611,7 @@ function _dvEnsureDom(){
 function _dvEnsureMap(){
   if(_dvMap) return _dvMap;
   _dvMap=L.map('dvMap',{zoomControl:true,attributionControl:false});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(_dvMap);
+  osBasemap().addTo(_dvMap);
   return _dvMap;
 }
 function _dvSelect(i){
