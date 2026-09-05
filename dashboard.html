@@ -3271,6 +3271,22 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       .catch(function(err){
         // fetch failed: leave the page exactly as the SAMPLE preview. Never throw.
         if(window.console && console.warn) console.warn('OceanSafety live telemetry unavailable, showing preview:', err);
+        /* A console warning is a message to us, and nobody is reading the operator's
+           console. For a REAL operator (they arrived with a slug) the standing banner
+           says "No measured data yet", which reads as "nothing has happened at your
+           property" when the truth is that we could not reach the data. Say which one
+           it is, so a broken key surfaces as a support call instead of a quiet quarter
+           of blank charts. The un-slugged sample preview keeps its own wording. */
+        try{
+          if(!slug || slug === 'demo') return;
+          var fb = document.getElementById('freshBanner');
+          if(!fb) return;
+          var why = /http 40[13]/i.test(String(err && err.message)) ? 'this dashboard is not connected to your data yet'
+                                                                   : 'we could not reach your data just now';
+          fb.innerHTML = '<span class="pv sample"></span> Live figures unavailable: ' + why
+            + ' &middot; the numbers below are sample data &middot; email nick@oceansafety.app and we will fix it';
+          fb.style.display = '';
+        }catch(_){}
       });
   } catch(e){
     if(window.console && console.warn) console.warn('OceanSafety live telemetry init error, showing preview:', e);

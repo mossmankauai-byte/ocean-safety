@@ -1,0 +1,79 @@
+name: Dashboard gates
+
+# Runs the Dashboard release-readiness gates on every pull request and on every push to a
+# work branch. The gates live in the standards tree (~/.claude/oceansafe-standards on
+# Nick's Mac), which is not a public repo, so this workflow vendors the four runnable
+# checks from .github/checks/ in THIS repo. Keep those copies in step with the standards
+# tree; the standards tree is the source, this is the mirror CI can reach.
+#
+# Gate 1  dashboard-ops.js         every segment route, every view, promo inputs, download
+# Gate 3  route-isolation.py       segment round-trip, fork detection, slug guessing
+# Gate 4  config-contract.js       partner-config contract, validation, fault injection
+# Gate 6  clean-route-freshness.py clean routes that must never serve a stale build
+
+on:
+  pull_request:
+  push:
+    branches: ["work/**"]
+  schedule:
+    # 16:00 UTC = 6:00am HST, an hour after the freshness job. This is the synthetic
+    # monitor: it walks the DEPLOYED Dashboard every morning, so a segment serving the
+    # wrong console, a stale clean route, or a partner config that stopped validating
+    # shows up as a failed run here rather than as a customer telling us.
+    - cron: "0 16 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null
+          npm i -D playwright@1.62.0 >/dev/null
+          npx playwright install --with-deps chromium
+
+      - name: Gate 6 · clean-route freshness (static, no network)
+        run: python3 .github/checks/clean-route-freshness.py .
+
+      - name: Gate 4 · partner-config contract
+        run: node .github/checks/config-contract.js .
+
+      - name: Gate 1 · Dashboard functional walk (this commit's files)
+        run: node .github/checks/dashboard-ops.js "$PWD/dashboard.html"
+
+      - name: Gate 3 · routing and tenant isolation (live mirror)
+        # Reads the deployed site, so it reports what customers have right now rather
+        # than what this branch would deploy. Kept non-blocking on pull requests for
+        # that reason; it blocks on the scheduled run instead.
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
+        run: python3 .github/checks/route-isolation.py --repo .
+
+      - name: Gate 1 · walk the DEPLOYED Dashboard (scheduled runs only)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: node .github/checks/dashboard-ops.js https://ocean-safety.netlify.app --redirects .
+
+      - name: Gates 9, 7, 8 · faults, performance budget, accessibility (scheduled only)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: node .github/checks/dashboard-faults.js https://ocean-safety.netlify.app
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Dashboard gates"
+            echo ""
+            echo "Commit \`${GITHUB_SHA::7}\` on \`${GITHUB_REF_NAME}\`"
+            echo ""
+            echo "Cache version in sw.js: \`$(grep -oE "CACHE_VERSION = '[^']+'" sw.js | head -1)\`"
+          } >> "$GITHUB_STEP_SUMMARY"
