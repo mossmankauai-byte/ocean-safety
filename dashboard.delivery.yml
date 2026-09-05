@@ -1,0 +1,15 @@
+# Delivery spec for dashboard.html, the one operator surface.
+# Required by oscheck.py --type console. The Dashboard is not sent to one recipient:
+# it is served at five segment routes and the segment is resolved from the pathname.
+
+recipient: any signed-in operator, at their own segment route
+segment: hotel, timeshare, pm, rental, concierge, cars   # /rental serves the pm segment
+tier: paid    # OS_PLAN defaults to paid; ?plan=free swaps the frame for the free-tier card
+fulfillment: >
+  Hand-onboarded through the sales-dashboard Close tab, or self-serve through
+  /join -> operator-signup-public -> square-webhook. The static square.link
+  URLs provision nothing (OD-1) and are never linked from here.
+must_be_true_after: >
+  The operator lands on their own segment's dashboard, sees their own property
+  name in the header, and every tab they can see is about their property.
+  Verified by checks/dashboard-ops.js, which must pass 60/60 before a deploy.
