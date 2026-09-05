@@ -18,7 +18,7 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const const CACHE_VERSION = 'v307-2026-09-05-telemetry-session-key-wins';
+const CACHE_VERSION = 'v308-2026-09-05-sw-parse-fix-and-sales-route';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -199,6 +199,11 @@ if (workbox) {
       // partner's own co-brand page; /plan and /onboard are prospect-facing; /review is
       // the internal notes surface. All five were served from the app-shell cache.
       /^\/(plan|onboard|review)$/.test(url.pathname) ||
+      // OD-19, sixth recurrence. /sales and /jade-sales rewrite to .html with a 200, so the
+      // pathname here has no .html and the alternation below never fired. Worse than stale
+      // for these two: their SALT/IV live in the wrapper and their ciphertext in a separate
+      // .bin that carries no SW route, so a stale wrapper makes the password itself look wrong.
+      /^\/(sales|jade-sales)$/.test(url.pathname) ||
       /^\/p\//.test(url.pathname) ||
       url.pathname === '/demo/dashboard' || /^\/demo\/dashboard\//.test(url.pathname) ||
       url.pathname === '/assets/creator-kit.js' ||
