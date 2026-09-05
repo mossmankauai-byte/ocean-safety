@@ -3944,6 +3944,14 @@ function osBasemap(extra){
   return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', o);
 }
 
+// CARTO's free basemap terms require CARTO and OpenStreetMap to be credited visibly.
+// Every map here is built with attributionControl:false, so switch the control back on
+// whenever a CARTO key is in play. No-op on the Esri branch.
+function osCredit(map){
+  if (!window.OS_CARTO_KEY || !map || map._osCredit) return;
+  map._osCredit = L.control.attribution({prefix:false}).addTo(map);
+}
+
 function initMap(){
   map=L.map('map',{center:ACTIVE.map.center,zoom:ACTIVE.map.zoom,minZoom:ACTIVE.map.minZoom,zoomSnap:0.5,maxBoundsViscosity:0.75,zoomControl:false,attributionControl:false});
   if(ACTIVE.map.maxBounds) map.setMaxBounds(ACTIVE.map.maxBounds);
@@ -3960,7 +3968,7 @@ function initMap(){
       },140);
     });
   }
-  window._streetTile = osBasemap().addTo(map);
+  window._streetTile = osBasemap().addTo(map); osCredit(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri'});
   window._isSat = false;
 
@@ -5611,7 +5619,7 @@ function _dvEnsureDom(){
 function _dvEnsureMap(){
   if(_dvMap) return _dvMap;
   _dvMap=L.map('dvMap',{zoomControl:true,attributionControl:false});
-  osBasemap().addTo(_dvMap);
+  osBasemap().addTo(_dvMap); osCredit(_dvMap);
   return _dvMap;
 }
 function _dvSelect(i){

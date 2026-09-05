@@ -3623,6 +3623,14 @@ function osBasemap(extra){
   return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', o);
 }
 
+// CARTO's free basemap terms require CARTO and OpenStreetMap to be credited visibly.
+// Every map here is built with attributionControl:false, so switch the control back on
+// whenever a CARTO key is in play. No-op on the Esri branch.
+function osCredit(map){
+  if (!window.OS_CARTO_KEY || !map || map._osCredit) return;
+  map._osCredit = L.control.attribution({prefix:false}).addTo(map);
+}
+
 function initMap(){
   map=L.map('map',{center:[22.05,-159.50],zoom:10,minZoom:10,zoomControl:false,attributionControl:false,maxBounds:[[21.45,-160.15],[22.65,-158.95]],maxBoundsViscosity:0.75});
   // Elastic island edge — same rule as the main app: give a little at the boundary, then
@@ -3634,7 +3642,7 @@ function initMap(){
       map.panInsideBounds(map.options.maxBounds,{animate:true,duration:.35});
     },140);
   });
-  window._streetTile = osBasemap().addTo(map);
+  window._streetTile = osBasemap().addTo(map); osCredit(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri'});
   window._isSat = false;
 

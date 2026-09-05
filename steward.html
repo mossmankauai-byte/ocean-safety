@@ -4581,6 +4581,14 @@ function osBasemap(extra){
   return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', o);
 }
 
+// CARTO's free basemap terms require CARTO and OpenStreetMap to be credited visibly.
+// Every map here is built with attributionControl:false, so switch the control back on
+// whenever a CARTO key is in play. No-op on the Esri branch.
+function osCredit(map){
+  if (!window.OS_CARTO_KEY || !map || map._osCredit) return;
+  map._osCredit = L.control.attribution({prefix:false}).addTo(map);
+}
+
 function initMap(){
   // Layer 4: map init framing comes from the ACTIVE island's config (center/zoom/minZoom +
   // optional maxBounds); frameIsland() below fits the island exactly. Kauaʻi's config mirrors
@@ -4605,7 +4613,7 @@ function initMap(){
   // the .leaflet-container ocean-blue background shows through (a flat sea + the beach pins) instead
   // of a grid of broken-tile squares. Pins/markers are DOM, not tiles, so they still render offline.
   const _blankTile='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
-  window._streetTile = osBasemap({errorTileUrl:_blankTile,className:'os-basemap'}).addTo(map);
+  window._streetTile = osBasemap({errorTileUrl:_blankTile,className:'os-basemap'}).addTo(map); osCredit(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri',errorTileUrl:_blankTile});
   window._isSat = false;
 
@@ -8451,7 +8459,7 @@ function _dvSetMode(m){
 function _dvEnsureMap(){
   if(_dvMap) return _dvMap;
   _dvMap=L.map('dvMap',{zoomControl:true,attributionControl:false});
-  osBasemap().addTo(_dvMap);
+  osBasemap().addTo(_dvMap); osCredit(_dvMap);
   return _dvMap;
 }
 function _dvSelect(i){
