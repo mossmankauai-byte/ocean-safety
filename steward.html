@@ -4570,15 +4570,23 @@ let map,mkrs={},ints=['snorkel','swim'],scored={};
 // Basemap. CARTO Voyager began requiring an API key in 2026 and now serves a watermarked
 // "API KEY REQUIRED" tile without one. Paste a key below to restore Voyager; left empty we
 // use Esri World Topo, which needs no key and is the same host as the satellite layer.
-window.OS_CARTO_KEY = '';
+window.OS_CARTO_KEY = 'cb1_2xoh_1_1c9ee40a2d7054fa0a5c8896';
 function osBasemap(extra){
   var o = Object.assign({maxZoom:19}, extra||{});
   if (window.OS_CARTO_KEY){
     o.attribution = '\u00a9OpenStreetMap \u00a9CartoDB'; o.subdomains = 'abcd';
-    return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=' + window.OS_CARTO_KEY, o);
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=' + window.OS_CARTO_KEY, o);
   }
   o.attribution = 'Esri'; delete o.subdomains; delete o.className;
   return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', o);
+}
+
+// CARTO's free basemap terms require CARTO and OpenStreetMap credited visibly. Every map
+// here is built with attributionControl:false, so switch the control on when a key is in
+// use. No-op on the Esri branch.
+function osCredit(map){
+  if (!window.OS_CARTO_KEY || !map || map._osCredit) return;
+  map._osCredit = L.control.attribution({prefix:false}).addTo(map);
 }
 
 function initMap(){
@@ -4605,7 +4613,7 @@ function initMap(){
   // the .leaflet-container ocean-blue background shows through (a flat sea + the beach pins) instead
   // of a grid of broken-tile squares. Pins/markers are DOM, not tiles, so they still render offline.
   const _blankTile='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
-  window._streetTile = osBasemap({errorTileUrl:_blankTile,className:'os-basemap'}).addTo(map);
+  window._streetTile = osBasemap({errorTileUrl:_blankTile,className:'os-basemap'}).addTo(map); osCredit(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri',errorTileUrl:_blankTile});
   window._isSat = false;
 
@@ -8451,7 +8459,7 @@ function _dvSetMode(m){
 function _dvEnsureMap(){
   if(_dvMap) return _dvMap;
   _dvMap=L.map('dvMap',{zoomControl:true,attributionControl:false});
-  osBasemap().addTo(_dvMap);
+  osBasemap().addTo(_dvMap); osCredit(_dvMap);
   return _dvMap;
 }
 function _dvSelect(i){
