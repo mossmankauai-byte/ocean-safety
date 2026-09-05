@@ -1280,13 +1280,14 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
        carries telemetry_key wins over anything typed in the address bar. Until the
        column exists this is a no-op: p.telemetry_key is undefined and the fallback
        below is exactly today's behaviour. */
-    // Only when the URL did NOT carry one. A partner provisioned before the go-live
-    // paths started seeding may hold a legacy key:<slug> minted with a DIFFERENT value
-    // (the ts- signup path minted its own), and their working ?key=<legacy> link must
-    // not be overridden by a dashboard_token the worker has never been told about.
-    // Everyone arriving from a welcome link has no ?key= at all, which is the case this
-    // is for: they get the credential from the session instead of from the address bar.
-    if(p.telemetry_key && !window.OS_KEY) window.OS_KEY = p.telemetry_key;
+    // The session's key WINS over ?key=. It was the other way round for a few hours,
+    // to protect partners holding a legacy key:<slug> minted by the ts- signup path with
+    // a value that was not their dashboard_token. That reason is gone: partner-auth now
+    // seeds key:<slug> with the dashboard_token on every successful login, so the worker
+    // and the partner row cannot disagree, and every live partner was verified 200 with
+    // their own token on 2026-09-05. A ?key= in the address bar is now the stale one, so
+    // letting it win would break exactly the operator it used to protect.
+    if(p.telemetry_key) window.OS_KEY = p.telemetry_key;
     window.OS_AUTH = { session: session, partner: p };
     if(!p.paid) document.body && document.body.classList.add('plan-free');
     doc.classList.remove('os-locked');
