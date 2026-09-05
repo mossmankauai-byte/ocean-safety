@@ -1274,6 +1274,13 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   function apply(p, session){
     window.OS_SLUG = p.slug;
     window.OS_PLAN = p.paid ? 'paid' : 'free';
+    /* Telemetry credential, from the SESSION rather than the URL (OD-25, ruled 2026-09-05:
+       Supabase owns operator telemetry). ?key= still works so existing links and the
+       ts- operators minted in the worker's KV keep functioning, but a partner row that
+       carries telemetry_key wins over anything typed in the address bar. Until the
+       column exists this is a no-op: p.telemetry_key is undefined and the fallback
+       below is exactly today's behaviour. */
+    if(p.telemetry_key) window.OS_KEY = p.telemetry_key;
     window.OS_AUTH = { session: session, partner: p };
     if(!p.paid) document.body && document.body.classList.add('plan-free');
     doc.classList.remove('os-locked');
@@ -3137,6 +3144,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       return acc;
     }
 
+    /* Wait for the verified session before asking for rollups. window.OS_KEY starts as
+       whatever was in ?key=, and partner-auth replaces it with the partner row's
+       telemetry_key a moment later; firing now would spend the request on the weaker
+       credential and 403. On the un-gated sample preview there is no session to wait
+       for, so it runs immediately and nothing about the demo changes. */
+    function loadRollups(){
     fetch(API + '/api/dashboard/' + encodeURIComponent(slug) + '?period=' + period + (window.OS_KEY ? '&key=' + encodeURIComponent(window.OS_KEY) : ''))
       .then(function(res){ if(!res.ok) throw new Error('http ' + res.status); return res.json(); })
       .then(function(data){
@@ -3288,6 +3301,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           fb.style.display = '';
         }catch(_){}
       });
+    }
+    if(document.documentElement.classList.contains('os-locked')){
+      document.addEventListener('os-authed', loadRollups, {once:true});
+    } else {
+      loadRollups();
+    }
   } catch(e){
     if(window.console && console.warn) console.warn('OceanSafety live telemetry init error, showing preview:', e);
   }
