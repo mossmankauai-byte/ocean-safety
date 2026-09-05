@@ -3609,6 +3609,20 @@ async function getCond(b){
 
 // MAP
 let map,mkrs={},ints=['snorkel','swim'],scored={};
+// Basemap. CARTO Voyager began requiring an API key in 2026 and now serves a watermarked
+// "API KEY REQUIRED" tile without one. Paste a key below to restore Voyager; left empty we
+// use Esri World Topo, which needs no key and is the same host as the satellite layer.
+window.OS_CARTO_KEY = '';
+function osBasemap(extra){
+  var o = Object.assign({maxZoom:19}, extra||{});
+  if (window.OS_CARTO_KEY){
+    o.attribution = '\u00a9OpenStreetMap \u00a9CartoDB'; o.subdomains = 'abcd';
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=' + window.OS_CARTO_KEY, o);
+  }
+  o.attribution = 'Esri'; delete o.subdomains; delete o.className;
+  return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', o);
+}
+
 function initMap(){
   map=L.map('map',{center:[22.05,-159.50],zoom:10,minZoom:10,zoomControl:false,attributionControl:false,maxBounds:[[21.45,-160.15],[22.65,-158.95]],maxBoundsViscosity:0.75});
   // Elastic island edge — same rule as the main app: give a little at the boundary, then
@@ -3620,7 +3634,7 @@ function initMap(){
       map.panInsideBounds(map.options.maxBounds,{animate:true,duration:.35});
     },140);
   });
-  window._streetTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'©OpenStreetMap ©CartoDB',subdomains:'abcd'}).addTo(map);
+  window._streetTile = osBasemap().addTo(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri'});
   window._isSat = false;
 
