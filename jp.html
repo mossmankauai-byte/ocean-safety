@@ -1187,7 +1187,7 @@ a{text-decoration:none;color:inherit}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 #topbar{background:#fff;border-bottom:1px solid var(--border);padding:10px 14px 0;flex-shrink:0}
 #map{flex:1;min-height:0}
-.leaflet-container{background:#b8d8e8!important}
+.leaflet-container{background:#b8d8e8!important}.os-basemap-esri{filter:saturate(.75) brightness(1.05) contrast(.89) hue-rotate(-4deg)}
 
 /* TOPBAR */
 .tb1{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px}
@@ -3938,9 +3938,9 @@ function osBasemap(extra){
   var o = Object.assign({maxZoom:19}, extra||{});
   if (window.OS_CARTO_KEY){
     o.attribution = '\u00a9OpenStreetMap \u00a9CartoDB'; o.subdomains = 'abcd';
-    return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=' + window.OS_CARTO_KEY, o);
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=' + window.OS_CARTO_KEY, o);
   }
-  o.attribution = 'Esri'; delete o.subdomains; delete o.className;
+  o.attribution = 'Esri'; delete o.subdomains; o.className = 'os-basemap-esri';
   return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', o);
 }
 
