@@ -1,5 +1,6 @@
 {
   "_note": "FREE-TIER demo config for the ?ref=free-demo flow — demo-resort with \"plan\":\"free\" and NO preview key. The guest app must render: generic OceanSafe branding (this name never appears in chrome), exactly ONE amenity with the neutral 'Property offer' header (phone/hours on it stay live), and NO promotions — the two live promotions below exist ON PURPOSE to prove the gate hides them, not the data. The lobby board (?mode=screen) stays fully functional but generic. Safety data is never gated in any tier.",
+  "island": "kauai",
   "name": "Your Resort",
   "plan": "free",
   "screenBeaches": [

@@ -18,7 +18,7 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const CACHE_VERSION = 'v304-2026-09-05-app-update';
+const const CACHE_VERSION = 'v304-2026-09-05-gate-fixes';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -193,6 +193,14 @@ if (workbox) {
       // worker sees is the clean path, so the \.html$ list below never matches them. /join
       // was already fixed for exactly this reason; these are the same trap.
       /^\/(set-password|partner-terms|hotel|rental|fleet|townad|timeshare|concierge)$/.test(url.pathname) ||
+      // OD-19, fifth recurrence of the same trap. These clean routes rewrite to .html
+      // with a 200, so the pathname the SW sees has no .html and the alternation below
+      // never fires. /demo/dashboard is the URL demoed on a live call; /p/ is a
+      // partner's own co-brand page; /plan and /onboard are prospect-facing; /review is
+      // the internal notes surface. All five were served from the app-shell cache.
+      /^\/(plan|onboard|review)$/.test(url.pathname) ||
+      /^\/p\//.test(url.pathname) ||
+      url.pathname === '/demo/dashboard' || /^\/demo\/dashboard\//.test(url.pathname) ||
       url.pathname === '/assets/creator-kit.js' ||
       (/^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|dashboard|setup|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)
        // OD-12: operators are given the CLEAN routes, whose pathname has no .html,

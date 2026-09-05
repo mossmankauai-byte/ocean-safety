@@ -42,6 +42,37 @@
   X-Robots-Tag: noindex, nofollow
   Referrer-Policy: no-referrer
 
+# ── Operator Dashboard: not embeddable ──────────────────────────────────────
+# One file (dashboard.html) served at five clean routes. Unlike the guest app above,
+# which is deliberately framable because hotels embed it, the operator Dashboard is a
+# signed-in surface and has no reason to appear inside anyone else's page. It DOES
+# frame /portal-demo/ itself, so 'self' rather than 'none'.
+# X-Frame-Options is the belt for clients that predate frame-ancestors.
+/dashboard.html
+  Content-Security-Policy: frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN
+  X-Robots-Tag: noindex, nofollow
+/hotel
+  Content-Security-Policy: frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN
+  X-Robots-Tag: noindex, nofollow
+/timeshare
+  Content-Security-Policy: frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN
+  X-Robots-Tag: noindex, nofollow
+/rental
+  Content-Security-Policy: frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN
+  X-Robots-Tag: noindex, nofollow
+/concierge
+  Content-Security-Policy: frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN
+  X-Robots-Tag: noindex, nofollow
+/fleet
+  Content-Security-Policy: frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN
+  X-Robots-Tag: noindex, nofollow
+
 # The review tool: an internal notes surface, not a page for visitors.
 /review.html
   X-Robots-Tag: noindex, nofollow

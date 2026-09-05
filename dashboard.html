@@ -1819,8 +1819,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       <div class="card" id="mgAmenities">
         <div class="mg-list" id="amList"></div>
         <div class="mg-add">
-          <input id="amA" placeholder="Amenity — e.g. The Spa" autocomplete="off">
-          <input id="amB" placeholder="Detail (optional) — e.g. lobby level, day passes" autocomplete="off">
+          <input id="amA" aria-label="Amenity name" placeholder="Amenity, e.g. The Spa" autocomplete="off">
+          <input id="amB" aria-label="Amenity detail, optional" placeholder="Detail (optional), e.g. lobby level, day passes" autocomplete="off">
           <button class="pl-btn primary" id="amAdd">Add amenity</button>
         </div>
         <div class="cat-lab">What is it?</div>
@@ -2232,7 +2232,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           <div class="sec-h" style="margin-bottom:10px"><h3 style="margin:0;font-size:15px;color:var(--ink)">Your tour affiliate link</h3></div>
           <p style="margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5">Paste your Viator, GetYourGuide or direct booking link. Every tour a guest taps in the guide routes through this &mdash; you keep the commission. Leave it blank to use OceanSafe&rsquo;s default.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <input id="affInput" type="url" inputmode="url" placeholder="https://www.viator.com/?pid=YOUR_ID" style="flex:1;min-width:240px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line,#d9e2e6);border-radius:10px;background:var(--bg-2,#fff);color:var(--ink,#1a2b30)">
+            <input id="affInput" aria-label="Your affiliate link" type="url" inputmode="url" placeholder="https://www.viator.com/?pid=YOUR_ID" style="flex:1;min-width:240px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line,#d9e2e6);border-radius:10px;background:var(--bg-2,#fff);color:var(--ink,#1a2b30)">
             <button type="button" id="affSave" class="pl-btn primary" style="border:0;cursor:pointer">Save link</button>
           </div>
           <p id="affNote" style="margin:10px 0 0;font-size:12.5px;color:var(--muted)"></p>
@@ -3951,17 +3951,35 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   // ---- PDF page-1 preview thumbnails (real, via pdf.js; graceful fallback) ----
   // Works for a dropped data:application/pdf (LIVE) and for the sample flyer URLs
   // (demo). If pdf.js isn't loaded yet or a render fails, the filename card stays.
+  // pdf.js spins up a NEW worker per getDocument call unless one is handed to it, and
+  // the worker bundle is ~1 MB. Four thumbnails meant four downloads of the same file:
+  // 4.2 MB of the 7.2 MB this page used to pull on a phone. One shared worker, made on
+  // first real use, and a per-source cache so the same flyer is parsed once.
+  var _pdfWorker = null, _pdfDocs = {};
+  function pdfDoc(source){
+    if(_pdfDocs[source]) return _pdfDocs[source];
+    if(!_pdfWorker){
+      try{ _pdfWorker = new window.pdfjsLib.PDFWorker(); }
+      catch(e){ _pdfWorker = null; }   // older builds: fall back to one worker per doc
+    }
+    var arg;
+    if(/^data:application\/pdf[;,]/i.test(source)){
+      var b64 = source.split(',')[1], bin = atob(b64), u8 = new Uint8Array(bin.length);
+      for(var k=0;k<bin.length;k++) u8[k] = bin.charCodeAt(k);
+      arg = {data:u8};
+    } else {
+      arg = {url:source};   // same-origin sample flyer or https URL
+    }
+    if(_pdfWorker) arg.worker = _pdfWorker;
+    _pdfDocs[source] = window.pdfjsLib.getDocument(arg).promise;
+    return _pdfDocs[source];
+  }
+
   function drawThumb(container, source){
     if(!window.pdfjsLib || !source) return;   // fallback card stays
     var task;
     try{
-      if(/^data:application\/pdf[;,]/i.test(source)){
-        var b64 = source.split(',')[1], bin = atob(b64), u8 = new Uint8Array(bin.length);
-        for(var k=0;k<bin.length;k++) u8[k] = bin.charCodeAt(k);
-        task = window.pdfjsLib.getDocument({data:u8});
-      } else {
-        task = window.pdfjsLib.getDocument(source);   // same-origin sample flyer or https URL
-      }
+      task = {promise: pdfDoc(source)};
     }catch(e){ return; }
     task.promise.then(function(pdf){ return pdf.getPage(1); }).then(function(page){
       var vp0 = page.getViewport({scale:1});
@@ -3977,19 +3995,38 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       });
     }).catch(function(){ /* leave the filename fallback in place */ });
   }
+  /* Nothing here is visible until the operator opens Offers, so nothing here should
+     be downloaded before then. An IntersectionObserver defers each thumbnail until its
+     container is actually on screen, which on a hidden tab is never. Without an
+     observer (old browser), fall back to drawing immediately. */
+  var _thumbObs = null;
+  function whenVisible(c, src){
+    if(typeof IntersectionObserver !== 'function'){ drawThumb(c, src); return; }
+    if(!_thumbObs){
+      _thumbObs = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(!e.isIntersecting) return;
+          _thumbObs.unobserve(e.target);
+          drawThumb(e.target, e.target.dataset.pdfsrc);
+        });
+      }, {rootMargin:'200px'});
+    }
+    c.dataset.pdfsrc = src;
+    _thumbObs.observe(c);
+  }
   function renderThumbs(){
     if(!listEl || !window.pdfjsLib) return;   // lib not here yet — its onload re-runs this
     listEl.querySelectorAll('.pm-gopen-art[data-i]').forEach(function(c){
       var p = items[+c.dataset.i]; if(!p) return;
       var src = p.dataUrl || p.src; if(!src) return;
-      drawThumb(c, src);
+      whenVisible(c, src);
     });
     listEl.querySelectorAll('.pm-thumb[data-i]').forEach(function(c){
       if(c.dataset.done) return;
       var p = items[+c.dataset.i]; if(!p) return;
       var src = p.dataUrl || p.src; if(!src) return;
       c.dataset.done = '1';
-      drawThumb(c, src);
+      whenVisible(c, src);
     });
   }
   window._osRenderPromoThumbs = renderThumbs;   // pdf.js onload re-runs this once the lib arrives
