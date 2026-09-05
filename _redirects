@@ -65,6 +65,7 @@
 /api/ts-promos/* /.netlify/functions/ts-promos/:splat 200
 /api/ts-signup   /.netlify/functions/ts-signup   200
 /api/self-signup /.netlify/functions/self-signup 200
+/api/os-users    /.netlify/functions/os-users    200
 /api/ts-upgrade  /.netlify/functions/ts-upgrade  200
 /onboard         /stay-close-signup.html         200
 
