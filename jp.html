@@ -3938,7 +3938,7 @@ function osBasemap(extra){
   var o = Object.assign({maxZoom:19}, extra||{});
   if (window.OS_CARTO_KEY){
     o.attribution = '\u00a9OpenStreetMap \u00a9CartoDB'; o.subdomains = 'abcd';
-    return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=' + window.OS_CARTO_KEY, o);
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=' + window.OS_CARTO_KEY, o);
   }
   o.attribution = 'Esri'; delete o.subdomains; delete o.className;
   return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', o);
