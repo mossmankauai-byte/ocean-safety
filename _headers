@@ -8,6 +8,9 @@
 #      and many load only on specific tabs, so an enforced policy guessed wrong = broken app.
 # Origins below were MEASURED off the live site, not guessed. Before flipping this to the
 # enforcing `Content-Security-Policy`, exercise every tab and confirm zero violation reports.
+# frame-src carries 'self': the operator Dashboard frames its own /portal-demo/ for the
+# Shop tab, and without 'self' that is a violation the report-only policy has been
+# logging since the Shop tab shipped. Enforcing the policy without this would break it.
 # ⚠ frame-ancestors stays permissive — the app is an intentionally embeddable widget.
 # No X-Frame-Options: the app is an intentionally embeddable widget (hotels embed it).
 /*
@@ -15,7 +18,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()
-  Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors *; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.sentry-cdn.com https://challenges.cloudflare.com https://widget.getyourguide.com https://www.viator.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.open-meteo.com https://*.supabase.co https://*.workers.dev https://*.i.posthog.com https://*.ingest.us.sentry.io https://world.openbeautyfacts.org; frame-src https://challenges.cloudflare.com https://widget.getyourguide.com https://www.viator.com https://partners.booking.com https://www.google.com https://maps.google.com; worker-src 'self' blob:; manifest-src 'self'
+  Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors *; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.sentry-cdn.com https://challenges.cloudflare.com https://widget.getyourguide.com https://www.viator.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.open-meteo.com https://*.supabase.co https://*.workers.dev https://*.i.posthog.com https://*.ingest.us.sentry.io https://world.openbeautyfacts.org; frame-src 'self' https://challenges.cloudflare.com https://widget.getyourguide.com https://www.viator.com https://partners.booking.com https://www.google.com https://maps.google.com; worker-src 'self' blob:; manifest-src 'self'
   # Allow large image previews in Search / Discover (thumbnail-size directive; does NOT force indexing).
   X-Robots-Tag: max-image-preview:large
 
