@@ -1254,6 +1254,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 (function(){
   var FN   = "https://arndnljtmjfsnzcpcuen.supabase.co/functions/v1/partner-auth";
   var KEY  = "os_console_session";
+  var FIRST = "os_console_first_token";   // the spent email token, carried across ONE reload
   var doc  = document.documentElement;
   var qp   = new URLSearchParams(location.search);
   var wants = (qp.get('ref') || qp.get('slug') || '').trim().toLowerCase();
@@ -1320,10 +1321,16 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     post({action:'token', token:tok}).then(function(r){
       if(r.ok && r.j.ok && r.j.session){
         save(r.j.session, r.j.partner);
-        window.OS_FIRST_TOKEN = tok;   // the password pop-up authorises with this same token
-        try{ qp.delete('t'); var q = qp.toString();
-             history.replaceState(null, '', location.pathname + (q ? '?' + q : '') + location.hash); }catch(e){}
-        apply(r.j.partner, r.j.session);
+        /* Reload at ?ref=<slug>, exactly as a password login does below. Every module in this
+           file reads the slug from the address bar as it loads (telemetry, the Shop frame, the
+           draft stores), so applying the session in place left an email arrival on the
+           un-slugged DEMO path: "Demo" pill, sample numbers, the sample store. Measured
+           2026-09-05 (feature test, F1). The token leaves the address bar in the same step
+           (replace, not push, so history never carries it) and rides to the next load in
+           sessionStorage so the one-time password offer can still authorise with it. */
+        try{ sessionStorage.setItem(FIRST, tok); }catch(e){}
+        qp.delete('t'); qp.set('ref', r.j.partner.slug);
+        location.replace(location.pathname + '?' + qp.toString() + location.hash);
       } else if(have && have.session){
         // A dead or rotated token on a device that is already signed in should not sign them
         // out of their own console.
@@ -1339,7 +1346,14 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     // the database, so an upgrade or a cancellation lands on next open instead of whenever the
     // cache happens to expire.
     post({action:'session', session:have.session}).then(function(r){
-      if(r.ok && r.j.ok){ save(have.session, r.j.partner); apply(r.j.partner, have.session); }
+      if(r.ok && r.j.ok){
+        save(have.session, r.j.partner);
+        // An email arrival that just reloaded here (see the token branch): hand the spent
+        // token to the one-time password offer, then forget it.
+        try{ var ft = sessionStorage.getItem(FIRST);
+             if(ft){ window.OS_FIRST_TOKEN = ft; sessionStorage.removeItem(FIRST); } }catch(e){}
+        apply(r.j.partner, have.session);
+      }
       else { clear(); lock(''); }
     }).catch(function(){
       // Offline with a cached session: let them in on the cached profile rather than locking an
