@@ -5279,7 +5279,10 @@ if(DEMO){
   var pop   = document.getElementById('shopPop');
   if(!frame || !wrap) return;
 
-  var isFree = (window.OS_PLAN === 'free');
+  /* Decided when the tab is opened, not when the file loads: a real partner's tier arrives
+     with the session, after every script has run, so a load-time read said "paid" for a free
+     operator (feature test 2026-09-05, F2). */
+  function isFree(){ return window.OS_PLAN === 'free' || document.body.classList.contains('plan-free'); }
   var cur = 'dashboard', mounted = false;
 
   // The "sample store" caption is a lie once it IS their store — swap it, and say the one
@@ -5294,7 +5297,7 @@ if(DEMO){
   function src(page){
     // embed=1 drops the portal's own top bar; plan=paid is explicit so a stale
     // os_portal_plan in localStorage can't open the demo on the gated view.
-    return BASE + page + '.html?embed=1&plan=' + (isFree ? 'free' : 'paid');
+    return BASE + page + '.html?embed=1&plan=' + (isFree() ? 'free' : 'paid');
   }
   function go(page){
     if(PAGES.indexOf(page) < 0) page = 'dashboard';
@@ -5306,7 +5309,7 @@ if(DEMO){
     frame.classList.remove('ready');
     frame.style.height = '';        // back to the CSS fallback until the new page measures
     frame.src = src(page);
-    if(pop) pop.href = BASE + page + '.html?plan=' + (isFree ? 'free' : 'paid');
+    if(pop) pop.href = BASE + page + '.html?plan=' + (isFree() ? 'free' : 'paid');
   }
 
   // Grow the frame to its content so the console has ONE scrollbar, not a
@@ -5349,8 +5352,29 @@ if(DEMO){
   });
 
   // Called by the view switcher the first time the Shop tab is opened.
+  /* Free plan: the store is a paid surface, so the frame never mounts. Until 2026-09-05 nothing
+     replaced it either, and a free operator opened this tab onto "Loading your store..." for
+     ever (feature test F2). The card below is what the markup always promised: same tone and
+     the same unlock door as the Promotions lock card. No price: pricing is on request. */
+  var lock = document.getElementById('shopLock');
+  function showLock(){
+    if(!lock) return;
+    if(!lock.innerHTML){
+      lock.innerHTML =
+        '<div style="margin:6px auto 10px;color:var(--sample)"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>' +
+        '<div class="title" style="justify-content:center"><span class="l">Your store is part of the paid plan</span></div>' +
+        '<p class="cap" style="margin:8px auto 0;max-width:56ch">Sell and rent gear straight from your guide: coolers, snorkel sets, boards. Guests pay into your own Square account; OceanSafe never holds the money. It switches on the day you unlock.</p>' +
+        '<div class="lockcard-btns" style="justify-content:center">' +
+          '<a class="pl-btn" href="/portal-demo/dashboard.html?plan=paid" target="_blank" rel="noopener">See a sample store</a>' +
+          '<a class="pl-btn primary" href="mailto:aloha@oceansafety.app?subject=' + encodeURIComponent('Unlock my OceanSafe guide') + '">Unlock everything</a>' +
+        '</div>';
+    }
+    wrap.hidden = true;
+    lock.hidden = false;
+  }
   window.osShopMount = function(){
-    if(mounted || isFree) return;
+    if(isFree()){ showLock(); return; }
+    if(mounted) return;
     mounted = true;
     go(cur);
   };
