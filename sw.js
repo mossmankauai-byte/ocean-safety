@@ -18,7 +18,7 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const CACHE_VERSION = 'v308-2026-09-05-sw-parse-fix-and-sales-route';
+const CACHE_VERSION = 'v309-2026-09-05-creator-at-route-fresh';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -205,6 +205,11 @@ if (workbox) {
       // .bin that carries no SW route, so a stale wrapper makes the password itself look wrong.
       /^\/(sales|jade-sales)$/.test(url.pathname) ||
       /^\/p\//.test(url.pathname) ||
+      // /@* rewrites to /at.html with a 200, so the pathname the worker sees is /@<handle>
+      // and no \.html$ pattern fires. It is a creator's public page: stale means last
+      // week's QR and artwork. Found by clean-route-freshness once it started probing
+      // implicit clean URLs rather than only _redirects entries.
+      /^\/@/.test(url.pathname) ||
       url.pathname === '/demo/dashboard' || /^\/demo\/dashboard\//.test(url.pathname) ||
       url.pathname === '/assets/creator-kit.js' ||
       (/^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|dashboard|setup|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)
