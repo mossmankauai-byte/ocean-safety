@@ -23,6 +23,7 @@ const OUT = process.argv[2] || '.';
 const ISLANDS = ['kauai', 'maui', 'oahu', 'hawaii'];
 const FORBIDDEN = /get_town_listings|get_partner_page|get_partner_promotions|workers\.dev|viator\.com|getyourguide|posthog/i;
 const fails = [];
+let planGhSlots = 0;
 function check(cond, msg){ if(cond) console.log('  ok   ' + msg); else { console.log('  FAIL ' + msg); fails.push(msg); } }
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 // Chrome sometimes disposes an incognito context before puppeteer asks it to; closing is best effort.
@@ -32,9 +33,14 @@ async function fresh(browser){
   const ctx = browser.createIncognitoBrowserContext ? await browser.createIncognitoBrowserContext() : await browser.createBrowserContext();
   const page = await ctx.newPage();
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  const reqs = [];
+  // gohawaii.com's Cloudflare refuses the HeadlessChrome user agent (a real browser gets the photo), so
+  // present the plain Chrome string. Both trees get the same agent; the app never reads it.
+  await page.setUserAgent((await browser.userAgent()).replace('HeadlessChrome', 'Chrome'));
+  const reqs = [], photoFails = [];
   page.on('request', r => reqs.push(r.url()));
-  return { ctx, page, reqs };
+  page.on('response', r => { if (/gohawaii\.com\/sites\//.test(r.url()) && r.status() >= 400) photoFails.push(r.status()); });
+  page.on('requestfailed', r => { if (/gohawaii\.com\/sites\//.test(r.url())) photoFails.push((r.failure() || {}).errorText || 'failed'); });
+  return { ctx, page, reqs, photoFails };
 }
 async function boot(page, url){
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 90000 });
@@ -80,7 +86,7 @@ async function state(page){
 
   console.log('\n[2] ON: ?ref=gohawaii on every island');
   for (const slug of ISLANDS) {
-    const { ctx, page, reqs } = await fresh(browser);
+    const { ctx, page, reqs, photoFails } = await fresh(browser);
     await boot(page, `${NEW}/?ref=gohawaii&island=${slug}`);
     if (slug === 'kauai') {
       // The notice opens on the first tab tap, not on load, so open it the way the app does and
@@ -151,6 +157,29 @@ async function state(page){
     check(layer.rows > 100, `${slug}: GoHawaii layer injected (${layer.rows} rows) ${JSON.stringify(layer.counts)}`);
     check(/Listing by GoHawaii/.test(layer.sheet) && !/\$\d/.test(layer.sheet), `${slug}: shared listing sheet carries the GoHawaii credit and no price`);
     check(['event','malama'].every(x => layer.subs.includes(x)) && !layer.subs.includes('golf') && !layer.subs.includes('wellness'), `${slug}: Family gained Events and Mālama only`);
+    // Photos: every photo the build found reaches the page over https from gohawaii.com. The floor is
+    // what gohawaii.com actually has: the rest of their events and some listings carry no photo at all.
+    const photos = await page.evaluate(async () => {
+      const rows = Object.values(window._GH_INDEX || {}), layerRows = (window.GH_LAYER[ACTIVE.slug] || {}).rows || [];
+      const https = rows.filter(g => /^https:\/\/www\.gohawaii\.com\//.test(g.img || ''));
+      const lost = layerRows.filter(r => r.img && !(window._GH_INDEX[r.id] || {}).img).map(r => r.id);
+      const withImg = rows.find(g => g.img), without = rows.find(g => !g.img), out = {};
+      if (withImg) { openGhSheet(withImg.id); const h = document.querySelector('#sc .poi-hero'); out.heroBg = h ? getComputedStyle(h).backgroundImage : '';
+        // The credit waits for the photo to load, so give it up to 15 s to appear.
+        for (let i = 0; i < 60 && !/Photo via GoHawaii/.test(document.getElementById('sc').innerText); i++) await new Promise(r => setTimeout(r, 250));
+        out.heroCredit = /Photo via GoHawaii/.test(document.getElementById('sc').innerText); }
+      if (without) { openGhSheet(without.id); const h = document.querySelector('#sc .poi-hero'); out.bareBg = h ? getComputedStyle(h).backgroundImage : ''; out.bareCredit = /Photo via GoHawaii/.test(document.getElementById('sc').innerText); out.bareImgs = document.querySelectorAll('#sc img').length; }
+      const tag = [...document.scripts].find(s => /\/data\/poi-gohawaii-/.test(s.src));
+      out.layerParam = tag ? (new URL(tag.src).searchParams.get('b') || '') : ''; out.layerBuilt = (window.GH_LAYER[ACTIVE.slug] || {}).built || '';
+      return { rows: rows.length, https: https.length, http: rows.filter(g => /^http:/i.test(g.img || '')).length, lost, ...out };
+    });
+    const pct = Math.round(100 * photos.https / photos.rows);
+    // Floor 65%: the rest have no photo on gohawaii.com, or only an event flyer withheld for its printed text.
+    check(photos.https / photos.rows >= 0.65, `${slug}: ${photos.https} of ${photos.rows} rows (${pct}%) carry an https gohawaii.com photo`);
+    check(photos.layerBuilt && photos.layerParam.indexOf(photos.layerBuilt) === 0, `${slug}: layer URL ?b=${photos.layerParam} matches the layer build ${photos.layerBuilt}`);
+    check(photos.http === 0 && photos.lost.length === 0, `${slug}: no photo URL starts with http:// (${photos.http}), none lost in injection (${photos.lost.length})`);
+    check(/gohawaii\.com/.test(photos.heroBg) && /linear-gradient/.test(photos.heroBg) && photos.heroCredit, `${slug}: sheet hero is the photo over the gradient, with "Photo via GoHawaii"`);
+    check(/linear-gradient/.test(photos.bareBg) && !/url\(/.test(photos.bareBg) && !photos.bareCredit && photos.bareImgs === 0, `${slug}: a row with no photo keeps the gradient hero, no credit, no image`);
     const homes = await page.evaluate(() => ({
       townWellness: (SUBTABS.shopping.items || []).some(i => i.sub === 'wellness'),
       townRows: (window.GH_TOWN || []).length,
@@ -170,9 +199,18 @@ async function state(page){
       openSheet(b.id); return { beach: b.name, status: scored[b.id].status };
     });
     await sleep(1200);
-    if (!malama.none) malama.has = await page.evaluate(() => /Give back instead/.test(document.getElementById('sc').innerHTML));
+    if (!malama.none) Object.assign(malama, await page.evaluate(() => {
+      const sc = document.getElementById('sc'), rows = [...sc.querySelectorAll('[onclick^="_ghDeflectTap"]')];
+      // Each Mālama row shows its photo when the row has one, and the old glyph when it has none.
+      const ok = rows.every(el => { const id = (el.getAttribute('onclick').match(/'(gh_[^']+)'\)/) || [])[1], g = window._GH_INDEX[id] || {};
+        return g.img ? !!el.querySelector('img.gh-thumb') : (!el.querySelector('img') && /❦/.test(el.textContent)); });
+      return { has: /Give back instead/.test(sc.innerHTML), rows: rows.length, thumbs: sc.querySelectorAll('[onclick^="_ghDeflectTap"] img.gh-thumb').length, ok };
+    }));
     if (malama.none) console.log(`  note ${slug}: every scored beach is green right now, Give back block not exercised`);
-    else check(malama.has, `${slug}: ${malama.beach} (${malama.status}) shows the Give back block`);
+    else {
+      check(malama.has, `${slug}: ${malama.beach} (${malama.status}) shows the Give back block`);
+      check(malama.ok, `${slug}: Mālama rows show a photo when they have one (${malama.thumbs} of ${malama.rows}), the glyph when not`);
+    }
     if (slug === 'kauai' && !malama.none) await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-malama-beach.png`) });
     // Town > Wellness and Family > Events chips, on screen.
     await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); document.getElementById('overlay').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="shopping"]'); if (t) t.click(); });
@@ -195,8 +233,35 @@ async function state(page){
     // Plan: Slow day chip, Mālama card, and a Tonight slot when an event falls on the picked day.
     await page.evaluate(() => { const t = document.querySelector('#tabs .tab[data-tab="activities"]'); if (t) t.click(); });
     await sleep(2500);
-    const plan = await page.evaluate(() => { const h = document.getElementById('sc').innerHTML, t = document.getElementById('sc').innerText; return { slow: /Slow day/.test(h), card: /Give back a morning/.test(h), tonight: /Tonight/.test(h), price: /\$\d/.test(t), head: t.slice(0, 80).replace(/\s+/g, ' ') }; });
+    const plan = await page.evaluate(() => {
+      const sc = document.getElementById('sc'), h = sc.innerHTML, t = sc.innerText;
+      // The Give back card and every GoHawaii Plan card: a photo when the row has one, none when it has none.
+      const cards = [...sc.querySelectorAll('[onclick^="openGhSheet"]')].filter(el => /Give back a morning/.test(el.textContent) || el.classList.contains('plan-slot'));
+      const ok = cards.every(el => { const id = (el.getAttribute('onclick').match(/'(gh_[^']+)'/) || [])[1], g = window._GH_INDEX[id] || {};
+        return g.img ? !!el.querySelector('img.gh-thumb') : !el.querySelector('img'); });
+      return { slow: /Slow day/.test(h), card: /Give back a morning/.test(h), tonight: /Tonight/.test(h), price: /\$\d/.test(t), head: t.slice(0, 80).replace(/\s+/g, ' '),
+        cards: cards.length, thumbs: cards.filter(el => el.querySelector('img.gh-thumb')).length, ok };
+    });
     check(plan.slow && plan.card && !plan.price, `${slug}: Plan shows Slow day, the Give back card, no price (Tonight slot: ${plan.tonight}) [${plan.head}]`);
+    check(plan.cards > 0 && plan.ok, `${slug}: Plan GoHawaii cards carry their photo when they have one (${plan.thumbs} of ${plan.cards})`);
+    // A Plan slot of kind 'gh' only appears on the Slow day vibe (a spa) or on an event night, so walk
+    // Slow day across every area: each GoHawaii slot shows its photo when it has one, none when not.
+    const slots = await page.evaluate(async () => {
+      const out = { slots: 0, thumbs: 0, ok: true }, area0 = _planArea, vibe0 = _planVibe;
+      for (const a of _planAreas()) {
+        planSetArea(a.key); planSetVibe('slow'); await new Promise(r => setTimeout(r, 400));
+        document.querySelectorAll('#sc .plan-slot[onclick^="openGhSheet"]').forEach(el => {
+          const id = (el.getAttribute('onclick').match(/'(gh_[^']+)'/) || [])[1], g = window._GH_INDEX[id] || {};
+          out.slots++; if (el.querySelector('img.gh-thumb')) out.thumbs++;
+          if (g.img ? !el.querySelector('img.gh-thumb') : !!el.querySelector('img')) out.ok = false;
+        });
+      }
+      _planArea = area0; planSetVibe(vibe0); return out;   // put the Plan back as the screenshot expects
+    });
+    // Slow day only moves a slot onto land when the day's surf says so, so an island can have none today;
+    // the run as a whole must exercise at least one (checked after the loop).
+    planGhSlots += slots.slots;
+    check(slots.ok, `${slug}: Plan 'gh' slots on Slow day show the photo when the row has one (${slots.thumbs} of ${slots.slots} slots)`);
     if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-plan-malama.png`) });
     check(layer.staysShown, `${slug}: Stays tab shown once their stays loaded`);
     if (slug === 'kauai') {
@@ -221,6 +286,13 @@ async function state(page){
     }));
     check(tours.on && /listed by gohawaii/i.test(tours.text) && tours.markers > 0, `${slug}: Tours tab lists GoHawaii operators with pins (${tours.markers})`);
     check(tours.gyg === 0 && !/\bbook\b|see times/i.test(tours.text), `${slug}: Tours has no booking widget, script or call to action`);   // 'bookable' in the placeholder is the disclaimer, not a CTA
+    // Directory rows carry the photo as a lazy thumbnail; the first one must actually load from gohawaii.com.
+    const thumbs = await page.evaluate(() => { const t = [...document.querySelectorAll('#sc img.gh-thumb')];
+      if (t[0]) t[0].scrollIntoView({ block: 'center' });
+      return { n: t.length, lazy: t.every(i => i.loading === 'lazy'), http: t.filter(i => !/^https:\/\/www\.gohawaii\.com\//.test(i.src)).length, first: t[0] ? t[0].src : '' }; });
+    const loaded = thumbs.n ? await page.waitForFunction(() => { const i = document.querySelector('#sc img.gh-thumb'); return i && i.complete && i.naturalWidth > 0 && i.naturalWidth; }, { timeout: 20000 }).then(h => h.jsonValue()).catch(() => 0) : 0;
+    check(thumbs.n > 0 && thumbs.lazy && thumbs.http === 0, `${slug}: Tours directory rows render ${thumbs.n} lazy https gohawaii.com thumbnails`);
+    check(loaded > 0, `${slug}: a real GoHawaii photo loads in the page (naturalWidth ${loaded}) ${thumbs.first.slice(0, 90)}`);
     if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-tours.png`) });
     // Town tab: editorial places only, no partner pins, offers or sponsored badge.
     await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="shopping"]'); if (t) t.click(); });
@@ -230,8 +302,12 @@ async function state(page){
     if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-town.png`) });
     const bad3 = reqs.filter(u => FORBIDDEN.test(u));
     check(bad3.length === 0, `${slug}: still no commerce request after Tours and Town`);
+    const photoReqs = reqs.filter(u => /gohawaii\.com\/sites\//.test(u)).length;
+    check(photoReqs > 0 && photoFails.length === 0, `${slug}: ${photoReqs} gohawaii.com photo requests, ${photoFails.length} failed ${photoFails.length ? JSON.stringify(photoFails.slice(0, 5)) : ''}`);
     await closeCtx(ctx);
   }
+
+  check(planGhSlots > 0, `all islands: ${planGhSlots} Plan 'gh' slot(s) exercised across the run`);
 
   console.log('\n[3] ON: ?mode=shop cannot bring Shop back; Plan tab has no booking');
   {
