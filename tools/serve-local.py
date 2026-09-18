@@ -28,6 +28,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(502); self.end_headers()
             return
         return super().do_GET()
+    # One-shot ingest for the GoHawaii pull: the browser tab (any origin) POSTs a JSON body and it
+    # lands under evidence/ingest/<name>.json. A cross-origin text/plain POST needs no preflight.
+    # Local rig only; the path is a fixed folder and the name is sanitised, nothing else is written.
+    def do_POST(self):
+        if self.path.startswith('/ingest'):
+            import os, re
+            name = re.sub(r'[^a-z0-9_-]', '', (self.path.split('name=')[1].split('&')[0] if 'name=' in self.path else 'ingest'))[:40] or 'ingest'
+            n = int(self.headers.get('Content-Length', '0'))
+            body = self.rfile.read(n)
+            out = os.path.expanduser('~/Desktop/OceanSafe/gohawaii/evidence/ingest')
+            os.makedirs(out, exist_ok=True)
+            with open(os.path.join(out, name + '.json'), 'wb') as f: f.write(body)
+            self.send_response(204); self.send_header('Access-Control-Allow-Origin', '*'); self.end_headers()
+            return
+        self.send_response(404); self.end_headers()
     def log_message(self, *a): pass
 
 socketserver.TCPServer.allow_reuse_address = True

@@ -1,0 +1,181 @@
+{
+ "oahu|Downtown Honolulu": null,
+ "kauai|Opaekaa Falls": null,
+ "oahu|Leahi (Diamond Head)": null,
+ "oahu|Aloha Tower": null,
+ "oahu|Bishop Museum": null,
+ "oahu|Honolulu Museum of Art & Shangri La": null,
+ "oahu|Iolani Palace": null,
+ "oahu|Kawaiahao Church": null,
+ "oahu|King Kamehameha Statue, Oahu": null,
+ "oahu|Queen Emma Summer Palace": null,
+ "oahu|Washington Place": null,
+ "oahu|Pearl Harbor": null,
+ "oahu|Kaena Point": null,
+ "oahu|Makaha Beach": null,
+ "oahu|Waimea Bay": null,
+ "oahu|Makapuu Point Lighthouse": null,
+ "oahu|Nuuanu Pali Lookout": null,
+ "oahu|Byodo In Temple": null,
+ "kauai|Wailua River Kauai": {
+  "lat": 22.0472719,
+  "lon": -159.3398151
+ },
+ "kauai|Fern Grotto": {
+  "lat": 22.0379759,
+  "lon": -159.3584111
+ },
+ "kauai|Kapaa Town, Kauai": null,
+ "kauai|Waimea Town, Kauai": null,
+ "kauai|Hanapepe Town": {
+  "lat": 21.9113611,
+  "lon": -159.5869973
+ },
+ "kauai|Kokee State Park": {
+  "lat": 22.1293696,
+  "lon": -159.6454462
+ },
+ "kauai|Waimea Canyon": {
+  "lat": 22.0097218,
+  "lon": -159.6759733
+ },
+ "kauai|Waioli Mission House & Church": null,
+ "kauai|Napali Coast Kauai": null,
+ "kauai|Daniel K. Inouye Kilauea Point Lighthouse": {
+  "lat": 22.2317025,
+  "lon": -159.4020048
+ },
+ "kauai|Hanalei Town Kauai": {
+  "lat": 22.2029937,
+  "lon": -159.4956949
+ },
+ "kauai|Koloa Heritage Trail": null,
+ "kauai|Poipu Beach Park": {
+  "lat": 21.8731696,
+  "lon": -159.4528746
+ },
+ "maui|Iao Valley State Park": {
+  "lat": 20.8805863,
+  "lon": -156.5471216
+ },
+ "kauai|Old Koloa Town": {
+  "lat": 21.9036493,
+  "lon": -159.4659318
+ },
+ "maui|Pools of Oheo": null,
+ "maui|Kaanapali Beach": {
+  "lat": 20.946911,
+  "lon": -156.6882852
+ },
+ "maui|Honolua Bay": {
+  "lat": 21.0146954,
+  "lon": -156.6394964
+ },
+ "maui|Haleakala National Park": {
+  "lat": 20.6991334,
+  "lon": -156.1324301
+ },
+ "hawaii|Puu Oo": {
+  "lat": 19.38891,
+  "lon": -155.106403
+ },
+ "hawaii|Maunaloa": {
+  "lat": 19.4717348,
+  "lon": -155.592374
+ },
+ "hawaii|Maunakea": null,
+ "kauai|Allerton & McBryde Gardens": null,
+ "maui|Road to Hana": {
+  "lat": 20.7853281,
+  "lon": -156.0045774
+ },
+ "kauai|Ke Ala Hele Makalae": null,
+ "kauai|Lydgate Beach Park": {
+  "lat": 22.0368013,
+  "lon": -159.3373227
+ },
+ "kauai|Limahuli Garden": {
+  "lat": 22.2182974,
+  "lon": -159.5764736
+ },
+ "kauai|Kauai Museum": {
+  "lat": 21.9750397,
+  "lon": -159.3682795
+ },
+ "oahu|Polynesian Cultural Center": null,
+ "oahu|Kualoa Ranch Private Nature Reserve": null,
+ "kauai|Wailua Falls": {
+  "lat": 22.0346267,
+  "lon": -159.3785828
+ },
+ "kauai|Grove Farm Homestead Museum": {
+  "lat": 21.966321,
+  "lon": -159.368194
+ },
+ "kauai|Kilohana Estate": null,
+ "hawaii|Waipio Valley Lookout": null,
+ "hawaii|Hamakua Heritage Corridor": null,
+ "hawaii|Akaka Falls State Park": {
+  "lat": 19.8547195,
+  "lon": -155.1535558
+ },
+ "hawaii|Wailuku River State Park": {
+  "lat": 19.7187409,
+  "lon": -155.108982
+ },
+ "hawaii|Hilo Farmers Market": {
+  "lat": 19.7231318,
+  "lon": -155.0846254
+ },
+ "hawaii|Punaluu Black Sand Beach": null,
+ "hawaii|Puukohola Heiau National Historic Site": {
+  "lat": 20.0280234,
+  "lon": -155.821121
+ },
+ "hawaii|Puako Petroglyph Archeological Preserve": null,
+ "hawaii|Hāpuna Beach State Recreation Area": {
+  "lat": 19.9905737,
+  "lon": -155.821805
+ },
+ "hawaii|Pololu Valley Lookout": {
+  "lat": 20.2037669,
+  "lon": -155.7338534
+ },
+ "hawaii|Lapakahi State Historical Park": {
+  "lat": 20.1692784,
+  "lon": -155.8975514
+ },
+ "hawaii|Kaloko Honokohau National Historical Park": {
+  "lat": 19.6818207,
+  "lon": -156.027088
+ },
+ "hawaii|Hulihee Palace": null,
+ "hawaii|Lava Trees State Park": null,
+ "hawaii|Volcano Village": {
+  "lat": 19.430115,
+  "lon": -155.2336061
+ },
+ "hawaii|Downtown Hilo Hawaii Island": null,
+ "hawaii|Liliuokalani Gardens Hawaii Island": null,
+ "hawaii|Hawaii Volcanoes National Park, Island of Hawaii": null,
+ "hawaii|Nahuku (Thurston Lava Tube) Hawaii Island": null,
+ "hawaii|Historic Kailua Village (Kailua-Kona), Island of Hawaii": null,
+ "hawaii|Kealakekua Bay State Historical Park": {
+  "lat": 19.4813398,
+  "lon": -155.9365228
+ },
+ "hawaii|Puuhonua o Honaunau National Historical Park, Island of Hawaii": null,
+ "hawaii|Kamehameha Statue, Kapaau": {
+  "lat": 20.2302887,
+  "lon": -155.798312
+ },
+ "kauai|Nounou Mountain (Sleeping Giant) Kauai": null,
+ "kauai|Alekoko Menehune Fishpond Kauai": null,
+ "kauai|Spouting Horn Kauai": {
+  "lat": 21.8846953,
+  "lon": -159.4934406
+ },
+ "maui|Makena Beach State Park (Big Beach) Maui": null,
+ "oahu|Duke Kahanamoku Statue, Oahu": null,
+ "oahu|National Memorial Cemetery of the Pacific Oahu": null
+}

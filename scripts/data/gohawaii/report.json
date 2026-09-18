@@ -1,0 +1,140 @@
+{
+  "built": "2026-09-18",
+  "source": "gohawaii.com public listing API (MilesAI), pulled 2026-09-18T01:12:31.063Z",
+  "islands": {
+    "kauai": {
+      "rows": 178,
+      "byTarget": {
+        "VENUES": 3,
+        "TOURS": 32,
+        "STAYS": 45,
+        "ACTS": 65,
+        "FOODS": 25,
+        "LOCAL_CRAFTS": 3,
+        "DRINKS": 5
+      }
+    },
+    "maui": {
+      "rows": 259,
+      "byTarget": {
+        "TOURS": 29,
+        "FOODS": 42,
+        "ACTS": 103,
+        "STAYS": 67,
+        "VENUES": 6,
+        "LOCAL_CRAFTS": 4,
+        "DRINKS": 8
+      }
+    },
+    "oahu": {
+      "rows": 397,
+      "byTarget": {
+        "STAYS": 82,
+        "ACTS": 169,
+        "FOODS": 53,
+        "TOURS": 50,
+        "LOCAL_CRAFTS": 14,
+        "DRINKS": 21,
+        "VENUES": 8
+      }
+    },
+    "hawaii": {
+      "rows": 217,
+      "byTarget": {
+        "FOODS": 23,
+        "VENUES": 3,
+        "TOURS": 37,
+        "ACTS": 88,
+        "STAYS": 48,
+        "DRINKS": 10,
+        "LOCAL_CRAFTS": 8
+      }
+    }
+  },
+  "dropped": {
+    "listing without coordinates": 116,
+    "coordinates outside the island box": 45,
+    "island not covered (Lānaʻi, Molokaʻi)": 15,
+    "event on an island not covered": 4,
+    "event without coordinates": 35,
+    "event with no upcoming date": 18,
+    "place could not be geocoded": 57,
+    "place on an island not covered": 24
+  },
+  "gaps": {
+    "Golf": 18,
+    "Spas and wellness": 22,
+    "Mālama volunteer programs": 43,
+    "Events": 216
+  },
+  "skipped": {
+    "services": 132,
+    "transportation": 35,
+    "booking or directory, not a place": 14,
+    "booking service, not a place": 31,
+    "wedding services, not a place": 14,
+    "travel professionals": 29,
+    "uncategorised": 1
+  },
+  "theirBeaches": {
+    "kauai": [
+      "Haena Beach Park, Kauai",
+      "Kealia Beach Park, Kauai",
+      "Lydgate Pond, Kauai",
+      "Lydgate Beach Park",
+      "Salt Pond Beach Park",
+      "Kekaha Beach Park, Kauai"
+    ],
+    "hawaii": [
+      "Carlsmith Beach Park (Four Mile)",
+      "Hapuna Beach Park",
+      "Honolii Beach Park",
+      "Anaehoomalu Bay (Waikoloa Beach Resort)",
+      "Ohaiula / Spencer Beach Park",
+      "Kahaluu Beach Park ",
+      "Kailua Bay",
+      "Kamakahonu Bay",
+      "Keauhou Bay",
+      "Kekahakai State Park ",
+      "Kohanaiki County Beach Park",
+      "Laaloa / White Sands Beach Park ",
+      "Leleiwi Beach Park",
+      "Richardson Ocean Center",
+      "Onekahakaha Beach Park",
+      "Pohoiki Beach",
+      "Waialea",
+      "Holoholokai Beach Park"
+    ],
+    "maui": [
+      "Baldwin Beach Park",
+      "D.T. Fleming Beach Park",
+      "Hookipa Beach Park, Maui",
+      "Kamaole Beach Parks, Maui",
+      "Kanaha Beach Park",
+      "Hanakaoo Park",
+      "Makena Beach State Park (Big Beach)"
+    ],
+    "oahu": [
+      "Ala Moana Regional Park",
+      "Haleiwa Alii Beach Park",
+      "Chun’s Reef",
+      "Depot Beach Park",
+      "Ehukai Beach Park (Banzai Pipeline)",
+      "Haleiwa Beach Park",
+      "Keawaula Beach (Yokohama Beach)",
+      "Ke Waena Beach",
+      "Kualoa Regional Park",
+      "Magic Island Lagoon",
+      " Maili Beach",
+      "Makapuu Beach Park",
+      "Nanakuli Beach Park",
+      "Pokai Beach Park",
+      "Sans Souci Kaimana Beach Park",
+      "Sunset Beach",
+      "Waikiki Beach",
+      "Duke’s Beach",
+      "Waikiki – Kuhio Beach",
+      "Queen’s Surf Beach"
+    ]
+  }
+}

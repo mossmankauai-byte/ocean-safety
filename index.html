@@ -2642,6 +2642,21 @@ window.ensureIsland = function(slug){
   });
 };
 
+// Lazy-load a named POI layer for an island: /data/poi-<name>-<slug>.js sets
+// window.GH_LAYER[slug]. Same script-append shape as ensureIsland above. Only a public ref ever
+// asks for one (see _ghInject), so every other load never requests the file.
+window.ensureLayer = function(name, slug){
+  return new Promise(function(resolve, reject){
+    if(!/^[a-z0-9-]{1,24}$/.test(String(name)) || !ISLANDS[slug]){ reject(new Error('bad layer request')); return; }
+    if(window.GH_LAYER && window.GH_LAYER[slug]){ resolve(window.GH_LAYER[slug]); return; }
+    var s = document.createElement('script');
+    s.src = '/data/poi-' + name + '-' + slug + '.js'; s.async = true;
+    s.onload  = function(){ (window.GH_LAYER && window.GH_LAYER[slug]) ? resolve(window.GH_LAYER[slug]) : reject(new Error('layer missing after load')); };
+    s.onerror = function(){ reject(new Error('failed to load layer ' + name + ' for ' + slug)); };
+    document.head.appendChild(s);
+  });
+};
+
 // Switch islands via a clean reload (?island=slug). resolveIsland() picks it up and the whole
 // app initialises for that island from the start — no in-place teardown. Reliable + simple.
 window.switchIsland = function(slug){
@@ -3266,6 +3281,7 @@ function renderStays(){
 }
 
 function openStaySheet(id){
+  if(typeof id==='string' && id.indexOf('gh_')===0){ return openGhSheet(id); }   // GoHawaii row: the shared sheet
   const s = STAYS.find(x=>x.id===id); if(!s) return;
   const themeColor = {family:'#16a34a', oceanfront:'#0ea5e9', surf:'#7c3aed', 'kid-safe':'#10b981', budget:'#d97706', luxury:'#a16207'}[s.theme] || '#0f4c5c';
   // Route through the shared heroBg()/heroPhoto() helpers: this both applies the NO CREDIT -> NO
@@ -5320,7 +5336,14 @@ let tourMkrs={};
 function renderTours(){
   Object.values(tourMkrs).forEach(m=>m.remove()); tourMkrs={};
   if(window._activeTab !== 'tours') return;
-  if(_isPublicRef()) return;   // public ref: no tours tab exists; keep the map free of tour markers
+  if(_isPublicRef()){   // public ref: pins are GoHawaii tour operators, each opening the shared sheet
+    (window.GH_TOURS||[]).forEach(function(t){
+      var mk=L.marker([t.lat,t.lon],{icon:mkActIcon(t)}).addTo(map);
+      mk.on('click',function(){ openGhSheet(t.id); });
+      tourMkrs[t.id]=mk;
+    });
+    return;
+  }
   (TOURS_LIBRARY||[]).forEach(t=>{
     if(typeof t.lat!=='number' || typeof t.lon!=='number') return;
     const mk=L.marker([t.lat,t.lon],{icon:mkTourIcon(t),zIndexOffset:200}).addTo(map);
@@ -5888,11 +5911,23 @@ function openToursSheet(){
     // Public ref: the Tours tab is a directory, never a booking surface. Until the GoHawaii
     // listings file is connected (Phase 1) it says so; no tour widget or script ever loads.
     var sc = document.getElementById('sc'); sc.style.display = '';
-    sc.innerHTML = '<div class="slbl">Tours and activities</div>'
-      + '<div style="padding:14px;border:1px dashed var(--border);border-radius:12px;font-size:13.5px;line-height:1.5;color:var(--ink)">'
-      + 'Tours, water and air activities listed by GoHawaii appear here once their listings are connected. '
-      + 'Each one is credited to GoHawaii and opens on gohawaii.com. Nothing is bookable inside this build.</div>'
-      + '<div style="margin-top:10px;font-size:11px;color:var(--mute)">Listings by GoHawaii (Hawaii Visitors and Convention Bureau)</div>';
+    var list = (window.GH_TOURS||[]).slice().sort(function(a,b){ return String(a.gh_sub).localeCompare(String(b.gh_sub)) || a.name.localeCompare(b.name); });
+    var groups = {}; list.forEach(function(t){ (groups[t.gh_sub||'Tours']=groups[t.gh_sub||'Tours']||[]).push(t); });
+    var html = '<div class="slbl">Tours and activities · '+list.length+' listed by GoHawaii</div>';
+    if(!list.length){
+      html += '<div style="padding:14px;border:1px dashed var(--border);border-radius:12px;font-size:13.5px;line-height:1.5;color:var(--ink)">'
+        + 'Tours, water and air activities listed by GoHawaii appear here once their listings are connected. Nothing is bookable inside this build.</div>';
+    }
+    Object.keys(groups).sort().forEach(function(k){
+      html += '<div style="margin-top:14px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)">'+_pesc(k)+' · '+groups[k].length+'</div>';
+      groups[k].forEach(function(t){
+        html += '<div onclick="openGhSheet(\''+_pesc(t.id)+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);cursor:pointer">'
+          + '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--ink);font-size:14px">'+_pesc(t.name)+'</div><div style="font-size:11.5px;color:var(--mute)">'+_pesc(t.r)+(t.tip?' · '+_pesc(t.tip.slice(0,70))+(t.tip.length>70?'…':''):'')+'</div></div>'
+          + '<div style="font-size:20px;color:var(--ocean)">›</div></div>';
+      });
+    });
+    html += '<div style="margin-top:14px;font-size:11px;color:var(--mute)">Listings by GoHawaii (Hawaii Visitors and Convention Bureau). Each opens on gohawaii.com. Nothing is bookable inside this build.</div>';
+    sc.innerHTML = html;
     document.getElementById('sheet').classList.add('on');
     document.getElementById('overlay').classList.add('on');
     return;
@@ -6352,6 +6387,7 @@ function renderToursSheetContent(){
 }
 
 function openActSheet(id){
+  if(typeof id==='string' && id.indexOf('gh_')===0){ return openGhSheet(id); }   // GoHawaii row: the shared sheet
   const a=ACTS.find(x=>x.id===id);if(!a)return;
   const ages = a.tags.filter(t=>['toddler','little_kid','school_age','teen'].includes(t)).map(t=>t.replace('_',' ')).join(', ')||'all ages';
   const acc = [];
@@ -6555,6 +6591,7 @@ function renderVenues(){
   });
 }
 function openVenueSheet(id){
+  if(typeof id==='string' && id.indexOf('gh_')===0){ return openGhSheet(id); }   // GoHawaii row: the shared sheet
   const v = (typeof VENUES !== 'undefined' ? VENUES : []).find(x=>x.id===id); if(!v) return;
   // Group by the array each vendor actually lives in, so every row opens the right sheet.
   const groups = venueCategoryArrays()
@@ -6588,6 +6625,7 @@ function openVenueSheet(id){
   document.getElementById('overlay').classList.add('on');
 }
 function openCraftSheet(id){
+  if(typeof id==='string' && id.indexOf('gh_')===0){ return openGhSheet(id); }   // GoHawaii row: the shared sheet
   const c = LOCAL_CRAFTS.find(x=>x.id===id); if(!c) return;
   const tagPills = (c.tags||[]).map(t=>`<span style="background:#f5e6f5;color:#581c87;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
@@ -6609,6 +6647,7 @@ function openCraftSheet(id){
   document.getElementById('overlay').classList.add('on');
 }
 function openDrinkSheet(id){
+  if(typeof id==='string' && id.indexOf('gh_')===0){ return openGhSheet(id); }   // GoHawaii row: the shared sheet
   const d = DRINKS.find(x=>x.id===id); if(!d) return;
   const tagPills = (d.tags||[]).map(t=>`<span style="background:#eef0fe;color:#3730a3;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
   const _sc=document.getElementById('sc');_sc.style.display='';_sc.innerHTML=`
@@ -6695,6 +6734,7 @@ function openRoadmapSheet(){
 }
 
 function openFoodSheet(id){
+  if(typeof id==='string' && id.indexOf('gh_')===0){ return openGhSheet(id); }   // GoHawaii row: the shared sheet
   const f = FOODS.find(x=>x.id===id); if(!f) return;
   const tagPills = (f.tags||[]).map(t=>`<span style="background:#fef3c7;color:#78530a;padding:3px 9px;border-radius:10px;font-size:11px">${t.replace(/_/g,' ')}</span>`).join('');
 
@@ -7443,6 +7483,7 @@ function poiCard(pid){
 }
 
 function openPoiSheet(pid){
+  if(typeof pid==='string' && pid.indexOf('gh_')===0){ return openGhSheet(pid); }   // GoHawaii row: the shared sheet
   const p=P[pid];if(!p)return;
   const incHTML=(p.includes||[]).map(i=>`<div class="poi-inc-item"><div class="poi-inc-dot"></div><div>${i}</div></div>`).join('');
   const tipHTML=p.tip?`<div class="poi-local-tip"><span style="font-size:14px;flex-shrink:0">◈</span><span>${p.tip}</span></div>`:'';
@@ -11628,6 +11669,93 @@ function _townToPoi(row){
   };
 }
 
+// ══ GOHAWAII LAYER (public ref only) ═══════════════════════════════════════════════════════════
+// Their listings ride the same arrays and subtabs our editorial places use, so every tab, region
+// pill and pin renderer works unchanged. Each row carries target (which array), type or theme
+// (which subtab), and src_url (their page). Every id starts with gh_, so a purge by prefix works
+// and every sheet opener hands a gh_ id to the one shared sheet below. Beaches are never touched.
+var GH_PREFIX = 'gh_';
+window._GH_INDEX = {};
+window.GH_TOURS = [];
+function _ghArrays(){
+  return { FOODS: typeof FOODS!=='undefined'?FOODS:null, DRINKS: typeof DRINKS!=='undefined'?DRINKS:null,
+           LOCAL_CRAFTS: typeof LOCAL_CRAFTS!=='undefined'?LOCAL_CRAFTS:null, VENUES: typeof VENUES!=='undefined'?VENUES:null,
+           ACTS: typeof ACTS!=='undefined'?ACTS:null, STAYS: typeof STAYS!=='undefined'?STAYS:null };
+}
+function _ghPurge(){
+  var A=_ghArrays(); Object.keys(A).forEach(function(k){ var arr=A[k]; if(!Array.isArray(arr)) return;
+    for(var i=arr.length-1;i>=0;i--) if(arr[i] && typeof arr[i].id==='string' && arr[i].id.indexOf(GH_PREFIX)===0) arr.splice(i,1); });
+  window.GH_TOURS = []; window._GH_INDEX = {};
+}
+// The subtabs their inventory needs that we did not have: Events, Golf, Spas, Mālama. Added once,
+// for a public ref only, so the organic Family tab is unchanged.
+function _ghExtendSubtabs(){
+  try {
+    var items = SUBTABS.acts.items; if(items.some(function(i){ return i.sub==='event'; })) return;
+    var allIdx = items.findIndex(function(i){ return i.sub==='all'; });
+    var extra = [{sub:'event',label:'Events'},{sub:'golf',label:'Golf'},{sub:'wellness',label:'Spas'},{sub:'malama',label:'Mālama'}];
+    items.splice(allIdx<0?items.length:allIdx, 0, extra[0], extra[1], extra[2], extra[3]);
+  } catch(e){}
+}
+function _ghInject(rows){
+  if(!_isPublicRef()) return 0;
+  _ghPurge();
+  var A=_ghArrays(), n=0;
+  (Array.isArray(rows)?rows:[]).forEach(function(r){
+    if(!r || typeof r.id!=='string' || r.id.indexOf(GH_PREFIX)!==0 || !r.name) return;
+    var lat=+r.lat, lon=+r.lon; if(!isFinite(lat)||!isFinite(lon)||(lat===0&&lon===0)) return;
+    var rec = { id:r.id, name:r.name, n:r.n||r.name, r:r.r||'', lat:lat, lon:lon, type:r.type||'', theme:r.theme, tags:Array.isArray(r.tags)?r.tags:['gohawaii'],
+                tip:r.tip||'', website:r.website, address:r.address, img:r.img, when:r.when, venue:r.venue, gh_sub:r.gh_sub||'', src:'gohawaii', src_url:r.src_url||'',
+                duration_min:undefined, price:undefined, hours:undefined };
+    window._GH_INDEX[rec.id] = rec;
+    if(r.target==='TOURS'){ window.GH_TOURS.push(rec); n++; return; }
+    var arr = A[r.target]; if(!Array.isArray(arr)) return;
+    arr.push(rec); n++;
+  });
+  _ghExtendSubtabs();
+  try { var st=document.querySelector('#tabs .tab[data-tab="stays"]'); if(st && A.STAYS && A.STAYS.length) st.style.display=''; } catch(e){}
+  try { if(typeof renderAll==='function') renderAll(); } catch(e){}
+  try { ['renderFoods','renderDrinks','renderCrafts','renderVenues','renderActs','renderStays','renderTours','renderCoffee'].forEach(function(f){ if(typeof window[f]==='function') window[f](); }); } catch(e){}
+  try { if(typeof declutterMarks==='function') declutterMarks(); } catch(e){}
+  return n;
+}
+function _ghNearestBeach(lat, lon){
+  try {
+    var best=null, bd=1e9;
+    (B||[]).forEach(function(b){ var d=(b.lat-lat)*(b.lat-lat)+(b.lon-lon)*(b.lon-lon); if(d<bd){ bd=d; best=b; } });
+    if(!best) return '';
+    var km = Math.round(Math.sqrt(bd)*111*10)/10;
+    var st = (typeof scored!=='undefined' && scored[best.id] && scored[best.id].status) || '';
+    var col = st==='red'?'#b91c1c':st==='yellow'?'#b45309':st==='green'?'#15803d':'var(--ocean)';
+    return '<div class="slbl" style="margin-top:14px">Nearest beach</div>'
+      + '<div onclick="openSheet(\''+_pesc(best.id)+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;cursor:pointer">'
+      + '<span style="width:12px;height:12px;border-radius:50%;background:'+col+';flex-shrink:0"></span>'
+      + '<span style="flex:1;font-weight:600;color:var(--ink)">'+_pesc(best.name)+'</span><span style="font-size:11.5px;color:var(--mute)">'+km+' km · today\'s verdict</span></div>';
+  } catch(e){ return ''; }
+}
+// The one sheet for every GoHawaii row, whatever array it lives in. No booking, no price.
+function openGhSheet(id){
+  var g = window._GH_INDEX && window._GH_INDEX[id]; if(!g) return;
+  var _sc=document.getElementById('sc'); _sc.style.display='';
+  var hero = g.img ? 'background:url("'+String(g.img).replace(/"/g,'')+'") center/cover' : 'background:linear-gradient(135deg,#0f4c5c,#1a7a8a)';
+  var kind = g.gh_sub || g.type || '';
+  _sc.innerHTML = '<div class="poi-hero" style="'+hero+';color:#fff;min-height:150px;position:relative;overflow:hidden">'
+    + '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.6) 100%);pointer-events:none"></div>'
+    + '<div style="position:relative;display:flex;flex-direction:column;justify-content:flex-end;flex:1;padding:14px;z-index:1">'
+    + '<div class="poi-hero-name" style="color:#fff">'+_pesc(g.name)+'</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">'+_pesc(g.r)+(kind?' · '+_pesc(kind):'')+'</div></div></div>'
+    + (g.img ? '<div style="font-size:10px;color:var(--mute);margin-top:6px;text-align:right">Photo via GoHawaii</div>' : '')
+    + (g.when ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">◷</span><span>Next date: '+_pesc(g.when)+(g.venue?' at '+_pesc(g.venue):'')+'</span></div>' : '')
+    + (g.tip ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">◈</span><span>'+_pesc(g.tip)+'</span></div>' : '')
+    + (g.address ? '<div style="margin-top:10px;font-size:13px;color:var(--ink)">'+_pesc(g.address)+'</div>' : '')
+    + contactRow(g)
+    + '<a href="'+dirUrl(g.name, g.lat, g.lon)+'" target="_blank" rel="noopener" class="dirbtn" style="margin-top:10px">Get Directions</a>'
+    + _ghNearestBeach(g.lat, g.lon)
+    + '<div style="margin-top:16px;font-size:11px;color:var(--mute)">Listing by GoHawaii (Hawaii Visitors and Convention Bureau). '
+    + (g.src_url ? '<a href="'+_pesc(g.src_url)+'" target="_blank" rel="noopener" style="color:var(--ocean);text-decoration:underline">Open on gohawaii.com</a>' : '') + '</div>';
+  document.getElementById('sheet').classList.add('on','sheet-poi');
+  document.getElementById('overlay').classList.add('on');
+}
+
 function _townInject(rows){
   _townPurge();
   window._townListings = Array.isArray(rows) ? rows : [];
@@ -11722,6 +11850,9 @@ async function boot(){
   // It injects and re-renders when it lands; if it never lands, the guide is exactly what it
   // was. Placed after the repoint so a non-Kauaʻi island's arrays already exist.
   try { _townFetch(); } catch(e){}
+  // Public ref: load this island's GoHawaii layer after the safety data is up and pour it into the
+  // same arrays the tabs already render. Fail-silent: no layer, no change to the guide.
+  if(_isPublicRef()){ try { ensureLayer('gohawaii', ACTIVE.slug).then(function(Lr){ _ghInject(Lr && Lr.rows); }).catch(function(){}); } catch(e){} }
   // ── Partner referral capture (QR codes, partner links) ──
   // ?ref=marriott / ?utm_source=hyatt → persist to localStorage so subsequent
   // affiliate clicks can be tagged for partner-revenue attribution (read by

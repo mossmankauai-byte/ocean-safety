@@ -136,7 +136,34 @@ async function state(page){
     const bad2 = reqs.filter(u => FORBIDDEN.test(u));
     check(bad2.length === 0, `${slug}: still no commerce request after the sheet`);
 
-    // Tours tab: a directory placeholder, never a booking surface.
+    // GoHawaii layer: loaded after boot, poured into our arrays, one shared sheet, no price anywhere.
+    await page.waitForFunction(() => window.GH_LAYER && window.ACTIVE && window.GH_LAYER[ACTIVE.slug] && Object.keys(window._GH_INDEX || {}).length > 0, { timeout: 30000 }).catch(() => {});
+    const layer = await page.evaluate(() => {
+      const idx = Object.keys(window._GH_INDEX || {});
+      const counts = {}; ['FOODS','DRINKS','LOCAL_CRAFTS','VENUES','ACTS','STAYS'].forEach(k => { try { counts[k] = eval(k).filter(x => String(x.id).startsWith('gh_')).length; } catch (e) { counts[k] = -1; } });
+      counts.TOURS = (window.GH_TOURS || []).length;
+      const first = idx[0]; let sheet = '';
+      if (first && typeof openGhSheet === 'function') { openGhSheet(first); sheet = document.getElementById('sc').innerText; }
+      const subs = (SUBTABS.acts.items || []).map(i => i.sub);
+      const staysShown = (() => { const t = document.querySelector('#tabs .tab[data-tab="stays"]'); return !!t && getComputedStyle(t).display !== 'none'; })();
+      return { rows: idx.length, counts, sheet, subs, staysShown };
+    });
+    check(layer.rows > 100, `${slug}: GoHawaii layer injected (${layer.rows} rows) ${JSON.stringify(layer.counts)}`);
+    check(/Listing by GoHawaii/.test(layer.sheet) && !/\$\d/.test(layer.sheet), `${slug}: shared listing sheet carries the GoHawaii credit and no price`);
+    check(['event','golf','wellness','malama'].every(x => layer.subs.includes(x)), `${slug}: Family tab gained Events, Golf, Spas, Mālama subtabs`);
+    check(layer.staysShown, `${slug}: Stays tab shown once their stays loaded`);
+    if (slug === 'kauai') {
+      await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-listing-sheet.png`) });
+      await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); document.getElementById('overlay').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="acts"]'); if (t) t.click(); });
+      await sleep(1500);
+      await page.evaluate(() => { const st = document.querySelector('#subtabs .subtab[data-sub="scenic"]'); if (st) st.click(); });
+      await sleep(2500);
+      await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-family-scenic.png`) });
+      await page.evaluate(() => { const st = document.querySelector('#subtabs .subtab[data-sub="event"]'); if (st) st.click(); });
+      await sleep(2500);
+      await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-family-events.png`) });
+    }
+    // Tours tab: a directory of their operators, never a booking surface.
     await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="tours"]'); if (t) t.click(); });
     await sleep(2500);
     const tours = await page.evaluate(() => ({
@@ -145,7 +172,7 @@ async function state(page){
       gyg: document.querySelectorAll('[data-gyg-href], script[src*="getyourguide"]').length,
       markers: document.querySelectorAll('.leaflet-marker-icon').length,
     }));
-    check(tours.on && /GoHawaii/.test(tours.text), `${slug}: Tours tab opens the GoHawaii directory placeholder`);
+    check(tours.on && /listed by gohawaii/i.test(tours.text) && tours.markers > 0, `${slug}: Tours tab lists GoHawaii operators with pins (${tours.markers})`);
     check(tours.gyg === 0 && !/\bbook\b|see times/i.test(tours.text), `${slug}: Tours has no booking widget, script or call to action`);   // 'bookable' in the placeholder is the disclaimer, not a CTA
     if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-tours.png`) });
     // Town tab: editorial places only, no partner pins, offers or sponsored badge.
