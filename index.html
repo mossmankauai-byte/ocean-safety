@@ -2209,7 +2209,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
       <p class="dis-lead">Effective 16 July 2026 · Version 2.0</p>
       <p>No accounts, no signup, no login — we never learn your name. This is the short version; the full, code-audited policy lives at <a href="/privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">oceansafety.app/privacy</a>.</p>
       <h4>What leaves your phone</h4>
-      <p>If you tap <b>Locate Me</b>, a position rounded to about 1&nbsp;km is sent to our server to fetch your local forecast — your exact position stays on your device. We count visits with privacy-respecting analytics (PostHog), watch for crashes (Sentry), and, on partner links, count opens. All of it rides a random id, never your name.</p>
+      <p id="privLeaves">If you tap <b>Locate Me</b>, a position rounded to about 1&nbsp;km is sent to our server to fetch your local forecast — your exact position stays on your device. We count visits with privacy-respecting analytics (PostHog), watch for crashes (Sentry), and, on partner links, count opens. All of it rides a random id, never your name.</p>
       <h4>What we don't do</h4>
       <p>We don't sell your data, run ads, build ad profiles, or set tracking cookies. If your browser sends <b>Do&nbsp;Not&nbsp;Track</b>, we turn all counting off.</p>
       <h4>Your call</h4>
@@ -2621,6 +2621,7 @@ function localizeSafety(){ var s=_si(), set=function(id,html){var e=document.get
   // notice says exactly that. DRAFT wording, same attorney-review gate as the paragraphs above.
   if(_isPublicRef()){
     var aff=document.getElementById('disAffiliate'); if(aff&&aff.parentNode) aff.parentNode.removeChild(aff);
+    set('privLeaves','If you tap <b>Locate Me</b>, a position rounded to about 1&nbsp;km is sent to our server to fetch your local forecast and is not kept; your exact position stays on your device. Nothing else leaves your phone in this build: no analytics, no crash reports, no visit counter.');
     set('disPrivacy','No accounts, no signup, no analytics and no visit counter in this build: we never learn your name, and nothing about your visit is sent to us. If you tap Locate&nbsp;Me, a position rounded to about 1&nbsp;km goes to our server to fetch your local forecast and is not kept. Full detail: <a href="/privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">the privacy page</a>.');
   } }
 if(document.readyState!=='loading') localizeSafety(); else document.addEventListener('DOMContentLoaded',localizeSafety);
