@@ -206,10 +206,12 @@
   // ---- feeds, cached for the page's life; refresh() re-reads both ----
   var last = { nws: null, hta: null, nwsAt: 0, htaAt: 0, nwsOk: null, htaOk: null };
   var inflight = null;
-  function refresh(){
+  // onEach(last) runs as each feed settles, so a slow feed never holds back the other.
+  function refresh(onEach){
     if(inflight) return inflight;
-    var a = fetchNws().then(function(x){ last.nws = x; last.nwsOk = true; }).catch(function(){ last.nwsOk = false; }).then(function(){ last.nwsAt = Date.now(); });
-    var b = fetchHta().then(function(x){ last.hta = x; last.htaOk = true; }).catch(function(){ last.htaOk = false; }).then(function(){ last.htaAt = Date.now(); });
+    function each(){ if(onEach) try { onEach(last); } catch(e){} }
+    var a = fetchNws().then(function(x){ last.nws = x; last.nwsOk = true; }).catch(function(){ last.nwsOk = false; }).then(function(){ last.nwsAt = Date.now(); each(); });
+    var b = fetchHta().then(function(x){ last.hta = x; last.htaOk = true; }).catch(function(){ last.htaOk = false; }).then(function(){ last.htaAt = Date.now(); each(); });
     inflight = Promise.all([a, b]).then(function(){ inflight = null; return last; });
     return inflight;
   }

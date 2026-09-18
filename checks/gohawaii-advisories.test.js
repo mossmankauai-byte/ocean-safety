@@ -68,7 +68,10 @@ async function page(br, url, opts){
       if(opts.nwsFail) return r.abort();
       return r.respond({ status: 200, contentType: 'application/geo+json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(opts.nws || NWS) });
     }
-    if(u.indexOf('/api/hta-feed') >= 0) return r.respond({ status: 200, contentType: 'application/rss+xml', body: opts.hta || HTA });
+    if(u.indexOf('/api/hta-feed') >= 0){
+      const send = () => r.respond({ status: 200, contentType: 'application/rss+xml', body: opts.hta || HTA }).catch(() => {});
+      return opts.htaDelay ? setTimeout(send, opts.htaDelay) : send();
+    }
     r.continue();
   });
   const errs = [];
@@ -183,6 +186,13 @@ function staff(o){ return Object.assign({ id: 's' + Math.random().toString(36).s
   check(!t.errs.length, 'no page errors (staff) ' + t.errs.join(' | '));
   await t.ctx.close();
 
+  console.log('5b. a slow HTA feed never holds back a staff red');
+  t = await page(br, '/?ref=gohawaii&island=kauai', { nws: { features: [] }, htaDelay: 8000, seed: { items: [staff({ id: 'sred', level: 'red', title: 'Staff red', approvedBy: 'Approver' })], hta: {}, log: [] } });
+  const t0 = Date.now();
+  const got = await t.pg.waitForSelector('#ghaRed', { timeout: 5000 }).then(() => true).catch(() => false);
+  check(got, 'staff red takes the screen while HTA is still loading (' + (Date.now() - t0) + ' ms after load)');
+  await t.ctx.close();
+
   console.log('6. Dashboard renders at both widths');
   for (const w of [390, 1280]) {
     t = await page(br, '/gohawaii-dashboard', { w, h: 900, nws: NWS });
@@ -192,9 +202,9 @@ function staff(o){ return Object.assign({ id: 's' + Math.random().toString(36).s
     check(d.cards === 4, 'Dashboard shows four island cards at ' + w + 'px');
     check(/High Surf Warning/.test(d.nws) && /New alert type, shown as yellow/.test(d.nws), 'Dashboard lists NWS alerts and flags the unlisted one at ' + w + 'px');
     await t.pg.screenshot({ path: path.join(OUT, 'dashboard-now-' + w + '.png'), fullPage: true });
-    await t.pg.evaluate(() => document.querySelector('nav.tabs button[data-view="adv"]').click()); await sleep(400);
+    await t.pg.evaluate(() => document.querySelector('.rail button[data-view="adv"]').click()); await sleep(400);
     await t.pg.screenshot({ path: path.join(OUT, 'dashboard-advisories-' + w + '.png'), fullPage: true });
-    await t.pg.evaluate(() => document.querySelector('nav.tabs button[data-view="feat"]').click()); await sleep(1200);
+    await t.pg.evaluate(() => document.querySelector('.rail button[data-view="feat"]').click()); await sleep(1200);
     await t.pg.screenshot({ path: path.join(OUT, 'dashboard-events-' + w + '.png'), fullPage: true });
     check(!t.errs.length, 'no Dashboard page errors at ' + w + 'px ' + t.errs.join(' | '));
     await t.ctx.close();

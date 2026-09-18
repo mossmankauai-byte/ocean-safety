@@ -104,7 +104,9 @@
       '@media (prefers-reduced-motion:reduce){.gha-ring::before{animation:none}}',
       '#ghaHubBtn{appearance:none;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:3px 10px 3px 9px;font:700 11.5px "DM Sans",system-ui,sans-serif;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}',
       '#ghaHubBtn .gha-dot{width:8px;height:8px;border-radius:50%;background:#5f92a8;box-shadow:0 0 0 2px rgba(255,255,255,.5)}'
-    ].join('\n');
+    ].join('\n')
+      // Inside the GoHawaii Dashboard's phone the service worker's reload prompt is noise.
+      + (window.parent !== window ? '\n#swUpdateToast{display:none!important}' : '');
     document.head.appendChild(st);
   }
 
@@ -258,23 +260,30 @@
     if(L.length) return h + nwsDown + L.map(advCard).join('');
     if(ok === null && okH === null) return h + '<div class="gha-empty">Checking the National Weather Service and the Hawaiʻi Tourism Authority now.</div>';
     if(ok === false) return h + nwsDown + (okH === false ? '<div class="gha-empty">We could not reach the Hawaiʻi Tourism Authority for travel updates either.</div>' : '');
+    if(ok === null) return h + '<div class="gha-empty">Still checking the National Weather Service for ' + esc(islName()) + '.' + (okH === false ? ' We could not reach the Hawaiʻi Tourism Authority for travel updates.' : '') + '</div>';
     var at = A.hst(new Date(A.last.nwsAt || Date.now()).toISOString());
+    if(okH === null) return h + '<div class="gha-empty">No National Weather Service alerts for ' + esc(islName()) + ' as of ' + esc(at) + '. Still checking the Hawaiʻi Tourism Authority.</div>';
     if(okH === false) return h + '<div class="gha-empty">No National Weather Service alerts for ' + esc(islName()) + ' as of ' + esc(at) + '. We could not reach the Hawaiʻi Tourism Authority for travel updates.</div>';
     return h + '<div class="gha-empty">No advisories from the National Weather Service or the Hawaiʻi Tourism Authority for ' + esc(islName()) + ' as of ' + esc(at) + '. The ocean can still change fast: check the beach verdicts below and swim near a lifeguard.</div>';
+  }
+  // score() has no 'red': below the yellow line it returns 'hidden', which the app reads as not
+  // recommended. 'hidden' with "Conditions Unavailable" means no live surf: never counted as a
+  // verdict either way.
+  function verdicts(){
+    var n = { green:0, yellow:0, red:0, nodata:0, calm:[] };
+    if(typeof B === 'undefined' || typeof scored === 'undefined') return n;
+    B.forEach(function(b){
+      if(b.warning_only) return;
+      var r = scored[b.id]; if(!r) return;
+      var s = r.status === 'hidden' ? (r.reason === 'Conditions Unavailable' ? 'nodata' : 'red') : r.status;
+      if(n[s] === undefined) return; n[s]++; if(s === 'green') n.calm.push(b);
+    });
+    return n;
   }
   function beachSection(){
     try {
       if(typeof B === 'undefined' || typeof scored === 'undefined') return '';
-      // score() has no 'red': below the yellow line it returns 'hidden', which the app reads as
-      // not recommended. 'hidden' with "Conditions Unavailable" means no live surf: never counted
-      // as a verdict either way.
-      var n = { green:0, yellow:0, red:0, nodata:0 }, calm = [];
-      B.forEach(function(b){
-        if(b.warning_only) return;
-        var r = scored[b.id]; if(!r) return;
-        var s = r.status === 'hidden' ? (r.reason === 'Conditions Unavailable' ? 'nodata' : 'red') : r.status;
-        if(n[s] === undefined) return; n[s]++; if(s === 'green') calm.push(b);
-      });
+      var n = verdicts(), calm = n.calm;
       if(n.nodata && !n.green && !n.yellow && !n.red) return '<div class="slbl">Beaches today</div><div class="gha-empty" style="background:#fef3c7;color:#78350f">Live surf data is unavailable right now, so there are no beach verdicts. Check with lifeguards before you swim.</div>';
       if(!n.green && !n.yellow && !n.red) return '';
       calm.sort(function(a, b){ var ca = scored[a.id]._c || {}, cb = scored[b.id]._c || {}; return (ca.es || 0) - (cb.es || 0); });
@@ -403,9 +412,31 @@
     setTimeout(autoHub, 900);
   }
   function tick(){ A.refresh().then(function(r){ feeds.nws = r.nws; feeds.hta = r.hta; paint(); if(!showRed()) pops(); }); }
+  // Inside the GoHawaii Dashboard (same origin, in an iframe) the app hands the parent its own beach
+  // verdict counts once scoring is done, so the Dashboard shows the app's numbers, never a copy of
+  // its rules. ?gh_probe=1 is a hidden iframe that only does this: no pop-ups, no page, no strip.
+  var PROBE = (function(){ try { return new URLSearchParams(location.search).get('gh_probe') === '1'; } catch(e){ return false; } })();
+  function postVerdicts(){
+    try {
+      if(window.parent === window) return;
+      // Wait until the counts hold still across two reads: the first paint can score on the
+      // snapshot before live surf lands.
+      var tries = 0, last = '', same = 0;
+      (function wait(){
+        var n = verdicts(), key = [n.green, n.yellow, n.red, n.nodata].join('/');
+        same = (key === last && n.green + n.yellow + n.red + n.nodata > 0) ? same + 1 : 0; last = key;
+        if(same < 2 && ++tries < 50){ setTimeout(wait, 700); return; }
+        window.parent.postMessage({ type: 'gh-verdicts', island: isl(), green: n.green, yellow: n.yellow, red: n.red, nodata: n.nodata, at: Date.now() }, location.origin);
+      })();
+    } catch(e){}
+  }
   function start(){
+    postVerdicts();
+    if(PROBE) return;
     css(); strip();
-    A.refresh().then(function(r){ feeds.nws = r.nws; feeds.hta = r.hta; afterFeeds(); });
+    // Staff posts need no feed: show them now, then again as each feed lands.
+    afterFeeds();
+    A.refresh(function(r){ feeds.nws = r.nws; feeds.hta = r.hta; afterFeeds(); });
     setInterval(tick, 10 * 60 * 1000);
     // A post from the Dashboard in another tab of this browser lands here at once.
     window.addEventListener('storage', function(e){ if(e.key === A.KEY){ paint(); if(!showRed()) pops(); } });

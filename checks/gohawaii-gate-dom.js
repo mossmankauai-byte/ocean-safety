@@ -66,7 +66,7 @@ async function visible(pg){
     await pg.goto(ORIGIN + '/gohawaii-dashboard?view=adv', { waitUntil: 'networkidle2', timeout: 60000 }); await sleep(2500);
     if(w === 1280){ const f = path.join(OUT, 'gohawaii-dashboard.html'); fs.writeFileSync(f, await visible(pg)); console.log('wrote', f); }
     for (const v of ['now', 'adv', 'feat']) {
-      await pg.evaluate((v) => document.querySelector('nav.tabs button[data-view="' + v + '"]').click(), v); await sleep(v === 'feat' ? 1500 : 500);
+      await pg.evaluate((v) => document.querySelector('.rail button[data-view="' + v + '"]').click(), v); await sleep(v === 'feat' ? 1500 : 500);
       await shot(pg, path.join(SH, 'review-dashboard-' + v + '-' + w + '.png'), true);
     }
     await ctx.close();
