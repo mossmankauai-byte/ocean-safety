@@ -211,7 +211,12 @@ async function state(page){
       check(malama.has, `${slug}: ${malama.beach} (${malama.status}) shows the Give back block`);
       check(malama.ok, `${slug}: Mālama rows show a photo when they have one (${malama.thumbs} of ${malama.rows}), the glyph when not`);
     }
-    if (slug === 'kauai' && !malama.none) await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-malama-beach.png`) });
+    if (slug === 'kauai' && !malama.none) {
+      // The shot is of the offer itself: scroll the Give back block into view and let its photos load.
+      await page.evaluate(() => { const h = [...document.querySelectorAll('#sc .slbl')].find(e => /Give back/.test(e.textContent)); if (h) h.scrollIntoView({ block: 'start' }); });
+      await sleep(2500);
+      await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-malama-beach.png`) });
+    }
     // Town > Wellness and Family > Events chips, on screen.
     await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); document.getElementById('overlay').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="shopping"]'); if (t) t.click(); });
     await sleep(1200);
@@ -265,6 +270,10 @@ async function state(page){
     if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-plan-malama.png`) });
     check(layer.staysShown, `${slug}: Stays tab shown once their stays loaded`);
     if (slug === 'kauai') {
+      // The shared listing card with its GoHawaii photo, credit, link back and nearest beach.
+      await page.evaluate(() => { const g = Object.values(window._GH_INDEX).find(x => x.img && x.type !== 'event' && x.tip && x.address) || Object.values(window._GH_INDEX).find(x => x.img);
+        openGhSheet(g.id); const sh = document.getElementById('sheet'); sh.scrollTop = 0; document.getElementById('sc').scrollTop = 0; });
+      await page.waitForFunction(() => /Photo via GoHawaii/.test(document.getElementById('sc').innerText), { timeout: 15000 }).catch(() => {});
       await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-listing-sheet.png`) });
       await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); document.getElementById('overlay').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="acts"]'); if (t) t.click(); });
       await sleep(1500);
