@@ -22,15 +22,19 @@ const BBOX = { kauai: [21.85, 22.30, -159.85, -159.25], maui: [20.55, 21.05, -15
 const region = (slug, lat, lon) => REGIONS[slug].map(([r, la, lo]) => [r, (la - lat) ** 2 + (lo - lon) ** 2]).sort((a, b) => a[1] - b[1])[0][0];
 const inBox = (slug, lat, lon) => { const [a, b, c, d] = BBOX[slug]; return lat >= a && lat <= b && lon >= c && lon <= d; };
 const short = s => { s = String(s || '').replace(/\s*[(|,:].*$/, '').trim(); if (s.length <= 18) return s; const cut = s.slice(0, 18).replace(/\s+\S*$/, ''); return (cut || s.slice(0, 18)).trim(); };
-const tip = s => { let t = String(s || '').replace(/\s+/g, ' ').replace(/&#039;|&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/<[^>]+>/g, '').trim();
+const tip = (s, strict) => { let t = String(s || '').replace(/\s+/g, ' ').replace(/&#039;|&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/<[^>]+>/g, '').trim();
   // No price and no sales pitch in a public build: drop any sentence that names a price, sells tickets or offers a deal
   // (their Malama listings are hotel incentives: a free night, a resort credit, a waived fee). A free event stays.
-  t = t.split(/(?<=[.!?])\s+/).filter(x => !/\$\d|buy tickets?|tickets? (are )?(available|on sale)|\bon sale\b|% off|\bdiscount|book (now|online|today)|reserve (now|online|today)|promo code|coupon|\bpric(e|es|ing)\b|nights? free|\bsave (you )?up to|resort (credit|fees?)|\bwaived\b|\bdeal\b|unbeatable value|available (for|to) purchase|\bbook your\b/i.test(x)).join(' ');
+  // strict (a Malama row): their teaser IS the hotel offer, so if any sentence goes, the rest is its fine print.
+  const all = t.split(/(?<=[.!?])\s+/);
+  t = all.filter(x => !/\$\d|\bdollars?\b|buy tickets?|tickets? (are )?(available|on sale)|\bon sale\b|% off|\bdiscount|book (now|online|today)|reserve (now|online|today)|promo code|coupon|\bpric(e|es|ing)\b|nights? free|\bsave (you )?up to|resort (credit|fees?)|\bwaived\b|\bdeal\b|unbeatable value|available (for|to) purchase|\bbook (your|the)\b|\bbonus\b|\b(earn|redeem)\b[^.]*\bpoints\b|bonvoy|world of hyatt|minimum stay|sign up here/i.test(x));
+  if (strict && t.length < all.length) return '';
+  t = t.join(' ');
   t = t.replace(/[\p{Extended_Pictographic}\u2728\uFE0F]/gu, '').replace(/\s{2,}/g, ' ').trim();   // their emoji are not our icons
   return t.length > 170 ? t.slice(0, 167).replace(/\s+\S*$/, '') + '.' : t; };
 const has = (r, k, v) => (r.filters[k] || []).includes(v);
 // A business link that lands on an offer or a booking engine is a sales surface; the card keeps its gohawaii.com link.
-const SALES_URL = /hotel-deals|\/deals?\b|\boffers?\b|special-offers|\/specials?\b|special-packages|\/packages?\b|promo=|\/shop\/|checkinDate|synxis\.com/i;
+const SALES_URL = /\btickets?\b|\/rooms?\b|ipoolside|resort-activities|book-?now|hotel-deals|\/deals?\b|\boffers?\b|special-offers|\/specials?\b|special-packages|\/packages?\b|promo=|\/shop\/|checkinDate|synxis\.com/i;
 const site = u => (u && !SALES_URL.test(u)) ? u : undefined;
 // Photos: their API hands out plain-http pantheonsite.io URLs (mixed content on our https page). The same
 // path serves from https://www.gohawaii.com, so every image host is rewritten there.
@@ -84,7 +88,7 @@ for (const r of L) {
     if (!inBox(slug, r.lat, r.lon)) { drop('coordinates outside the island box'); continue; }
     if (c.gap) report.gaps[c.gap] = (report.gaps[c.gap] || 0) + 1;
     const a = r.address || {};
-    out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, c, { tip: tip(r.teaser), website: site(r.websites.business), src_url: 'https://www.gohawaii.com' + r.link,
+    out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, c, { tip: tip(r.teaser, c.type === 'malama'), website: c.type === 'malama' ? undefined : site(r.websites.business), src_url: 'https://www.gohawaii.com' + r.link,
       address: [a.line_1, a.city].filter(Boolean).join(', ') || undefined, img: ghImg(r.img), ...(c.facts || {}) }));
   }
 }
@@ -127,8 +131,8 @@ for (const p of places) {
 for (const slug of Object.keys(out)) { const seen = new Set(); out[slug] = out[slug].filter(r => { if (seen.has(r.id)) { drop('duplicate row in their data'); return false; } seen.add(r.id); return true; }); }
 // 3b. Rows the API gave no photo. Two sources, both gohawaii.com's own: (a) img-overrides.json, the hero photo on
 // the row's own gohawaii.com page (read in a browser tab, since curl gets a Cloudflare 403); (b) the photo on
-// another of their records with the same name within 1.5 km (their Malama listings duplicate a hotel's main
-// listing without its photo). Anything still bare keeps the gradient card; nothing is invented.
+// another of their records with the same name within 1.5 km (a stay listed twice), never for a Malama row.
+// Anything still bare keeps the gradient card; nothing is invented.
 // Overrides must be a Drupal image-style derivative (/styles/); a raw original can run to several MB.
 const overrides = Object.fromEntries(Object.entries(fs.existsSync(new URL('img-overrides.json', D)) ? read('img-overrides.json') : {})
   .filter(([, u]) => /\/sites\/default\/files\/styles\//.test(u)));
@@ -144,7 +148,8 @@ for (const slug of Object.keys(out)) {
   for (const r of out[slug]) {
     let src = r.img ? 'api' : null;
     if (!r.img && overrides[r.id]) { r.img = ghImg(overrides[r.id]); src = 'page_hero'; }
-    if (!r.img) { const sib = (withPhoto[nameKey(r.name)] || []).find(x => km(x.lat, x.lon, r.lat, r.lon) <= 1.5); if (sib) { r.img = ghImg(sib.img); src = 'same_name_listing'; } }
+    // A Malama row borrows no photo: the same-name listing is the hotel's own (rooms, pools), a sales image on a safety sheet.
+    if (!r.img && r.type !== 'malama') { const sib = (withPhoto[nameKey(r.name)] || []).find(x => km(x.lat, x.lon, r.lat, r.lon) <= 1.5); if (sib) { r.img = ghImg(sib.img); src = 'same_name_listing'; } }
     const flyer = r.img && r.type === 'event' && !eventOk.has(r.img);
     if (flyer) { r.img = undefined; photos.eventFlyersWithheld++; (photos.withheld[slug] = photos.withheld[slug] || []).push(r.name); }
     P.rows++; photos.rows++;

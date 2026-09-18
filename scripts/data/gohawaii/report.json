@@ -144,34 +144,34 @@
   },
   "photos": {
     "rows": 1045,
-    "with": 795,
-    "without": 250,
+    "with": 755,
+    "without": 290,
     "bySource": {
       "api": 723,
       "page_hero": 31,
-      "same_name_listing": 41
+      "same_name_listing": 1
     },
     "eventFlyersWithheld": 80,
     "islands": {
       "kauai": {
         "rows": 176,
-        "with": 140,
-        "without": 36
+        "with": 134,
+        "without": 42
       },
       "maui": {
         "rows": 258,
-        "with": 173,
-        "without": 85
+        "with": 166,
+        "without": 92
       },
       "oahu": {
         "rows": 396,
-        "with": 300,
-        "without": 96
+        "with": 281,
+        "without": 115
       },
       "hawaii": {
         "rows": 215,
-        "with": 182,
-        "without": 33
+        "with": 174,
+        "without": 41
       }
     },
     "missing": {
@@ -179,6 +179,14 @@
         "american": [
           "The Garden Grille",
           "Driftwood Bar & Grill"
+        ],
+        "malama": [
+          "Sheraton Kauai Coconut Beach Resort",
+          "Grand Hyatt Kauai Resort & Spa",
+          "Ko’a Kea Resort on Poipu Beach",
+          "Castle Kaha Lani Resort",
+          "Kiahuna Plantation® & Beach Bungalows by Castle",
+          "Castle Po‘ipū Shores"
         ],
         "tour": [
           "Smith's Kauai Wailua River Cruise",
@@ -251,6 +259,15 @@
           "Ma'alaea Banyans - Maui Oceanfront Condo",
           "Aloha Baby Grand at Wailea Beach Villas"
         ],
+        "malama": [
+          "The Westin Maui Resort & Spa, Kaʻanapali",
+          "Hyatt Regency Maui Resort and Spa",
+          "Fairmont Kea Lani, Maui",
+          "Castle Kama‘ole Sands",
+          "Grand Wailea",
+          "Hana-Maui Resort",
+          "AC Hotel by Marriott Maui Wailea"
+        ],
         "mediterranean": [
           "Pizza Paradiso"
         ],
@@ -320,6 +337,27 @@
           "Sunset",
           "Kani Ka Pila Grille",
           "Mai Tai Bar"
+        ],
+        "malama": [
+          "CASTLE Bamboo Waīkikī Hotel",
+          "The Laylow, Autograph Collection",
+          "The Ritz-Carlton Residences, Waikiki Beach",
+          "Waikiki Beach Marriott Resort & Spa",
+          "ʻAlohilani Resort Waikiki Beach",
+          "OUTRIGGER Waikīkī Beachcomber Hotel",
+          "OUTRIGGER Waikiki Beach Resort",
+          "Prince Waikiki",
+          "Courtyard Oahu North Shore",
+          "Embassy Suites by Hilton Oahu Kapolei",
+          "Embassy Suites by Hilton Waikiki Beach Walk",
+          "Castle Wakīkī Shore",
+          "The Imperial Hawaii Resort",
+          "The Kahala Hotel & Resort",
+          "Hyatt Centric Waikiki Beach",
+          "Holiday Inn Express Waikiki",
+          "International Market Place",
+          "Castle Bamboo Waikīkī Hotel",
+          "Castle @ Waikīkī Grand"
         ],
         "hawaii regional": [
           "Alaia",
@@ -414,7 +452,15 @@
       },
       "hawaii": {
         "malama": [
-          "Castle Waimea Country Lodge"
+          "Mauna Kea Beach Hotel",
+          "The Westin Hapuna Beach Resort",
+          "Waikoloa Beach Marriott Resort & Spa",
+          "The Puakea Ranch",
+          "Halii Kai Villa Rentals at Waikoloa Beach Resort",
+          "Hilo Hawaiian Hotel, Trademark Collection by Wyndham",
+          "Castle Kanaloa at Kona",
+          "Castle Waimea Country Lodge",
+          "Castle Hali‘i Kai at Waikoloa"
         ],
         "stay": [
           "Castle Waimea Country Lodge",

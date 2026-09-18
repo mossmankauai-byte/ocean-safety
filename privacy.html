@@ -106,7 +106,7 @@ footer a{color:var(--mute)}
 
 <section>
 <h2>What we count, and how</h2>
-<p>Three separate systems. They run in different places and collect different things.</p>
+<p>Three separate systems. They run in different places and collect different things. None of the three runs in the GoHawaii version of the app (links with <code>?ref=gohawaii</code>): no analytics, no crash reports, no visit counter.</p>
 
 <h3>1. Product analytics: PostHog</h3>
 <p class="meta"><b>Runs on:</b> oceansafety.app only. Not on any hotel or shop deployment. &nbsp;·&nbsp; <b>Off if:</b> your browser sends Do Not Track.</p>
@@ -161,7 +161,7 @@ footer a{color:var(--mute)}
 <tr><td><b>Esri</b></td><td>Same, for satellite view</td><td>Whenever satellite view is on</td></tr>
 <tr><td><b>Open-Meteo</b></td><td>Your IP, and a fixed grid over the island, not your position</td><td>Only when the rain radar overlay loads, which calls them directly</td></tr>
 <tr><td><b>Unsplash, Wikimedia, Flickr</b></td><td>IP and that you came from oceansafety.app</td><td>Whenever a beach photo loads</td></tr>
-<tr><td><b>GoHawaii</b> (gohawaii.com)</td><td>IP and that you came from this site</td><td>Only in the GoHawaii build, whenever one of their listing photos loads</td></tr>
+<tr><td><b>GoHawaii</b> (gohawaii.com)</td><td>IP and that you came from this site</td><td>Only in the GoHawaii version, whenever one of their listing photos loads</td></tr>
 <tr><td><b>Clearbit</b></td><td>IP and which business logo we asked for</td><td>When a business logo loads</td></tr>
 <tr><td><b>Supabase</b></td><td>IP and which partner you arrived through</td><td>Only on partner pages</td></tr>
 <tr><td><b>GetYourGuide</b> and <b>Viator</b></td><td>Their code runs inside our page, so they see what any script in a page sees, and they set their own storage</td><td>Only on the tours tab</td></tr>
@@ -214,12 +214,13 @@ footer a{color:var(--mute)}
 
 <section>
 <h2>Photos</h2>
-<p>Beach photos are licensed: Creative Commons via Wikimedia Commons and Flickr, plus Unsplash. Every photo carries its credit in our public source tree. If we have used a photo of yours without proper credit, email <a href="mailto:privacy@oceansafety.app">privacy@oceansafety.app</a> and we will credit it or pull it that day. In the GoHawaii build, listing photos are GoHawaii&rsquo;s own, loaded from gohawaii.com and credited on the card.</p>
+<p>Beach photos are licensed: Creative Commons via Wikimedia Commons and Flickr, plus Unsplash. Every photo carries its credit in our public source tree. If we have used a photo of yours without proper credit, email <a href="mailto:privacy@oceansafety.app">privacy@oceansafety.app</a> and we will credit it or pull it that day. In the GoHawaii version, listing photos are GoHawaii&rsquo;s own, loaded from gohawaii.com and credited to GoHawaii wherever they appear.</p>
 </section>
 
 <section>
 <h2>Changes</h2>
 <p>When this policy changes materially, we bump the version, date it, and note what changed here.</p>
+<p><b>Version 2.1, 18 September 2026.</b> Names gohawaii.com, which sees your visit when one of their listing photos loads in the GoHawaii version, and says that version runs no analytics, crash reports or visit counter.</p>
 <p><b>Version 2.0, 16 July 2026.</b> Full rewrite following a code audit. Corrections to the May 2026 version:</p>
 <ul>
 <li>The old policy said your Locate Me position "never leaves your device." It does: a version rounded to about 1&nbsp;km goes to our server for weather. Corrected above.</li>

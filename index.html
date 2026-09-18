@@ -2621,7 +2621,7 @@ function localizeSafety(){ var s=_si(), set=function(id,html){var e=document.get
   // notice says exactly that. DRAFT wording, same attorney-review gate as the paragraphs above.
   if(_isPublicRef()){
     var aff=document.getElementById('disAffiliate'); if(aff&&aff.parentNode) aff.parentNode.removeChild(aff);
-    set('privLeaves','If you tap <b>Locate Me</b>, a position rounded to about 1&nbsp;km is sent to our server to fetch your local forecast and is not kept; your exact position stays on your device. Nothing else leaves your phone in this build: no analytics, no crash reports, no visit counter. GoHawaii photos load straight from gohawaii.com, so gohawaii.com sees your IP address and that you came from this site.');
+    set('privLeaves','If you tap <b>Locate Me</b>, a position rounded to about 1&nbsp;km is sent to our server to fetch your local forecast and is not kept; your exact position stays on your device. Nothing is sent to us beyond that: no analytics, no crash reports, no visit counter. Photos and map tiles load straight from the sites that host them, gohawaii.com included, so those sites see your IP address and that you came from this site.');
     set('disPrivacy','No accounts, no signup, no analytics and no visit counter in this build: we never learn your name, and nothing about your visit is sent to us. If you tap Locate&nbsp;Me, a position rounded to about 1&nbsp;km goes to our server to fetch your local forecast and is not kept. Full detail: <a href="/privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">the privacy page</a>.');
   } }
 if(document.readyState!=='loading') localizeSafety(); else document.addEventListener('DOMContentLoaded',localizeSafety);
@@ -5931,7 +5931,7 @@ function openToursSheet(){
           + '<div style="font-size:20px;color:var(--ocean)">›</div></div>';
       });
     });
-    html += '<div style="margin-top:14px;font-size:11px;color:var(--mute)">Listings by GoHawaii (Hawaii Visitors and Convention Bureau). Each opens on gohawaii.com. Nothing is bookable inside this build.</div>';
+    html += '<div style="margin-top:14px;font-size:11px;color:var(--mute)">Listings and photos by GoHawaii (Hawaii Visitors and Convention Bureau). Each opens on gohawaii.com. Nothing is bookable inside this build.</div>';
     sc.innerHTML = html;
     document.getElementById('sheet').classList.add('on');
     document.getElementById('overlay').classList.add('on');
@@ -6117,7 +6117,7 @@ function _planSlotRow(s,idx){
   if(s.kind==='gh'){   // a GoHawaii row: opens the shared sheet, no swap, no heart, credit inline
     return '<div class="plan-slot" onclick="openGhSheet(\''+_pesc(it.id)+'\')"><div class="plan-when">'+s.when+'</div>'+
       '<div class="plan-card" style="border-left:4px solid #7c3aed">'+_ghThumb(it)+'<div class="plan-card-b"><div class="plan-card-name">'+_pesc(name)+' <span class="plan-tag" style="color:#7c3aed">'+(it.type==='event'?'Event':'GoHawaii')+'</span></div>'+
-      '<div class="plan-card-sub">'+_pesc(_planSlotSub(s))+'</div><div style="font-size:10.5px;color:var(--mute);margin-top:4px">Listing by GoHawaii</div></div></div></div>';
+      '<div class="plan-card-sub">'+_pesc(_planSlotSub(s))+'</div><div style="font-size:10.5px;color:var(--mute);margin-top:4px">'+(_ghThumb(it)?'Listing and photo by GoHawaii':'Listing by GoHawaii')+'</div></div></div></div>';
   }
   var heart=(s.kind==='tour')?'':heartButton(s.kind,it.id);
   var act=(s.kind==='tour')?'<button class="plan-book" onclick="event.stopPropagation();openToursSheet()">See times & book</button>':'';
@@ -11736,7 +11736,7 @@ function renderGhTown(){
 function _ghThumb(g){
   var u = g && g.img ? String(g.img) : '';
   if(u.indexOf('https://www.gohawaii.com/')!==0) return '';
-  return '<img class="gh-thumb" src="'+_pesc(u)+'" alt="" loading="lazy" decoding="async" width="52" height="52" onerror="this.style.display=\'none\'" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;display:block;background:#e6eef0">';
+  return '<img class="gh-thumb" src="'+_pesc(u)+'" alt="" loading="lazy" decoding="async" width="52" height="52" onerror="this.style.display=\'none\'" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;display:block;background:var(--ocean-lt)">';
 }
 // The beach-sheet block: when the verdict is red or yellow, the two nearest Mālama programs.
 // This is the "redirect to a safer activity" HTA asked for, with HTA's own program as the answer.
