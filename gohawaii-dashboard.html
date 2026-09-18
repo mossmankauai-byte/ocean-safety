@@ -323,7 +323,7 @@
   <p class="foot">Weather alerts come from the National Weather Service (api.weather.gov) and travel updates from the Hawaiʻi Tourism Authority (hta.hawaii.gov), credited on each card in the app. Beach verdicts in the app are OceanSafety's, from live surf and wind. Always follow lifeguards and posted signs.</p>
 </div>
 
-<script src="/gh/advisories.js?b=2026-09-18-adv3"></script>
+<script src="/gh/advisories.js?b=2026-09-18-adv4"></script>
 <script>
 (function(){
   'use strict';
@@ -392,7 +392,7 @@
   // ---- data loads ----
   function loadBeaches(){
     if(state.beaches) return Promise.resolve(state.beaches);
-    return fetch('/gh/beaches.json?b=2026-09-18-adv3').then(function(r){ return r.ok ? r.json() : {}; }).catch(function(){ return {}; })
+    return fetch('/gh/beaches.json?b=2026-09-18-adv4').then(function(r){ return r.ok ? r.json() : {}; }).catch(function(){ return {}; })
       .then(function(d){ state.beaches = d || {}; return state.beaches; });
   }
   function loadLayer(slug){
@@ -423,7 +423,7 @@
       var lines = L.slice(0, 3).map(function(a){ return '<div class="mini">' + lvChip(a.level) + '<span class="t">' + esc(a.title) + '</span></div>'; }).join('')
         + F.slice(0, 1).map(function(f){ return '<div class="mini"><span class="lvl feat">Featured</span><span class="t">' + esc(f.title) + '</span></div>'; }).join('');
       return '<div class="card islcard"><div class="hd"><h3>' + ISL[k] + '</h3><span class="pill"><i style="background:' + dot + '"></i>' + pill + '</span></div>'
-        + (lines || '<div class="empty">Nothing active from the National Weather Service, the Hawaiʻi Tourism Authority or your team.</div>')
+        + (lines || '<div class="empty">' + emptyLine() + '</div>')
         + '<div class="formfoot" style="margin-top:10px"><button type="button" class="btn" data-go="' + k + '">See it as a visitor</button></div></div>';
     }).join('');
     var L = A.last, at = Math.max(L.nwsAt || 0, L.htaAt || 0);
@@ -441,6 +441,16 @@
       + '<div class="src"><span class="ic">' + svgPen() + '</span><div class="x" style="flex:1"><b>GoHawaii staff</b><div class="note">' + (function(){ var st = A.load(); var live = st.items.filter(function(i){ return status(i) === 'live'; }).length; return live === 1 ? '1 of your posts is live now.' : live ? live + ' of your posts are live now.' : 'None of your posts are live.'; })() + '</div></div></div>';
     var pend = A.load().items.filter(function(i){ return i.status === 'pending'; });
     $('pendingNow').innerHTML = pend.length ? pend.map(rowHtml).join('') : '<div class="empty">Nothing is waiting. Red posts land here until someone other than the poster approves them.</div>';
+  }
+  // The empty island card names what was actually checked. A feed that is down is said, never
+  // folded into "nothing active".
+  function emptyLine(){
+    var n = A.last.nwsOk, h = A.last.htaOk;
+    if(n === null && h === null) return 'Checking the National Weather Service and the Hawaiʻi Tourism Authority...';
+    if(n === false && h === false) return 'Neither the National Weather Service nor the Hawaiʻi Tourism Authority could be reached on the last check. Nothing from your team is active.';
+    if(n === false) return 'The National Weather Service could not be reached on the last check, so weather alerts may be missing. Nothing active from the Hawaiʻi Tourism Authority or your team.';
+    if(h === false) return 'Nothing active from the National Weather Service or your team. The Hawaiʻi Tourism Authority could not be reached on the last check.';
+    return 'Nothing active from the National Weather Service, the Hawaiʻi Tourism Authority or your team.';
   }
   $('islCards').addEventListener('click', function(e){ var b = e.target.closest('[data-go]'); if(!b) return; state.isl = b.dataset.go; islPick(); show('prev'); });
   function svgCloud(){ return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .6-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z"/></svg>'; }

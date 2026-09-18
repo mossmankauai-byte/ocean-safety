@@ -146,6 +146,15 @@ function staff(o){ return Object.assign({ id: 's' + Math.random().toString(36).s
   check(!/No advisories from|No National Weather Service alerts/i.test(fail), 'no all-clear line when the weather feed failed');
   await t.ctx.close();
 
+  console.log('4b. Dashboard with feeds down: island cards never say "nothing active" for a source that failed');
+  t = await page(br, '/gohawaii-dashboard', { w: 1280, h: 900, nwsFail: true, hta: 'not rss' });
+  await sleep(3000);
+  const dd = await t.pg.evaluate(() => document.getElementById('islCards').innerText);
+  check(/Weather feed down/.test(dd), 'Dashboard pill says the weather feed is down');
+  check(/National Weather Service could not be reached|Neither the National Weather Service/.test(dd), 'empty island card says the weather service could not be reached');
+  check(!/Nothing active from the National Weather Service/.test(dd), 'no island card claims nothing active from a failed feed');
+  await t.ctx.close();
+
   console.log('5. staff posts: approval, targeting, end');
   const pend = staff({ id: 'spend', level: 'red', title: 'Pending red', status: 'pending' });
   const tgt = staff({ id: 'stgt', level: 'yellow', title: 'Hanalei only', beaches: ['hanalei'] });

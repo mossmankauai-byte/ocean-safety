@@ -115,6 +115,9 @@
       .then(function(r){ return r.text(); })
       .then(function(xml){
         var doc = new DOMParser().parseFromString(xml, 'text/xml');
+        // A bot-check page or any non-feed body is a failure, never an empty feed (an empty feed
+        // would read as "no HTA updates").
+        if(!doc.querySelector('rss > channel')) throw new Error('not an RSS feed');
         var items = [];
         Array.prototype.forEach.call(doc.querySelectorAll('item'), function(it){
           function tx(sel){ var n = it.querySelector(sel); return n ? (n.textContent || '').trim() : ''; }
