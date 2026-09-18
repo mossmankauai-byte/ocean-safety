@@ -40,7 +40,8 @@ async function visible(pg){
   for (const isl of ['kauai', 'oahu', 'maui', 'hawaii']) {
     const ctx = await br.createBrowserContext(); const pg = await ctx.newPage();
     await pg.setViewport({ width: 390, height: 844, deviceScaleFactor: 2 });
-    await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); localStorage.setItem('disclaimerAccepted', '1'); } catch(e){} }, JSON.stringify(seed(isl)));
+    await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); localStorage.setItem('disclaimerAccepted', '1'); } catch(e){}
+      document.addEventListener('DOMContentLoaded', () => { const st = document.createElement('style'); st.textContent = '#swUpdateToast{display:none!important}'; document.head.appendChild(st); }); }, JSON.stringify(seed(isl)));
     await pg.goto(ORIGIN + '/?ref=gohawaii&island=' + isl, { waitUntil: 'networkidle2', timeout: 60000 });
     await pg.waitForSelector('#ghaRed', { timeout: 15000 });
     if(isl === 'kauai') await shot(pg, path.join(SH, 'review-app-red-390.png'));

@@ -135,7 +135,8 @@
   .phone iframe{width:100%;height:100%;border:0;border-radius:24px;background:#fff}
   @media(max-width:520px){.phone{height:640px;border-width:6px;border-radius:26px}}
   .evimg{width:44px;height:44px;border-radius:9px;background:var(--sea-tint) center/cover no-repeat;flex:none}
-  .evimg.evic{display:flex;align-items:center;justify-content:center;color:var(--sea)}
+  .evimg.evic{display:flex;align-items:center;justify-content:center;color:var(--sea);position:relative;overflow:hidden}
+  .evimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .warnline{font-size:11.5px;color:var(--warn);font-weight:600;margin-top:3px}
   .search{margin-bottom:8px}
   .foot{margin-top:28px;font-size:12px;color:var(--muted);line-height:1.5}
@@ -323,7 +324,7 @@
   <p class="foot">Weather alerts come from the National Weather Service (api.weather.gov) and travel updates from the Hawaiʻi Tourism Authority (hta.hawaii.gov), credited on each card in the app. Beach verdicts in the app are OceanSafety's, from live surf and wind. Always follow lifeguards and posted signs.</p>
 </div>
 
-<script src="/gh/advisories.js?b=2026-09-18-adv4"></script>
+<script src="/gh/advisories.js?b=2026-09-18-adv5"></script>
 <script>
 (function(){
   'use strict';
@@ -392,7 +393,7 @@
   // ---- data loads ----
   function loadBeaches(){
     if(state.beaches) return Promise.resolve(state.beaches);
-    return fetch('/gh/beaches.json?b=2026-09-18-adv4').then(function(r){ return r.ok ? r.json() : {}; }).catch(function(){ return {}; })
+    return fetch('/gh/beaches.json?b=2026-09-18-adv5').then(function(r){ return r.ok ? r.json() : {}; }).catch(function(){ return {}; })
       .then(function(d){ state.beaches = d || {}; return state.beaches; });
   }
   function loadLayer(slug){
@@ -636,7 +637,8 @@
     $('evList').innerHTML = rows.slice(0, 40).map(function(g){
       var img = g.img && String(g.img).indexOf('https://www.gohawaii.com/') === 0 ? g.img : '';
       var on = feat[g.id];
-      return '<div class="row">' + (img ? '<span class="evimg" style="background-image:url(\'' + esc(img).replace(/'/g, '%27') + '\')"></span>' : '<span class="evimg evic">' + (state.evKind === 'event' ? SVG_CAL : SVG_HAND) + '</span>') + '<div class="x"><b>' + esc(g.name) + '</b><div class="m">'
+      // The icon is always drawn; a photo lays over it and removes itself if gohawaii.com refuses it.
+      return '<div class="row"><span class="evimg evic">' + (state.evKind === 'event' ? SVG_CAL : SVG_HAND) + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</span>' + '<div class="x"><b>' + esc(g.name) + '</b><div class="m">'
         + esc([g.when ? A.hst(g.when + 'T12:00:00-10:00', true).replace(/,? \d+(am|pm)$/, '') : '', g.venue || '', g.r || '', g.gh_sub || ''].filter(Boolean).join(' · ')) + '</div>'
         + (state.evKind === 'malama' && hotelish(g) ? '<div class="warnline">Mentions a hotel stay, rate or package. Featuring it would put an offer on the page.</div>' : '')
         + '</div><div class="acts">' + (on ? '<span class="lvl feat">Featured</span>' : '<button class="btn" data-feat="' + esc(g.id) + '">Feature</button>') + '</div></div>';

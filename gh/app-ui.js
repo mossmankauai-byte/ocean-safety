@@ -87,14 +87,15 @@
       '.gha-li .gha-x{flex:1;min-width:0}',
       '.gha-li .gha-x b{display:block;font-size:13.5px;color:var(--ink,#0f172a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
       '.gha-li .gha-x span{display:block;font-size:11.5px;color:var(--mute,#64748b)}',
-      '.gha-li .gha-ico{width:40px;height:40px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#e7f1f4;color:#0f4c5c;background-size:cover;background-position:center}',
+      '.gha-li .gha-ico{position:relative;overflow:hidden;width:40px;height:40px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#e7f1f4;color:#0f4c5c}',
+      '.gha-li .gha-ico img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}',
       '.gha-feat{border-radius:14px;overflow:hidden;border:1px solid var(--border,#e2e8f0);margin-bottom:8px;cursor:pointer;background:#fff}',
       '.gha-feat .gha-fimg{height:112px;background:linear-gradient(135deg,#0f4c5c,#1a7a8a);background-size:cover;background-position:center;position:relative}',
       '.gha-feat .gha-ftag{position:absolute;left:10px;top:10px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.94);color:#0f4c5c;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800}',
       '.gha-feat .gha-fb{padding:10px 12px}',
       '.gha-feat .gha-ftag-in{position:static;background:#e7f1f4;margin-bottom:6px}',
       '.gha-feat .gha-fb b{display:block;font-size:15px;color:var(--ink,#0f172a)}',
-      '.gha-feat .gha-fb span{display:block;font-size:12.5px;color:var(--mute,#64748b);margin-top:2px}',
+      '.gha-feat .gha-fb > span:not(.gha-ftag){display:block;font-size:12.5px;color:var(--mute,#64748b);margin-top:2px}',
       '.gha-fine{font-size:11px;color:var(--mute,#64748b);margin-top:18px;line-height:1.5}',
       '.gha-ring{position:relative;width:0;height:0}',
       '.gha-ring::before{content:"";position:absolute;left:-19px;top:-19px;width:38px;height:38px;border-radius:50%;border:3px solid var(--lv);box-shadow:0 0 0 3px rgba(255,255,255,.85);animation:ghaPulse 1.8s ease-in-out infinite}',
@@ -299,7 +300,7 @@
       // A photo band only when there is a photo; otherwise the tag sits in the text block.
       var tag = '<span class="gha-ftag">' + ICON.star + esc(f.sub || 'Featured') + '</span>';
       return '<div class="gha-feat" onclick="_ghaOpenFeature(\'' + esc(f.id) + '\')">'
-        + (imgOk(img) ? '<div class="gha-fimg" style="background-image:url(\'' + esc(img).replace(/'/g, '%27') + '\')">' + tag + '</div>' : '')
+        + (imgOk(img) ? '<div class="gha-fimg" style="background-image:url(\'' + esc(img).replace(/'/g, '%27') + '\'),linear-gradient(135deg,#0f4c5c,#1a7a8a)">' + tag + '</div>' : '')
         + '<div class="gha-fb">' + (imgOk(img) ? '' : tag.replace('gha-ftag', 'gha-ftag gha-ftag-in')) + '<b>' + esc(f.title) + sampleTag(f) + '</b>' + (sub ? '<span>' + esc(sub.length > 160 ? sub.slice(0, 157) + '...' : sub) + '</span>' : '') + '</div></div>';
     }).join('');
   }
@@ -312,7 +313,7 @@
       .sort(function(a, b){ return a.when < b.when ? -1 : a.when > b.when ? 1 : 0; }).slice(0, 6);
     if(!ev.length) return '';
     return '<div class="slbl">Events this week</div>' + ev.map(function(g){
-      return '<div class="gha-li" onclick="_ghaGo(\'' + esc(g.id) + '\')"><span class="gha-ico"' + (imgOk(g.img) ? ' style="background-image:url(\'' + esc(g.img).replace(/'/g, '%27') + '\')"' : '') + '>' + (imgOk(g.img) ? '' : ICON.cal) + '</span>'
+      return '<div class="gha-li" onclick="_ghaGo(\'' + esc(g.id) + '\')"><span class="gha-ico">' + ICON.cal + (imgOk(g.img) ? '<img src="' + esc(g.img) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</span>'
         + '<span class="gha-x"><b>' + esc(g.name) + '</b><span>' + esc(dayLabel(g.when)) + (g.venue ? ' · ' + esc(g.venue) : (g.r ? ' · ' + esc(g.r) : '')) + '</span></span>' + ICON.chev + '</div>';
     }).join('');
   }

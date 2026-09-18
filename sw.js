@@ -20,7 +20,7 @@
 // v289 was claimed twice on the same day. Forward, never backward.
 // v319 is claimed on work/reserve-links; this branch skips to v320.
 // v321 and v322 were claimed on both work/gohawaii-option-a and work/gohawaii-advisories. Forward to v327.
-const CACHE_VERSION = 'v328-2026-09-18-app-update';
+const CACHE_VERSION = 'v329-2026-09-18-app-update';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
