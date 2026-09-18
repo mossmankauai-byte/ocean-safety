@@ -111,6 +111,19 @@ async function state(page){
     if (slug === 'kauai') {
       await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-beach-sheet.png`) });
       fs.writeFileSync(path.join(OUT, 'gohawaii-rendered-kauai.html'), await page.evaluate(() => document.documentElement.outerHTML));
+      // The visible document: the same DOM with script source, comments and noscript removed.
+      // This is what a visitor can see, and the file the segment gate runs on (the inline
+      // scripts still carry every shop string in their source, which nobody is shown).
+      fs.writeFileSync(path.join(OUT, 'gohawaii-rendered-kauai-visible.html'), await page.evaluate(() => {
+        const c = document.documentElement.cloneNode(true);
+        c.querySelectorAll('script, noscript').forEach(n => n.remove());
+        const w = document.createTreeWalker(c, NodeFilter.SHOW_COMMENT), dead = [];
+        while (w.nextNode()) dead.push(w.currentNode);
+        dead.forEach(n => n.remove());
+        return c.outerHTML;
+      }));
+      const visible = await page.evaluate(() => document.body.innerText);
+      check(!/\$\d/.test(visible), 'kauai: no price anywhere in the visible text' + (/\$\d/.test(visible) ? ' ' + JSON.stringify(visible.match(/.{0,30}\$\d.{0,10}/g).slice(0, 3)) : ''));
     }
     const bad2 = reqs.filter(u => FORBIDDEN.test(u));
     check(bad2.length === 0, `${slug}: still no commerce request after the sheet`);

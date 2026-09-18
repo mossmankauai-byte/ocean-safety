@@ -7417,7 +7417,7 @@ function channelCard(cid){
 
 function poiCard(pid){
   const p=P[pid];if(!p)return'';
-  const priceChip=p.price_from?`<span class="pc-chip gold">${p.price_from.split('—')[0].trim()}</span>`:'';
+  const priceChip=(p.price_from && !_isPublicRef())?`<span class="pc-chip gold">${p.price_from.split('—')[0].trim()}</span>`:'';   // public ref: no price on any card
   const hoursChip=p.hours?`<span class="pc-chip">${p.hours.split(',')[0]}</span>`:'';
   return`<div class="pc" onclick="openPoiSheet('${pid}');event.stopPropagation()">
     ${pcTop(p, p.type, p.hero_col||'#e0f2f7', 'var(--ocean)', p.icon||'+')}
@@ -7477,7 +7477,7 @@ function nearbyItems(lat,lon,items,minCount=3,radius=5,maxRadius=10){
 // Compact nearby-activity card — matches existing .pc card style
 function nearbyActCard(a,dist){
   const distChip=`<span class="pc-chip">${dist.toFixed(1)} mi</span>`;
-  const priceChip=a.price?`<span class="pc-chip gold">${a.price.split('—')[0].trim()}</span>`:'';
+  const priceChip=(a.price && !_isPublicRef())?`<span class="pc-chip gold">${a.price.split('—')[0].trim()}</span>`:'';   // public ref: no price on any card
   return`<div class="pc" onclick="openActSheet('${a.id}');event.stopPropagation()">
     ${pcTop(a, a.type, '#fef3c7', '#a16207', '★')}
     <div class="pn" style="margin-top:8px">${a.name}</div>
