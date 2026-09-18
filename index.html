@@ -5884,7 +5884,19 @@ function selectTourDate(idx){
   renderToursSheetContent();
 }
 function openToursSheet(){
-  if(_isPublicRef()) return;   // public ref: no tours surface exists, even by deep link
+  if(_isPublicRef()){
+    // Public ref: the Tours tab is a directory, never a booking surface. Until the GoHawaii
+    // listings file is connected (Phase 1) it says so; no tour widget or script ever loads.
+    var sc = document.getElementById('sc'); sc.style.display = '';
+    sc.innerHTML = '<div class="slbl">Tours and activities</div>'
+      + '<div style="padding:14px;border:1px dashed var(--border);border-radius:12px;font-size:13.5px;line-height:1.5;color:var(--ink)">'
+      + 'Tours, water and air activities listed by GoHawaii appear here once their listings are connected. '
+      + 'Each one is credited to GoHawaii and opens on gohawaii.com. Nothing is bookable inside this build.</div>'
+      + '<div style="margin-top:10px;font-size:11px;color:var(--mute)">Listings by GoHawaii (Hawaii Visitors and Convention Bureau)</div>';
+    document.getElementById('sheet').classList.add('on');
+    document.getElementById('overlay').classList.add('on');
+    return;
+  }
   _selectedDayIdx = 0;
   renderToursSheetContent();
   document.getElementById('sheet').classList.add('on');
@@ -8379,16 +8391,17 @@ try{ var _qm=new URLSearchParams(location.search).get('mode'); if(_qm==='shop'||
 try{ if(new URLSearchParams(location.search).get('safety')==='1'){ window.addEventListener('load', function(){ try{ openDisclaimer(); }catch(e){} }); } }catch(e){}
 var SHOP_ICO='data:image/png;base64,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';
 var RETAIL_ICO='data:image/png;base64,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';
+function toursTabPublic(){ return document.querySelector('#tabs .tab[data-tab="tours"]'); }
 function applyPartnerMode(){
-  // Public ref (GoHawaii embed): commerce is absent, not hidden. The Tours, Shop and Town tab
-  // nodes are removed from the DOM before wireTabs() binds anything, so no later call to this
-  // function, no ?mode= param and no segment lookup can bring them back. Plan stays (the day
-  // planner over editorial places); its tour slot is gated in the planner itself.
+  // Public ref (GoHawaii embed): the full footer stays (Beaches, Trails, Family, Tours, Plan,
+  // Town) because their listings fill those same tabs and subtabs. Only the Shop tab node is
+  // removed from the DOM before wireTabs() binds anything, so no ?mode= param and no segment
+  // lookup can bring it back. Commerce inside the surviving tabs is gated where it renders:
+  // Tours shows no booking widget, Town shows no partner pins or offers, Plan has no tour slot.
   if(_isPublicRef()){
-    ['tours','shop','shopping'].forEach(function(t){
-      var el=document.querySelector('#tabs .tab[data-tab="'+t+'"]');
-      if(el&&el.parentNode) el.parentNode.removeChild(el);
-    });
+    var shopEl=document.querySelector('#tabs .tab[data-tab="shop"]');
+    if(shopEl&&shopEl.parentNode) shopEl.parentNode.removeChild(shopEl);
+    if(toursTabPublic()) toursTabPublic().style.display='';
     return;
   }
   // C-3: a non-sellable island never surfaces Shop/buy (guide-only). UX-only; the server gate

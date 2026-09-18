@@ -94,7 +94,7 @@ async function state(page){
     await accept(page);
     const s = await state(page);
     check(s.island === slug, `${slug}: booted as ${s.island}`);
-    check(!s.tabs.some(t => /^(tours|shop|shopping):/.test(t)), `${slug}: no Tours, Shop or Town tab node ${JSON.stringify(s.tabs)}`);
+    check(!s.tabs.some(t => /^shop:/.test(t)) && s.tabs.includes('tours:shown') && s.tabs.includes('shopping:shown'), `${slug}: footer keeps Tours and Town, no Shop node ${JSON.stringify(s.tabs)}`);
     check(s.planPaid === false, `${slug}: _planPaid() is false`);
     check(s.referrer === null, `${slug}: nothing persisted as referrer (${s.referrer})`);
     check(/GoHawaii/.test(s.strip) && /Ocean Safe/.test(s.strip), `${slug}: brand strip "${s.strip.trim()}"`);
@@ -136,13 +136,26 @@ async function state(page){
     const bad2 = reqs.filter(u => FORBIDDEN.test(u));
     check(bad2.length === 0, `${slug}: still no commerce request after the sheet`);
 
-    // Deep-link attempts stay inert.
-    const inert = await page.evaluate(() => {
-      document.getElementById('sheet').classList.remove('on');
-      if (typeof openToursSheet === 'function') openToursSheet();
-      return !document.getElementById('sheet').classList.contains('on');
-    });
-    check(inert, `${slug}: openToursSheet() is inert`);
+    // Tours tab: a directory placeholder, never a booking surface.
+    await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="tours"]'); if (t) t.click(); });
+    await sleep(2500);
+    const tours = await page.evaluate(() => ({
+      on: document.getElementById('sheet').classList.contains('on'),
+      text: document.getElementById('sc').innerText,
+      gyg: document.querySelectorAll('[data-gyg-href], script[src*="getyourguide"]').length,
+      markers: document.querySelectorAll('.leaflet-marker-icon').length,
+    }));
+    check(tours.on && /GoHawaii/.test(tours.text), `${slug}: Tours tab opens the GoHawaii directory placeholder`);
+    check(tours.gyg === 0 && !/\bbook\b|see times/i.test(tours.text), `${slug}: Tours has no booking widget, script or call to action`);   // 'bookable' in the placeholder is the disclaimer, not a CTA
+    if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-tours.png`) });
+    // Town tab: editorial places only, no partner pins, offers or sponsored badge.
+    await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="shopping"]'); if (t) t.click(); });
+    await sleep(3000);
+    const town = await page.evaluate(() => ({ chip: !!document.getElementById('promoChip'), text: document.body.innerText, markers: document.querySelectorAll('.leaflet-marker-icon').length }));
+    check(!town.chip && !/Sponsored/.test(town.text), `${slug}: Town has no offer chip or sponsored badge (${town.markers} pins)`);
+    if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-town.png`) });
+    const bad3 = reqs.filter(u => FORBIDDEN.test(u));
+    check(bad3.length === 0, `${slug}: still no commerce request after Tours and Town`);
     await closeCtx(ctx);
   }
 
@@ -151,7 +164,7 @@ async function state(page){
     const { ctx, page } = await fresh(browser);
     await boot(page, `${NEW}/?ref=gohawaii&island=kauai&mode=shop`); await accept(page);
     const s = await state(page);
-    check(!s.tabs.some(t => /^(tours|shop|shopping):/.test(t)), `mode=shop: no Tours, Shop or Town tab ${JSON.stringify(s.tabs)}`);
+    check(!s.tabs.some(t => /^shop:/.test(t)), `mode=shop: no Shop node ${JSON.stringify(s.tabs)}`);
     await page.evaluate(() => { const t = document.querySelector('#tabs .tab[data-tab="activities"]'); if (t) t.click(); });
     await sleep(3000);
     const plan = await page.evaluate(() => ({ book: document.querySelectorAll('.plan-book').length, text: document.body.innerText }));   // innerText: rendered text only, never the inline script source
