@@ -174,8 +174,9 @@ async function state(page){
       return { rows: rows.length, https: https.length, http: rows.filter(g => /^http:/i.test(g.img || '')).length, lost, ...out };
     });
     const pct = Math.round(100 * photos.https / photos.rows);
-    // Floor 65%: the rest have no photo on gohawaii.com, or only an event flyer withheld for its printed text.
-    check(photos.https / photos.rows >= 0.65, `${slug}: ${photos.https} of ${photos.rows} rows (${pct}%) carry an https gohawaii.com photo`);
+    // Floor 60%: the rest have no photo on gohawaii.com, only an event flyer withheld for its printed text, or are
+    // Malama rows, which borrow no hotel photo.
+    check(photos.https / photos.rows >= 0.6, `${slug}: ${photos.https} of ${photos.rows} rows (${pct}%) carry an https gohawaii.com photo`);
     check(photos.layerBuilt && photos.layerParam.indexOf(photos.layerBuilt) === 0, `${slug}: layer URL ?b=${photos.layerParam} matches the layer build ${photos.layerBuilt}`);
     check(photos.http === 0 && photos.lost.length === 0, `${slug}: no photo URL starts with http:// (${photos.http}), none lost in injection (${photos.lost.length})`);
     check(/gohawaii\.com/.test(photos.heroBg) && /linear-gradient/.test(photos.heroBg) && photos.heroCredit, `${slug}: sheet hero is the photo over the gradient, with "Photo via GoHawaii"`);
@@ -201,15 +202,15 @@ async function state(page){
     await sleep(1200);
     if (!malama.none) Object.assign(malama, await page.evaluate(() => {
       const sc = document.getElementById('sc'), rows = [...sc.querySelectorAll('[onclick^="_ghDeflectTap"]')];
-      // Each Mālama row shows its photo when the row has one, and the old glyph when it has none.
+      // Each Mālama row shows its photo when the row has one, and the leaf icon when it has none.
       const ok = rows.every(el => { const id = (el.getAttribute('onclick').match(/'(gh_[^']+)'\)/) || [])[1], g = window._GH_INDEX[id] || {};
-        return g.img ? !!el.querySelector('img.gh-thumb') : (!el.querySelector('img') && /❦/.test(el.textContent)); });
+        return g.img ? !!el.querySelector('img.gh-thumb') : (!el.querySelector('img') && !!el.querySelector('svg.gh-leaf')); });
       return { has: /Give back instead/.test(sc.innerHTML), rows: rows.length, thumbs: sc.querySelectorAll('[onclick^="_ghDeflectTap"] img.gh-thumb').length, ok };
     }));
     if (malama.none) console.log(`  note ${slug}: every scored beach is green right now, Give back block not exercised`);
     else {
       check(malama.has, `${slug}: ${malama.beach} (${malama.status}) shows the Give back block`);
-      check(malama.ok, `${slug}: Mālama rows show a photo when they have one (${malama.thumbs} of ${malama.rows}), the glyph when not`);
+      check(malama.ok, `${slug}: Mālama rows show a photo when they have one (${malama.thumbs} of ${malama.rows}), the leaf icon when not`);
     }
     if (slug === 'kauai' && !malama.none) {
       // The shot is of the offer itself: scroll the Give back block into view and let its photos load.
