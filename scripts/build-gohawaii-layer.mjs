@@ -29,6 +29,9 @@ const tip = s => { let t = String(s || '').replace(/\s+/g, ' ').replace(/&#039;|
   t = t.replace(/[\p{Extended_Pictographic}\u2728\uFE0F]/gu, '').replace(/\s{2,}/g, ' ').trim();   // their emoji are not our icons
   return t.length > 170 ? t.slice(0, 167).replace(/\s+\S*$/, '') + '.' : t; };
 const has = (r, k, v) => (r.filters[k] || []).includes(v);
+// A business link that lands on an offer or a booking engine is a sales surface; the card keeps its gohawaii.com link.
+const SALES_URL = /hotel-deals|\/deals?\b|\boffers?\b|special-offers|\/specials?\b|special-packages|\/packages?\b|promo=|\/shop\/|checkinDate|synxis\.com/i;
+const site = u => (u && !SALES_URL.test(u)) ? u : undefined;
 // Photos: their API hands out plain-http pantheonsite.io URLs (mixed content on our https page). The same
 // path serves from https://www.gohawaii.com, so every image host is rewritten there.
 const ghImg = u => u ? String(u).replace(/^https?:\/\/(?:live-gohawaii-com\.pantheonsite\.io|(?:www\.)?gohawaii\.com)(?=\/)/, 'https://www.gohawaii.com') : undefined;
@@ -81,7 +84,7 @@ for (const r of L) {
     if (!inBox(slug, r.lat, r.lon)) { drop('coordinates outside the island box'); continue; }
     if (c.gap) report.gaps[c.gap] = (report.gaps[c.gap] || 0) + 1;
     const a = r.address || {};
-    out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, c, { tip: tip(r.teaser), website: r.websites.business || undefined, src_url: 'https://www.gohawaii.com' + r.link,
+    out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, c, { tip: tip(r.teaser), website: site(r.websites.business), src_url: 'https://www.gohawaii.com' + r.link,
       address: [a.line_1, a.city].filter(Boolean).join(', ') || undefined, img: ghImg(r.img), ...(c.facts || {}) }));
   }
 }
