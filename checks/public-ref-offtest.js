@@ -82,7 +82,15 @@ async function state(page){
   for (const slug of ISLANDS) {
     const { ctx, page, reqs } = await fresh(browser);
     await boot(page, `${NEW}/?ref=gohawaii&island=${slug}`);
-    if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-disclaimer.png`) });
+    if (slug === 'kauai') {
+      // The notice opens on the first tab tap, not on load, so open it the way the app does and
+      // hide the service-worker toast first; the shot must be the modal a first-time visitor sees.
+      await page.evaluate(() => { const t = document.getElementById('swUpdateToast'); if (t) t.style.display = 'none'; if (typeof openDisclaimer === 'function') openDisclaimer(); });
+      await sleep(900);
+      const shown = await page.evaluate(() => { const m = document.getElementById('disclaimerModal'); return !!m && getComputedStyle(m).display !== 'none' && m.getBoundingClientRect().height > 0; });
+      check(shown, 'kauai: disclaimer modal is on screen for its screenshot');
+      await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-disclaimer.png`) });
+    }
     await accept(page);
     const s = await state(page);
     check(s.island === slug, `${slug}: booted as ${s.island}`);
