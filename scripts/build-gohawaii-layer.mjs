@@ -25,6 +25,9 @@ const short = s => { s = String(s || '').replace(/\s*[(|,:].*$/, '').trim(); if 
 const tip = s => { let t = String(s || '').replace(/\s+/g, ' ').replace(/&#039;|&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/<[^>]+>/g, '').trim();
   t = t.split(/(?<=[.!?])\s+/).filter(x => !/\$\d/.test(x)).join(' '); return t.length > 170 ? t.slice(0, 167).replace(/\s+\S*$/, '') + '.' : t; };
 const has = (r, k, v) => (r.filters[k] || []).includes(v);
+// Photos: their API hands out plain-http pantheonsite.io URLs (mixed content on our https page). The same
+// path serves from https://www.gohawaii.com, so every image host is rewritten there.
+const ghImg = u => u ? String(u).replace(/^https?:\/\/(?:live-gohawaii-com\.pantheonsite\.io|(?:www\.)?gohawaii\.com)(?=\/)/, 'https://www.gohawaii.com') : undefined;
 
 // Their category -> our home. target names are the arrays index.html injects into.
 function classify(r) {
@@ -75,7 +78,7 @@ for (const r of L) {
     if (c.gap) report.gaps[c.gap] = (report.gaps[c.gap] || 0) + 1;
     const a = r.address || {};
     out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, c, { tip: tip(r.teaser), website: r.websites.business || undefined, src_url: 'https://www.gohawaii.com' + r.link,
-      address: [a.line_1, a.city].filter(Boolean).join(', ') || undefined, img: r.img || undefined, ...(c.facts || {}) }));
+      address: [a.line_1, a.city].filter(Boolean).join(', ') || undefined, img: ghImg(r.img), ...(c.facts || {}) }));
   }
 }
 // 2. Events (dated)
@@ -89,7 +92,7 @@ for (const r of E) {
   for (const slug of slugs) {
     if (!inBox(slug, r.lat, r.lon)) { drop('coordinates outside the island box'); continue; }
     out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, { target: 'ACTS', type: 'event', sub: (r.filters['Event Categories'] || [])[0] || 'Event' },
-      { tip: tip(r.teaser), when: next.slice(0, 10), venue: r.event_venue || undefined, src_url: 'https://www.gohawaii.com' + r.link, img: r.img || undefined }));
+      { tip: tip(r.teaser), when: next.slice(0, 10), venue: r.event_venue || undefined, src_url: 'https://www.gohawaii.com' + r.link, img: ghImg(r.img) }));
   }
 }
 // 3. Editorial places (waterfalls, towns, lookouts, museums): no coordinates in their data, geocoded once and cached.
@@ -110,8 +113,36 @@ for (const p of places) {
   }
   const g = cache[key]; if (!g) { drop('place could not be geocoded'); continue; }
   out[slug].push(row(slug, 'p' + p.id, p.title, g.lat, g.lon, { target: 'ACTS', type: placeType(p.title), sub: 'GoHawaii place page', tags: ['place', 'geocoded'] },
-    { tip: tip(p.teaser), src_url: 'https://www.gohawaii.com' + p.link, img: p.img || undefined, geocoded: true }));
+    { tip: tip(p.teaser), src_url: 'https://www.gohawaii.com' + p.link, img: ghImg(p.img), geocoded: true }));
 }
+// 3b. Rows the API gave no photo. Two sources, both gohawaii.com's own: (a) img-overrides.json, the hero photo on
+// the row's own gohawaii.com page (read in a browser tab, since curl gets a Cloudflare 403); (b) the photo on
+// another of their records with the same name within 1.5 km (their Malama listings duplicate a hotel's main
+// listing without its photo). Anything still bare keeps the gradient card; nothing is invented.
+// Overrides must be a Drupal image-style derivative (/styles/); a raw original can run to several MB.
+const overrides = Object.fromEntries(Object.entries(fs.existsSync(new URL('img-overrides.json', D)) ? read('img-overrides.json') : {})
+  .filter(([, u]) => /\/sites\/default\/files\/styles\//.test(u)));
+// Event images are mostly flyers that print prices, ticket lines and QR codes, which no text filter can see.
+// An event shows a photo only if a person cleared that exact image (event-photo-ok.json).
+const eventOk = new Set(fs.existsSync(new URL('event-photo-ok.json', D)) ? read('event-photo-ok.json').ok : []);
+const nameKey = s => norm(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/['®&]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+const km = (a, b, c, d) => Math.hypot((a - c) * 111, (b - d) * 111 * Math.cos(a * Math.PI / 180));
+const withPhoto = {}; for (const r of [...L, ...E]) if (r.img && typeof r.lat === 'number' && r.lat) (withPhoto[nameKey(r.title)] = withPhoto[nameKey(r.title)] || []).push(r);
+const photos = { rows: 0, with: 0, without: 0, bySource: { api: 0, page_hero: 0, same_name_listing: 0 }, eventFlyersWithheld: 0, islands: {}, missing: {}, withheld: {} };
+for (const slug of Object.keys(out)) {
+  const P = photos.islands[slug] = { rows: 0, with: 0, without: 0 };
+  for (const r of out[slug]) {
+    let src = r.img ? 'api' : null;
+    if (!r.img && overrides[r.id]) { r.img = ghImg(overrides[r.id]); src = 'page_hero'; }
+    if (!r.img) { const sib = (withPhoto[nameKey(r.name)] || []).find(x => km(x.lat, x.lon, r.lat, r.lon) <= 1.5); if (sib) { r.img = ghImg(sib.img); src = 'same_name_listing'; } }
+    const flyer = r.img && r.type === 'event' && !eventOk.has(r.img);
+    if (flyer) { r.img = undefined; photos.eventFlyersWithheld++; (photos.withheld[slug] = photos.withheld[slug] || []).push(r.name); }
+    P.rows++; photos.rows++;
+    if (r.img) { P.with++; photos.with++; photos.bySource[src]++; }
+    else { P.without++; photos.without++; if (!flyer) { const m = photos.missing[slug] = photos.missing[slug] || {}; (m[r.type] = m[r.type] || []).push(r.name); } }
+  }
+}
+report.photos = photos;
 // 4. Write one file per island + the report
 for (const slug of Object.keys(out)) {
   const rows = out[slug]; const by = {}; rows.forEach(r => { by[r.target] = (by[r.target] || 0) + 1; });
@@ -120,4 +151,4 @@ for (const slug of Object.keys(out)) {
   fs.writeFileSync(new URL(`../data/poi-gohawaii-${slug}.js`, import.meta.url), js);
 }
 fs.writeFileSync(new URL('report.json', D), JSON.stringify(report, null, 2));
-console.log(JSON.stringify({ islands: report.islands, dropped: report.dropped, skipped: report.skipped, gaps: report.gaps }, null, 1));
+console.log(JSON.stringify({ islands: report.islands, dropped: report.dropped, skipped: report.skipped, gaps: report.gaps, photos: { ...photos, missing: undefined } }, null, 1));

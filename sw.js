@@ -18,7 +18,8 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const CACHE_VERSION = 'v318-2026-09-17-app-update';
+// v319 is claimed on work/reserve-links; this branch skips to v320.
+const CACHE_VERSION = 'v320-2026-09-18-gohawaii-photos';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 

@@ -140,5 +140,415 @@
       "Waikiki – Kuhio Beach",
       "Queen’s Surf Beach"
     ]
+  },
+  "photos": {
+    "rows": 1051,
+    "with": 800,
+    "without": 251,
+    "bySource": {
+      "api": 726,
+      "page_hero": 33,
+      "same_name_listing": 41
+    },
+    "eventFlyersWithheld": 80,
+    "islands": {
+      "kauai": {
+        "rows": 178,
+        "with": 142,
+        "without": 36
+      },
+      "maui": {
+        "rows": 259,
+        "with": 174,
+        "without": 85
+      },
+      "oahu": {
+        "rows": 397,
+        "with": 301,
+        "without": 96
+      },
+      "hawaii": {
+        "rows": 217,
+        "with": 183,
+        "without": 34
+      }
+    },
+    "missing": {
+      "kauai": {
+        "american": [
+          "The Garden Grille",
+          "Driftwood Bar & Grill"
+        ],
+        "tour": [
+          "Smith's Kauai Wailua River Cruise",
+          "Seasport Divers",
+          "CJM Country Stables, Inc."
+        ],
+        "venue": [
+          "Ching Young Village"
+        ],
+        "stay": [
+          "Prince Kuhio Condominium",
+          "Princeville Condominiums",
+          "Kauai Beach Villas",
+          "Poipu Makai",
+          "Hanalei Surfboard House"
+        ],
+        "cultural": [
+          "Grand Hyatt Kauai Luau",
+          "Grove Farm Homestead Museum"
+        ],
+        "wellness": [
+          "The Spa at Ko’a Kea",
+          "Anara Spa"
+        ],
+        "drinks": [
+          "Aupaka Terrace"
+        ],
+        "continental": [
+          "Hale Nalu",
+          "Poipu Bay Clubhouse"
+        ],
+        "event": [
+          "Sunrise Beach Clean-Up At Nukoliʻi Beach",
+          "Pau-Hana Beach Clean-Up At Nukoliʻi Beach",
+          "ʻŌpala Art Marine Debris Art Workshop",
+          "41st Annual Kaua'i Matsuri"
+        ]
+      },
+      "maui": {
+        "tour": [
+          "Royal Lahaina Tennis Ranch",
+          "Sea Maui",
+          "Maui Snorkel Charters",
+          "Sea Maui"
+        ],
+        "cultural": [
+          "The Feast at Mokapu",
+          "Wailele Polynesian Luau"
+        ],
+        "american": [
+          "Hideaway at Kapalua Bay",
+          "Kea Lani Restaurant",
+          "The Hana Ranch Restaurant",
+          "The Beach Club Restaurant & Bar",
+          "KAPA Bar & Grill"
+        ],
+        "hawaii regional": [
+          "The Restaurant at Hotel Wailea",
+          "DUO",
+          "Ka'ana Kitchen"
+        ],
+        "scenic": [
+          "Shim Coffee and Protea Farm Tour",
+          "Road to Hana"
+        ],
+        "stay": [
+          "Days Inn by Wyndham Maui Oceanfront",
+          "The Hale Pau Hana",
+          "Maui Holiday Vacation Condos",
+          "Ma'alaea Banyans - Maui Oceanfront Condo",
+          "Aloha Baby Grand at Wailea Beach Villas"
+        ],
+        "mediterranean": [
+          "Pizza Paradiso"
+        ],
+        "venue": [
+          "Ching Store",
+          "Cliff House"
+        ],
+        "italian": [
+          "Ferraro's Bar e Ristorante"
+        ],
+        "japanese": [
+          "Teppanyaki Dan"
+        ],
+        "wellness": [
+          "The Spa",
+          "Heavenly Spa by Westin",
+          "The Spa at Four Seasons Resort Maui",
+          "Awili Spa and Salon",
+          "The Spa at Kapalua Bay"
+        ],
+        "continental": [
+          "The Cliff Dive Bar",
+          "The Mai Tai Bar – Kaanapali Beach",
+          "Mokapu Market"
+        ],
+        "hawaiian": [
+          "Aloha Mixed Plate"
+        ],
+        "nightlife": [
+          "Lobby Lounge"
+        ],
+        "shop": [
+          "Maui Floral",
+          "Kaanapali Beach Resort Association"
+        ],
+        "drinks": [
+          "Lehua Lounge",
+          "Bumbye Beach Bar"
+        ],
+        "steak and seafood": [
+          "Cane & Canoe"
+        ],
+        "event": [
+          "Hula Is The Heartbeat",
+          "Sounds of the Sea - A Music Concert",
+          "St. Anthony Fun Daze Bazaar",
+          "St. Anthony Fun Daze Bazaar",
+          "Auwahi greenhouse native plant work day",
+          "Festivals of Aloha - Carmen Hulu Lindsey Leo Haʻihaʻi Falsetto Contest",
+          "Richard Ho‘opi‘i Leo Ki‘eki‘e Falsetto Contest",
+          "Festivals of Aloha - Hana Jamboree Night",
+          "Celebration of the Arts",
+          "Festivals Of Aloha - Hana Teen Night",
+          "Festivals Of Aloha - Hana Hōike Night",
+          "Festivals Of Aloha - Hana Craft Fair",
+          "Pacific Whale Foundation Stable Road Beach Cleanup",
+          "Mālama Pono",
+          "Southwest Maui Invitational",
+          "Jazz Maui Presents Sunset Jazz Featuring Sheryl Renee",
+          "Jazz Maui Presents Sunset Jazz Featuring the Dayan Kai Quartet"
+        ]
+      },
+      "oahu": {
+        "drinks": [
+          "Swell Bar",
+          "Off The Lip",
+          "Sunset",
+          "Kani Ka Pila Grille",
+          "Mai Tai Bar"
+        ],
+        "hawaii regional": [
+          "Alaia",
+          "Kai Market",
+          "Hau Tree",
+          "Roy's Waikiki",
+          "'AMA'AMA"
+        ],
+        "coffee": [
+          "Hoolana"
+        ],
+        "wellness": [
+          "Moana Lani Spa"
+        ],
+        "stay": [
+          "Stay Hotel Waikiki",
+          "Vive Hotel Waikiki"
+        ],
+        "tour": [
+          "Hawaii Polo Oceanfront Trail Rides",
+          "Aloha VIP Tours, Inc."
+        ],
+        "american": [
+          "Surfrider Cafe",
+          "Beach Bar",
+          "Café 410",
+          "The Veranda",
+          "Makahiki - The Bounty of the Islands"
+        ],
+        "continental": [
+          "Island Buffet at the Gateway Restaurant",
+          "Hapas",
+          "Surf Lanai",
+          "House Without A Key"
+        ],
+        "nightlife": [
+          "The Edge of Waikiki",
+          "Rum Fire",
+          "Lewers Lounge"
+        ],
+        "scenic": [
+          "E.K. Fernandez Shows"
+        ],
+        "venue": [
+          "Haiku Gardens Weddings"
+        ],
+        "shop": [
+          "Leis by Ron",
+          "Chanel Boutique",
+          "Precious Hawaii"
+        ],
+        "steak and seafood": [
+          "Orchids",
+          "Wai'olu Ocean Cuisine",
+          "Ruth's Chris Steak House - Honolulu",
+          "Azure Restaurant",
+          "Ruth's Chris Steak House"
+        ],
+        "cultural": [
+          "Ka Waa - A Luau at Aulani, A Disney Resort & Spa"
+        ],
+        "event": [
+          "The Lumpia Class + Dinner and Wine Tasting",
+          "Waimea Valley’s Moonwalk",
+          "Waimea Valley’s Moonwalk",
+          "Lauhala Apo Lima (Bracelet) Workshop with Leialoha Mahuka",
+          "Lauhala Coaster Workshop (Create a Pair) with Leialoha Mahuka",
+          "Lauhala Half Bangle Workshop with Leialoha Mahuka",
+          "Lauhala Christmas Ornament Workshop with Leialoha Mahuka",
+          "ʻUkulele and Hula workshop with Aunty Kela",
+          "Talk Story & Mākeke",
+          "Mālama ʻĀina Workday",
+          "Arbor Day Tree Giveaway",
+          "Carnival of the Nearly Extinct Animals",
+          "Hapa Holiday Extravaganza",
+          "Elf in Concert",
+          "The Sounds of Ravel & Rosalia with Carolina Rial",
+          "Beethovenʻs Ode to Joy",
+          "Brahms & Destiny",
+          "Brahms vs Wagner",
+          "Brahms Dances",
+          "Brahms & the Schumanns",
+          "Firebird & the Phoenix",
+          "Star Wars: A New Hope",
+          "HapaSymphony: Kolohe Kai",
+          "Virtuosity in Motion",
+          "Lauhala Anthurium Weaving Workshop with Leialoha Mahuka",
+          "Lauhala Half Bangle Workshop with Leialoha Mahuka",
+          "Long Beach Dub Allstars at Blue Note Hawaii",
+          "Riya Davis at Blue Note Hawaii"
+        ]
+      },
+      "hawaii": {
+        "malama": [
+          "Castle Waimea Country Lodge"
+        ],
+        "stay": [
+          "Castle Waimea Country Lodge",
+          "Old Hawaiian B&B",
+          "Ka'awa Loa Plantation Guesthouse & Retreat"
+        ],
+        "hawaii regional": [
+          "Kamuela Provision Company",
+          "Ulu Ocean Grill",
+          "Hualalai Grille",
+          "Beach Tree Restaurant"
+        ],
+        "wellness": [
+          "Ho'ola Spa at Outrigger Kona Resort & Spa",
+          "Kohala Sports Club & Spa",
+          "Spa Without Walls"
+        ],
+        "drinks": [
+          "Kahakai Bar",
+          "Hale Kai"
+        ],
+        "golf": [
+          "Mauna Kea Golf Course"
+        ],
+        "american": [
+          "The Orchid Court",
+          "Lagoon Grill",
+          "Orchid Marketplace"
+        ],
+        "nightlife": [
+          "Luana Lounge"
+        ],
+        "tour": [
+          "Volcano Winery"
+        ],
+        "event": [
+          "'Ulu Festival",
+          "Waimea Community Theatre presents \"The Odd Couple\" by Neil Simon",
+          "The 5th Annual Honokaʻa Renaissance Faire"
+        ],
+        "cultural": [
+          "Kealakekua Bay State Historical Park",
+          "Kealakekua Bay State Historical Park"
+        ]
+      }
+    },
+    "withheld": {
+      "kauai": [
+        "Beach House Craft Fair",
+        "Annual 5k Turkey Trot",
+        "Kauai Brewers Festival",
+        "Rice Street Block Party",
+        "2nd Saturday Night Market",
+        "Pop Up Speakeasy with Jazz Music",
+        "Princeville Night Market",
+        "5k On The 4th of July",
+        "Wings and Woodlands: A Tribute to Native Birds and Forests",
+        "Trashion Show",
+        "Kōnane Lessons",
+        "Mālama Kūpuna",
+        "Paint and Sip with Kumu Pineki",
+        "Rice Street Block Party"
+      ],
+      "maui": [
+        "'Ainakea",
+        "MATT FRASER",
+        "SOJA",
+        "The Whaler on Kāʻanapali Beach Cleanup",
+        "MELE FOR MAUI",
+        "Mele at the Market: Nā Pōʻalima ma Hāna",
+        "Mālama Pono",
+        "Mālama Pono",
+        "Mālama Pono",
+        "Raise the Roof! A Sneak Peek Fundraiser",
+        "Observe and Play Family Day - In Honor of Shirley Yokouchi",
+        "MORGAN JAY: Goofy Guy Tour",
+        "HOME IN THE ISLANDS | HENRY KAPONO, JERRY SANTOS, KEOLA BEAMER & More!",
+        "JUSTIN KAWIKA YOUNG",
+        "THE GREEN: TITLES Tour 2026",
+        "STEEL PULSE",
+        "HAWAII’S FAVORITE COMEDIANS – A CELEBRATION OF LAUGHS! Tour with FRANK DELIMA, featuring ANDY BUMATAI & AUGIE T",
+        "JO KOY: Koy Meets World Tour",
+        "JIAOYING SUMMERS",
+        "JOHN MULANEY",
+        "John Cruz does it Island Style Series",
+        "Salon Concert Series: Sound Waves with Andrew Wu & Nolan Wren",
+        "Free Range Comedy",
+        "Couplet does Honey Honey Moon Moon",
+        "Magic in Paradise with David Kuraya",
+        "Sheryl Renee B'Day Concert & Party",
+        "Standup Comedy Showcase"
+      ],
+      "oahu": [
+        "2026 Kāne Cup Youth Volleyball Tournament",
+        "JCCH Craft & Collectibles Fair",
+        "Hot Kūpuna Nights",
+        "OnoFest & Fall Expo",
+        "Intimate Korea 2026",
+        "Chinatown Building QR Code Self-Guided Digital Tour",
+        "Rainforest Ramble 2026",
+        "American Independence",
+        "Twin Horns",
+        "Twin Horns",
+        "Holiday Brass",
+        "Dreams & Delirium",
+        "Crosscurrents",
+        "Crosscurrents",
+        "Brahms Sextet",
+        "Brahms Sextet",
+        "Fire & Water",
+        "Fire & Water",
+        "Café Espressivo",
+        "The Soldier's Tale",
+        "Mele Tūtū – Songs of our Grandparents",
+        "Waikiki By Moonlight",
+        "55th Annual Holiday Craft Fair",
+        "Mary Foster's Birthday Celebration",
+        "A VeryMerryFest",
+        "Nature Bathing: Bye Bye Manic Mondays",
+        "Hawaii Truck Jamboree hosted by Event Sanitation",
+        "Keiki Construction Zone hosted by Bz Services LLC",
+        "Designing the Pacific: Conversations Shaping the Future of Pacific Fashion"
+      ],
+      "hawaii": [
+        "Waikoloa Community Market",
+        "55th Annual Kona Coffee Cultural Festival",
+        "19th Annual Run for the Dry Forest",
+        "Neave Trio (Kahilu Theatre)",
+        "Script & Sip (Kahilu Theatre)",
+        "Honey Bee Painting with Patrick Ching",
+        "Sansei Connections",
+        "The Organ Virtuosos",
+        "Farm-to-table tea party & blending playshop",
+        "20th Annual Musical Nostalgia"
+      ]
+    }
   }
 }
