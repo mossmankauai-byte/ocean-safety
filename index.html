@@ -88,7 +88,22 @@
   // ▲▲▲ ───────────────────────────────────────── ▲▲▲
 
   var DNT = navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1';
-  var ENABLED = !!OS_PH_KEY && OS_PH_KEY.indexOf('YOUR_') === -1 && !DNT && /(^|\.)oceansafety\.app$/i.test(location.hostname);
+  // Public refs (the GoHawaii embed): the ONE list of ref slugs that must render a commerce-free,
+  // telemetry-free build. Same allowlist idiom as LANGS_LIVE and SELLABLE_ISLANDS. Every other ref
+  // and every no-ref load is byte-identical to before this list existed. It lives here, at the
+  // earliest consumer, so analytics can switch off before anything else runs; the partner code
+  // below reads window.PUBLIC_REFS and never restates the list. Reads only THIS load's URL:
+  // boot() never persists a public slug, so _activeRefSlug() agrees with it on every load.
+  window.PUBLIC_REFS = ['gohawaii'];
+  window._isPublicRef = function(){
+    try {
+      var q = new URLSearchParams(location.search);
+      var raw = q.get('ref') || q.get('utm_source') || '';
+      var slug = raw.toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0, 32);
+      return !!slug && window.PUBLIC_REFS.indexOf(slug) >= 0;
+    } catch(e){ return false; }
+  };
+  var ENABLED = !!OS_PH_KEY && OS_PH_KEY.indexOf('YOUR_') === -1 && !DNT && /(^|\.)oceansafety\.app$/i.test(location.hostname) && !window._isPublicRef();
 
   // ── Visibility-aware view timer (a "view" = a tab map OR an open POI sheet) ──
   var view = null, startedAt = null, activeMs = 0;
@@ -2011,11 +2026,13 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
       <h4>No liability</h4>
       <p>Swimming, snorkeling, surfing, and other ocean activities carry inherent risks of serious injury and death, including from waves, shorebreak, and currents that are natural and not always visible. To the fullest extent permitted by law, the creators and distributors of this app are not responsible for any injury, illness, death, or property damage arising from use of this app or its information, whether based on contract, negligence, or any other theory. <b>You assume all risk</b> when entering the ocean or visiting any location shown.</p>
 
+      <div id="disAffiliate">
       <h4>Affiliate relationships</h4>
       <p>Some recommendations include affiliate or partner relationships. This does not affect safety information or beach ratings.</p>
+      </div>
 
       <h4>Privacy</h4>
-      <p>No accounts and no signup — we never learn your name. We use privacy-respecting analytics and, on partner links, a visit counter; both turn off if your browser sends Do&nbsp;Not&nbsp;Track. If you tap Locate&nbsp;Me, a ~1&nbsp;km-rounded position goes to our server to fetch your local forecast. Full detail: <a href="/privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">oceansafety.app/privacy</a>.</p>
+      <p id="disPrivacy">No accounts and no signup — we never learn your name. We use privacy-respecting analytics and, on partner links, a visit counter; both turn off if your browser sends Do&nbsp;Not&nbsp;Track. If you tap Locate&nbsp;Me, a ~1&nbsp;km-rounded position goes to our server to fetch your local forecast. Full detail: <a href="/privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">oceansafety.app/privacy</a>.</p>
     </div>
     <div class="dis-footer">
       <button class="dis-accept" onclick="acceptDisclaimer()">I Understand — Continue</button>
@@ -2599,7 +2616,13 @@ const SAFETY_INFO={
 function _si(){ return SAFETY_INFO[(ACTIVE&&ACTIVE.slug)||'kauai']||SAFETY_INFO.kauai; }
 function safetyFooterSuffix(){ var s=_si(); return s.phone?(' · <b>'+s.agencyShort+':</b> '+s.phone):''; }
 function localizeSafety(){ var s=_si(), set=function(id,html){var e=document.getElementById(id); if(e) e.innerHTML=html;};
-  set('disIsland',s.island); set('disCounty',s.county); set('disAgency',s.agency); }
+  set('disIsland',s.island); set('disCounty',s.county); set('disAgency',s.agency);
+  // Public ref: no affiliate relationships exist in this build, and it collects nothing, so the
+  // notice says exactly that. DRAFT wording, same attorney-review gate as the paragraphs above.
+  if(_isPublicRef()){
+    var aff=document.getElementById('disAffiliate'); if(aff&&aff.parentNode) aff.parentNode.removeChild(aff);
+    set('disPrivacy','No accounts, no signup, no analytics and no visit counter in this build: we never learn your name, and nothing about your visit is sent to us. If you tap Locate&nbsp;Me, a position rounded to about 1&nbsp;km goes to our server to fetch your local forecast and is not kept. Full detail: <a href="/privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">the privacy page</a>.');
+  } }
 if(document.readyState!=='loading') localizeSafety(); else document.addEventListener('DOMContentLoaded',localizeSafety);
 
 // Lazy-load an island's dataset on demand. Kauaʻi is inlined (data already set), so
@@ -2640,6 +2663,9 @@ window.switchIsland = function(slug){
 // Everything else (the dictionaries, the DOM translation layer, the switcher) stays built and
 // working, so opening a language is a one-line change.
 var LANGS_LIVE = ['en'];
+// PUBLIC_REFS (the commerce-free GoHawaii embed) is the third allowlist of this shape. It is
+// defined once, in the analytics block at the top of the page, as window.PUBLIC_REFS with
+// window._isPublicRef(); nothing below restates the list.
 function resolveLang(){
   try { var p=new URLSearchParams(location.search).get('lang'); if(p&&LANGS_LIVE.indexOf(p)>=0) return p; } catch(e){}
   try { var s=localStorage.getItem('os_lang'); if(s&&LANGS_LIVE.indexOf(s)>=0) return s; } catch(e){}
@@ -5293,6 +5319,7 @@ let tourMkrs={};
 function renderTours(){
   Object.values(tourMkrs).forEach(m=>m.remove()); tourMkrs={};
   if(window._activeTab !== 'tours') return;
+  if(_isPublicRef()) return;   // public ref: no tours tab exists; keep the map free of tour markers
   (TOURS_LIBRARY||[]).forEach(t=>{
     if(typeof t.lat!=='number' || typeof t.lon!=='number') return;
     const mk=L.marker([t.lat,t.lon],{icon:mkTourIcon(t),zIndexOffset:200}).addTo(map);
@@ -5856,6 +5883,7 @@ function selectTourDate(idx){
   renderToursSheetContent();
 }
 function openToursSheet(){
+  if(_isPublicRef()) return;   // public ref: no tours surface exists, even by deep link
   _selectedDayIdx = 0;
   renderToursSheetContent();
   document.getElementById('sheet').classList.add('on');
@@ -5993,7 +6021,7 @@ function buildPlanDay(){
   }
   var lfList=PFOODS.filter(function(x){return x.r===area && _planOpenFor(x,'lunch');}); if(!lfList.length) lfList=PFOODS.filter(function(x){return x.r===area;});
   var lf=_planChoose(_planSavedFirst(lfList,'food')); if(lf) slots.push({when:'Lunch',kind:'food',ref:lf});
-  if(_planTours){ var t=pickFeaturedTour(c); if(t) slots.push({when:'Afternoon',kind:'tour',ref:t}); else slots.push(_planAfternoon(slots)); }
+  if(_planTours && !_isPublicRef()){ var t=pickFeaturedTour(c); if(t) slots.push({when:'Afternoon',kind:'tour',ref:t}); else slots.push(_planAfternoon(slots)); }
   else slots.push(_planAfternoon(slots));
   var usedFood=slots.filter(function(s){return s.kind==='food';}).map(function(s){return s.ref.id;});
   var dfList=PFOODS.filter(function(x){return x.r===area && usedFood.indexOf(x.id)<0 && _planOpenFor(x,'dinner');});
@@ -6085,7 +6113,7 @@ function openPlanInfo(id){ openPlanSheet(); }
 function planSetDay(i){ _planDay=i; _planRandom=false; planRebuild(); }
 function planSetArea(a){ _planArea=a; _planRandom=false; planRebuild(); }
 function planSetVibe(v){ _planVibe=v; _planRandom=false; planRebuild(); }
-function planToggleTours(){ _planTours=!_planTours; _planRandom=false; planRebuild(); }
+function planToggleTours(){ if(_isPublicRef()) return; _planTours=!_planTours; _planRandom=false; planRebuild(); }
 function planRandomize(){ _planRandom=true; planRebuild(); }
 
 function planSwap(idx){
@@ -7821,18 +7849,20 @@ function openSheet(id){
     ${caut}${dgr}${tp}${rope}${cs}${(typeof rsSheetHtml==='function')?rsSheetHtml(b):''}${ps}${nas}
     <details style="margin-top:12px"><summary style="font-size:10px;color:var(--mute);cursor:pointer;text-transform:uppercase;letter-spacing:.06em">Tide today</summary>${tideGraph(c)}</details>
     <a href="${murl}" target="_blank" rel="noopener" class="dirbtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="1,8 15,1 9,8 15,15"/></svg>Get Directions</a>
-    ${viatorBlock}`;
+    ${_isPublicRef()?'':viatorBlock}`;
   document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
   pushItemRoute('beach', b.id, b.name);
   // Lazy-load Viator widget script. We re-append on every open so the widget rescans the freshly-injected divs.
   // Old tags are removed first to keep the document head tidy.
-  document.querySelectorAll('script[data-vi-script]').forEach(s=>s.remove());
-  const vs = document.createElement('script');
-  vs.src = 'https://www.viator.com/orion/partner/widget.js';
-  vs.async = true;
-  vs.dataset.viScript = '1';
-  document.head.appendChild(vs);
+  if(!_isPublicRef()){   // public ref: the block above is absent, so the widget script never loads
+    document.querySelectorAll('script[data-vi-script]').forEach(s=>s.remove());
+    const vs = document.createElement('script');
+    vs.src = 'https://www.viator.com/orion/partner/widget.js';
+    vs.async = true;
+    vs.dataset.viScript = '1';
+    document.head.appendChild(vs);
+  }
   // count-up replaced by visual indicators
 }
 
@@ -8349,6 +8379,17 @@ try{ if(new URLSearchParams(location.search).get('safety')==='1'){ window.addEve
 var SHOP_ICO='data:image/png;base64,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';
 var RETAIL_ICO='data:image/png;base64,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';
 function applyPartnerMode(){
+  // Public ref (GoHawaii embed): commerce is absent, not hidden. The Tours, Shop and Town tab
+  // nodes are removed from the DOM before wireTabs() binds anything, so no later call to this
+  // function, no ?mode= param and no segment lookup can bring them back. Plan stays (the day
+  // planner over editorial places); its tour slot is gated in the planner itself.
+  if(_isPublicRef()){
+    ['tours','shop','shopping'].forEach(function(t){
+      var el=document.querySelector('#tabs .tab[data-tab="'+t+'"]');
+      if(el&&el.parentNode) el.parentNode.removeChild(el);
+    });
+    return;
+  }
   // C-3: a non-sellable island never surfaces Shop/buy (guide-only). UX-only; the server gate
   // is authoritative. Kauaʻi stays sellable → unchanged.
   var aff=window.PARTNER_MODE==='affiliate' || !_islandSellable();
@@ -8865,7 +8906,7 @@ function renderOutlookSheet(){
 
   // Top tour pick for the selected region's conditions — uses the same scorer as the Activities tab,
   // and the card opens the full tours sheet (with the GetYourGuide booking widget) on tap.
-  const featured = (typeof TOURS_LIBRARY !== 'undefined' && typeof pickFeaturedTour === 'function')
+  const featured = (!_isPublicRef() && typeof TOURS_LIBRARY !== 'undefined' && typeof pickFeaturedTour === 'function')
     ? pickFeaturedTour(c) : null;
   const featuredMatch = featured ? matchTour(featured, c) : null;
   const featuredColor = featured ? (featured.color || 'var(--ocean)') : 'var(--ocean)';
@@ -10247,7 +10288,9 @@ window._partnerCfg = null;
 // plan:'free' ALWAYS renders free — even preview mints (a "Free" mint must demo
 // the free tier; the worker stamps preview:true on every mint). Paid previews
 // simply omit the plan key.
-function _planPaid(){ var c = window._partnerCfg; return !c || c.plan !== 'free'; }
+// A public ref is never paid: a missing, slow or failed config must not fail open to the paid
+// surface (the OD-24 shape), so the ref itself answers before the config is consulted.
+function _planPaid(){ if(_isPublicRef()) return false; var c = window._partnerCfg; return !c || c.plan !== 'free'; }
 // ── Trip stage ──────────────────────────────────────────────────────────────
 // Where the guest is in their trip, read from the device clock alone. No
 // geolocation prompt, no coordinates stored, nothing sent anywhere. Background
@@ -10530,6 +10573,7 @@ function _activeUnitId(){
 // with its same privacy rule: the worker emit happens only when THIS page
 // load carries ?ref=<slug>; organic visitors emit nothing. Fail-silent.
 function _partnerTrack(type, label){
+  if(_isPublicRef()) return;   // public ref: nothing is emitted, not even to the worker
   if(navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1') return;
   label = String(label || '').slice(0, 64);
   try { if(window.OSA && typeof OSA.track === 'function') OSA.track(type, { label: label }); } catch(e){}
@@ -11255,7 +11299,7 @@ function _promoPopSee(i){
 // the next sheet open picks the config up. No slug → resolved null, no fetch.
 // ── Partner segment lookup (DB partners): a RETAIL store's Shop tab gets the Town bag icon ──
 window._partnerSeg = null;
-(function(){ try{ var slug=_activeRefSlug(); if(!slug||!window.fetch) return;
+(function(){ try{ var slug=_activeRefSlug(); if(!slug||!window.fetch||_isPublicRef()) return;
   fetch('https://arndnljtmjfsnzcpcuen.supabase.co/rest/v1/rpc/get_partner_page',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um','Authorization':'Bearer sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um'},body:JSON.stringify({p_slug:slug})})
     .then(function(r){return r.ok?r.json():null})
     .then(function(d){ var row=Array.isArray(d)?d[0]:d;
@@ -11284,7 +11328,7 @@ window._partnerSeg = null;
 // blank because a fetch failed is not.
 function _promoFetchLive(slug){
   try {
-    if(!slug || !window.fetch) return;
+    if(!slug || !window.fetch || _isPublicRef()) return;   // public ref: no offers surface
     fetch('https://arndnljtmjfsnzcpcuen.supabase.co/rest/v1/rpc/get_partner_promotions', {
       method:'POST',
       headers:{'Content-Type':'application/json',
@@ -11317,9 +11361,32 @@ function _cobrandIslandOK(cfg){
     if(cfg.islands&&typeof cfg.islands==='object') return !!cfg.islands[a];
     return true;                                          // banner-only creator config → any island
   }
+  if(cfg&&cfg.islands&&typeof cfg.islands==='object'&&!cfg.island) return !!cfg.islands[a];   // multi-island cfg (a public ref): valid only where it says
   var isl=cfg&&cfg.island;
   if(isl) return isl===a;   // explicit binding → must match (fail closed on mismatch)
   return a==='kauai';       // legacy fieldless cfg → honored only on Kauaʻi
+}
+// ── Public ref co-brand strip ──────────────────────────────────────────────────
+// The only chrome a public ref adds: one line inside the top bar naming the host brand from
+// the committed config, and who runs the engine. No logo swap, no welcome chip, no offers.
+// Both strings are escaped and capped: the config is a committed file, but the shape is the
+// same one the worker can serve to other slugs, so it is treated as untrusted anyway.
+function _renderPublicBrand(cfg){
+  try {
+    if(!_isPublicRef() || document.getElementById('publicBrandStrip')) return;
+    var b = (cfg && cfg.brand && typeof cfg.brand === 'object') ? cfg.brand : {};
+    var name  = String(b.name  || '').trim().slice(0, 40);
+    var entry = String(b.entry || '').trim().slice(0, 80);
+    if(!name && !entry) return;
+    var tb = document.getElementById('topbar'); if(!tb) return;
+    var el = document.createElement('div');
+    el.id = 'publicBrandStrip';
+    el.setAttribute('role', 'note');
+    el.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 -14px;padding:6px 14px;background:#0f4c5c;color:#fff;font-family:"DM Sans",system-ui,sans-serif;font-size:11.5px;line-height:1.35;font-weight:600;letter-spacing:.01em';
+    el.innerHTML = '<span>' + _pesc(entry || ('Beach safety for ' + name + ' visitors')) + '</span>'
+                 + '<span style="opacity:.85;font-weight:500;white-space:nowrap">Powered by Ocean Safe</span>';
+    tb.appendChild(el);
+  } catch(e){}
 }
 // The rescue for the ONE case the check above gets wrong: nobody said which island,
 // we defaulted to Kauaʻi, and the partner is bound to a different one. Today that
@@ -11383,19 +11450,26 @@ window._partnerCfgReady = (function(){
       })
       .catch(() => null);
 
+  // Public ref: the committed JSON is the only source. The worker KV config is POST-writable
+  // and the synthesised config comes from a live table; neither may shape a government-adjacent
+  // build, so on any failure a public ref resolves null and stays commerce-free.
+  const _pub = _isPublicRef();
   return fetch('/partner-config/' + slug + '.json', opts)
     .then(r => (r.ok ? r.json() : Promise.reject(new Error('no committed config'))))
-    .catch(() => fetch('https://concierge-guide-api.oceansafe-hi.workers.dev/cfg/' + slug, opts)
+    .catch(() => _pub ? null : fetch('https://concierge-guide-api.oceansafe-hi.workers.dev/cfg/' + slug, opts)
       .then(r => (r.ok ? r.json() : null))
       .catch(() => null))
-    .then(cfg => (cfg && typeof cfg === 'object' && !Array.isArray(cfg)) ? cfg : _synthCfg())
+    .then(cfg => (cfg && typeof cfg === 'object' && !Array.isArray(cfg)) ? cfg : (_pub ? null : _synthCfg()))
     .then(cfg => {
       if(timer) clearTimeout(timer);
       if(cfg && typeof cfg === 'object' && !Array.isArray(cfg)){
         if(_cobrandIslandOK(cfg)){
           window._partnerCfg = cfg;
-          try { _renderPartnerPromos(cfg); } catch(e){}
-          try { _promoFetchLive(slug); } catch(e){}
+          if(_pub){ try { _renderPublicBrand(cfg); } catch(e){} }
+          else {
+            try { _renderPartnerPromos(cfg); } catch(e){}
+            try { _promoFetchLive(slug); } catch(e){}
+          }
         } else if(!_cobrandIslandRescue(cfg)){
           // Rescue declined (explicit island signal, or nothing to rescue to) → the
           // C-3 drop stands exactly as before.
@@ -11563,7 +11637,7 @@ function _townInject(rows){
 // renders exactly as before. A partner pin is never worth breaking the guide for.
 function _townFetch(){
   try {
-    if(!window.fetch || !window.ACTIVE) return Promise.resolve(0);
+    if(!window.fetch || !window.ACTIVE || _isPublicRef()) return Promise.resolve(0);   // public ref: no partner pins
     return fetch('https://arndnljtmjfsnzcpcuen.supabase.co/rest/v1/rpc/get_town_listings', {
       method:'POST',
       headers:{'Content-Type':'application/json',
@@ -11644,7 +11718,7 @@ async function boot(){
     const ref = params.get('ref') || params.get('utm_source');
     if(ref){
       const slug = ref.toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0, 32);
-      if(slug){
+      if(slug && !_isPublicRef()){   // a public ref is never persisted: the next organic open stays organic
         localStorage.setItem('referrer', slug);
         localStorage.setItem('referrerFirstSeen', new Date().toISOString());
         const partnerName = PARTNER_NAMES[slug] || slug[0].toUpperCase() + slug.slice(1);
@@ -13019,6 +13093,7 @@ if('serviceWorker' in navigator){
     if(navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1') return;
     var slug = (new URLSearchParams(location.search).get('ref') || '').trim().toLowerCase();
     if(!slug || !/^[a-z0-9-]{2,64}$/.test(slug)) return;
+    if(window._isPublicRef && _isPublicRef()) return;   // public ref: no session id, no events
     var API = 'https://concierge-guide-api.oceansafe-hi.workers.dev/e';
     var sid = null;
     try{

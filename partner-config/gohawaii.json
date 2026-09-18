@@ -1,0 +1,13 @@
+{
+  "_note": "PUBLIC REF for the GoHawaii (Hawaii Visitors and Convention Bureau) embed, Option A. The slug is allowlisted in window.PUBLIC_REFS in index.html; that list, not this file, is what makes the build commerce-free (tabs removed, no tour widgets, no offers, no telemetry, _planPaid hard false). This file only adds the brand strip and names the layers the build may load. commerce is informational and never read by the app. Never add name, promotions, amenities, affiliates or tourDesk here.",
+  "slug": "gohawaii",
+  "plan": "free",
+  "commerce": "none",
+  "layers": ["gohawaii"],
+  "islands": { "kauai": true, "maui": true, "oahu": true, "hawaii": true },
+  "brand": {
+    "name": "GoHawaii",
+    "entry": "Beach safety for GoHawaii visitors",
+    "attribution": "Listings by GoHawaii (Hawaii Visitors and Convention Bureau)"
+  }
+}
