@@ -142,8 +142,8 @@ function staff(o){ return Object.assign({ id: 's' + Math.random().toString(36).s
   await sleep(3000);
   await t.pg.evaluate(() => ghOpenHub()); await sleep(400);
   const fail = await t.pg.evaluate(() => document.getElementById('sc').innerText);
-  check(/could not be reached/i.test(fail), 'hub says the weather service could not be reached');
-  check(!/^No National Weather Service or Hawaiʻi Tourism Authority advisories/m.test(fail) || /could not be reached/i.test(fail), 'no plain all-clear line when a source failed');
+  check(/could not reach the National Weather Service/i.test(fail), 'hub says the weather service could not be reached');
+  check(!/No advisories from|No National Weather Service alerts/i.test(fail), 'no all-clear line when the weather feed failed');
   await t.ctx.close();
 
   console.log('5. staff posts: approval, targeting, end');
