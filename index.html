@@ -11866,7 +11866,7 @@ function _ghNearestBeach(lat, lon){
 // GoHawaii advisories (public ref only). The engine and the visitor UI live in /gh/, so no other
 // load fetches or parses them. ?b= changes with each build: /gh/ scripts ride the service worker's
 // stale-while-revalidate shell cache, so without it a returning visitor runs the previous build once.
-var GH_ADV_BUILD = '2026-09-18-adv8';
+var GH_ADV_BUILD = '2026-09-18-adv9';
 function _ghAdvLoad(){
   if(window.GH_ADV || document.getElementById('ghAdvJs')) return;
   var a = document.createElement('script'); a.id = 'ghAdvJs'; a.src = '/gh/advisories.js?b=' + GH_ADV_BUILD;

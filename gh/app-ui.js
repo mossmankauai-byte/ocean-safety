@@ -262,8 +262,9 @@
     if(ok === false) return h + nwsDown + (okH === false ? '<div class="gha-empty">We could not reach the Hawaiʻi Tourism Authority for travel updates either.</div>' : '');
     if(ok === null) return h + '<div class="gha-empty">Still checking the National Weather Service for ' + esc(islName()) + '.' + (okH === false ? ' We could not reach the Hawaiʻi Tourism Authority for travel updates.' : '') + '</div>';
     var at = A.hst(new Date(A.last.nwsAt || Date.now()).toISOString());
-    if(okH === null) return h + '<div class="gha-empty">No National Weather Service alerts for ' + esc(islName()) + ' as of ' + esc(at) + '. Still checking the Hawaiʻi Tourism Authority.</div>';
-    if(okH === false) return h + '<div class="gha-empty">No National Weather Service alerts for ' + esc(islName()) + ' as of ' + esc(at) + '. We could not reach the Hawaiʻi Tourism Authority for travel updates.</div>';
+    var careful = ' The ocean can still change fast: check the beach verdicts below and swim near a lifeguard.';
+    if(okH === null) return h + '<div class="gha-empty">No National Weather Service alerts for ' + esc(islName()) + ' as of ' + esc(at) + '. Still checking the Hawaiʻi Tourism Authority.' + careful + '</div>';
+    if(okH === false) return h + '<div class="gha-empty">No National Weather Service alerts for ' + esc(islName()) + ' as of ' + esc(at) + '. We could not reach the Hawaiʻi Tourism Authority for travel updates.' + careful + '</div>';
     return h + '<div class="gha-empty">No advisories from the National Weather Service or the Hawaiʻi Tourism Authority for ' + esc(islName()) + ' as of ' + esc(at) + '. The ocean can still change fast: check the beach verdicts below and swim near a lifeguard.</div>';
   }
   // score() has no 'red': below the yellow line it returns 'hidden', which the app reads as not
