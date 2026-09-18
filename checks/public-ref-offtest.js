@@ -150,7 +150,54 @@ async function state(page){
     });
     check(layer.rows > 100, `${slug}: GoHawaii layer injected (${layer.rows} rows) ${JSON.stringify(layer.counts)}`);
     check(/Listing by GoHawaii/.test(layer.sheet) && !/\$\d/.test(layer.sheet), `${slug}: shared listing sheet carries the GoHawaii credit and no price`);
-    check(['event','golf','wellness','malama'].every(x => layer.subs.includes(x)), `${slug}: Family tab gained Events, Golf, Spas, Mālama subtabs`);
+    check(['event','malama'].every(x => layer.subs.includes(x)) && !layer.subs.includes('golf') && !layer.subs.includes('wellness'), `${slug}: Family gained Events and Mālama only`);
+    const homes = await page.evaluate(() => ({
+      townWellness: (SUBTABS.shopping.items || []).some(i => i.sub === 'wellness'),
+      townRows: (window.GH_TOWN || []).length,
+      golfInTours: (window.GH_TOURS || []).filter(t => t.gh_sub === 'Golf').length,
+      slowVibe: (PLAN_VIBES || []).some(v => v.key === 'slow'),
+      malamaRows: Object.values(window._GH_INDEX || {}).filter(g => g.type === 'malama').length,
+      eventRows: Object.values(window._GH_INDEX || {}).filter(g => g.type === 'event').length,
+    }));
+    check(homes.townWellness && homes.townRows > 0, `${slug}: Town > Wellness subtab with ${homes.townRows} spas`);
+    check(homes.golfInTours > 0, `${slug}: Golf is a Tours group (${homes.golfInTours} courses)`);
+    check(homes.slowVibe, `${slug}: Plan has a Slow day vibe`);
+    check(homes.malamaRows > 0 && homes.eventRows > 0, `${slug}: ${homes.malamaRows} Mālama and ${homes.eventRows} events loaded`);
+    // Beach sheet: a red or yellow verdict shows the Give back block; on an all-green day say so.
+    const malama = await page.evaluate(() => {
+      const b = (typeof B !== 'undefined' ? B : []).find(x => !x.warning_only && scored[x.id] && ['red','yellow','warning'].includes(scored[x.id].status));
+      if (!b) return { none: true };
+      openSheet(b.id); return { beach: b.name, status: scored[b.id].status };
+    });
+    await sleep(1200);
+    if (!malama.none) malama.has = await page.evaluate(() => /Give back instead/.test(document.getElementById('sc').innerHTML));
+    if (malama.none) console.log(`  note ${slug}: every scored beach is green right now, Give back block not exercised`);
+    else check(malama.has, `${slug}: ${malama.beach} (${malama.status}) shows the Give back block`);
+    if (slug === 'kauai' && !malama.none) await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-malama-beach.png`) });
+    // Town > Wellness and Family > Events chips, on screen.
+    await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); document.getElementById('overlay').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="shopping"]'); if (t) t.click(); });
+    await sleep(1200);
+    await page.evaluate(() => { const st = document.querySelector('#subtabs .subtab[data-sub="wellness"]'); if (st) st.click(); });
+    await sleep(2200);
+    const well = await page.evaluate(() => ({ pins: Object.keys(ghTownMkrs || {}).length, sub: window._activeSub }));
+    check(well.sub === 'wellness' && well.pins > 0, `${slug}: Town > Wellness draws ${well.pins} pins`);
+    if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-town-wellness.png`) });
+    await page.evaluate(() => { const t = document.querySelector('#tabs .tab[data-tab="acts"]'); if (t) t.click(); });
+    await sleep(1200);
+    await page.evaluate(() => { const st = document.querySelector('#subtabs .subtab[data-sub="event"]'); if (st) st.click(); });
+    await sleep(2200);
+    const evc = await page.evaluate(() => ({ chips: !!document.getElementById('ghEvChips'), text: (document.getElementById('ghEvChips') || {}).innerText || '' }));
+    check(evc.chips && /Today/.test(evc.text) && /weekend/i.test(evc.text), `${slug}: Events chips on screen (${evc.text.replace(/\n/g, ' ')})`);
+    await page.evaluate(() => { const t = document.querySelector('#tabs .tab[data-tab="beaches"]'); if (t) t.click(); });
+    await sleep(800);
+    const gone = await page.evaluate(() => !document.getElementById('ghEvChips'));
+    check(gone, `${slug}: Events chips leave with the subtab`);
+    // Plan: Slow day chip, Mālama card, and a Tonight slot when an event falls on the picked day.
+    await page.evaluate(() => { const t = document.querySelector('#tabs .tab[data-tab="activities"]'); if (t) t.click(); });
+    await sleep(2500);
+    const plan = await page.evaluate(() => { const h = document.getElementById('sc').innerHTML, t = document.getElementById('sc').innerText; return { slow: /Slow day/.test(h), card: /Give back a morning/.test(h), tonight: /Tonight/.test(h), price: /\$\d/.test(t), head: t.slice(0, 80).replace(/\s+/g, ' ') }; });
+    check(plan.slow && plan.card && !plan.price, `${slug}: Plan shows Slow day, the Give back card, no price (Tonight slot: ${plan.tonight}) [${plan.head}]`);
+    if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-plan-malama.png`) });
     check(layer.staysShown, `${slug}: Stays tab shown once their stays loaded`);
     if (slug === 'kauai') {
       await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-listing-sheet.png`) });

@@ -40,8 +40,10 @@ function classify(r) {
     return { target: 'TOURS', type: 'tour', sub: act.find(x => /Water|Land|Sky|Tours|Cruises|Culinary|Voluntourism|Distilleries/.test(x)) };
   if (act.some(x => /Luau|Dinner Shows|Culture, History and the Arts/.test(x))) return { target: 'ACTS', type: 'cultural', sub: act[0] };
   if (act.some(x => /Attractions|Plantations, Farms and Gardens|Coffee Farms/.test(x))) return { target: 'ACTS', type: 'scenic', sub: act[0] };
-  if (act.some(x => /Wellness and Rejuvenation/.test(x))) return { target: 'ACTS', type: 'wellness', sub: 'Wellness and Rejuvenation', gap: 'Spas and wellness' };
-  if ((f['Golf'] || []).includes('Golf Courses')) return { target: 'ACTS', type: 'golf', sub: 'Golf Courses', gap: 'Golf' };
+  // Spas live in Town (a Wellness subtab we add for the public build); tagged indoor so Plan can offer them on wet afternoons.
+  if (act.some(x => /Wellness and Rejuvenation/.test(x))) return { target: 'GHTOWN', type: 'wellness', tags: ['indoor', 'rain_ok'], sub: 'Wellness and Rejuvenation', gap: 'Spas and wellness' };
+  // Golf courses are activities: they join the Tours directory as their own group, with course facts.
+  if ((f['Golf'] || []).includes('Golf Courses')) return { target: 'TOURS', type: 'golf', sub: 'Golf', gap: 'Golf', facts: { yards: (f['Total Yards'] || [])[0], course_type: (f['Course Type'] || [])[0] } };
   if (shop.length) {
     if (shop.some(x => /Department Stores, Shopping Centers/.test(x))) return { target: 'VENUES', type: 'venue', sub: shop[0] };
     return { target: 'LOCAL_CRAFTS', type: 'shop', sub: shop[0] };
@@ -73,7 +75,7 @@ for (const r of L) {
     if (c.gap) report.gaps[c.gap] = (report.gaps[c.gap] || 0) + 1;
     const a = r.address || {};
     out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, c, { tip: tip(r.teaser), website: r.websites.business || undefined, src_url: 'https://www.gohawaii.com' + r.link,
-      address: [a.line_1, a.city].filter(Boolean).join(', ') || undefined, img: r.img || undefined }));
+      address: [a.line_1, a.city].filter(Boolean).join(', ') || undefined, img: r.img || undefined, ...(c.facts || {}) }));
   }
 }
 // 2. Events (dated)

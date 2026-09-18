@@ -5464,7 +5464,7 @@ function openMarketSheet(id){
 
 function renderActs(){
   Object.values(actMkrs).forEach(m=>m.remove());actMkrs={};
-  if(window._activeTab !== 'acts')return;
+  if(window._activeTab !== 'acts'){ try { _ghEventChips(false); } catch(e){} return; }
   const sub = window._activeSub || 'beaches';
   // Hazards: hidden by default — only renders when user explicitly selects this subtab.
   // Uses the dedicated poi-hazard marker so the "do not enter" pictogram is unmistakable
@@ -5491,8 +5491,10 @@ function renderActs(){
   }
   // Typed subtabs (Playgrounds, Wildlife, Scenic, Towns, Cultural) filter ACTS by type.
   // 'all' shows every ACTS item, plus kid-friendly beaches and easy hikes (cumulative bundle).
+  try { _ghEventChips(_isPublicRef() && sub==='event'); } catch(e){}
   ACTS.forEach(a=>{
     if(sub !== 'all' && a.type !== sub) return;
+    if(a.type==='event' && !_ghEventInRange(a)) return;
     const mk=L.marker([a.lat,a.lon],{icon:mkActIcon(a)}).addTo(map);
     mk.on('click',()=>openActSheet(a.id));
     actMkrs[a.id]=mk;
@@ -5978,6 +5980,11 @@ function _planWalks(){ return _planIsKauai() ? WALKS : []; }
 // Island-safe "on land" slot: a local walk if this island has them, else a real family
 // activity from the island's own ACTS, else nothing (caller renders the unknown card).
 function _planLandPick(area){
+  // Slow day (public build): a spa, a garden, or a coffee stop before any walk or hike.
+  if(_planVibe==='slow' && _isPublicRef()){
+    var sp=(window.GH_TOWN||[]).filter(function(x){return x.r===area;})[0]; if(sp) return {kind:'gh',ref:sp};
+    var sc=(typeof ACTS!=='undefined'?ACTS:[]).filter(function(x){return x.r===area && x.type==='scenic';})[0]; if(sc) return {kind:'act',ref:sc};
+  }
   var w=_planSavedFirst(_planWalks().filter(function(x){return x.r===area;}),'walk')[0];
   if(w) return {kind:(w.kind||'walk'),ref:w};
   if(_planIsKauai() && area==='East Side' && PLAN_BIKE[0]) return {kind:'bike',ref:PLAN_BIKE[0]};
@@ -6076,6 +6083,7 @@ function buildPlanDay(){
   if(!dfList.length) dfList=PFOODS.filter(function(x){return x.r===area && _planOpenFor(x,'dinner');}); // relax "exclude lunch spot" BEFORE the open-for-dinner rule, so a lunch-only place never wins
   if(!dfList.length) dfList=PFOODS.filter(function(x){return x.r===area && usedFood.indexOf(x.id)<0;});
   var df=_planChoose(_planSavedFirst(dfList,'food')); if(df) slots.push({when:'Evening',kind:'food',ref:df});
+  var gev=_ghPlanEvent(area,_planDay); if(gev) slots.push({when:'Tonight',kind:'gh',ref:gev});   // a GoHawaii event on the picked day
   return slots;
 }
 
@@ -6089,11 +6097,13 @@ function _planSlotSub(s){
     } else word='Popular '+_planVibeObj().label.toLowerCase()+' spot';
     return word+' · '+it.r;
   }
-  if(s.kind==='drink'||s.kind==='food') return (it.type||'')+' · '+it.r+(it.price?' · '+it.price:'');
+  var _pr=(it.price && !_isPublicRef()) ? ' · '+it.price : '';   // public build: no price on any card
+  if(s.kind==='drink'||s.kind==='food') return (it.type||'')+' · '+it.r+_pr;
   if(s.kind==='walk'||s.kind==='bike') return _planClip(it.note||'',80)+' · '+it.r;
-  if(s.kind==='act') return _planClip(it.tip||'',80)+' · '+it.r+(it.price?' · '+it.price:'');
+  if(s.kind==='act') return _planClip(it.tip||'',80)+' · '+it.r+_pr;
   if(s.kind==='hike') return (it.difficulty?it.difficulty.charAt(0).toUpperCase()+it.difficulty.slice(1):'Hike')+(it.length_mi?' · '+it.length_mi+' mi':'')+' · '+_planClip(it.tip||it.r,60);
   if(s.kind==='tour') return (it.subtitle||'')+' · conditions-matched';
+  if(s.kind==='gh') return (it.when?_ghDayLabel(it.when)+' · ':'')+(it.gh_sub||'')+' · '+it.r+(it.venue?' · '+it.venue:'');
   return '';
 }
 function _planSlotRow(s,idx){
@@ -6101,6 +6111,11 @@ function _planSlotRow(s,idx){
     return '<div class="plan-slot"><div class="plan-when">'+s.when+'</div><div class="plan-card" style="border-left:4px solid #9ca3af"><div class="plan-card-b"><div class="plan-card-name">Ocean conditions unavailable</div><div class="plan-card-sub">We can\'t read today\'s surf right now — check posted signs and lifeguards before the water.</div></div></div></div>';
   }
   var m=PLAN_KMETA[s.kind]||PLAN_KMETA.beach, it=s.ref, name=it.name||it.title||it.n||'';
+  if(s.kind==='gh'){   // a GoHawaii row: opens the shared sheet, no swap, no heart, credit inline
+    return '<div class="plan-slot" onclick="openGhSheet(\''+_pesc(it.id)+'\')"><div class="plan-when">'+s.when+'</div>'+
+      '<div class="plan-card" style="border-left:4px solid #7c3aed"><div class="plan-card-b"><div class="plan-card-name">'+_pesc(name)+' <span class="plan-tag" style="color:#7c3aed">'+(it.type==='event'?'Event':'GoHawaii')+'</span></div>'+
+      '<div class="plan-card-sub">'+_pesc(_planSlotSub(s))+'</div><div style="font-size:10.5px;color:var(--mute);margin-top:4px">Listing by GoHawaii</div></div></div></div>';
+  }
   var heart=(s.kind==='tour')?'':heartButton(s.kind,it.id);
   var act=(s.kind==='tour')?'<button class="plan-book" onclick="event.stopPropagation();openToursSheet()">See times & book</button>':'';
   var swap=(s.kind==='tour')?'':'<span class="plan-swap"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h13"/><path d="m17 20 4-4-4-4"/><path d="M21 16H8"/></svg>Swap</span>';
@@ -6143,6 +6158,7 @@ function renderPlanDay(){
       '<div class="plan-col"><div class="plan-lbl">Type of day</div><div class="plan-seg">'+vibeChips+'</div></div></div>'+
       '</div>'+
     '<div class="plan-why">'+_planWhy()+'</div>'+
+    _ghPlanMalamaCard(_planArea)+
     '<div class="plan-day">'+rows+'</div>'+
     '<div class="plan-foot">'+saveBtn+'<button class="plan-shuffle" onclick="planRandomize()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px"><path d="M16 3h5v5M21 3l-7 7M4 20l6-6M16 21h5v-5M14 14l7 7M4 4l5 5" stroke-linecap="round" stroke-linejoin="round"/></svg> Shuffle</button><span class="plan-note">Tap <b>Swap</b> on any card to change it — or switch the Area / Type of day above.</span></div>'+
     '<div class="plan-legal">Conditions change fast — always check posted signs and lifeguards before entering the water. A guide, not a safety guarantee.</div>';
@@ -6578,6 +6594,7 @@ function mkVenueIcon(v, more){
 }
 let venueMkrs={};
 function renderVenues(){
+  try { renderGhTown(); } catch(e){}
   // Clear BEFORE any early return, or switching off a venue subtab and back leaves ghosts.
   Object.values(venueMkrs).forEach(m=>m.remove()); venueMkrs={};
   if(window._activeTab !== 'shopping' || typeof VENUES === 'undefined') return;
@@ -7900,7 +7917,7 @@ function openSheet(id){
       <div class="vis-row"><div class="vis-icon-lbl">UV</div>${uvBar(c.uv)}</div>
       <div class="vis-row" style="border-top:1px dashed var(--border);padding-top:10px"><div class="vis-icon-lbl">Tide</div><div class="vis-text"><span class="vis-lbl">${c.tt==='rising'?'Rising':c.tt==='falling'?'Falling':'Slack'}</span><span class="vis-num">${c.tide.toFixed(1)} ft</span></div></div>
     </div>
-    ${caut}${dgr}${tp}${rope}${cs}${(typeof rsSheetHtml==='function')?rsSheetHtml(b):''}${ps}${nas}
+    ${caut}${dgr}${tp}${rope}${cs}${(typeof rsSheetHtml==='function')?rsSheetHtml(b):''}${ps}${nas}${_ghMalamaBlock(b)}
     <details style="margin-top:12px"><summary style="font-size:10px;color:var(--mute);cursor:pointer;text-transform:uppercase;letter-spacing:.06em">Tide today</summary>${tideGraph(c)}</details>
     <a href="${murl}" target="_blank" rel="noopener" class="dirbtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="1,8 15,1 9,8 15,15"/></svg>Get Directions</a>
     ${_isPublicRef()?'':viatorBlock}`;
@@ -11677,6 +11694,93 @@ function _townToPoi(row){
 var GH_PREFIX = 'gh_';
 window._GH_INDEX = {};
 window.GH_TOURS = [];
+window.GH_TOWN = [];    // their rows that live on a Town subtab we added (Wellness)
+var ghTownMkrs = {};
+function _ghDayLabel(iso){ try { var d=new Date(iso+'T12:00:00'); return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+(d.getMonth()+1)+'/'+d.getDate(); } catch(e){ return iso; } }
+function _ghToday(){ try { return new Date().toLocaleDateString('en-CA', {timeZone:'Pacific/Honolulu'}); } catch(e){ return new Date().toISOString().slice(0,10); } }
+function _ghAddDays(iso, n){ var d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+// Events list chips: Today, Tomorrow, This weekend, All. Hawaiʻi time, never the phone's zone.
+window._ghEvRange = 'all';
+function _ghEventInRange(a){
+  if(!a || a.type!=='event' || !a.when) return true;
+  var t=_ghToday(), r=window._ghEvRange;
+  if(r==='today') return a.when===t;
+  if(r==='tomorrow') return a.when===_ghAddDays(t,1);
+  if(r==='weekend'){ var d=new Date(t+'T12:00:00'); var dow=d.getDay(); var sat=_ghAddDays(t,(6-dow+7)%7), sun=_ghAddDays(sat,1); return a.when===sat||a.when===sun||(dow===0&&a.when===t); }
+  return true;
+}
+function _ghSetEvRange(r){ window._ghEvRange=r; try{ renderActs(); }catch(e){} }
+function _ghEventChips(show){
+  var el=document.getElementById('ghEvChips');
+  if(!show){ if(el) el.remove(); return; }
+  if(!el){ el=document.createElement('div'); el.id='ghEvChips'; el.style.cssText='position:absolute;left:12px;right:12px;z-index:540;display:flex;gap:6px;flex-wrap:wrap'; document.getElementById('app').appendChild(el); }
+  try { var sb=document.getElementById('subtabs'); var r=sb.getBoundingClientRect(); el.style.top=(r.bottom+8)+'px'; } catch(e){ el.style.top='240px'; }
+  var opts=[['all','All'],['today','Today'],['tomorrow','Tomorrow'],['weekend','This weekend']];
+  el.innerHTML=opts.map(function(o){ var on=o[0]===window._ghEvRange; return '<button type="button" onclick="_ghSetEvRange(\''+o[0]+'\')" style="border:1px solid '+(on?'var(--ocean)':'var(--border)')+';background:'+(on?'var(--ocean)':'#fff')+';color:'+(on?'#fff':'var(--ink)')+';border-radius:999px;padding:6px 11px;font:600 12px \'DM Sans\',system-ui,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.08)">'+o[1]+'</button>'; }).join('');
+}
+// Town > Wellness pins (their spas). Cleared on every other tab or subtab.
+function renderGhTown(){
+  Object.values(ghTownMkrs).forEach(function(m){ m.remove(); }); ghTownMkrs={};
+  if(window._activeTab!=='shopping' || window._activeSub!=='wellness') return;
+  (window.GH_TOWN||[]).forEach(function(t){
+    var mk=L.marker([t.lat,t.lon],{icon:mkActIcon(t)}).addTo(map);
+    mk.on('click',function(){ openGhSheet(t.id); });
+    ghTownMkrs[t.id]=mk;
+  });
+}
+// The beach-sheet block: when the verdict is red or yellow, the two nearest Mālama programs.
+// This is the "redirect to a safer activity" HTA asked for, with HTA's own program as the answer.
+window._ghDeflect = { taps: 0 };
+function _ghDeflectTap(beachId, ghId){
+  try { window._ghDeflect.taps++; var n=+(localStorage.getItem('gh_deflect_taps')||0)+1; localStorage.setItem('gh_deflect_taps', String(n)); } catch(e){}
+  openGhSheet(ghId);
+}
+function _ghMalamaBlock(b){
+  try {
+    if(!_isPublicRef() || !b) return '';
+    var st=(typeof scored!=='undefined' && scored[b.id] && scored[b.id].status) || '';
+    if(st!=='red' && st!=='yellow' && st!=='warning') return '';
+    var rows=Object.values(window._GH_INDEX||{}).filter(function(g){ return g.type==='malama'; })
+      .map(function(g){ return [g, (g.lat-b.lat)*(g.lat-b.lat)+(g.lon-b.lon)*(g.lon-b.lon)]; }).sort(function(x,y){ return x[1]-y[1]; }).slice(0,2);
+    if(!rows.length) return '';
+    var lead = st==='red' ? 'The ocean is off here today.' : 'Conditions are marginal here today.';
+    var far = rows[0] && Math.sqrt(rows[0][1])*111 > 15;   // their Mālama programs are sparse; say "on the island" when the nearest is a drive away
+    return '<div class="slbl" style="margin-top:16px">Give back instead</div>'
+      + '<div style="font-size:12.5px;color:var(--mute);margin:-2px 0 8px">'+lead+' '+(rows.length>1?'Two ways':'One way')+' to give back '+(far?'on the island':'nearby')+', from HTA\'s Mālama Hawaiʻi program.</div>'
+      + rows.map(function(x){ var g=x[0], km=Math.round(Math.sqrt(x[1])*111*10)/10;
+          return '<div onclick="_ghDeflectTap(\''+_pesc(b.id)+'\',\''+_pesc(g.id)+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:#f0faf4">'
+            + '<span style="font-size:18px;flex-shrink:0">❦</span><span style="flex:1;min-width:0"><div style="font-weight:600;color:var(--ink)">'+_pesc(g.name)+'</div><div style="font-size:11.5px;color:var(--mute)">'+_pesc(g.gh_sub||'Mālama')+' · '+km+' km</div></span><span style="color:var(--ocean);font-size:20px">›</span></div>'; }).join('');
+  } catch(e){ return ''; }
+}
+// Plan: the event for the picked day and area, and a Mālama card for the picked area.
+function _ghPlanEvent(area, dayIdx){
+  try {
+    if(!_isPublicRef()) return null;
+    var date=(typeof FORECAST!=='undefined' && FORECAST && FORECAST[dayIdx] && FORECAST[dayIdx].date) || _ghAddDays(_ghToday(), dayIdx);
+    var evs=Object.values(window._GH_INDEX||{}).filter(function(g){ return g.type==='event' && g.when===date; });
+    return evs.filter(function(g){ return g.r===area; })[0] || evs[0] || null;
+  } catch(e){ return null; }
+}
+function _ghPlanMalamaCard(area){
+  try {
+    if(!_isPublicRef()) return '';
+    var rows=Object.values(window._GH_INDEX||{}).filter(function(g){ return g.type==='malama'; });
+    var pick=rows.filter(function(g){ return g.r===area; })[0] || rows[0]; if(!pick) return '';
+    return '<div onclick="openGhSheet(\''+_pesc(pick.id)+'\')" style="margin:10px 14px 0;padding:12px 14px;border-radius:12px;background:#f0faf4;border:1px solid #cfe9d8;cursor:pointer;display:flex;gap:10px;align-items:center">'
+      + '<span style="font-size:20px">❦</span><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#2f6b45">Give back a morning</div>'
+      + '<div style="font-weight:600;color:var(--ink)">'+_pesc(pick.name)+'</div><div style="font-size:11.5px;color:var(--mute)">'+_pesc(pick.gh_sub||'Mālama Hawaiʻi')+' · '+_pesc(pick.r)+'</div></div><span style="color:var(--ocean);font-size:20px">›</span></div>';
+  } catch(e){ return ''; }
+}
+function _ghForecastNote(iso){
+  try {
+    if(!iso || typeof FORECAST==='undefined' || !FORECAST) return '';
+    var idx=FORECAST.findIndex(function(f){ return f.date===iso; }); if(idx<0) return '';
+    var c=getDayConditions(idx); var bits=[];
+    if(typeof c.precip==='number') bits.push(c.precip>1 ? 'rain in the forecast' : 'dry in the forecast');
+    if(typeof c.wind==='number') bits.push(Math.round(c.wind)+' mph wind');
+    return bits.length ? '<div class="poi-local-tip" style="margin-top:10px"><span style="flex-shrink:0">☁</span><span>That day: '+bits.join(', ')+'.</span></div>' : '';
+  } catch(e){ return ''; }
+}
 function _ghArrays(){
   return { FOODS: typeof FOODS!=='undefined'?FOODS:null, DRINKS: typeof DRINKS!=='undefined'?DRINKS:null,
            LOCAL_CRAFTS: typeof LOCAL_CRAFTS!=='undefined'?LOCAL_CRAFTS:null, VENUES: typeof VENUES!=='undefined'?VENUES:null,
@@ -11691,10 +11795,14 @@ function _ghPurge(){
 // for a public ref only, so the organic Family tab is unchanged.
 function _ghExtendSubtabs(){
   try {
-    var items = SUBTABS.acts.items; if(items.some(function(i){ return i.sub==='event'; })) return;
-    var allIdx = items.findIndex(function(i){ return i.sub==='all'; });
-    var extra = [{sub:'event',label:'Events'},{sub:'golf',label:'Golf'},{sub:'wellness',label:'Spas'},{sub:'malama',label:'Mālama'}];
-    items.splice(allIdx<0?items.length:allIdx, 0, extra[0], extra[1], extra[2], extra[3]);
+    var items = SUBTABS.acts.items;
+    if(!items.some(function(i){ return i.sub==='event'; })){
+      var allIdx = items.findIndex(function(i){ return i.sub==='all'; });
+      items.splice(allIdx<0?items.length:allIdx, 0, {sub:'event',label:'Events'}, {sub:'malama',label:'Mālama'});
+    }
+    var town = SUBTABS.shopping.items;
+    if(!town.some(function(i){ return i.sub==='wellness'; })) town.push({sub:'wellness',label:'Wellness'});
+    if(!PLAN_VIBES.some(function(v){ return v.key==='slow'; })) PLAN_VIBES.push({key:'slow',label:'Slow day',ints:['walk']});
   } catch(e){}
 }
 function _ghInject(rows){
@@ -11707,8 +11815,11 @@ function _ghInject(rows){
     var rec = { id:r.id, name:r.name, n:r.n||r.name, r:r.r||'', lat:lat, lon:lon, type:r.type||'', theme:r.theme, tags:Array.isArray(r.tags)?r.tags:['gohawaii'],
                 tip:r.tip||'', website:r.website, address:r.address, img:r.img, when:r.when, venue:r.venue, gh_sub:r.gh_sub||'', src:'gohawaii', src_url:r.src_url||'',
                 duration_min:undefined, price:undefined, hours:undefined };
+    if(r.yards) rec.yards = r.yards; if(r.course_type) rec.course_type = r.course_type;
+    if(rec.type==='event' && rec.when){ rec.n = rec.n + ' · ' + _ghDayLabel(rec.when); }   // the pin label reads like a calendar
     window._GH_INDEX[rec.id] = rec;
     if(r.target==='TOURS'){ window.GH_TOURS.push(rec); n++; return; }
+    if(r.target==='GHTOWN'){ window.GH_TOWN.push(rec); n++; return; }
     var arr = A[r.target]; if(!Array.isArray(arr)) return;
     arr.push(rec); n++;
   });
@@ -11744,7 +11855,8 @@ function openGhSheet(id){
     + '<div style="position:relative;display:flex;flex-direction:column;justify-content:flex-end;flex:1;padding:14px;z-index:1">'
     + '<div class="poi-hero-name" style="color:#fff">'+_pesc(g.name)+'</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">'+_pesc(g.r)+(kind?' · '+_pesc(kind):'')+'</div></div></div>'
     + (g.img ? '<div style="font-size:10px;color:var(--mute);margin-top:6px;text-align:right">Photo via GoHawaii</div>' : '')
-    + (g.when ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">◷</span><span>Next date: '+_pesc(g.when)+(g.venue?' at '+_pesc(g.venue):'')+'</span></div>' : '')
+    + (g.when ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">◷</span><span>Next date: '+_pesc(_ghDayLabel(g.when))+(g.venue?' at '+_pesc(g.venue):'')+'</span></div>' + _ghForecastNote(g.when) : '')
+    + (g.type==='golf' ? (function(){ var f=[]; if(g.yards) f.push(_pesc(g.yards)+' yards'); if(g.course_type) f.push(_pesc(g.course_type)); try { var c=getIslandConditions(); if(typeof c.wind==='number') f.push('wind today about '+Math.round(c.wind)+' mph'); } catch(e){} return f.length ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">⛳</span><span>'+f.join(' · ')+'</span></div>' : ''; })() : '')
     + (g.tip ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">◈</span><span>'+_pesc(g.tip)+'</span></div>' : '')
     + (g.address ? '<div style="margin-top:10px;font-size:13px;color:var(--ink)">'+_pesc(g.address)+'</div>' : '')
     + contactRow(g)

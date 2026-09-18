@@ -6,10 +6,11 @@
       "rows": 178,
       "byTarget": {
         "VENUES": 3,
-        "TOURS": 32,
+        "TOURS": 36,
         "STAYS": 45,
-        "ACTS": 65,
+        "GHTOWN": 3,
         "FOODS": 25,
+        "ACTS": 58,
         "LOCAL_CRAFTS": 3,
         "DRINKS": 5
       }
@@ -17,10 +18,11 @@
     "maui": {
       "rows": 259,
       "byTarget": {
-        "TOURS": 29,
+        "TOURS": 33,
         "FOODS": 42,
-        "ACTS": 103,
+        "ACTS": 90,
         "STAYS": 67,
+        "GHTOWN": 9,
         "VENUES": 6,
         "LOCAL_CRAFTS": 4,
         "DRINKS": 8
@@ -30,11 +32,12 @@
       "rows": 397,
       "byTarget": {
         "STAYS": 82,
-        "ACTS": 169,
+        "ACTS": 162,
         "FOODS": 53,
-        "TOURS": 50,
+        "TOURS": 52,
         "LOCAL_CRAFTS": 14,
         "DRINKS": 21,
+        "GHTOWN": 5,
         "VENUES": 8
       }
     },
@@ -43,10 +46,11 @@
       "byTarget": {
         "FOODS": 23,
         "VENUES": 3,
-        "TOURS": 37,
-        "ACTS": 88,
+        "TOURS": 45,
         "STAYS": 48,
+        "ACTS": 75,
         "DRINKS": 10,
+        "GHTOWN": 5,
         "LOCAL_CRAFTS": 8
       }
     }
