@@ -322,7 +322,7 @@
   <p class="foot">Weather alerts come from the National Weather Service (api.weather.gov) and travel updates from the Hawaiʻi Tourism Authority (hta.hawaii.gov), credited on each card in the app. Beach verdicts in the app are OceanSafety's, from live surf and wind. Always follow lifeguards and posted signs.</p>
 </div>
 
-<script src="/gh/advisories.js?b=2026-09-18-adv1"></script>
+<script src="/gh/advisories.js?b=2026-09-18-adv2"></script>
 <script>
 (function(){
   'use strict';
@@ -362,7 +362,7 @@
     if(state.view === 'feat') loadLayer(state.isl).then(renderEvents);
   });
   function islChecks(id, sel){
-    $(id).innerHTML = '<label><input type="checkbox" value="all"' + (sel.indexOf('all') >= 0 ? ' checked' : '') + '> All islands</label>'
+    $(id).innerHTML = '<label><input type="checkbox" value="all"' + (sel.indexOf('all') >= 0 ? ' checked' : '') + '> All four islands</label>'
       + ORDER.map(function(k){ return '<label><input type="checkbox" value="' + k + '"' + (sel.indexOf(k) >= 0 ? ' checked' : '') + '> ' + ISL[k] + '</label>'; }).join('');
   }
   function readIsl(id){
@@ -391,13 +391,13 @@
   // ---- data loads ----
   function loadBeaches(){
     if(state.beaches) return Promise.resolve(state.beaches);
-    return fetch('/gh/beaches.json?b=2026-09-18-adv1').then(function(r){ return r.ok ? r.json() : {}; }).catch(function(){ return {}; })
+    return fetch('/gh/beaches.json?b=2026-09-18-adv2').then(function(r){ return r.ok ? r.json() : {}; }).catch(function(){ return {}; })
       .then(function(d){ state.beaches = d || {}; return state.beaches; });
   }
   function loadLayer(slug){
     if(state.layers[slug]) return Promise.resolve(state.layers[slug]);
     return new Promise(function(res){
-      var s = document.createElement('script'); s.src = '/data/poi-gohawaii-' + slug + '.js?b=2026-09-18-adv1';
+      var s = document.createElement('script'); s.src = '/data/poi-gohawaii-' + slug + '.js?b=2026-09-18-adv2';
       s.onload = function(){ state.layers[slug] = (window.GH_LAYER && window.GH_LAYER[slug]) || { rows: [] }; res(state.layers[slug]); };
       s.onerror = function(){ state.layers[slug] = { rows: [] }; res(state.layers[slug]); };
       document.head.appendChild(s);
