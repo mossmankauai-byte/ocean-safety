@@ -11731,6 +11731,12 @@ function renderGhTown(){
     ghTownMkrs[t.id]=mk;
   });
 }
+// Line icons for the GoHawaii rows (SVG, never an emoji glyph): leaf for Malama, cloud for the forecast note, flag for golf.
+var GH_ICON = {
+  leaf: function(px){ return '<svg class="gh-leaf" viewBox="0 0 24 24" width="'+px+'" height="'+px+'" fill="none" stroke="#2f6b45" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>'; },
+  cloud: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>'
+};
 // A GoHawaii photo as a small rounded list thumbnail. https gohawaii.com images only; a row with no
 // photo gets no thumbnail (it keeps its current look), and a photo that fails to load hides itself.
 function _ghThumb(g){
@@ -11759,7 +11765,7 @@ function _ghMalamaBlock(b){
       + '<div style="font-size:12.5px;color:var(--mute);margin:-2px 0 8px">'+lead+' '+(rows.length>1?'Two ways':'One way')+' to give back '+(far?'on the island':'nearby')+', from HTA\'s Mālama Hawaiʻi program.</div>'
       + rows.map(function(x){ var g=x[0], km=Math.round(Math.sqrt(x[1])*111*10)/10;
           return '<div onclick="_ghDeflectTap(\''+_pesc(b.id)+'\',\''+_pesc(g.id)+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:#f0faf4">'
-            + (_ghThumb(g) || '<span style="font-size:18px;flex-shrink:0">❦</span>')+'<span style="flex:1;min-width:0"><div style="font-weight:600;color:var(--ink)">'+_pesc(g.name)+'</div><div style="font-size:11.5px;color:var(--mute)">'+_pesc(g.gh_sub||'Mālama')+' · '+km+' km</div></span><span style="color:var(--ocean);font-size:20px">›</span></div>'; }).join('');
+            + (_ghThumb(g) || GH_ICON.leaf(20))+'<span style="flex:1;min-width:0"><div style="font-weight:600;color:var(--ink)">'+_pesc(g.name)+'</div><div style="font-size:11.5px;color:var(--mute)">'+_pesc(g.gh_sub||'Mālama')+' · '+km+' km</div></span><span style="color:var(--ocean);font-size:20px">›</span></div>'; }).join('');
   } catch(e){ return ''; }
 }
 // Plan: the event for the picked day and area, and a Mālama card for the picked area.
@@ -11777,7 +11783,7 @@ function _ghPlanMalamaCard(area){
     var rows=Object.values(window._GH_INDEX||{}).filter(function(g){ return g.type==='malama'; });
     var pick=rows.filter(function(g){ return g.r===area; })[0] || rows[0]; if(!pick) return '';
     return '<div onclick="openGhSheet(\''+_pesc(pick.id)+'\')" style="margin:10px 14px 0;padding:12px 14px;border-radius:12px;background:#f0faf4;border:1px solid #cfe9d8;cursor:pointer;display:flex;gap:10px;align-items:center">'
-      + (_ghThumb(pick) || '<span style="font-size:20px">❦</span>')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#2f6b45">Give back a morning</div>'
+      + (_ghThumb(pick) || GH_ICON.leaf(22))+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#2f6b45">Give back a morning</div>'
       + '<div style="font-weight:600;color:var(--ink)">'+_pesc(pick.name)+'</div><div style="font-size:11.5px;color:var(--mute)">'+_pesc(pick.gh_sub||'Mālama Hawaiʻi')+' · '+_pesc(pick.r)+'</div></div><span style="color:var(--ocean);font-size:20px">›</span></div>';
   } catch(e){ return ''; }
 }
@@ -11788,7 +11794,7 @@ function _ghForecastNote(iso){
     var c=getDayConditions(idx); var bits=[];
     if(typeof c.precip==='number') bits.push(c.precip>1 ? 'rain in the forecast' : 'dry in the forecast');
     if(typeof c.wind==='number') bits.push(Math.round(c.wind)+' mph wind');
-    return bits.length ? '<div class="poi-local-tip" style="margin-top:10px"><span style="flex-shrink:0">☁</span><span>That day: '+bits.join(', ')+'.</span></div>' : '';
+    return bits.length ? '<div class="poi-local-tip" style="margin-top:10px"><span style="flex-shrink:0">'+GH_ICON.cloud+'</span><span>That day: '+bits.join(', ')+'.</span></div>' : '';
   } catch(e){ return ''; }
 }
 function _ghArrays(){
@@ -11869,7 +11875,7 @@ function openGhSheet(id){
     + '<div class="poi-hero-name" style="color:#fff">'+_pesc(g.name)+'</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">'+_pesc(g.r)+(kind?' · '+_pesc(kind):'')+'</div></div></div>'
     + (img ? '<div class="gh-credit" style="display:none;font-size:10px;color:var(--mute);margin-top:6px;text-align:right">Photo via GoHawaii</div>' : '')
     + (g.when ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">◷</span><span>Next date: '+_pesc(_ghDayLabel(g.when))+(g.venue?' at '+_pesc(g.venue):'')+'</span></div>' + _ghForecastNote(g.when) : '')
-    + (g.type==='golf' ? (function(){ var f=[]; if(g.yards) f.push(_pesc(g.yards)+' yards'); if(g.course_type) f.push(_pesc(g.course_type)); try { var c=getIslandConditions(); if(typeof c.wind==='number') f.push('wind today about '+Math.round(c.wind)+' mph'); } catch(e){} return f.length ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">⛳</span><span>'+f.join(' · ')+'</span></div>' : ''; })() : '')
+    + (g.type==='golf' ? (function(){ var f=[]; if(g.yards) f.push(_pesc(g.yards)+' yards'); if(g.course_type) f.push(_pesc(g.course_type)); try { var c=getIslandConditions(); if(typeof c.wind==='number') f.push('wind today about '+Math.round(c.wind)+' mph'); } catch(e){} return f.length ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">'+GH_ICON.flag+'</span><span>'+f.join(' · ')+'</span></div>' : ''; })() : '')
     + (g.tip ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">◈</span><span>'+_pesc(g.tip)+'</span></div>' : '')
     + (g.address ? '<div style="margin-top:10px;font-size:13px;color:var(--ink)">'+_pesc(g.address)+'</div>' : '')
     + contactRow(g)

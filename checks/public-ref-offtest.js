@@ -202,15 +202,15 @@ async function state(page){
     await sleep(1200);
     if (!malama.none) Object.assign(malama, await page.evaluate(() => {
       const sc = document.getElementById('sc'), rows = [...sc.querySelectorAll('[onclick^="_ghDeflectTap"]')];
-      // Each Mālama row shows its photo when the row has one, and the old glyph when it has none.
+      // Each Mālama row shows its photo when the row has one, and the leaf icon when it has none.
       const ok = rows.every(el => { const id = (el.getAttribute('onclick').match(/'(gh_[^']+)'\)/) || [])[1], g = window._GH_INDEX[id] || {};
-        return g.img ? !!el.querySelector('img.gh-thumb') : (!el.querySelector('img') && /❦/.test(el.textContent)); });
+        return g.img ? !!el.querySelector('img.gh-thumb') : (!el.querySelector('img') && !!el.querySelector('svg.gh-leaf')); });
       return { has: /Give back instead/.test(sc.innerHTML), rows: rows.length, thumbs: sc.querySelectorAll('[onclick^="_ghDeflectTap"] img.gh-thumb').length, ok };
     }));
     if (malama.none) console.log(`  note ${slug}: every scored beach is green right now, Give back block not exercised`);
     else {
       check(malama.has, `${slug}: ${malama.beach} (${malama.status}) shows the Give back block`);
-      check(malama.ok, `${slug}: Mālama rows show a photo when they have one (${malama.thumbs} of ${malama.rows}), the glyph when not`);
+      check(malama.ok, `${slug}: Mālama rows show a photo when they have one (${malama.thumbs} of ${malama.rows}), the leaf icon when not`);
     }
     if (slug === 'kauai' && !malama.none) {
       // The shot is of the offer itself: scroll the Give back block into view and let its photos load.

@@ -31,7 +31,13 @@ const tip = (s, strict) => { let t = String(s || '').replace(/\s+/g, ' ').replac
   if (strict && t.length < all.length) return '';
   t = t.join(' ');
   t = t.replace(/[\p{Extended_Pictographic}\u2728\uFE0F]/gu, '').replace(/\s{2,}/g, ' ').trim();   // their emoji are not our icons
-  return t.length > 170 ? t.slice(0, 167).replace(/\s+\S*$/, '') + '.' : t; };
+  // Keep whole sentences up to 170 characters. Their teasers often stop mid-sentence, and cutting one and adding
+  // a full stop printed fragments like "restaurants. Its." A text with no complete sentence ends in an ellipsis.
+  const done = (t.match(/[^.!?]*[.!?]+["'”’)\]]*(?=\s|$)/g) || []).map(x => x.trim()).filter(Boolean);
+  let out = ''; for (const x of done) { if ((out ? out.length + 1 : 0) + x.length > 170) break; out = out ? out + ' ' + x : x; }
+  if (out) return out.replace(/\.{2,}$/, '.');
+  if (!t) return t;
+  return (t.length > 168 ? t.slice(0, 168).replace(/\s+\S*$/, '') : t).replace(/[\s,;:.]+$/, '') + '…'; };
 const has = (r, k, v) => (r.filters[k] || []).includes(v);
 // A business link that lands on an offer or a booking engine is a sales surface; the card keeps its gohawaii.com link.
 const SALES_URL = /\btickets?\b|\/rooms?\b|ipoolside|resort-activities|book-?now|hotel-deals|\/deals?\b|\boffers?\b|special-offers|\/specials?\b|special-packages|\/packages?\b|promo=|\/shop\/|checkinDate|synxis\.com/i;
