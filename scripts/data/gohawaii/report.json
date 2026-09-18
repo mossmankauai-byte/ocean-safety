@@ -3,22 +3,22 @@
   "source": "gohawaii.com public listing API (MilesAI), pulled 2026-09-18T01:12:31.063Z",
   "islands": {
     "kauai": {
-      "rows": 178,
+      "rows": 176,
       "byTarget": {
         "VENUES": 3,
-        "TOURS": 36,
+        "TOURS": 35,
         "STAYS": 45,
         "GHTOWN": 3,
         "FOODS": 25,
-        "ACTS": 58,
+        "ACTS": 57,
         "LOCAL_CRAFTS": 3,
         "DRINKS": 5
       }
     },
     "maui": {
-      "rows": 259,
+      "rows": 258,
       "byTarget": {
-        "TOURS": 33,
+        "TOURS": 32,
         "FOODS": 42,
         "ACTS": 90,
         "STAYS": 67,
@@ -29,10 +29,10 @@
       }
     },
     "oahu": {
-      "rows": 397,
+      "rows": 396,
       "byTarget": {
         "STAYS": 82,
-        "ACTS": 162,
+        "ACTS": 161,
         "FOODS": 53,
         "TOURS": 52,
         "LOCAL_CRAFTS": 14,
@@ -42,13 +42,13 @@
       }
     },
     "hawaii": {
-      "rows": 217,
+      "rows": 215,
       "byTarget": {
         "FOODS": 23,
         "VENUES": 3,
         "TOURS": 45,
         "STAYS": 48,
-        "ACTS": 75,
+        "ACTS": 73,
         "DRINKS": 10,
         "GHTOWN": 5,
         "LOCAL_CRAFTS": 8
@@ -63,7 +63,8 @@
     "event without coordinates": 35,
     "event with no upcoming date": 18,
     "place could not be geocoded": 57,
-    "place on an island not covered": 24
+    "place on an island not covered": 24,
+    "duplicate row in their data": 6
   },
   "gaps": {
     "Golf": 18,
@@ -142,35 +143,35 @@
     ]
   },
   "photos": {
-    "rows": 1051,
-    "with": 800,
-    "without": 251,
+    "rows": 1045,
+    "with": 795,
+    "without": 250,
     "bySource": {
-      "api": 726,
-      "page_hero": 33,
+      "api": 723,
+      "page_hero": 31,
       "same_name_listing": 41
     },
     "eventFlyersWithheld": 80,
     "islands": {
       "kauai": {
-        "rows": 178,
-        "with": 142,
+        "rows": 176,
+        "with": 140,
         "without": 36
       },
       "maui": {
-        "rows": 259,
-        "with": 174,
+        "rows": 258,
+        "with": 173,
         "without": 85
       },
       "oahu": {
-        "rows": 397,
-        "with": 301,
+        "rows": 396,
+        "with": 300,
         "without": 96
       },
       "hawaii": {
-        "rows": 217,
-        "with": 183,
-        "without": 34
+        "rows": 215,
+        "with": 182,
+        "without": 33
       }
     },
     "missing": {
@@ -455,7 +456,6 @@
           "The 5th Annual Honokaʻa Renaissance Faire"
         ],
         "cultural": [
-          "Kealakekua Bay State Historical Park",
           "Kealakekua Bay State Historical Park"
         ]
       }

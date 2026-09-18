@@ -23,6 +23,7 @@ const OUT = process.argv[2] || '.';
 const ISLANDS = ['kauai', 'maui', 'oahu', 'hawaii'];
 const FORBIDDEN = /get_town_listings|get_partner_page|get_partner_promotions|workers\.dev|viator\.com|getyourguide|posthog/i;
 const fails = [];
+let planGhSlots = 0;
 function check(cond, msg){ if(cond) console.log('  ok   ' + msg); else { console.log('  FAIL ' + msg); fails.push(msg); } }
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 // Chrome sometimes disposes an incognito context before puppeteer asks it to; closing is best effort.
@@ -158,12 +159,15 @@ async function state(page){
     check(['event','malama'].every(x => layer.subs.includes(x)) && !layer.subs.includes('golf') && !layer.subs.includes('wellness'), `${slug}: Family gained Events and Mālama only`);
     // Photos: every photo the build found reaches the page over https from gohawaii.com. The floor is
     // what gohawaii.com actually has: the rest of their events and some listings carry no photo at all.
-    const photos = await page.evaluate(() => {
+    const photos = await page.evaluate(async () => {
       const rows = Object.values(window._GH_INDEX || {}), layerRows = (window.GH_LAYER[ACTIVE.slug] || {}).rows || [];
       const https = rows.filter(g => /^https:\/\/www\.gohawaii\.com\//.test(g.img || ''));
       const lost = layerRows.filter(r => r.img && !(window._GH_INDEX[r.id] || {}).img).map(r => r.id);
       const withImg = rows.find(g => g.img), without = rows.find(g => !g.img), out = {};
-      if (withImg) { openGhSheet(withImg.id); const h = document.querySelector('#sc .poi-hero'); out.heroBg = h ? getComputedStyle(h).backgroundImage : ''; out.heroCredit = /Photo via GoHawaii/.test(document.getElementById('sc').innerText); }
+      if (withImg) { openGhSheet(withImg.id); const h = document.querySelector('#sc .poi-hero'); out.heroBg = h ? getComputedStyle(h).backgroundImage : '';
+        // The credit waits for the photo to load, so give it up to 15 s to appear.
+        for (let i = 0; i < 60 && !/Photo via GoHawaii/.test(document.getElementById('sc').innerText); i++) await new Promise(r => setTimeout(r, 250));
+        out.heroCredit = /Photo via GoHawaii/.test(document.getElementById('sc').innerText); }
       if (without) { openGhSheet(without.id); const h = document.querySelector('#sc .poi-hero'); out.bareBg = h ? getComputedStyle(h).backgroundImage : ''; out.bareCredit = /Photo via GoHawaii/.test(document.getElementById('sc').innerText); out.bareImgs = document.querySelectorAll('#sc img').length; }
       const tag = [...document.scripts].find(s => /\/data\/poi-gohawaii-/.test(s.src));
       out.layerParam = tag ? (new URL(tag.src).searchParams.get('b') || '') : ''; out.layerBuilt = (window.GH_LAYER[ACTIVE.slug] || {}).built || '';
@@ -254,7 +258,10 @@ async function state(page){
       }
       _planArea = area0; planSetVibe(vibe0); return out;   // put the Plan back as the screenshot expects
     });
-    check(slots.slots > 0 && slots.ok, `${slug}: Plan 'gh' slots on Slow day show the photo when the row has one (${slots.thumbs} of ${slots.slots} slots)`);
+    // Slow day only moves a slot onto land when the day's surf says so, so an island can have none today;
+    // the run as a whole must exercise at least one (checked after the loop).
+    planGhSlots += slots.slots;
+    check(slots.ok, `${slug}: Plan 'gh' slots on Slow day show the photo when the row has one (${slots.thumbs} of ${slots.slots} slots)`);
     if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-plan-malama.png`) });
     check(layer.staysShown, `${slug}: Stays tab shown once their stays loaded`);
     if (slug === 'kauai') {
@@ -299,6 +306,8 @@ async function state(page){
     check(photoReqs > 0 && photoFails.length === 0, `${slug}: ${photoReqs} gohawaii.com photo requests, ${photoFails.length} failed ${photoFails.length ? JSON.stringify(photoFails.slice(0, 5)) : ''}`);
     await closeCtx(ctx);
   }
+
+  check(planGhSlots > 0, `all islands: ${planGhSlots} Plan 'gh' slot(s) exercised across the run`);
 
   console.log('\n[3] ON: ?mode=shop cannot bring Shop back; Plan tab has no booking');
   {

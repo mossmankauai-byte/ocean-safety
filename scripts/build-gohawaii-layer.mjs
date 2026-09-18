@@ -23,7 +23,10 @@ const region = (slug, lat, lon) => REGIONS[slug].map(([r, la, lo]) => [r, (la - 
 const inBox = (slug, lat, lon) => { const [a, b, c, d] = BBOX[slug]; return lat >= a && lat <= b && lon >= c && lon <= d; };
 const short = s => { s = String(s || '').replace(/\s*[(|,:].*$/, '').trim(); if (s.length <= 18) return s; const cut = s.slice(0, 18).replace(/\s+\S*$/, ''); return (cut || s.slice(0, 18)).trim(); };
 const tip = s => { let t = String(s || '').replace(/\s+/g, ' ').replace(/&#039;|&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/<[^>]+>/g, '').trim();
-  t = t.split(/(?<=[.!?])\s+/).filter(x => !/\$\d/.test(x)).join(' '); return t.length > 170 ? t.slice(0, 167).replace(/\s+\S*$/, '') + '.' : t; };
+  // No price and no sales pitch in a public build: drop any sentence that names a price, sells tickets or offers a deal.
+  t = t.split(/(?<=[.!?])\s+/).filter(x => !/\$\d|buy tickets?|tickets? (are )?(available|on sale)|\bon sale\b|% off|\bdiscount|book (now|online|today)|reserve (now|online|today)|promo code|coupon|\bpric(e|es|ing)\b/i.test(x)).join(' ');
+  t = t.replace(/[\p{Extended_Pictographic}\u2728\uFE0F]/gu, '').replace(/\s{2,}/g, ' ').trim();   // their emoji are not our icons
+  return t.length > 170 ? t.slice(0, 167).replace(/\s+\S*$/, '') + '.' : t; };
 const has = (r, k, v) => (r.filters[k] || []).includes(v);
 // Photos: their API hands out plain-http pantheonsite.io URLs (mixed content on our https page). The same
 // path serves from https://www.gohawaii.com, so every image host is rewritten there.
@@ -81,7 +84,8 @@ for (const r of L) {
       address: [a.line_1, a.city].filter(Boolean).join(', ') || undefined, img: ghImg(r.img), ...(c.facts || {}) }));
   }
 }
-// 2. Events (dated)
+// 2. Events (dated). Their event ids share a number space with listings (1642 is both a condo and a craft
+// fair), so events get their own prefix, gh_e<id>, the way editorial places get gh_p<id>.
 for (const r of E) {
   const slugs = [...new Set((r.filters.Region || []).map(norm).map(i => ISLAND[i]).filter(Boolean))];
   if (!slugs.length) { drop('event on an island not covered'); continue; }
@@ -91,7 +95,7 @@ for (const r of E) {
   report.gaps['Events'] = (report.gaps['Events'] || 0) + 1;
   for (const slug of slugs) {
     if (!inBox(slug, r.lat, r.lon)) { drop('coordinates outside the island box'); continue; }
-    out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, { target: 'ACTS', type: 'event', sub: (r.filters['Event Categories'] || [])[0] || 'Event' },
+    out[slug].push(row(slug, 'e' + r.id, r.title, r.lat, r.lon, { target: 'ACTS', type: 'event', sub: (r.filters['Event Categories'] || [])[0] || 'Event' },
       { tip: tip(r.teaser), when: next.slice(0, 10), venue: r.event_venue || undefined, src_url: 'https://www.gohawaii.com' + r.link, img: ghImg(r.img) }));
   }
 }
@@ -115,6 +119,8 @@ for (const p of places) {
   out[slug].push(row(slug, 'p' + p.id, p.title, g.lat, g.lon, { target: 'ACTS', type: placeType(p.title), sub: 'GoHawaii place page', tags: ['place', 'geocoded'] },
     { tip: tip(p.teaser), src_url: 'https://www.gohawaii.com' + p.link, img: ghImg(p.img), geocoded: true }));
 }
+// 3a. The raw pull lists a few rows twice (same id, same place); keep the first.
+for (const slug of Object.keys(out)) { const seen = new Set(); out[slug] = out[slug].filter(r => { if (seen.has(r.id)) { drop('duplicate row in their data'); return false; } seen.add(r.id); return true; }); }
 // 3b. Rows the API gave no photo. Two sources, both gohawaii.com's own: (a) img-overrides.json, the hero photo on
 // the row's own gohawaii.com page (read in a browser tab, since curl gets a Cloudflare 403); (b) the photo on
 // another of their records with the same name within 1.5 km (their Malama listings duplicate a hotel's main
