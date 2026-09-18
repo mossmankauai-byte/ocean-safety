@@ -25,7 +25,7 @@
     star: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>'
   };
   var VERDICT = { green:'Calmer today', yellow:'Use caution', red:'Not recommended', nodata:'No live data' };
-  var VCOL = { green:'#16a34a', yellow:'#d97706', red:'#b91c1c', nodata:'#94a3b8' };
+  var VCOL = { green:'#16a34a', yellow:'#d97706', red:'#b91c1c', nodata:'#5f92a8' };
 
   function isl(){ return (window.ACTIVE && ACTIVE.slug) || 'kauai'; }
   function islName(){ return A.ISL[isl()] || (window.ACTIVE && ACTIVE.name) || ''; }
@@ -92,6 +92,7 @@
       '.gha-feat .gha-fimg{height:112px;background:linear-gradient(135deg,#0f4c5c,#1a7a8a);background-size:cover;background-position:center;position:relative}',
       '.gha-feat .gha-ftag{position:absolute;left:10px;top:10px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.94);color:#0f4c5c;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800}',
       '.gha-feat .gha-fb{padding:10px 12px}',
+      '.gha-feat .gha-ftag-in{position:static;background:#e7f1f4;margin-bottom:6px}',
       '.gha-feat .gha-fb b{display:block;font-size:15px;color:var(--ink,#0f172a)}',
       '.gha-feat .gha-fb span{display:block;font-size:12.5px;color:var(--mute,#64748b);margin-top:2px}',
       '.gha-fine{font-size:11px;color:var(--mute,#64748b);margin-top:18px;line-height:1.5}',
@@ -101,7 +102,7 @@
       '@keyframes ghaPulse{0%,100%{opacity:1}50%{opacity:.45}}',
       '@media (prefers-reduced-motion:reduce){.gha-ring::before{animation:none}}',
       '#ghaHubBtn{appearance:none;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:3px 10px 3px 9px;font:700 11.5px "DM Sans",system-ui,sans-serif;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}',
-      '#ghaHubBtn .gha-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;box-shadow:0 0 0 2px rgba(255,255,255,.5)}'
+      '#ghaHubBtn .gha-dot{width:8px;height:8px;border-radius:50%;background:#5f92a8;box-shadow:0 0 0 2px rgba(255,255,255,.5)}'
     ].join('\n');
     document.head.appendChild(st);
   }
@@ -121,10 +122,11 @@
     var when = a.src === 'hta' ? 'posted ' + A.hst(a.sent, true) : A.until(a);
     return who + ' · ' + when;
   }
+  // A weather alert is named by its own last word (Warning, Watch, Advisory, Statement), the terms
+  // state staff and forecasters use. GoHawaii and HTA posts are advisories.
   function kicker(a){
-    var word = a.level === 'red' ? (a.src === 'nws' && /Warning/.test(a.title) ? 'Warning' : 'Advisory')
-             : a.level === 'yellow' ? (a.src === 'nws' && /Watch/.test(a.title) ? 'Watch' : 'Advisory') : 'Notice';
-    return word;
+    if(a.src === 'nws'){ var w = String(a.title || '').trim().split(/\s+/).pop(); return w || 'Alert'; }
+    return 'Advisory';
   }
   function sampleTag(a){ return a.sample ? ' <span class="gha-sample">Sample</span>' : (a.preview ? ' <span class="gha-sample">Preview</span>' : ''); }
 
@@ -144,7 +146,7 @@
       s.addEventListener('click', function(){ openHub(); });
     }
     var L = list().filter(function(a){ return a.level !== 'info'; });
-    var col = L.length ? (L[0].level === 'red' ? '#f87171' : '#fbbf24') : '#94a3b8';
+    var col = L.length ? (L[0].level === 'red' ? '#f87171' : '#fbbf24') : '#5f92a8';
     btn.innerHTML = '<span class="gha-dot" style="background:' + col + '"></span>Today' + ICON.chev;
   }
   function bar(){
@@ -245,17 +247,19 @@
           + (a.link ? '<div style="margin-top:6px"><a href="' + esc(a.link) + '" target="_blank" rel="noopener" style="color:var(--lv)">Open the source</a></div>' : '') + '</details>' : '')
       + '</div></div>';
   }
+  // A failed or missing source is said first and in amber, whatever else is on the list, so a
+  // short list never reads as the whole story and an empty one never reads as an all-clear.
   function advSection(){
-    var L = list();
+    var L = list(), ok = A.last.nwsOk, okH = A.last.htaOk;
     var h = '<div class="slbl">Advisories</div>';
-    if(L.length) return h + L.map(advCard).join('');
-    var ok = A.last.nwsOk, okH = A.last.htaOk;
+    var amber = ' style="background:#fef3c7;color:#78350f"';
+    var nwsDown = ok === false ? '<div class="gha-empty"' + amber + '>We could not reach the National Weather Service just now, so weather warnings may be missing here. Check weather.gov/hfo before you head out.</div>' : '';
+    if(L.length) return h + nwsDown + L.map(advCard).join('');
     if(ok === null && okH === null) return h + '<div class="gha-empty">Checking the National Weather Service and the Hawaiʻi Tourism Authority now.</div>';
-    if(ok === false && okH === false) return h + '<div class="gha-empty" style="background:#fef3c7;color:#78350f">We could not reach the advisory sources just now. Check weather.gov/hfo before you head out.</div>';
-    var at = A.hst(new Date(Math.max(A.last.nwsAt || 0, A.last.htaAt || 0)).toISOString());
-    var partial = (ok === false ? ' The National Weather Service could not be reached, so weather alerts may be missing.' : '')
-      + (okH === false ? ' The Hawaiʻi Tourism Authority could not be reached.' : '');
-    return h + '<div class="gha-empty">No National Weather Service or Hawaiʻi Tourism Authority advisories for ' + esc(islName()) + ' as of ' + esc(at) + '.' + esc(partial) + ' Beach conditions below still apply.</div>';
+    if(ok === false) return h + nwsDown + (okH === false ? '<div class="gha-empty">We could not reach the Hawaiʻi Tourism Authority for travel updates either.</div>' : '');
+    var at = A.hst(new Date(A.last.nwsAt || Date.now()).toISOString());
+    if(okH === false) return h + '<div class="gha-empty">No National Weather Service alerts for ' + esc(islName()) + ' as of ' + esc(at) + '. We could not reach the Hawaiʻi Tourism Authority for travel updates.</div>';
+    return h + '<div class="gha-empty">No advisories from the National Weather Service or the Hawaiʻi Tourism Authority for ' + esc(islName()) + ' as of ' + esc(at) + '. The ocean can still change fast: check the beach verdicts below and swim near a lifeguard.</div>';
   }
   function beachSection(){
     try {
@@ -292,8 +296,11 @@
     return '<div class="slbl">Featured by GoHawaii</div>' + F.slice(0, 3).map(function(f){
       var g = f.ref ? gh()[f.ref] : null, img = (g && g.img) || f.img;
       var sub = [f.when ? dayLabel(f.when) : '', f.venue || '', f.body || ''].filter(Boolean).join(' · ');
-      return '<div class="gha-feat" onclick="_ghaOpenFeature(\'' + esc(f.id) + '\')"><div class="gha-fimg"' + (imgOk(img) ? ' style="background-image:url(\'' + esc(img).replace(/'/g, '%27') + '\'),linear-gradient(135deg,#0f4c5c,#1a7a8a)"' : '') + '>'
-        + '<span class="gha-ftag">' + ICON.star + esc(f.sub || 'Featured') + '</span></div><div class="gha-fb"><b>' + esc(f.title) + sampleTag(f) + '</b>' + (sub ? '<span>' + esc(sub.length > 160 ? sub.slice(0, 157) + '...' : sub) + '</span>' : '') + '</div></div>';
+      // A photo band only when there is a photo; otherwise the tag sits in the text block.
+      var tag = '<span class="gha-ftag">' + ICON.star + esc(f.sub || 'Featured') + '</span>';
+      return '<div class="gha-feat" onclick="_ghaOpenFeature(\'' + esc(f.id) + '\')">'
+        + (imgOk(img) ? '<div class="gha-fimg" style="background-image:url(\'' + esc(img).replace(/'/g, '%27') + '\')">' + tag + '</div>' : '')
+        + '<div class="gha-fb">' + (imgOk(img) ? '' : tag.replace('gha-ftag', 'gha-ftag gha-ftag-in')) + '<b>' + esc(f.title) + sampleTag(f) + '</b>' + (sub ? '<span>' + esc(sub.length > 160 ? sub.slice(0, 157) + '...' : sub) + '</span>' : '') + '</div></div>';
     }).join('');
   }
   function eventSection(){
@@ -318,7 +325,7 @@
     return '<div class="gha-hub"><div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0f4c5c">GoHawaii</div>'
       + '<h2>Today on ' + esc(islName()) + '</h2><div class="gha-date">' + esc(d) + ' · Hawaiʻi time</div>'
       + advSection() + beachSection() + featSection() + eventSection()
-      + '<div class="gha-fine">Weather advisories come from the National Weather Service and travel updates from the Hawaiʻi Tourism Authority, credited on each card. GoHawaii posts its own notices here. Beach verdicts by OceanSafety. Always follow lifeguards and posted signs.</div></div>';
+      + '<div class="gha-fine">Weather advisories come from the National Weather Service and travel updates from the Hawaiʻi Tourism Authority, credited on each card. GoHawaii posts its own notices here. Beach verdicts by Ocean Safe. Always follow lifeguards and posted signs.</div></div>';
   }
   function openHub(){
     var sc = document.getElementById('sc'), sh = document.getElementById('sheet'), ov = document.getElementById('overlay');

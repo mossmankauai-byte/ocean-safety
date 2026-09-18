@@ -163,7 +163,7 @@
   }
   var RANK = { red: 0, yellow: 1, info: 2 };
   function byLevel(a, b){
-    var d = (RANK[a.level] || 2) - (RANK[b.level] || 2); if(d) return d;
+    var d = (a.level in RANK ? RANK[a.level] : 2) - (b.level in RANK ? RANK[b.level] : 2); if(d) return d;   // red is 0: never || it
     return (Date.parse(b.sent || b.starts || 0) || 0) - (Date.parse(a.sent || a.starts || 0) || 0);
   }
 
@@ -222,7 +222,7 @@
   }
   function until(it){ return it.ends ? 'until ' + hst(it.ends, true) : 'no end time'; }
   function islandNames(a){
-    if(!a || !a.length || a.indexOf('all') >= 0) return 'All four islands';
+    if(!a || !a.length || a.indexOf('all') >= 0) return 'Kauaʻi, Oʻahu, Maui and Hawaiʻi Island';
     return ORDER.filter(function(k){ return a.indexOf(k) >= 0; }).map(function(k){ return ISL[k]; }).join(', ');
   }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }

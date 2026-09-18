@@ -119,6 +119,15 @@ function staff(o){ return Object.assign({ id: 's' + Math.random().toString(36).s
   check(!t.errs.length, 'no page errors (Kauaʻi) ' + t.errs.join(' | '));
   await t.ctx.close();
 
+  console.log('2b. Oʻahu: a red sorts above a yellow');
+  t = await page(br, '/?ref=gohawaii&island=oahu');
+  await t.pg.waitForSelector('#ghaRed', { timeout: 15000 }).catch(() => {});
+  await t.pg.click('#ghaRed .gha-ok').catch(() => {}); await sleep(900);
+  const oa = await t.pg.evaluate(() => ({ bar: (document.getElementById('ghaBar') || {}).textContent || '', cls: (document.getElementById('ghaBar') || {}).className || '', pop: (document.querySelector('#ghaPop b') || {}).textContent || '' }));
+  check(/High Surf Warning/.test(oa.bar) && /red/.test(oa.cls), 'the bar leads with the red warning, not the yellow Flood Advisory');
+  check(oa.pop === 'Flood Advisory', 'the yellow Flood Advisory pops after the red is acknowledged');
+  await t.ctx.close();
+
   console.log('3. Hawaiʻi Island: unlisted NWS product is yellow, never silent');
   t = await page(br, '/?ref=gohawaii&island=hawaii');
   await t.pg.waitForSelector('#ghaPop', { timeout: 15000 }).catch(() => {});
@@ -172,7 +181,7 @@ function staff(o){ return Object.assign({ id: 's' + Math.random().toString(36).s
     const d = await t.pg.evaluate(() => ({ sx: document.documentElement.scrollWidth > window.innerWidth + 1, cards: document.querySelectorAll('.islcard').length, nws: document.getElementById('nwsList').innerText }));
     check(!d.sx, 'Dashboard has no sideways scroll at ' + w + 'px');
     check(d.cards === 4, 'Dashboard shows four island cards at ' + w + 'px');
-    check(/High Surf Warning/.test(d.nws) && /Not on our list: shown yellow/.test(d.nws), 'Dashboard lists NWS alerts and flags the unlisted one at ' + w + 'px');
+    check(/High Surf Warning/.test(d.nws) && /New alert type, shown as yellow/.test(d.nws), 'Dashboard lists NWS alerts and flags the unlisted one at ' + w + 'px');
     await t.pg.screenshot({ path: path.join(OUT, 'dashboard-now-' + w + '.png'), fullPage: true });
     await t.pg.evaluate(() => document.querySelector('nav.tabs button[data-view="adv"]').click()); await sleep(400);
     await t.pg.screenshot({ path: path.join(OUT, 'dashboard-advisories-' + w + '.png'), fullPage: true });

@@ -4,6 +4,8 @@
  * must read what a visitor reads (learned 2026-09-17). App: one file per island, with a sample red
  * and a sample yellow staff post live, a featured campaign, and the GoHawaii page open under the red.
  * Dashboard: its Advisories view with the same posts listed.
+ * Also writes the review screenshots into <outdir>/shots: live NWS and HTA feeds plus the labeled
+ * sample posts only, never test fixtures, so no screenshot puts words in an agency's mouth.
  *   ORIGIN=http://127.0.0.1:4631 node checks/gohawaii-gate-dom.js <outdir>
  */
 'use strict';
@@ -22,6 +24,8 @@ function seed(isl){
     Object.assign({}, base, { id: 'gate-feat', kind: 'feature', sub: 'Campaign', title: 'Sample: travel with care this winter', body: 'Watch big surf from the lookouts.', link: 'https://www.gohawaii.com/' })
   ] };
 }
+// Screenshot hygiene: the SW "New version available" toast is a local-rig artifact.
+async function shot(pg, f, full){ await pg.evaluate(() => { const t = document.getElementById('swUpdateToast'); if(t) t.remove(); }); await pg.screenshot({ path: f, fullPage: !!full }); }
 async function visible(pg){
   return pg.evaluate(() => {
     const d = document.documentElement.cloneNode(true);
@@ -32,22 +36,39 @@ async function visible(pg){
 }
 (async () => {
   const br = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: 'new' });
+  const SH = path.join(OUT, 'shots'); fs.mkdirSync(SH, { recursive: true });
   for (const isl of ['kauai', 'oahu', 'maui', 'hawaii']) {
     const ctx = await br.createBrowserContext(); const pg = await ctx.newPage();
-    await pg.setViewport({ width: 390, height: 844 });
-    await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); } catch(e){} }, JSON.stringify(seed(isl)));
+    await pg.setViewport({ width: 390, height: 844, deviceScaleFactor: 2 });
+    await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); localStorage.setItem('disclaimerAccepted', '1'); } catch(e){} }, JSON.stringify(seed(isl)));
     await pg.goto(ORIGIN + '/?ref=gohawaii&island=' + isl, { waitUntil: 'networkidle2', timeout: 60000 });
     await pg.waitForSelector('#ghaRed', { timeout: 15000 });
+    if(isl === 'kauai') await shot(pg, path.join(SH, 'review-app-red-390.png'));
     await pg.evaluate(() => ghOpenHub()); await sleep(600);
     const f = path.join(OUT, 'gohawaii-advisories-' + isl + '-visible.html');
     fs.writeFileSync(f, await visible(pg)); console.log('wrote', f);
+    if(isl === 'kauai'){
+      await pg.click('#ghaRed .gha-ok'); await sleep(900);
+      await pg.evaluate(() => { if(typeof closeSheet === 'function') closeSheet(); }); await sleep(400);
+      await shot(pg, path.join(SH, 'review-app-yellow-390.png'));
+      await pg.evaluate(() => { const p = document.getElementById('ghaPop'); if(p) p.remove(); ghOpenHub(); }); await sleep(600);
+      await shot(pg, path.join(SH, 'review-app-gohawaii-page-390.png'));
+      await pg.evaluate(() => { document.getElementById('sc').scrollTop = 99999; }); await sleep(300);
+      await shot(pg, path.join(SH, 'review-app-gohawaii-page-lower-390.png'));
+    }
     await ctx.close();
   }
-  const ctx = await br.createBrowserContext(); const pg = await ctx.newPage();
-  await pg.setViewport({ width: 1280, height: 900 });
-  await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); } catch(e){} }, JSON.stringify(seed('kauai')));
-  await pg.goto(ORIGIN + '/gohawaii-dashboard?view=adv', { waitUntil: 'networkidle2', timeout: 60000 }); await sleep(2500);
-  const f = path.join(OUT, 'gohawaii-dashboard.html');
-  fs.writeFileSync(f, await visible(pg)); console.log('wrote', f);
+  for (const w of [390, 1280]) {
+    const ctx = await br.createBrowserContext(); const pg = await ctx.newPage();
+    await pg.setViewport({ width: w, height: 900, deviceScaleFactor: 2 });
+    await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); } catch(e){} }, JSON.stringify(seed('kauai')));
+    await pg.goto(ORIGIN + '/gohawaii-dashboard?view=adv', { waitUntil: 'networkidle2', timeout: 60000 }); await sleep(2500);
+    if(w === 1280){ const f = path.join(OUT, 'gohawaii-dashboard.html'); fs.writeFileSync(f, await visible(pg)); console.log('wrote', f); }
+    for (const v of ['now', 'adv', 'feat']) {
+      await pg.evaluate((v) => document.querySelector('nav.tabs button[data-view="' + v + '"]').click(), v); await sleep(v === 'feat' ? 1500 : 500);
+      await shot(pg, path.join(SH, 'review-dashboard-' + v + '-' + w + '.png'), true);
+    }
+    await ctx.close();
+  }
   await br.close();
 })().catch((e) => { console.error(e); process.exit(1); });
