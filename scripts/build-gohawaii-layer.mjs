@@ -25,6 +25,9 @@ const short = s => { s = String(s || '').replace(/\s*[(|,:].*$/, '').trim(); if 
 const tip = s => { let t = String(s || '').replace(/\s+/g, ' ').replace(/&#039;|&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/<[^>]+>/g, '').trim();
   t = t.split(/(?<=[.!?])\s+/).filter(x => !/\$\d/.test(x)).join(' '); return t.length > 170 ? t.slice(0, 167).replace(/\s+\S*$/, '') + '.' : t; };
 const has = (r, k, v) => (r.filters[k] || []).includes(v);
+// Venue names as their owners spell them. GoHawaii's feed has "Hawaii Theatre Centre"; the venue's
+// own site and its nonprofit registration say Hawaii Theatre Center (hawaiitheatre.com).
+const VENUE_FIX = { 'Hawaii Theatre Centre': 'Hawaii Theatre Center' };
 
 // Their category -> our home. target names are the arrays index.html injects into.
 function classify(r) {
@@ -89,7 +92,7 @@ for (const r of E) {
   for (const slug of slugs) {
     if (!inBox(slug, r.lat, r.lon)) { drop('coordinates outside the island box'); continue; }
     out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, { target: 'ACTS', type: 'event', sub: (r.filters['Event Categories'] || [])[0] || 'Event' },
-      { tip: tip(r.teaser), when: next.slice(0, 10), venue: r.event_venue || undefined, src_url: 'https://www.gohawaii.com' + r.link, img: r.img || undefined }));
+      { tip: tip(r.teaser), when: next.slice(0, 10), venue: (VENUE_FIX[r.event_venue] || r.event_venue) || undefined, src_url: 'https://www.gohawaii.com' + r.link, img: r.img || undefined }));
   }
 }
 // 3. Editorial places (waterfalls, towns, lookouts, museums): no coordinates in their data, geocoded once and cached.
