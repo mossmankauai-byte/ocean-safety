@@ -2645,7 +2645,7 @@ window.ensureIsland = function(slug){
 // Lazy-load a named POI layer for an island: /data/poi-<name>-<slug>.js sets
 // window.GH_LAYER[slug]. Same script-append shape as ensureIsland above. Only a public ref ever
 // asks for one (see _ghInject), so every other load never requests the file.
-var LAYER_BUILD = '2026-09-18-photos-adv';
+var LAYER_BUILD = '2026-09-18-photos-adv2';
 window.ensureLayer = function(name, slug){
   return new Promise(function(resolve, reject){
     if(!/^[a-z0-9-]{1,24}$/.test(String(name)) || !ISLANDS[slug]){ reject(new Error('bad layer request')); return; }

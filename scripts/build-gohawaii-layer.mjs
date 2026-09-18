@@ -23,8 +23,9 @@ const region = (slug, lat, lon) => REGIONS[slug].map(([r, la, lo]) => [r, (la - 
 const inBox = (slug, lat, lon) => { const [a, b, c, d] = BBOX[slug]; return lat >= a && lat <= b && lon >= c && lon <= d; };
 const short = s => { s = String(s || '').replace(/\s*[(|,:].*$/, '').trim(); if (s.length <= 18) return s; const cut = s.slice(0, 18).replace(/\s+\S*$/, ''); return (cut || s.slice(0, 18)).trim(); };
 const tip = s => { let t = String(s || '').replace(/\s+/g, ' ').replace(/&#039;|&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/<[^>]+>/g, '').trim();
-  // No price and no sales pitch in a public build: drop any sentence that names a price, sells tickets or offers a deal.
-  t = t.split(/(?<=[.!?])\s+/).filter(x => !/\$\d|buy tickets?|tickets? (are )?(available|on sale)|\bon sale\b|% off|\bdiscount|book (now|online|today)|reserve (now|online|today)|promo code|coupon|\bpric(e|es|ing)\b/i.test(x)).join(' ');
+  // No price and no sales pitch in a public build: drop any sentence that names a price, sells tickets or offers a deal
+  // (their Malama listings are hotel incentives: a free night, a resort credit, a waived fee). A free event stays.
+  t = t.split(/(?<=[.!?])\s+/).filter(x => !/\$\d|buy tickets?|tickets? (are )?(available|on sale)|\bon sale\b|% off|\bdiscount|book (now|online|today)|reserve (now|online|today)|promo code|coupon|\bpric(e|es|ing)\b|nights? free|\bsave (you )?up to|resort (credit|fees?)|\bwaived\b|\bdeal\b|unbeatable value|available (for|to) purchase|\bbook your\b/i.test(x)).join(' ');
   t = t.replace(/[\p{Extended_Pictographic}\u2728\uFE0F]/gu, '').replace(/\s{2,}/g, ' ').trim();   // their emoji are not our icons
   return t.length > 170 ? t.slice(0, 167).replace(/\s+\S*$/, '') + '.' : t; };
 const has = (r, k, v) => (r.filters[k] || []).includes(v);
