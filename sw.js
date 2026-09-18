@@ -18,7 +18,7 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const CACHE_VERSION = 'v318-2026-09-17-app-update';
+const CACHE_VERSION = 'v321-2026-09-18-gohawaii-advisories';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -204,6 +204,8 @@ if (workbox) {
       // for these two: their SALT/IV live in the wrapper and their ciphertext in a separate
       // .bin that carries no SW route, so a stale wrapper makes the password itself look wrong.
       /^\/(sales|jade-sales)$/.test(url.pathname) ||
+      // The GoHawaii Dashboard (review build): a staff page, so a stale copy is never acceptable.
+      /^\/gohawaii-dashboard(\.html)?$/.test(url.pathname) ||
       /^\/p\//.test(url.pathname) ||
       // /@* rewrites to /at.html with a 200, so the pathname the worker sees is /@<handle>
       // and no \.html$ pattern fires. It is a creator's public page: stale means last

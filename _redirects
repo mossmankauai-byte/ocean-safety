@@ -14,6 +14,11 @@
 
 # Conditions proxy + cache (collapses per-visitor open-meteo/NOAA calls into one cached server fetch)
 /api/wx         /.netlify/functions/wx  200
+# GoHawaii advisories: the Hawaiʻi Tourism Authority feed sends no CORS header, so the app reads it
+# through this proxy. Only the /alerts/ items are used; see gh/advisories.js.
+/api/hta-feed   https://hta.hawaii.gov/feed/  200
+# GoHawaii Dashboard (review build)
+/gohawaii-dashboard   /gohawaii-dashboard.html   200
 /api/creator-provision   /.netlify/functions/creator-provision   200
 
 # Store checkout return (create-square-checkout appends ?order=&pickup= to this URL)

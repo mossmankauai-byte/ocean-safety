@@ -6844,6 +6844,7 @@ function renderMap(){
   // on every other tab, so vis stays 0 there and the banner used to hang over Family/Trails.
   const _onBeaches = (window._activeTab === 'beaches' || !window._activeTab);
   document.getElementById('nores').style.display=(_onBeaches && !vis)?'block':'none';
+  if(window._ghAdvPins) window._ghAdvPins();
 }
 
 // ── MAP DECLUTTER ───────────────────────────────────────────────────────────
@@ -7601,6 +7602,7 @@ function openSheet(id){
         <div><div class="poi-hero-name" style="color:#fff">${_bw.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.9)">${_bw.r} • Caution beach</div></div>
       </div>
       <div style="background:#fef3c7;border-left:3px solid #d97706;padding:12px 14px;margin-bottom:14px;border-radius:8px;color:#78530a;font-weight:600;font-size:14px;line-height:1.4"><span style="margin-right:6px">ⓘ</span>${_bw.danger}</div>
+      ${window._ghAdvBeach?window._ghAdvBeach(_bw):''}
       ${(function(){
         // Current Hazards — the named rip/reef-exit/shorebreak channels attached to this beach.
         // This warning_only branch returns before the main sheet template, so it never reached the
@@ -7895,6 +7897,7 @@ function openSheet(id){
       </div>
     </div>
     ${photoCreditLine(b)}
+    ${window._ghAdvBeach?window._ghAdvBeach(b):''}
     <div class="dir-pill-row"><a class="dir-pill" href="${murl}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Get Directions</a></div>
     ${weatherBar(c)}
     ${_bigSurfNotice}
@@ -11844,6 +11847,16 @@ function _ghNearestBeach(lat, lon){
       + '<span style="flex:1;font-weight:600;color:var(--ink)">'+_pesc(best.name)+'</span><span style="font-size:11.5px;color:var(--mute)">'+km+' km · today\'s verdict</span></div>';
   } catch(e){ return ''; }
 }
+// GoHawaii advisories (public ref only). The engine and the visitor UI live in /gh/, so no other
+// load fetches or parses them. ?b= changes with each build: /gh/ scripts ride the service worker's
+// stale-while-revalidate shell cache, so without it a returning visitor runs the previous build once.
+var GH_ADV_BUILD = '2026-09-18-adv1';
+function _ghAdvLoad(){
+  if(window.GH_ADV || document.getElementById('ghAdvJs')) return;
+  var a = document.createElement('script'); a.id = 'ghAdvJs'; a.src = '/gh/advisories.js?b=' + GH_ADV_BUILD;
+  a.onload = function(){ var u = document.createElement('script'); u.src = '/gh/app-ui.js?b=' + GH_ADV_BUILD; document.head.appendChild(u); };
+  document.head.appendChild(a);
+}
 // The one sheet for every GoHawaii row, whatever array it lives in. No booking, no price.
 function openGhSheet(id){
   var g = window._GH_INDEX && window._GH_INDEX[id]; if(!g) return;
@@ -11965,6 +11978,7 @@ async function boot(){
   // Public ref: load this island's GoHawaii layer after the safety data is up and pour it into the
   // same arrays the tabs already render. Fail-silent: no layer, no change to the guide.
   if(_isPublicRef()){ try { ensureLayer('gohawaii', ACTIVE.slug).then(function(Lr){ _ghInject(Lr && Lr.rows); }).catch(function(){}); } catch(e){} }
+  if(_isPublicRef()){ try { _ghAdvLoad(); } catch(e){} }
   // ── Partner referral capture (QR codes, partner links) ──
   // ?ref=marriott / ?utm_source=hyatt → persist to localStorage so subsequent
   // affiliate clicks can be tagged for partner-revenue attribution (read by

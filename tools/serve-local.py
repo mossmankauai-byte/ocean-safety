@@ -15,6 +15,23 @@ MIRROR = 'https://ocean-safety.netlify.app'
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        # Same two routes _redirects gives the GoHawaii review site: the HTA feed proxy and the
+        # Dashboard's clean URL.
+        if self.path.startswith('/api/hta-feed'):
+            try:
+                req = urllib.request.Request('https://hta.hawaii.gov/feed/', headers={'User-Agent': 'Mozilla/5.0 (OceanSafe local rig)'})
+                with urllib.request.urlopen(req, timeout=20) as r:
+                    body = r.read()
+                    self.send_response(200)
+                    self.send_header('Content-Type', r.headers.get('Content-Type', 'application/rss+xml'))
+                    self.send_header('Content-Length', str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+            except Exception:
+                self.send_response(502); self.end_headers()
+            return
+        if self.path.split('?')[0] == '/gohawaii-dashboard':
+            self.path = '/gohawaii-dashboard.html' + (('?' + self.path.split('?', 1)[1]) if '?' in self.path else '')
         if self.path.startswith('/api/wx'):
             try:
                 with urllib.request.urlopen(MIRROR + self.path, timeout=20) as r:
