@@ -527,7 +527,7 @@
             <label class="f" for="pTitle">Headline</label>
             <input type="text" id="pTitle" maxlength="80" required placeholder="Mālama Hawaiʻi beach cleanup at Hanalei">
             <label class="f" for="pBody">One line of text</label>
-            <input type="text" id="pBody" maxlength="140" placeholder="Meet at the pier, gloves and bags provided. Sign up on the GoHawaii Mālama page.">
+            <input type="text" id="pBody" maxlength="140" placeholder="Meet at the pier, gloves and bags provided. Details on the GoHawaii Mālama page.">
             <label class="f" for="pLink">Link <small>(https)</small></label>
             <input type="url" id="pLink" maxlength="300" placeholder="https://www.gohawaii.com/malama">
             <label class="f">Islands</label>
@@ -1075,7 +1075,7 @@
     meta.push('by ' + it.by + (it.approvedBy ? ', approved by ' + it.approvedBy : ''));
     if(seen) meta.push('shown ' + seen + ' time' + (seen > 1 ? 's' : '') + ' in this browser');
     if(it.kind === 'promo'){ meta.splice(1, 0, A.hoursLabel(it)); if(s === 'live' && !A.inDaily(it)) meta.push('outside its hours right now'); if(s === 'live' || s === 'sched') acts.push('<button class="btn ghost" data-act="dup" data-id="' + it.id + '">Duplicate</button>'); }
-    return '<div class="row"><div class="x"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">' + (it.kind === 'feature' ? '<span class="lvl feat">' + esc(it.sub || 'Featured') + '</span>' : it.kind === 'promo' ? '<span class="lvl feat">Promotion</span>' : lvChip(it.level)) + (it.kind === 'promo' && s === 'live' && !A.inDaily(it) ? '<span class="lvl draft">Outside its hours</span>' : stChip(s)) + '</div>'
+    return '<div class="row"' + (it.kind === 'promo' ? ' data-commerce="promo"' : '') + '><div class="x"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">' + (it.kind === 'feature' ? '<span class="lvl feat">' + esc(it.sub || 'Featured') + '</span>' : it.kind === 'promo' ? '<span class="lvl feat">Promotion</span>' : lvChip(it.level)) + (it.kind === 'promo' && s === 'live' && !A.inDaily(it) ? '<span class="lvl draft">Outside its hours</span>' : stChip(s)) + '</div>'
       + '<b>' + esc(it.title) + smp(it) + '</b><div class="m">' + esc(meta.join(' · ')) + '</div></div><div class="acts2">' + acts.join('') + '</div></div>';
   }
   document.addEventListener('click', function(e){
@@ -1284,7 +1284,7 @@
   chipGroup('pWin', 'pWin', function(v){ $('pWinWrap').style.display = v === 'set' ? 'block' : 'none'; });
   chipGroup('pEnd', 'pEnd');
   $('pSample').addEventListener('click', function(){
-    promoFill({ title: 'Sample: Mālama Hawaiʻi beach cleanup at Hanalei', body: 'Meet at the pier at 8am, gloves and bags provided. Sign up on the GoHawaii Mālama page.', link: 'https://www.gohawaii.com/malama', islands: ['kauai'], days: [6, 0], window: { start: '07:00', end: '11:00' } });
+    promoFill({ title: 'Sample: Mālama Hawaiʻi beach cleanup at Hanalei', body: 'Meet at the pier at 8am, gloves and bags provided. Details on the GoHawaii Mālama page.', link: 'https://www.gohawaii.com/malama', islands: ['kauai'], days: [6, 0], window: { start: '07:00', end: '11:00' } });
     chipSet('pEnd', 'pEnd', '168'); promoSampleFlag = true; msg('pMsg', 'ok', 'Sample filled in. Post it to see it in the app on this browser.');
   });
   $('promoForm').addEventListener('submit', function(e){
