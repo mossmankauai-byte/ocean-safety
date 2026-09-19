@@ -81,17 +81,18 @@
   .mapwrap{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);min-height:640px;background:#a9c9dd}
   #map{position:absolute;inset:0}
   .legend{position:absolute;left:16px;top:16px;z-index:500;background:rgba(255,255,255,.97);border-radius:14px;padding:12px;width:310px;box-shadow:0 8px 24px rgba(15,42,51,.16)}
-  .legend h3{margin:0 0 6px;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+  .legend h3{margin:0 0 6px;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .legend h3 .smp{letter-spacing:.06em;margin:0}
   .feednote{font-size:12px;border-radius:9px;padding:8px 10px;margin:6px 0 4px;background:var(--yelbg);color:#78350f;line-height:1.4}
   #islCards{display:grid;gap:8px;background:var(--tint);border-radius:12px;padding:8px}
-  .islcard{display:grid;grid-template-columns:48px 1fr auto;gap:3px 10px;padding:10px 10px 10px 8px;background:#fff;border:1px solid var(--line);border-radius:12px;cursor:pointer;box-shadow:0 1px 2px rgba(15,42,51,.06)}
+  .islcard{display:grid;grid-template-columns:44px 1fr auto;gap:3px 10px;padding:10px 10px 10px 8px;background:#fff;border:1px solid var(--line);border-radius:12px;cursor:pointer;box-shadow:0 1px 2px rgba(15,42,51,.06)}
   .islcard:hover{border-color:#b9cbd3}
   .islcard.on{border-color:var(--sea);box-shadow:0 0 0 2px var(--tint),0 2px 6px rgba(15,42,51,.10)}
-  .islcard .ishape{grid-column:1;grid-row:1/span 4;width:48px;height:32px;align-self:start;margin-top:2px}
+  .islcard .ishape{grid-column:1;grid-row:1/span 4;width:44px;height:30px;align-self:start;margin-top:2px}
   .islcard .ishape path{fill:#dbe9ee;stroke:var(--sea);stroke-width:1.2;stroke-linejoin:round}
   .islcard.on .ishape path{fill:var(--sea);stroke:var(--rail)}
-  .islcard b{font-size:14px;grid-column:2}
-  .islcard .s{font-size:11.5px;font-weight:700;color:var(--mute);white-space:nowrap}
+  .islcard b{font-size:14px;grid-column:2;white-space:nowrap}
+  .islcard .s{font-size:11.5px;font-weight:700;color:var(--mute);text-align:right;max-width:120px;line-height:1.2}
   .islcard .s.red{color:var(--red)}.islcard .s.yellow{color:var(--yel)}.islcard .s.down{color:#92400e}
   .islcard .i,.islcard .m,.islcard .ulink{grid-column:2/-1}
   .islcard .i{font-size:12px;color:var(--ink2);line-height:1.35}
@@ -400,7 +401,7 @@
       <div class="stage">
         <div class="mapwrap">
           <div id="map" role="img" aria-label="Map of Kauaʻi, Oʻahu, Maui and Hawaiʻi Island with the live advisory level on each"></div>
-          <div class="legend"><h3>Islands today</h3><div id="islCards"></div></div>
+          <div class="legend"><h3>Islands today <span class="smp" title="Visitor figures are illustrative; this review build counts nothing">Visitor figures sample</span></h3><div id="islCards"></div></div>
           <div class="stamp" id="stamp">Checking the sources...</div>
         </div>
         <div class="side2">
@@ -934,7 +935,7 @@
     $('islCards').innerHTML = (fn ? '<div class="feednote">' + esc(fn) + '</div>' : '') + ORDER.map(function(k){
       var s = islState(k);
       return '<div class="islcard' + (k === state.isl ? ' on' : '') + '" data-isl="' + k + '" role="button" tabindex="0">' + islSvg(k) + '<b>' + ISL[k] + '</b><span class="s ' + s.c + '">' + esc(s.t) + '</span>'
-        + '<button type="button" class="ulink" data-use="' + k + '"><b>About ' + fmt(USE[k].perDay) + '</b> checks a day · visitor graphs<span class="smp">Sample</span></button>'
+        + '<button type="button" class="ulink" data-use="' + k + '"><b>About ' + fmt(USE[k].perDay) + '</b> checks a day · visitor graphs</button>'
         + '<span class="i">' + intentLine(k) + '</span>'
         + '<span class="m">' + verdLine(k) + '</span></div>';
     }).join('');
