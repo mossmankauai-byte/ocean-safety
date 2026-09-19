@@ -89,10 +89,10 @@
   .islcard b{font-size:14px}
   .islcard .s{font-size:11.5px;font-weight:700;color:var(--mute);white-space:nowrap}
   .islcard .s.red{color:var(--red)}.islcard .s.yellow{color:var(--yel)}.islcard .s.down{color:#92400e}
-  .islcard .vbar,.islcard .m{grid-column:1/-1}
-  .islcard .m{font-size:11.5px;color:var(--mute)}
-  .vbar{display:flex;height:6px;border-radius:99px;overflow:hidden;background:var(--hair);gap:2px}
-  .vbar i{display:block}.vbar .g{background:var(--good)}.vbar .y{background:var(--amber)}.vbar .r{background:var(--red)}.vbar .u{background:var(--steel)}
+  .islcard .i,.islcard .m{grid-column:1/-1}
+  .islcard .i{font-size:12px;color:var(--ink2);line-height:1.35}
+  .islcard .i b{font-size:12px;color:var(--ink)}
+  .islcard .m{font-size:11px;color:var(--mute)}
   .stamp{position:absolute;right:16px;top:16px;z-index:500;background:rgba(10,39,49,.9);color:#e4f1f5;border-radius:10px;padding:8px 12px;font-size:12px}
   .stamp b{color:var(--foam)}
   .mk{transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;cursor:pointer;padding-bottom:var(--s,0px)}
@@ -866,12 +866,12 @@
     $('probe').setAttribute('src', '/?ref=gohawaii&island=' + k + '&gh_probe=1');
     probeTimer = setTimeout(function(){ if(!fresh(k)) state.verd[k] = { failed: true, at: now() }; renderLegend(); probeNext(); }, 45000);
   }
-  function verdBar(k){
+  // Beach status, one muted line under the intent (the verdict bar and its long counts line went on 2026-09-19).
+  function verdLine(k){
     var v = state.verd[k];
-    if(!v || v.failed) return '<div class="vbar"><i class="u" style="flex:1"></i></div><span class="m">' + (v && v.failed ? 'Beach verdicts could not be read' : 'Reading beach verdicts...') + extraEv(k) + '</span>';
-    if(!(v.green + v.yellow + v.red) && v.nodata) return '<div class="vbar"><i class="u" style="flex:1"></i></div><span class="m">No live surf data, so no beach verdicts right now' + extraEv(k) + '</span>';
-    return '<div class="vbar"><i class="g" style="flex:' + v.green + '"></i><i class="y" style="flex:' + v.yellow + '"></i><i class="r" style="flex:' + v.red + '"></i></div>'
-      + '<span class="m">' + v.green + ' calmer · ' + v.yellow + ' use caution · ' + v.red + ' not recommended' + extraEv(k) + '</span>';
+    if(!v || v.failed) return (v && v.failed ? 'Beach verdicts could not be read' : 'Reading beach verdicts...') + extraEv(k);
+    if(!(v.green + v.yellow + v.red) && v.nodata) return 'No live verdicts right now' + extraEv(k);
+    return v.green + ' calmer · ' + v.yellow + ' caution · ' + v.red + ' not recommended' + extraEv(k);
   }
   function extraEv(k){ var n = eventsThisWeek(k); return n === null ? '' : ' · ' + n + ' event' + (n === 1 ? '' : 's') + ' this week'; }
 
@@ -925,8 +925,19 @@
     var fn = feedNote();
     $('islCards').innerHTML = (fn ? '<div class="feednote">' + esc(fn) + '</div>' : '') + ORDER.map(function(k){
       var s = islState(k);
-      return '<div class="islcard' + (k === state.isl ? ' on' : '') + '" data-isl="' + k + '" role="button" tabindex="0"><b>' + ISL[k] + '</b><span class="s ' + s.c + '">' + esc(s.t) + '</span>' + verdBar(k) + '<button type="button" class="ulink" data-use="' + k + '"><b>' + fmt(USE[k].perDay) + '</b> checks a day · visitor graphs</button></div>';
+      return '<div class="islcard' + (k === state.isl ? ' on' : '') + '" data-isl="' + k + '" role="button" tabindex="0"><b>' + ISL[k] + '</b><span class="s ' + s.c + '">' + esc(s.t) + '</span>'
+        + '<button type="button" class="ulink" data-use="' + k + '"><b>About ' + fmt(USE[k].perDay) + '</b> checks a day · visitor graphs<span class="smp">Sample</span></button>'
+        + '<span class="i">' + intentLine(k) + '</span>'
+        + '<span class="m">' + verdLine(k) + '</span></div>';
     }).join('');
+    // Beach names for the intent line come from the app's own list; paint again once it lands.
+    if(!state.beaches && !state._bLoading){ state._bLoading = true; loadBeaches().then(function(){ renderLegend(); }); }
+  }
+  // Intent, one line (Nick, 2026-09-19: the island list leads with where visitors are heading, not the verdict mix):
+  // the most-checked beach, then the unguarded share on Kauaʻi or the busiest district elsewhere. Sample, like the Visitors view.
+  function intentLine(k){
+    var u = USE[k], top = k === 'kauai' ? u.beaches[0][0] : u.beaches[0];
+    return 'Most checked: <b>' + esc(bname(k, top)) + '</b> · ' + (k === 'kauai' ? '<b>' + u.unguardedPct + '%</b> at shoreline with no tower' : '<b>' + u.districts[0][1] + '%</b> in ' + esc(u.districts[0][0]));
   }
   $('islCards').addEventListener('click', function(e){ var u = e.target.closest('[data-use]'); if(u){ pickIsland(u.dataset.use); show('use'); return; } var c = e.target.closest('[data-isl]'); if(c) pickIsland(c.dataset.isl); });
   $('islCards').addEventListener('keydown', function(e){ if(e.key !== 'Enter' && e.key !== ' ') return; var c = e.target.closest('[data-isl]'); if(c){ e.preventDefault(); pickIsland(c.dataset.isl); } });
