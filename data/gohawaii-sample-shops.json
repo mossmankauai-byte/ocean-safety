@@ -31,7 +31,8 @@
      "title": "Island print tea towel",
      "price_cents": 1800
     }
-   ]
+   ],
+   "hours": "Daily 10am to 5pm"
   },
   {
    "slug": "sample-coffee-kauai",
@@ -58,7 +59,8 @@
      "title": "Ceramic mug",
      "price_cents": 2400
     }
-   ]
+   ],
+   "hours": "Daily 10am to 5pm"
   }
  ],
  "maui": [
@@ -92,7 +94,8 @@
      "title": "Island print tea towel",
      "price_cents": 1800
     }
-   ]
+   ],
+   "hours": "Daily 10am to 5pm"
   },
   {
    "slug": "sample-coffee-maui",
@@ -119,7 +122,8 @@
      "title": "Ceramic mug",
      "price_cents": 2400
     }
-   ]
+   ],
+   "hours": "Daily 10am to 5pm"
   }
  ],
  "oahu": [
@@ -153,7 +157,8 @@
      "title": "Island print tea towel",
      "price_cents": 1800
     }
-   ]
+   ],
+   "hours": "Daily 10am to 5pm"
   },
   {
    "slug": "sample-coffee-oahu",
@@ -180,7 +185,8 @@
      "title": "Ceramic mug",
      "price_cents": 2400
     }
-   ]
+   ],
+   "hours": "Daily 10am to 5pm"
   }
  ],
  "hawaii": [
@@ -214,7 +220,8 @@
      "title": "Island print tea towel",
      "price_cents": 1800
     }
-   ]
+   ],
+   "hours": "Daily 10am to 5pm"
   },
   {
    "slug": "sample-coffee-hawaii",
@@ -241,7 +248,8 @@
      "title": "Ceramic mug",
      "price_cents": 2400
     }
-   ]
+   ],
+   "hours": "Daily 10am to 5pm"
   }
  ]
 }
