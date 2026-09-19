@@ -64,11 +64,13 @@ async function visible(pg){
     await pg.setViewport({ width: w, height: 900, deviceScaleFactor: 2 });
     await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); } catch(e){} }, JSON.stringify(seed('kauai')));
     await pg.goto(ORIGIN + '/gohawaii-dashboard?view=adv', { waitUntil: 'networkidle2', timeout: 60000 }); await sleep(2500);
-    for (const v of ['now', 'adv', 'feat', 'use']) {
+    for (const v of ['now', 'adv', 'feat', 'use', 'rep']) {
       await pg.evaluate((v) => document.querySelector('.rail button[data-view="' + v + '"]').click(), v); await sleep(v === 'feat' ? 1500 : 500);
+      // Report view: every dataset on, methodology notes on, so the gate copy carries the whole report.
+      if(v === 'rep') await pg.evaluate(() => { document.querySelector('#v-rep .presets button[data-preset="all"]').click(); const m = document.getElementById('rpMeth'); if(m && !m.checked) m.click(); });
       await shot(pg, path.join(SH, 'review-dashboard-' + v + '-' + w + '.png'), true);
     }
-    // Gate copy after every view has rendered once, so the Visitors view's sample figures are in it.
+    // Gate copy after every view has rendered once, so the Visitors and Report sample figures are in it.
     if(w === 1280){ const f = path.join(OUT, 'gohawaii-dashboard.html'); fs.writeFileSync(f, await visible(pg)); console.log('wrote', f); }
     await ctx.close();
   }
