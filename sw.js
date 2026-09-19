@@ -19,7 +19,8 @@
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
 // v319 is claimed on work/reserve-links; this branch skips to v320.
-const CACHE_VERSION = 'v345-2026-09-19-app-update';   // commerce line + tsunami way-out map (work/gohawaii-tsunami)
+// v345 was claimed twice on 2026-09-19 (gh-promotions and the tsunami map): tsunami resolves forward to v346.
+const CACHE_VERSION = 'v346-2026-09-19-gh-tsunami';   // commerce line 657dd7f (promotions) + tsunami way-out map
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
