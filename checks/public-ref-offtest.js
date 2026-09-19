@@ -4,10 +4,14 @@
  * Proves two things against a REAL headless render, not the file bytes:
  *   1. OFF: a no-ref load of every island is unchanged versus the baseline tree (origin/main):
  *      same tab bar, same marker count, no /data/poi- request.
- *   2. ON:  ?ref=gohawaii has no Tours, Shop or Town tab (removed, not hidden), no request to any
- *      commerce or telemetry host, no Nearby Tours block on a beach sheet, no Viator script,
- *      _planPaid() false, nothing persisted as a referrer, the brand strip present, and the
- *      disclaimer without the affiliate paragraph. ?mode=shop and openToursSheet() stay inert.
+ *   2. ON:  ?ref=gohawaii has no Shop tab (removed, not hidden), no telemetry, no tour widget, no
+ *      Nearby Tours block on a beach sheet, no Viator script, _planPaid() false, nothing persisted
+ *      as a referrer, the brand strip present, and the disclaimer without the affiliate paragraph.
+ *      Commerce matches gohawaii.com (Nick, option A, 2026-09-18): a GoHawaii listing may show its
+ *      own deal, price and booking link; free local-shop pins load (paid Sponsored pins filtered) and
+ *      a shop card shows that shop's items with a preview-only Buy; no OceanSafe price, Sponsored
+ *      pin, checkout or partner-page read anywhere. Red and yellow beach sheets stay offer-free: a
+ *      Malama row that sells never sits one tap from one. ?mode=shop and openToursSheet() stay inert.
  *
  * Also writes the rendered Kauai DOM (the thing oscheck gates) and the screenshots for the
  * Andy pack. Same rig as tools/shoot-town.js: puppeteer-core from brochure-src, system Chrome.
@@ -21,7 +25,9 @@ const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const NEW = process.env.NEW_ORIGIN, BASE = process.env.BASE_ORIGIN;
 const OUT = process.argv[2] || '.';
 const ISLANDS = ['kauai', 'maui', 'oahu', 'hawaii'];
-const FORBIDDEN = /get_town_listings|get_partner_page|get_partner_promotions|workers\.dev|viator\.com|getyourguide|posthog/i;
+// get_town_listings (free shop pins) and get_partner_products (a shop's items) are the two reads a public
+// build makes; a partner page, promotions, a checkout or any Square link never (OD-24, no live money).
+const FORBIDDEN = /get_partner_page|get_partner_promotions|create-square-checkout|checkout_url|square\.link|workers\.dev|viator\.com|getyourguide|posthog/i;
 const fails = [];
 let planGhSlots = 0;
 function check(cond, msg){ if(cond) console.log('  ok   ' + msg); else { console.log('  FAIL ' + msg); fails.push(msg); } }
@@ -108,7 +114,8 @@ async function state(page){
     check(/no analytics/.test(s.disPrivacy), `${slug}: public privacy paragraph in place`);
     check(s.cfgPlan === 'free', `${slug}: committed config resolved (plan=${s.cfgPlan})`);
     const bad = reqs.filter(u => FORBIDDEN.test(u));
-    check(bad.length === 0, `${slug}: no commerce or telemetry request` + (bad.length ? ' ' + JSON.stringify(bad.slice(0, 4)) : ''));
+    check(bad.length === 0, `${slug}: no checkout, partner-page or telemetry request` + (bad.length ? ' ' + JSON.stringify(bad.slice(0, 4)) : ''));
+    check(reqs.some(u => /get_town_listings/.test(u)), `${slug}: free local-shop pins were read (get_town_listings)`);
     await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-beaches.png`) });
 
     // Beach sheet: no Nearby Tours, no Viator script.
@@ -140,7 +147,7 @@ async function state(page){
       check(!/\$\d/.test(visible), 'kauai: no price anywhere in the visible text' + (/\$\d/.test(visible) ? ' ' + JSON.stringify(visible.match(/.{0,30}\$\d.{0,10}/g).slice(0, 3)) : ''));
     }
     const bad2 = reqs.filter(u => FORBIDDEN.test(u));
-    check(bad2.length === 0, `${slug}: still no commerce request after the sheet`);
+    check(bad2.length === 0, `${slug}: still no checkout or partner-page request after the sheet`);
 
     // GoHawaii layer: loaded after boot, poured into our arrays, one shared sheet, no price anywhere.
     await page.waitForFunction(() => window.GH_LAYER && window.ACTIVE && window.GH_LAYER[ACTIVE.slug] && Object.keys(window._GH_INDEX || {}).length > 0, { timeout: 30000 }).catch(() => {});
@@ -148,14 +155,24 @@ async function state(page){
       const idx = Object.keys(window._GH_INDEX || {});
       const counts = {}; ['FOODS','DRINKS','LOCAL_CRAFTS','VENUES','ACTS','STAYS'].forEach(k => { try { counts[k] = eval(k).filter(x => String(x.id).startsWith('gh_')).length; } catch (e) { counts[k] = -1; } });
       counts.TOURS = (window.GH_TOURS || []).length;
-      const first = idx[0]; let sheet = '';
-      if (first && typeof openGhSheet === 'function') { openGhSheet(first); sheet = document.getElementById('sc').innerText; }
+      const first = idx[0]; let sheet = '', ownPrice = false;
+      if (first && typeof openGhSheet === 'function') { openGhSheet(first); sheet = document.getElementById('sc').innerText; const g = window._GH_INDEX[first] || {}; ownPrice = /\$\d/.test((g.tip || '') + (g.teaser || '') + (g.deal || '')); }
       const subs = (SUBTABS.acts.items || []).map(i => i.sub);
       const staysShown = (() => { const t = document.querySelector('#tabs .tab[data-tab="stays"]'); return !!t && getComputedStyle(t).display !== 'none'; })();
-      return { rows: idx.length, counts, sheet, subs, staysShown };
+      return { rows: idx.length, counts, sheet, ownPrice, subs, staysShown };
     });
     check(layer.rows > 100, `${slug}: GoHawaii layer injected (${layer.rows} rows) ${JSON.stringify(layer.counts)}`);
-    check(/Listing by GoHawaii/.test(layer.sheet) && !/\$\d/.test(layer.sheet), `${slug}: shared listing sheet carries the GoHawaii credit and no price`);
+    check(/Listing by GoHawaii/.test(layer.sheet) && (layer.ownPrice || !/\$\d/.test(layer.sheet)), `${slug}: shared listing sheet carries the GoHawaii credit${layer.ownPrice ? ' and its own listed price' : ' and no price'}`);
+    // A listing whose own GoHawaii text carries a price or deal shows it, with a link back (theirs or the business's own page).
+    const deal = await page.evaluate(() => {
+      const g = Object.values(window._GH_INDEX || {}).find(x => /\$\d/.test((x.tip || '') + ' ' + (x.teaser || '') + ' ' + (x.deal || '')));
+      if (!g) return { none: true };
+      openGhSheet(g.id); const sc = document.getElementById('sc');
+      return { name: g.name, price: /\$\d/.test(sc.innerText), link: [...sc.querySelectorAll('a[href]')].some(a => /gohawaii\.com|^https?:\/\//.test(a.href) && !/oceansafety|netlify/.test(a.href)) };
+    });
+    if (deal.none) console.log(`  note ${slug}: no GoHawaii listing carries a price in its own text`);
+    else check(deal.price && deal.link, `${slug}: "${deal.name}" shows its own listed price and a link out`);
+    if (slug === 'kauai' && !deal.none) await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-listing-deal.png`) });
     check(['event','malama'].every(x => layer.subs.includes(x)) && !layer.subs.includes('golf') && !layer.subs.includes('wellness'), `${slug}: Family gained Events and Mālama only`);
     // Photos: every photo the build found reaches the page over https from gohawaii.com. The floor is
     // what gohawaii.com actually has: the rest of their events and some listings carry no photo at all.
@@ -196,8 +213,9 @@ async function state(page){
     // Beach sheet: a red or yellow verdict shows the Give back block; on an all-green day say so.
     const malama = await page.evaluate(() => {
       const b = (typeof B !== 'undefined' ? B : []).find(x => !x.warning_only && scored[x.id] && ['red','yellow','warning'].includes(scored[x.id].status));
-      if (!b) return { none: true };
-      openSheet(b.id); return { beach: b.name, status: scored[b.id].status };
+      const giving = Object.values(window._GH_INDEX || {}).filter(g => g.type === 'malama' && !g.sales).length;
+      if (!b) return { none: true, giving };
+      openSheet(b.id); return { beach: b.name, status: scored[b.id].status, giving };
     });
     await sleep(1200);
     if (!malama.none) Object.assign(malama, await page.evaluate(() => {
@@ -205,14 +223,19 @@ async function state(page){
       // Each Mālama row shows its photo when the row has one, and the leaf icon when it has none.
       const ok = rows.every(el => { const id = (el.getAttribute('onclick').match(/'(gh_[^']+)'\)/) || [])[1], g = window._GH_INDEX[id] || {};
         return g.img ? !!el.querySelector('img.gh-thumb') : (!el.querySelector('img') && !!el.querySelector('svg.gh-leaf')); });
-      return { has: /Give back instead/.test(sc.innerHTML), rows: rows.length, thumbs: sc.querySelectorAll('[onclick^="_ghDeflectTap"] img.gh-thumb').length, ok };
+      return { has: /Give back instead/.test(sc.innerHTML), rows: rows.length, thumbs: sc.querySelectorAll('[onclick^="_ghDeflectTap"] img.gh-thumb').length, ok,
+        offer: /\$\d|book now|resort credit|night free|promo code|% off/i.test(sc.innerText) };
     }));
-    if (malama.none) console.log(`  note ${slug}: every scored beach is green right now, Give back block not exercised`);
-    else {
-      check(malama.has, `${slug}: ${malama.beach} (${malama.status}) shows the Give back block`);
+    if (malama.none) console.log(`  note ${slug}: every scored beach is green right now, Give back block not exercised (${malama.giving} Mālama rows that do not sell)`);
+    else if (malama.giving === 0) {
+      // Every Malama row on this island sells (hotel package, offer or booking link), so a red or yellow
+      // beach sheet offers none of them and carries no offer wording at all.
+      check(!malama.has && malama.rows === 0 && !malama.offer, `${slug}: ${malama.beach} (${malama.status}) carries no Give back block, no Mālama row and no offer (every Mālama row here sells)`);
+    } else {
+      check(malama.has && malama.rows > 0, `${slug}: ${malama.beach} (${malama.status}) shows the Give back block (${malama.giving} rows that do not sell)`);
       check(malama.ok, `${slug}: Mālama rows show a photo when they have one (${malama.thumbs} of ${malama.rows}), the leaf icon when not`);
     }
-    if (slug === 'kauai' && !malama.none) {
+    if (slug === 'kauai' && !malama.none && malama.has) {
       // The shot is of the offer itself: scroll the Give back block into view and let its photos load.
       await page.evaluate(() => { const h = [...document.querySelectorAll('#sc .slbl')].find(e => /Give back/.test(e.textContent)); if (h) h.scrollIntoView({ block: 'start' }); });
       await sleep(2500);
@@ -310,8 +333,29 @@ async function state(page){
     const town = await page.evaluate(() => ({ chip: !!document.getElementById('promoChip'), text: document.body.innerText, markers: document.querySelectorAll('.leaflet-marker-icon').length }));
     check(!town.chip && !/Sponsored/.test(town.text), `${slug}: Town has no offer chip or sponsored badge (${town.markers} pins)`);
     if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-town.png`) });
+    // Local-shop pins: free placements only (a paid pin is Sponsored placement), a sample shop only when the
+    // island has no free shop yet; the shop card shows its items in a data-commerce="shop" block, and Buy is a
+    // preview that explains itself and never calls a checkout.
+    const shops = await page.evaluate(() => {
+      const rows = window._townListings || [];
+      const r = rows.find(x => x && x.placement === 'sample') || rows[0]; if (!r) return { rows: rows.length };
+      const id = 'tp_' + r.slug; let fn = null;
+      for (const f of ['openCraftSheet','openMarketSheet','openFoodSheet','openDrinkSheet','openGrocerySheet','openGasSheet']) { try { window[f](id); if (document.getElementById('sheet').classList.contains('on')) { fn = f; break; } } catch (e) {} }
+      return { rows: rows.length, paid: rows.filter(x => x && x.placement === 'paid').length, sample: rows.filter(x => x && x.placement === 'sample').length, id, fn, name: r.name };
+    });
+    await sleep(1500);
+    const card = await page.evaluate(() => {
+      const sc = document.getElementById('sc'), blk = sc.querySelector('[data-commerce="shop"]'), b = sc.querySelector('.tp-shop button[data-prod]');
+      if (b) b.click();
+      return { block: !!blk, items: blk ? blk.querySelectorAll('.os-store-prod').length : 0, prices: blk ? (blk.innerText.match(/\$\d+\.\d\d/g) || []).length : 0, buy: !!b,
+        note: /Checkout is off in this review copy/.test(sc.innerText), badge: /Sample shop|Local shop/.test(sc.innerText) };
+    });
+    check(shops.rows > 0 && shops.paid === 0 && (shops.sample === 0 || shops.sample === shops.rows), `${slug}: ${shops.rows} local-shop pins, none paid${shops.sample ? ', all labelled sample' : ''}`);
+    check(shops.fn && card.block && card.items > 0 && card.prices === card.items && card.buy && card.note, `${slug}: "${shops.name}" card lists ${card.items} items with prices in the shop block; Buy says checkout is off in this copy`);
+    if (slug === 'kauai') await page.screenshot({ path: path.join(OUT, `gohawaii-${slug}-shop-card.png`) });
+    await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); document.getElementById('overlay').classList.remove('on'); });
     const bad3 = reqs.filter(u => FORBIDDEN.test(u));
-    check(bad3.length === 0, `${slug}: still no commerce request after Tours and Town`);
+    check(bad3.length === 0, `${slug}: still no checkout or partner-page request after Tours and Town`);
     const photoReqs = reqs.filter(u => /gohawaii\.com\/sites\//.test(u)).length;
     check(photoReqs > 0 && photoFails.length === 0, `${slug}: ${photoReqs} gohawaii.com photo requests, ${photoFails.length} failed ${photoFails.length ? JSON.stringify(photoFails.slice(0, 5)) : ''}`);
     await closeCtx(ctx);
