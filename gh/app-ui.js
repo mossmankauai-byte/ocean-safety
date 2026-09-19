@@ -31,6 +31,7 @@
   function islName(){ return A.ISL[isl()] || (window.ACTIVE && ACTIVE.name) || ''; }
   function list(){ return A.active(feeds, isl(), Date.now(), PREVIEW); }
   function feats(){ return A.features(isl(), Date.now(), PREVIEW); }
+  function promos(){ return A.promos(isl(), Date.now(), PREVIEW); }
   function ss(k, v){ try { if(v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch(e){ return null; } }
 
   function css(){
@@ -314,6 +315,18 @@
         + '<div class="gha-fb">' + (imgOk(img) ? '' : tag.replace('gha-ftag', 'gha-ftag gha-ftag-in')) + '<b>' + esc(f.title) + sampleTag(f) + '</b>' + (sub ? '<span>' + esc(sub.length > 160 ? sub.slice(0, 157) + '...' : sub) + '</span>' : '') + '</div></div>';
     }).join('');
   }
+  // Today's promotions: GoHawaii's own timed notices, inside their hours right now. Their text is GoHawaii's
+  // (the gate reads it as such through data-commerce="promo"); the ocean call never changes for one.
+  function promoSection(){
+    var P = promos(); if(!P.length) return '';
+    return '<div class="slbl">Today from GoHawaii</div>' + P.slice(0, 4).map(function(p){
+      return '<div class="gha-feat" data-commerce="promo"><div class="gha-fb"><span class="gha-ftag gha-ftag-in">' + ICON.star + 'Promotion</span><b>' + esc(p.title) + sampleTag(p) + '</b>'
+        + (p.body ? '<span>' + esc(p.body) + '</span>' : '')
+        + '<span class="gha-m">' + esc(A.hoursLabel(p)) + ' · ' + esc(A.until(p)) + '</span>'
+        + (p.link ? '<a class="gha-more" href="' + esc(p.link) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">See details</a>' : '')
+        + '</div></div>';
+    }).join('');
+  }
   function eventSection(){
     var t = today(); if(!t) return '';
     var end = addDays(t, 6), taken = {};
@@ -335,7 +348,7 @@
     try { d = new Date().toLocaleDateString('en-US', { timeZone:'Pacific/Honolulu', weekday:'long', month:'long', day:'numeric' }); } catch(e){}
     return '<div class="gha-hub"><div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0f4c5c">GoHawaii</div>'
       + '<h2>Today on ' + esc(islName()) + '</h2><div class="gha-date">' + esc(d) + ' · Hawaiʻi time</div>'
-      + advSection() + beachSection() + featSection() + eventSection()
+      + advSection() + beachSection() + featSection() + promoSection() + eventSection()
       + '<div class="gha-fine">Weather advisories come from the National Weather Service and travel updates from the Hawaiʻi Tourism Authority, credited on each card. GoHawaii posts its own notices here. Beach verdicts by Ocean Safe. Always follow lifeguards and posted signs.</div></div>';
   }
   function openHub(){
@@ -431,16 +444,36 @@
       })();
     } catch(e){}
   }
+  // ---- timed promotions: the app's own chip, sheet and pop-up, fed from GoHawaii's posts (public ref only) ----
+  // Each post maps to the shape index.html already renders for a partner's offers; the window rides along so the
+  // chip's live dot and end label work. Only posts inside their Hawaiʻi-time hours are handed over, re-read each minute.
+  var promoSig = null, promoTries = 0;
+  function promoApply(){
+    try {
+      if(typeof _isPublicRef !== 'function' || !_isPublicRef() || !window._partnerCfg || typeof _renderPartnerPromos !== 'function') return;
+      var mapped = promos().map(function(p){
+        return { title: p.title, detail: p.body || '', request_to: p.link || '', cta_label: 'See details', window: p.window || undefined,
+                 expires: p.ends ? String(p.ends).slice(0, 10) : undefined, stage: 'any', gh_id: p.id };
+      });
+      var sig = mapped.map(function(m){ return m.gh_id; }).join('|');
+      if(sig === promoSig) return;
+      promoSig = sig;
+      window._partnerCfg.promotions = mapped; window._promoRenderSig = null;
+      _renderPartnerPromos(window._partnerCfg);
+      hubRefresh();
+    } catch(e){}
+  }
+  function promoBoot(){ if(!window._partnerCfg){ if(++promoTries < 80) setTimeout(promoBoot, 500); return; } promoApply(); setInterval(promoApply, 60 * 1000); }
   function start(){
     postVerdicts();
     if(PROBE) return;
-    css(); strip();
+    css(); strip(); promoBoot();
     // Staff posts need no feed: show them now, then again as each feed lands.
     afterFeeds();
     A.refresh(function(r){ feeds.nws = r.nws; feeds.hta = r.hta; afterFeeds(); });
     setInterval(tick, 10 * 60 * 1000);
     // A post from the Dashboard in another tab of this browser lands here at once.
-    window.addEventListener('storage', function(e){ if(e.key === A.KEY){ paint(); if(!showRed()) pops(); } });
+    window.addEventListener('storage', function(e){ if(e.key === A.KEY){ paint(); if(!showRed()) pops(); promoSig = null; promoApply(); } });
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

@@ -83,6 +83,9 @@
   .legend{position:absolute;left:16px;top:16px;z-index:500;background:rgba(255,255,255,.97);border-radius:14px;padding:12px;width:310px;box-shadow:0 8px 24px rgba(15,42,51,.16)}
   .legend h3{margin:0 0 6px;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;justify-content:space-between;gap:8px}
   .legend h3 .smp{letter-spacing:.06em;margin:0}
+  .ptimes{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+  .ptimes input[type=time]{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);margin-left:6px}
+  .checks.days label{min-width:0}
   .feednote{font-size:12px;border-radius:9px;padding:8px 10px;margin:6px 0 4px;background:var(--yelbg);color:#78350f;line-height:1.4}
   #islCards{display:grid;gap:8px;background:var(--tint);border-radius:12px;padding:8px}
   .islcard{display:grid;grid-template-columns:44px 1fr auto;gap:3px 10px;padding:10px 10px 10px 8px;background:#fff;border:1px solid var(--line);border-radius:12px;cursor:pointer;box-shadow:0 1px 2px rgba(15,42,51,.06)}
@@ -374,6 +377,7 @@
     <button type="button" data-view="now" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lbl">Overview</span></button>
     <button type="button" data-view="adv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span class="lbl">Advisories</span><span class="dot" id="advDot" hidden></span></button>
     <button type="button" data-view="feat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="lbl">Events</span></button>
+    <button type="button" data-view="promo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span class="lbl">Promotions</span></button>
     <button type="button" data-view="use"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M6 16V9M11 16V4M16 16v-6M21 16v-3"/></svg><span class="lbl">Visitors</span></button>
     <button type="button" data-view="rep"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="lbl">Report</span></button>
     <button type="button" data-view="prev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg><span class="lbl">Preview</span></button>
@@ -512,6 +516,36 @@
     </section>
 
     <!-- PREVIEW -->
+    <!-- PROMOTIONS: GoHawaii's own timed notices -->
+    <section class="view" id="v-promo" aria-label="Promotions" hidden>
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card"><h2>Your promotions</h2><p class="sub">On now, outside their hours, scheduled, and recently ended. While its hours are on, a promotion shows on the app's Town tab as a chip, once per visit as a pop-up, and on the GoHawaii page.</p><div id="promoList"></div></div>
+        <div class="card">
+          <h2>Post a promotion</h2>
+          <p class="sub">A timed notice from GoHawaii: a shuttle, a program, a seasonal special. It runs only in the hours and days you set, Hawaiʻi time. In the review build a post stays in this browser.</p>
+          <form id="promoForm" autocomplete="off">
+            <label class="f" for="pTitle">Headline</label>
+            <input type="text" id="pTitle" maxlength="80" required placeholder="Mālama Hawaiʻi beach cleanup at Hanalei">
+            <label class="f" for="pBody">One line of text</label>
+            <input type="text" id="pBody" maxlength="140" placeholder="Meet at the pier, gloves and bags provided. Sign up on the GoHawaii Mālama page.">
+            <label class="f" for="pLink">Link <small>(https)</small></label>
+            <input type="url" id="pLink" maxlength="300" placeholder="https://www.gohawaii.com/malama">
+            <label class="f">Islands</label>
+            <div class="checks" id="pIsl"></div>
+            <label class="f">Hours</label>
+            <div class="chips" id="pWin"><button type="button" data-v="all" aria-pressed="true">All day</button><button type="button" data-v="set" aria-pressed="false">Set hours</button></div>
+            <div id="pWinWrap" style="display:none;margin-top:8px"><div class="ptimes"><label>From <input type="time" id="pWinStart" value="07:00"></label><label>To <input type="time" id="pWinEnd" value="16:00"></label></div><div class="note" style="margin-top:6px">Hawaiʻi time. Hours that end before they start run past midnight.</div></div>
+            <label class="f">Days</label>
+            <div class="checks days" id="pDays"></div>
+            <label class="f">Runs for</label>
+            <div class="chips" id="pEnd"><button type="button" data-v="24" aria-pressed="false">1 day</button><button type="button" data-v="72" aria-pressed="false">3 days</button><button type="button" data-v="168" aria-pressed="true">1 week</button><button type="button" data-v="336" aria-pressed="false">2 weeks</button><button type="button" data-v="720" aria-pressed="false">30 days</button></div>
+            <div class="formfoot"><button type="submit" class="btn pri">Post now</button><button type="button" class="btn ghost" id="pSample">Fill in a sample</button></div>
+            <div class="msg" id="pMsg" role="status"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <section class="view" id="v-use" aria-label="Visitors and intent" hidden>
       <div class="umode">
         <span class="rb samp">Sample data. Illustrative figures, not a report. This review build counts nothing, so live numbers begin once counting is switched on for the GoHawaii link.</span>
@@ -752,7 +786,7 @@
   try { state.role = sessionStorage.getItem('ghd_role') || 'Editor'; } catch(e){}
   try { var q = new URLSearchParams(location.search); if(ISL[q.get('island')]) state.isl = q.get('island'); if(q.get('view')) state.view = q.get('view'); } catch(e){}
   try { state.verd = JSON.parse(sessionStorage.getItem('ghd_verdicts') || '{}') || {}; } catch(e){}
-  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', use: 'Visitors and intent', rep: 'Monthly report', prev: 'Visitor preview', log: 'Activity log' };
+  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', promo: 'Promotions', use: 'Visitors and intent', rep: 'Monthly report', prev: 'Visitor preview', log: 'Activity log' };
 
   function now(){ return Date.now(); }
   function uid(){ return 's' + now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -813,13 +847,14 @@
     if(!TITLES[v]) v = 'now';
     state.view = v;
     Array.prototype.forEach.call(document.querySelectorAll('.rail button[data-view]'), function(b){ if(b.dataset.view === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
-    ['now','adv','feat','use','rep','prev','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
+    ['now','adv','feat','promo','use','rep','prev','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
     $('viewTitle').textContent = TITLES[v];
     $('islPick').hidden = v === 'now' || v === 'log';
     if(v === 'now'){ setTimeout(function(){ if(map) map.invalidateSize(); }, 50); loadNowFrame(); }
     if(v === 'prev') loadPreview();
     if(v === 'use') renderUse();
     if(v === 'rep') renderReport();
+    if(v === 'promo') renderPromos();
     if(v === 'feat') loadLayer(state.isl).then(renderEvents);
     window.scrollTo(0, 0);
   }
@@ -1039,7 +1074,8 @@
     meta.push(s === 'ended' ? 'ended ' + A.hst(it.endedAt || it.ends, true) : A.until(it));
     meta.push('by ' + it.by + (it.approvedBy ? ', approved by ' + it.approvedBy : ''));
     if(seen) meta.push('shown ' + seen + ' time' + (seen > 1 ? 's' : '') + ' in this browser');
-    return '<div class="row"><div class="x"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">' + (it.kind === 'feature' ? '<span class="lvl feat">' + esc(it.sub || 'Featured') + '</span>' : lvChip(it.level)) + stChip(s) + '</div>'
+    if(it.kind === 'promo'){ meta.splice(1, 0, A.hoursLabel(it)); if(s === 'live' && !A.inDaily(it)) meta.push('outside its hours right now'); if(s === 'live' || s === 'sched') acts.push('<button class="btn ghost" data-act="dup" data-id="' + it.id + '">Duplicate</button>'); }
+    return '<div class="row"><div class="x"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">' + (it.kind === 'feature' ? '<span class="lvl feat">' + esc(it.sub || 'Featured') + '</span>' : it.kind === 'promo' ? '<span class="lvl feat">Promotion</span>' : lvChip(it.level)) + (it.kind === 'promo' && s === 'live' && !A.inDaily(it) ? '<span class="lvl draft">Outside its hours</span>' : stChip(s)) + '</div>'
       + '<b>' + esc(it.title) + smp(it) + '</b><div class="m">' + esc(meta.join(' · ')) + '</div></div><div class="acts2">' + acts.join('') + '</div></div>';
   }
   document.addEventListener('click', function(e){
@@ -1047,9 +1083,10 @@
     var st = A.load(), it = st.items.filter(function(x){ return x.id === b.dataset.id; })[0]; if(!it) return;
     var a = b.dataset.act;
     if(a === 'preview'){ state.previewId = it.status === 'live' ? '' : it.id; state.isl = (it.islands && it.islands[0] && ISL[it.islands[0]]) ? it.islands[0] : state.isl; islPick(); show('prev'); return; }
+    if(a === 'dup'){ promoFill(it); show('promo'); msg('pMsg', 'ok', 'Copied into the form. Change what you need and post it.'); return; }
     if(a === 'approve'){ if(it.by === state.role) return; it.status = 'live'; it.approvedBy = state.role; it.approvedAt = iso(now()); log(st, 'Approved red advisory', it); }
     if(a === 'reject'){ it.status = 'draft'; log(st, 'Sent back to draft', it); }
-    if(a === 'end'){ it.status = 'ended'; it.endedAt = iso(now()); log(st, it.kind === 'feature' ? 'Ended feature' : 'Ended advisory', it); }
+    if(a === 'end'){ it.status = 'ended'; it.endedAt = iso(now()); log(st, it.kind === 'feature' ? 'Ended feature' : it.kind === 'promo' ? 'Ended promotion' : 'Ended advisory', it); }
     if(a === 'publish'){ if(it.level === 'red' && it.kind === 'advisory'){ it.status = 'pending'; log(st, 'Sent red advisory for approval', it); } else { it.status = 'live'; log(st, 'Posted', it); } }
     A.save(st); renderAll();
   });
@@ -1227,6 +1264,47 @@
       img: g.img || '', link: g.src_url || '', body: '', islands: [state.isl], starts: iso(now()), ends: iso(end), status: 'live', by: state.role, created: iso(now()) };
     st.items.push(it); log(st, it.sub === 'Event' ? 'Featured event' : 'Featured Mālama program', it); A.save(st); renderAll();
   });
+  // ---- Promotions: GoHawaii's own timed notices, kind 'promo' in the shared engine (Nick, 2026-09-19) ----
+  var DAYN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], promoSampleFlag = false;
+  state.pWin = 'all'; state.pEnd = '168';
+  function dayChecks(sel){ $('pDays').innerHTML = [1,2,3,4,5,6,0].map(function(d){ return '<label><input type="checkbox" value="' + d + '"' + (sel.indexOf(d) >= 0 ? ' checked' : '') + '> ' + DAYN[d] + '</label>'; }).join(''); }
+  function readDays(){ return Array.prototype.map.call($('pDays').querySelectorAll('input:checked'), function(i){ return +i.value; }); }
+  function chipSet(id, key, v){ Array.prototype.forEach.call($(id).querySelectorAll('button[data-v]'), function(x){ x.setAttribute('aria-pressed', String(x.dataset.v === v)); }); state[key] = v; }
+  function winSet(w){ var set = !!(w && w.start && w.end); chipSet('pWin', 'pWin', set ? 'set' : 'all'); $('pWinWrap').style.display = set ? 'block' : 'none'; if(set){ $('pWinStart').value = w.start; $('pWinEnd').value = w.end; } }
+  function promoStatus(it){ var s = status(it); return (s === 'live' && !A.inDaily(it)) ? 'off' : s; }
+  function renderPromos(){
+    var st = A.load(), P = st.items.filter(function(i){ return i.kind === 'promo'; }), order = { live:0, off:1, sched:2, draft:3, ended:4 };
+    P.sort(function(a, b){ return (order[promoStatus(a)] - order[promoStatus(b)]) || ((Date.parse(b.created) || 0) - (Date.parse(a.created) || 0)); });
+    $('promoList').innerHTML = P.length ? P.map(rowHtml).join('') : '<div class="empty">No promotions yet. Post one on the right, or fill in the sample.</div>';
+  }
+  function promoFill(it){
+    $('pTitle').value = it.title || ''; $('pBody').value = it.body || ''; $('pLink').value = it.link || '';
+    islChecks('pIsl', it.islands && it.islands.length ? it.islands : [state.isl]); dayChecks(it.days && it.days.length ? it.days : [0,1,2,3,4,5,6]); winSet(it.window);
+  }
+  chipGroup('pWin', 'pWin', function(v){ $('pWinWrap').style.display = v === 'set' ? 'block' : 'none'; });
+  chipGroup('pEnd', 'pEnd');
+  $('pSample').addEventListener('click', function(){
+    promoFill({ title: 'Sample: Mālama Hawaiʻi beach cleanup at Hanalei', body: 'Meet at the pier at 8am, gloves and bags provided. Sign up on the GoHawaii Mālama page.', link: 'https://www.gohawaii.com/malama', islands: ['kauai'], days: [6, 0], window: { start: '07:00', end: '11:00' } });
+    chipSet('pEnd', 'pEnd', '168'); promoSampleFlag = true; msg('pMsg', 'ok', 'Sample filled in. Post it to see it in the app on this browser.');
+  });
+  $('promoForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var title = $('pTitle').value.trim(), link = $('pLink').value.trim(), islands = readIsl('pIsl'), days = readDays();
+    if(!title){ msg('pMsg', 'err', 'Add a headline.'); return; }
+    if(link && !/^https:\/\/[^\s]+$/i.test(link)){ msg('pMsg', 'err', 'The link has to start with https://'); return; }
+    if(!islands.length){ msg('pMsg', 'err', 'Pick at least one island.'); return; }
+    if(!days.length){ msg('pMsg', 'err', 'Pick at least one day.'); return; }
+    var win = null;
+    if(state.pWin === 'set'){ win = { start: $('pWinStart').value, end: $('pWinEnd').value }; if(!/^\d{2}:\d{2}$/.test(win.start) || !/^\d{2}:\d{2}$/.test(win.end) || win.start === win.end){ msg('pMsg', 'err', 'Set a start and an end hour.'); return; } }
+    var st = A.load();
+    var it = { id: uid(), kind: 'promo', src: 'staff', srcName: 'GoHawaii', title: title, body: $('pBody').value.trim(), link: link, islands: islands, beaches: [],
+      window: win, days: days.length === 7 ? null : days, starts: iso(now()), ends: iso(now() + (+state.pEnd) * 3600e3), status: 'live', by: state.role, created: iso(now()), sample: promoSampleFlag };
+    promoSampleFlag = false;
+    st.items.push(it); log(st, 'Posted promotion', it); A.save(st);
+    $('promoForm').reset(); islChecks('pIsl', [state.isl]); dayChecks([0,1,2,3,4,5,6]); winSet(null); chipSet('pEnd', 'pEnd', '168');
+    msg('pMsg', 'ok', 'Posted. It shows in the app on this browser while its hours are on.'); renderAll();
+  });
+
   $('campForm').addEventListener('submit', function(e){
     e.preventDefault();
     var title = $('cTitle').value.trim(), link = $('cLink').value.trim(), islands = readIsl('cIsl');
@@ -1641,11 +1719,11 @@
     var st = A.load();
     var pend = st.items.filter(function(i){ return i.status === 'pending'; }).length;
     $('advDot').hidden = !pend;
-    renderNow(); paintMap(); renderAdvLists(); renderEvents(); renderLog();
+    renderNow(); paintMap(); renderAdvLists(); renderEvents(); renderPromos(); renderLog();
   }
 
   window.addEventListener('storage', function(e){ if(e.key === A.KEY) renderAll(); });
-  islPick(); rolePaint(); islChecks('fIsl', [state.isl]); islChecks('cIsl', [state.isl]); lvPaint();
+  islPick(); rolePaint(); islChecks('fIsl', [state.isl]); islChecks('cIsl', [state.isl]); islChecks('pIsl', [state.isl]); dayChecks([0,1,2,3,4,5,6]); lvPaint();
   initMap();
   show(state.view);
   renderAll(); check();

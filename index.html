@@ -11073,7 +11073,9 @@ function _promoMaybeRerender(){
 function _renderPartnerPromos(cfg){
   // Free plan: no promotion surfaces at all — no chip, no sheet, regardless
   // of what the config carries. (cfg is already window._partnerCfg here.)
-  if(!_planPaid()) return;
+  // Public ref (GoHawaii, 2026-09-19): the same chip, sheet and pop-up carry GoHawaii's own timed
+  // promotions, read from its posts in this browser (gh/app-ui.js promoApply), never from the network.
+  if(!_planPaid() && !_isPublicRef()) return;
   const promos = Array.isArray(cfg && cfg.promotions) ? cfg.promotions : [];
   const now = new Date();
   const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -11150,7 +11152,8 @@ function _renderPartnerPromos(cfg){
   const chip = document.createElement('button');
   chip.id = 'promoChip';
   chip.type = 'button';
-  chip.setAttribute('aria-label', 'Offers from ' + _demoName(cfg.name || 'your resort') + ' — ' + live.length + ' available, tap to view');
+  chip.setAttribute('aria-label', _isPublicRef() ? 'From GoHawaii: ' + live.length + ' promotion' + (live.length === 1 ? '' : 's') + ' today, tap to view'
+    : 'Offers from ' + _demoName(cfg.name || 'your resort') + ' — ' + live.length + ' available, tap to view');
   chip.setAttribute('onclick', '_promoSheetOpen()');
   chip.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>'
     + '<span id="promoChipCount" aria-hidden="true">' + live.length + '</span>'
@@ -11178,7 +11181,7 @@ function _promoRequestAction(p, i){
     if(!s) return '';
     const subj = encodeURIComponent('Aloha, I would like to ask about: ' + String((p && p.title) || ''));
     let href = '', label = '', ch = '';
-    if(/^https:\/\//i.test(s)){ href = s; label = 'Request this'; ch = 'url'; }
+    if(/^https:\/\//i.test(s)){ href = s; label = (p && p.cta_label) || 'Request this'; ch = 'url'; }
     else if(s.indexOf('@') > 0){ href = 'mailto:' + s + '?subject=' + subj; label = 'Email the front desk'; ch = 'email'; }
     else {
       const d = s.replace(/[^+0-9]/g, '');
@@ -11201,10 +11204,11 @@ function _promoRequestTrack(idx, channel){
   } catch(e){}
 }
 function _promoSheetOpen(){
-  if(!_planPaid()) return; // free plan: no promo sheet, even if a chip somehow exists
+  if(!_planPaid() && !_isPublicRef()) return; // free plan: no promo sheet, even if a chip somehow exists
   const live = window._promoLive || [];
   if(!live.length) return;
-  const name = _demoName((window._partnerCfg && window._partnerCfg.name) || 'your resort');
+  const pub = _isPublicRef();
+  const name = pub ? 'GoHawaii' : _demoName((window._partnerCfg && window._partnerCfg.name) || 'your resort');
   const tagSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
   const rows = live.map(x => {
     const ends = x.p.expires ? `<span style="display:block;font-size:11px;color:var(--mute);margin-top:2px">Ends ${_pesc(_promoEndsLabel(x.p.expires))}</span>` : '';
@@ -11229,14 +11233,14 @@ function _promoSheetOpen(){
     // Where the tap goes. Without this a pre-arrival card is decoration: the guest
     // reads about an airport transfer and has no way to ask for one.
     const req = _promoRequestAction(x.p, x.i);
-    return `<div style="display:flex;flex-direction:column;width:100%;padding:12px;background:#fff;border:1px solid var(--border);border-radius:12px">${head}${req}</div>`;
+    return `<div${pub ? ' data-commerce="promo"' : ''} style="display:flex;flex-direction:column;width:100%;padding:12px;background:#fff;border:1px solid var(--border);border-radius:12px">${head}${req}</div>`;
   }).join('');
   const sc = document.getElementById('sc');
   sc.style.display = '';
   sc.innerHTML = `
     <div style="padding:6px 2px 0">
-      <div style="font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:600;color:var(--ink)">Offers from ${_pesc(name)}</div>
-      <div style="font-size:12px;color:var(--mute);margin-top:3px;line-height:1.4">Property offers, separate from the safety report. The ocean call never changes for an offer.</div>
+      <div style="font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:600;color:var(--ink)">${pub ? 'From GoHawaii' : 'Offers from ' + _pesc(name)}</div>
+      <div style="font-size:12px;color:var(--mute);margin-top:3px;line-height:1.4">${pub ? 'Timed notices from GoHawaii, separate from the safety report. The ocean call never changes for a promotion.' : 'Property offers, separate from the safety report. The ocean call never changes for an offer.'}</div>
     </div>
     <div aria-label="Offers from ${_pesc(name)}" style="display:flex;flex-direction:column;gap:8px;margin-top:12px">${rows}</div>`;
   document.getElementById('sheet').classList.add('on');
@@ -11292,7 +11296,7 @@ function _promoPopBlocked(){
 }
 function _promoPopSchedule(live){
   if(window._promoPopArmed) return;
-  if(!_planPaid()) return; // free plan: no promotion surfaces, ever
+  if(!_planPaid() && !_isPublicRef()) return; // free plan: no promotion surfaces, ever
   try { if(new URLSearchParams(location.search).get('mode') === 'screen') return; } catch(e){} // lobby TV: never
   var slug = _activeRefSlug();
   if(!slug) return;
@@ -11322,7 +11326,8 @@ function _promoPopSchedule(live){
 }
 function _promoPopShow(x){
   if(document.getElementById('promoPop')) return;
-  var name = _demoName((window._partnerCfg && window._partnerCfg.name) || 'your resort');
+  var pub = _isPublicRef();
+  var name = pub ? 'GoHawaii' : _demoName((window._partnerCfg && window._partnerCfg.name) || 'your resort');
   var winLbl = _promoWinEndLabel(x.p.window);
   if(!document.getElementById('promoPopStyle')){
     var st = document.createElement('style');
@@ -11338,7 +11343,8 @@ function _promoPopShow(x){
   var el = document.createElement('div');
   el.id = 'promoPop';
   el.setAttribute('role', 'dialog');
-  el.setAttribute('aria-label', 'Offer from ' + name);
+  el.setAttribute('aria-label', (pub ? 'Promotion from ' : 'Offer from ') + name);
+  if(pub) el.setAttribute('data-commerce', 'promo');
   // Demo chrome (?demo=freepaid) floats its toggle at bottom:84px — sit above it.
   try { if(new URLSearchParams(location.search).get('demo') === 'freepaid') el.style.bottom = 'calc(140px + env(safe-area-inset-bottom,0px))'; } catch(e){}
   var tagSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ocean,#0f4c5c)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>';
@@ -11348,10 +11354,10 @@ function _promoPopShow(x){
     + '<div style="display:flex;gap:11px;align-items:flex-start;padding-right:30px">'
     +   tagSvg
     +   '<div style="flex:1;min-width:0">'
-    +     '<div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)">Offer from ' + _pesc(name) + '</div>'
+    +     '<div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)">' + (pub ? 'From GoHawaii' : 'Offer from ' + _pesc(name)) + '</div>'
     +     '<div style="font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.3;margin-top:2px">' + _pesc(x.p.title) + '</div>'
     +     (winLbl ? '<span style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;font-weight:700;color:#8a6d1f;background:#fdf6e3;border:1px solid #e9d9b0;border-radius:999px;padding:3px 9px">' + clockSvg + _pesc(winLbl) + '</span>' : '')
-    +     '<div style="font-size:10.5px;color:var(--mute);margin-top:6px;line-height:1.4">Property offer — separate from the safety report.</div>'
+    +     '<div style="font-size:10.5px;color:var(--mute);margin-top:6px;line-height:1.4">' + (pub ? 'GoHawaii notice, separate from the safety report.' : 'Property offer — separate from the safety report.') + '</div>'
     +   '</div>'
     + '</div>'
     + '<button type="button" onclick="_promoPopSee(' + x.i + ')" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:10px;border:none;border-radius:10px;background:var(--ocean,#0f4c5c);color:#fff;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">See offer</button>';

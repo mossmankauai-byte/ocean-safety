@@ -203,6 +203,50 @@
     }).sort(function(a, b){ return (Date.parse(b.created) || 0) - (Date.parse(a.created) || 0); });
   }
 
+  // ---- timed promotions (kind 'promo'): GoHawaii's own notices with daily hours in Hawaiʻi time ----
+  // Posted by an Editor, live at once (only a red advisory needs a second approval). A promotion shows
+  // in the app only inside its active dates AND its daily hours and days, all read in Hawaiʻi time.
+  var DOW = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 }, DAYN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  function hstParts(now){
+    try {
+      var s = new Date(now).toLocaleString('en-US', { timeZone:'Pacific/Honolulu', weekday:'short', hour:'2-digit', minute:'2-digit', hour12:false }).replace(/\u200e/g, '');
+      var m = /^(\w{3})\D+(\d{1,2}):(\d{2})/.exec(s);
+      if(!m) return null;
+      return { dow: DOW[m[1]], min: ((+m[2]) % 24) * 60 + (+m[3]) };
+    } catch(e){ return null; }
+  }
+  function winParse(w){
+    if(!w || typeof w !== 'object') return null;
+    var a = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(w.start || '')), b = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(w.end || ''));
+    if(!a || !b) return null;
+    return { s: (+a[1]) * 60 + (+a[2]), e: (+b[1]) * 60 + (+b[2]) };
+  }
+  // True when the promotion's hours and days include this moment, Hawaiʻi time. No hours set = all day.
+  // A malformed window never shows: a typo hides a promotion, it never shows it at the wrong time.
+  function inDaily(it, now){
+    var h = hstParts(now || Date.now()); if(!h) return true;
+    if(Array.isArray(it.days) && it.days.length && it.days.indexOf(h.dow) < 0) return false;
+    if(!it.window) return true;
+    var p = winParse(it.window); if(!p) return false;
+    return p.s <= p.e ? (h.min >= p.s && h.min < p.e) : (h.min >= p.s || h.min < p.e);
+  }
+  function promos(isl, now, previewId, all){
+    now = now || Date.now();
+    return load().items.filter(function(it){
+      if(it.kind !== 'promo') return false;
+      var pv = previewId && it.id === previewId;
+      if(!pv && (it.status !== 'live' || !inWindow(it, now))) return false;
+      if(!pv && !all && !inDaily(it, now)) return false;
+      return onIsland(it, isl);
+    }).sort(function(a, b){ return (Date.parse(b.created) || 0) - (Date.parse(a.created) || 0); });
+  }
+  function hoursLabel(it){
+    var p = winParse(it.window);
+    function t(m){ var h = Math.floor(m / 60), mi = m % 60; return (((h + 11) % 12) + 1) + (mi ? ':' + (mi < 10 ? '0' : '') + mi : '') + (h >= 12 ? 'pm' : 'am'); }
+    var d = Array.isArray(it.days) && it.days.length && it.days.length < 7 ? ' · ' + it.days.slice().sort().map(function(x){ return DAYN[x]; }).join(', ') : '';
+    return (p ? t(p.s) + ' to ' + t(p.e) + ' Hawaiʻi time' : 'All day') + d;
+  }
+
   // ---- feeds, cached for the page's life; refresh() re-reads both ----
   var last = { nws: null, hta: null, nwsAt: 0, htaAt: 0, nwsOk: null, htaOk: null };
   var inflight = null;
@@ -240,7 +284,7 @@
 
   window.GH_ADV = {
     KEY: KEY, ISL: ISL, ORDER: ORDER, NWS_LEVEL: NWS_LEVEL, HTA_SHOW_HOURS: HTA_SHOW_HOURS,
-    load: load, save: save, refresh: refresh, last: last, active: active, features: features,
+    load: load, save: save, refresh: refresh, last: last, active: active, features: features, promos: promos, inDaily: inDaily, hoursLabel: hoursLabel,
     inWindow: inWindow, onIsland: onIsland, nwsLevel: nwsLevel,
     hst: hst, until: until, islandNames: islandNames, esc: esc, markSeen: markSeen, seen: seen
   };
