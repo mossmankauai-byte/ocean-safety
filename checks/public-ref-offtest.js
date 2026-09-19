@@ -378,6 +378,45 @@ async function state(page){
     await closeCtx(ctx);
   }
 
+  console.log('\n[4] ON: GoHawaii timed promotions (kind promo, same browser) reach the Town chip, the sheet and the GoHawaii page; never a beach sheet');
+  {
+    // Two promotions seeded into this context: one inside its Hawaiʻi-time hours right now, one outside.
+    const hst = new Date(new Date().toLocaleString('en-US', { timeZone: 'Pacific/Honolulu' })), h = hst.getHours(), pad = (n) => String(n).padStart(2, '0');
+    const t0 = Date.now(), isoT = (t) => new Date(t).toISOString();
+    const base = { kind: 'promo', src: 'staff', srcName: 'GoHawaii', islands: ['kauai'], beaches: [], starts: isoT(t0 - 3600e3), ends: isoT(t0 + 48 * 3600e3), status: 'live', by: 'Editor', created: isoT(t0 - 3600e3), sample: true };
+    const seed = { hta: {}, log: [], items: [
+      Object.assign({}, base, { id: 'test-promo-on', title: 'Sample: 10% off the North Shore shuttle before 9am', body: 'Book the early run and save. A sample promotion for the review build.', link: 'https://www.gohawaii.com/', window: { start: pad(h) + ':00', end: pad((h + 2) % 24) + ':00' } }),
+      Object.assign({}, base, { id: 'test-promo-off', title: 'Sample: sunset lei workshop', body: 'A sample outside its hours right now.', link: 'https://www.gohawaii.com/', window: { start: pad((h + 3) % 24) + ':00', end: pad((h + 5) % 24) + ':00' } })
+    ] };
+    const { ctx, page, reqs } = await fresh(browser);
+    await page.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); } catch (e) {} }, JSON.stringify(seed));
+    await boot(page, `${NEW}/?ref=gohawaii&island=kauai`); await accept(page);
+    await page.evaluate(() => { document.getElementById('sheet').classList.remove('on'); document.getElementById('overlay').classList.remove('on'); const t = document.querySelector('#tabs .tab[data-tab="shopping"]'); if (t) t.click(); });
+    await page.waitForFunction(() => document.getElementById('promoChip'), { timeout: 30000 }).catch(() => {});
+    const chip = await page.evaluate(() => { const c = document.getElementById('promoChip'); return { has: !!c, shown: c ? getComputedStyle(c).display !== 'none' : false, now: !!document.getElementById('promoChipNow'), count: c ? (document.getElementById('promoChipCount') || {}).textContent : '', paid: (typeof _planPaid === 'function') ? _planPaid() : 'missing' }; });
+    check(chip.has && chip.shown && chip.now && chip.count === '1' && chip.paid === false, `promo chip on Town: shown ${chip.shown}, live dot ${chip.now}, count ${chip.count}, _planPaid() ${chip.paid}`);
+    await page.evaluate(() => { const c = document.getElementById('promoChip'); if (c) c.click(); }); await sleep(900);
+    const sh = await page.evaluate(() => { const sc = document.getElementById('sc'); return { on: document.getElementById('sheet').classList.contains('on'), text: sc.innerText, blocks: sc.querySelectorAll('[data-commerce="promo"]').length, link: [...sc.querySelectorAll('a[href]')].some(a => /gohawaii\.com/.test(a.href)) }; });
+    check(sh.on && /From GoHawaii/.test(sh.text) && /North Shore shuttle/.test(sh.text) && !/sunset lei/.test(sh.text) && sh.blocks === 1 && sh.link, `promo sheet: From GoHawaii, the in-hours promotion only (${sh.blocks} promo block), link out`);
+    await page.screenshot({ path: path.join(OUT, 'gohawaii-kauai-promo-sheet.png') });
+    fs.writeFileSync(path.join(OUT, 'gohawaii-rendered-kauai-promo-visible.html'), await page.evaluate(() => {
+      const c = document.documentElement.cloneNode(true); c.querySelectorAll('script, noscript').forEach(n => n.remove());
+      const w = document.createTreeWalker(c, NodeFilter.SHOW_COMMENT), dead = []; while (w.nextNode()) dead.push(w.currentNode); dead.forEach(n => n.remove()); return c.outerHTML; }));
+    await page.evaluate(() => { if (typeof closeSheet === 'function') closeSheet(); }); await sleep(1000);   // the close animation clears the sheet a moment later
+    await page.evaluate(() => ghOpenHub()); await sleep(700);
+    const hub = await page.evaluate(() => { const sc = document.getElementById('sc'); return { text: sc.innerText, blocks: sc.querySelectorAll('[data-commerce="promo"]').length }; });
+    check(/today from gohawaii/i.test(hub.text) && /North Shore shuttle/.test(hub.text) && !/sunset lei/.test(hub.text) && hub.blocks === 1, 'GoHawaii page lists the in-hours promotion, with its hours');
+    if (/Hawaiʻi time/.test(hub.text)) console.log('  ok   hours line reads in Hawaiʻi time');
+    await page.screenshot({ path: path.join(OUT, 'gohawaii-kauai-promo-hub.png') });
+    const bs = await page.evaluate(() => { if (typeof closeSheet === 'function') closeSheet(); const b = (typeof B !== 'undefined' ? B : []).find(x => !x.warning_only && scored[x.id] && ['red','yellow','warning'].includes(scored[x.id].status)) || (typeof B !== 'undefined' ? B[0] : null); if (!b) return null; openSheet(b.id); return { name: b.name, status: (scored[b.id] || {}).status }; });
+    await sleep(1500);
+    const bt = await page.evaluate(() => document.getElementById('sc').innerText);
+    check(!!bs && !/North Shore shuttle|From GoHawaii|Promotion/.test(bt), `beach sheet ${bs ? bs.name + ' (' + bs.status + ')' : ''} carries no promotion`);
+    const bad4 = reqs.filter(u => FORBIDDEN.test(u));
+    check(bad4.length === 0, 'no checkout, partner-page or telemetry request with promotions on');
+    await closeCtx(ctx);
+  }
+
   await browser.close();
   console.log(`\n${fails.length ? 'FAIL' : 'PASS'}: ${fails.length} failure(s)`);
   fails.forEach(f => console.log('  - ' + f));

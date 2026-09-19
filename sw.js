@@ -19,7 +19,7 @@
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
 // v319 is claimed on work/reserve-links; this branch skips to v320.
-const CACHE_VERSION = 'v343-2026-09-19-app-update';   // commerce line: advisories 702d8f7 (Maʻemaʻe data fixes) merged
+const CACHE_VERSION = 'v344-2026-09-19-app-update';   // commerce line: advisories 702d8f7 (Maʻemaʻe data fixes) merged
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 

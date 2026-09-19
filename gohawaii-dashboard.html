@@ -81,18 +81,26 @@
   .mapwrap{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);min-height:640px;background:#a9c9dd}
   #map{position:absolute;inset:0}
   .legend{position:absolute;left:16px;top:16px;z-index:500;background:rgba(255,255,255,.97);border-radius:14px;padding:12px;width:310px;box-shadow:0 8px 24px rgba(15,42,51,.16)}
-  .legend h3{margin:0 0 6px;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+  .legend h3{margin:0 0 6px;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .legend h3 .smp{letter-spacing:.06em;margin:0}
+  .ptimes{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+  .ptimes input[type=time]{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);margin-left:6px}
+  .checks.days label{min-width:0}
   .feednote{font-size:12px;border-radius:9px;padding:8px 10px;margin:6px 0 4px;background:var(--yelbg);color:#78350f;line-height:1.4}
-  .islcard{display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:9px 6px;border-top:1px solid var(--hair);border-radius:10px;cursor:pointer}
-  .islcard:first-of-type{border-top:0}
-  .islcard:hover,.islcard.on{background:#f3f8fa}
-  .islcard b{font-size:14px}
-  .islcard .s{font-size:11.5px;font-weight:700;color:var(--mute);white-space:nowrap}
+  #islCards{display:grid;gap:8px;background:var(--tint);border-radius:12px;padding:8px}
+  .islcard{display:grid;grid-template-columns:44px 1fr auto;gap:3px 10px;padding:10px 10px 10px 8px;background:#fff;border:1px solid var(--line);border-radius:12px;cursor:pointer;box-shadow:0 1px 2px rgba(15,42,51,.06)}
+  .islcard:hover{border-color:#b9cbd3}
+  .islcard.on{border-color:var(--sea);box-shadow:0 0 0 2px var(--tint),0 2px 6px rgba(15,42,51,.10)}
+  .islcard .ishape{grid-column:1;grid-row:1/span 4;width:44px;height:30px;align-self:start;margin-top:2px}
+  .islcard .ishape path{fill:#dbe9ee;stroke:var(--sea);stroke-width:1.2;stroke-linejoin:round}
+  .islcard.on .ishape path{fill:var(--sea);stroke:var(--rail)}
+  .islcard b{font-size:14px;grid-column:2;white-space:nowrap}
+  .islcard .s{font-size:11.5px;font-weight:700;color:var(--mute);text-align:right;max-width:120px;line-height:1.2}
   .islcard .s.red{color:var(--red)}.islcard .s.yellow{color:var(--yel)}.islcard .s.down{color:#92400e}
-  .islcard .vbar,.islcard .m{grid-column:1/-1}
-  .islcard .m{font-size:11.5px;color:var(--mute)}
-  .vbar{display:flex;height:6px;border-radius:99px;overflow:hidden;background:var(--hair);gap:2px}
-  .vbar i{display:block}.vbar .g{background:var(--good)}.vbar .y{background:var(--amber)}.vbar .r{background:var(--red)}.vbar .u{background:var(--steel)}
+  .islcard .i,.islcard .m,.islcard .ulink{grid-column:2/-1}
+  .islcard .i{font-size:12px;color:var(--ink2);line-height:1.35}
+  .islcard .i b{font-size:12px;color:var(--ink)}
+  .islcard .m{font-size:11px;color:var(--mute)}
   .stamp{position:absolute;right:16px;top:16px;z-index:500;background:rgba(10,39,49,.9);color:#e4f1f5;border-radius:10px;padding:8px 12px;font-size:12px}
   .stamp b{color:var(--foam)}
   .mk{transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;cursor:pointer;padding-bottom:var(--s,0px)}
@@ -105,8 +113,9 @@
   .mk .use{appearance:none;display:block;width:100%;margin:4px 0 0;padding:4px 0 0;border:0;border-top:1px solid var(--hair);background:transparent;font:600 11px Inter,sans-serif;color:var(--sea);text-align:left;cursor:pointer}
   .mk .use b{font-size:12.5px;color:var(--ink)}
   .mk .use:hover b,.mk .use:focus-visible b{text-decoration:underline}
-  .islcard .ulink{grid-column:1/-1;appearance:none;border:0;background:transparent;padding:2px 0 0;margin:0;font:600 11.5px Inter,sans-serif;color:var(--sea);text-align:left;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
-  .islcard .ulink b{color:var(--ink)}
+  .islcard .ulink{appearance:none;border:0;background:transparent;padding:2px 0 0;margin:0;font:600 11.5px Inter,sans-serif;color:var(--sea);text-align:left;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .islcard .ulink{flex-wrap:wrap;row-gap:2px}
+  .islcard .ulink b{color:var(--ink);white-space:nowrap}
   .islcard .ulink:hover,.islcard .ulink:focus-visible{text-decoration:underline}
 
   /* Visitors view: sample usage and intent graphs (county set per island, state set across all four) */
@@ -368,6 +377,7 @@
     <button type="button" data-view="now" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lbl">Overview</span></button>
     <button type="button" data-view="adv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span class="lbl">Advisories</span><span class="dot" id="advDot" hidden></span></button>
     <button type="button" data-view="feat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="lbl">Events</span></button>
+    <button type="button" data-view="promo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span class="lbl">Promotions</span></button>
     <button type="button" data-view="use"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M6 16V9M11 16V4M16 16v-6M21 16v-3"/></svg><span class="lbl">Visitors</span></button>
     <button type="button" data-view="rep"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="lbl">Report</span></button>
     <button type="button" data-view="prev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg><span class="lbl">Preview</span></button>
@@ -395,7 +405,7 @@
       <div class="stage">
         <div class="mapwrap">
           <div id="map" role="img" aria-label="Map of Kauaʻi, Oʻahu, Maui and Hawaiʻi Island with the live advisory level on each"></div>
-          <div class="legend"><h3>Islands today</h3><div id="islCards"></div></div>
+          <div class="legend"><h3>Islands today <span class="smp" title="Visitor figures are illustrative; this review build counts nothing">Visitor figures sample</span></h3><div id="islCards"></div></div>
           <div class="stamp" id="stamp">Checking the sources...</div>
         </div>
         <div class="side2">
@@ -506,6 +516,36 @@
     </section>
 
     <!-- PREVIEW -->
+    <!-- PROMOTIONS: GoHawaii's own timed notices -->
+    <section class="view" id="v-promo" aria-label="Promotions" hidden>
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card"><h2>Your promotions</h2><p class="sub">On now, outside their hours, scheduled, and recently ended. While its hours are on, a promotion shows on the app's Town tab as a chip, once per visit as a pop-up, and on the GoHawaii page.</p><div id="promoList"></div></div>
+        <div class="card">
+          <h2>Post a promotion</h2>
+          <p class="sub">A timed notice from GoHawaii: a shuttle, a program, a seasonal special. It runs only in the hours and days you set, Hawaiʻi time. In the review build a post stays in this browser.</p>
+          <form id="promoForm" autocomplete="off">
+            <label class="f" for="pTitle">Headline</label>
+            <input type="text" id="pTitle" maxlength="80" required placeholder="Mālama Hawaiʻi beach cleanup at Hanalei">
+            <label class="f" for="pBody">One line of text</label>
+            <input type="text" id="pBody" maxlength="140" placeholder="Meet at the pier, gloves and bags provided. Details on the GoHawaii Mālama page.">
+            <label class="f" for="pLink">Link <small>(https)</small></label>
+            <input type="url" id="pLink" maxlength="300" placeholder="https://www.gohawaii.com/malama">
+            <label class="f">Islands</label>
+            <div class="checks" id="pIsl"></div>
+            <label class="f">Hours</label>
+            <div class="chips" id="pWin"><button type="button" data-v="all" aria-pressed="true">All day</button><button type="button" data-v="set" aria-pressed="false">Set hours</button></div>
+            <div id="pWinWrap" style="display:none;margin-top:8px"><div class="ptimes"><label>From <input type="time" id="pWinStart" value="07:00"></label><label>To <input type="time" id="pWinEnd" value="16:00"></label></div><div class="note" style="margin-top:6px">Hawaiʻi time. Hours that end before they start run past midnight.</div></div>
+            <label class="f">Days</label>
+            <div class="checks days" id="pDays"></div>
+            <label class="f">Runs for</label>
+            <div class="chips" id="pEnd"><button type="button" data-v="24" aria-pressed="false">1 day</button><button type="button" data-v="72" aria-pressed="false">3 days</button><button type="button" data-v="168" aria-pressed="true">1 week</button><button type="button" data-v="336" aria-pressed="false">2 weeks</button><button type="button" data-v="720" aria-pressed="false">30 days</button></div>
+            <div class="formfoot"><button type="submit" class="btn pri">Post now</button><button type="button" class="btn ghost" id="pSample">Fill in a sample</button></div>
+            <div class="msg" id="pMsg" role="status"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <section class="view" id="v-use" aria-label="Visitors and intent" hidden>
       <div class="umode">
         <span class="rb samp">Sample data. Illustrative figures, not a report. This review build counts nothing, so live numbers begin once counting is switched on for the GoHawaii link.</span>
@@ -746,7 +786,7 @@
   try { state.role = sessionStorage.getItem('ghd_role') || 'Editor'; } catch(e){}
   try { var q = new URLSearchParams(location.search); if(ISL[q.get('island')]) state.isl = q.get('island'); if(q.get('view')) state.view = q.get('view'); } catch(e){}
   try { state.verd = JSON.parse(sessionStorage.getItem('ghd_verdicts') || '{}') || {}; } catch(e){}
-  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', use: 'Visitors and intent', rep: 'Monthly report', prev: 'Visitor preview', log: 'Activity log' };
+  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', promo: 'Promotions', use: 'Visitors and intent', rep: 'Monthly report', prev: 'Visitor preview', log: 'Activity log' };
 
   function now(){ return Date.now(); }
   function uid(){ return 's' + now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -807,13 +847,14 @@
     if(!TITLES[v]) v = 'now';
     state.view = v;
     Array.prototype.forEach.call(document.querySelectorAll('.rail button[data-view]'), function(b){ if(b.dataset.view === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
-    ['now','adv','feat','use','rep','prev','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
+    ['now','adv','feat','promo','use','rep','prev','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
     $('viewTitle').textContent = TITLES[v];
     $('islPick').hidden = v === 'now' || v === 'log';
     if(v === 'now'){ setTimeout(function(){ if(map) map.invalidateSize(); }, 50); loadNowFrame(); }
     if(v === 'prev') loadPreview();
     if(v === 'use') renderUse();
     if(v === 'rep') renderReport();
+    if(v === 'promo') renderPromos();
     if(v === 'feat') loadLayer(state.isl).then(renderEvents);
     window.scrollTo(0, 0);
   }
@@ -866,12 +907,12 @@
     $('probe').setAttribute('src', '/?ref=gohawaii&island=' + k + '&gh_probe=1');
     probeTimer = setTimeout(function(){ if(!fresh(k)) state.verd[k] = { failed: true, at: now() }; renderLegend(); probeNext(); }, 45000);
   }
-  function verdBar(k){
+  // Beach status, one muted line under the intent (the verdict bar and its long counts line went on 2026-09-19).
+  function verdLine(k){
     var v = state.verd[k];
-    if(!v || v.failed) return '<div class="vbar"><i class="u" style="flex:1"></i></div><span class="m">' + (v && v.failed ? 'Beach verdicts could not be read' : 'Reading beach verdicts...') + extraEv(k) + '</span>';
-    if(!(v.green + v.yellow + v.red) && v.nodata) return '<div class="vbar"><i class="u" style="flex:1"></i></div><span class="m">No live surf data, so no beach verdicts right now' + extraEv(k) + '</span>';
-    return '<div class="vbar"><i class="g" style="flex:' + v.green + '"></i><i class="y" style="flex:' + v.yellow + '"></i><i class="r" style="flex:' + v.red + '"></i></div>'
-      + '<span class="m">' + v.green + ' calmer · ' + v.yellow + ' use caution · ' + v.red + ' not recommended' + extraEv(k) + '</span>';
+    if(!v || v.failed) return (v && v.failed ? 'Beach verdicts could not be read' : 'Reading beach verdicts...') + extraEv(k);
+    if(!(v.green + v.yellow + v.red) && v.nodata) return 'No live verdicts right now' + extraEv(k);
+    return v.green + ' calmer · ' + v.yellow + ' caution · ' + v.red + ' not recommended' + extraEv(k);
   }
   function extraEv(k){ var n = eventsThisWeek(k); return n === null ? '' : ' · ' + n + ' event' + (n === 1 ? '' : 's') + ' this week'; }
 
@@ -921,12 +962,26 @@
     if(h === false) return 'The Hawaiʻi Tourism Authority could not be reached on the last check.';
     return '';
   }
+  // Island silhouettes: the app's own coastlines (ISLAND_OUTLINES in index.html), scaled into a 48 x 32 box.
+  var ISL_SHAPE = {"kauai": "M6.3 17.6L13.2 23.0L15.9 24.3L16.5 25.4L17.1 26.2L19.1 27.6L20.0 27.3L20.7 27.6L21.7 28.1L22.7 28.4L23.8 28.5L24.7 28.6L26.6 28.6L27.4 28.8L28.2 29.0L29.0 29.2L29.6 29.5L30.6 29.8L31.8 29.4L33.2 28.4L33.8 27.8L35.2 26.5L37.8 24.2L37.1 23.7L38.3 23.0L39.2 20.5L39.0 19.9L38.5 18.1L38.7 16.4L40.0 15.1L40.1 13.9L40.9 12.8L41.4 11.8L41.7 9.5L41.7 8.6L40.3 6.4L38.9 4.2L37.4 3.2L35.4 2.5L34.8 2.4L34.2 2.0L30.3 2.3L27.8 2.2L26.2 4.0L24.4 3.1L20.7 2.8L19.4 3.8L18.1 4.5L17.1 5.4L14.7 6.9L12.0 7.7L6.5 15.7Z", "maui": "M8.5 2.6L8.9 2.0L9.6 2.1L10.3 2.9L12.3 3.8L13.3 6.1L16.4 10.6L21.5 9.0L22.4 8.2L25.0 7.2L26.0 7.6L27.2 7.3L27.9 8.0L28.5 7.7L30.4 8.3L30.4 9.2L31.1 9.2L31.2 9.8L34.1 12.4L36.0 12.6L37.0 14.7L38.5 14.4L40.2 15.7L43.4 16.7L44.5 18.4L44.1 21.7L40.6 25.3L39.0 25.3L35.5 27.2L33.7 27.2L32.6 26.7L31.6 26.9L26.3 29.5L23.5 29.5L22.0 30.0L19.8 29.5L19.7 28.8L18.9 28.8L18.1 28.2L17.8 26.1L18.2 25.2L17.9 22.2L17.0 17.5L14.8 16.4L12.8 17.7L7.4 15.1L4.1 10.9L4.2 9.9L3.5 9.0L4.6 5.3L5.4 3.7L6.6 3.2L6.8 2.4L8.5 2.6Z", "oahu": "M19.5 27.0L15.6 27.3L15.0 26.0L15.6 25.8L14.8 25.5L14.0 22.9L11.8 21.0L11.0 18.3L8.7 15.9L8.6 12.6L6.0 10.4L14.8 9.8L15.9 9.1L15.8 8.5L21.0 2.8L23.8 2.0L26.4 5.8L26.4 7.1L29.1 10.5L29.0 11.4L30.3 11.4L31.4 13.2L31.3 14.3L30.5 15.1L31.1 17.6L32.6 18.2L34.3 20.3L35.0 19.9L35.1 17.7L37.4 17.8L37.0 21.0L37.9 21.1L38.7 22.3L38.7 24.1L39.6 25.4L42.0 26.5L41.9 27.3L39.2 29.6L38.4 29.6L38.5 28.5L35.5 28.7L32.9 30.0L30.9 28.0L28.3 27.0L27.5 25.6L26.7 26.3L27.1 27.0L24.8 27.0L24.8 26.2L23.9 25.7L19.5 27.0Z", "hawaii": "M17.4 2.5L20.9 5.0L21.6 4.9L23.9 5.6L27.0 7.2L28.5 8.2L30.8 10.6L30.8 13.2L32.4 13.0L32.9 14.0L32.8 15.0L33.5 15.3L34.4 16.5L36.2 17.5L35.7 18.7L32.9 21.1L29.4 22.7L26.7 22.8L25.5 24.0L24.4 24.4L23.7 25.2L22.5 25.6L21.6 26.6L21.7 27.3L20.9 28.3L20.8 28.9L19.4 30.0L18.4 28.9L16.8 28.0L15.3 27.5L14.8 26.6L14.6 25.8L15.2 21.1L14.5 19.2L14.5 18.4L13.9 18.2L13.5 15.7L13.1 15.0L12.4 14.8L11.8 13.2L12.1 12.2L13.5 10.7L14.5 10.5L15.1 9.0L16.3 8.0L16.4 6.9L15.6 6.0L15.0 4.6L14.9 3.4L15.2 2.3L15.9 2.0L17.4 2.5Z"};
+  function islSvg(k){ return '<svg class="ishape" viewBox="0 0 48 32" aria-hidden="true"><path d="' + (ISL_SHAPE[k] || '') + '"/></svg>'; }
   function renderLegend(){
     var fn = feedNote();
     $('islCards').innerHTML = (fn ? '<div class="feednote">' + esc(fn) + '</div>' : '') + ORDER.map(function(k){
       var s = islState(k);
-      return '<div class="islcard' + (k === state.isl ? ' on' : '') + '" data-isl="' + k + '" role="button" tabindex="0"><b>' + ISL[k] + '</b><span class="s ' + s.c + '">' + esc(s.t) + '</span>' + verdBar(k) + '<button type="button" class="ulink" data-use="' + k + '"><b>' + fmt(USE[k].perDay) + '</b> checks a day · visitor graphs</button></div>';
+      return '<div class="islcard' + (k === state.isl ? ' on' : '') + '" data-isl="' + k + '" role="button" tabindex="0">' + islSvg(k) + '<b>' + ISL[k] + '</b><span class="s ' + s.c + '">' + esc(s.t) + '</span>'
+        + '<button type="button" class="ulink" data-use="' + k + '"><b>About ' + fmt(USE[k].perDay) + '</b> checks a day · visitor graphs</button>'
+        + '<span class="i">' + intentLine(k) + '</span>'
+        + '<span class="m">' + verdLine(k) + '</span></div>';
     }).join('');
+    // Beach names for the intent line come from the app's own list; paint again once it lands.
+    if(!state.beaches && !state._bLoading){ state._bLoading = true; loadBeaches().then(function(){ renderLegend(); }); }
+  }
+  // Intent, one line (Nick, 2026-09-19: the island list leads with where visitors are heading, not the verdict mix):
+  // the most-checked beach, then the unguarded share on Kauaʻi or the busiest district elsewhere. Sample, like the Visitors view.
+  function intentLine(k){
+    var u = USE[k], top = k === 'kauai' ? u.beaches[0][0] : u.beaches[0];
+    return 'Most checked: <b>' + esc(bname(k, top)) + '</b> · ' + (k === 'kauai' ? '<b>' + u.unguardedPct + '%</b> at shoreline with no tower' : '<b>' + u.districts[0][1] + '%</b> in ' + esc(u.districts[0][0]));
   }
   $('islCards').addEventListener('click', function(e){ var u = e.target.closest('[data-use]'); if(u){ pickIsland(u.dataset.use); show('use'); return; } var c = e.target.closest('[data-isl]'); if(c) pickIsland(c.dataset.isl); });
   $('islCards').addEventListener('keydown', function(e){ if(e.key !== 'Enter' && e.key !== ' ') return; var c = e.target.closest('[data-isl]'); if(c){ e.preventDefault(); pickIsland(c.dataset.isl); } });
@@ -1019,7 +1074,8 @@
     meta.push(s === 'ended' ? 'ended ' + A.hst(it.endedAt || it.ends, true) : A.until(it));
     meta.push('by ' + it.by + (it.approvedBy ? ', approved by ' + it.approvedBy : ''));
     if(seen) meta.push('shown ' + seen + ' time' + (seen > 1 ? 's' : '') + ' in this browser');
-    return '<div class="row"><div class="x"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">' + (it.kind === 'feature' ? '<span class="lvl feat">' + esc(it.sub || 'Featured') + '</span>' : lvChip(it.level)) + stChip(s) + '</div>'
+    if(it.kind === 'promo'){ meta.splice(1, 0, A.hoursLabel(it)); if(s === 'live' && !A.inDaily(it)) meta.push('outside its hours right now'); if(s === 'live' || s === 'sched') acts.push('<button class="btn ghost" data-act="dup" data-id="' + it.id + '">Duplicate</button>'); }
+    return '<div class="row"' + (it.kind === 'promo' ? ' data-commerce="promo"' : '') + '><div class="x"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">' + (it.kind === 'feature' ? '<span class="lvl feat">' + esc(it.sub || 'Featured') + '</span>' : it.kind === 'promo' ? '<span class="lvl feat">Promotion</span>' : lvChip(it.level)) + (it.kind === 'promo' && s === 'live' && !A.inDaily(it) ? '<span class="lvl draft">Outside its hours</span>' : stChip(s)) + '</div>'
       + '<b>' + esc(it.title) + smp(it) + '</b><div class="m">' + esc(meta.join(' · ')) + '</div></div><div class="acts2">' + acts.join('') + '</div></div>';
   }
   document.addEventListener('click', function(e){
@@ -1027,9 +1083,10 @@
     var st = A.load(), it = st.items.filter(function(x){ return x.id === b.dataset.id; })[0]; if(!it) return;
     var a = b.dataset.act;
     if(a === 'preview'){ state.previewId = it.status === 'live' ? '' : it.id; state.isl = (it.islands && it.islands[0] && ISL[it.islands[0]]) ? it.islands[0] : state.isl; islPick(); show('prev'); return; }
+    if(a === 'dup'){ promoFill(it); show('promo'); msg('pMsg', 'ok', 'Copied into the form. Change what you need and post it.'); return; }
     if(a === 'approve'){ if(it.by === state.role) return; it.status = 'live'; it.approvedBy = state.role; it.approvedAt = iso(now()); log(st, 'Approved red advisory', it); }
     if(a === 'reject'){ it.status = 'draft'; log(st, 'Sent back to draft', it); }
-    if(a === 'end'){ it.status = 'ended'; it.endedAt = iso(now()); log(st, it.kind === 'feature' ? 'Ended feature' : 'Ended advisory', it); }
+    if(a === 'end'){ it.status = 'ended'; it.endedAt = iso(now()); log(st, it.kind === 'feature' ? 'Ended feature' : it.kind === 'promo' ? 'Ended promotion' : 'Ended advisory', it); }
     if(a === 'publish'){ if(it.level === 'red' && it.kind === 'advisory'){ it.status = 'pending'; log(st, 'Sent red advisory for approval', it); } else { it.status = 'live'; log(st, 'Posted', it); } }
     A.save(st); renderAll();
   });
@@ -1207,6 +1264,47 @@
       img: g.img || '', link: g.src_url || '', body: '', islands: [state.isl], starts: iso(now()), ends: iso(end), status: 'live', by: state.role, created: iso(now()) };
     st.items.push(it); log(st, it.sub === 'Event' ? 'Featured event' : 'Featured Mālama program', it); A.save(st); renderAll();
   });
+  // ---- Promotions: GoHawaii's own timed notices, kind 'promo' in the shared engine (Nick, 2026-09-19) ----
+  var DAYN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], promoSampleFlag = false;
+  state.pWin = 'all'; state.pEnd = '168';
+  function dayChecks(sel){ $('pDays').innerHTML = [1,2,3,4,5,6,0].map(function(d){ return '<label><input type="checkbox" value="' + d + '"' + (sel.indexOf(d) >= 0 ? ' checked' : '') + '> ' + DAYN[d] + '</label>'; }).join(''); }
+  function readDays(){ return Array.prototype.map.call($('pDays').querySelectorAll('input:checked'), function(i){ return +i.value; }); }
+  function chipSet(id, key, v){ Array.prototype.forEach.call($(id).querySelectorAll('button[data-v]'), function(x){ x.setAttribute('aria-pressed', String(x.dataset.v === v)); }); state[key] = v; }
+  function winSet(w){ var set = !!(w && w.start && w.end); chipSet('pWin', 'pWin', set ? 'set' : 'all'); $('pWinWrap').style.display = set ? 'block' : 'none'; if(set){ $('pWinStart').value = w.start; $('pWinEnd').value = w.end; } }
+  function promoStatus(it){ var s = status(it); return (s === 'live' && !A.inDaily(it)) ? 'off' : s; }
+  function renderPromos(){
+    var st = A.load(), P = st.items.filter(function(i){ return i.kind === 'promo'; }), order = { live:0, off:1, sched:2, draft:3, ended:4 };
+    P.sort(function(a, b){ return (order[promoStatus(a)] - order[promoStatus(b)]) || ((Date.parse(b.created) || 0) - (Date.parse(a.created) || 0)); });
+    $('promoList').innerHTML = P.length ? P.map(rowHtml).join('') : '<div class="empty">No promotions yet. Post one on the right, or fill in the sample.</div>';
+  }
+  function promoFill(it){
+    $('pTitle').value = it.title || ''; $('pBody').value = it.body || ''; $('pLink').value = it.link || '';
+    islChecks('pIsl', it.islands && it.islands.length ? it.islands : [state.isl]); dayChecks(it.days && it.days.length ? it.days : [0,1,2,3,4,5,6]); winSet(it.window);
+  }
+  chipGroup('pWin', 'pWin', function(v){ $('pWinWrap').style.display = v === 'set' ? 'block' : 'none'; });
+  chipGroup('pEnd', 'pEnd');
+  $('pSample').addEventListener('click', function(){
+    promoFill({ title: 'Sample: Mālama Hawaiʻi beach cleanup at Hanalei', body: 'Meet at the pier at 8am, gloves and bags provided. Details on the GoHawaii Mālama page.', link: 'https://www.gohawaii.com/malama', islands: ['kauai'], days: [6, 0], window: { start: '07:00', end: '11:00' } });
+    chipSet('pEnd', 'pEnd', '168'); promoSampleFlag = true; msg('pMsg', 'ok', 'Sample filled in. Post it to see it in the app on this browser.');
+  });
+  $('promoForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var title = $('pTitle').value.trim(), link = $('pLink').value.trim(), islands = readIsl('pIsl'), days = readDays();
+    if(!title){ msg('pMsg', 'err', 'Add a headline.'); return; }
+    if(link && !/^https:\/\/[^\s]+$/i.test(link)){ msg('pMsg', 'err', 'The link has to start with https://'); return; }
+    if(!islands.length){ msg('pMsg', 'err', 'Pick at least one island.'); return; }
+    if(!days.length){ msg('pMsg', 'err', 'Pick at least one day.'); return; }
+    var win = null;
+    if(state.pWin === 'set'){ win = { start: $('pWinStart').value, end: $('pWinEnd').value }; if(!/^\d{2}:\d{2}$/.test(win.start) || !/^\d{2}:\d{2}$/.test(win.end) || win.start === win.end){ msg('pMsg', 'err', 'Set a start and an end hour.'); return; } }
+    var st = A.load();
+    var it = { id: uid(), kind: 'promo', src: 'staff', srcName: 'GoHawaii', title: title, body: $('pBody').value.trim(), link: link, islands: islands, beaches: [],
+      window: win, days: days.length === 7 ? null : days, starts: iso(now()), ends: iso(now() + (+state.pEnd) * 3600e3), status: 'live', by: state.role, created: iso(now()), sample: promoSampleFlag };
+    promoSampleFlag = false;
+    st.items.push(it); log(st, 'Posted promotion', it); A.save(st);
+    $('promoForm').reset(); islChecks('pIsl', [state.isl]); dayChecks([0,1,2,3,4,5,6]); winSet(null); chipSet('pEnd', 'pEnd', '168');
+    msg('pMsg', 'ok', 'Posted. It shows in the app on this browser while its hours are on.'); renderAll();
+  });
+
   $('campForm').addEventListener('submit', function(e){
     e.preventDefault();
     var title = $('cTitle').value.trim(), link = $('cLink').value.trim(), islands = readIsl('cIsl');
@@ -1621,11 +1719,11 @@
     var st = A.load();
     var pend = st.items.filter(function(i){ return i.status === 'pending'; }).length;
     $('advDot').hidden = !pend;
-    renderNow(); paintMap(); renderAdvLists(); renderEvents(); renderLog();
+    renderNow(); paintMap(); renderAdvLists(); renderEvents(); renderPromos(); renderLog();
   }
 
   window.addEventListener('storage', function(e){ if(e.key === A.KEY) renderAll(); });
-  islPick(); rolePaint(); islChecks('fIsl', [state.isl]); islChecks('cIsl', [state.isl]); lvPaint();
+  islPick(); rolePaint(); islChecks('fIsl', [state.isl]); islChecks('cIsl', [state.isl]); islChecks('pIsl', [state.isl]); dayChecks([0,1,2,3,4,5,6]); lvPaint();
   initMap();
   show(state.view);
   renderAll(); check();
