@@ -1346,7 +1346,7 @@
     maui:   [['Pīpīwai Trail (Kīpahulu)', 1180, 'remote'], ['Waiheʻe Ridge', 760, ''], ['ʻĪao Valley', 700, ''], ['Kapalua Coastal Trail', 610, ''], ['Lahaina Pali', 330, 'steep']],
     hawaii: [['Kīlauea Iki', 1240, ''], ['Pololū Valley', 690, 'steep'], ['Waipiʻo Valley lookout', 620, ''], ['Kaʻawaloa (Captain Cook)', 540, 'remote'], ['Papakōlea (green sand)', 470, 'remote']]
   };
-  var WEATHER = { labels: ['Beaches', 'Trails', 'Town', 'Family', 'Tours'], dry: [58, 9, 17, 11, 5], rain: [31, 4, 33, 24, 8], cols: ['sea', 'good', 'gold', 'steel', 'red'] };
+  var WEATHER = { labels: ['Beaches', 'Trails', 'Town', 'Family', 'Tours'], dry: [58, 9, 17, 11, 5], rain: [31, 4, 33, 24, 8], cols: ['sea', 'good', 'gold', 'steel', 'sample'] };
   var CATEG = [['Dining', 34], ['Activities and tours', 27], ['Stays', 14], ['Events', 11], ['Culture and scenic', 9], ['Wellness', 3], ['Golf', 2]];
   var MARKETS = [['US West', 38], ['US East and Central', 27], ['Japan', 9], ['Canada', 8], ['Europe', 7], ['Australia and NZ', 5], ['Other', 6]];
   var ACT104 = [['Reef-safer', 36, 'good'], ['Caution', 41, 'gold'], ['Avoid (Act 104 filter)', 23, 'red']];
@@ -1382,6 +1382,9 @@
   function trailRows(k){ return TRAILS[k].map(function(t){ return { lab: t[0], v: t[1], tag: t[2], cls: t[2] ? 'gold' : '' }; }).sort(function(a, b){ return b.v - a.v; }); }
   function retailRows(k){ return RETAIL[k].map(function(r){ return r[2] ? { lab: r[0], v: 0, txt: 'suppressed', tag: 'under ten', cls: 'steel' } : { lab: r[0], v: r[1] }; }); }
   function reefRows(k){ return REEF[k].map(function(r){ return { lab: r[0], v: r[1] }; }); }
+  function wxStacks(){
+    return '<div class="uduo"><div class="col"><h5>Dry day</h5>' + stackBar(WEATHER.labels.map(function(l, i){ return [l, WEATHER.dry[i], WEATHER.cols[i]]; })) + '</div><div class="col"><h5>Rainy day</h5>' + stackBar(WEATHER.labels.map(function(l, i){ return [l, WEATHER.rain[i], WEATHER.cols[i]]; })) + '</div></div>';
+  }
   function morningShare(){ var v = HOURS.values; return Math.round(v.slice(2, 5).reduce(add, 0) / v.reduce(add, 0) * 100); }
   function xTable(){
     var ms = morningShare();
@@ -1407,7 +1410,7 @@
     $('uTrailH').textContent = 'Trail and hike intent · ' + name;
     $('uTrail').innerHTML = hrows(tr);
     $('uTrailCap').innerHTML = '<b>' + esc(tr[0].lab) + '</b> leads with about ' + fmt(tr[0].v) + ' opens in the sample month. Remote and steep trails are tagged; one of those rising week over week is the row to watch.';
-    $('uWx').innerHTML = '<div class="uduo"><div class="col"><h5>Dry day</h5>' + stackBar(WEATHER.labels.map(function(l, i){ return [l, WEATHER.dry[i], WEATHER.cols[i]]; })) + '</div><div class="col"><h5>Rainy day</h5>' + stackBar(WEATHER.labels.map(function(l, i){ return [l, WEATHER.rain[i], WEATHER.cols[i]]; })) + '</div></div>';
+    $('uWx').innerHTML = wxStacks();
     $('uWxCap').innerHTML = 'On a rainy day the beach share falls from <b>' + WEATHER.dry[0] + '% to ' + WEATHER.rain[0] + '%</b> and Town rises from <b>' + WEATHER.dry[2] + '% to ' + WEATHER.rain[2] + '%</b>. The island does not stop; it moves indoors and inland.';
     $('uCat').innerHTML = hrows(CATEG.map(function(x){ return { lab: x[0], v: x[1] }; }), true);
     $('uCatCap').innerHTML = '<b>Dining</b> and <b>activities</b> are ' + (CATEG[0][1] + CATEG[1][1]) + '% of GoHawaii listings opened. Events at ' + CATEG[3][1] + '% is the share the Tonight slot in Plan feeds.';
@@ -1474,7 +1477,7 @@
     { id: 'reef', t: 'Reef sampling priority', tier: 3, c: '20', s: '22', st: 'B', own: 'Planning · Resilience · DLNR · DAR', island: true,
       get: function(k){ var rows = reefRows(k); return { kind: 'bars', rows: rows, head: 'Sample ' + rows[0].lab + ' first, then ' + rows[1].lab + ' and ' + rows[2].lab + '. Index, top reef = 100.', top: rows[0].lab, unit: 'first reef to sample' }; } },
     { id: 'weather', t: 'Weather-shift redistribution', tier: 4, c: '23', s: '26', st: 'L', own: 'OED · Parks · Research', island: false,
-      get: function(){ var rows = WEATHER.labels.map(function(l, i){ return { lab: l, v: WEATHER.rain[i], txt: WEATHER.dry[i] + '% dry, ' + WEATHER.rain[i] + '% rain' }; }); return { kind: 'bars', pct: true, rows: rows, head: 'On a rainy day the beach share falls from ' + WEATHER.dry[0] + '% to ' + WEATHER.rain[0] + '% and Town rises from ' + WEATHER.dry[2] + '% to ' + WEATHER.rain[2] + '%.', top: WEATHER.rain[2], unit: '% Town on a rainy day' }; } },
+      get: function(){ var rows = []; WEATHER.labels.forEach(function(l, i){ rows.push({ lab: l + ', dry day', v: WEATHER.dry[i] }); rows.push({ lab: l + ', rainy day', v: WEATHER.rain[i] }); }); return { kind: 'html', html: wxStacks(), pct: true, rows: rows, head: 'On a rainy day the beach share falls from ' + WEATHER.dry[0] + '% to ' + WEATHER.rain[0] + '% and Town rises from ' + WEATHER.dry[2] + '% to ' + WEATHER.rain[2] + '%.', top: WEATHER.rain[2], unit: '% Town on a rainy day' }; } },
     { id: 'markets', t: 'Source-market mix', tier: 4, c: '25', s: '28', st: 'B', own: 'OED · Research · Brand', island: false,
       get: function(){ return { kind: 'bars', pct: true, rows: MARKETS.map(function(x){ return { lab: x[0], v: x[1] }; }), head: 'US West ' + MARKETS[0][1] + '%, Japan ' + MARKETS[2][1] + '%. A proxy from device language and clock, never location.', top: MARKETS[2][1], unit: '% Japan' }; } },
     { id: 'lang', t: 'Language mix', tier: 4, c: '26', s: '29', st: 'B', own: 'PIO · Comms · HI-EMA', island: false,
@@ -1568,12 +1571,12 @@
     $('rpScopeIsl').textContent = ISL[k];
     var gen = new Date().toLocaleDateString('en-US', { timeZone: 'Pacific/Honolulu', month: 'long', day: 'numeric', year: 'numeric' });
     var checks = (all ? stateTotal() : USE[k].perDay) * days;
-    var h = '<div class="rh"><div><h2>Beach safety, visitors and intent</h2><div class="k">Monthly report · ' + esc(period) + ' · ' + esc(rpScopeLabel()) + ' · generated ' + esc(gen) + '</div></div><div class="mark">GoHawaii · Ocean Safe<br><span class="chip sample">Sample data</span></div></div>';
+    var h = '<div class="rh"><div><h2>Beach safety, visitors and intent</h2><div class="k">Monthly report · ' + esc(period) + ' · ' + esc(rpScopeLabel()) + ' · generated ' + esc(gen) + '</div></div><div class="mark">OceanSafety · GoHawaii<br><span class="chip sample">Sample data</span></div></div>';
     h += '<p class="note" style="margin:0">Illustrative figures. This review build counts nothing; the layout, datasets and exports are what a live month produces once counting is switched on for the GoHawaii link.</p>';
     if(state.rp.sum) h += '<div class="repsum"><div><b>About ' + fmt(checks) + '</b><span>beach checks in ' + esc(period) + ', ' + esc(rpScopeLabel()) + '</span></div><div><b>' + (all || k === 'kauai' ? USE.kauai.unguardedPct + '%' : 'in build') + '</b><span>of checks at shoreline with no tower' + (all ? ' (Kauaʻi)' : '') + '</span></div><div><b>37%</b><span>changed plan after a hazard verdict' + (all || k !== 'kauai' ? ' (Kauaʻi sample)' : '') + '</span></div><div><b>' + REACH[0][1] + '%</b><span>reached by an advisory posted 12 hours ahead</span></div></div>';
     if(!sel.length) h += '<div class="repempty">No datasets selected. Pick a preset or tick datasets on the left.</div>';
     sel.forEach(function(d){ h += rpBlock(d); });
-    h += '<div class="repfoot">Everything here is visitors as a group: counts and percentages. No individual is stored or reported, and any cell under ten is suppressed. Rank tags are positions in the County of Kauaʻi catalogue (33 datasets) and the HTA state catalogue (38). Status: counting today, in build, or waiting on the agency.</div>';
+    h += '<div class="repfoot"><b>OceanSafety</b> for GoHawaii. Everything here is visitors as a group: counts and percentages. No individual is stored or reported, and any cell under ten is suppressed. Rank tags are positions in the County of Kauaʻi catalogue (33 datasets) and the HTA state catalogue (38). Status: counting today, in build, or waiting on the agency.</div>';
     $('repDoc').innerHTML = h;
     $('rpCount').textContent = sel.length + ' of ' + DS.length + ' datasets';
     rpSave();
@@ -1585,7 +1588,7 @@
       (all && d.island ? ORDER : [state.isl]).forEach(function(x){
         var g = d.get(x), isl = d.island ? ISL[x] : 'All four islands';
         if(g.kind === 'table') g.rows.forEach(function(r){ out.push({ dataset: d.t, id: d.id, island: isl, label: r[0], value: r[2], unit: 'during; before ' + r[1] + '; change ' + r[3] }); });
-        else if(g.kind === 'html') ORDER.forEach(function(y){ out.push({ dataset: d.t, id: d.id, island: ISL[y], label: 'checks a day', value: USE[y].perDay, unit: 'checks' }); });
+        else if(d.id === 'xisland') ORDER.forEach(function(y){ out.push({ dataset: d.t, id: d.id, island: ISL[y], label: 'checks a day', value: USE[y].perDay, unit: 'checks' }); });
         else (g.rows || []).forEach(function(r){ var lab = Array.isArray(r) ? r[0] : r.lab, v = Array.isArray(r) ? r[1] : r.v; out.push({ dataset: d.t, id: d.id, island: isl, label: lab, value: v, unit: r.txt ? r.txt : (g.pct || g.kind === 'stack' ? '%' : 'count') }); });
       });
     });
@@ -1600,7 +1603,7 @@
     var all = rpScopeAll();
     return { title: 'Beach safety, visitors and intent', period: rpLabel(), month: state.rp.month, scope: rpScopeLabel(), generated: new Date().toISOString(), sample: true, source: 'GoHawaii Dashboard, review build', privacy: 'Aggregate counts and percentages only; cells under ten suppressed.',
       datasets: rpSelected().map(function(d){ return { id: d.id, title: d.t, tier: TIER_NAMES[d.tier], county_rank: d.c, state_rank: d.s, status: ST_LONG[d.st], owner: d.own, method: METH[d.id] || '',
-        islands: (all && d.island ? ORDER : [state.isl]).map(function(x){ var g = d.get(x); return { island: d.island ? ISL[x] : 'All four islands', headline: g.head, top: g.top, unit: g.unit, rows: g.kind === 'html' ? ORDER.map(function(y){ return { label: ISL[y], value: USE[y].perDay, unit: 'checks a day' }; }) : (g.rows || []).map(function(r){ return Array.isArray(r) ? { label: r[0], value: r[1] } : { label: r.lab, value: r.v, note: r.txt || r.tag || '' }; }) }; }) }; }) };
+        islands: (all && d.island ? ORDER : [state.isl]).map(function(x){ var g = d.get(x); return { island: d.island ? ISL[x] : 'All four islands', headline: g.head, top: g.top, unit: g.unit, rows: d.id === 'xisland' ? ORDER.map(function(y){ return { label: ISL[y], value: USE[y].perDay, unit: 'checks a day' }; }) : (g.rows || []).map(function(r){ return Array.isArray(r) ? { label: r[0], value: r[1] } : { label: r.lab, value: r.v, note: r.txt || r.tag || '' }; }) }; }) }; }) };
   }
   function rpText(){
     var lines = ['Beach safety, visitors and intent. Monthly report, ' + rpLabel() + ', ' + rpScopeLabel() + '. Sample data.', ''];
