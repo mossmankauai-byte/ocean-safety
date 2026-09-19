@@ -64,11 +64,12 @@ async function visible(pg){
     await pg.setViewport({ width: w, height: 900, deviceScaleFactor: 2 });
     await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); } catch(e){} }, JSON.stringify(seed('kauai')));
     await pg.goto(ORIGIN + '/gohawaii-dashboard?view=adv', { waitUntil: 'networkidle2', timeout: 60000 }); await sleep(2500);
-    if(w === 1280){ const f = path.join(OUT, 'gohawaii-dashboard.html'); fs.writeFileSync(f, await visible(pg)); console.log('wrote', f); }
-    for (const v of ['now', 'adv', 'feat']) {
+    for (const v of ['now', 'adv', 'feat', 'use']) {
       await pg.evaluate((v) => document.querySelector('.rail button[data-view="' + v + '"]').click(), v); await sleep(v === 'feat' ? 1500 : 500);
       await shot(pg, path.join(SH, 'review-dashboard-' + v + '-' + w + '.png'), true);
     }
+    // Gate copy after every view has rendered once, so the Visitors view's sample figures are in it.
+    if(w === 1280){ const f = path.join(OUT, 'gohawaii-dashboard.html'); fs.writeFileSync(f, await visible(pg)); console.log('wrote', f); }
     await ctx.close();
   }
   await br.close();

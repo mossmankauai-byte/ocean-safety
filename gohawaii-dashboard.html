@@ -95,11 +95,75 @@
   .vbar i{display:block}.vbar .g{background:var(--good)}.vbar .y{background:var(--amber)}.vbar .r{background:var(--red)}.vbar .u{background:var(--steel)}
   .stamp{position:absolute;right:16px;top:16px;z-index:500;background:rgba(10,39,49,.9);color:#e4f1f5;border-radius:10px;padding:8px 12px;font-size:12px}
   .stamp b{color:var(--foam)}
-  .mk{transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;cursor:pointer}
+  .mk{transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;cursor:pointer;padding-bottom:var(--s,0px)}
+  .mk.dn{transform:translate(-50%,0);flex-direction:column-reverse;padding:var(--s,0px) 0 0}
+  .mk.dn i{border-top-color:transparent;border-bottom-color:#fff}
   .mk div{background:#fff;border-radius:10px;padding:5px 10px;box-shadow:0 4px 14px rgba(0,0,0,.2);font:700 12px Inter,sans-serif;white-space:nowrap;border-left:4px solid var(--c);color:var(--ink)}
   .mk div em{display:block;font-style:normal;font-weight:600;font-size:11px;color:var(--c)}
   .mk i{width:0;height:0;border:6px solid transparent;border-top-color:#fff}
   .mk.on div{box-shadow:0 0 0 2px var(--c),0 6px 18px rgba(0,0,0,.25)}
+  .mk .use{appearance:none;display:block;width:100%;margin:4px 0 0;padding:4px 0 0;border:0;border-top:1px solid var(--hair);background:transparent;font:600 11px Inter,sans-serif;color:var(--sea);text-align:left;cursor:pointer}
+  .mk .use b{font-size:12.5px;color:var(--ink)}
+  .mk .use:hover b,.mk .use:focus-visible b{text-decoration:underline}
+  .islcard .ulink{grid-column:1/-1;appearance:none;border:0;background:transparent;padding:2px 0 0;margin:0;font:600 11.5px Inter,sans-serif;color:var(--sea);text-align:left;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .islcard .ulink b{color:var(--ink)}
+  .islcard .ulink:hover,.islcard .ulink:focus-visible{text-decoration:underline}
+
+  /* Visitors view: sample usage and intent graphs (county set per island, state set across all four) */
+  .umode{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .rb.samp{color:var(--sample);background:var(--samplebg);border-color:#d5bd85;line-height:1.4;padding:6px 12px;max-width:760px}
+  .chip{display:inline-flex;align-items:center;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:6px;white-space:nowrap}
+  .chip.sample{color:var(--sample);background:var(--samplebg);border:1px dashed #d5bd85}
+  .chip.build{color:var(--mute);background:transparent;border:1px dashed var(--line)}
+  .chip.live{color:var(--good);background:#e2efe8}
+  .uh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .uh .r{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+  .big{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1;margin:6px 0 2px}
+  .big small{font-size:12.5px;font-weight:600;color:var(--mute);letter-spacing:0;margin-left:4px}
+  .ugrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:4px}
+  .ut{appearance:none;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;font:inherit;color:var(--ink);display:flex;flex-direction:column;gap:2px;min-width:0}
+  .ut:hover{border-color:#c7d3d8}
+  .ut[aria-pressed="true"]{border-color:var(--sea);box-shadow:0 0 0 2px var(--tint)}
+  .ut b{font-size:13px}
+  .ut .big{font-size:22px;margin:2px 0 0}
+  .ut small{font-size:11px;color:var(--mute)}
+  .ut svg{width:100%;height:28px;margin-top:6px;display:block}
+  .ut.tot{background:var(--rail);color:#fff;border-color:var(--rail);cursor:default}
+  .ut.tot small{color:#9fc3cf}
+  .ub{display:grid;gap:7px;margin-top:12px}
+  .ur{display:grid;grid-template-columns:150px 1fr 60px;gap:10px;align-items:center;font-size:12.5px}
+  .ur .lab{color:var(--mute);text-align:right;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ur .lab small{display:block;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--red)}
+  .ur i{display:block;height:16px;border-radius:4px;background:var(--sea);min-width:3px}
+  .ur .n{font-weight:600;font-size:12px;white-space:nowrap}
+  .ub.pct .ur{grid-template-columns:150px 1fr 46px}
+  .uv{display:flex;align-items:flex-end;gap:3px;height:150px;padding-top:34px;position:relative;margin-top:12px}
+  .uv .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0}
+  .uv .c i{display:block;background:var(--sea);border-radius:3px 3px 0 0;min-height:2px}
+  .uv .c span{font-size:9px;color:var(--mute);text-align:center;margin-top:5px;white-space:nowrap;overflow:hidden}
+  .uv .pk{position:absolute;top:0;bottom:22px;background:rgba(10,110,140,.07);border-radius:8px;pointer-events:none}
+  .uv .pl{position:absolute;top:0;font-size:10.5px;color:var(--sea);font-weight:700;text-align:center;line-height:1.2}
+  .u2{display:flex;gap:28px;align-items:flex-end;justify-content:center;height:150px;padding:8px 8px 0;margin-top:10px}
+  .u2 .b{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;flex:0 1 120px}
+  .u2 .b i{display:block;width:100%;border-radius:5px 5px 0 0}
+  .u2 .b .n{font-weight:800;font-size:19px;margin-bottom:5px}
+  .u2 .b .lab{font-size:11.5px;color:var(--mute);margin-top:7px;text-align:center;line-height:1.3}
+  .uf{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--hair);font-size:12.5px}
+  .uf .a{text-align:right;color:var(--red);font-weight:600}.uf .b{color:var(--good);font-weight:600}
+  .uf .p{display:block;color:var(--mute);font-weight:400;font-size:11px}
+  .uf .arw{color:var(--mute);font-size:11px}
+  .ustack{display:flex;height:26px;border-radius:6px;overflow:hidden;gap:2px;margin-top:12px}
+  .ustack span{display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff;min-width:30px}
+  .uleg{display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--mute);flex-wrap:wrap}
+  .uleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .cap{font-size:12.5px;color:var(--ink2);line-height:1.5;margin-top:12px}
+  .meth{margin-top:8px;font-size:12px;color:var(--mute)}
+  .meth summary{cursor:pointer;font-weight:600}
+  .meth .body{margin-top:5px;line-height:1.5}
+  .u3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:10px}
+  .u3 h4{margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .u3 ul{margin:0;padding-left:16px;font-size:12.5px;line-height:1.5}
+  .priv{margin-top:14px;font-size:12px;color:var(--mute);line-height:1.5;padding:9px 11px;background:var(--bg);border-radius:9px}
   .side2{display:flex;flex-direction:column;gap:16px}
   .phwrap{display:flex;justify-content:center}
   .phone{border-radius:34px;border:8px solid #0f2a33;background:#0f2a33;box-shadow:0 14px 34px rgba(15,42,51,.25);overflow:hidden}
@@ -218,6 +282,11 @@
     /* Phone width: the island list under the map carries the status, so map labels are names only. */
     .mk div{padding:3px 8px;font-size:11px}
     .mk div em{display:none}
+    .mk .use{display:none}
+    .mk,.mk.dn{--s:0px}
+    .ugrid{grid-template-columns:1fr 1fr}
+    .u3{grid-template-columns:1fr}
+    .ur{grid-template-columns:96px 1fr 54px}
   }
 </style>
 </head>
@@ -228,6 +297,7 @@
     <button type="button" data-view="now" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lbl">Overview</span></button>
     <button type="button" data-view="adv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span class="lbl">Advisories</span><span class="dot" id="advDot" hidden></span></button>
     <button type="button" data-view="feat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="lbl">Events</span></button>
+    <button type="button" data-view="use"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M6 16V9M11 16V4M16 16v-6M21 16v-3"/></svg><span class="lbl">Visitors</span></button>
     <button type="button" data-view="prev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg><span class="lbl">Preview</span></button>
     <button type="button" data-view="log"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="lbl">Log</span></button>
   </nav>
@@ -364,6 +434,80 @@
     </section>
 
     <!-- PREVIEW -->
+    <section class="view" id="v-use" aria-label="Visitors and intent" hidden>
+      <div class="umode">
+        <span class="rb samp">Sample data. Illustrative figures, not a report. This review build counts nothing, so live numbers begin once counting is switched on for the GoHawaii link.</span>
+        <div class="seg" role="group" aria-label="Data mode"><button type="button" aria-pressed="true">Preview</button><button type="button" aria-pressed="false" disabled title="This review build counts nothing. Switch counting on for the GoHawaii link to see live numbers.">Live data · switch on counting</button></div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="uh"><div><h2>All four islands</h2><p class="sub" style="margin-bottom:0">The state set: checks a day on each of the four islands the GoHawaii link runs on. A check is one visitor opening one beach in the app. Pick an island for its graphs.</p></div><span class="chip sample">Sample</span></div>
+        <div class="ugrid" id="uState"></div>
+      </div>
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="uh"><h2 id="uDayH">Checks a day</h2><span class="r"><span class="chip live">Counting</span><span class="chip sample">Sample</span></span></div>
+          <div class="big" id="uDayBig"></div>
+          <div id="uDay"></div>
+          <div class="cap" id="uDayCap"></div>
+          <details class="meth"><summary>How this is computed</summary><div class="body">Checks divided by days in the window, per island, split by weekday. Kauaʻi rows are the County sample set; the other three islands are scaled from it. Measured once counting is on.</div></details>
+        </div>
+        <div class="card">
+          <div class="uh"><h2>When visitors plan</h2><span class="r"><span class="chip live">Counting</span><span class="chip sample">Sample</span></span></div>
+          <p class="sub">The hours visitors open the app, on their own clock. Advisories posted before the morning window reach the most people.</p>
+          <div id="uHour"></div>
+          <div class="cap" id="uHourCap"></div>
+          <details class="meth"><summary>How this is computed</summary><div class="body">Sixteen hourly buckets from 5am to 8pm, visitor device clock, averaged over the window. Measured once counting is on.</div></details>
+        </div>
+      </div>
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="uh"><h2 id="uBeachH">Where intent points</h2><span class="r"><span class="chip live">Counting</span><span class="chip sample">Sample</span></span></div>
+          <p class="sub" id="uBeachSub"></p>
+          <div id="uBeach"></div>
+          <div class="cap" id="uBeachCap"></div>
+          <details class="meth"><summary>How this is computed</summary><div class="body">Beach cards opened, ranked. A "no tower" tag comes from our own lifeguard field, which is filled in for Kauaʻi today; the other islands are tagged as that field is completed. Measured once counting is on.</div></details>
+        </div>
+        <div class="card">
+          <div class="uh"><h2>Dispersal by district</h2><span class="r"><span class="chip live">Counting</span><span class="chip sample">Sample</span></span></div>
+          <p class="sub">Where the island's checks point, by district. The number a destination manager watches when one shore is over capacity.</p>
+          <div id="uDist"></div>
+          <div class="cap" id="uDistCap"></div>
+        </div>
+      </div>
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="uh"><h2>When a beach turns dangerous</h2><span class="r"><span class="chip live">Counting</span><span class="chip sample">Sample</span></span></div>
+          <p class="sub">Share of visitors who changed their plan after the app showed them a verdict, and where they went instead.</p>
+          <div id="uDefl"></div>
+          <div id="uFlows"></div>
+          <details class="meth"><summary>How this is computed</summary><div class="body">A plan change is a visitor who opened a beach with a hazard verdict and then opened a calmer beach on the same island within the same visit. Named flows are the County sample set for Kauaʻi; the other islands fill in once counting is on.</div></details>
+        </div>
+        <div class="card">
+          <div class="uh"><h2>Does the advisory reach anyone</h2><span class="r"><span class="chip live">Counting</span><span class="chip sample">Sample</span></span></div>
+          <p class="sub">Share of visitors who saw an advisory in the app, by how long before their beach check it was posted.</p>
+          <div id="uReach"></div>
+          <div class="cap">Post before the morning planning window and the advisory reaches almost everyone that day. Post at noon and it reaches a third.</div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="uh"><h2>Language</h2><span class="r"><span class="chip live">Counting</span><span class="chip sample">Sample</span></span></div>
+          <p class="sub">The language visitors read the app in. Statewide, the same on all four islands until counting is on.</p>
+          <div id="uLang"></div>
+          <div class="cap">The app runs in English and Japanese today. The Japanese share is the case for the next language a market needs.</div>
+        </div>
+        <div class="card">
+          <div class="uh"><h2>What is counted today, and what is not</h2><span class="chip build">Honest status</span></div>
+          <div class="u3">
+            <div><h4>Counting today</h4><ul><li>Beach checks, per beach and per day</li><li>Verdict shown at the moment of the check</li><li>Hour of day and weekday</li><li>Island and district</li><li>Advisory seen, and how long after posting</li><li>Language</li></ul></div>
+            <div><h4>In build</h4><ul><li>Plan-change flows on Oʻahu, Maui and Hawaiʻi Island</li><li>Tower tags for the beaches outside Kauaʻi</li><li>Counting switched on for the GoHawaii link</li></ul></div>
+            <div><h4>Needs County or HTA input</h4><ul><li>Tower schedules, to split guarded hours from unguarded ones</li><li>Hāʻena and other reservation counts, to set intent against capacity</li><li>Which surfaces carry the QR, to read reach by placement</li></ul></div>
+          </div>
+          <div class="priv">Everything here is visitors as a group: counts and percentages. No individual is stored or reported, and any cell under ten is suppressed.</div>
+        </div>
+      </div>
+    </section>
+
     <section class="view" id="v-prev" aria-label="Visitor preview" hidden>
       <div class="g2">
         <div class="card">
@@ -408,7 +552,7 @@
   try { state.role = sessionStorage.getItem('ghd_role') || 'Editor'; } catch(e){}
   try { var q = new URLSearchParams(location.search); if(ISL[q.get('island')]) state.isl = q.get('island'); if(q.get('view')) state.view = q.get('view'); } catch(e){}
   try { state.verd = JSON.parse(sessionStorage.getItem('ghd_verdicts') || '{}') || {}; } catch(e){}
-  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', prev: 'Visitor preview', log: 'Activity log' };
+  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', use: 'Visitors and intent', prev: 'Visitor preview', log: 'Activity log' };
 
   function now(){ return Date.now(); }
   function uid(){ return 's' + now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -440,6 +584,7 @@
     state.isl = k; islPick(); renderNow(); paintMap();
     if(state.view === 'now') loadNowFrame();
     if(state.view === 'prev') loadPreview();
+    if(state.view === 'use') renderUse();
     if(state.view === 'feat') loadLayer(state.isl).then(renderEvents);
     if(state.view === 'adv' && !$('fTitle').value) { islChecks('fIsl', [state.isl]); beachPick(); }
   }
@@ -467,11 +612,12 @@
     if(!TITLES[v]) v = 'now';
     state.view = v;
     Array.prototype.forEach.call(document.querySelectorAll('.rail button[data-view]'), function(b){ if(b.dataset.view === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
-    ['now','adv','feat','prev','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
+    ['now','adv','feat','use','prev','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
     $('viewTitle').textContent = TITLES[v];
     $('islPick').hidden = v === 'now' || v === 'log';
     if(v === 'now'){ setTimeout(function(){ if(map) map.invalidateSize(); }, 50); loadNowFrame(); }
     if(v === 'prev') loadPreview();
+    if(v === 'use') renderUse();
     if(v === 'feat') loadLayer(state.isl).then(renderEvents);
     window.scrollTo(0, 0);
   }
@@ -537,6 +683,8 @@
   var map = null, markers = {};
   var COL = { red: '#b91c1c', yellow: '#d97706', none: '#5f92a8', down: '#b45309', wait: '#5f92a8' };
   var CENTER = { kauai: [22.07, -159.52], oahu: [21.47, -157.97], maui: [20.80, -156.33], hawaii: [19.60, -155.52] };
+  // Bubble side and stem: Oʻahu and Hawaiʻi Island hang below their island so the four three-line bubbles never cover each other.
+  var POS = { kauai: ['', 6], oahu: ['dn', 6], maui: ['', 28], hawaii: ['dn', 6] };
   function islState(k){
     var L0 = A.active(state.feeds, k, now());
     var n = { red:0, yellow:0, info:0 }; L0.forEach(function(a){ n[a.level]++; });
@@ -560,10 +708,12 @@
     if(!map) return;
     ORDER.forEach(function(k){
       var s = islState(k);
-      var html = '<div class="mk' + (k === state.isl ? ' on' : '') + '" style="--c:' + COL[s.c] + '"><div>' + ISL[k] + '<em>' + esc(s.t) + '</em></div><i></i></div>';
+      var html = '<div class="mk' + (k === state.isl ? ' on' : '') + (POS[k][0] ? ' ' + POS[k][0] : '') + '" style="--c:' + COL[s.c] + ';--s:' + POS[k][1] + 'px"><div>' + ISL[k] + '<em>' + esc(s.t) + '</em><button type="button" class="use" data-isl="' + k + '" title="Visitor graphs for ' + ISL[k] + '"><b>' + fmt(USE[k].perDay) + '</b> checks a day ›</button></div><i></i></div>';
       var icon = L.divIcon({ className: '', iconSize: [0, 0], html: html });
       if(markers[k]) markers[k].setIcon(icon);
       else { markers[k] = L.marker(CENTER[k], { icon: icon, keyboard: true, title: ISL[k] }).addTo(map); markers[k].on('click', function(){ pickIsland(k); }); }
+      var ub = markers[k].getElement() && markers[k].getElement().querySelector('.use');
+      if(ub) L.DomEvent.on(ub, 'click', function(e){ L.DomEvent.stop(e); pickIsland(k); show('use'); });
     });
   }
 
@@ -579,10 +729,10 @@
     var fn = feedNote();
     $('islCards').innerHTML = (fn ? '<div class="feednote">' + esc(fn) + '</div>' : '') + ORDER.map(function(k){
       var s = islState(k);
-      return '<div class="islcard' + (k === state.isl ? ' on' : '') + '" data-isl="' + k + '" role="button" tabindex="0"><b>' + ISL[k] + '</b><span class="s ' + s.c + '">' + esc(s.t) + '</span>' + verdBar(k) + '</div>';
+      return '<div class="islcard' + (k === state.isl ? ' on' : '') + '" data-isl="' + k + '" role="button" tabindex="0"><b>' + ISL[k] + '</b><span class="s ' + s.c + '">' + esc(s.t) + '</span>' + verdBar(k) + '<button type="button" class="ulink" data-use="' + k + '"><b>' + fmt(USE[k].perDay) + '</b> checks a day · visitor graphs</button></div>';
     }).join('');
   }
-  $('islCards').addEventListener('click', function(e){ var c = e.target.closest('[data-isl]'); if(c) pickIsland(c.dataset.isl); });
+  $('islCards').addEventListener('click', function(e){ var u = e.target.closest('[data-use]'); if(u){ pickIsland(u.dataset.use); show('use'); return; } var c = e.target.closest('[data-isl]'); if(c) pickIsland(c.dataset.isl); });
   $('islCards').addEventListener('keydown', function(e){ if(e.key !== 'Enter' && e.key !== ' ') return; var c = e.target.closest('[data-isl]'); if(c){ e.preventDefault(); pickIsland(c.dataset.isl); } });
   function nowUrl(){ return '/?ref=gohawaii&island=' + state.isl; }
   function loadNowFrame(){
@@ -898,6 +1048,89 @@
     try { localStorage.removeItem(A.KEY); localStorage.removeItem('gh_adv_seen'); } catch(e){}
     renderAll();
   });
+
+  // ---- Visitors: sample usage and intent (county set per island, state set across all four) ----
+  // The GoHawaii build counts nothing (PUBLIC_REFS in the app), so every figure here is a labeled sample.
+  // Kauaʻi rows are the County sample set from county-insights-demo.html; the other islands are scaled from it.
+  var HOURS = { labels: ['5a','6a','7a','8a','9a','10a','11a','12p','1p','2p','3p','4p','5p','6p','7p','8p'], values: [6,18,41,58,52,34,26,19,17,21,18,14,12,15,22,16], peaks: [{ from:2, to:4, label:'Morning plan' }, { from:9, to:11, label:'Re-check' }] };
+  var KDOW = [1180,1140,1210,1290,1420,1560,1380], DOWL = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var NOTOWER = { kauai: ['brennecke','donkey','kalapaki','kalihiwai','lumahai','mahaulepu','pakala','polihale','queens_bath','secret','shipwreck','tunnels','wailua'] };
+  var REACH = [['12 to 24 hours ahead', 96], ['6 to 12 hours ahead', 91], ['2 to 6 hours ahead', 78], ['Under 2 hours ahead', 34]];
+  var LANG = [['English', 84, 'var(--sea)'], ['Japanese', 7, 'var(--good)'], ['Other', 9, 'var(--steel)']];
+  var USE = {
+    kauai:  { perDay: 1310, unguardedPct: 41, beaches: [['poipu',2140],['hanalei',1880],['kee',1460],['queens_bath',1290],['tunnels',1120],['lumahai',980],['lydgate',910],['secret',760],['salt_pond',640],['polihale',590],['mahaulepu',470]], others: 1340,
+              districts: [['North Shore',31],['South Shore',27],['East Side',21],['West Side',13],['Līhuʻe',8]],
+              flows: [['queens_bath','anini',34],['lumahai','hanalei',29],['tunnels','lydgate',41],['kee','kalapaki',22],['polihale','salt_pond',31]] },
+    oahu:   { perDay: 4120, beaches: ['waikiki','hanauma_bay','lanikai','waimea_bay','kailua_beach_park','sandy_beach','ko_olina_lagoon','makapuu','sunset_beach','sharks_cove','ala_moana'], districts: [['South Shore',46],['North Shore',22],['Windward',20],['Leeward',12]] },
+    maui:   { perDay: 2390, beaches: ['kaanapali','wailea','big_beach_makena','napili_bay','kapalua_bay','hookipa','kamaole_iii','hamoa','baldwin','waianapanapa','honolua_bay'], districts: [['West Maui',38],['South Maui',34],['North Shore',16],['East/Hāna',12]] },
+    hawaii: { perDay: 1570, beaches: ['hapuna','kua_bay','magic_sands','honaunau_two_step','punaluu','kahaluu','kaunaoa','papakolea','richardson','waialea','pololu'], districts: [['Kona',44],['Kohala',30],['Hilo/Puna',17],['Kaʻū',9]] }
+  };
+  var CURVE = [1, .88, .68, .6, .52, .46, .43, .36, .3, .28, .22];
+  function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
+  function bname(k, id){ var b = (state.beaches && state.beaches[k] || []).filter(function(x){ return x.id === id; })[0]; return b ? b.name : id; }
+  function factor(k){ return USE[k].perDay / USE.kauai.perDay; }
+  function dow(k){ var f = factor(k); return KDOW.map(function(v){ return Math.round(v * f); }); }
+  function beachRows(k){
+    var u = USE[k], f = factor(k), nt = NOTOWER[k] || [];
+    var rows = k === 'kauai' ? u.beaches.map(function(b){ return { id: b[0], v: b[1] }; }) : u.beaches.map(function(id, i){ return { id: id, v: Math.round(2140 * f * CURVE[i]) }; });
+    rows = rows.map(function(r){ return { lab: bname(k, r.id), v: r.v, tag: nt.indexOf(r.id) >= 0 ? 'no tower' : '', cls: nt.indexOf(r.id) >= 0 ? 'red' : '' }; });
+    rows.push({ lab: 'All others', v: Math.round((u.others || 1340) * f), cls: 'steel' });
+    return rows;
+  }
+  function hrows(rows, pct){
+    var max = Math.max.apply(null, rows.map(function(r){ return r.v; }));
+    return '<div class="ub' + (pct ? ' pct' : '') + '">' + rows.map(function(r){
+      return '<div class="ur"><span class="lab" title="' + esc(r.lab) + '">' + esc(r.lab) + (r.tag ? '<small>' + r.tag + '</small>' : '') + '</span><i style="width:' + (r.v / max * 100).toFixed(1) + '%' + (r.cls ? ';background:var(--' + r.cls + ')' : '') + '"></i><span class="n">' + (r.txt || (pct ? r.v + '%' : fmt(r.v))) + '</span></div>';
+    }).join('') + '</div>';
+  }
+  function hourChart(k){
+    var f = factor(k), vs = HOURS.values.map(function(v){ return Math.round(v * f); }), max = Math.max.apply(null, vs), n = vs.length;
+    var cols = vs.map(function(v, i){ return '<div class="c" title="' + HOURS.labels[i] + ': ' + fmt(v) + '"><i style="height:' + (v / max * 100).toFixed(1) + '%"></i><span>' + HOURS.labels[i] + '</span></div>'; }).join('');
+    var bands = HOURS.peaks.map(function(p){
+      var tot = 0; for(var i = p.from; i <= p.to; i++) tot += vs[i];
+      var l = (p.from / n * 100).toFixed(2) + '%', w = ((p.to - p.from + 1) / n * 100).toFixed(2) + '%';
+      return '<div class="pk" style="left:' + l + ';width:' + w + '"></div><div class="pl" style="left:' + l + ';width:' + w + '">' + p.label + '<br>' + fmt(tot) + '</div>';
+    }).join('');
+    return '<div class="uv">' + cols + bands + '</div>';
+  }
+  function spark(vals){
+    var w = 100, h = 28, min = Math.min.apply(null, vals) * .9, max = Math.max.apply(null, vals) * 1.05;
+    var pts = vals.map(function(v, i){ return (i / (vals.length - 1) * w).toFixed(1) + ',' + (h - (v - min) / (max - min) * (h - 4) - 2).toFixed(1); }).join(' ');
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+  }
+  function renderUse(){
+    // Beach names come from the same list the app uses; load it once, then paint.
+    if(!state.beaches){ loadBeaches().then(function(){ if(state.view === 'use') renderUse(); }); return; }
+    var k = state.isl, u = USE[k], f = factor(k), name = ISL[k];
+    var total = ORDER.reduce(function(a, x){ return a + USE[x].perDay; }, 0);
+    $('uState').innerHTML = ORDER.map(function(x){
+      return '<button type="button" class="ut" data-isl="' + x + '" aria-pressed="' + (x === k) + '"><b>' + ISL[x] + '</b><span class="big">' + fmt(USE[x].perDay) + '</span><small>checks a day · ' + Math.round(USE[x].perDay / total * 100) + '% of the state</small><span style="color:var(--sea)">' + spark(dow(x)) + '</span></button>';
+    }).join('') + '<div class="ut tot"><b>Statewide</b><span class="big">' + fmt(total) + '</span><small>checks a day, all four islands</small><small style="margin-top:auto">' + fmt(total * 7) + ' a week</small></div>';
+    var d = dow(k), pk = d.indexOf(Math.max.apply(null, d));
+    $('uDayH').textContent = 'Checks a day · ' + name;
+    $('uDayBig').innerHTML = fmt(u.perDay) + '<small>checks a day</small>';
+    $('uDay').innerHTML = hrows(d.map(function(v, i){ return { lab: DOWL[i], v: v, cls: i === pk ? 'gold' : '' }; }));
+    $('uDayCap').innerHTML = 'About <b>' + fmt(u.perDay) + ' checks a day</b> on ' + esc(name) + ', peaking <b>' + DOWL[pk] + '</b> (' + fmt(d[pk]) + '). About <b>' + fmt(u.perDay * 30) + '</b> a month.';
+    $('uHour').innerHTML = hourChart(k);
+    var hv = HOURS.values, morning = hv.slice(2, 5).reduce(function(a, b){ return a + b; }, 0) / hv.reduce(function(a, b){ return a + b; }, 0);
+    $('uHourCap').innerHTML = 'Visitors plan <b>between 7 and 9am</b>, about ' + Math.round(morning * 100) + '% of the day’s checks, and <b>re-check around 2pm</b>. An advisory posted the night before is waiting when they open the app.';
+    var rows = beachRows(k);
+    $('uBeachH').textContent = 'Where intent points · ' + name;
+    $('uBeachSub').textContent = 'The beaches visitors read up on, ranked. Guarded beaches already log their own day; the unguarded shoreline is the blind spot.';
+    $('uBeach').innerHTML = hrows(rows);
+    $('uBeachCap').innerHTML = k === 'kauai'
+      ? '<b>' + u.unguardedPct + '% of checks</b> point at shoreline with no tower. ' + esc(rows[3].lab) + ' alone drew <b>' + fmt(rows[3].v) + '</b> checks in the sample month with no lifeguard in sight.'
+      : 'Tower tags for ' + esc(name) + ' are still being filled in, so this island shows the ranking without the guarded split. Kauaʻi already has it.';
+    $('uDist').innerHTML = hrows(u.districts.map(function(x){ return { lab: x[0], v: x[1] }; }), true);
+    $('uDistCap').innerHTML = '<b>' + esc(u.districts[0][0]) + '</b> carries ' + u.districts[0][1] + '% of ' + esc(name) + '’s checks. When one district is over capacity, this is the number that shows whether visitors are spreading out.';
+    $('uDefl').innerHTML = '<div class="u2"><div class="b"><span class="n" style="color:var(--good)">9%</span><i style="height:18%;background:var(--good)"></i><span class="lab">Changed plan on a calm day</span></div><div class="b"><span class="n" style="color:var(--red)">37%</span><i style="height:74%;background:var(--red)"></i><span class="lab">Changed plan after a hazard verdict</span></div></div>';
+    $('uFlows').innerHTML = u.flows ? u.flows.map(function(x){
+      return '<div class="uf"><span class="a">' + esc(bname(k, x[0])) + '<span class="p">hazard verdict</span></span><span class="arw">went to</span><span class="b">' + esc(bname(k, x[1])) + '<span class="p">' + x[2] + '% of the plan changes</span></span></div>';
+    }).join('') : '<div class="empty" style="margin-top:10px">Named beach-to-beach flows are shown for Kauaʻi, the County sample set. ' + esc(name) + ' fills in once counting is on.</div>';
+    $('uReach').innerHTML = hrows(REACH.map(function(x){ return { lab: x[0], v: x[1] }; }), true);
+    $('uLang').innerHTML = '<div class="ustack">' + LANG.map(function(l){ return '<span style="flex:' + l[1] + ';background:' + l[2] + '" title="' + l[0] + ': ' + l[1] + '%">' + l[1] + '%</span>'; }).join('') + '</div><div class="uleg">' + LANG.map(function(l){ return '<span><i style="background:' + l[2] + '"></i>' + l[0] + '</span>'; }).join('') + '</div>';
+  }
+  $('uState').addEventListener('click', function(e){ var b = e.target.closest('button[data-isl]'); if(b) pickIsland(b.dataset.isl); });
 
   function renderAll(){
     var st = A.load();

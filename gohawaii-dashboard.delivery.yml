@@ -1,6 +1,8 @@
 # Delivery spec for gohawaii-dashboard.html (GoHawaii review build). Required by oscheck.py --type console.
-recipient: Nick first, then Andy Evers, then HVCB and HTA staff via Andy
+# Updated 2026-09-18 for the Visitors view + clickable "checks a day" numbers. Prior spec: .bak-2026-09-18
+recipient: Nick's own review now; GoHawaii / HTA and County staff later. Not sent to anyone yet, not Andy Evers
 segment: public
 tier: free
-fulfillment: none server-side. Posts save to localStorage on htagohawaii.netlify.app in the poster's own browser only; no Supabase write, no visitor ever receives them
-must_be_true_after: a post shows in the app opened from the Dashboard's own Preview link in the same browser; red shows only after a second approval; expired posts vanish; every action lands in the audit log; the page says plainly that posts stay in this browser
+fulfillment: none server-side. Advisory posts save to localStorage on htagohawaii.netlify.app in the poster's own browser only; no Supabase write. Clicking a "checks a day" number is an in-page view switch to the Visitors view filtered to that island. Every Visitors number is SAMPLE (index.html PUBLIC_REFS = ['gohawaii'] switches telemetry off): Kauaʻi rows from county-insights-demo.html, other three islands scaled, beach names from gh/beaches.json. The Live data switch is disabled by design
+must_be_true_after: a post shows in the app opened from the Dashboard's own Preview link in the same browser; red shows only after a second approval; expired posts vanish; every action lands in the audit log; the page says plainly that posts stay in this browser. Visitors view: any island number lands on that island's graphs with the Sample ribbon visible, a Sample chip on every card, the Live data switch disabled with the reason stated, an aggregate-only privacy line, and a "what is counted today" block that says no live count exists; no absolute usage claim (OD-18 floor rule), no efficacy or drowning-outcome claim, no offer or price, only Kauaʻi, Oʻahu, Maui, Hawaiʻi Island
+layer_data: gh/beaches.json
