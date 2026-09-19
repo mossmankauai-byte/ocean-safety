@@ -83,13 +83,17 @@
   .legend{position:absolute;left:16px;top:16px;z-index:500;background:rgba(255,255,255,.97);border-radius:14px;padding:12px;width:310px;box-shadow:0 8px 24px rgba(15,42,51,.16)}
   .legend h3{margin:0 0 6px;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
   .feednote{font-size:12px;border-radius:9px;padding:8px 10px;margin:6px 0 4px;background:var(--yelbg);color:#78350f;line-height:1.4}
-  .islcard{display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:9px 6px;border-top:1px solid var(--hair);border-radius:10px;cursor:pointer}
-  .islcard:first-of-type{border-top:0}
-  .islcard:hover,.islcard.on{background:#f3f8fa}
-  .islcard b{font-size:14px}
+  #islCards{display:grid;gap:8px;background:var(--tint);border-radius:12px;padding:8px}
+  .islcard{display:grid;grid-template-columns:48px 1fr auto;gap:3px 10px;padding:10px 10px 10px 8px;background:#fff;border:1px solid var(--line);border-radius:12px;cursor:pointer;box-shadow:0 1px 2px rgba(15,42,51,.06)}
+  .islcard:hover{border-color:#b9cbd3}
+  .islcard.on{border-color:var(--sea);box-shadow:0 0 0 2px var(--tint),0 2px 6px rgba(15,42,51,.10)}
+  .islcard .ishape{grid-column:1;grid-row:1/span 4;width:48px;height:32px;align-self:start;margin-top:2px}
+  .islcard .ishape path{fill:#dbe9ee;stroke:var(--sea);stroke-width:1.2;stroke-linejoin:round}
+  .islcard.on .ishape path{fill:var(--sea);stroke:var(--rail)}
+  .islcard b{font-size:14px;grid-column:2}
   .islcard .s{font-size:11.5px;font-weight:700;color:var(--mute);white-space:nowrap}
   .islcard .s.red{color:var(--red)}.islcard .s.yellow{color:var(--yel)}.islcard .s.down{color:#92400e}
-  .islcard .i,.islcard .m{grid-column:1/-1}
+  .islcard .i,.islcard .m,.islcard .ulink{grid-column:2/-1}
   .islcard .i{font-size:12px;color:var(--ink2);line-height:1.35}
   .islcard .i b{font-size:12px;color:var(--ink)}
   .islcard .m{font-size:11px;color:var(--mute)}
@@ -105,8 +109,9 @@
   .mk .use{appearance:none;display:block;width:100%;margin:4px 0 0;padding:4px 0 0;border:0;border-top:1px solid var(--hair);background:transparent;font:600 11px Inter,sans-serif;color:var(--sea);text-align:left;cursor:pointer}
   .mk .use b{font-size:12.5px;color:var(--ink)}
   .mk .use:hover b,.mk .use:focus-visible b{text-decoration:underline}
-  .islcard .ulink{grid-column:1/-1;appearance:none;border:0;background:transparent;padding:2px 0 0;margin:0;font:600 11.5px Inter,sans-serif;color:var(--sea);text-align:left;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
-  .islcard .ulink b{color:var(--ink)}
+  .islcard .ulink{appearance:none;border:0;background:transparent;padding:2px 0 0;margin:0;font:600 11.5px Inter,sans-serif;color:var(--sea);text-align:left;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .islcard .ulink{flex-wrap:wrap;row-gap:2px}
+  .islcard .ulink b{color:var(--ink);white-space:nowrap}
   .islcard .ulink:hover,.islcard .ulink:focus-visible{text-decoration:underline}
 
   /* Visitors view: sample usage and intent graphs (county set per island, state set across all four) */
@@ -921,11 +926,14 @@
     if(h === false) return 'The Hawaiʻi Tourism Authority could not be reached on the last check.';
     return '';
   }
+  // Island silhouettes: the app's own coastlines (ISLAND_OUTLINES in index.html), scaled into a 48 x 32 box.
+  var ISL_SHAPE = {"kauai": "M6.3 17.6L13.2 23.0L15.9 24.3L16.5 25.4L17.1 26.2L19.1 27.6L20.0 27.3L20.7 27.6L21.7 28.1L22.7 28.4L23.8 28.5L24.7 28.6L26.6 28.6L27.4 28.8L28.2 29.0L29.0 29.2L29.6 29.5L30.6 29.8L31.8 29.4L33.2 28.4L33.8 27.8L35.2 26.5L37.8 24.2L37.1 23.7L38.3 23.0L39.2 20.5L39.0 19.9L38.5 18.1L38.7 16.4L40.0 15.1L40.1 13.9L40.9 12.8L41.4 11.8L41.7 9.5L41.7 8.6L40.3 6.4L38.9 4.2L37.4 3.2L35.4 2.5L34.8 2.4L34.2 2.0L30.3 2.3L27.8 2.2L26.2 4.0L24.4 3.1L20.7 2.8L19.4 3.8L18.1 4.5L17.1 5.4L14.7 6.9L12.0 7.7L6.5 15.7Z", "maui": "M8.5 2.6L8.9 2.0L9.6 2.1L10.3 2.9L12.3 3.8L13.3 6.1L16.4 10.6L21.5 9.0L22.4 8.2L25.0 7.2L26.0 7.6L27.2 7.3L27.9 8.0L28.5 7.7L30.4 8.3L30.4 9.2L31.1 9.2L31.2 9.8L34.1 12.4L36.0 12.6L37.0 14.7L38.5 14.4L40.2 15.7L43.4 16.7L44.5 18.4L44.1 21.7L40.6 25.3L39.0 25.3L35.5 27.2L33.7 27.2L32.6 26.7L31.6 26.9L26.3 29.5L23.5 29.5L22.0 30.0L19.8 29.5L19.7 28.8L18.9 28.8L18.1 28.2L17.8 26.1L18.2 25.2L17.9 22.2L17.0 17.5L14.8 16.4L12.8 17.7L7.4 15.1L4.1 10.9L4.2 9.9L3.5 9.0L4.6 5.3L5.4 3.7L6.6 3.2L6.8 2.4L8.5 2.6Z", "oahu": "M19.5 27.0L15.6 27.3L15.0 26.0L15.6 25.8L14.8 25.5L14.0 22.9L11.8 21.0L11.0 18.3L8.7 15.9L8.6 12.6L6.0 10.4L14.8 9.8L15.9 9.1L15.8 8.5L21.0 2.8L23.8 2.0L26.4 5.8L26.4 7.1L29.1 10.5L29.0 11.4L30.3 11.4L31.4 13.2L31.3 14.3L30.5 15.1L31.1 17.6L32.6 18.2L34.3 20.3L35.0 19.9L35.1 17.7L37.4 17.8L37.0 21.0L37.9 21.1L38.7 22.3L38.7 24.1L39.6 25.4L42.0 26.5L41.9 27.3L39.2 29.6L38.4 29.6L38.5 28.5L35.5 28.7L32.9 30.0L30.9 28.0L28.3 27.0L27.5 25.6L26.7 26.3L27.1 27.0L24.8 27.0L24.8 26.2L23.9 25.7L19.5 27.0Z", "hawaii": "M17.4 2.5L20.9 5.0L21.6 4.9L23.9 5.6L27.0 7.2L28.5 8.2L30.8 10.6L30.8 13.2L32.4 13.0L32.9 14.0L32.8 15.0L33.5 15.3L34.4 16.5L36.2 17.5L35.7 18.7L32.9 21.1L29.4 22.7L26.7 22.8L25.5 24.0L24.4 24.4L23.7 25.2L22.5 25.6L21.6 26.6L21.7 27.3L20.9 28.3L20.8 28.9L19.4 30.0L18.4 28.9L16.8 28.0L15.3 27.5L14.8 26.6L14.6 25.8L15.2 21.1L14.5 19.2L14.5 18.4L13.9 18.2L13.5 15.7L13.1 15.0L12.4 14.8L11.8 13.2L12.1 12.2L13.5 10.7L14.5 10.5L15.1 9.0L16.3 8.0L16.4 6.9L15.6 6.0L15.0 4.6L14.9 3.4L15.2 2.3L15.9 2.0L17.4 2.5Z"};
+  function islSvg(k){ return '<svg class="ishape" viewBox="0 0 48 32" aria-hidden="true"><path d="' + (ISL_SHAPE[k] || '') + '"/></svg>'; }
   function renderLegend(){
     var fn = feedNote();
     $('islCards').innerHTML = (fn ? '<div class="feednote">' + esc(fn) + '</div>' : '') + ORDER.map(function(k){
       var s = islState(k);
-      return '<div class="islcard' + (k === state.isl ? ' on' : '') + '" data-isl="' + k + '" role="button" tabindex="0"><b>' + ISL[k] + '</b><span class="s ' + s.c + '">' + esc(s.t) + '</span>'
+      return '<div class="islcard' + (k === state.isl ? ' on' : '') + '" data-isl="' + k + '" role="button" tabindex="0">' + islSvg(k) + '<b>' + ISL[k] + '</b><span class="s ' + s.c + '">' + esc(s.t) + '</span>'
         + '<button type="button" class="ulink" data-use="' + k + '"><b>About ' + fmt(USE[k].perDay) + '</b> checks a day · visitor graphs<span class="smp">Sample</span></button>'
         + '<span class="i">' + intentLine(k) + '</span>'
         + '<span class="m">' + verdLine(k) + '</span></div>';
