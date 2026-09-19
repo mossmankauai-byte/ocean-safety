@@ -7853,7 +7853,10 @@ function openSheet(id){
   const channels=(b.channels||[]).map(channelCard).join('');
   const cs=channels?`<div class="slbl hazard">Current Hazards</div><div class="prow">${channels}</div>`:'';
   // Nearby family-friendly activities — within 5 mi, expanding to 10 mi if fewer than 3 results
-  const nearbyActs = nearbyItems(b.lat, b.lon, ACTS, 3, 5, 10);
+  // Public ref (GoHawaii, ruled 2026-09-18): a row that sells (a Malama hotel package, an offer, a booking link)
+  // never sits one tap from a beach that says no. Same rule as the Give back block; off-test checks it.
+  const _saysNo = (typeof scored !== 'undefined') && scored[b.id] && ['red','yellow','warning'].includes(scored[b.id].status);
+  const nearbyActs = nearbyItems(b.lat, b.lon, ACTS, 3, 5, 10).filter(x => !(_isPublicRef() && _saysNo && x.i.sales));
   const nas = nearbyActs.length
     ? `<div class="slbl">Nearby Activities</div><div class="prow">${nearbyActs.slice(0,5).map(x=>nearbyActCard(x.i,x.d)).join('')}</div>`
     : '';
@@ -11841,7 +11844,9 @@ function _ghInject(rows){
                 tip:r.tip||'', website:r.website, address:r.address, img:r.img, when:r.when, venue:r.venue, gh_sub:r.gh_sub||'', src:'gohawaii', src_url:r.src_url||'',
                 duration_min:undefined, price:undefined, hours:undefined };
     if(r.yards) rec.yards = r.yards; if(r.course_type) rec.course_type = r.course_type;
-    if(r.sales) rec.sales = true;   // a Malama row that sells: kept off red and yellow beach sheets
+    // A row that sells (a Malama package flagged by the layer build, or any listing whose own text carries a price,
+    // a discount or a booking line): kept off red and yellow beach sheets and their nearby lists (ruled 2026-09-18).
+    if(r.sales || /\$\d|%\s*off|night free|resort credit|promo code|book now/i.test(rec.tip)) rec.sales = true;
     if(rec.type==='event' && rec.when){ rec.n = rec.n + ' · ' + _ghDayLabel(rec.when); }   // the pin label reads like a calendar
     window._GH_INDEX[rec.id] = rec;
     if(r.target==='TOURS'){ window.GH_TOURS.push(rec); n++; return; }
