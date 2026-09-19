@@ -14,6 +14,9 @@
  * Writes screenshots to <outdir> for review.
  *
  *   ORIGIN=http://127.0.0.1:4631 node checks/gohawaii-tsunami.test.js <outdir>
+ * GATE_OUT=<dir> also writes gohawaii-tsunami-kauai-visible.html there: the rendered page with the
+ * way-out map open on Poʻipū, script source and comments stripped, for oscheck (same method as
+ * checks/gohawaii-gate-dom.js).
  */
 'use strict';
 const puppeteer = require('/Users/nickmossman/Desktop/OceanSafe/brochure-src/node_modules/puppeteer-core');
@@ -92,6 +95,16 @@ const routeDrawn = (pg) => pg.evaluate(() => document.querySelectorAll('#ghTsuMa
   check(/Felt shaking/.test(txt), 'the shaking rule is always on screen');
   check((await routeDrawn(t.pg)) >= 4, 'zones and the route are drawn on the map');
   await t.pg.screenshot({ path: path.join(OUT, 'tsu-kauai-3-poipu-390.png') });
+  if(process.env.GATE_OUT){
+    const html = await t.pg.evaluate(() => {
+      const d = document.documentElement.cloneNode(true);
+      d.querySelectorAll('script,noscript').forEach(n => n.remove());
+      const w = document.createTreeWalker(d, NodeFilter.SHOW_COMMENT); const cs = []; while(w.nextNode()) cs.push(w.currentNode); cs.forEach(c => c.remove());
+      return '<!doctype html>\n' + d.outerHTML;
+    });
+    fs.mkdirSync(process.env.GATE_OUT, { recursive: true });
+    fs.writeFileSync(path.join(process.env.GATE_OUT, 'gohawaii-tsunami-kauai-visible.html'), html);
+  }
   const longId = await t.pg.evaluate(() => { const R = window.GH_TSU.kauai.routes; return Object.keys(R).filter(k => R[k].d > 2000).sort((a, b) => R[b].d - R[a].d)[0] || ''; });
   if(longId){
     await t.pg.select('#ghTsu select', longId); await sleep(2000);
