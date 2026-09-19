@@ -1,0 +1,247 @@
+{
+ "_note": "Review mock only (GoHawaii build, Nick's option A, 2026-09-18). Shown only on an island where get_town_listings returns no free local shop. Not real businesses: every name says Sample shop. Buy is preview-only in this build.",
+ "kauai": [
+  {
+   "slug": "sample-gifts-kauai",
+   "name": "Sample shop: island gifts",
+   "short": "A sample local gift shop in Kapaʻa",
+   "category": "crafts",
+   "region": "East Side",
+   "lat": 22.0762,
+   "lon": -159.3196,
+   "placement": "sample",
+   "items": [
+    {
+     "id": "g1",
+     "title": "Hand-printed tote bag",
+     "price_cents": 2800
+    },
+    {
+     "id": "g2",
+     "title": "Woven bracelet",
+     "price_cents": 2400
+    },
+    {
+     "id": "g3",
+     "title": "Wood coasters, set of 4",
+     "price_cents": 4500
+    },
+    {
+     "id": "g4",
+     "title": "Island print tea towel",
+     "price_cents": 1800
+    }
+   ]
+  },
+  {
+   "slug": "sample-coffee-kauai",
+   "name": "Sample shop: coffee roaster",
+   "short": "A sample local coffee roaster in Hanapēpē",
+   "category": "coffee",
+   "region": "West Side",
+   "lat": 21.9116,
+   "lon": -159.5906,
+   "placement": "sample",
+   "items": [
+    {
+     "id": "c1",
+     "title": "Whole bean coffee, 7 oz",
+     "price_cents": 1800
+    },
+    {
+     "id": "c2",
+     "title": "Coffee sampler, 3 bags",
+     "price_cents": 4200
+    },
+    {
+     "id": "c3",
+     "title": "Ceramic mug",
+     "price_cents": 2400
+    }
+   ]
+  }
+ ],
+ "maui": [
+  {
+   "slug": "sample-gifts-maui",
+   "name": "Sample shop: island gifts",
+   "short": "A sample local gift shop in Pāʻia",
+   "category": "crafts",
+   "region": "North Shore",
+   "lat": 20.9105,
+   "lon": -156.381,
+   "placement": "sample",
+   "items": [
+    {
+     "id": "g1",
+     "title": "Hand-printed tote bag",
+     "price_cents": 2800
+    },
+    {
+     "id": "g2",
+     "title": "Woven bracelet",
+     "price_cents": 2400
+    },
+    {
+     "id": "g3",
+     "title": "Wood coasters, set of 4",
+     "price_cents": 4500
+    },
+    {
+     "id": "g4",
+     "title": "Island print tea towel",
+     "price_cents": 1800
+    }
+   ]
+  },
+  {
+   "slug": "sample-coffee-maui",
+   "name": "Sample shop: coffee roaster",
+   "short": "A sample local coffee roaster in Kīhei",
+   "category": "coffee",
+   "region": "South Maui",
+   "lat": 20.764,
+   "lon": -156.445,
+   "placement": "sample",
+   "items": [
+    {
+     "id": "c1",
+     "title": "Whole bean coffee, 7 oz",
+     "price_cents": 1800
+    },
+    {
+     "id": "c2",
+     "title": "Coffee sampler, 3 bags",
+     "price_cents": 4200
+    },
+    {
+     "id": "c3",
+     "title": "Ceramic mug",
+     "price_cents": 2400
+    }
+   ]
+  }
+ ],
+ "oahu": [
+  {
+   "slug": "sample-gifts-oahu",
+   "name": "Sample shop: island gifts",
+   "short": "A sample local gift shop in Haleʻiwa",
+   "category": "crafts",
+   "region": "North Shore",
+   "lat": 21.5937,
+   "lon": -158.103,
+   "placement": "sample",
+   "items": [
+    {
+     "id": "g1",
+     "title": "Hand-printed tote bag",
+     "price_cents": 2800
+    },
+    {
+     "id": "g2",
+     "title": "Woven bracelet",
+     "price_cents": 2400
+    },
+    {
+     "id": "g3",
+     "title": "Wood coasters, set of 4",
+     "price_cents": 4500
+    },
+    {
+     "id": "g4",
+     "title": "Island print tea towel",
+     "price_cents": 1800
+    }
+   ]
+  },
+  {
+   "slug": "sample-coffee-oahu",
+   "name": "Sample shop: coffee roaster",
+   "short": "A sample local coffee roaster in Kailua",
+   "category": "coffee",
+   "region": "Windward",
+   "lat": 21.396,
+   "lon": -157.7395,
+   "placement": "sample",
+   "items": [
+    {
+     "id": "c1",
+     "title": "Whole bean coffee, 7 oz",
+     "price_cents": 1800
+    },
+    {
+     "id": "c2",
+     "title": "Coffee sampler, 3 bags",
+     "price_cents": 4200
+    },
+    {
+     "id": "c3",
+     "title": "Ceramic mug",
+     "price_cents": 2400
+    }
+   ]
+  }
+ ],
+ "hawaii": [
+  {
+   "slug": "sample-gifts-hawaii",
+   "name": "Sample shop: island gifts",
+   "short": "A sample local gift shop in Hilo",
+   "category": "crafts",
+   "region": "Hilo/Puna",
+   "lat": 19.723,
+   "lon": -155.085,
+   "placement": "sample",
+   "items": [
+    {
+     "id": "g1",
+     "title": "Hand-printed tote bag",
+     "price_cents": 2800
+    },
+    {
+     "id": "g2",
+     "title": "Woven bracelet",
+     "price_cents": 2400
+    },
+    {
+     "id": "g3",
+     "title": "Wood coasters, set of 4",
+     "price_cents": 4500
+    },
+    {
+     "id": "g4",
+     "title": "Island print tea towel",
+     "price_cents": 1800
+    }
+   ]
+  },
+  {
+   "slug": "sample-coffee-hawaii",
+   "name": "Sample shop: coffee roaster",
+   "short": "A sample local coffee roaster in Kailua-Kona",
+   "category": "coffee",
+   "region": "Kona",
+   "lat": 19.6395,
+   "lon": -155.9965,
+   "placement": "sample",
+   "items": [
+    {
+     "id": "c1",
+     "title": "Whole bean coffee, 7 oz",
+     "price_cents": 1800
+    },
+    {
+     "id": "c2",
+     "title": "Coffee sampler, 3 bags",
+     "price_cents": 4200
+    },
+    {
+     "id": "c3",
+     "title": "Ceramic mug",
+     "price_cents": 2400
+    }
+   ]
+  }
+ ]
+}

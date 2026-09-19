@@ -8,7 +8,7 @@ import fs from 'node:fs';
 const D = new URL('./data/gohawaii/', import.meta.url);
 const read = f => JSON.parse(fs.readFileSync(new URL(f, D), 'utf8'));
 const L = read('raw-listing.json'), E = read('raw-event.json'), A = read('raw-article.json');
-const TODAY = new Date().toISOString().slice(0, 10);
+const TODAY = new Date(Date.now() - 10 * 3600e3).toISOString().slice(0, 10);   // Hawaiʻi date (UTC-10, no DST): a UTC date drops tonight's events from 2 pm on
 const norm = s => String(s || '').replace(/[ʻ‘’]/g, "'");
 const ISLAND = { "Kaua'i": 'kauai', "O'ahu": 'oahu', 'Maui': 'maui', "Island of Hawai'i": 'hawaii' };
 const SLUG_FROM_PATH = { kauai: 'kauai', oahu: 'oahu', maui: 'maui', 'hawaii-big-island': 'hawaii' };
@@ -22,14 +22,9 @@ const BBOX = { kauai: [21.85, 22.30, -159.85, -159.25], maui: [20.55, 21.05, -15
 const region = (slug, lat, lon) => REGIONS[slug].map(([r, la, lo]) => [r, (la - lat) ** 2 + (lo - lon) ** 2]).sort((a, b) => a[1] - b[1])[0][0];
 const inBox = (slug, lat, lon) => { const [a, b, c, d] = BBOX[slug]; return lat >= a && lat <= b && lon >= c && lon <= d; };
 const short = s => { s = String(s || '').replace(/\s*[(|,:].*$/, '').trim(); if (s.length <= 18) return s; const cut = s.slice(0, 18).replace(/\s+\S*$/, ''); return (cut || s.slice(0, 18)).trim(); };
-const tip = (s, strict) => { let t = String(s || '').replace(/\s+/g, ' ').replace(/&#039;|&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/<[^>]+>/g, '').trim();
-  // No price and no sales pitch in a public build: drop any sentence that names a price, sells tickets or offers a deal
-  // (their Malama listings are hotel incentives: a free night, a resort credit, a waived fee). A free event stays.
-  // strict (a Malama row): their teaser IS the hotel offer, so if any sentence goes, the rest is its fine print.
-  const all = t.split(/(?<=[.!?])\s+/);
-  t = all.filter(x => !/\$\d|\bdollars?\b|buy tickets?|tickets? (are )?(available|on sale)|\bon sale\b|% off|\bdiscount|book (now|online|today)|reserve (now|online|today)|promo code|coupon|\bpric(e|es|ing)\b|nights? free|\bsave (you )?up to|resort (credit|fees?)|\bwaived\b|\bdeal\b|unbeatable value|available (for|to) purchase|\bbook (your|the)\b|\bbonus\b|\b(earn|redeem)\b[^.]*\bpoints\b|bonvoy|world of hyatt|minimum stay|sign up here/i.test(x));
-  if (strict && t.length < all.length) return '';
-  t = t.join(' ');
+const tip = s => { let t = String(s || '').replace(/\s+/g, ' ').replace(/&#039;|&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/<[^>]+>/g, '').trim();
+  // Their own deals, prices and booking lines stay: the GoHawaii build matches gohawaii.com on commerce
+  // (Nick, 2026-09-18). The Malama hotel offers never reach a beach sheet: that block shows name and distance only.
   t = t.replace(/[\p{Extended_Pictographic}\u2728\uFE0F]/gu, '').replace(/\s{2,}/g, ' ').trim();   // their emoji are not our icons
   // Keep whole sentences up to 170 characters. Their teasers often stop mid-sentence, and cutting one and adding
   // a full stop printed fragments like "restaurants. Its." A text with no complete sentence ends in an ellipsis.
@@ -42,9 +37,15 @@ const has = (r, k, v) => (r.filters[k] || []).includes(v);
 // Venue names as their owners spell them. GoHawaii's feed has "Hawaii Theatre Centre"; the venue's
 // own site and its nonprofit registration say Hawaii Theatre Center (hawaiitheatre.com).
 const VENUE_FIX = { 'Hawaii Theatre Centre': 'Hawaii Theatre Center' };
-// A business link that lands on an offer or a booking engine is a sales surface; the card keeps its gohawaii.com link.
+// Every business link stays, offer and booking pages included, the way gohawaii.com shows them.
+const site = u => u || undefined;
+// Their deals stay on their own cards, but a Malama row that sells (a hotel offer in its teaser, an offer or
+// booking link, or an Accommodations listing) is flagged `sales` so it never sits one tap from a red or yellow
+// beach sheet: the app's "Give back instead" block skips it (ad wall, release brief 2026-09-18).
+const SALES_TEXT = /\$\d|\bdollars?\b|buy tickets?|tickets? (are )?(available|on sale)|\bon sale\b|% off|\bdiscount|book (now|online|today)|reserve (now|online|today)|promo code|coupon|\bpric(e|es|ing)\b|nights? free|\bsave (you )?up to|resort (credit|fees?)|\bwaived\b|\bdeal\b|unbeatable value|available (for|to) purchase|\bbook (your|the)\b|\bbonus\b|\b(earn|redeem)\b[^.]*\bpoints\b|bonvoy|world of hyatt|minimum stay|sign up here/i;
 const SALES_URL = /\btickets?\b|\/rooms?\b|ipoolside|resort-activities|book-?now|hotel-deals|\/deals?\b|\boffers?\b|special-offers|\/specials?\b|special-packages|\/packages?\b|promo=|\/shop\/|checkinDate|synxis\.com/i;
-const site = u => (u && !SALES_URL.test(u)) ? u : undefined;
+const sells = r => SALES_TEXT.test(r.teaser || '') || SALES_URL.test((r.websites || {}).business || '') || (r.filters['Accommodations'] || []).length > 0
+  || /\b(resort|hotel|marriott|hyatt|hilton|sheraton|westin|suites|lodge)\b/i.test(r.title || '');   // a hotel's Malama row is its package
 // Photos: their API hands out plain-http pantheonsite.io URLs (mixed content on our https page). The same
 // path serves from https://www.gohawaii.com, so every image host is rewritten there.
 const ghImg = u => u ? String(u).replace(/^https?:\/\/(?:live-gohawaii-com\.pantheonsite\.io|(?:www\.)?gohawaii\.com)(?=\/)/, 'https://www.gohawaii.com') : undefined;
@@ -81,7 +82,7 @@ function classify(r) {
 const out = {}; for (const s of Object.keys(REGIONS)) out[s] = [];
 const report = { built: TODAY, source: 'gohawaii.com public listing API (MilesAI), pulled ' + fs.readFileSync(new URL('pulled-at.txt', D), 'utf8').trim(), islands: {}, dropped: {}, gaps: {}, skipped: {}, theirBeaches: {} };
 const drop = (k) => { report.dropped[k] = (report.dropped[k] || 0) + 1; };
-const cleanName = s => String(s || '').replace(/\$\s?\d+(?:\.\d+)?\s*/g, '').replace(/\s+/g, ' ').trim();   // a price in a title is still a price
+const cleanName = s => String(s || '').replace(/\s+/g, ' ').trim();   // their titles as written, prices included
 const row = (slug, id, name, lat, lon, c, extra) => (name = cleanName(name), { id: 'gh_' + id, name, n: short(name), r: region(slug, lat, lon), lat: +(+lat).toFixed(6), lon: +(+lon).toFixed(6),
   target: c.target, type: c.type, theme: c.theme, tags: ['gohawaii', ...(c.tags || [])], gh_sub: c.sub, src: 'gohawaii', ...extra });
 
@@ -97,8 +98,8 @@ for (const r of L) {
     if (!inBox(slug, r.lat, r.lon)) { drop('coordinates outside the island box'); continue; }
     if (c.gap) report.gaps[c.gap] = (report.gaps[c.gap] || 0) + 1;
     const a = r.address || {};
-    out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, c, { tip: tip(r.teaser, c.type === 'malama'), website: c.type === 'malama' ? undefined : site(r.websites.business), src_url: 'https://www.gohawaii.com' + r.link,
-      address: [a.line_1, a.city].filter(Boolean).join(', ') || undefined, img: ghImg(r.img), ...(c.facts || {}) }));
+    out[slug].push(row(slug, r.id, r.title, r.lat, r.lon, c, { tip: tip(r.teaser), website: site(r.websites.business), src_url: 'https://www.gohawaii.com' + r.link,
+      address: [a.line_1, a.city].filter(Boolean).join(', ') || undefined, img: ghImg(r.img), ...(c.type === 'malama' && sells(r) ? { sales: true } : {}), ...(c.facts || {}) }));
   }
 }
 // 2. Events (dated). Their event ids share a number space with listings (1642 is both a condo and a craft

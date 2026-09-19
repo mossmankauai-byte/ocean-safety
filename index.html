@@ -11635,8 +11635,11 @@ function _placementBadge(it){
   if(!it || !it._placement) return '';
   if(it._placement === 'paid')
     return '<div class="pl-badge pl-paid" role="note">Sponsored</div>';
+  if(it._placement === 'sample')
+    return '<div class="pl-badge pl-pick" role="note">Sample shop</div>';
   if(it._placement === 'partner_pick')
-    return '<div class="pl-badge pl-pick" role="note">' + _pesc(it._partnerName || 'Partner') + ' pick</div>';
+    return _isPublicRef() ? '<div class="pl-badge pl-pick" role="note">Local shop</div>'
+      : '<div class="pl-badge pl-pick" role="note">' + _pesc(it._partnerName || 'Partner') + ' pick</div>';
   return '';
 }
 
@@ -11674,7 +11677,7 @@ function _townPurge(){
 // doesn't carry is simply absent — every sheet renders only the fields that are present.
 function _townToPoi(row){
   var cat = String(row.category||'');
-  var tags = ['partner'];
+  var tags = [_isPublicRef() ? 'local shop' : 'partner'];   // display-only pill; nothing filters on it
   if(cat==='coffee') tags.push('coffee');          // load-bearing: renderCoffee filters on it
   return {
     id: TOWN_PIN_PREFIX + row.slug,
@@ -11686,7 +11689,8 @@ function _townToPoi(row){
     phone: row.phone || undefined,
     website: row.website || undefined,
     address: row.address || undefined,
-    _placement: row.placement === 'paid' ? 'paid' : 'partner_pick',
+    // 'sample' only ever comes from the committed review fixture (data/gohawaii-sample-shops.json) on a public ref.
+    _placement: row.placement === 'paid' ? 'paid' : (row.placement === 'sample' && _isPublicRef() ? 'sample' : 'partner_pick'),
     _partnerName: row.name,
     _partnerSlug: row.slug
   };
@@ -11759,7 +11763,9 @@ function _ghMalamaBlock(b){
     if(!_isPublicRef() || !b) return '';
     var st=(typeof scored!=='undefined' && scored[b.id] && scored[b.id].status) || '';
     if(st!=='red' && st!=='yellow' && st!=='warning') return '';
-    var rows=Object.values(window._GH_INDEX||{}).filter(function(g){ return g.type==='malama'; })
+    // A Malama row that sells (hotel package, offer or booking link: `sales` from the layer build) never
+    // sits one tap from a red or yellow beach. Their 43 rows all sell as of 2026-09-18, so the block stays empty.
+    var rows=Object.values(window._GH_INDEX||{}).filter(function(g){ return g.type==='malama' && !g.sales; })
       .map(function(g){ return [g, (g.lat-b.lat)*(g.lat-b.lat)+(g.lon-b.lon)*(g.lon-b.lon)]; }).sort(function(x,y){ return x[1]-y[1]; }).slice(0,2);
     if(!rows.length) return '';
     var lead = st==='red' ? 'The ocean is off here today.' : 'Conditions are marginal here today.';
@@ -11835,6 +11841,7 @@ function _ghInject(rows){
                 tip:r.tip||'', website:r.website, address:r.address, img:r.img, when:r.when, venue:r.venue, gh_sub:r.gh_sub||'', src:'gohawaii', src_url:r.src_url||'',
                 duration_min:undefined, price:undefined, hours:undefined };
     if(r.yards) rec.yards = r.yards; if(r.course_type) rec.course_type = r.course_type;
+    if(r.sales) rec.sales = true;   // a Malama row that sells: kept off red and yellow beach sheets
     if(rec.type==='event' && rec.when){ rec.n = rec.n + ' · ' + _ghDayLabel(rec.when); }   // the pin label reads like a calendar
     window._GH_INDEX[rec.id] = rec;
     if(r.target==='TOURS'){ window.GH_TOURS.push(rec); n++; return; }
@@ -11925,7 +11932,7 @@ function _townInject(rows){
 // renders exactly as before. A partner pin is never worth breaking the guide for.
 function _townFetch(){
   try {
-    if(!window.fetch || !window.ACTIVE || _isPublicRef()) return Promise.resolve(0);   // public ref: no partner pins
+    if(!window.fetch || !window.ACTIVE) return Promise.resolve(0);
     return fetch('https://arndnljtmjfsnzcpcuen.supabase.co/rest/v1/rpc/get_town_listings', {
       method:'POST',
       headers:{'Content-Type':'application/json',
@@ -11933,10 +11940,82 @@ function _townFetch(){
                'Authorization':'Bearer sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um'},
       body: JSON.stringify({p_island: ACTIVE.slug})
     }).then(function(r){ return r.ok ? r.json() : []; })
-      .then(function(rows){ return _townInject(rows); })
+      // Public ref (GoHawaii): free local-shop pins only. A paid pin is Sponsored placement, which a
+      // state-funded build does not carry (Nick, 2026-09-18, option A).
+      .then(function(rows){
+        if(!_isPublicRef()) return _townInject(rows);
+        rows=(Array.isArray(rows)?rows:[]).filter(function(r){ return r && r.placement!=='paid'; });
+        if(rows.length) return _townInject(rows);
+        // No free local shop on this island yet: the review build shows two labelled sample shops.
+        var isl=ACTIVE.slug;
+        return fetch('/data/gohawaii-sample-shops.json').then(function(r){ return r.ok ? r.json() : {}; })
+          .then(function(d){ window._ghSampleShops=d||{}; if(!window.ACTIVE || ACTIVE.slug!==isl) return 0; return _townInject((d&&d[isl])||[]); });
+      })
       .catch(function(){ return 0; });
   } catch(e){ return Promise.resolve(0); }
 }
+
+// ── A shop's online store under its own pin (Nick, 2026-09-18) ──────────────────────────────
+// A Town partner pin (id tp_<slug>) opens its usual card. If that shop has storefront items, they
+// show under the card, above Get Directions. Buy runs the shop's OWN Square checkout (storeBuy: the
+// shop is the merchant of record) and shows only when get_partner_page says their Square is
+// connected and the island takes orders. Otherwise the items show with a plain note, never a Buy
+// that cannot work. Wired by wrapping the six Town card functions by name: every caller (pin, list
+// row, venue row, saved list) resolves them through window at call time.
+function _shopRpc(fn, slug){
+  return fetch('https://arndnljtmjfsnzcpcuen.supabase.co/rest/v1/rpc/'+fn, {
+    method:'POST',
+    headers:{'Content-Type':'application/json',
+             'apikey':'sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um',
+             'Authorization':'Bearer sb_publishable_riEPrtz2STeoz0vq4HKIdA_3Tu8a3Um'},
+    body: JSON.stringify({p_slug: slug})
+  }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; });
+}
+function _shopItemsHtml(slug, items, canBuy, preview){
+  return '<div class="slbl" style="margin-top:16px">Shop online</div>'
+    + '<div class="tp-shop-note" style="font-size:12.5px;color:var(--mute);margin:-2px 0 10px">'+(preview ? 'This shop&#8217;s online store. Buy is a preview in this review copy.' : canBuy ? 'Order here and pick up at the shop.' : 'Online orders are not open yet. Visit the shop to buy.')+'</div>'
+    + '<div class="os-store-prods">' + items.map(function(p){
+        var img = (typeof p.image_url==='string' && /^https:\/\//i.test(p.image_url))
+          ? '<img src="'+_pesc(p.image_url)+'" alt="" loading="lazy">'
+          : '<span class="os-store-phi">'+_pesc(String(p.title||'?').trim().charAt(0).toUpperCase())+'</span>';
+        return '<div class="os-store-prod"><div class="os-store-pimg">'+img+'</div><div class="os-store-pbody">'
+          + '<div class="os-store-ptitle">'+_pesc(p.title)+'</div>'
+          + '<div class="os-store-prow"><span class="os-store-price">$'+(p.price_cents/100).toFixed(2)+'</span></div>'
+          + (canBuy ? '<button class="os-store-btn buy" data-shop="'+_pesc(slug)+'" data-prod="'+_pesc(p.id)+'">Buy</button>' : '')
+          + '</div></div>';
+      }).join('') + '</div>';
+}
+function _shopItemsInto(id){
+  if(typeof id!=='string' || id.indexOf(TOWN_PIN_PREFIX)!==0) return;
+  var slug=id.slice(TOWN_PIN_PREFIX.length), sc=document.getElementById('sc');
+  if(!slug || !sc || !window.fetch) return;
+  var slot=document.createElement('div'); slot.className='tp-shop'; slot.setAttribute('data-commerce','shop');
+  var cta=sc.querySelector('.poi-cta-row'); if(cta) sc.insertBefore(slot, cta); else sc.appendChild(slot);
+  var pub=_isPublicRef(), row=(window._townListings||[]).filter(function(r){ return r && r.slug===slug; })[0] || {};
+  var sample=pub && row.placement==='sample';
+  // Public ref: items only (no get_partner_page, OD-24), and Buy is a preview that never calls the network.
+  var load = sample ? Promise.resolve([row.items||[], null])
+    : Promise.all([_shopRpc('get_partner_products', slug), pub ? Promise.resolve(null) : _shopRpc('get_partner_page', slug)]);
+  load.then(function(res){
+    if(!slot.isConnected) return;   // the sheet moved on before the items landed
+    var items=(Array.isArray(res[0]) ? res[0] : []).filter(function(p){ return p && p.id && p.title && p.price_cents!=null; });
+    if(!items.length){ slot.remove(); return; }
+    var page=Array.isArray(res[1]) ? res[1][0] : res[1];
+    var canBuy=pub || (!!(page && page.can_buy) && (typeof _islandSellable!=='function' || _islandSellable()));
+    slot.innerHTML=_shopItemsHtml(slug, items, canBuy, pub);
+    var who=sample ? 'the shop' : _pesc(row.name || 'the shop');
+    slot.querySelectorAll('button[data-prod]').forEach(function(b){ b.onclick=function(){
+      if(pub){   // review copy: explain, never check out
+        var n=slot.querySelector('.tp-shop-note'); if(n) n.innerHTML='Checkout is off in this review copy. In the live app, Buy opens '+who+'&#8217;s own checkout, and '+who+' is the seller.';
+        return;
+      }
+      if(typeof storeBuy==='function') storeBuy(b.dataset.shop, b.dataset.prod); }; });
+  });
+}
+['openFoodSheet','openDrinkSheet','openMarketSheet','openCraftSheet','openGasSheet','openGrocerySheet'].forEach(function(n){
+  var f=window[n]; if(typeof f!=='function') return;
+  window[n]=function(id){ var r=f.apply(this, arguments); try { _shopItemsInto(id); } catch(e){} return r; };
+});
 
 function repointIslandGlobals(d){
   if(!d || typeof d!=='object') throw new Error('island dataset missing');
