@@ -9,6 +9,8 @@
  *     it: several of their Mālama listings are hotel packages, and this page carries no offers.
  *   - on a beach card: the advisories that apply there, at the top
  *   - on the map: a ring on any beach a GoHawaii advisory names
+ *   - a Tsunami Warning: "Show the way out" opens a full-screen map of the state's evacuation zone
+ *     with a walking route from the visitor's beach (or location) to the nearest spot outside it
  * It never changes a beach verdict. Safety content from the app still wins every tie.
  */
 (function(){
@@ -16,20 +18,39 @@
   var A = window.GH_ADV; if(!A) return;
   var esc = A.esc;
   var PREVIEW = (function(){ try { return new URLSearchParams(location.search).get('gh_preview') || ''; } catch(e){ return ''; } })();
+  // ?gh_demo=tsunami (review build): a sample Tsunami Warning on the island in view, so the warning
+  // and the way-out map can be shown on a calm day. One allowlisted literal; anything else is ignored.
+  var DEMO = (function(){ try { return new URLSearchParams(location.search).get('gh_demo') === 'tsunami'; } catch(e){ return false; } })();
+  var DEMO_AT = Date.now();
   var feeds = { nws: null, hta: null };
   var ICON = {
     warn: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
     info: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
     chev: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
     cal:  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
-    star: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>'
+    star: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+    up:   '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 20 6-8 4 5 3-4 5 7z"/><path d="M12 3v6M9 6l3-3 3 3"/></svg>',
+    pin:  '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    loc:  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+    shake:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h3l3-7 4 14 3-7h5"/></svg>',
+    x:    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'
   };
   var VERDICT = { green:'Calmer today', yellow:'Use caution', red:'Not recommended', nodata:'No live data' };
   var VCOL = { green:'#16a34a', yellow:'#d97706', red:'#b91c1c', nodata:'#5f92a8' };
 
   function isl(){ return (window.ACTIVE && ACTIVE.slug) || 'kauai'; }
   function islName(){ return A.ISL[isl()] || (window.ACTIVE && ACTIVE.name) || ''; }
-  function list(){ return A.active(feeds, isl(), Date.now(), PREVIEW); }
+  function list(){ var out = A.active(feeds, isl(), Date.now(), PREVIEW); if(DEMO) out.unshift(demoTsu()); return out; }
+  function demoTsu(){
+    var i = isl(), first = new Date(DEMO_AT + 45 * 60e3).toISOString();
+    return { id: 'demo:tsunami:' + i, src: 'nws', srcName: 'National Weather Service', demo: true, sample: true, level: 'red', listed: true,
+      title: 'Tsunami Warning', headline: 'Tsunami Warning for ' + (A.ISL[i] || ''),
+      body: 'A tsunami that could flood the coast is on the way. First waves are expected about ' + A.hst(first) + ' Hawaiʻi time.',
+      where: 'All coasts of ' + (A.ISL[i] || ''),
+      instruction: 'Leave the tsunami evacuation zone now. Go inland and uphill, away from the ocean. Follow police, sirens, and posted signs.',
+      islands: [i], starts: new Date(DEMO_AT - 5 * 60e3).toISOString(), ends: new Date(DEMO_AT + 3 * 3600e3).toISOString(),
+      sent: new Date(DEMO_AT).toISOString(), link: 'https://www.tsunami.gov/' };
+  }
   function feats(){ return A.features(isl(), Date.now(), PREVIEW); }
   function ss(k, v){ try { if(v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch(e){ return null; } }
 
@@ -103,7 +124,48 @@
       '@keyframes ghaPulse{0%,100%{opacity:1}50%{opacity:.45}}',
       '@media (prefers-reduced-motion:reduce){.gha-ring::before{animation:none}}',
       '#ghaHubBtn{appearance:none;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:3px 10px 3px 9px;font:700 11.5px "DM Sans",system-ui,sans-serif;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}',
-      '#ghaHubBtn .gha-dot{width:8px;height:8px;border-radius:50%;background:#5f92a8;box-shadow:0 0 0 2px rgba(255,255,255,.5)}'
+      '#ghaHubBtn .gha-dot{width:8px;height:8px;border-radius:50%;background:#5f92a8;box-shadow:0 0 0 2px rgba(255,255,255,.5)}',
+      '#ghaRed .gha-ok2{background:#fff;color:#b91c1c;border:2px solid #b91c1c}',
+      '.gha-waybtn{appearance:none;display:inline-flex;align-items:center;gap:6px;margin-top:8px;border:0;border-radius:10px;background:#b91c1c;color:#fff;font:800 13.5px "DM Sans",system-ui,sans-serif;padding:9px 12px;cursor:pointer}',
+      '#ghTsu{position:fixed;inset:0;z-index:5900;display:flex;flex-direction:column;background:#dfe7ea;font-family:"DM Sans",system-ui,sans-serif;color:#0f172a}',
+      '@media(min-width:760px){#ghTsu{left:50%;width:480px;margin-left:-240px;box-shadow:0 0 0 100vmax rgba(15,23,42,.6)}}',
+      '#ghTsu .ght-bar{display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px 14px;background:#b91c1c;color:#fff}',
+      '#ghTsu .ght-bar .ght-t{flex:1;min-width:0}',
+      '#ghTsu .ght-bar b{display:block;font-size:15.5px;font-weight:800;line-height:1.2}',
+      '#ghTsu .ght-bar .ght-s{display:block;font-size:12.5px;opacity:.92}',
+      '#ghTsu .ght-bar .gha-sample{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.6)}',
+      '#ghTsu .ght-x{appearance:none;border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}',
+      '#ghTsuMap{flex:1;min-height:0;position:relative;z-index:0}',
+      '#ghTsu .ght-leg{position:absolute;z-index:2;left:10px;top:calc(72px + env(safe-area-inset-top,0px));background:rgba(255,255,255,.95);border-radius:12px;padding:7px 10px;font-size:11.5px;box-shadow:0 2px 10px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:4px}',
+      '#ghTsu .ght-leg span{display:flex;align-items:center;gap:7px}',
+      '#ghTsu .ght-sw{width:16px;height:11px;border-radius:3px;flex-shrink:0;background:rgba(220,38,38,.42);border:2px solid #b91c1c}',
+      '#ghTsu .ght-sw.x{background:rgba(245,158,11,.16);border:2px dashed #c2410c}',
+      '#ghTsu .ght-sheet{position:absolute;z-index:2;left:0;right:0;bottom:0;max-height:62%;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 24px rgba(0,0,0,.2)}',
+      '#ghTsu .ght-pick{display:flex;gap:8px;margin-bottom:10px}',
+      '#ghTsu .ght-pick select{flex:1;min-width:0;border:1px solid #cbd5e1;border-radius:10px;padding:8px 10px;font:600 14px "DM Sans",system-ui,sans-serif;color:#0f172a;background:#fff}',
+      '#ghTsu .ght-pick button{appearance:none;display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#1d4ed8;font:700 13px "DM Sans",system-ui,sans-serif;padding:8px 10px;cursor:pointer;white-space:nowrap}',
+      '#ghTsu .ght-st{display:flex;gap:10px;align-items:flex-start}',
+      '#ghTsu .ght-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fdecea;color:#b91c1c}',
+      '#ghTsu .ght-ic.gray{background:#eef2f5;color:#475569}',
+      '#ghTsu .ght-ic.amber{background:#fef3c7;color:#b45309}',
+      '#ghTsu h3{margin:0;font-size:18px;line-height:1.2;font-weight:800}',
+      '#ghTsu .ght-st p{margin:4px 0 0;font-size:14px;color:#334155;line-height:1.4}',
+      '#ghTsu .ght-way{margin-top:10px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:12px;padding:9px 11px}',
+      '#ghTsu .ght-wh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-weight:800;color:#1e3a8a;font-size:14px}',
+      '#ghTsu .ght-wh span{font-weight:600;font-size:12.5px;color:#1d4ed8;white-space:nowrap}',
+      '#ghTsu .ght-from{font-size:12px;color:#475569;margin-top:1px}',
+      '#ghTsu .ght-way ol{margin:6px 0 0;padding:0;list-style:none;font-size:13px;color:#1e293b}',
+      '#ghTsu .ght-way li{display:flex;gap:8px;align-items:center;padding:3px 0}',
+      '#ghTsu .ght-way li i{font-style:normal;width:18px;height:18px;border-radius:50%;background:#2563eb;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}',
+      '#ghTsu .ght-way li.end i{background:#15803d}',
+      '#ghTsu .ght-way li b{margin-left:auto;font-weight:600;color:#475569;font-size:12px;white-space:nowrap}',
+      '#ghTsu .ght-tip{margin:8px 0 0;font-size:12.5px;color:#475569;line-height:1.4}',
+      '#ghTsu .ght-shake{margin-top:10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:9px 11px;font-size:13px;color:#7c2d12;display:flex;gap:8px;align-items:flex-start;line-height:1.4}',
+      '#ghTsu .ght-shake svg{flex-shrink:0;margin-top:1px}',
+      '#ghTsu .ght-src{margin-top:10px;font-size:11px;color:#64748b;display:flex;justify-content:space-between;gap:10px;line-height:1.35}',
+      '#ghTsu .ght-src b{color:#15803d;white-space:nowrap}',
+      '#ghTsu .ght-src b.stale{color:#b91c1c}',
+      'body:has(#ghTsu) #swUpdateToast{display:none!important}'
     ].join('\n')
       // Inside the GoHawaii Dashboard's phone the service worker's reload prompt is noise.
       + (window.parent !== window ? '\n#swUpdateToast{display:none!important}' : '');
@@ -160,7 +222,7 @@
     var a = L[0];
     if(!el){
       el = document.createElement('button'); el.type = 'button'; el.id = 'ghaBar';
-      el.addEventListener('click', function(){ openHub(); });
+      el.addEventListener('click', function(){ if(tsuAlert()) tsuOpen(); else openHub(); });
       var s = document.getElementById('publicBrandStrip');
       if(s && s.nextSibling) tb.insertBefore(el, s.nextSibling); else tb.appendChild(el);
     }
@@ -179,24 +241,27 @@
     var a = q[0];
     var w = document.createElement('div'); w.id = 'ghaRed'; w.setAttribute('role', 'alertdialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-labelledby', 'ghaRedT');
     var txt = a.src === 'nws' ? (a.headline ? a.headline + '\n\n' : '') + a.body : a.body;
+    var tsu = isTsu(a); if(tsu) tsuLoad(isl());
     w.innerHTML = '<div class="gha-card"><div class="gha-head"><div class="gha-kicker">' + ICON.warn + esc(kicker(a)) + ' · ' + esc(a.src === 'staff' ? 'GoHawaii' : a.srcName) + sampleTag(a) + '</div>'
       + '<h2 id="ghaRedT">' + esc(a.title) + '</h2><div class="gha-sub">' + esc(A.islandNames(a.islands)) + ' · ' + esc(A.until(a)) + '</div></div>'
       + '<div class="gha-body">'
       + (a.where ? '<div class="gha-where"><b>Where:</b> ' + esc(a.where) + '</div>' : '')
       + (txt ? '<div class="gha-txt">' + esc(txt) + '</div>' : '')
       + (a.instruction ? '<div class="gha-txt" style="margin-top:12px"><b>What to do:</b> ' + esc(a.instruction) + '</div>' : '')
-      + (a.sample ? '<p class="gha-fine" style="text-align:left;margin-top:12px">This is a sample posted from the GoHawaii Dashboard review build. It is not a real advisory.</p>' : '')
-      + '</div><div class="gha-foot"><button type="button" class="gha-ok">I understand</button>'
+      + (a.demo ? '<p class="gha-fine" style="text-align:left;margin-top:12px">This is a sample tsunami warning for the review build. It is not real.</p>'
+        : a.sample ? '<p class="gha-fine" style="text-align:left;margin-top:12px">This is a sample posted from the GoHawaii Dashboard review build. It is not a real advisory.</p>' : '')
+      + '</div><div class="gha-foot">' + (tsu ? '<button type="button" class="gha-ok gha-way">Show the way out</button><button type="button" class="gha-ok gha-ok2">I understand</button>' : '<button type="button" class="gha-ok">I understand</button>')
       + (a.link ? '<div class="gha-fine"><a href="' + esc(a.link) + '" target="_blank" rel="noopener">Full details from ' + esc(a.src === 'staff' ? 'GoHawaii' : a.srcName) + '</a></div>' : '')
       + '<div class="gha-fine">Always follow lifeguards and posted signs.</div></div></div>';
     document.body.appendChild(w);
     A.markSeen(a.id);
-    var ok = w.querySelector('.gha-ok');
+    var ok = w.querySelector('.gha-ok:not(.gha-way)'), way = w.querySelector('.gha-way');
     ok.addEventListener('click', function(){
       ss('gha_ack_' + a.id, '1'); w.remove();
       if(!showRed()) setTimeout(pops, 400);
     });
-    try { ok.focus(); } catch(e){}
+    if(way) way.addEventListener('click', function(){ ss('gha_ack_' + a.id, '1'); w.remove(); tsuOpen(); });
+    try { (way || ok).focus(); } catch(e){}
     return true;
   }
 
@@ -248,6 +313,7 @@
       + (a.where ? '<div class="gha-w"><b>Where:</b> ' + esc(a.where.length > 220 ? a.where.slice(0, 217) + '...' : a.where) + '</div>' : '')
       + (more.length ? '<details><summary>Details</summary><div style="white-space:pre-line;margin-top:6px">' + esc(more.join('\n\n')) + '</div>'
           + (a.link ? '<div style="margin-top:6px"><a href="' + esc(a.link) + '" target="_blank" rel="noopener" style="color:var(--lv)">Open the source</a></div>' : '') + '</details>' : '')
+      + (isTsu(a) ? '<button type="button" class="gha-waybtn" onclick="event.stopPropagation();ghTsuOpen()">' + ICON.up + 'Show the way out</button>' : '')
       + '</div></div>';
   }
   // A failed or missing source is said first and in amber, whatever else is on the list, so a
@@ -370,6 +436,7 @@
         return '<div class="gha-card-a gha-lv-' + a.level + '" onclick="ghOpenHub()"><span class="gha-ic">' + ICON.warn + '</span><div style="flex:1;min-width:0">'
           + '<div class="gha-t">' + esc(a.title) + sampleTag(a) + '</div><div class="gha-m">' + esc(srcLine(a)) + '</div>'
           + (a.where && a.src !== 'nws' ? '<div class="gha-w">' + esc(a.where) + '</div>' : '')
+          + (isTsu(a) ? '<button type="button" class="gha-waybtn" onclick="event.stopPropagation();ghTsuOpen(\'' + esc(b.id) + '\')">' + ICON.up + esc(tsuBeachLabel(b.id)) + '</button>' : '')
           + '</div></div>';
       }).join('') + (L.length > 3 ? '<div style="font-size:12px;color:var(--mute)">+' + (L.length - 3) + ' more on the GoHawaii page</div>' : '') + '</div>';
     } catch(e){ return ''; }
@@ -395,8 +462,213 @@
     } catch(e){}
   };
 
+  // ---- tsunami: the evacuation zone and a walking way out, full screen ----
+  // Opens only for a Tsunami Warning (an NWS name from the fixed list, never a pattern) or the
+  // ?gh_demo=tsunami sample. The zones and a route from every beach are built ahead of time by
+  // scripts/build-tsunami-routes.mjs into /gh/tsunami/<island>.js, loaded as a script so the service
+  // worker keeps a copy when the network jams. A Tsunami Advisory keeps its full-screen card and gets
+  // no map: its action is to leave the water, not the zone. The extreme zone is drawn, never routed:
+  // the feed does not say when officials call for it.
+  var TSU_BUILD = '2026-09-19-tsu1';
+  function isTsu(a){ return !!a && a.level === 'red' && (a.demo === true || (a.src === 'nws' && a.title === 'Tsunami Warning')); }
+  function tsuAlert(){ return list().filter(isTsu)[0] || null; }
+  var tsuWait = {};
+  function tsuLoad(slug, cb){
+    var have = window.GH_TSU && window.GH_TSU[slug];
+    if(have){ if(cb) cb(have); return; }
+    (tsuWait[slug] = tsuWait[slug] || []).push(cb || function(){});
+    if(document.getElementById('ghTsuJs-' + slug)) return;
+    var s = document.createElement('script'); s.id = 'ghTsuJs-' + slug; s.src = '/gh/tsunami/' + slug + '.js?b=' + TSU_BUILD;
+    s.onload = s.onerror = function(){
+      var d = window.GH_TSU && window.GH_TSU[slug], w = tsuWait[slug] || []; tsuWait[slug] = [];
+      if(!d) s.remove();                                   // let a later open try again
+      w.forEach(function(f){ try { f(d || null); } catch(e){} });
+    };
+    document.head.appendChild(s);
+  }
+  function pip(g, lat, lon){                              // even-odd over every ring, so holes count
+    var P = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates], c = false;
+    for(var i = 0; i < P.length; i++) for(var j = 0; j < P[i].length; j++){
+      var r = P[i][j];
+      for(var k = 0, m = r.length - 1; k < r.length; m = k++){
+        var xi = r[k][0], yi = r[k][1], xj = r[m][0], yj = r[m][1];
+        if((yi > lat) !== (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) c = !c;
+      }
+    }
+    return c;
+  }
+  function meters(a, b){ var dx = (a[1] - b[1]) * 111320 * Math.cos(a[0] * Math.PI / 180), dy = (a[0] - b[0]) * 111320; return Math.sqrt(dx * dx + dy * dy); }
+  function fmtD(m){ return m < 1000 ? Math.max(10, Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1) + ' km'; }
+  function fmtT(s){ var m = Math.max(1, Math.round(s / 60)); return m < 60 ? 'about ' + m + ' min walk' : 'about ' + Math.floor(m / 60) + ' hr ' + (m % 60 ? m % 60 + ' min ' : '') + 'walk'; }
+  function tsuBeachLabel(id){
+    var d = window.GH_TSU && window.GH_TSU[isl()], r = d && d.routes[id];
+    return r && r.d ? 'Way out from here: ' + fmtD(r.d) + ' walk' : 'Show the way out';
+  }
+
+  var T = { map: null, zl: null, rl: null, pick: '', me: null, slug: '', data: null, msg: '' };
+  function tsuClose(){
+    var w = document.getElementById('ghTsu'); if(w) w.remove();
+    if(T.map){ try { T.map.remove(); } catch(e){} } T.map = null; T.rl = null;
+    document.removeEventListener('keydown', tsuKey);
+  }
+  function tsuKey(e){ if(e.key === 'Escape') tsuClose(); }
+  function tsuOpen(beachId){
+    css();
+    var a = tsuAlert();
+    if(T.slug !== isl()){ T.slug = isl(); T.pick = ''; T.data = null; }
+    if(beachId){ T.pick = beachId; T.me = null; }
+    else if(!T.pick) T.pick = ss('ght_pick_' + T.slug) || '';
+    if(!beachId && !T.me && window._userLocation) T.me = [window._userLocation.lat, window._userLocation.lon];
+    T.msg = '';
+    tsuClose();
+    var w = document.createElement('div'); w.id = 'ghTsu'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-labelledby', 'ghTsuT');
+    w.innerHTML = '<div class="ght-bar">' + ICON.warn + '<div class="ght-t"><b id="ghTsuT">' + esc(a ? a.title : 'Tsunami Warning') + ' · ' + esc(islName()) + '</b>'
+      + '<span class="ght-s">Leave the red zone now' + (a && a.sample ? ' <span class="gha-sample">Sample</span>' : '') + '</span></div>'
+      + '<button type="button" class="ght-x" aria-label="Close the evacuation map">' + ICON.x + '</button></div>'
+      + '<div id="ghTsuMap"></div>'
+      + '<div class="ght-leg"><span><i class="ght-sw"></i>Evacuation zone: leave now</span><span><i class="ght-sw x"></i>Extreme zone: only if officials say so</span></div>'
+      + '<div class="ght-sheet"><div class="ght-pick"><select aria-label="Your beach"><option value="">Pick your beach</option></select>'
+      + '<button type="button" class="ght-loc">' + ICON.loc + 'My location</button></div><div class="ght-body"><div class="gha-empty">Loading the evacuation map...</div></div></div>';
+    document.body.appendChild(w);
+    w.querySelector('.ght-x').addEventListener('click', tsuClose);
+    document.addEventListener('keydown', tsuKey);
+    var sel = w.querySelector('select');
+    sel.addEventListener('change', function(){ T.pick = sel.value; T.me = null; T.msg = ''; ss('ght_pick_' + T.slug, T.pick); tsuDraw(); });
+    w.querySelector('.ght-loc').addEventListener('click', tsuLocate);
+    try { w.querySelector('.ght-x').focus(); } catch(e){}
+    tsuLoad(T.slug, function(d){
+      if(!document.getElementById('ghTsu')) return;
+      if(!d){ w.querySelector('.ght-body').innerHTML = tsuFail(); return; }
+      T.data = d;
+      Object.keys(d.routes).map(function(id){ return [id, d.routes[id].n]; })
+        .sort(function(x, y){ return x[1].localeCompare(y[1]); })
+        .forEach(function(r){ var o = document.createElement('option'); o.value = r[0]; o.textContent = r[1]; sel.appendChild(o); });
+      tsuDraw();
+    });
+  }
+  function tsuFail(){
+    return '<div class="ght-st"><div class="ght-ic">' + ICON.up + '</div><div><h3>Go inland and uphill now</h3><p>The evacuation map could not load. Leave the beach and move away from the ocean. Follow police, sirens, and posted signs.</p></div></div>' + tsuShake();
+  }
+  function tsuLocate(){
+    var b = document.querySelector('#ghTsu .ght-body');
+    if(!navigator.geolocation){ T.msg = 'This browser cannot share your location. Pick your beach instead.'; tsuDraw(); return; }
+    if(b) b.insertAdjacentHTML('afterbegin', '<div class="gha-empty" id="ghtFinding">Finding your location...</div>');
+    navigator.geolocation.getCurrentPosition(function(pos){
+      T.me = [pos.coords.latitude, pos.coords.longitude]; T.msg = '';
+      window._userLocation = { lat: T.me[0], lon: T.me[1] };
+      tsuDraw();
+    }, function(){ T.msg = 'We could not get your location. Pick your beach instead.'; tsuDraw(); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+  }
+  // From a location inside the zone: walk to the nearest point of any saved beach route, then follow
+  // it out. Scored as the walk there (straight line, plus 30% for streets) and the rest of the route.
+  // No network needed, so it still works when the router or the cell network is down.
+  function tsuJoin(me){
+    var R = T.data.routes, best = null;
+    Object.keys(R).forEach(function(id){
+      var L = R[id].line; if(!L) return;
+      var rem = new Array(L.length); rem[L.length - 1] = 0;
+      for(var i = L.length - 2; i >= 0; i--) rem[i] = rem[i + 1] + meters(L[i], L[i + 1]);
+      for(var j = 0; j < L.length; j++){
+        var dm = meters(me, L[j]); if(dm > 500) continue;
+        var tot = dm * 1.3 + rem[j];
+        if(!best || tot < best.tot) best = { tot: tot, dm: dm, rem: rem[j], line: L.slice(j) };
+      }
+    });
+    if(!best) return null;
+    var st = best.dm >= 15 ? [['Walk to the blue route', fmtD(best.dm)], ['Follow it out of the zone', fmtD(best.rem)]] : [['Follow the blue route out of the zone', fmtD(best.rem)]];
+    return { n: '', a: me, line: best.line, d: best.dm + best.rem, s: best.tot / 1.35, st: st };
+  }
+  // Where the visitor is, and what to tell them. A location wins over a picked beach; a location
+  // more than 40 km from every beach on this island is not on it, so the beach list is used.
+  function tsuState(){
+    var d = T.data, R = d.routes;
+    if(T.me){
+      var nd = 1e9;
+      Object.keys(R).forEach(function(id){ var r = R[id], m = meters(T.me, r.a || r.ll); if(m < nd) nd = m; });
+      if(nd > 40000){ T.me = null; T.msg = 'Your location is not on ' + islName() + '. Pick a beach to see its way out.'; }
+      else {
+        if(pip(d.zone, T.me[0], T.me[1])) return { k: 'me-in', row: tsuJoin(T.me) };
+        if(pip(d.extreme, T.me[0], T.me[1])) return { k: 'me-x' };
+        return { k: 'me-out' };
+      }
+    }
+    if(T.pick && R[T.pick]) return { k: R[T.pick].line ? 'beach' : 'beach-none', row: R[T.pick] };
+    return { k: 'none' };
+  }
+  function tsuShake(){ return '<div class="ght-shake">' + ICON.shake + '<span><b>Felt shaking or saw the ocean pull back?</b> Go inland now. Do not wait for an alert.</span></div>'; }
+  function tsuSrc(){
+    var a = tsuAlert(), right;
+    if(a && a.demo) right = '<b class="stale">Sample</b>';
+    else if(A.last.nwsOk === false) right = '<b class="stale">Weather service not reached</b>';
+    else right = '<b>Checked ' + esc(A.hst(new Date(A.last.nwsAt || Date.now()).toISOString())) + '</b>';
+    return '<div class="ght-src"><span>National Weather Service. Zones: State of Hawaiʻi. Routes: OpenStreetMap.</span>' + right + '</div>';
+  }
+  function tsuWay(r, from){
+    var long = r.d > 2000 ? '<p class="ght-tip">That is a long way on foot. If you came by car, drive this way inland now.</p>' : '';
+    return '<div class="ght-way"><div class="ght-wh">Nearest way out<span>' + fmtD(r.d) + ' · ' + fmtT(r.s) + '</span></div>'
+      + '<div class="ght-from">' + esc(from) + '</div><ol>'
+      + r.st.map(function(s, i){ return '<li><i>' + (i + 1) + '</i>' + esc(s[0]) + '<b>' + esc(s[1]) + '</b></li>'; }).join('')
+      + '<li class="end"><i>' + (r.st.length + 1) + '</i>Out of the zone. Keep going inland if you can.</li></ol></div>' + long;
+  }
+  function tsuStatus(ic, cls, h, p){ return '<div class="ght-st"><div class="ght-ic ' + cls + '">' + ic + '</div><div><h3>' + h + '</h3><p>' + p + '</p></div></div>'; }
+  var TALL = '<p class="ght-tip">Cannot get out in time? Go to the 4th floor or higher of a concrete building 10 or more stories tall.</p>';
+  function tsuDraw(){
+    var d = T.data, Lf = window.L, w = document.getElementById('ghTsu'); if(!d || !Lf || !w) return;
+    if(!T.map){
+      T.map = Lf.map('ghTsuMap', { zoomControl: false, attributionControl: true, zoomSnap: 0.5 });
+      (typeof osBasemap === 'function' ? osBasemap() : Lf.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Esri' })).addTo(T.map);
+      T.map.attributionControl.setPrefix(false).addAttribution('Zones: State of Hawaiʻi · Routes: © OpenStreetMap');
+      Lf.geoJSON({ type: 'Feature', geometry: d.extreme }, { interactive: false, style: { color: '#c2410c', weight: 2, dashArray: '6 5', fillColor: '#f59e0b', fillOpacity: .14 } }).addTo(T.map);
+      T.zl = Lf.geoJSON({ type: 'Feature', geometry: d.zone }, { interactive: false, style: { color: '#b91c1c', weight: 2, fillColor: '#dc2626', fillOpacity: .4 } }).addTo(T.map);
+      T.rl = Lf.layerGroup().addTo(T.map);
+    }
+    var st = tsuState(), r = st.row, h = T.msg ? '<div class="gha-empty">' + esc(T.msg) + '</div>' : '';
+    var sel = w.querySelector('select'); if(sel) sel.value = T.me ? '' : (T.pick || '');
+    if(st.k === 'me-in') h += tsuStatus(ICON.up, '', 'You are in the evacuation zone', 'Leave now. Go inland and uphill, away from the ocean. Follow police, sirens, and posted signs.')
+      + (r ? tsuWay(r, 'From where you are') : '<p class="ght-tip">The red area on the map is the zone. Head for the nearest road that leaves it, inland and uphill.</p>') + TALL;
+    else if(st.k === 'me-x') h += tsuStatus(ICON.pin, 'amber', 'You are in the extreme zone', 'Only the red zone has to leave for this warning. Be ready to move farther inland if officials call for the extreme zone.');
+    else if(st.k === 'me-out') h += tsuStatus(ICON.pin, 'gray', 'You are outside the mapped zone', 'Stay here unless officials tell you to move. Do not go to the coast to watch, and keep roads clear for people leaving.')
+      + '<p class="ght-tip">The zone is the minimum distance, not a guarantee. Wait for the all clear.</p>';
+    else if(st.k === 'beach') h += tsuStatus(ICON.up, '', esc(r.n) + ' is in the evacuation zone', 'Leave now. Follow the blue route, then keep going inland.') + tsuWay(r, 'From ' + r.n) + TALL;
+    else if(st.k === 'beach-none') h += tsuStatus(ICON.up, '', 'Leave ' + esc(r.n) + ' now', 'We have no saved route from this beach. Go inland and uphill, away from the ocean, and follow police and posted signs.');
+    else h += tsuStatus(ICON.pin, 'gray', 'Where are you?', 'Pick your beach above, or use your location, to see the nearest way out of the zone.');
+    w.querySelector('.ght-body').innerHTML = h + tsuShake() + tsuSrc();
+
+    T.rl.clearLayers();
+    var pts = [];
+    function flag(ll, txt, col){
+      return Lf.marker(ll, { interactive: false, keyboard: false, icon: Lf.divIcon({ className: '', iconSize: [0, 0], html:
+        '<div style="position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center">'
+        + '<div style="background:' + col + ';color:#fff;font:800 11px \'DM Sans\',sans-serif;padding:3px 7px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3)">' + esc(txt) + '</div>'
+        + '<div style="width:12px;height:12px;border-radius:50%;background:' + col + ';border:3px solid #fff;margin-top:3px;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div></div>' }) });
+    }
+    if(r && r.line){
+      var line = r.line, a0 = r.a || r.ll;
+      if(meters(a0, line[0]) > 5) Lf.polyline([a0, line[0]], { color: '#2563eb', weight: 4, dashArray: '2 8', lineCap: 'round' }).addTo(T.rl);
+      Lf.polyline(line, { color: '#fff', weight: 10, opacity: .95, lineCap: 'round', lineJoin: 'round' }).addTo(T.rl);
+      Lf.polyline(line, { color: '#2563eb', weight: 6, lineCap: 'round', lineJoin: 'round' }).addTo(T.rl);
+      if(st.k === 'beach') flag(a0, r.n, '#0f4c5c').addTo(T.rl);
+      flag(line[line.length - 1], 'Out of zone', '#15803d').addTo(T.rl);
+      pts = pts.concat([a0], line);
+    } else if(r){ flag(r.ll, r.n, '#0f4c5c').addTo(T.rl); pts.push(r.ll); }
+    if(T.me){
+      Lf.marker(T.me, { interactive: false, keyboard: false, zIndexOffset: 1000, icon: Lf.divIcon({ className: '', iconSize: [20, 20], iconAnchor: [10, 10],
+        html: '<div style="width:20px;height:20px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 7px rgba(37,99,235,.25),0 2px 6px rgba(0,0,0,.35)"></div>' }) }).addTo(T.rl);
+      pts.push(T.me);
+    }
+    T.map.invalidateSize();
+    var sh = w.querySelector('.ght-sheet'), leg = w.querySelector('.ght-leg');
+    // The padding clears the legend and the sheet, plus a flag's label, which sits above its point
+    // and runs up to about 80 px either side of it.
+    var pad = { paddingTopLeft: [80, (leg ? leg.offsetHeight + 16 : 60) + 36], paddingBottomRight: [80, (sh ? sh.offsetHeight : 300) + 16], maxZoom: 17 };
+    if(pts.length > 1) T.map.fitBounds(Lf.latLngBounds(pts), pad);
+    else if(pts.length) T.map.setView(pts[0], 15);
+    else T.map.fitBounds(T.zl.getBounds(), pad);
+  }
+  window.ghTsuOpen = tsuOpen;
+
   // ---- run ----
-  function paint(){ css(); strip(); bar(); try { window._ghAdvPins(); } catch(e){} hubRefresh(); }
+  function paint(){ css(); strip(); bar(); try { window._ghAdvPins(); } catch(e){} hubRefresh(); if(tsuAlert()) tsuLoad(isl()); }
   var hubTries = 0;
   function autoHub(){
     if(ss('gha_hub_auto')) return;
