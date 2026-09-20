@@ -1686,7 +1686,19 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 #cultureToggle svg{width:22px;height:22px}
 body[data-tab="acts"] #cultureToggle{top:188px}
 #cultureToggle.on{background:#2f6b45;color:#fff;border-color:#2f6b45}
-:root[data-theme="culture"] .os-basemap{filter:saturate(.3) brightness(1.03)}
+/* Vintage: the street basemap goes sepia so its roads and names read like faint print under the sheet, the sea
+   outside the sheet is parchment, a soft vignette + paper grain sit over the whole map (z401, above every
+   pane, so pins near the edge dim a touch, nothing else changes), and the ahupuaʻa washes multiply like ink. */
+:root[data-theme="culture"] .os-basemap{filter:sepia(.75) saturate(.45) contrast(.88) brightness(1.06)}
+:root[data-theme="culture"] .leaflet-container{background:#e6d9bf}
+:root[data-theme="culture"] #map::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:401;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(74,53,32,.32) 100%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .10 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.leaflet-culture-pane svg path{mix-blend-mode:multiply}
+.leaflet-cultureLabels-pane{pointer-events:none}
+.os-culture-label-anchor{background:none;border:0}
+.os-ahu-label,.os-moku-label{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;color:#3f2e1c;text-shadow:0 0 2px #f1e7d2,0 0 4px #f1e7d2,0 0 8px #f1e7d2;pointer-events:none}
+.os-ahu-label{font-size:11px;line-height:1.15;letter-spacing:.03em}
+.os-ahu-label small{display:block;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.os-moku-label{font-size:var(--os-moku-fs,14px);font-weight:600;letter-spacing:.16em;text-transform:uppercase}
 
 
 /* DISCLAIMER MODAL */
@@ -4997,6 +5009,66 @@ function initMap(){
   // Hawaiʻi GIS") belongs on the Culture sheet's About panel when that is built.
   window.CULTURE_CREDIT = 'Sheet: UH Mānoa MAGIS';
   window._isCulture = function(){ return document.documentElement.getAttribute('data-theme') === 'culture'; };
+  // Sections: every ahupuaʻa is a tinted, bounded, named piece of the island. The tint family follows the
+  // moku, so neighbours in one moku read as kin. Names are the State GIS spellings (ʻokina, kahakō).
+  // Moku names show at island zoom; ahupuaʻa names from z11 up, largest first, so labels never pile up.
+  window.CULTURE_TINTS = ['#c9a86a','#8fae7e','#d39a7c','#9db8c4','#b9a3c9','#d9c07f','#93b9a8','#cfa48c','#a7b58a','#c4a4a4','#8fa9b8','#d1b48e'];
+  window._culturePolyStats = function(geom){
+    // Largest ring only: its shoelace area (deg²) and centroid. Enough for label placement and size ranking.
+    var polys = geom.type === 'Polygon' ? [geom.coordinates] : (geom.type === 'MultiPolygon' ? geom.coordinates : []), best = null;
+    polys.forEach(function(poly){
+      var ring = poly[0] || [], a = 0, cx = 0, cy = 0, n = ring.length;
+      for (var i = 0; i < n - 1; i++){ var x0 = ring[i][0], y0 = ring[i][1], x1 = ring[i+1][0], y1 = ring[i+1][1], f = x0*y1 - x1*y0; a += f; cx += (x0+x1)*f; cy += (y0+y1)*f; }
+      a = a / 2; if (!a) return;
+      var c = [cy/(6*a), cx/(6*a)]; a = Math.abs(a);
+      if (!best || a > best.area) best = {area:a, center:c};
+    });
+    return best;
+  };
+  window._cultureBuildSections = function(g){
+    var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); };
+    var mokus = []; (g.features || []).forEach(function(f){ var m = f.properties && f.properties.moku; if (m && mokus.indexOf(m) < 0) mokus.push(m); });
+    mokus.sort();
+    var ahu = [], mk = {};
+    window._cultureLines = L.geoJSON(g, {pane:'culture', interactive:false,
+      style:function(f){ var i = Math.max(0, mokus.indexOf(f.properties.moku)); return {color:'#5a4630', weight:1.4, opacity:.9, fillColor:window.CULTURE_TINTS[i % window.CULTURE_TINTS.length], fillOpacity:.3}; },
+      onEachFeature:function(f){
+        var s = window._culturePolyStats(f.geometry); if (!s) return;
+        var name = f.properties.ahupuaa || '', moku = f.properties.moku || '';
+        ahu.push({area:s.area, len:name.length, mlen:moku.length, m:L.marker(s.center, {pane:'cultureLabels', interactive:false, keyboard:false, icon:L.divIcon({className:'os-culture-label-anchor', iconSize:null, html:'<span class="os-ahu-label">' + esc(name) + '<small>' + esc(moku) + '</small></span>'})})});
+        if (moku){ var e = mk[moku] || (mk[moku] = {a:0, x:0, y:0}); e.a += s.area; e.x += s.center[1]*s.area; e.y += s.center[0]*s.area; }
+      }});
+    window._cultureAhuLabels = ahu;
+    window._cultureMokuLabels = Object.keys(mk).map(function(name){ var e = mk[name]; return {area:e.a, len:name.length, m:L.marker([e.y/e.a, e.x/e.a], {pane:'cultureLabels', interactive:false, keyboard:false, icon:L.divIcon({className:'os-culture-label-anchor', iconSize:null, html:'<span class="os-moku-label">' + esc(name) + '</span>'})})}; });
+    window._cultureLabelGroup = L.layerGroup();
+    map.on('zoomend', window._cultureRelabel);
+  };
+  window._cultureRelabel = function(){
+    if (!window._cultureLabelGroup || !window._isCulture()) return;
+    var z = map.getZoom(), grp = window._cultureLabelGroup; grp.clearLayers();
+    // Type scales with zoom, the smallest pieces wait a zoom level (screen area quadruples per level, so each
+    // size cut-off shrinks 4x), and labels are placed largest-first with a screen-space overlap check, so
+    // twelve Maui moku on a phone at island zoom never pile onto each other.
+    var fs = z < 9.5 ? 10 : z < 10.5 ? 12 : 14;
+    try { map.getContainer().style.setProperty('--os-moku-fs', fs + 'px'); } catch(e){}
+    var placed = [];
+    var fits = function(ll, w, h){
+      var p = map.latLngToContainerPoint(ll), b = [p.x - w/2, p.y - h/2, p.x + w/2, p.y + h/2];
+      for (var i = 0; i < placed.length; i++){ var q = placed[i]; if (b[0] < q[2] && b[2] > q[0] && b[1] < q[3] && b[3] > q[1]) return false; }
+      placed.push(b); return true;
+    };
+    var moku = z < 11, list = moku ? (window._cultureMokuLabels || []) : (window._cultureAhuLabels || []);
+    var gain = Math.pow(4, z - (moku ? 9 : 11)), cut = moku ? 0.006 : 0.00055;
+    list.slice().sort(function(a, b){ return b.area - a.area; }).forEach(function(o){
+      if (o.area * gain <= cut) return;
+      var w = moku ? o.len * fs * 0.95 : Math.max(o.len * 7, o.mlen * 6.5), h = moku ? fs * 1.4 : 24;
+      if (fits(o.m.getLatLng(), w + 6, h + 4)) grp.addLayer(o.m);
+    });
+  };
+  window._cultureLabelsOn = function(on){
+    if (!window._cultureLabelGroup) return;
+    if (on){ window._cultureLabelGroup.addTo(map); window._cultureRelabel(); } else { map.removeLayer(window._cultureLabelGroup); }
+  };
   window._cultureApply = function(on){
     var root = document.documentElement, btn = document.getElementById('cultureToggle');
     var slug = (window.ACTIVE && ACTIVE.slug) || 'kauai', cfg = window.CULTURE_MAPS[slug];
@@ -5006,15 +5078,16 @@ function initMap(){
       try { localStorage.setItem('os_theme','culture'); } catch(e){}
       if (cfg && window.map){
         if (!map.getPane('culture')){ var p = map.createPane('culture'); p.style.zIndex = 210; p.style.pointerEvents = 'none'; }
-        if (!window._cultureSheet) window._cultureSheet = L.imageOverlay(cfg.src, cfg.bounds, {opacity:.72, pane:'culture', interactive:false, alt:cfg.title, attribution:window.CULTURE_CREDIT});
+        if (!map.getPane('cultureLabels')){ var pl = map.createPane('cultureLabels'); pl.style.zIndex = 215; pl.style.pointerEvents = 'none'; }
+        if (!window._cultureSheet) window._cultureSheet = L.imageOverlay(cfg.src, cfg.bounds, {opacity:.8, pane:'culture', interactive:false, alt:cfg.title, attribution:window.CULTURE_CREDIT});
         window._cultureSheet.addTo(map);
-        if (window._cultureLines){ window._cultureLines.addTo(map); }
+        if (window._cultureLines){ window._cultureLines.addTo(map); window._cultureLabelsOn(true); }
         else if (!window._cultureLinesLoading){
           window._cultureLinesLoading = true;
           fetch('culture/ahupuaa/' + slug + '.geojson').then(function(r){ return r.ok ? r.json() : null; }).then(function(g){
             if (!g) return;
-            window._cultureLines = L.geoJSON(g, {pane:'culture', interactive:false, style:{color:'#0f4c5c', weight:1.2, opacity:.75, fill:false, dashArray:'4 3'}});
-            if (window._isCulture()) window._cultureLines.addTo(map);
+            window._cultureBuildSections(g);
+            if (window._isCulture()){ window._cultureLines.addTo(map); window._cultureLabelsOn(true); }
           }).catch(function(){});
         }
       }
@@ -5024,6 +5097,7 @@ function initMap(){
       try { localStorage.setItem('os_theme','default'); } catch(e){}
       if (window._cultureSheet && window.map) map.removeLayer(window._cultureSheet);
       if (window._cultureLines && window.map) map.removeLayer(window._cultureLines);
+      window._cultureLabelsOn(false);
     }
     try { var u = new URL(location.href); if (on) u.searchParams.set('theme','culture'); else u.searchParams.delete('theme'); history.replaceState(null, '', u); } catch(e){}
   };
