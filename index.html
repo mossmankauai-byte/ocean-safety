@@ -1678,6 +1678,15 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 #toursBtn:hover{transform:scale(1.04);background:#1a7a8a}
 #toursBtn svg{width:18px;height:18px}
 #satToggle.on{background:#0f4c5c;color:#fff;border-color:#0f4c5c}
+/* CULTURE toggle: second map button under the satellite one. Same shape, leaf icon (GH_ICON.leaf path).
+   On: data-theme="culture" on <html>, the island's 1885-1903 survey sheet + State ahupuaʻa lines drop in
+   below every hazard/marker pane, and the street basemap is muted so the old sheet reads. Off = untouched. */
+#cultureToggle{position:absolute;top:160px;right:162px;z-index:700;width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid rgba(15,76,92,.2);color:#2f6b45;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .2s}
+#cultureToggle:hover{transform:scale(1.05)}
+#cultureToggle svg{width:22px;height:22px}
+body[data-tab="acts"] #cultureToggle{top:188px}
+#cultureToggle.on{background:#2f6b45;color:#fff;border-color:#2f6b45}
+:root[data-theme="culture"] .os-basemap{filter:saturate(.3) brightness(1.03)}
 
 
 /* DISCLAIMER MODAL */
@@ -2119,6 +2128,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
   <span>Loading live conditions…</span>
 </div>
 <button id="satToggle" onclick="toggleSat()" aria-label="Toggle satellite view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
+<button id="cultureToggle" onclick="toggleCulture()" aria-label="Toggle culture view: historic survey map and ahupuaʻa" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
 <button id="rainToggle" onclick="toggleRain()" aria-label="Toggle 12-hour rain forecast" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 0 1-.5-7.97 5.5 5.5 0 0 1 10.7-1.3A4.5 4.5 0 0 1 17 16"/><line x1="8" y1="18.5" x2="7.2" y2="21"/><line x1="12" y1="18.5" x2="11.2" y2="22"/><line x1="16" y1="18.5" x2="15.2" y2="21"/></svg></button>
 <div id="fcBar" role="group" aria-label="Rain forecast time"><div class="fcBar-row"><button id="fcPlay" onclick="fcPlayToggle()" aria-label="Pause forecast animation"></button><span id="fcTime">Now</span><input id="fcSlider" type="range" min="0" max="12" step="1" value="0" oninput="fcSlide(this.value)" aria-label="Forecast hours ahead"><span class="fc-cap">12&#8209;hr rain</span></div><div class="fc-legend"><svg class="fc-lg-drop" viewBox="0 0 24 24" width="9" height="11" aria-hidden="true"><path d="M12 3s6.5 7.2 6.5 11.5a6.5 6.5 0 0 1-13 0C5.5 10.2 12 3 12 3z" fill="currentColor"/></svg><span class="fc-lg-lbl">Rain</span><span class="fc-lg-lbl fc-lg-end">Light</span><span class="fc-lg-grad"></span><span class="fc-lg-lbl fc-lg-end">Heavy</span></div></div>
 <button id="savedChip" class="saved-chip" onclick="openSavedSheet()" aria-label="View saved">
@@ -4968,6 +4978,59 @@ function initMap(){
   window._streetTile = osBasemap({errorTileUrl:_blankTile,className:'os-basemap'}).addTo(map); osCredit(map);
   window._satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri',errorTileUrl:_blankTile});
   window._isSat = false;
+
+  // CULTURE THEME, map layer only. One gate, window._isCulture(), the way _isPublicRef() gates the
+  // public ref. On: the island's georeferenced 1885-1903 Hawaiian Government / Territory Survey sheet
+  // (UH Mānoa Library MAGIS, already EPSG:3857) as an image overlay plus the State GIS ahupuaʻa lines,
+  // both in one pane at z210: above the basemap (200), below the rain blobs (250), swell waves and every
+  // marker. Nothing here touches hazard rules, verdicts or flags. Off: no asset is requested at all.
+  // Preference: ?theme=culture on the URL wins, else localStorage os_theme. Island switches reload the
+  // page, so the sheet is picked per load from ACTIVE.slug; there is no cross-island layer to swap.
+  window.CULTURE_MAPS = {
+    kauai:  {src:'culture/maps/kauai-1903.webp',  bounds:[[21.777819,-159.915072],[22.327009,-159.184384]], title:'Kauaʻi, Hawaii Territory Survey 1903 (Donn, Wall)'},
+    oahu:   {src:'culture/maps/oahu-1902.webp',   bounds:[[21.169354,-158.371494],[21.795169,-157.553816]], title:'Oʻahu, Hawaii Territory Survey 1902 (Donn, Wall)'},
+    maui:   {src:'culture/maps/maui-1885.webp',   bounds:[[20.43655,-156.76858],[21.134063,-155.89339]],   title:'Maui, Hawaiian Government Survey 1885 (Dodge, Alexander)'},
+    hawaii: {src:'culture/maps/hawaii-1901.webp', bounds:[[18.766178,-156.220653],[20.436262,-154.643036]], title:'Hawaiʻi, Hawaii Territory Survey 1901 (Donn, Alexander, Wall)'}
+  };
+  window.CULTURE_CREDIT = 'Hawaiian Government Survey sheet georeferenced by UH Mānoa Library MAGIS; ahupuaʻa: State of Hawaiʻi GIS';
+  window._isCulture = function(){ return document.documentElement.getAttribute('data-theme') === 'culture'; };
+  window._cultureApply = function(on){
+    var root = document.documentElement, btn = document.getElementById('cultureToggle');
+    var slug = (window.ACTIVE && ACTIVE.slug) || 'kauai', cfg = window.CULTURE_MAPS[slug];
+    if (on){
+      root.setAttribute('data-theme','culture');
+      if (btn){ btn.classList.add('on'); btn.setAttribute('aria-pressed','true'); }
+      try { localStorage.setItem('os_theme','culture'); } catch(e){}
+      if (cfg && window.map){
+        if (!map.getPane('culture')){ var p = map.createPane('culture'); p.style.zIndex = 210; p.style.pointerEvents = 'none'; }
+        if (!window._cultureSheet) window._cultureSheet = L.imageOverlay(cfg.src, cfg.bounds, {opacity:.72, pane:'culture', interactive:false, alt:cfg.title, attribution:window.CULTURE_CREDIT});
+        window._cultureSheet.addTo(map);
+        if (window._cultureLines){ window._cultureLines.addTo(map); }
+        else if (!window._cultureLinesLoading){
+          window._cultureLinesLoading = true;
+          fetch('culture/ahupuaa/' + slug + '.geojson').then(function(r){ return r.ok ? r.json() : null; }).then(function(g){
+            if (!g) return;
+            window._cultureLines = L.geoJSON(g, {pane:'culture', interactive:false, style:{color:'#0f4c5c', weight:1.2, opacity:.75, fill:false, dashArray:'4 3'}});
+            if (window._isCulture()) window._cultureLines.addTo(map);
+          }).catch(function(){});
+        }
+      }
+    } else {
+      root.removeAttribute('data-theme');
+      if (btn){ btn.classList.remove('on'); btn.setAttribute('aria-pressed','false'); }
+      try { localStorage.setItem('os_theme','default'); } catch(e){}
+      if (window._cultureSheet && window.map) map.removeLayer(window._cultureSheet);
+      if (window._cultureLines && window.map) map.removeLayer(window._cultureLines);
+    }
+    try { var u = new URL(location.href); if (on) u.searchParams.set('theme','culture'); else u.searchParams.delete('theme'); history.replaceState(null, '', u); } catch(e){}
+  };
+  window.toggleCulture = function(){ window._cultureApply(!window._isCulture()); };
+  (function(){
+    try {
+      var q = new URLSearchParams(location.search).get('theme'), s = localStorage.getItem('os_theme');
+      if (q === 'culture' || (q === null && s === 'culture')) window._cultureApply(true);
+    } catch(e){}
+  })();
 
   // Frame the whole ACTIVE island within the visible map area (chrome-aware padding) instead of
   // a hand-picked center/zoom — every island lands centered + fully in view. (Layer 4, ported.)
