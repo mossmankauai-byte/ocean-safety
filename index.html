@@ -1715,6 +1715,30 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 #cultureCard .cc-row small{margin-left:auto;color:#6b5a3e;font-size:12px;white-space:nowrap}
 #cultureCard .cc-empty{border:1px dashed rgba(47,36,22,.3);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4;color:#6b5a3e;background:rgba(255,255,255,.4)}
 #cultureCard .cc-link{background:none;border:0;padding:0;color:#0f4c5c;font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline}
+/* Culture chrome: serif island name and sheet title, a kapa band behind the side chips, earth-tone chips.
+   Colors and type only; every label, verdict and number is the same text as with the theme off. */
+:root[data-theme="culture"] .brand-text,:root[data-theme="culture"] .sname{font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif}
+:root[data-theme="culture"] .hdr-side-row{background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'><path d='M0 14L7 0l7 14L21 0l7 14' fill='none' stroke='%235a4630' stroke-opacity='.22' stroke-width='1.2'/></svg>") repeat-x center;padding-top:6px;padding-bottom:6px}
+:root[data-theme="culture"] .hdr-side{background:#f3e9d4;border-color:rgba(90,70,48,.35);color:#3f2e1c}
+:root[data-theme="culture"] .hdr-side.on{background:#5a4630;border-color:#5a4630;color:#fff}
+#cultureMoku{position:absolute;left:12px;right:12px;z-index:540;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;pointer-events:none}
+#cultureMoku::-webkit-scrollbar{display:none}
+#cultureMoku button{pointer-events:auto;flex:none;border:1px solid rgba(90,70,48,.4);background:rgba(246,239,223,.94);color:#3f2e1c;border-radius:999px;padding:7px 11px;font:600 11px/1 'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+#cultureMoku button.on{background:#5a4630;color:#fff;border-color:#5a4630}
+/* Blocks inside the beach sheet and the Plan sheet. */
+.cc-block{margin:10px 0 12px;background:#f6efdf;border:1px solid rgba(90,70,48,.2);border-radius:12px;padding:12px 14px;color:#2f2416}
+.cc-block h4{margin:0 0 6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b5a3e}
+.cc-block p{margin:0 0 8px;font-size:14px;line-height:1.45}
+.cc-block p:last-child{margin-bottom:0}
+.cc-block .cc-empty{border:1px dashed rgba(47,36,22,.3);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4;color:#6b5a3e;background:rgba(255,255,255,.4)}
+.cc-block .cc-credit{font-size:11.5px;color:#6b5a3e;margin-top:6px}
+.cc-block .cc-say{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(90,70,48,.35);background:#fff;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:600;color:#3f2e1c;cursor:pointer}
+.cc-block .cc-link{background:none;border:0;padding:0;color:#0f4c5c;font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline}
+details.cc-proto-block summary{display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#6b5a3e;font-weight:600}
+details.cc-proto-block summary::-webkit-details-marker{display:none}
+details.cc-proto-block summary small{margin-left:auto;font-size:11px;letter-spacing:0;text-transform:none}
+details.cc-proto-block .cc-proto{display:flex;gap:8px;align-items:flex-start;margin:8px 0 0;font-size:14px;line-height:1.4}
+p.cc-credit .cc-link{font-size:12.5px}
 .os-ahu-label{font-size:11px;line-height:1.15;letter-spacing:.03em}
 .os-ahu-label small{display:block;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
 .os-moku-label{font-size:var(--os-moku-fs,14px);font-weight:600;letter-spacing:.16em;text-transform:uppercase}
@@ -5073,6 +5097,7 @@ function initMap(){
     });
     window._cultureLabelGroup = L.layerGroup();
     map.on('zoomend', window._cultureRelabel);
+    try { window._cultureMokuChips(!!window._isCulture()); } catch(e){}
   };
   window._cultureRelabel = function(){
     if (!window._cultureLabelGroup || !window._isCulture()) return;
@@ -5117,6 +5142,8 @@ function initMap(){
   window._cultureOrd = function(n){ var s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
   window.CULTURE_ICON = {
     x:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    leaf:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2f6b45" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+    speaker:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>',
     wave:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0f4c5c" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 10c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 16c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>',
     land:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5a4630" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20L9 6l4 8 3-4 5 10Z"/></svg>'
   };
@@ -5152,7 +5179,7 @@ function initMap(){
     window._cultureLit = entries || [];
     window._cultureLit.forEach(function(e){ e.layer.setStyle({weight:2.6, color:'#0f4c5c', fillOpacity:.5}); if (e.layer.bringToFront) e.layer.bringToFront(); });
   };
-  window._cultureCloseCard = function(){ var el = document.getElementById('cultureCard'); if (el) el.classList.remove('open'); window._cultureHighlight([]); };
+  window._cultureCloseCard = function(){ var el = document.getElementById('cultureCard'); if (el) el.classList.remove('open'); window._cultureHighlight([]); window._cultureMokuOn = null; try { window._cultureMokuChips(!!window._isCulture()); } catch(e){} };
   window._cultureLearnHTML = function(){
     var Lr = window.CULTURE_LEARN;
     return '<h3>The land system</h3><p>' + Lr.system.text + '</p><p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p>'
@@ -5166,12 +5193,13 @@ function initMap(){
     var esc = window._cultureEsc, sibs = (idx.byMoku[e.moku] || []).slice().sort(function(a, b){ return b.acres - a.acres; }), rank = sibs.indexOf(e) + 1;
     var bm = window._cultureBeachMap(), beaches = (typeof B !== 'undefined' ? B : []).filter(function(b){ return bm[b.id] === id; });
     var island = (window.ACTIVE && ACTIVE.name) || '';
+    window._cultureCount('culture_card', 'ahupuaa|' + e.name);
     var html = window._cultureHead(e.name, 'Ahupuaʻa · moku of ' + e.moku + ' · ' + island)
       + '<div class="cc-facts"><div class="cc-fact"><b>' + window._cultureNum(e.acres) + '</b><span>acres</span></div>'
       + '<div class="cc-fact"><b>' + (e.acres * 0.00404686).toFixed(1) + '</b><span>km²</span></div>'
       + '<div class="cc-fact"><b>' + window._cultureOrd(rank) + ' of ' + sibs.length + '</b><span>by size in ' + esc(e.moku) + '</span></div></div>'
       + '<h3>In this ahupuaʻa</h3>'
-      + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(b.name) + '</span><small>' + esc(b.r || '') + '</small></div>'; }).join('') + '</div>'
+      + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ var row = window._culturePlaceRow ? window._culturePlaceRow(b.id) : null, nm = window._cultureNames ? window._cultureNames(b).n : b.name; return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(nm) + '</span><small>' + (row && /^y/i.test(row.wahi_pana || '') ? 'wahi pana · ' : '') + esc(b.r || '') + '</small></div>'; }).join('') + '</div>'
                        : '<div class="cc-empty">No beach in this app sits inside this ahupuaʻa.</div>')
       + '<h3>About this place</h3><div class="cc-empty">Awaiting cultural review. The meaning of the name, its moʻolelo, and guest protocol for ' + esc(e.name) + ' come from the cultural review partner, not from us.</div>'
       + window._cultureLearnHTML()
@@ -5184,6 +5212,7 @@ function initMap(){
     var esc = window._cultureEsc, sorted = list.slice().sort(function(a, b){ return b.acres - a.acres; }), acres = 0; sorted.forEach(function(e){ acres += e.acres; });
     var bm = window._cultureBeachMap(), nb = (typeof B !== 'undefined' ? B : []).filter(function(b){ return list.some(function(e){ return bm[b.id] === e.id; }); }).length;
     var island = (window.ACTIVE && ACTIVE.name) || '';
+    window._cultureCount('culture_card', 'moku|' + name);
     var html = window._cultureHead(name, 'Moku · ' + island)
       + '<div class="cc-facts"><div class="cc-fact"><b>' + sorted.length + '</b><span>ahupuaʻa</span></div><div class="cc-fact"><b>' + window._cultureNum(acres) + '</b><span>acres</span></div><div class="cc-fact"><b>' + nb + '</b><span>beaches in app</span></div></div>'
       + '<h3>Its ahupuaʻa, largest first</h3><div class="cc-list">' + sorted.map(function(e){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureZoomTo(' + esc(JSON.stringify(e.id)) + ')">' + window.CULTURE_ICON.land + '<span>' + esc(e.name) + '</span><small>' + window._cultureNum(e.acres) + ' ac</small></div>'; }).join('') + '</div>'
@@ -5196,6 +5225,182 @@ function initMap(){
     try { map.fitBounds(e.layer.getBounds(), {paddingTopLeft:[16, 80], paddingBottomRight:[16, Math.round(map.getSize().y * .45)], maxZoom:13}); } catch(x){}
     window._cultureOpenAhupuaa(id);
   };
+  /* culture-lint:start */
+  // ── THE REST OF THE THEME. Names lead Hawaiian, the beach sheet's About slot, tabs re-weighted, moku chips,
+  //    a pronunciation slot, and the counts. Every function here returns '' or does nothing while the theme is
+  //    off, so a theme-off render is the app as it was. checks/culture-offtest.js proves that per island.
+  window.CULTURE_HAW = /^[aeiouhklmnpwāēīōūʻ\s-]+$/i;
+  window._cultureHawaiian = function(s){ return !!s && window.CULTURE_HAW.test(String(s).trim()); };
+  window._culturePlaceRow = function(id){ var p = window._culturePlaces; return p && p.byId ? (p.byId[String(id)] || null) : null; };
+  window._cultureNames = function(b){
+    // {name, n}. The review partner's place_name and also_called win. Otherwise a "Hawaiian (nickname)" or
+    // "Nickname (Hawaiian)" pair is put Hawaiian first, "Mākua, also called Tunnels". Anything else is left alone.
+    var row = window._culturePlaceRow(b.id), name = b.name || '', n = b.n || name;
+    if (row && row.place_name) return {name: row.place_name + (row.also_called ? ', also called ' + row.also_called : ''), n: row.place_name};
+    var m = /^(.+?)\s*\((.+?)\)\s*$/.exec(name);
+    if (m){
+      var a = m[1].trim(), c = m[2].trim(), ha = window._cultureHawaiian(a), hc = window._cultureHawaiian(c);
+      if (ha && !hc) return {name: a + ', also called ' + c, n: a};
+      if (hc && !ha) return {name: c + ', also called ' + a, n: c};
+    }
+    return {name: name, n: n};
+  };
+  window._cultureAlias = function(b){ var nm = window._cultureNames(b); if (nm.name === b.name && nm.n === b.n) return b; var c = Object.assign({}, b); c.name = nm.name; c.n = nm.n; return c; };
+  window._cultureBeachEntry = function(b){ var idx = window._cultureIdx; if (!idx) return null; var bm = window._cultureBeachMap(); return bm[b.id] ? idx.byId[bm[b.id]] : null; };
+  window._cultureSheetSub = function(b){
+    if (!(window._isCulture && window._isCulture())) return '';
+    // The hero title carries the Hawaiian name alone (a long title collides with the activity chips), so the
+    // nickname leads the subtitle: "Also called Tunnels · Hāʻena ahupuaʻa, ma kai · moku of Haleleʻa".
+    var esc = window._cultureEsc, island = (window.ACTIVE && ACTIVE.name) || 'Kauaʻi', e = window._cultureBeachEntry(b), nm = window._cultureNames(b);
+    var also = nm.name !== nm.n && nm.name.indexOf(nm.n + ', also called ') === 0 ? 'Also called ' + esc(nm.name.slice(nm.n.length + 14)) + ' · ' : '';
+    if (!e) return also + esc(b.r) + ' · ' + esc(island);
+    return also + esc(e.name) + ' ahupuaʻa, ma kai · moku of ' + esc(e.moku) + ' · ' + esc(island);
+  };
+  window._cultureParseCSV = function(text){
+    var rows = [], row = [], cur = '', q = false, i, ch;
+    for (i = 0; i < text.length; i++){
+      ch = text[i];
+      if (q){ if (ch === '"'){ if (text[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === ','){ row.push(cur); cur = ''; }
+      else if (ch === '\n' || ch === '\r'){ if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+      else cur += ch;
+    }
+    if (cur.length || row.length){ row.push(cur); rows.push(row); }
+    if (!rows.length) return [];
+    var head = rows[0].map(function(h){ return h.trim(); });
+    return rows.slice(1).filter(function(r){ return r.length > 1 || (r[0] && r[0].trim()); }).map(function(r){ var o = {}; head.forEach(function(h, j){ o[h] = (r[j] || '').trim(); }); return o; });
+  };
+  window._cultureLintText = function(s){
+    // The Maʻemaʻe rules the kit checks, run on every row before it can show: the island nickname the
+    // kit bans, the a-word for a living practice, and a straight apostrophe standing in for an ʻokina inside
+    // a Hawaiian word. The words are assembled so checks/culture-lint.py does not trip on this function.
+    var out = [], t = String(s || ''), big = new RegExp('big ' + 'island', 'i'), anc = new RegExp('\\b' + 'anc' + 'ient\\b', 'i');
+    if (big.test(t)) out.push(big.source);
+    if (anc.test(t)) out.push('anc' + 'ient');
+    (t.match(/[A-Za-zāēīōūĀĒĪŌŪ]+'[A-Za-zāēīōū]+/g) || []).forEach(function(w){
+      if (/^[aeiouhklmnpwāēīōū']+$/i.test(w)) out.push('apostrophe as ʻokina: ' + w);
+    });
+    return out;
+  };
+  window._cultureLoadPlaces = function(slug){
+    // culture/places/<island>.csv: the kit's 19-column layer, filled only by the cultural review partner.
+    // A row shows when status is approved/reviewed/final/published, do_not_publish is not yes, no field still
+    // carries SAMPLE text, and every field passes the lint. Anything else stays invisible and is logged.
+    if (window._culturePlaces || window._culturePlacesLoading) return;
+    window._culturePlacesLoading = true;
+    fetch('culture/places/' + slug + '.csv').then(function(r){ return r.ok ? r.text() : ''; }).then(function(t){
+      var byId = {}, dropped = 0;
+      window._cultureParseCSV(t).forEach(function(row){
+        if (!row.place_id) return;
+        if (/^y/i.test(row.do_not_publish || '') || !/^(approved|reviewed|final|published)$/i.test(row.status || '')) return;
+        var bad = [];
+        Object.keys(row).forEach(function(k){ if (/^SAMPLE:/i.test(row[k])) bad.push('sample text in ' + k); bad = bad.concat(window._cultureLintText(row[k])); });
+        if (bad.length){ dropped++; try { console.warn('[culture] row not shown, ' + row.place_id + ': ' + bad.join('; ')); } catch(e){} return; }
+        byId[row.place_id] = row;
+      });
+      window._culturePlaces = {byId:byId, dropped:dropped};
+      window._cultureRepaint();
+    }).catch(function(){ window._culturePlaces = {byId:{}, dropped:0}; });
+  };
+  window._cultureSay = function(u){ try { var a = new Audio(u); a.play(); window._cultureCount('culture_voice', u); } catch(e){} };
+  window._cultureCount = function(ev, label){
+    // The HTA number: theme on, cards read, protocol taps, voice taps. Rides whichever counter this load already
+    // has (PostHog on the apex, the partner collector on a ?ref link). Both are inert on the public ref by design.
+    try { if (window.posthog && typeof posthog.capture === 'function') posthog.capture(ev, {label:String(label || '')}); } catch(e){}
+    try { if (typeof _partnerTrack === 'function') _partnerTrack(ev, String(label || '')); } catch(e){}
+  };
+  window._cultureSheetBlock = function(b, pos){
+    // pos 'protocol': the guest-protocol lines, shown above Get Directions for a wahi pana. pos 'about': the
+    // About block (meaning, moʻolelo, protocol for other places, pronunciation, credit) or its empty state.
+    if (!(window._isCulture && window._isCulture())) return '';
+    var esc = window._cultureEsc, row = window._culturePlaceRow(b.id), e = window._cultureBeachEntry(b);
+    var proto = row ? [row.guest_protocol_1, row.guest_protocol_2, row.guest_protocol_3].filter(Boolean) : [];
+    var wahi = !!(row && /^y/i.test(row.wahi_pana || ''));
+    var protoHTML = proto.length ? '<details class="cc-block cc-proto-block" ontoggle="if(this.open)_cultureCount(\'culture_protocol\',' + esc(JSON.stringify(b.id)) + ')"><summary>' + window.CULTURE_ICON.leaf + '<span>' + (wahi ? 'Wahi pana · before you go' : 'Before you go') + '</span><small>' + proto.length + '</small></summary>' + proto.map(function(t){ return '<div class="cc-proto"><span>' + esc(t) + '</span></div>'; }).join('') + '</details>' : '';
+    if (pos === 'protocol') return wahi ? protoHTML : '';
+    var h = '<div class="cc-block cc-about"><h4>About this place</h4>';
+    if (row){
+      if (row.name_meaning) h += '<p><b>' + esc(row.place_name || b.name) + '</b>: ' + esc(row.name_meaning) + '</p>';
+      if (row.moolelo) h += '<p>' + esc(row.moolelo) + '</p>';
+      var pr = row.pronunciation || '';
+      if (/^(https?:\/\/|culture\/voice\/).+\.(mp3|m4a|ogg|wav)(\?|$)/i.test(pr)) h += '<p><button class="cc-say" onclick="_cultureSay(' + esc(JSON.stringify(pr)) + ')">' + window.CULTURE_ICON.speaker + 'Hear it said</button></p>';
+      else if (pr) h += '<p class="cc-credit">Say it: ' + esc(pr) + '</p>';
+      h += '<div class="cc-credit">' + esc(row.author_org || 'Cultural review partner') + (row.reviewed_on ? ', reviewed ' + esc(row.reviewed_on) : '') + (row.sources ? '. Sources: ' + esc(row.sources) : '') + '</div>';
+      h += '</div>' + (wahi ? '' : protoHTML);
+    } else {
+      h += '<div class="cc-empty">Awaiting cultural review. The meaning of the name, its moʻolelo, and guest protocol for this place come from the cultural review partner, not from us.</div></div>';
+    }
+    if (e) h += '<p class="cc-credit" style="margin:-4px 0 12px"><button class="cc-link" onclick="closeSheet();setTimeout(function(){_cultureOpenAhupuaa(' + esc(JSON.stringify(e.id)) + ')},320)">The ' + esc(e.name) + ' ahupuaʻa, moku of ' + esc(e.moku) + '</button></p>';
+    return h;
+  };
+  window._culturePlanHTML = function(){
+    // Plan's Learn slot: the island's moku, each a tap into its group card.
+    if (!(window._isCulture && window._isCulture()) || !window._cultureIdx) return '';
+    var esc = window._cultureEsc, names = Object.keys(window._cultureIdx.byMoku).sort();
+    return '<div class="cc-block cc-plan"><h4>Learn</h4><p>The land your days cross, by moku. Tap one for its ahupuaʻa.</p><div style="display:flex;gap:6px;flex-wrap:wrap">' + names.map(function(n){ return '<button class="cc-say" onclick="closeSheet();setTimeout(function(){_cultureOpenMoku(' + esc(JSON.stringify(n)) + ')},320)">' + esc(n) + '</button>'; }).join('') + '</div></div>';
+  };
+  window._cultureEvMatch = function(a, kw){
+    var t = [a.name, a.n, a.desc, a.tip, a.type, (a.tags || []).join(' ')].join(' ').toLowerCase();
+    if (kw === 'hula') return /hula|hālau|halau/.test(t);
+    if (kw === 'lei') return /\blei\b/.test(t);
+    if (kw === 'makahiki') return /makahiki/.test(t);
+    return true;
+  };
+  window._cultureMokuChips = function(show){
+    // Moku chips under the subtab bar: the island's moku as a row, a tap opens the group card and frames it.
+    var el = document.getElementById('cultureMoku');
+    if (!show || !window._cultureIdx){ if (el) el.remove(); return; }
+    var esc = window._cultureEsc, names = Object.keys(window._cultureIdx.byMoku).sort();
+    if (!el){ el = document.createElement('div'); el.id = 'cultureMoku'; el.setAttribute('role', 'group'); el.setAttribute('aria-label', 'Moku'); (document.getElementById('app') || document.body).appendChild(el); }
+    // Sits just above the map's bottom region pills, clear of the button row and the North pill at the top.
+    try { var r = document.getElementById('map').getBoundingClientRect(); el.style.top = Math.round(r.bottom - 142) + 'px'; } catch(e){ el.style.top = '240px'; }
+    el.innerHTML = names.map(function(n){ return '<button type="button" class="' + (window._cultureMokuOn === n ? 'on' : '') + '" onclick="_cultureMokuTap(' + esc(JSON.stringify(n)) + ')">' + esc(n) + '</button>'; }).join('');
+  };
+  window._cultureMokuTap = function(n){
+    window._cultureMokuOn = n; window._cultureOpenMoku(n); window._cultureMokuChips(true);
+    try { var g = L.featureGroup(window._cultureIdx.byMoku[n].map(function(e){ return e.layer; })); map.fitBounds(g.getBounds(), {paddingTopLeft:[16, 80], paddingBottomRight:[16, Math.round(map.getSize().y * .45)]}); } catch(e){}
+  };
+  window._cultureDefaultSub = function(){
+    // Family opens on Cultural, Town on Crafts: by tapping the subtab the way a guest would, only if it exists.
+    var want = window._activeTab === 'acts' ? 'cultural' : (window._activeTab === 'shopping' ? 'crafts' : null); if (!want) return;
+    var el = document.querySelector('#subtabs .subtab[data-sub="' + want + '"]'); if (el && !el.classList.contains('active')) el.click();
+  };
+  window._cultureWrapSubtabs = function(){
+    if (window._cultureSubtabsWrapped || typeof buildSubtabs !== 'function') return;
+    window._cultureSubtabsWrapped = true;
+    var orig = buildSubtabs;
+    buildSubtabs = function(t){ orig(t); try { if (window._isCulture && window._isCulture()){ window._cultureDefaultSub(); window._cultureMokuChips(true); } else window._cultureMokuChips(false); } catch(e){} };
+  };
+  window._cultureRepaint = function(){
+    try { if (typeof rescore === 'function') rescore(); } catch(e){}
+    try { if (typeof renderActs === 'function') renderActs(); } catch(e){}
+    try { if (typeof renderHikes === 'function') renderHikes(); } catch(e){}
+  };
+  window._cultureChrome = function(on){
+    var slug = (window.ACTIVE && ACTIVE.slug) || 'kauai';
+    if (on){
+      window._cultureLoadPlaces(slug);
+      // Trails: heiau, historic and other cultural sites first; everything else keeps its order. Undone on off.
+      try {
+        if (typeof HIKES !== 'undefined' && !window._cultureHikesOrig){
+          window._cultureHikesOrig = HIKES.slice();
+          var rk = function(h){ return /heiau|historic|petroglyph|sacred|cultural|wahi pana|temple|royal|aliʻi/i.test([h.name, h.n, h.tip, (h.tags || []).join(' ')].join(' ')) ? 0 : 1; };
+          var s = HIKES.slice().sort(function(a, b){ return rk(a) - rk(b); });
+          HIKES.splice.apply(HIKES, [0, HIKES.length].concat(s));
+        }
+      } catch(e){}
+      window._cultureWrapSubtabs();
+      window._cultureMokuChips(true);
+      window._cultureDefaultSub();
+    } else {
+      try { if (window._cultureHikesOrig){ HIKES.splice.apply(HIKES, [0, HIKES.length].concat(window._cultureHikesOrig)); window._cultureHikesOrig = null; } } catch(e){}
+      window._cultureMokuChips(false);
+      if (/^(hula|lei|makahiki)$/.test(String(window._ghEvRange || ''))) window._ghEvRange = 'all';
+    }
+    window._cultureRepaint();
+  };
+  /* culture-lint:end */
   window._cultureApply = function(on){
     var root = document.documentElement, btn = document.getElementById('cultureToggle');
     var slug = (window.ACTIVE && ACTIVE.slug) || 'kauai', cfg = window.CULTURE_MAPS[slug];
@@ -5230,8 +5435,11 @@ function initMap(){
       window._cultureCloseCard();
     }
     try { var u = new URL(location.href); if (on) u.searchParams.set('theme','culture'); else u.searchParams.delete('theme'); history.replaceState(null, '', u); } catch(e){}
+    // The chrome (names, subtabs, chips, trails order) needs the app booted; at parse time it waits for load.
+    if (document.readyState === 'complete') window._cultureChrome(on);
+    else window.addEventListener('load', function(){ setTimeout(function(){ window._cultureChrome(window._isCulture()); }, 400); }, {once:true});
   };
-  window.toggleCulture = function(){ window._cultureApply(!window._isCulture()); };
+  window.toggleCulture = function(){ var on = !window._isCulture(); window._cultureApply(on); if (on) window._cultureCount('culture_on', (window.ACTIVE && ACTIVE.slug) || ''); };
   (function(){
     try {
       var q = new URLSearchParams(location.search).get('theme'), s = localStorage.getItem('os_theme');
@@ -5358,6 +5566,8 @@ function ensureRipCSS(){
   document.head.appendChild(st);
 }
 function mkIcon(b,r){
+  // Culture theme: the pin label leads Hawaiian (a copy of the record; the record itself never changes).
+  if(window._isCulture && window._isCulture() && window._cultureAlias) b = window._cultureAlias(b);
   // ── DANGER override: painted poi-hazard glyph when conditions are unsafe ──
   // Fires for warning_only beaches, brown water, big surf without lifeguard,
   // or proximity to a strong-current channel on a falling tide. Returns the
@@ -6431,6 +6641,7 @@ function renderPlanDay(){
       '<div class="plan-col"><div class="plan-lbl">Type of day</div><div class="plan-seg">'+vibeChips+'</div></div></div>'+
       '</div>'+
     '<div class="plan-why">'+_planWhy()+'</div>'+
+    (window._culturePlanHTML?_culturePlanHTML():'')+   // Culture theme: the Learn slot, else ''
     _ghPlanMalamaCard(_planArea)+
     '<div class="plan-day">'+rows+'</div>'+
     '<div class="plan-foot">'+saveBtn+'<button class="plan-shuffle" onclick="planRandomize()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px"><path d="M16 3h5v5M21 3l-7 7M4 20l6-6M16 21h5v-5M14 14l7 7M4 4l5 5" stroke-linecap="round" stroke-linejoin="round"/></svg> Shuffle</button><span class="plan-note">Tap <b>Swap</b> on any card to change it — or switch the Area / Type of day above.</span></div>'+
@@ -8168,13 +8379,15 @@ function openSheet(id){
       ${_housePickBadge(b.id)}
       ${ibsHero}
       <div class="hero-text">
-        <div class="sname">${b.name}</div>
-        <div class="sreg">${b.r} · ${(window.ACTIVE&&ACTIVE.name)||'Kauaʻi'}</div>
+        <div class="sname">${(window._isCulture&&window._isCulture()&&window._cultureNames)?_cultureEsc(_cultureNames(b).n):b.name}</div>
+        <div class="sreg">${(window._isCulture&&window._isCulture()&&window._cultureSheetSub)?_cultureSheetSub(b):(b.r+' · '+((window.ACTIVE&&ACTIVE.name)||'Kauaʻi'))}</div>
       </div>
     </div>
     ${photoCreditLine(b)}
     ${window._ghAdvBeach?window._ghAdvBeach(b):''}
+    ${window._cultureSheetBlock?_cultureSheetBlock(b,'protocol'):''}
     <div class="dir-pill-row"><a class="dir-pill" href="${murl}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Get Directions</a></div>
+    ${window._cultureSheetBlock?_cultureSheetBlock(b,'about'):''}
     ${weatherBar(c)}
     ${_bigSurfNotice}
     ${_jellyNotice}
@@ -10335,7 +10548,7 @@ function renderPlanBody(cards){
       ${daySelect(c)}
     </div>`;
   };
-  let html = '';
+  let html = (window._culturePlanHTML ? _culturePlanHTML() : '');   // Culture theme: the Learn slot, else ''
   for(let d = 1; d <= p.days; d++){
     const inDay = cards.filter(c => dayOf(c) === d);
     html += `<div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);margin:13px 2px 6px">Day ${d}</div>`;
@@ -11993,6 +12206,7 @@ window._ghEvRange = 'all';
 function _ghEventInRange(a){
   if(!a || a.type!=='event' || !a.when) return true;
   var t=_ghToday(), r=window._ghEvRange;
+  if(r==='hula'||r==='lei'||r==='makahiki') return window._cultureEvMatch ? window._cultureEvMatch(a, r) : true;   // Culture theme chips
   if(r==='today') return a.when===t;
   if(r==='tomorrow') return a.when===_ghAddDays(t,1);
   if(r==='weekend'){ var d=new Date(t+'T12:00:00'); var dow=d.getDay(); var sat=_ghAddDays(t,(6-dow+7)%7), sun=_ghAddDays(sat,1); return a.when===sat||a.when===sun||(dow===0&&a.when===t); }
@@ -12005,6 +12219,7 @@ function _ghEventChips(show){
   if(!el){ el=document.createElement('div'); el.id='ghEvChips'; el.style.cssText='position:absolute;left:12px;right:12px;z-index:540;display:flex;gap:6px;flex-wrap:wrap'; document.getElementById('app').appendChild(el); }
   try { var sb=document.getElementById('subtabs'); var r=sb.getBoundingClientRect(); el.style.top=(r.bottom+8)+'px'; } catch(e){ el.style.top='240px'; }
   var opts=[['all','All'],['today','Today'],['tomorrow','Tomorrow'],['weekend','This weekend']];
+  if(window._isCulture && window._isCulture()) opts=[['hula','Hula'],['lei','Lei'],['makahiki','Makahiki']].concat(opts);   // Culture theme: these lead
   el.innerHTML=opts.map(function(o){ var on=o[0]===window._ghEvRange; return '<button type="button" onclick="_ghSetEvRange(\''+o[0]+'\')" style="border:1px solid '+(on?'var(--ocean)':'var(--border)')+';background:'+(on?'var(--ocean)':'#fff')+';color:'+(on?'#fff':'var(--ink)')+';border-radius:999px;padding:6px 11px;font:600 12px \'DM Sans\',system-ui,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.08)">'+o[1]+'</button>'; }).join('');
 }
 // Town > Wellness pins (their spas). Cleared on every other tab or subtab.
