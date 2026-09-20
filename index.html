@@ -4992,7 +4992,10 @@ function initMap(){
     maui:   {src:'culture/maps/maui-1885.webp',   bounds:[[20.43655,-156.76858],[21.134063,-155.89339]],   title:'Maui, Hawaiian Government Survey 1885 (Dodge, Alexander)'},
     hawaii: {src:'culture/maps/hawaii-1901.webp', bounds:[[18.766178,-156.220653],[20.436262,-154.643036]], title:'Hawaiʻi, Hawaii Territory Survey 1901 (Donn, Alexander, Wall)'}
   };
-  window.CULTURE_CREDIT = 'Hawaiian Government Survey sheet georeferenced by UH Mānoa Library MAGIS; ahupuaʻa: State of Hawaiʻi GIS';
+  // Short on purpose: it joins the CARTO credit control, which must stay one line on a phone. The full
+  // credit ("Hawaiian Government Survey sheet georeferenced by UH Mānoa Library MAGIS; ahupuaʻa: State of
+  // Hawaiʻi GIS") belongs on the Culture sheet's About panel when that is built.
+  window.CULTURE_CREDIT = 'Sheet: UH Mānoa MAGIS';
   window._isCulture = function(){ return document.documentElement.getAttribute('data-theme') === 'culture'; };
   window._cultureApply = function(on){
     var root = document.documentElement, btn = document.getElementById('cultureToggle');
