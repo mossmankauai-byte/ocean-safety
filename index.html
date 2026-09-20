@@ -1693,9 +1693,28 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 :root[data-theme="culture"] .leaflet-container{background:#e6d9bf}
 :root[data-theme="culture"] #map::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:401;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(74,53,32,.32) 100%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .10 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 .leaflet-culture-pane svg path{mix-blend-mode:multiply}
-.leaflet-cultureLabels-pane{pointer-events:none}
 .os-culture-label-anchor{background:none;border:0}
-.os-ahu-label,.os-moku-label{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;color:#3f2e1c;text-shadow:0 0 2px #f1e7d2,0 0 4px #f1e7d2,0 0 8px #f1e7d2;pointer-events:none}
+.os-ahu-label,.os-moku-label{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;color:#3f2e1c;text-shadow:0 0 2px #f1e7d2,0 0 4px #f1e7d2,0 0 8px #f1e7d2;cursor:pointer}
+.leaflet-culture-pane .leaflet-interactive{cursor:pointer}
+/* The section card: parchment sheet under the app's own beach sheet (z1001), serif title, facts row, lists. */
+#cultureCard{position:fixed;left:0;right:0;bottom:0;z-index:1000;background:#f6efdf;color:#2f2416;border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.18);max-height:64vh;overflow:auto;padding:14px 16px 28px;transform:translateY(105%);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+#cultureCard.open{transform:none}
+#cultureCard .cc-head{display:flex;align-items:flex-start;gap:10px}
+#cultureCard h2{margin:0;font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;font-weight:600;font-size:26px;line-height:1.1;color:#2f2416}
+#cultureCard .cc-sub{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:#6b5a3e;margin-top:5px}
+#cultureCard .cc-x{margin-left:auto;width:36px;height:36px;border-radius:10px;border:1px solid rgba(47,36,22,.18);background:#fff;color:#2f2416;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+#cultureCard .cc-facts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+#cultureCard .cc-fact{background:rgba(255,255,255,.65);border:1px solid rgba(47,36,22,.12);border-radius:10px;padding:8px 10px;min-width:84px;flex:1}
+#cultureCard .cc-fact b{display:block;font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;font-size:18px;font-weight:600;line-height:1.1}
+#cultureCard .cc-fact span{display:block;margin-top:3px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#6b5a3e}
+#cultureCard h3{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#6b5a3e;margin:16px 0 6px}
+#cultureCard p{margin:0 0 8px;font-size:14px;line-height:1.45}
+#cultureCard .cc-cite{font-size:12px;color:#6b5a3e}
+#cultureCard .cc-list{display:flex;flex-direction:column;gap:6px}
+#cultureCard .cc-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.65);border:1px solid rgba(47,36,22,.12);border-radius:10px;padding:9px 10px;cursor:pointer;font-size:14px}
+#cultureCard .cc-row small{margin-left:auto;color:#6b5a3e;font-size:12px;white-space:nowrap}
+#cultureCard .cc-empty{border:1px dashed rgba(47,36,22,.3);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4;color:#6b5a3e;background:rgba(255,255,255,.4)}
+#cultureCard .cc-link{background:none;border:0;padding:0;color:#0f4c5c;font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline}
 .os-ahu-label{font-size:11px;line-height:1.15;letter-spacing:.03em}
 .os-ahu-label small{display:block;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
 .os-moku-label{font-size:var(--os-moku-fs,14px);font-weight:600;letter-spacing:.16em;text-transform:uppercase}
@@ -5030,16 +5049,28 @@ function initMap(){
     var mokus = []; (g.features || []).forEach(function(f){ var m = f.properties && f.properties.moku; if (m && mokus.indexOf(m) < 0) mokus.push(m); });
     mokus.sort();
     var ahu = [], mk = {};
-    window._cultureLines = L.geoJSON(g, {pane:'culture', interactive:false,
+    var idx = {byId:{}, byMoku:{}};
+    // Every section and every label is tappable: an ahupuaʻa opens its card, a moku name opens the group.
+    window._cultureLines = L.geoJSON(g, {pane:'culture', interactive:true,
       style:function(f){ var i = Math.max(0, mokus.indexOf(f.properties.moku)); return {color:'#5a4630', weight:1.4, opacity:.9, fillColor:window.CULTURE_TINTS[i % window.CULTURE_TINTS.length], fillOpacity:.3}; },
-      onEachFeature:function(f){
+      onEachFeature:function(f, layer){
         var s = window._culturePolyStats(f.geometry); if (!s) return;
-        var name = f.properties.ahupuaa || '', moku = f.properties.moku || '';
-        ahu.push({area:s.area, len:name.length, mlen:moku.length, m:L.marker(s.center, {pane:'cultureLabels', interactive:false, keyboard:false, icon:L.divIcon({className:'os-culture-label-anchor', iconSize:null, html:'<span class="os-ahu-label">' + esc(name) + '<small>' + esc(moku) + '</small></span>'})})});
+        var p = f.properties || {}, name = p.ahupuaa || '', moku = p.moku || '', id = String(p.id != null ? p.id : name);
+        var entry = {id:id, name:name, moku:moku, acres:+p.acres || 0, area:s.area, center:s.center, layer:layer};
+        idx.byId[id] = entry; (idx.byMoku[moku] = idx.byMoku[moku] || []).push(entry);
+        layer.on('click', function(ev){ L.DomEvent.stop(ev); window._cultureOpenAhupuaa(id); });
+        var m = L.marker(s.center, {pane:'cultureLabels', interactive:true, keyboard:false, icon:L.divIcon({className:'os-culture-label-anchor', iconSize:null, html:'<span class="os-ahu-label">' + esc(name) + '<small>' + esc(moku) + '</small></span>'})});
+        m.on('click', function(ev){ L.DomEvent.stop(ev); window._cultureOpenAhupuaa(id); });
+        ahu.push({area:s.area, len:name.length, mlen:moku.length, m:m});
         if (moku){ var e = mk[moku] || (mk[moku] = {a:0, x:0, y:0}); e.a += s.area; e.x += s.center[1]*s.area; e.y += s.center[0]*s.area; }
       }});
+    window._cultureIdx = idx;
     window._cultureAhuLabels = ahu;
-    window._cultureMokuLabels = Object.keys(mk).map(function(name){ var e = mk[name]; return {area:e.a, len:name.length, m:L.marker([e.y/e.a, e.x/e.a], {pane:'cultureLabels', interactive:false, keyboard:false, icon:L.divIcon({className:'os-culture-label-anchor', iconSize:null, html:'<span class="os-moku-label">' + esc(name) + '</span>'})})}; });
+    window._cultureMokuLabels = Object.keys(mk).map(function(name){
+      var e = mk[name], m = L.marker([e.y/e.a, e.x/e.a], {pane:'cultureLabels', interactive:true, keyboard:false, icon:L.divIcon({className:'os-culture-label-anchor', iconSize:null, html:'<span class="os-moku-label">' + esc(name) + '</span>'})});
+      m.on('click', function(ev){ L.DomEvent.stop(ev); window._cultureOpenMoku(name); });
+      return {area:e.a, len:name.length, m:m};
+    });
     window._cultureLabelGroup = L.layerGroup();
     map.on('zoomend', window._cultureRelabel);
   };
@@ -5069,6 +5100,102 @@ function initMap(){
     if (!window._cultureLabelGroup) return;
     if (on){ window._cultureLabelGroup.addTo(map); window._cultureRelabel(); } else { map.removeLayer(window._cultureLabelGroup); }
   };
+  // THE SECTION CARD. Facts come from the State layer (acres, moku, rank) and from the app's own beach list
+  // (which beaches sit in this ahupuaʻa). The two learn passages are quotations from OHA and from the State
+  // GIS metadata, cited in place. Meaning, moʻolelo and guest protocol for a place are a slot that only the
+  // cultural review partner fills; until then the card says so. Nothing on the card is written by us.
+  window.CULTURE_LEARN = {
+    system: {text:'Each island (mokupuni) is divided into moku, each moku into ahupuaʻa, and those into ʻili and kuleana.',
+             quote:'“The foundation of Kīpuka is the traditional land system, mokupuni divided into moku, ahupuaʻa, ili and kuleana.”',
+             cite:'Office of Hawaiian Affairs, Kīpuka Database.'},
+    bounds: {quote:'“Although not survey grade, and not checked for legal validity, the boundaries correspond to the 19th century survey maps.”',
+             note:'Traditional ahupuaʻa boundaries extended into the ocean. The layer does not draw that seaward part, so the sea off a beach belonged to the ahupuaʻa behind it.',
+             cite:'State of Hawaiʻi Statewide GIS Program, Ahupuaa layer metadata. Names per Pukui, Elbert and Mookini, spellings verified by the State Historic Preservation Division, 2017 to 2026.'}
+  };
+  window._cultureEsc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); };
+  window._cultureNum = function(n){ return Math.round(n).toLocaleString('en-US'); };
+  window._cultureOrd = function(n){ var s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+  window.CULTURE_ICON = {
+    x:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    wave:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0f4c5c" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 10c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 16c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>',
+    land:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5a4630" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20L9 6l4 8 3-4 5 10Z"/></svg>'
+  };
+  window._cultureCardEl = function(){
+    var el = document.getElementById('cultureCard');
+    if (!el){ el = document.createElement('div'); el.id = 'cultureCard'; el.setAttribute('role','dialog'); el.setAttribute('aria-label','Land division'); document.body.appendChild(el); }
+    return el;
+  };
+  window._cultureBeachMap = function(){
+    // Nearest ahupuaʻa per beach, computed once per island load. Inside a polygon wins; otherwise the nearest
+    // boundary vertex within about a kilometre, because the State layer stops at a 19th-century shoreline
+    // while many beach pins sit on today's sand.
+    if (window._cultureBeachMapCache) return window._cultureBeachMapCache;
+    var idx = window._cultureIdx || {byId:{}}, out = {};
+    var pip = function(x, y, ring){ var inside = false; for (var i = 0, j = ring.length - 1; i < ring.length; j = i++){ var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside; } return inside; };
+    (typeof B !== 'undefined' ? B : []).forEach(function(b){
+      if (typeof b.lat !== 'number' || typeof b.lon !== 'number') return;
+      var best = null, bestD = 0.01, k = Math.cos(b.lat * Math.PI / 180), ids = Object.keys(idx.byId);
+      for (var n = 0; n < ids.length && bestD > 0; n++){
+        var e = idx.byId[ids[n]], geom = e.layer.feature.geometry, polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+        for (var p = 0; p < polys.length && bestD > 0; p++){
+          var ring = polys[p][0];
+          if (pip(b.lon, b.lat, ring)){ best = ids[n]; bestD = 0; break; }
+          for (var i = 0; i < ring.length; i++){ var dx = (ring[i][0] - b.lon) * k, dy = ring[i][1] - b.lat, d = Math.sqrt(dx*dx + dy*dy); if (d < bestD){ bestD = d; best = ids[n]; } }
+        }
+      }
+      if (best) out[b.id] = best;
+    });
+    window._cultureBeachMapCache = out; return out;
+  };
+  window._cultureHighlight = function(entries){
+    (window._cultureLit || []).forEach(function(e){ try { window._cultureLines.resetStyle(e.layer); } catch(x){} });
+    window._cultureLit = entries || [];
+    window._cultureLit.forEach(function(e){ e.layer.setStyle({weight:2.6, color:'#0f4c5c', fillOpacity:.5}); if (e.layer.bringToFront) e.layer.bringToFront(); });
+  };
+  window._cultureCloseCard = function(){ var el = document.getElementById('cultureCard'); if (el) el.classList.remove('open'); window._cultureHighlight([]); };
+  window._cultureLearnHTML = function(){
+    var Lr = window.CULTURE_LEARN;
+    return '<h3>The land system</h3><p>' + Lr.system.text + '</p><p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p>'
+         + '<h3>These boundaries</h3><p class="cc-cite">' + Lr.bounds.quote + '</p><p>' + Lr.bounds.note + '</p><p class="cc-cite">' + Lr.bounds.cite + '</p>';
+  };
+  window._cultureHead = function(title, sub){
+    return '<div class="cc-head"><div><h2>' + window._cultureEsc(title) + '</h2><div class="cc-sub">' + window._cultureEsc(sub) + '</div></div><button class="cc-x" aria-label="Close" onclick="_cultureCloseCard()">' + window.CULTURE_ICON.x + '</button></div>';
+  };
+  window._cultureOpenAhupuaa = function(id){
+    var idx = window._cultureIdx, e = idx && idx.byId[id]; if (!e) return;
+    var esc = window._cultureEsc, sibs = (idx.byMoku[e.moku] || []).slice().sort(function(a, b){ return b.acres - a.acres; }), rank = sibs.indexOf(e) + 1;
+    var bm = window._cultureBeachMap(), beaches = (typeof B !== 'undefined' ? B : []).filter(function(b){ return bm[b.id] === id; });
+    var island = (window.ACTIVE && ACTIVE.name) || '';
+    var html = window._cultureHead(e.name, 'Ahupuaʻa · moku of ' + e.moku + ' · ' + island)
+      + '<div class="cc-facts"><div class="cc-fact"><b>' + window._cultureNum(e.acres) + '</b><span>acres</span></div>'
+      + '<div class="cc-fact"><b>' + (e.acres * 0.00404686).toFixed(1) + '</b><span>km²</span></div>'
+      + '<div class="cc-fact"><b>' + window._cultureOrd(rank) + ' of ' + sibs.length + '</b><span>by size in ' + esc(e.moku) + '</span></div></div>'
+      + '<h3>In this ahupuaʻa</h3>'
+      + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(b.name) + '</span><small>' + esc(b.r || '') + '</small></div>'; }).join('') + '</div>'
+                       : '<div class="cc-empty">No beach in this app sits inside this ahupuaʻa.</div>')
+      + '<h3>About this place</h3><div class="cc-empty">Awaiting cultural review. The meaning of the name, its moʻolelo, and guest protocol for ' + esc(e.name) + ' come from the cultural review partner, not from us.</div>'
+      + window._cultureLearnHTML()
+      + '<p style="margin-top:12px"><button class="cc-link" onclick="_cultureOpenMoku(' + esc(JSON.stringify(e.moku)) + ')">All ' + sibs.length + ' ahupuaʻa of ' + esc(e.moku) + '</button></p>';
+    var el = window._cultureCardEl(); el.innerHTML = html; el.classList.add('open'); el.scrollTop = 0;
+    window._cultureHighlight([e]);
+  };
+  window._cultureOpenMoku = function(name){
+    var idx = window._cultureIdx, list = idx && idx.byMoku[name]; if (!list || !list.length) return;
+    var esc = window._cultureEsc, sorted = list.slice().sort(function(a, b){ return b.acres - a.acres; }), acres = 0; sorted.forEach(function(e){ acres += e.acres; });
+    var bm = window._cultureBeachMap(), nb = (typeof B !== 'undefined' ? B : []).filter(function(b){ return list.some(function(e){ return bm[b.id] === e.id; }); }).length;
+    var island = (window.ACTIVE && ACTIVE.name) || '';
+    var html = window._cultureHead(name, 'Moku · ' + island)
+      + '<div class="cc-facts"><div class="cc-fact"><b>' + sorted.length + '</b><span>ahupuaʻa</span></div><div class="cc-fact"><b>' + window._cultureNum(acres) + '</b><span>acres</span></div><div class="cc-fact"><b>' + nb + '</b><span>beaches in app</span></div></div>'
+      + '<h3>Its ahupuaʻa, largest first</h3><div class="cc-list">' + sorted.map(function(e){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureZoomTo(' + esc(JSON.stringify(e.id)) + ')">' + window.CULTURE_ICON.land + '<span>' + esc(e.name) + '</span><small>' + window._cultureNum(e.acres) + ' ac</small></div>'; }).join('') + '</div>'
+      + window._cultureLearnHTML();
+    var el = window._cultureCardEl(); el.innerHTML = html; el.classList.add('open'); el.scrollTop = 0;
+    window._cultureHighlight(list);
+  };
+  window._cultureZoomTo = function(id){
+    var e = window._cultureIdx && window._cultureIdx.byId[id]; if (!e) return;
+    try { map.fitBounds(e.layer.getBounds(), {paddingTopLeft:[16, 80], paddingBottomRight:[16, Math.round(map.getSize().y * .45)], maxZoom:13}); } catch(x){}
+    window._cultureOpenAhupuaa(id);
+  };
   window._cultureApply = function(on){
     var root = document.documentElement, btn = document.getElementById('cultureToggle');
     var slug = (window.ACTIVE && ACTIVE.slug) || 'kauai', cfg = window.CULTURE_MAPS[slug];
@@ -5077,8 +5204,10 @@ function initMap(){
       if (btn){ btn.classList.add('on'); btn.setAttribute('aria-pressed','true'); }
       try { localStorage.setItem('os_theme','culture'); } catch(e){}
       if (cfg && window.map){
-        if (!map.getPane('culture')){ var p = map.createPane('culture'); p.style.zIndex = 210; p.style.pointerEvents = 'none'; }
-        if (!map.getPane('cultureLabels')){ var pl = map.createPane('cultureLabels'); pl.style.zIndex = 215; pl.style.pointerEvents = 'none'; }
+        // Panes keep Leaflet's default pointer rules: only layers marked interactive (the sections, the labels)
+        // take taps; the sheet image never does, so drags and pin taps behave as before.
+        if (!map.getPane('culture')){ var p = map.createPane('culture'); p.style.zIndex = 210; }
+        if (!map.getPane('cultureLabels')){ var pl = map.createPane('cultureLabels'); pl.style.zIndex = 215; }
         if (!window._cultureSheet) window._cultureSheet = L.imageOverlay(cfg.src, cfg.bounds, {opacity:.8, pane:'culture', interactive:false, alt:cfg.title, attribution:window.CULTURE_CREDIT});
         window._cultureSheet.addTo(map);
         if (window._cultureLines){ window._cultureLines.addTo(map); window._cultureLabelsOn(true); }
@@ -5098,6 +5227,7 @@ function initMap(){
       if (window._cultureSheet && window.map) map.removeLayer(window._cultureSheet);
       if (window._cultureLines && window.map) map.removeLayer(window._cultureLines);
       window._cultureLabelsOn(false);
+      window._cultureCloseCard();
     }
     try { var u = new URL(location.href); if (on) u.searchParams.set('theme','culture'); else u.searchParams.delete('theme'); history.replaceState(null, '', u); } catch(e){}
   };
