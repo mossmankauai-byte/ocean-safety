@@ -33,11 +33,11 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     await sleep(1500);
     const off = await page.evaluate(() => ({
       theme: document.documentElement.getAttribute('data-theme'), card: !!document.getElementById('cultureCard'),
-      isCulture: !!(window._isCulture && window._isCulture()), chips: !!document.getElementById('cultureMoku'),
+      isCulture: !!(window._isCulture && window._isCulture()), ribbon: !!document.getElementById('cultureRibbon'),
       ids: (typeof B !== 'undefined' ? B : []).map((b) => b.id),
     }));
     ok(off.theme === null && !off.isCulture, `${isl} off: no data-theme`);
-    ok(!off.card && !off.chips, `${isl} off: no culture card, no moku chips`);
+    ok(!off.card && !off.ribbon, `${isl} off: no culture card, no ribbon`);
     ok(!requested.some((u) => u.includes('/culture/')), `${isl} off: nothing requested under /culture/`);
 
     // Safety text of the beach sheet, theme off vs on.
@@ -57,7 +57,7 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     await page.evaluate(() => toggleCulture());
     await page.waitForFunction(() => window._cultureLines && window._culturePlaces, { timeout: 20000 }).catch(() => {});
     await sleep(800);
-    const on = await page.evaluate(() => ({ isCulture: window._isCulture(), chips: !!document.getElementById('cultureMoku') }));
+    const on = await page.evaluate(() => ({ isCulture: window._isCulture(), ribbon: !!document.getElementById('cultureRibbon') }));
     ok(on.isCulture, `${isl} on: theme applied`);
     for (const id of sample) {
       const g = await grab(id);
@@ -65,8 +65,8 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     }
     await page.evaluate(() => toggleCulture());
     await sleep(400);
-    const back = await page.evaluate(() => ({ theme: document.documentElement.getAttribute('data-theme'), chips: !!document.getElementById('cultureMoku'), lines: !!(window._cultureLines && map.hasLayer(window._cultureLines)) }));
-    ok(back.theme === null && !back.chips && !back.lines, `${isl} off again: theme, chips and sections gone`);
+    const back = await page.evaluate(() => ({ theme: document.documentElement.getAttribute('data-theme'), ribbon: !!document.getElementById('cultureRibbon'), lines: !!(window._cultureLines && map.hasLayer(window._cultureLines)) }));
+    ok(back.theme === null && !back.ribbon && !back.lines, `${isl} off again: theme, ribbon and sections gone`);
   }
   await browser.close();
   console.log(fails ? `HOLD, ${fails} failure(s)` : 'PASS, theme off is the app as it was; safety text identical on');

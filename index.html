@@ -1721,10 +1721,18 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 :root[data-theme="culture"] .hdr-side-row{background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'><path d='M0 14L7 0l7 14L21 0l7 14' fill='none' stroke='%235a4630' stroke-opacity='.22' stroke-width='1.2'/></svg>") repeat-x center;padding-top:6px;padding-bottom:6px}
 :root[data-theme="culture"] .hdr-side{background:#f3e9d4;border-color:rgba(90,70,48,.35);color:#3f2e1c}
 :root[data-theme="culture"] .hdr-side.on{background:#5a4630;border-color:#5a4630;color:#fff}
-#cultureMoku{position:absolute;left:12px;right:12px;z-index:540;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;pointer-events:none}
-#cultureMoku::-webkit-scrollbar{display:none}
-#cultureMoku button{pointer-events:auto;flex:none;border:1px solid rgba(90,70,48,.4);background:rgba(246,239,223,.94);color:#3f2e1c;border-radius:999px;padding:7px 11px;font:600 11px/1 'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.12)}
-#cultureMoku button.on{background:#5a4630;color:#fff;border-color:#5a4630}
+#cultureRibbon{position:absolute;left:12px;right:12px;z-index:540;display:flex;justify-content:center;pointer-events:none}
+#cultureRibbon .cr-pill{pointer-events:auto;display:inline-flex;align-items:center;gap:8px;max-width:100%;border:1px solid rgba(90,70,48,.4);background:rgba(246,239,223,.96);color:#3f2e1c;border-radius:999px;padding:8px 12px 8px 10px;font:500 13px/1.2 'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+#cultureRibbon .cr-pill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cultureCard .cp-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+#cultureCard .cp-dots{display:flex;gap:6px}
+#cultureCard .cp-dots span{width:8px;height:8px;border-radius:50%;background:rgba(90,70,48,.25)}
+#cultureCard .cp-dots span.on{background:#0f4c5c}
+#cultureCard .cp-dots span.done{background:#5a4630}
+#cultureCard .cp-chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+#cultureCard .cc-say{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(90,70,48,.35);background:#fff;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:600;color:#3f2e1c;cursor:pointer}
+#cultureCard .cc-say.on,#cultureCard .cp-next{background:#0f4c5c;border-color:#0f4c5c;color:#fff}
+#cultureCard .cp-body p{font-size:14px;line-height:1.45;margin:0 0 8px}
 /* Blocks inside the beach sheet and the Plan sheet. */
 .cc-block{margin:10px 0 12px;background:#f6efdf;border:1px solid rgba(90,70,48,.2);border-radius:12px;padding:12px 14px;color:#2f2416}
 .cc-block h4{margin:0 0 6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b5a3e}
@@ -5097,7 +5105,7 @@ function initMap(){
     });
     window._cultureLabelGroup = L.layerGroup();
     map.on('zoomend', window._cultureRelabel);
-    try { window._cultureMokuChips(!!window._isCulture()); } catch(e){}
+    try { window._cultureRibbon(!!window._isCulture()); } catch(e){}
   };
   window._cultureRelabel = function(){
     if (!window._cultureLabelGroup || !window._isCulture()) return;
@@ -5179,7 +5187,7 @@ function initMap(){
     window._cultureLit = entries || [];
     window._cultureLit.forEach(function(e){ e.layer.setStyle({weight:2.6, color:'#0f4c5c', fillOpacity:.5}); if (e.layer.bringToFront) e.layer.bringToFront(); });
   };
-  window._cultureCloseCard = function(){ var el = document.getElementById('cultureCard'); if (el) el.classList.remove('open'); window._cultureHighlight([]); window._cultureMokuOn = null; try { window._cultureMokuChips(!!window._isCulture()); } catch(e){} };
+  window._cultureCloseCard = function(){ var el = document.getElementById('cultureCard'); if (el) el.classList.remove('open'); window._cultureHighlight([]); try { window._cultureRibbon(!!window._isCulture()); } catch(e){} };
   window._cultureLearnHTML = function(){
     var Lr = window.CULTURE_LEARN;
     return '<h3>The land system</h3><p>' + Lr.system.text + '</p><p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p>'
@@ -5347,19 +5355,76 @@ function initMap(){
     if (kw === 'makahiki') return /makahiki/.test(t);
     return true;
   };
-  window._cultureMokuChips = function(show){
-    // Moku chips under the subtab bar: the island's moku as a row, a tap opens the group card and frames it.
-    var el = document.getElementById('cultureMoku');
-    if (!show || !window._cultureIdx){ if (el) el.remove(); return; }
-    var esc = window._cultureEsc, names = Object.keys(window._cultureIdx.byMoku).sort();
-    if (!el){ el = document.createElement('div'); el.id = 'cultureMoku'; el.setAttribute('role', 'group'); el.setAttribute('aria-label', 'Moku'); (document.getElementById('app') || document.body).appendChild(el); }
-    // Sits just above the map's bottom region pills, clear of the button row and the North pill at the top.
-    try { var r = document.getElementById('map').getBoundingClientRect(); el.style.top = Math.round(r.bottom - 142) + 'px'; } catch(e){ el.style.top = '240px'; }
-    el.innerHTML = names.map(function(n){ return '<button type="button" class="' + (window._cultureMokuOn === n ? 'on' : '') + '" onclick="_cultureMokuTap(' + esc(JSON.stringify(n)) + ')">' + esc(n) + '</button>'; }).join('');
+  // ── START HERE: the path and the ribbon. The ribbon is one pill over the map. Located, it reads "You are in
+  //    Kōloa ahupuaʻa, moku of Kona" and opens the path at that step; not located, it reads "Start here" and opens
+  //    step one. The path walks island, moku, ahupuaʻa, the beach, lighting the map at each level. Every sentence
+  //    is structural or a cited quotation; nothing here is cultural interpretation.
+  window._cultureWhereAmI = function(){
+    var loc = window._userLocation, idx = window._cultureIdx; if (!loc || !idx) return null;
+    var pip = function(x, y, ring){ var inside = false; for (var i = 0, j = ring.length - 1; i < ring.length; j = i++){ var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside; } return inside; };
+    var ids = Object.keys(idx.byId);
+    for (var n = 0; n < ids.length; n++){ var e = idx.byId[ids[n]], g = e.layer.feature.geometry, polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates; for (var p = 0; p < polys.length; p++) if (pip(loc.lon, loc.lat, polys[p][0])) return e; }
+    return null;
   };
-  window._cultureMokuTap = function(n){
-    window._cultureMokuOn = n; window._cultureOpenMoku(n); window._cultureMokuChips(true);
-    try { var g = L.featureGroup(window._cultureIdx.byMoku[n].map(function(e){ return e.layer; })); map.fitBounds(g.getBounds(), {paddingTopLeft:[16, 80], paddingBottomRight:[16, Math.round(map.getSize().y * .45)]}); } catch(e){}
+  window._cultureRibbon = function(show){
+    var el = document.getElementById('cultureRibbon');
+    if (!show || !window._cultureIdx){ if (el) el.remove(); if (window._cultureRibbonTimer){ clearInterval(window._cultureRibbonTimer); window._cultureRibbonTimer = null; } return; }
+    var esc = window._cultureEsc, here = window._cultureWhereAmI();
+    if (!el){ el = document.createElement('div'); el.id = 'cultureRibbon'; (document.getElementById('app') || document.body).appendChild(el); }
+    // Just above the map's bottom region pills, clear of the button row and the North pill.
+    try { var r = document.getElementById('map').getBoundingClientRect(); el.style.top = Math.round(r.bottom - 142) + 'px'; } catch(e){ el.style.top = '240px'; }
+    var key = here ? here.id : 'start';
+    if (el.getAttribute('data-key') !== key){
+      el.setAttribute('data-key', key);
+      el.innerHTML = '<button type="button" class="cr-pill" onclick="' + (here ? '_culturePathHere()' : '_culturePathOpen(1)') + '">' + window.CULTURE_ICON.leaf
+        + (here ? '<span>You are in <b>' + esc(here.name) + '</b> ahupuaʻa, moku of ' + esc(here.moku) + '</span>' : '<span><b>Start here</b>: the land, step by step</span>')
+        + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>';
+    }
+    if (!window._cultureRibbonTimer) window._cultureRibbonTimer = setInterval(function(){ if (window._isCulture && window._isCulture()) window._cultureRibbon(true); }, 3000);   // Locate Me can land later
+  };
+  window._culturePath = {step:0, moku:null, ahu:null};
+  window._culturePathHere = function(){ var h = window._cultureWhereAmI(); if (!h) return window._culturePathOpen(1); window._culturePath.moku = h.moku; window._culturePath.ahu = h.id; window._culturePathOpen(3); };
+  window._culturePathPick = function(kind, v){ if (kind === 'moku'){ window._culturePath.moku = v; window._culturePath.ahu = null; window._culturePathOpen(2); } else { window._culturePath.ahu = v; window._culturePathOpen(3); } };
+  window._culturePathOpen = function(step){
+    var idx = window._cultureIdx; if (!idx) return;
+    var esc = window._cultureEsc, P = window._culturePath, island = (window.ACTIVE && ACTIVE.name) || 'Kauaʻi', here = window._cultureWhereAmI();
+    var mokus = Object.keys(idx.byMoku).sort();
+    if (!P.moku || !idx.byMoku[P.moku]) P.moku = here ? here.moku : mokus.slice().sort(function(a, b){ return idx.byMoku[b].length - idx.byMoku[a].length; })[0];
+    var list = (idx.byMoku[P.moku] || []).slice().sort(function(a, b){ return b.acres - a.acres; });
+    var ahu = (P.ahu && idx.byId[P.ahu]) || (here && here.moku === P.moku ? here : list[0]); if (!ahu) return; P.ahu = ahu.id;
+    P.step = Math.max(1, Math.min(4, step));
+    window._cultureCount('culture_path', 'step' + P.step);
+    var Lr = window.CULTURE_LEARN, body = '', title = '', onMap = null, pad = {paddingTopLeft:[16, 80], paddingBottomRight:[16, Math.round(map.getSize().y * .45)]};
+    var dots = [1, 2, 3, 4].map(function(n){ return '<span class="' + (n === P.step ? 'on' : (n < P.step ? 'done' : '')) + '"></span>'; }).join('');
+    var nav = '<div class="cp-nav">' + (P.step > 1 ? '<button class="cc-say" onclick="_culturePathOpen(' + (P.step - 1) + ')">Back</button>' : '<span></span>')
+      + '<div class="cp-dots">' + dots + '</div>'
+      + (P.step < 4 ? '<button class="cc-say cp-next" onclick="_culturePathOpen(' + (P.step + 1) + ')">Next</button>' : '<button class="cc-say cp-next" onclick="_cultureOpenAhupuaa(' + esc(JSON.stringify(ahu.id)) + ')">Open the card</button>') + '</div>';
+    if (P.step === 1){
+      title = island;
+      body = '<p><b>' + esc(island) + '</b> is a mokupuni, an island. It is divided into ' + mokus.length + ' moku.</p><p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p>';
+      onMap = function(){ window._cultureHighlight([]); if (typeof frameIsland === 'function') frameIsland(true); };
+    } else if (P.step === 2){
+      title = 'Moku';
+      body = '<p>Each moku is a district of the island. ' + esc(island) + ' has ' + mokus.length + '. Pick one to follow.</p><div class="cp-chips">' + mokus.map(function(n){ return '<button class="cc-say' + (n === P.moku ? ' on' : '') + '" onclick="_culturePathPick(\'moku\',' + esc(JSON.stringify(n)) + ')">' + esc(n) + (here && here.moku === n ? ' · you' : '') + '</button>'; }).join('') + '</div>';
+      onMap = function(){ window._cultureHighlight(list); map.fitBounds(L.featureGroup(list.map(function(e){ return e.layer; })).getBounds(), pad); };
+    } else if (P.step === 3){
+      title = 'Ahupuaʻa';
+      var rank = list.indexOf(ahu) + 1;
+      body = '<p><b>' + esc(P.moku) + '</b> holds ' + list.length + ' ahupuaʻa. <b>' + esc(ahu.name) + '</b> is ' + window._cultureOrd(rank) + ' of ' + list.length + ' by size, ' + window._cultureNum(ahu.acres) + ' acres.' + (here && here.id === ahu.id ? ' You are standing in it.' : '') + '</p>'
+        + '<div class="cp-chips">' + list.slice(0, 12).map(function(e){ return '<button class="cc-say' + (e.id === ahu.id ? ' on' : '') + '" onclick="_culturePathPick(\'ahu\',' + esc(JSON.stringify(e.id)) + ')">' + esc(e.name) + '</button>'; }).join('') + (list.length > 12 ? '<span class="cc-credit">and ' + (list.length - 12) + ' more</span>' : '') + '</div>'
+        + '<p class="cc-cite">' + Lr.bounds.quote + ' ' + Lr.bounds.cite + '</p>';
+      onMap = function(){ window._cultureHighlight([ahu]); map.fitBounds(ahu.layer.getBounds(), Object.assign({maxZoom:13}, pad)); };
+    } else {
+      title = 'The beach';
+      var bm = window._cultureBeachMap(), beaches = (typeof B !== 'undefined' ? B : []).filter(function(b){ return bm[b.id] === ahu.id; });
+      body = '<p>' + Lr.bounds.note + '</p><p>' + (here && here.id === ahu.id ? 'You are in <b>' + esc(ahu.name) + '</b>. ' : '') + (beaches.length ? 'In ' + esc(ahu.name) + ':' : 'No beach in this app sits inside ' + esc(ahu.name) + '.') + '</p>'
+        + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(window._cultureNames(b).n) + '</span><small>' + esc(b.r || '') + '</small></div>'; }).join('') + '</div>' : '');
+      onMap = function(){ window._cultureHighlight([ahu]); map.fitBounds(ahu.layer.getBounds(), Object.assign({maxZoom:14}, pad)); };
+    }
+    var el = window._cultureCardEl();
+    el.innerHTML = window._cultureHead(title, 'Start here · step ' + P.step + ' of 4 · ' + island) + '<div class="cp-body">' + body + '</div>' + nav;
+    el.classList.add('open'); el.scrollTop = 0;
+    try { onMap(); } catch(e){}
   };
   window._cultureDefaultSub = function(){
     // Family opens on Cultural, Town on Crafts: by tapping the subtab the way a guest would, only if it exists.
@@ -5370,7 +5435,7 @@ function initMap(){
     if (window._cultureSubtabsWrapped || typeof buildSubtabs !== 'function') return;
     window._cultureSubtabsWrapped = true;
     var orig = buildSubtabs;
-    buildSubtabs = function(t){ orig(t); try { if (window._isCulture && window._isCulture()){ window._cultureDefaultSub(); window._cultureMokuChips(true); } else window._cultureMokuChips(false); } catch(e){} };
+    buildSubtabs = function(t){ orig(t); try { if (window._isCulture && window._isCulture()){ window._cultureDefaultSub(); window._cultureRibbon(true); } else window._cultureRibbon(false); } catch(e){} };
   };
   window._cultureRepaint = function(){
     try { if (typeof rescore === 'function') rescore(); } catch(e){}
@@ -5391,11 +5456,11 @@ function initMap(){
         }
       } catch(e){}
       window._cultureWrapSubtabs();
-      window._cultureMokuChips(true);
+      window._cultureRibbon(true);
       window._cultureDefaultSub();
     } else {
       try { if (window._cultureHikesOrig){ HIKES.splice.apply(HIKES, [0, HIKES.length].concat(window._cultureHikesOrig)); window._cultureHikesOrig = null; } } catch(e){}
-      window._cultureMokuChips(false);
+      window._cultureRibbon(false);
       if (/^(hula|lei|makahiki)$/.test(String(window._ghEvRange || ''))) window._ghEvRange = 'all';
     }
     window._cultureRepaint();
