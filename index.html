@@ -5289,7 +5289,7 @@ function initMap(){
       + '<div class="cc-fact"><b>' + (e.acres * 0.00404686).toFixed(1) + '</b><span>km²</span></div>'
       + '<div class="cc-fact"><b>' + window._cultureOrd(rank) + ' of ' + sibs.length + '</b><span>by size in ' + esc(e.moku) + '</span></div></div>'
       + '<h3>In this ahupuaʻa</h3>'
-      + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ var row = window._culturePlaceRow ? window._culturePlaceRow(b.id) : null, nm = window._cultureNames ? window._cultureNames(b).n : b.name; return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(nm) + '</span><small>' + (row && /^y/i.test(row.wahi_pana || '') ? 'wahi pana · ' : '') + esc(b.r || '') + '</small></div>'; }).join('') + '</div>'
+      + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ var row = window._culturePlaceRow ? window._culturePlaceRow(b.id) : null, nm = window._cultureShortName ? window._cultureShortName(b) : b.name; return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(nm) + '</span><small>' + (row && /^y/i.test(row.wahi_pana || '') ? 'wahi pana · ' : '') + esc(b.r || '') + '</small></div>'; }).join('') + '</div>'
                        : '<div class="cc-empty">No beach in this app sits inside this ahupuaʻa.</div>')
       + '<h3>About this place</h3><div class="cc-empty">Awaiting cultural review. The meaning of the name, its moʻolelo, and guest protocol for ' + esc(e.name) + ' come from the cultural review partner, not from us.</div>'
       + window._cultureLearnHTML()
@@ -5534,7 +5534,7 @@ function initMap(){
       title = 'The beach';
       var bm = window._cultureBeachMap(), beaches = (typeof B !== 'undefined' ? B : []).filter(function(b){ return bm[b.id] === ahu.id; });
       body = '<p>' + Lr.bounds.note + '</p><p>' + (here && here.id === ahu.id ? 'You are in <b>' + esc(ahu.name) + '</b>. ' : '') + (beaches.length ? 'In ' + esc(ahu.name) + ':' : 'No beach in this app sits inside ' + esc(ahu.name) + '.') + '</p>'
-        + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(window._cultureNames(b).n) + '</span><small>' + esc(b.r || '') + '</small></div>'; }).join('') + '</div>' : '');
+        + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(window._cultureShortName(b)) + '</span><small>' + esc(b.r || '') + '</small></div>'; }).join('') + '</div>' : '');
       onMap = function(){ window._cultureHighlight([ahu]); map.fitBounds(ahu.layer.getBounds(), Object.assign({maxZoom:14}, pad)); };
     }
     var el = window._cultureCardEl();
@@ -5587,14 +5587,22 @@ function initMap(){
   //    untouched. The icon set has no ahupuaʻa, moku or step glyph yet, so the land glyph stands for the
   //    upland level and the wave glyph for the beach level, which is the one lit.
   window._cultureShortName = function(b){
-    // _cultureNames().n is the short name to lead with, but where there is no Hawaiian-and-nickname pair it
-    // falls back to the app's plain short field, which drops the marks: Anini for ʻAnini Beach, and a
-    // straight apostrophe where the full name carries an ʻokina. That apostrophe is the exact thing the
-    // Maʻemaʻe lint bans, so in those two cases the full name, which keeps the marks, is used instead.
+    // The short name to lead with, with its marks. _cultureNames().n falls back to the app's plain short
+    // field where a beach has no Hawaiian-and-nickname pair, and that field drops the ʻokina and the
+    // kahōkō: Anini for ʻAnini Beach, and a straight apostrophe where the full name carries an ʻokina.
+    // A straight apostrophe standing in for an ʻokina is the exact thing the Maʻemaʻe lint bans.
+    // So the full name is stripped of a trailing English descriptor and kept only when it is the SAME word
+    // as the short field once the marks are taken off. That restores the marks without ever lengthening the
+    // title or inventing a name. Anything that does not match that test is left exactly as it was.
     var nm = window._cultureNames(b), n = nm.n || '', full = b.name || n;
-    var marks = /[\u02bb\u0101\u0113\u012b\u014d\u016b]/;
+    var bare = function(t){ return String(t || '').toLowerCase()
+      .replace(/[\u02bb\u02bc'\u2018\u2019`]/g, '')
+      .replace(/\u0101/g, 'a').replace(/\u0113/g, 'e').replace(/\u012b/g, 'i').replace(/\u014d/g, 'o').replace(/\u016b/g, 'u')
+      .replace(/\s+/g, ' ').trim(); };
+    if (bare(n) === bare(full)) return full;
+    var cut = full.replace(/\s+(Beach Park|Beach|Bay|Park|Point|Landing|Cove|Pier|Harbor)$/i, '');
+    if (bare(n) === bare(cut)) return cut;
     if (/[A-Za-z]['][A-Za-z]/.test(n)) return full;
-    if (marks.test(full) && !marks.test(n)) return full;
     return n;
   };
   window._cultureLandLine = function(b){
@@ -8614,7 +8622,7 @@ function openSheet(id){
       ${_housePickBadge(b.id)}
       ${ibsHero}
       <div class="hero-text">
-        <div class="sname">${(window._isCulture&&window._isCulture()&&window._cultureNames)?_cultureEsc(_cultureNames(b).n):b.name}</div>
+        <div class="sname">${(window._isCulture&&window._isCulture()&&window._cultureShortName)?_cultureEsc(_cultureShortName(b)):b.name}</div>
         <div class="sreg">${(window._isCulture&&window._isCulture()&&window._cultureSheetSub)?_cultureSheetSub(b):(b.r+' · '+((window.ACTIVE&&ACTIVE.name)||'Kauaʻi'))}</div>
       </div>
     </div>

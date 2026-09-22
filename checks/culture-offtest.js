@@ -86,6 +86,33 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     await sleep(800);
     const on = await page.evaluate(() => ({ isCulture: window._isCulture(), ribbon: !!document.getElementById('cultureRibbon') }));
     ok(on.isCulture, `${isl} on: theme applied`);
+    // Names in the theme lead Hawaiian and must keep their marks. _cultureShortName restores the ʻokina and
+    // the kahōkō the app's plain short field drops, and must do it without inventing a name, without making
+    // a title longer, and without leaving a straight apostrophe standing in for an ʻokina. Checked over every
+    // beach on the island, using the same two regexes culture-lint.py uses, so an English possessive
+    // (Queen's Bath, Chun's Reef) is not counted as an ʻokina substitute.
+    const names = await page.evaluate(() => {
+      const bare = (t) => String(t || '').toLowerCase().replace(/[\u02bb\u02bc'\u2018\u2019`]/g, '')
+        .replace(/\u0101/g, 'a').replace(/\u0113/g, 'e').replace(/\u012b/g, 'i').replace(/\u014d/g, 'o').replace(/\u016b/g, 'u')
+        .replace(/\s+/g, ' ').trim();
+      const APOS = /[A-Za-z\u0101\u0113\u012b\u014d\u016b\u0100\u0112\u012a\u014c\u016a]+'[A-Za-z\u0101\u0113\u012b\u014d\u016b]+/g;
+      const HAW = /^[aeiouhklmnpw\u0101\u0113\u012b\u014d\u016b']+$/i;
+      const out = { n: 0, fixed: 0, invented: [], longer: [], apos: [] };
+      (typeof B !== 'undefined' ? B : []).forEach((b) => {
+        const was = window._cultureNames(b).n || '', now = window._cultureShortName(b);
+        out.n++;
+        if (bare(now) !== bare(was) && bare(now) !== bare(b.name || '')) out.invented.push(b.id + ': ' + was + ' -> ' + now);
+        if (now.length > was.length && bare(now) !== bare(was)) out.longer.push(b.id + ': ' + was + ' -> ' + now);
+        (String(now).match(APOS) || []).forEach((w) => { if (HAW.test(w)) out.apos.push(b.id + ': ' + now); });
+        if (now !== was) out.fixed++;
+      });
+      return out;
+    });
+    ok(!names.invented.length, `${isl} on: no short name invented` + (names.invented.length ? `\n     ${names.invented.slice(0, 4).join('\n     ')}` : ''));
+    ok(!names.longer.length, `${isl} on: no short name made longer` + (names.longer.length ? `\n     ${names.longer.slice(0, 4).join('\n     ')}` : ''));
+    ok(!names.apos.length, `${isl} on: no straight apostrophe standing in for an ʻokina` + (names.apos.length ? `\n     ${names.apos.slice(0, 4).join('\n     ')}` : ''));
+    console.log(`     ${isl}: ${names.fixed} of ${names.n} names had their marks restored`);
+
     const onList = await grabList();
     const dupes = onList.ids.filter((id, i) => onList.ids.indexOf(id) !== i);
     ok(!onList.flat && !dupes.length && onList.ids.length === onList.n,
