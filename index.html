@@ -1711,7 +1711,7 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 #cultureCard p{margin:0 0 8px;font-size:14px;line-height:1.45}
 #cultureCard .cc-cite{font-size:12px;color:#6b5a3e}
 #cultureCard .cc-list{display:flex;flex-direction:column;gap:6px}
-#cultureCard .cc-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.65);border:1px solid rgba(47,36,22,.12);border-radius:10px;padding:9px 10px;cursor:pointer;font-size:14px}
+#cultureCard .cc-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.65);border:1px solid rgba(47,36,22,.12);border-radius:10px;padding:9px 10px;cursor:pointer;font-size:14px;color:#3f2e1c}
 #cultureCard .cc-row small{margin-left:auto;color:#6b5a3e;font-size:12px;white-space:nowrap}
 #cultureCard .cc-empty{border:1px dashed rgba(47,36,22,.3);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4;color:#6b5a3e;background:rgba(255,255,255,.4)}
 #cultureCard .cc-link{background:none;border:0;padding:0;color:#0f4c5c;font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline}
@@ -1722,16 +1722,30 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 :root[data-theme="culture"] .hdr-side{background:#f3e9d4;border-color:rgba(90,70,48,.35);color:#3f2e1c}
 :root[data-theme="culture"] .hdr-side.on{background:#5a4630;border-color:#5a4630;color:#fff}
 #cultureRibbon{position:absolute;left:12px;right:12px;z-index:540;display:flex;justify-content:center;pointer-events:none}
-#cultureRibbon .cr-pill{pointer-events:auto;display:inline-flex;align-items:center;gap:8px;max-width:100%;border:1px solid rgba(90,70,48,.4);background:rgba(246,239,223,.96);color:#3f2e1c;border-radius:999px;padding:8px 12px 8px 10px;font:500 13px/1.2 'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+#cultureRibbon .cr-pill{pointer-events:auto;display:inline-flex;align-items:center;gap:8px;max-width:100%;border:1px solid rgba(90,70,48,.4);background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'><path d='M0 8L6 1.6l6 6.4 6-6.4 6 6.4' fill='none' stroke='%235a4630' stroke-opacity='.32' stroke-width='1.1'/></svg>") repeat-x top,rgba(246,239,223,.96);color:#3f2e1c;border-radius:999px;padding:13px 12px 9px 10px;font:500 13px/1.2 'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 #cultureRibbon .cr-pill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cultureRibbon .cr-pill>svg:first-child{width:16px;height:16px;flex-shrink:0}
 #cultureCard .cp-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
-#cultureCard .cp-dots{display:flex;gap:6px}
-#cultureCard .cp-dots span{width:8px;height:8px;border-radius:50%;background:rgba(90,70,48,.25)}
-#cultureCard .cp-dots span.on{background:#0f4c5c}
-#cultureCard .cp-dots span.done{background:#5a4630}
+#cultureCard .cc-band{height:8px;margin:11px 0 2px;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'><path d='M0 8L6 1.6l6 6.4 6-6.4 6 6.4' fill='none' stroke='%235a4630' stroke-opacity='.32' stroke-width='1.1'/></svg>") repeat-x center}
+#cultureCard .cp-strip{display:flex;align-items:center;justify-content:center}
+#cultureCard .cp-strip .cs{position:relative;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:rgba(63,46,28,.4)}
+#cultureCard .cp-strip .cs svg{position:relative}
+#cultureCard .cp-strip .cs+.cs::before{content:'';position:absolute;left:-7px;top:50%;width:14px;border-top:1px solid rgba(90,70,48,.32)}
+#cultureCard .cp-strip .cs.done{color:#5a4630}
+#cultureCard .cp-strip .cs.on{color:#3f2e1c}
+#cultureCard .cp-strip .cs.done .cf,#cultureCard .cp-strip .cs.on .cf{fill:currentColor}
+#cultureCard .cd{display:block;margin:2px 0 10px;color:#3f2e1c}
+#cultureCard .cd-area{fill:#3f2e1c;fill-opacity:0;stroke:rgba(63,46,28,.26);stroke-width:1.2}
+#cultureCard .cd-area.cd-on{fill-opacity:.16;stroke:#3f2e1c;stroke-width:1.6}
+#cultureCard .cd-line{stroke:rgba(90,70,48,.3);stroke-width:1}
+#cultureCard .cd-ridge{stroke:#5a4630;stroke-width:1.6}
+#cultureCard .cd-plant{color:#5a4630;opacity:.7}
+#cultureCard .cd-t{font:600 8px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.14em;text-transform:uppercase;fill:#6b5a3e;stroke:none}
 #cultureCard .cp-chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-#cultureCard .cc-say{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(90,70,48,.35);background:#fff;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:600;color:#3f2e1c;cursor:pointer}
-#cultureCard .cc-say.on,#cultureCard .cp-next{background:#0f4c5c;border-color:#0f4c5c;color:#fff}
+#cultureCard .cc-say{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(63,46,28,.45);background:#f6efdf;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:600;color:#3f2e1c;cursor:pointer}
+#cultureCard .cp-chips .cc-say svg{width:16px;height:16px;flex-shrink:0}
+#cultureCard .cc-say.on{background:#3f2e1c;border-color:#3f2e1c;color:#f6efdf}
+#cultureCard .cp-next{background:#0f4c5c;border-color:#0f4c5c;color:#fff}
 #cultureCard .cp-body p{font-size:14px;line-height:1.45;margin:0 0 8px}
 /* Blocks inside the beach sheet and the Plan sheet. */
 .cc-block{margin:10px 0 12px;background:#f6efdf;border:1px solid rgba(90,70,48,.2);border-radius:12px;padding:12px 14px;color:#2f2416}
@@ -1747,6 +1761,21 @@ details.cc-proto-block summary::-webkit-details-marker{display:none}
 details.cc-proto-block summary small{margin-left:auto;font-size:11px;letter-spacing:0;text-transform:none}
 details.cc-proto-block .cc-proto{display:flex;gap:8px;align-items:flex-start;margin:8px 0 0;font-size:14px;line-height:1.4}
 p.cc-credit .cc-link{font-size:12.5px}
+/* Beaches in the theme: the grouped outlook list, the sheet's mauka-to-makai line, the nearby chips. */
+.cb-moku{display:flex;align-items:center;gap:7px;font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;font-variant:small-caps;font-size:14px;font-weight:600;letter-spacing:.1em;color:#5a4630;margin:12px 0 2px}
+.cb-moku svg{width:15px;height:15px;flex-shrink:0}
+.cb-ahu svg{flex-shrink:0}
+.cb-ahu{display:flex;align-items:center;gap:7px;font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;font-variant:small-caps;font-size:15px;font-weight:600;letter-spacing:.06em;color:#3f2e1c;margin:4px 0 2px}
+.cb-also{font-weight:500;font-size:11px;color:#6b5a3e;margin-left:6px}
+.cc-land{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:7px 12px;background:#f6efdf;border:1px solid rgba(90,70,48,.2);border-radius:10px;font:500 12.5px/1.3 'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;color:#3f2e1c}
+.cc-land .cl-strip{display:flex;align-items:center;flex-shrink:0}
+.cc-land .cs{position:relative;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:rgba(63,46,28,.38)}
+.cc-land .cs svg{position:relative;width:17px;height:17px}
+.cc-land .cs+.cs::before{content:'';position:absolute;left:-4px;top:50%;width:8px;border-top:1px solid rgba(90,70,48,.32)}
+.cc-land .cs.on{color:#3f2e1c}
+.cc-land .cs.on .cf{fill:currentColor}
+.cc-nearby{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
+.cc-block .cc-what{display:block;margin:0 0 8px}
 .os-ahu-label{font-size:11px;line-height:1.15;letter-spacing:.03em}
 .os-ahu-label small{display:block;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
 .os-moku-label{font-size:var(--os-moku-fs,14px);font-weight:600;letter-spacing:.16em;text-transform:uppercase}
@@ -5148,13 +5177,47 @@ function initMap(){
   window._cultureEsc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); };
   window._cultureNum = function(n){ return Math.round(n).toLocaleString('en-US'); };
   window._cultureOrd = function(n){ var s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
-  window.CULTURE_ICON = {
-    x:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
-    leaf:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2f6b45" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
-    speaker:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>',
-    wave:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0f4c5c" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 10c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 16c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>',
-    land:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5a4630" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20L9 6l4 8 3-4 5 10Z"/></svg>'
-  };
+  // One stroke style for the whole theme: 24-unit viewBox, 1.8 stroke, round caps and joins, currentColor
+  // so a glyph on a filled chip flips to parchment. Land, water, plants and geometry only. Every glyph and
+  // its meaning is listed in CULTURE-OLD-MAPS-2026-09-19.md for the cultural review partner to approve.
+  window.CULTURE_ICON = (function(){
+    var g = function(d, w){ return '<svg viewBox="0 0 24 24" width="' + (w || 18) + '" height="' + (w || 18) + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+    var CREST = '<path d="M2.6 8.6L7 5.4h10l4.4 3.2"/>';
+    var WEDGE = CREST + '<path d="M10.2 5.4h3.6l2.4 11c-2.9 1.3-5.9 1.3-8.8 0Z"/>';
+    var WEDGE_WAVE = '<path d="M4.2 19.8c1.6-1.4 3.2-1.4 4.8 0s3.2 1.4 4.8 0 3.2-1.4 4.8 0"/>';
+    var WEDGE_SITE = '<circle cx="12" cy="11.6" r="1.6" fill="currentColor" stroke="none"/>';
+    var half = '<path d="M12 3.4L17.6 7.6 14.8 9 19.2 13.2 12 15.6"/>';
+    var ICON = {
+      x:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+      speaker: g('<path d="M11 5L6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/>', 16),
+      // Water. The beach glyph is the wave.
+      wave: g('<path d="M2.5 10c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2.5 16c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>'),
+      // Island: a land form with its ridge inside.
+      mokupuni: g('<path d="M11.6 5c5.2-.4 9.8 2.4 10 5.8.2 3.6-4.4 8-10.2 7.8C5.8 18.4 2.2 14.8 2.4 11.4 2.6 8 6.6 5.3 11.6 5Z"/><path d="M4.8 11.2L8.6 7l3.4 3.4 2.6-2.4 3.4 3.6"/>'),
+      // District: one bounded piece of the island, its ridge along the top, the shore curving below.
+      moku: g('<path d="M3 9.8L7.4 5.8 11.8 8.4 16.2 5.6 21 9.8 20.2 16.6c-5.4 1.8-11 1.8-16.4 0Z"/>'),
+      // Land division: the wedge from the ridge down to the shore. Optional wave when the section holds a
+      // beach in this app, optional site mark when a Cultural place in this app sits inside its boundary.
+      ahupuaa: function(o){ o = o || {}; return g(WEDGE + (o.beach ? WEDGE_WAVE : '') + (o.site ? WEDGE_SITE : ''), o.w); },
+      // Fishpond: the curved wall and the water it holds. Shipped for a later data field, not wired.
+      lokoia: g('<path d="M2.6 19h18.8"/><path d="M6.4 19c-1.7-5.6 1.2-11 5.6-11 3.5 0 6.2 3.4 5.9 7.4"/><path d="M8.4 14.6c1.2-1 2.4-1 3.6 0s2.4 1 3.6 0"/>'),
+      // Plant accents. Kalo leaf and stem. The leaf key is the kalo glyph: it is what the older call
+      // sites ask for, and the land key is the plain wedge, the upland level those call sites mean.
+      kalo: g('<path d="M12 21.2c-5.2-4.4-8.2-7.8-8.2-11.4 0-3 2.2-5 4.8-5 1.8 0 3 1 3.4 2.1.4-1.1 1.6-2.1 3.4-2.1 2.6 0 4.8 2 4.8 5 0 3.6-3 7-8.2 11.4Z"/><path d="M12 8.8v11M12 13.6L8.2 10M12 13.6l3.8-3.6"/><path d="M12 8.8c.2-2.8 1.8-4.6 4.4-5.6"/>'),
+      // ʻUlu leaf, lobed, drawn once and mirrored.
+      ulu: g('<path d="M12 20.6V4.6"/>' + half + '<g transform="translate(24,0) scale(-1,1)">' + half + '</g>'),
+      land: g(WEDGE),
+      // The four path steps, ridge to shore. Closed shapes carry .cf so the strip can fill the step reached.
+      step: [
+        g('<path class="cf" d="M2.6 19.4L8.4 7l4 6.6 3.2-4.2 5.8 10Z"/>', 20),
+        g('<path class="cf" d="M2.8 9.4L7.4 5 12 7.8 16.6 4.8 21.2 9.4 20.4 17.2c-5.6 1.8-11.6 1.8-17.2 0Z"/>', 20),
+        g('<path class="cf" d="M9.6 5.4h4.8l3.4 11.6c-3.9 1.6-7.7 1.6-11.6 0Z"/><path d="M2.6 8.4L6.8 5.4h10.4l4.2 3"/>', 20),
+        g('<path class="cf" d="M2.6 12.4c2-2 4-2 6 0s4 2 6 0 4-2 6 0v7.6H2.6Z"/><path d="M2.6 8c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>', 20)
+      ]
+    };
+    ICON.leaf = ICON.kalo;
+    return ICON;
+  })();
   window._cultureCardEl = function(){
     var el = document.getElementById('cultureCard');
     if (!el){ el = document.createElement('div'); el.id = 'cultureCard'; el.setAttribute('role','dialog'); el.setAttribute('aria-label','Land division'); document.body.appendChild(el); }
@@ -5182,6 +5245,25 @@ function initMap(){
     });
     window._cultureBeachMapCache = out; return out;
   };
+  window._cultureAhuMarks = function(){
+    // Which sections hold a beach and which hold a Cultural place, read from the app's own data so the
+    // wedge icon's variants are chosen from what is there, never from a name. Point in polygon, the same
+    // helper as _cultureBeachMap, computed once per island load.
+    if (window._cultureAhuMarkCache) return window._cultureAhuMarkCache;
+    var idx = window._cultureIdx || {byId:{}}, out = {}, bm = window._cultureBeachMap();
+    Object.keys(bm).forEach(function(bid){ (out[bm[bid]] = out[bm[bid]] || {}).beach = true; });
+    var pip = function(x, y, ring){ var inside = false; for (var i = 0, j = ring.length - 1; i < ring.length; j = i++){ var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside; } return inside; };
+    var ids = Object.keys(idx.byId);
+    (typeof ACTS !== 'undefined' ? ACTS : []).forEach(function(a){
+      if (a.type !== 'cultural' || typeof a.lat !== 'number' || typeof a.lon !== 'number') return;
+      for (var n = 0; n < ids.length; n++){
+        var e = idx.byId[ids[n]], geom = e.layer.feature.geometry, polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+        for (var pp = 0; pp < polys.length; pp++) if (pip(a.lon, a.lat, polys[pp][0])){ (out[ids[n]] = out[ids[n]] || {}).site = true; return; }
+      }
+    });
+    window._cultureAhuMarkCache = out; return out;
+  };
+  window._cultureAhuIcon = function(id){ var m = window._cultureAhuMarks()[id] || {}; return window.CULTURE_ICON.ahupuaa({beach:m.beach, site:m.site}); };
   window._cultureHighlight = function(entries){
     (window._cultureLit || []).forEach(function(e){ try { window._cultureLines.resetStyle(e.layer); } catch(x){} });
     window._cultureLit = entries || [];
@@ -5194,7 +5276,7 @@ function initMap(){
          + '<h3>These boundaries</h3><p class="cc-cite">' + Lr.bounds.quote + '</p><p>' + Lr.bounds.note + '</p><p class="cc-cite">' + Lr.bounds.cite + '</p>';
   };
   window._cultureHead = function(title, sub){
-    return '<div class="cc-head"><div><h2>' + window._cultureEsc(title) + '</h2><div class="cc-sub">' + window._cultureEsc(sub) + '</div></div><button class="cc-x" aria-label="Close" onclick="_cultureCloseCard()">' + window.CULTURE_ICON.x + '</button></div>';
+    return '<div class="cc-head"><div><h2>' + window._cultureEsc(title) + '</h2><div class="cc-sub">' + window._cultureEsc(sub) + '</div></div><button class="cc-x" aria-label="Close" onclick="_cultureCloseCard()">' + window.CULTURE_ICON.x + '</button></div><div class="cc-band" aria-hidden="true"></div>';
   };
   window._cultureOpenAhupuaa = function(id){
     var idx = window._cultureIdx, e = idx && idx.byId[id]; if (!e) return;
@@ -5223,7 +5305,7 @@ function initMap(){
     window._cultureCount('culture_card', 'moku|' + name);
     var html = window._cultureHead(name, 'Moku · ' + island)
       + '<div class="cc-facts"><div class="cc-fact"><b>' + sorted.length + '</b><span>ahupuaʻa</span></div><div class="cc-fact"><b>' + window._cultureNum(acres) + '</b><span>acres</span></div><div class="cc-fact"><b>' + nb + '</b><span>beaches in app</span></div></div>'
-      + '<h3>Its ahupuaʻa, largest first</h3><div class="cc-list">' + sorted.map(function(e){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureZoomTo(' + esc(JSON.stringify(e.id)) + ')">' + window.CULTURE_ICON.land + '<span>' + esc(e.name) + '</span><small>' + window._cultureNum(e.acres) + ' ac</small></div>'; }).join('') + '</div>'
+      + '<h3>Its ahupuaʻa, largest first</h3><div class="cc-list">' + sorted.map(function(e){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureZoomTo(' + esc(JSON.stringify(e.id)) + ')">' + window._cultureAhuIcon(e.id) + '<span>' + esc(e.name) + '</span><small>' + window._cultureNum(e.acres) + ' ac</small></div>'; }).join('') + '</div>'
       + window._cultureLearnHTML();
     var el = window._cultureCardEl(); el.innerHTML = html; el.classList.add('open'); el.scrollTop = 0;
     window._cultureHighlight(list);
@@ -5325,8 +5407,10 @@ function initMap(){
     var esc = window._cultureEsc, row = window._culturePlaceRow(b.id), e = window._cultureBeachEntry(b);
     var proto = row ? [row.guest_protocol_1, row.guest_protocol_2, row.guest_protocol_3].filter(Boolean) : [];
     var wahi = !!(row && /^y/i.test(row.wahi_pana || ''));
-    var protoHTML = proto.length ? '<details class="cc-block cc-proto-block" ontoggle="if(this.open)_cultureCount(\'culture_protocol\',' + esc(JSON.stringify(b.id)) + ')"><summary>' + window.CULTURE_ICON.leaf + '<span>' + (wahi ? 'Wahi pana · before you go' : 'Before you go') + '</span><small>' + proto.length + '</small></summary>' + proto.map(function(t){ return '<div class="cc-proto"><span>' + esc(t) + '</span></div>'; }).join('') + '</details>' : '';
+    var protoHTML = proto.length ? '<details class="cc-block cc-proto-block" ontoggle="if(this.open)_cultureCount(\'culture_protocol\',' + esc(JSON.stringify(b.id)) + ')"><summary>' + window.CULTURE_ICON.kalo + '<span>' + (wahi ? 'Wahi pana · before you go' : 'Before you go') + '</span><small>' + proto.length + '</small></summary>' + proto.map(function(t){ return '<div class="cc-proto"><span>' + esc(t) + '</span></div>'; }).join('') + '</details>' : '';
     if (pos === 'protocol') return wahi ? protoHTML : '';
+    var nearby = window._cultureNearbyHTML(b, e);
+    var whatRow = e ? '<button class="cc-link cc-what" onclick="closeSheet();setTimeout(function(){_cultureOpenAhupuaa(' + esc(JSON.stringify(e.id)) + ')},320)">What an ahupuaʻa is</button>' : '';
     var h = '<div class="cc-block cc-about"><h4>About this place</h4>';
     if (row){
       if (row.name_meaning) h += '<p><b>' + esc(row.place_name || b.name) + '</b>: ' + esc(row.name_meaning) + '</p>';
@@ -5335,9 +5419,9 @@ function initMap(){
       if (/^(https?:\/\/|culture\/voice\/).+\.(mp3|m4a|ogg|wav)(\?|$)/i.test(pr)) h += '<p><button class="cc-say" onclick="_cultureSay(' + esc(JSON.stringify(pr)) + ')">' + window.CULTURE_ICON.speaker + 'Hear it said</button></p>';
       else if (pr) h += '<p class="cc-credit">Say it: ' + esc(pr) + '</p>';
       h += '<div class="cc-credit">' + esc(row.author_org || 'Cultural review partner') + (row.reviewed_on ? ', reviewed ' + esc(row.reviewed_on) : '') + (row.sources ? '. Sources: ' + esc(row.sources) : '') + '</div>';
-      h += '</div>' + (wahi ? '' : protoHTML);
+      h += nearby + '</div>' + (wahi ? '' : protoHTML);
     } else {
-      h += '<div class="cc-empty">Awaiting cultural review. The meaning of the name, its moʻolelo, and guest protocol for this place come from the cultural review partner, not from us.</div></div>';
+      h += whatRow + '<div class="cc-empty">Awaiting cultural review. The meaning of the name, its moʻolelo, and guest protocol for this place come from the cultural review partner, not from us.</div>' + nearby + '</div>';
     }
     if (e) h += '<p class="cc-credit" style="margin:-4px 0 12px"><button class="cc-link" onclick="closeSheet();setTimeout(function(){_cultureOpenAhupuaa(' + esc(JSON.stringify(e.id)) + ')},320)">The ' + esc(e.name) + ' ahupuaʻa, moku of ' + esc(e.moku) + '</button></p>';
     return h;
@@ -5376,11 +5460,44 @@ function initMap(){
     var key = here ? here.id : 'start';
     if (el.getAttribute('data-key') !== key){
       el.setAttribute('data-key', key);
-      el.innerHTML = '<button type="button" class="cr-pill" onclick="' + (here ? '_culturePathHere()' : '_culturePathOpen(1)') + '">' + window.CULTURE_ICON.leaf
+      el.innerHTML = '<button type="button" class="cr-pill" onclick="' + (here ? '_culturePathHere()' : '_culturePathOpen(1)') + '">' + (here ? window._cultureAhuIcon(here.id) : window.CULTURE_ICON.mokupuni)
         + (here ? '<span>You are in <b>' + esc(here.name) + '</b> ahupuaʻa, moku of ' + esc(here.moku) + '</span>' : '<span><b>Start here</b>: the land, step by step</span>')
         + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>';
     }
     if (!window._cultureRibbonTimer) window._cultureRibbonTimer = setInterval(function(){ if (window._isCulture && window._isCulture()) window._cultureRibbon(true); }, 3000);   // Locate Me can land later
+  };
+  // The land system as one picture, ridge at the top, shore at the bottom: the island, its districts, the
+  // wedges that run from ridge to shore, and the water. The level the step is on is the filled one, so the
+  // stepper teaches the system instead of counting dots. Geometry and plants only, no text but Ridge and Shore.
+  window._cultureDiagram = function(level){
+    var RIDGE = 'M6 28L40 14 80 22 118 10 152 20 190 12 230 22 268 14 294 28';
+    var LAND  = RIDGE + 'V66C150 76 70 74 6 70Z';
+    var SEA   = 'M6 70C70 74 150 76 294 66V88H6Z';
+    var MOKU  = 'M118 10L152 20 190 12 230 22 248 68C200 72 150 72 104 69Z';
+    var AHU   = 'M152 20L190 12 200 68C184 70 166 70 150 69Z';
+    var fan = [[40,14,14],[80,22,58],[118,10,104],[152,20,150],[190,12,200],[230,22,248],[268,14,290]];
+    var crest = function(y){ var d = 'M8 ' + y; for (var i = 0; i < 12; i++) d += 'c4-3 8-3 12 0s8 3 12 0'; return '<path d="' + d + '" class="cd-line"/>'; };
+    var lit = function(n){ return level === n ? ' cd-on' : ''; };
+    var s = '<svg class="cd" viewBox="0 0 300 100" width="100%" height="76" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+    s += '<path d="' + LAND + '" class="cd-area' + lit(1) + '"/>';
+    s += '<path d="' + SEA + '" class="cd-area cd-sea' + (level === 1 || level === 4 ? ' cd-on' : '') + '"/>';
+    s += '<path d="' + MOKU + '" class="cd-area' + lit(2) + '"/>';
+    s += '<path d="' + AHU + '" class="cd-area' + lit(3) + '"/>';
+    s += fan.map(function(f){ return '<path d="M' + f[0] + ' ' + f[1] + 'L' + f[2] + ' 69" class="cd-line"/>'; }).join('');
+    s += '<path d="' + RIDGE + '" class="cd-ridge"/>';
+    s += crest(76) + crest(83);
+    s += '<g transform="translate(156,24) scale(1.05)" class="cd-plant">' + window.CULTURE_ICON.ulu + '</g>';
+    s += '<g transform="translate(168,44) scale(1.05)" class="cd-plant">' + window.CULTURE_ICON.kalo + '</g>';
+    s += '<text x="6" y="8" class="cd-t">Ridge</text><text x="294" y="98" text-anchor="end" class="cd-t">Shore</text>';
+    return s + '</svg>';
+  };
+  window._cultureStrip = function(step){
+    // The four levels in place of four dots: the one you are on is filled in ink, the ones behind you in
+    // earth brown, the ones ahead outlined.
+    return '<div class="cp-strip" aria-hidden="true">' + window.CULTURE_ICON.step.map(function(sv, i){
+      var n = i + 1;
+      return '<span class="cs' + (n === step ? ' on' : (n < step ? ' done' : '')) + '">' + sv + '</span>';
+    }).join('') + '</div>';
   };
   window._culturePath = {step:0, moku:null, ahu:null};
   window._culturePathHere = function(){ var h = window._cultureWhereAmI(); if (!h) return window._culturePathOpen(1); window._culturePath.moku = h.moku; window._culturePath.ahu = h.id; window._culturePathOpen(3); };
@@ -5395,9 +5512,8 @@ function initMap(){
     P.step = Math.max(1, Math.min(4, step));
     window._cultureCount('culture_path', 'step' + P.step);
     var Lr = window.CULTURE_LEARN, body = '', title = '', onMap = null, pad = {paddingTopLeft:[16, 80], paddingBottomRight:[16, Math.round(map.getSize().y * .45)]};
-    var dots = [1, 2, 3, 4].map(function(n){ return '<span class="' + (n === P.step ? 'on' : (n < P.step ? 'done' : '')) + '"></span>'; }).join('');
     var nav = '<div class="cp-nav">' + (P.step > 1 ? '<button class="cc-say" onclick="_culturePathOpen(' + (P.step - 1) + ')">Back</button>' : '<span></span>')
-      + '<div class="cp-dots">' + dots + '</div>'
+      + window._cultureStrip(P.step)
       + (P.step < 4 ? '<button class="cc-say cp-next" onclick="_culturePathOpen(' + (P.step + 1) + ')">Next</button>' : '<button class="cc-say cp-next" onclick="_cultureOpenAhupuaa(' + esc(JSON.stringify(ahu.id)) + ')">Open the card</button>') + '</div>';
     if (P.step === 1){
       title = island;
@@ -5405,13 +5521,13 @@ function initMap(){
       onMap = function(){ window._cultureHighlight([]); if (typeof frameIsland === 'function') frameIsland(true); };
     } else if (P.step === 2){
       title = 'Moku';
-      body = '<p>Each moku is a district of the island. ' + esc(island) + ' has ' + mokus.length + '. Pick one to follow.</p><div class="cp-chips">' + mokus.map(function(n){ return '<button class="cc-say' + (n === P.moku ? ' on' : '') + '" onclick="_culturePathPick(\'moku\',' + esc(JSON.stringify(n)) + ')">' + esc(n) + (here && here.moku === n ? ' · you' : '') + '</button>'; }).join('') + '</div>';
+      body = '<p>Each moku is a district of the island. ' + esc(island) + ' has ' + mokus.length + '. Pick one to follow.</p><div class="cp-chips">' + mokus.map(function(n){ return '<button class="cc-say' + (n === P.moku ? ' on' : '') + '" onclick="_culturePathPick(\'moku\',' + esc(JSON.stringify(n)) + ')">' + window.CULTURE_ICON.moku + esc(n) + (here && here.moku === n ? ' · you' : '') + '</button>'; }).join('') + '</div>';
       onMap = function(){ window._cultureHighlight(list); map.fitBounds(L.featureGroup(list.map(function(e){ return e.layer; })).getBounds(), pad); };
     } else if (P.step === 3){
       title = 'Ahupuaʻa';
       var rank = list.indexOf(ahu) + 1;
       body = '<p><b>' + esc(P.moku) + '</b> holds ' + list.length + ' ahupuaʻa. <b>' + esc(ahu.name) + '</b> is ' + window._cultureOrd(rank) + ' of ' + list.length + ' by size, ' + window._cultureNum(ahu.acres) + ' acres.' + (here && here.id === ahu.id ? ' You are standing in it.' : '') + '</p>'
-        + '<div class="cp-chips">' + list.slice(0, 12).map(function(e){ return '<button class="cc-say' + (e.id === ahu.id ? ' on' : '') + '" onclick="_culturePathPick(\'ahu\',' + esc(JSON.stringify(e.id)) + ')">' + esc(e.name) + '</button>'; }).join('') + (list.length > 12 ? '<span class="cc-credit">and ' + (list.length - 12) + ' more</span>' : '') + '</div>'
+        + '<div class="cp-chips">' + list.slice(0, 12).map(function(e){ return '<button class="cc-say' + (e.id === ahu.id ? ' on' : '') + '" onclick="_culturePathPick(\'ahu\',' + esc(JSON.stringify(e.id)) + ')">' + window._cultureAhuIcon(e.id) + esc(e.name) + '</button>'; }).join('') + (list.length > 12 ? '<span class="cc-credit">and ' + (list.length - 12) + ' more</span>' : '') + '</div>'
         + '<p class="cc-cite">' + Lr.bounds.quote + ' ' + Lr.bounds.cite + '</p>';
       onMap = function(){ window._cultureHighlight([ahu]); map.fitBounds(ahu.layer.getBounds(), Object.assign({maxZoom:13}, pad)); };
     } else {
@@ -5422,7 +5538,7 @@ function initMap(){
       onMap = function(){ window._cultureHighlight([ahu]); map.fitBounds(ahu.layer.getBounds(), Object.assign({maxZoom:14}, pad)); };
     }
     var el = window._cultureCardEl();
-    el.innerHTML = window._cultureHead(title, 'Start here · step ' + P.step + ' of 4 · ' + island) + '<div class="cp-body">' + body + '</div>' + nav;
+    el.innerHTML = window._cultureHead(title, 'Start here · step ' + P.step + ' of 4 · ' + island) + '<div class="cp-body">' + window._cultureDiagram(P.step) + body + '</div>' + nav;
     el.classList.add('open'); el.scrollTop = 0;
     try { onMap(); } catch(e){}
   };
@@ -5464,6 +5580,60 @@ function initMap(){
       if (/^(hula|lei|makahiki)$/.test(String(window._ghEvRange || ''))) window._ghEvRange = 'all';
     }
     window._cultureRepaint();
+  };
+  // ── THE BEACHES IN THE THEME. The outlook list groups by moku then ahupuaʻa, the sheet gains a
+  //    mauka-to-makai line under the subtitle, and the About block carries the other beaches on the same
+  //    land. Every status badge, verdict word and color below is the app's own string, passed through
+  //    untouched. The icon set has no ahupuaʻa, moku or step glyph yet, so the land glyph stands for the
+  //    upland level and the wave glyph for the beach level, which is the one lit.
+  window._cultureShortName = function(b){
+    // _cultureNames().n is the short name to lead with, but where there is no Hawaiian-and-nickname pair it
+    // falls back to the app's plain short field, which drops the marks: Anini for ʻAnini Beach, and a
+    // straight apostrophe where the full name carries an ʻokina. That apostrophe is the exact thing the
+    // Maʻemaʻe lint bans, so in those two cases the full name, which keeps the marks, is used instead.
+    var nm = window._cultureNames(b), n = nm.n || '', full = b.name || n;
+    var marks = /[\u02bb\u0101\u0113\u012b\u014d\u016b]/;
+    if (/[A-Za-z]['][A-Za-z]/.test(n)) return full;
+    if (marks.test(full) && !marks.test(n)) return full;
+    return n;
+  };
+  window._cultureLandLine = function(b){
+    if (!(window._isCulture && window._isCulture())) return '';
+    var e = window._cultureBeachEntry(b); if (!e) return '';
+    var esc = window._cultureEsc;
+    var strip = '<span class="cl-strip" aria-hidden="true">' + window.CULTURE_ICON.step.map(function(sv, i){
+      return '<span class="cs' + (i === 3 ? ' on' : '') + '">' + sv + '</span>';
+    }).join('') + '</span>';
+    return '<div class="cc-land">' + strip + '<span>' + esc(window._cultureShortName(b))
+      + ' · ' + esc(e.name) + ' ahupuaʻa · moku of ' + esc(e.moku) + '</span></div>';
+  };
+  window._cultureNearbyHTML = function(b, e){
+    // The other beaches inside the same ahupuaʻa, so a guest sees that two beaches share one piece of land.
+    if (!e) return '';
+    var esc = window._cultureEsc, bm = window._cultureBeachMap();
+    var others = (typeof B !== 'undefined' ? B : []).filter(function(o){ return o.id !== b.id && bm[o.id] === e.id; });
+    if (!others.length) return '';
+    return '<div class="cc-credit">Also in ' + esc(e.name) + ' ahupuaʻa</div><div class="cc-nearby">'
+      + others.map(function(o){ return '<button class="cc-say" onclick="closeSheet();setTimeout(function(){openSheet(' + esc(JSON.stringify(o.id)) + ')},320)">' + window.CULTURE_ICON.wave + esc(window._cultureShortName(o)) + '</button>'; }).join('') + '</div>';
+  };
+  window._cultureOutlookGroups = function(picks, rowHTML){
+    // Same beaches, same rows, same order: only the headers are new, so the calmer beaches still lead and
+    // every beach the flat list shows appears exactly once.
+    if (!(window._isCulture && window._isCulture()) || !window._cultureIdx) return null;
+    var esc = window._cultureEsc, order = [], by = {}, out = '', lastMoku = null;
+    picks.forEach(function(p){
+      var e = window._cultureBeachEntry(p.b), k = e ? e.id : '';
+      if (!by[k]){ by[k] = {e:e, rows:[]}; order.push(k); }
+      by[k].rows.push(p);
+    });
+    order.forEach(function(k){
+      var g = by[k], e = g.e;
+      if (e && e.moku !== lastMoku){ out += '<div class="cb-moku">' + window.CULTURE_ICON.moku + '<span>Moku of ' + esc(e.moku) + '</span></div>'; lastMoku = e.moku; }
+      if (!e) lastMoku = null;
+      out += '<div class="cb-ahu">' + (e ? window._cultureAhuIcon(e.id) : window.CULTURE_ICON.land) + '<span>' + (e ? esc(e.name) + ' ahupuaʻa' : 'Not inside a mapped ahupuaʻa') + '</span></div>'
+           + g.rows.map(rowHTML).join('');
+    });
+    return out;
   };
   /* culture-lint:end */
   window._cultureApply = function(on){
@@ -8449,6 +8619,7 @@ function openSheet(id){
       </div>
     </div>
     ${photoCreditLine(b)}
+    ${window._cultureLandLine?_cultureLandLine(b):''}
     ${window._ghAdvBeach?window._ghAdvBeach(b):''}
     ${window._cultureSheetBlock?_cultureSheetBlock(b,'protocol'):''}
     <div class="dir-pill-row"><a class="dir-pill" href="${murl}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Get Directions</a></div>
@@ -9578,9 +9749,16 @@ function renderOutlookSheet(){
       return `
         <div class="slbl" style="margin-top:18px">Best beaches now</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
-          ${beachPicks.map(({b, r}) => {
+          ${(()=>{
+            // One row renderer, two arrangements. Theme off: the flat list, unchanged. Theme on: the same
+            // rows under moku and ahupuaʻa headers, with the Hawaiian name leading and the nickname small.
+            // The status colour, the verdict word and their position in the row are the same either way.
+            const rowHTML = ({b, r}) => {
             const col = stColor[r.status] || '#9ca3af';
             const lbl = stLbl[r.status] || '';
+            const nm = (window._isCulture && window._isCulture() && window._cultureNames) ? window._cultureNames(b) : null;
+            const alsoTxt = (nm && nm.name.indexOf(nm.n + ', also called ') === 0) ? nm.name.slice(nm.n.length + 14) : '';
+            const nameHTML = nm ? `${window._cultureShortName(b)}${alsoTxt ? `<span class="cb-also">also called ${alsoTxt}</span>` : ''}` : b.name;
             const tops = (r.top && r.top.length) ? r.top : (Array.isArray(b.intents) ? b.intents.slice(0,3) : []);
             const chips = tops.length
               ? `<div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">${tops.slice(0,4).map(intentChip).join('')}</div>`
@@ -9588,14 +9766,17 @@ function renderOutlookSheet(){
             return `
               <div onclick="closeSheet();setTimeout(()=>openSheet('${b.id}'),320)" style="display:flex;align-items:center;gap:12px;padding:12px;background:#fff;border:1px solid var(--border);border-left:4px solid ${col};border-radius:10px;cursor:pointer">
                 <div style="flex:1;min-width:0">
-                  <div style="font-weight:700;color:var(--ink);font-size:14px;line-height:1.25">${b.name}</div>
+                  <div style="font-weight:700;color:var(--ink);font-size:14px;line-height:1.25">${nameHTML}</div>
                   <div style="font-size:11px;color:var(--mute);margin-top:2px">${b.r} · ${lbl}</div>
                   ${chips}
                 </div>
                 ${cardHeartButton('beach', b.id)}
                 <div style="font-size:18px;color:var(--mute);flex-shrink:0">›</div>
               </div>`;
-          }).join('')}
+            };
+            const grouped = window._cultureOutlookGroups ? window._cultureOutlookGroups(beachPicks, rowHTML) : null;
+            return grouped === null ? beachPicks.map(rowHTML).join('') : grouped;
+          })()}
         </div>`;
     })()}
     ${(()=>{

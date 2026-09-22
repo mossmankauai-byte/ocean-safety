@@ -45,12 +45,39 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     const grab = async (id) => page.evaluate((id) => {
       openSheet(id);
       const sc = document.getElementById('sc').cloneNode(true);
-      sc.querySelectorAll('.cc-block, details.cc-proto-block, .sname, .sreg, p.cc-credit').forEach((e) => e.remove());
+      sc.querySelectorAll('.cc-block, details.cc-proto-block, .sname, .sreg, p.cc-credit, .cc-land').forEach((e) => e.remove());
       const text = sc.innerText.replace(/\s+/g, ' ').trim();
       const cult = document.getElementById('sc').querySelectorAll('.cc-block, .cc-proto-block').length;
       try { closeSheet(); } catch (e) {}
       return { text, cult };
     }, id);
+    // The beach list the liveNow chip opens. Its rows depend on live conditions, which a headless run does
+    // not have, so the grouping itself is driven directly over the island's real beaches: theme off it must
+    // hand the flat list straight back, theme on it must place every beach under a header exactly once.
+    const grabList = async () => {
+      await page.evaluate(() => { const t = document.querySelector('.tab[data-tab="beaches"]'); if (t) t.click(); });
+      await sleep(1000);
+      return page.evaluate(() => {
+        openOutlookSheet('temp');
+        const sc = document.getElementById('sc');
+        const wrap = [...sc.querySelectorAll('.slbl')].find((e) => e.textContent.trim() === 'Best beaches now');
+        const html = wrap && wrap.nextElementSibling ? wrap.nextElementSibling.innerHTML : '';
+        const picks = (typeof B !== 'undefined' ? B : []).filter((b) => !b.warning_only).map((b) => ({ b, r: { status: 'green' } }));
+        const out = window._cultureOutlookGroups ? window._cultureOutlookGroups(picks, ({ b }) => `<i data-id="${b.id}"></i>`) : undefined;
+        const box = document.createElement('div');
+        if (typeof out === 'string') box.innerHTML = out;
+        try { closeSheet(); } catch (e) {}
+        return {
+          html, flat: out === null, n: picks.length,
+          ids: [...box.querySelectorAll('i[data-id]')].map((e) => e.getAttribute('data-id')),
+          heads: box.querySelectorAll('.cb-moku, .cb-ahu').length,
+        };
+      });
+    };
+    const offList = await grabList();
+    ok(offList.flat, `${isl} off: beach list stays the flat list, no grouping applied`);
+    ok(!/cb-moku|cb-ahu/.test(offList.html), `${isl} off: beach list HTML carries no culture header`);
+
     const offText = {};
     for (const id of sample) { const g = await grab(id); offText[id] = g.text; ok(g.cult === 0, `${isl} off: ${id} sheet has no culture block`); }
 
@@ -59,12 +86,19 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     await sleep(800);
     const on = await page.evaluate(() => ({ isCulture: window._isCulture(), ribbon: !!document.getElementById('cultureRibbon') }));
     ok(on.isCulture, `${isl} on: theme applied`);
+    const onList = await grabList();
+    const dupes = onList.ids.filter((id, i) => onList.ids.indexOf(id) !== i);
+    ok(!onList.flat && !dupes.length && onList.ids.length === onList.n,
+      `${isl} on: grouped list holds every beach exactly once (${onList.ids.length} of ${onList.n})` + (dupes.length ? `\n     duplicated: ${dupes.join(',')}` : ''));
+    ok(onList.heads > 0, `${isl} on: list carries moku and ahupuaʻa headers (${onList.heads})`);
     for (const id of sample) {
       const g = await grab(id);
       ok(g.text === offText[id], `${isl} same: ${id} safety text identical with the theme on` + (g.text === offText[id] ? '' : `\n     off: ${offText[id].slice(0, 160)}\n     on:  ${g.text.slice(0, 160)}`));
     }
     await page.evaluate(() => toggleCulture());
     await sleep(400);
+    const backList = await grabList();
+    ok(backList.flat && backList.html === offList.html, `${isl} off again: beach list HTML unchanged, byte for byte`);
     const back = await page.evaluate(() => ({ theme: document.documentElement.getAttribute('data-theme'), ribbon: !!document.getElementById('cultureRibbon'), lines: !!(window._cultureLines && map.hasLayer(window._cultureLines)) }));
     ok(back.theme === null && !back.ribbon && !back.lines, `${isl} off again: theme, ribbon and sections gone`);
   }
