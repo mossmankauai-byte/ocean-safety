@@ -1005,6 +1005,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	border-bottom: 2px solid #777;
 	}
 
+#map .leaflet-bottom{bottom:var(--os-tabs-over,0px)}
+#map .leaflet-control-attribution{font-size:10px;line-height:1.35;padding:1px 6px;border-top-left-radius:6px}
 .leaflet-touch .leaflet-control-attribution,
 .leaflet-touch .leaflet-control-layers,
 .leaflet-touch .leaflet-bar {
@@ -1228,6 +1230,8 @@ a{text-decoration:none;color:inherit}
 /* TOPBAR */
 .tb1{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px}
 .brand-lockup{display:flex;align-items:center;gap:10px;min-width:0}
+/* Live-data status under the island name: a note in the header instead of a full-width bar that pushed the map down. */
+#offline-bar{font-size:9px;line-height:1.25;color:#78530a;font-weight:600;margin-top:2px;max-width:132px}
 .brand-icon{width:40px;height:40px;flex-shrink:0;border-radius:9px;box-shadow:0 1px 3px rgba(15,76,92,.15);display:block}
 .brand-text{min-width:0}
 .bname{font-size:22px;color:var(--ocean);font-style:italic;font-weight:700;line-height:.95;letter-spacing:-.4px;white-space:nowrap}
@@ -1685,6 +1689,22 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 #cultureToggle:hover{transform:scale(1.05)}
 #cultureToggle svg{width:22px;height:22px}
 body[data-tab="acts"] #cultureToggle{top:188px}
+/* The buttons above were placed for a map that started 182px down (the old full-width conditions bar
+   layout, where the Family row of buttons sat just under the subtab row). --os-map-dy is the map's real top minus 182, set by _osMapDy(), so they ride
+   with the map instead of landing on the North pill when the header is shorter. body prefix: the swell
+   badge's own rule is injected later at runtime and would otherwise win. */
+/* The map toggles stack down the left edge under the Today's conditions list button (Nick, 2026-09-23),
+   so they never sit on the subtab row. --os-col-y is that button's bottom, set by _osMapDy(). */
+body #cultureToggle,body #rainToggle,body #satToggle,body #os-swell-badge{left:12px;right:auto}
+body #cultureToggle,body[data-tab="acts"] #cultureToggle{top:calc(var(--os-col-y,190px) + 8px)}
+body #rainToggle,body[data-tab="acts"] #rainToggle{top:calc(var(--os-col-y,190px) + 58px)}
+body #satToggle,body[data-tab="acts"] #satToggle{top:calc(var(--os-col-y,190px) + 108px)}
+body #os-swell-badge,body[data-tab="acts"] #os-swell-badge{top:calc(var(--os-col-y,190px) + 158px)}
+body #locateBtn{top:calc(210px + var(--os-map-dy,0px))}
+body .saved-chip{top:calc(215px + var(--os-map-dy,0px))}
+body .live-now-chip{top:calc(220px + var(--os-map-dy,0px))}
+body #toursBtn{top:calc(120px + var(--os-map-dy,0px))}
+body[data-tab="acts"] .saved-chip{top:calc(243px + var(--os-map-dy,0px))}
 #cultureToggle.on{background:#2f6b45;color:#fff;border-color:#2f6b45}
 /* Vintage: the map is a plate on aged paper. The sea is the paper itself, the street basemap is off while
    the plate is up and fades in past z13 (sepia, so its roads read as faint print), the plate pane carries the
@@ -1734,7 +1754,9 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 :root[data-theme="culture"] .hdr-side-row{background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'><path d='M0 14L7 0l7 14L21 0l7 14' fill='none' stroke='%235a4630' stroke-opacity='.22' stroke-width='1.2'/></svg>") repeat-x center;padding-top:6px;padding-bottom:6px}
 :root[data-theme="culture"] .hdr-side{background:#f3e9d4;border-color:rgba(90,70,48,.35);color:#3f2e1c}
 :root[data-theme="culture"] .hdr-side.on{background:#5a4630;border-color:#5a4630;color:#fff}
-#cultureRibbon{position:absolute;left:12px;right:12px;z-index:540;display:flex;justify-content:center;pointer-events:none}
+#cultureRibbon{position:absolute;left:12px;right:auto;max-width:calc(100% - 24px);z-index:540;display:flex;justify-content:flex-start;pointer-events:none}
+/* Compact: one short pill parked above the West shore chip. */
+#cultureRibbon .cr-pill{padding:8px 11px 5px 9px!important;font-size:12px!important;gap:6px!important}
 #cultureRibbon .cr-pill{pointer-events:auto;display:inline-flex;align-items:center;gap:8px;max-width:100%;border:1px solid rgba(90,70,48,.4);background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'><path d='M0 8L6 1.6l6 6.4 6-6.4 6 6.4' fill='none' stroke='%235a4630' stroke-opacity='.32' stroke-width='1.1'/></svg>") repeat-x top,rgba(246,239,223,.96);color:#3f2e1c;border-radius:999px;padding:13px 12px 9px 10px;font:500 13px/1.2 'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 #cultureRibbon .cr-pill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #cultureRibbon .cr-pill>svg:first-child{width:16px;height:16px;flex-shrink:0}
@@ -2236,7 +2258,7 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
 <div id="app">
   <div id="topbar">
     <div class="tb1">
-      <div class="brand-lockup" onclick="openIslandGate()" role="button" aria-label="Switch island" style="cursor:pointer"><img class="brand-icon" alt="Ocean Safe" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAMAAAAOusbgAAADAFBMVEX9zCf+0C39xRj8/P39vBEBeNAChtoCSJAAa8UAAADr17ABjOEBZLoBV6cEUZoDkeL922sAO4j99dPmzJTsx2j////Q5vX56cf76LL82FWw1vAJkN3K2uv+5ZBvuOksh9InWY6PxuxQeKv+0xapyujQti7k7PMAR6UAN3suWHf+4nX1xk6Ih0sxZqg0pObizqZup9lMl9f98tRQot30vScwltyIueS3pTjy2I6Ulk7989f66cT56cejttNIp+RIZ2n//6zJqSj66smKpsszZJMsm+NqdVarmDJrms736sf87c53glj46Mb46siyxdhbsupTcWyWstL+8dBri7X/9LK84fUvcrJ3lLt2wu0qe8lsq+T147z+8dL/qqr/+9JGiMr//3+qpET98M42Y3RxgWUORnz98NKc0vIBW8FhcmFbZ1h8s97/6r3//wAAKIP/AP84od9jbVYlXKH/AAAAPqhCaYJZhrrashwubcPz4r0hT3j99+z89eZslHT89OKpjy4mTI7Dnx//5rxKkJ/c8Prd0qKAfT0kj+AdUX7dwCVckOBke7FDXmn/f3//75//4VreyqKAncLUw2ainUYdcKj/359EX5pUf40AKXjv37/Qz5gAHW7/1H9Uh4nJpBry3rq9vHH88+X/9uEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACbUZE0AAABAHRSTlP+/v7+/v////8A/v///////v/8/v8B//v+/v////7////////////////+/v////7//5b///////7/0VGU////A/92////////KBb/zqv/////Jv//////////0HUDDv8C/0v///+0//////8YAf8B////Af//////l/9cl//P////Kv////////////8CEP///////xD///8Q//8G///f/3C+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAk8VrBAAADqVJREFUeNq1m4V/28gSx9crtGXJtlJzHHYbapukaaiQS1Nur1fmVzhmxnf0mJmZ/tI3syDtyrJjp735hCTH+mpmfjO7K0skq1q5DD+ufv7Fxr1aa7ZYrNeLkdWZFXFPnX2JvcVe1mrVqhsbS89flceOjajYZ7LZN+//L7ze+nUmQxTL6JsDWabYCo3w5fvns9lnyulgwH5vKQxnM4QyWEwVFh+M/8h0nFEmZYMCu2YY4dI5hugEl7N/XAqvFzOUH44dkv9OYOPj9hUI9tY6ur10PlvuAEMGjmyExchBxdFOj0nnHu2Molcz8t8JrdfCcOP57KOyDgbuCeN6hsZv0ZEavPNU8D+Uv7Q3iujQTKsahvezb5VVcLn8jyVjNs3LLkaUk9DE1xmq6JRIHchLD4S6Cec+etmo035gidDHcuiQYjIu8Ee9Vg1fLnMyB2efDesD+Kv5kklKKZ3NfwP52WwELmfvG7vgZjQNid9ddBkZkO8zMoC/lT0SFulAnmaIfnzSuSv9jZP1ajV8HpAALpd/tdEiA4a4S7ntEBn4B1qshhvnIc0Azi6FAwc3tZSTwiOpWlyrhkcBSsrvnBtYWPwIlEKTw4FjdhaHkPh0lMbRJc1Xs2UCDl8ng+uJZurFFjQjI7aw1qpnKI2QqWQebHCZZN8cxGHRK6Dtq0jFarMZ2qu6MBq5avUB5Pi/1wf1FQebHlYr8uGN9HD5RJY8+mqgVknqvak86HWa6rGsuFx4sUyuhoPU0Wxo9GW1evfmnaFr1epV8nnf0qJ9Y9GKXfMMUctVj5AvWv01LUoHwYK1lMFSx5NMrnqUbPSVYhjIB8MynxWy1tagiVwkG/0UE8m0jMFNJeouFwFc7SfMxdDYDZh2GznquRqpkZ3drRm7shZOHFMPj+Cu2pKVsIvsxlWVoeldJJcjvURNWJi1Qw1fuTI1kMJoakX1AnNlUE1Vx/Y7YCcV9PD2xMT23l5Op7awtRxR5h4kOZ6CqendO+E4QQDk0iW565YzDZtjw736Z0rXJkMS3LFYEfWnyepkyRE2Jtzdz/YEzvupyL3HKpzcuRiS4JTuwtiarCamX5ouBXkrD6wJjO52AEzHh+/SsVTy8M/Z/hrVj044mEQjNunJPYbeWZ7nFWwfcBMTY+ht3rbt/EvT17rE+U/XYoWpaAnumCKx/9O4ezG5VsHzbNuzZMgdC7i2F5RE7C/d2q7o5O9MyB6WSQm1TKk2faN625goob82M8/Cs3D8vMd2eBD8iQqk9OT09HQi6sN/QZ9bVB+TBTh1HRzVUaUBmq1cm3ZKvi0Nwm1ZGHZOtiHLzthYiUmtpEv81t/xTORqSzZtFUxSudtYue/vhwOXAiR6ghYxmVn4OosBgM/q0nacvTzLGTlaJcFEWRyTOs/ZWFRBClfA7MNxBOy8v8/3IQa2Mz2hZ/nW279FYevLtyQ4JrP3XJuOuAHmU+OOjvxYYtkrbKdl56eDRE05wV7sIupqupvHGd44UE9OYIE/ll0oeAUltrZ1vHHK9vSAY94tiDrIafjWxFnZSPeXrmCStckIA2sLTbYsorMRN89dgjIaOeXFObZGKgXbVrGAzOfzPrYTZ+ymUypFjXSiBMHP6NMRxWM5ELK/I66L3jJrPIdeS/CI0cTMxlhkRtXtQIq+7ZQmJHhMgEkaWKGzCr6G3T+PWWNWGfea0t+CN2KcstUQuxJbcmZe2JxxnM02PSMLa6IUxP1aGA918vpVUTRIxuW96cYPvEJUSvZx4zm7GYeZxZhhZ+a3cCnXbk9OkskLb2+LHAfG9d5g0deYFDG/nuDaDeOAIOH3KeMVr9AsiLOIsM4Lq1QaHurx27eYqksAnqWZ3mAMNLYObBu+TK91G0lRSr2KARJHQ3DMvRAx8XIemVwtjaGwoY/u5/O+3mCmrO1SgHXEtGpbhw2joDStcWPEbkqwC1zWuJ3fTzKe7PSEtmGGcOwSDNnT27M0cckxBYwOD+NEg40IWJh2xbjN+jOHHTAq4D7nem7k7+NJQvVDTZ4uwQAOWvHXOq7+pXkMg+EEDPC+bEXWOHPYLghroLJ4ry7EslqfTF7BhB+bgIWv/2SSF6VSwDipvIQTC4v3IRbocSAVFIdFCTNunvl7mRKaclFzfmZm5kK785U0cA2VFaCyhDUMlLT012tghlnPatpRoGdMStOv3Ha51t0BpjAqXWFzHEs4fMowbngS27QPQNy9Ju7wCpbrCofXaTq4q3WC10QpcSwkGRwekbqC7dtGQ0bdBq7LHH6BpkV6MHAVMow9WoKbUFynJNjDGpa1BBmWDs9T8oQeUyjijyOHMdIjBlaP9BikJRKOpeRKaW3RJw01aHqvD9LKS0nbN5imRWxt77ZRKTRZt1QijdJ6UnDNuAIz9CByGGoJylYUMfx+xWh4DGwzaXHwa3RgckeOQ+OmE/hapCG2om01m82KMe7xqCPY5eB5DqZPAjYq4K+fj4oYulbctqCLgMTtAlaT93TBdR7pGFyRYI+F+hQGvtnEucBTBYO2Pt4Hs6Yo0jZO6O2mmHXZ2D6es8WYiGBLA9Pdg9ewXUpt2VxbjXjyjGDZTRTwZVMZ/3cHbuGAGMTaeleCvRhsF+w4x/m4nJ4IXJtSwZZ1CMA3OJjNASACr2DkEWxHYN5ABiIrYMrA27rHx1mO7Wgm24xSDhtupK4X6aDkCCxmSq2zWMWxxxFYGqi8yRctOBpLl4PlQcmxxxzfeqiDMdSMJA3GquO23JGP5HWa0sHQEixGNTp7x/E7wIVobVaAURFadzyfjrK8SjU07Q8cnWkHGMsJXBRcDyc+aujjLI8RSvvwmnYDFz/1NTA2ECggZTFaiU4Er0gwMpvdXsbDJuH8O46DOCP4mQTX9+tg1jIb6vp/nBc2r2tPCfblJLeXdYDJfhRX4FrKTA8mAspy9F02XEXbOBcQs4FNslswauLkPlR1PgLjsGgcUFffN7ClxDsicuCcbE+S3YHBAByoYCbrcbWSj4upgUpmCoNFzzzdNfgyAyfUpbUQdFlbHVsIdsUy9cwgYGV78sUEmCXZOG4poAOoN0sn53ESxC7UnFxv08k0VrvdC0zXOTgRa42DwjamtD0MzdYUUFrB5fV2kmquXggeK6XVASZth4ETBWUcthMN27htJa5FYMDFgrXkvHB6fbUtD7k6v/kT2NfuCaaIDfwgctkd6XSZ9bMRbZdA5/1AXI6DuAdjaIHYOkl7gicvw9RHG5KZvOJuxSCnmNZ1MkzTWGkpF39K3OAU/Lz7pSriJBjUhUlGi3vIeKeweeanLE1ijJ0X5vvSd2j+qHr3cS9Vo/iwHlNc1iPLyZVRfafMDpuacMOBk838/0B7gwn9iHEDP3Z5gZEP6xCWZ+NQ5LTVwxD8JV3uDcZY+0xgiVquJDI6yuTeGGWz0R3MzVs/1QPbGWpKfJ9VFAhbOj1qpIjJsqdEDqyduYt/ozuBefNi6CjY7l2ZZiuWEXzx3ZW7O2Dd0SmDmDuCSRu7D5CVYLtTIqO2LuRRvr+yMtoVClgoi5q5s8dwDZI1Pi3YFr8cumhxV6Ppr7UoLg03Dt1hAk6EOG8davAPdOnOOabL/JI8K2ZX65ycrNsh+XlP443FUVFLLjsJe/GNBo/I72gfYMjyPAOjsuM0c4Fh/STdEk5xxNT4ytnFxcWFuytT8oQqd79vmv2AweexfQ4bLIAs4yfJqSIeXal0+0izsmD5bdoneHJV9M2AkRHuRuTxdBktjjQ6P8ytrCzCm9epySwaI0UDMVPIUFI8z44f5czlLYP1jFT9WqMLEOBKZS9YZXjqjUWmN/efnIZgDhfglpk2XxgTH/pEZPTZEslc6FE8btQlWaN23ZumGmiTnwL/xDzNtiRYI/PBGZw+7Fq94JHBCP1JMsESXEvjmvBRhgD7AR/WGFuG2xgfdXeCcvIW1fLLXaZzAA5T58LLdL4kqxkuxiiHWhHCWelAd1Jdty2CazJXYcNkX3sQPGemT0FPS4FhuBX0qLw1YfywxVIat4wOdFxIpogyP4chAH9VTAdDH9kXJ1pVt7soO8bwwh10KyW3aK/mV/X8Cq5pkoO5e2SjZnabdl/4MP7sLHZajDeyUS6MpuXWhdFt/1ZCV6a0uVztHlkKiUm7sOfjD1NZpq34sDcXhuM+ubJ4x8r7keHZPbx7ifCEqtIS7D252mfkiFHsBpbadmQDzSuh9N2HaqOEjnFlYeEs2MLKeKNSafwwo3qpebx8MFc7ArfO1bp6bNKtMdVnvMypzuHc0YWplHtPKlM/+3S9I8pxpEHTtXOkfNGYkypPIZunlTwzlakKh/jmbz4EJ6eGmU2Njyw8vOl/OLYVH46XEhW6wuoaylXhZkG407gmT6XTc9hxJv64XpsoK1NoXG1Ff/mv5tcVIfGDmopB96jC7ZHZB2E4ZyYGkO5Os+IKBCnN3Ff/3FarVrSN2JahiKvns3gLbOxymtewvfWak2IpeNjz0SpNisnUDr/nINwqiPfefnA1DNfiF2KwDAD+3jrtlNLgvmb7nM0zZiov5s4dBIfPfVDG25yPhuGexMt62HHjk/mZVLSyRHNe2wFrsqaV47c5w43d5y+GVZJydlTNDmyceW/G6QKHewJe/3pHqkjwxfOPyvxW9ufDVHLnmcDKHu4A4GtPZSn60uaFVZPujGVcuAuV38qON++fCKvVOdPsi23+68z86dc3N+GD0plfvP7e6R99/V2zLyo1CXLhTuNn1McVdiB39L+05r+DzTGu8rgCpPmZl4G8RnqfcN+EdIM6Qq76gAaQHywBOTdnfmO2PMS4Rx+8U9YewnkL8oxOf0Nosuc3wK1Bq9QfwgHyI3zsqJrLrc0t9yGTwZydGzrI3L14JPvLcsqDVm8uVcMa/MOendgDgJeX5/ZwbLV69K8pD1rxR8vOARq8zh0cGtrzNGxoiGUWqdWj57BldH2Y7vyJZ6u1Wi33FK1Wq1afPdHjYTr5iN+5I0fv3Xt63H/f++zIuWwCm83+H3tH5QfC2RSaAAAAAElFTkSuQmCC"><div class="brand-text"><div class="bname">Kauaʻi</div></div></div>
+      <div class="brand-lockup" onclick="openIslandGate()" role="button" aria-label="Switch island" style="cursor:pointer"><img class="brand-icon" alt="Ocean Safe" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAMAAAAOusbgAAADAFBMVEX9zCf+0C39xRj8/P39vBEBeNAChtoCSJAAa8UAAADr17ABjOEBZLoBV6cEUZoDkeL922sAO4j99dPmzJTsx2j////Q5vX56cf76LL82FWw1vAJkN3K2uv+5ZBvuOksh9InWY6PxuxQeKv+0xapyujQti7k7PMAR6UAN3suWHf+4nX1xk6Ih0sxZqg0pObizqZup9lMl9f98tRQot30vScwltyIueS3pTjy2I6Ulk7989f66cT56cejttNIp+RIZ2n//6zJqSj66smKpsszZJMsm+NqdVarmDJrms736sf87c53glj46Mb46siyxdhbsupTcWyWstL+8dBri7X/9LK84fUvcrJ3lLt2wu0qe8lsq+T147z+8dL/qqr/+9JGiMr//3+qpET98M42Y3RxgWUORnz98NKc0vIBW8FhcmFbZ1h8s97/6r3//wAAKIP/AP84od9jbVYlXKH/AAAAPqhCaYJZhrrashwubcPz4r0hT3j99+z89eZslHT89OKpjy4mTI7Dnx//5rxKkJ/c8Prd0qKAfT0kj+AdUX7dwCVckOBke7FDXmn/f3//75//4VreyqKAncLUw2ainUYdcKj/359EX5pUf40AKXjv37/Qz5gAHW7/1H9Uh4nJpBry3rq9vHH88+X/9uEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACbUZE0AAABAHRSTlP+/v7+/v////8A/v///////v/8/v8B//v+/v////7////////////////+/v////7//5b///////7/0VGU////A/92////////KBb/zqv/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"><div class="brand-text"><div class="bname">Kauaʻi</div><div id="offline-bar" aria-live="polite">Loading live conditions…</div></div></div>
       <div class="hdr-wx" id="hdrWx">
         <div class="hdr-wx-item" id="hdrTemp" aria-label="Temperature outlook">
           <span class="hdr-wx-ic"><img class="hdr-wx-png" alt="" src="data:image/png;base64,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"></span>
@@ -2268,9 +2290,6 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]
     </div>
     <div id="hdrFc" class="hdr-fc" aria-label="7-day forecast"></div>
   </div>
-  <div id="offline-bar" style="background:#fef3c7;border-bottom:1px solid #c9a84c;padding:5px 14px;font-size:10px;color:#78530a;font-family:monospace;display:flex;align-items:center;gap:6px;flex-shrink:0">
-  <span>Loading live conditions…</span>
-</div>
 <button id="satToggle" onclick="toggleSat()" aria-label="Toggle satellite view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
 <button id="cultureToggle" onclick="toggleCulture()" aria-label="Toggle culture view: historic survey map and ahupuaʻa" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
 <button id="rainToggle" onclick="toggleRain()" aria-label="Toggle 12-hour rain forecast" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 0 1-.5-7.97 5.5 5.5 0 0 1 10.7-1.3A4.5 4.5 0 0 1 17 16"/><line x1="8" y1="18.5" x2="7.2" y2="21"/><line x1="12" y1="18.5" x2="11.2" y2="22"/><line x1="16" y1="18.5" x2="15.2" y2="21"/></svg></button>
@@ -5024,7 +5043,7 @@ async function fetchLive(){
   }catch(e){
     console.warn('Live fetch failed, using snapshot:',e);
     const bar=document.getElementById('offline-bar');
-    if(bar) bar.innerHTML='Using last-known conditions, verify before you enter the water';
+    if(bar) bar.innerHTML='Last-known conditions. Verify before you enter the water';
   }
 }
 async function getCond(b){
@@ -5084,10 +5103,13 @@ let map,mkrs={},ints=['snorkel','swim'],scored={};
 // "API KEY REQUIRED" tile without one. Paste a key below to restore Voyager; left empty we
 // use Esri World Topo, which needs no key and is the same host as the satellite layer.
 window.OS_CARTO_KEY = 'cb1_2xoh_1_1c9ee40a2d7054fa0a5c8896';
+// CARTO's required wording, both names linked (carto.com/attribution). ODbL is named here because the
+// culture layer also ships an extracted OSM road file; one OSM line then covers the tiles and the roads.
+window.OS_OSM_CREDIT = '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">\u00a9 OpenStreetMap contributors</a> (ODbL)';
 function osBasemap(extra){
   var o = Object.assign({maxZoom:19}, extra||{});
   if (window.OS_CARTO_KEY){
-    o.attribution = '\u00a9OpenStreetMap \u00a9CartoDB'; o.subdomains = 'abcd';
+    o.attribution = window.OS_OSM_CREDIT + ', <a href="https://carto.com/attribution/" target="_blank" rel="noopener">\u00a9 CARTO</a>'; o.subdomains = 'abcd';
     return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=' + window.OS_CARTO_KEY, o);
   }
   o.attribution = 'Esri'; delete o.subdomains; delete o.className;
@@ -5100,6 +5122,16 @@ function osBasemap(extra){
 function osCredit(map){
   if (!window.OS_CARTO_KEY || !map || map._osCredit) return;
   map._osCredit = L.control.attribution({prefix:false}).addTo(map);
+  // The tab bar is fixed over the bottom of the main map, so the credit would print on top of the tab
+  // icons. Lift the map's bottom corner by however much of the map the tab bar covers. CARTO's terms do
+  // not allow the credit to be hidden or put behind a tap, so it moves instead.
+  if (map.getContainer().id !== 'map') return;
+  var lift = function(){
+    var t = document.getElementById('tabs'), m = map.getContainer();
+    var over = t && t.getClientRects().length ? m.getBoundingClientRect().bottom - t.getBoundingClientRect().top : 0;
+    m.style.setProperty('--os-tabs-over', Math.max(0, Math.round(over)) + 'px');
+  };
+  lift(); setTimeout(lift, 600); window.addEventListener('resize', lift);
 }
 
 function initMap(){
@@ -5141,7 +5173,7 @@ function initMap(){
   // Short on purpose: it joins the CARTO credit control, which must stay one line on a phone. The
   // boundaries drawn on the plate are the State GIS ahupuaʻa layer; no survey sheet is drawn any more,
   // so no sheet is credited.
-  window.CULTURE_CREDIT = 'Ahupuaʻa: State of Hawaiʻi GIS';
+  window.CULTURE_CREDIT = 'Ahupuaʻa: Hawaiʻi State GIS';
   window._isCulture = function(){ return document.documentElement.getAttribute('data-theme') === 'culture'; };
   // Sections: every ahupuaʻa is a tinted, bounded, named piece of the island. The tint family follows the
   // moku, so neighbours in one moku read as kin. Names are the State GIS spellings (ʻokina, kahakō).
@@ -5240,7 +5272,9 @@ function initMap(){
   // Loaded only when the theme is on, and put away past z13 where the street basemap takes over.
   // ODbL, not just a courtesy line: culture/roads/*.geojson is an EXTRACTED and clipped OSM database,
   // so the notice names the contributors and the licence, not only the project.
-  window.CULTURE_ROAD_CREDIT = '\u00a9 OpenStreetMap contributors, ODbL';
+  // With a CARTO key the basemap line already names the OSM contributors and ODbL; repeating it doubled
+  // the credit on a phone. The Esri basemap names neither, so the roads carry their own line there.
+  window.CULTURE_ROAD_CREDIT = window.OS_CARTO_KEY ? null : window.OS_OSM_CREDIT;
   // Drawn twice: a paper casing wide enough to clear the hachure, then the ink on top. Without the
   // casing a road is indistinguishable from an ahupuaʻa boundary, which is the same ink on the same
   // paper. It is how a printed sheet separates a route from a line of survey, and it costs one path.
@@ -5698,13 +5732,17 @@ function initMap(){
     if (!show || !window._cultureIdx){ if (el) el.remove(); if (window._cultureRibbonTimer){ clearInterval(window._cultureRibbonTimer); window._cultureRibbonTimer = null; } return; }
     var esc = window._cultureEsc, here = window._cultureWhereAmI();
     if (!el){ el = document.createElement('div'); el.id = 'cultureRibbon'; (document.getElementById('app') || document.body).appendChild(el); }
-    // Just above the map's bottom region pills, clear of the button row and the North pill.
-    try { var r = document.getElementById('map').getBoundingClientRect(); el.style.top = Math.round(r.bottom - 142) + 'px'; } catch(e){ el.style.top = '240px'; }
+    // Parked just above the West shore chip, same left edge; falls back to above the bottom pills.
+    try {
+      var w = document.querySelector('.shore-w'), a = (document.getElementById('app') || document.body).getBoundingClientRect(), ph = el.offsetHeight || 34;
+      if (w && w.getClientRects().length){ var wr = w.getBoundingClientRect(); el.style.top = Math.round(wr.top - a.top - ph - 6) + 'px'; el.style.left = Math.round(wr.left - a.left) + 'px'; }
+      else { var r = document.getElementById('map').getBoundingClientRect(); el.style.top = Math.round(r.bottom - a.top - 142) + 'px'; }
+    } catch(e){ el.style.top = '240px'; }
     var key = here ? here.id : 'start';
     if (el.getAttribute('data-key') !== key){
       el.setAttribute('data-key', key);
       el.innerHTML = '<button type="button" class="cr-pill" onclick="' + (here ? '_culturePathHere()' : '_culturePathOpen(1)') + '">' + (here ? window._cultureAhuIcon(here.id) : window._cultureIslandMark())
-        + (here ? '<span>You are in <b>' + esc(here.name) + '</b> ahupuaʻa, moku of ' + esc(here.moku) + '</span>' : '<span><b>Start here</b>: the land, step by step</span>')
+        + (here ? '<span>You are in <b>' + esc(here.name) + '</b></span>' : '<span><b>Start here</b></span>')
         + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>';
     }
     if (!window._cultureRibbonTimer) window._cultureRibbonTimer = setInterval(function(){ if (window._isCulture && window._isCulture()) window._cultureRibbon(true); }, 3000);   // Locate Me can land later
@@ -6973,6 +7011,23 @@ function layoutOutlookChip(){
   n.style.marginLeft = -Math.max(0, Math.min(dx, Math.round(nL - hb.left - 8))) + 'px';
 }
 addEventListener('resize', function(){ requestAnimationFrame(layoutOutlookChip); });
+// Map-top offset for the fixed map buttons (see --os-map-dy in the CSS). Re-read whenever the header stack
+// changes height: the conditions note, the 7-DAY strip, a resize.
+function _osMapDy(){
+  var m = document.getElementById('map'), a = document.getElementById('app'); if(!m || !a) return;
+  var dy = Math.round(m.getBoundingClientRect().top - a.getBoundingClientRect().top) - 182;
+  document.documentElement.style.setProperty('--os-map-dy', dy + 'px');
+  // The toggle column starts under the Today's conditions list button, or under the map's top edge when it is hidden.
+  var ln = document.getElementById('liveNow'), at = a.getBoundingClientRect().top;
+  var colY = ln && ln.getClientRects().length ? ln.getBoundingClientRect().bottom - at : m.getBoundingClientRect().top - at + 8;
+  document.documentElement.style.setProperty('--os-col-y', Math.round(colY) + 'px');
+}
+addEventListener('resize', _osMapDy);
+addEventListener('DOMContentLoaded', function(){
+  _osMapDy();
+  try { if(window.ResizeObserver){ var ro = new ResizeObserver(_osMapDy); ['topbar','map','liveNow'].forEach(function(id){ var el = document.getElementById(id); if(el) ro.observe(el); }); } } catch(e){}
+  try { new MutationObserver(function(){ requestAnimationFrame(_osMapDy); }).observe(document.body, {attributes:true, attributeFilter:['data-tab']}); } catch(e){}
+});
 // The header stack grows asynchronously (weather chips, 7-DAY strip, offline
 // bar all render after boot) — watch it directly instead of chasing call sites.
 addEventListener('DOMContentLoaded', function(){
@@ -8062,7 +8117,11 @@ function _declutterReg(reg, prioFn, seedRects){
         const wrap=e.mk._icon.querySelector('.mkw'), host=wrap&&wrap.firstElementChild;
         // Anchor the "+N" to the glyph: POI glyphs (.mkfood etc.) are position:static, so an
         // absolute badge would otherwise pin to the whole marker icon and land off the pin.
-        if(host){ host.style.position='relative'; const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more; host.appendChild(s); }
+        // A pin whose face is an <img> (the drawn disk) cannot hold a child, so the badge went in and
+        // drew at 0x0. There it hangs off the wrapper at the image's top-left corner instead.
+        if(host){ const s=document.createElement('span'); s.className='mk-more'; s.textContent='+'+e.more;
+          if(host.tagName==='IMG'){ wrap.style.position='relative'; s.style.left=(host.offsetLeft-4)+'px'; s.style.top=(host.offsetTop-6)+'px'; wrap.appendChild(s); }
+          else { host.style.position='relative'; host.appendChild(s); } }
         // The WHOLE cluster pin opens the halo — a far bigger tap target than the little badge.
         // Capture-phase so it pre-empts Leaflet's marker-click (which would open the leader's sheet).
         // EXCEPTION — the Town tab (data-tab "shopping") is shop/food browsing, not spatial: a
