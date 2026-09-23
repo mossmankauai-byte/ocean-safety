@@ -5663,6 +5663,9 @@ function initMap(){
       + '<p>The land your days cross, by moku. Tap one for its ahupuaʻa.</p>'
       + (here ? window._cultureLandRow('You are here', here, 2) : '')
       + '<div class="cc-nearby">' + names.map(function(n){ return '<button class="cc-say" onclick="closeSheet();setTimeout(function(){_cultureOpenMoku(' + esc(JSON.stringify(n)) + ')},320)">' + I.moku + esc(n) + '</button>'; }).join('') + '</div>'
+      // A band between the chips and the tour: browsing the moku and taking the tour are two different
+      // offers, and without the divider the last chip's name runs straight into the link in extracted text.
+      + '<div class="cc-band" aria-hidden="true"></div>'
       + '<p class="cc-credit" style="margin:10px 0 0"><button class="cc-link" onclick="closeSheet();setTimeout(function(){_culturePathOpen(1)},320)">' + I.mokupuni + 'Start here: the land, step by step</button></p></div>';
   };
   window._cultureEvMatch = function(a, kw){
