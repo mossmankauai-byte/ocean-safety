@@ -5231,7 +5231,9 @@ function initMap(){
   // stroked in the plate's ink through the same pen wobble. Two weights, one MultiLineString each, so a
   // whole island is two paths and 6 to 32 KB. Rebuild with tools/fetch-roads.js.
   // Loaded only when the theme is on, and put away past z13 where the street basemap takes over.
-  window.CULTURE_ROAD_CREDIT = '\u00a9OpenStreetMap';
+  // ODbL, not just a courtesy line: culture/roads/*.geojson is an EXTRACTED and clipped OSM database,
+  // so the notice names the contributors and the licence, not only the project.
+  window.CULTURE_ROAD_CREDIT = '\u00a9 OpenStreetMap contributors, ODbL';
   // Drawn twice: a paper casing wide enough to clear the hachure, then the ink on top. Without the
   // casing a road is indistinguishable from an ahupuaʻa boundary, which is the same ink on the same
   // paper. It is how a printed sheet separates a route from a line of survey, and it costs one path.
@@ -5846,8 +5848,10 @@ function initMap(){
       // read right now. Every status word below is the app's own string, passed through untouched.
       title = ahu.name;
       var bm = window._cultureBeachMap(), beaches = (typeof B !== 'undefined' ? B : []).filter(function(b){ return bm[b.id] === ahu.id; });
+      // The seaward claim is the source's, not ours, so it is quoted and cited rather than asserted:
+      // this screen reaches the state tourism authority before the cultural review partner has seen it.
       body = '<p>' + (here && here.id === ahu.id ? 'You are standing in <b>' + esc(ahu.name) + '</b>. ' : '')
-        + 'Its lower end is the shore, and the sea off that shore belonged to it too.</p>'
+        + 'Its lower end is the shore.</p>'
         + (beaches.length
             ? '<div class="cc-list">' + beaches.map(function(b){
                 var r = (typeof scored !== 'undefined' && scored[b.id]) || null;
@@ -5857,7 +5861,8 @@ function initMap(){
                   + (st ? '<em class="cp-st cp-' + esc(st) + '"></em>' : '') + '<small>' + esc(b.r || '') + '</small></div>';
               }).join('') + '</div>'
             : '<div class="cc-empty">No beach in this app sits inside ' + esc(ahu.name) + '.</div>')
-        + '<p class="cp-note">' + window.CULTURE_LEARN.bounds.note + '</p>';
+        + '<p class="cp-note">' + window.CULTURE_LEARN.bounds.note + '</p>'
+        + '<p class="cc-cite">' + window.CULTURE_LEARN.bounds.cite + '</p>';
       onMap = function(){ window._cultureHighlight([ahu]); map.fitBounds(ahu.layer.getBounds(), Object.assign({maxZoom:14}, pad)); };
     }
 
