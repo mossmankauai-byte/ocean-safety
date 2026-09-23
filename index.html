@@ -1698,7 +1698,10 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 :root[data-theme="culture"] #map.leaflet-container{background:#e9dcc0!important;background-image:radial-gradient(ellipse 120% 90% at 32% 22%,#f3e8cc 0%,#e8daba 58%,#dcc9a1 100%)!important}
 .leaflet-culturePlate-pane{opacity:1;transition:opacity .35s linear;pointer-events:none}
 :root[data-plate="close"] .leaflet-culturePlate-pane{opacity:0}
+.leaflet-cultureRoads-pane{opacity:1;transition:opacity .35s linear;pointer-events:none}
+:root[data-plate="close"] .leaflet-cultureRoads-pane{opacity:0}
 :root[data-theme="culture"] #map::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:401;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(74,53,32,.32) 100%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='1' seed='9'/><feColorMatrix values='0 0 0 0 .52 0 0 0 0 .33 0 0 0 0 .14 0 0 0 2.2 -1.72'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>"),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .10 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.mk-ink{display:block;line-height:0;filter:drop-shadow(0 2px 3px rgba(74,55,32,.3))}
 .tab-glyph{display:block;line-height:0}
 .tab-glyph svg{width:24px;height:24px;display:block;margin:0 auto}
 #cultureCard h3 .cc-h3i{display:inline-block;vertical-align:-3px;margin-right:6px;line-height:0;opacity:.75}
@@ -5156,17 +5159,26 @@ function initMap(){
       +   '<feFlood flood-color="#45331c" result="coastC"/>'
       +   '<feComposite in="coastC" in2="coastA" operator="in" result="coast"/>'
       +   '<feMerge><feMergeNode in="sea"/><feMergeNode in="land"/><feMergeNode in="relief"/><feMergeNode in="coast"/></feMerge>'
-      + '</filter></defs></svg>';
+      + '</filter>'
+      + '<filter id="osInkF" filterUnits="userSpaceOnUse" x="-2000" y="-2000" width="4000" height="4000" color-interpolation-filters="sRGB">'
+      +   '<feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="17" result="iw"/>'
+      +   '<feDisplacementMap in="SourceGraphic" in2="iw" scale="1.2" xChannelSelector="R" yChannelSelector="G"/>'
+      + '</filter>'
+      + '</defs></svg>';
     document.body.appendChild(d);
   };
   // The filter works in screen pixels, so its box is the viewport grown by half a screen on each side:
   // enough to cover a drag between repaints, small enough that a z16 island costs no more than a z9 one.
   window._culturePlateRegion = function(){
-    var f = document.getElementById('osPlateDefs'); f = f && f.querySelector('#osPlateF');
-    if (!f || !window.map) return;
+    var d = document.getElementById('osPlateDefs');
+    if (!d || !window.map) return;
     var sz = map.getSize(), tl = map.containerPointToLayerPoint([-sz.x / 2, -sz.y / 2]);
-    f.setAttribute('x', Math.round(tl.x)); f.setAttribute('y', Math.round(tl.y));
-    f.setAttribute('width', Math.round(sz.x * 2)); f.setAttribute('height', Math.round(sz.y * 2));
+    var box = [Math.round(tl.x), Math.round(tl.y), Math.round(sz.x * 2), Math.round(sz.y * 2)];
+    ['#osPlateF', '#osInkF'].forEach(function(id){
+      var f = d.querySelector(id); if (!f) return;
+      f.setAttribute('x', box[0]); f.setAttribute('y', box[1]);
+      f.setAttribute('width', box[2]); f.setAttribute('height', box[3]);
+    });
   };
   // Close in, a drawn island is no help: the plate fades out and the sepia street basemap fades in.
   window._culturePlateZoom = function(){
@@ -5183,10 +5195,49 @@ function initMap(){
     map.on('moveend zoomend', window._culturePlateRegion);
     map.on('zoomend', window._culturePlateZoom);
   };
+  // ROADS ON THE PLATE, drawn not photographed. A raster basemap cannot do this cleanly: on every CARTO
+  // style the road ink and the open sea sit in the same tonal band, so the threshold that inks a highway
+  // inks the ocean with it. So the roads are their own line work: OpenStreetMap's motorway, trunk and
+  // primary ways, simplified to 50 m, clipped to the island's own ahupuaʻa union at build time, and
+  // stroked in the plate's ink through the same pen wobble. Two weights, one MultiLineString each, so a
+  // whole island is two paths and 6 to 32 KB. Rebuild with tools/fetch-roads.js.
+  // Loaded only when the theme is on, and put away past z13 where the street basemap takes over.
+  window.CULTURE_ROAD_CREDIT = '\u00a9OpenStreetMap';
+  // Drawn twice: a paper casing wide enough to clear the hachure, then the ink on top. Without the
+  // casing a road is indistinguishable from an ahupuaʻa boundary, which is the same ink on the same
+  // paper. It is how a printed sheet separates a route from a line of survey, and it costs one path.
+  window._cultureBuildRoads = function(g){
+    var r = window._cultureRoadsR = L.svg({pane:'cultureRoads', padding:0.4});
+    var mk = function(cased){ return L.geoJSON(g, {pane:'cultureRoads', renderer:r, interactive:false,
+      attribution:cased ? null : window.CULTURE_ROAD_CREDIT,
+      style:function(f){ var big = f.properties.c === 1;
+        if (cased) return {color:'#f2e8cf', weight:big ? 4.4 : 3, opacity:.9, lineCap:'round', lineJoin:'round', fill:false};
+        return big ? {color:'#4a3720', weight:1.5, opacity:.95, lineCap:'round', lineJoin:'round', fill:false}
+                   : {color:'#6d5838', weight:.9, opacity:.7, lineCap:'round', lineJoin:'round', fill:false}; }}); };
+    window._cultureRoadsCase = mk(true);
+    window._cultureRoads = mk(false);
+  };
+  window._cultureRoadsOn = function(){
+    var slug = (window.ACTIVE && ACTIVE.slug) || 'kauai';
+    if (window._cultureRoads){
+      window._cultureRoadsCase.addTo(map);
+      window._cultureRoads.addTo(map);
+      try { window._cultureRoadsR._rootGroup.setAttribute('filter','url(#osInkF)'); } catch(e){}
+      return;
+    }
+    if (window._cultureRoadsLoading) return;
+    window._cultureRoadsLoading = true;
+    fetch('culture/roads/' + slug + '.geojson').then(function(r){ return r.ok ? r.json() : null; }).then(function(g){
+      if (!g || !window._isCulture()) return;
+      window._cultureBuildRoads(g);
+      window._cultureRoadsOn();
+    }).catch(function(){});
+  };
   window._culturePlateOn = function(){
     if (!window._culturePlate) return;
     window._culturePlate.addTo(map);
     try { window._culturePlateR._rootGroup.setAttribute('filter','url(#osPlateF)'); } catch(e){}
+    window._cultureRoadsOn();
     window._culturePlateRegion(); window._culturePlateZoom();
   };
   window._cultureBuildSections = function(g){
@@ -5197,7 +5248,7 @@ function initMap(){
     var idx = {byId:{}, byMoku:{}};
     // Every section and every label is tappable: an ahupuaʻa opens its card, a moku name opens the group.
     window._cultureLines = L.geoJSON(g, {pane:'culture', interactive:true,
-      style:function(f){ var i = Math.max(0, mokus.indexOf(f.properties.moku)); return {color:'#4a3a22', weight:1, opacity:.85, fillColor:window.CULTURE_TINTS[i % window.CULTURE_TINTS.length], fillOpacity:.14}; },
+      style:function(f){ var i = Math.max(0, mokus.indexOf(f.properties.moku)); return {color:'#57452a', weight:.9, opacity:.72, fillColor:window.CULTURE_TINTS[i % window.CULTURE_TINTS.length], fillOpacity:.14}; },
       onEachFeature:function(f, layer){
         var s = window._culturePolyStats(f.geometry); if (!s) return;
         var p = f.properties || {}, name = p.ahupuaa || '', moku = p.moku || '', id = String(p.id != null ? p.id : name);
@@ -5351,6 +5402,57 @@ function initMap(){
     // ahupuaa is a builder, not a string: it takes the beach and site flags. Called bare here.
     var g = window.CULTURE_ICON[key], svg = typeof g === 'function' ? g({}) : (g || '');
     return '<h3>' + (svg ? '<span class="cc-h3i" aria-hidden="true">' + svg + '</span>' : '') + window._cultureEsc(label) + '</h3>';
+  };
+  // THE PINS. Every map marker is a brand disk PNG with the status colour baked into the disk. In the
+  // theme the disk is redrawn instead: parchment, an ink ring in the SAME status colour the app chose,
+  // and the set's glyph for what the pin is. The colour is never recomputed here, only read back off the
+  // data-glyph key the builder already wrote, so a red beach stays red. The hazard pin is not touched.
+  window.CULTURE_PINS = {beach:'wave', trail:'moku', cultural:'kalo', scenic:'mokupuni', wildlife:'nene',
+                         playground:'hibiscus', town:'hala', stay:'niu', tour:'koae', market:'hala'};
+  window.CULTURE_PIN_INK = {green:'#2f6b45', amber:'#9a5f1c', red:'#992a16', night:'#4b5563', teal:'#1f5d63'};
+  window._cultureInkPin = function(html, kind){
+    if (kind === 'hazard') return html;                       // safety glyph, left exactly as the app drew it
+    var key = window.CULTURE_PINS[kind]; if (!key) return html;
+    var g = window.CULTURE_ICON[key], glyph = typeof g === 'function' ? g({}) : g;
+    if (!glyph) return html;
+    // The builder bakes the status into the disk art and names it on the wrapper; read it back, never
+    // recompute it, so a red beach stays red and an amber one stays amber.
+    var st = /data-glyph="[a-z]+-([a-z]+)"/.exec(html);
+    var ink = (st && window.CULTURE_PIN_INK[st[1]]) || '#4a3720';
+    return html.replace(/<img src="data:image\/png[^"]*"[^>]*style="width:(\d+)px[^"]*"[^>]*>/, function(_, w){
+      var d = +w, r = d / 2, gs = Math.round(d * 0.46), off = (d - gs) / 2;
+      return '<span class="mk-ink" style="color:' + ink + '">'
+        + '<svg viewBox="0 0 ' + d + ' ' + d + '" width="' + d + '" height="' + d + '" aria-hidden="true">'
+        + '<circle cx="' + r + '" cy="' + r + '" r="' + (r - 1.6) + '" fill="#f4ead2" stroke="currentColor" stroke-width="1.8"/>'
+        + '<g transform="translate(' + off + ',' + off + ') scale(' + (gs / 18) + ')">' + glyph + '</g></svg></span>';
+    });
+  };
+  // Wrapped once, the way the subtabs are: each builder keeps its own markup, label and anchor, and only
+  // the disk inside it changes. The kind comes from the builder that was called, not from the markup,
+  // because the activity pins carry no glyph key. Off, the wrapper passes straight through and the
+  // repaint that follows rebuilds every marker from the app's own PNG.
+  window.CULTURE_PIN_KIND = {
+    mkIcon:       function(){ return 'beach'; },
+    mkHikeIcon:   function(){ return 'trail'; },
+    mkActIcon:    function(a){ return (a && a.type) || 'cultural'; },
+    mkTourIcon:   function(){ return 'tour'; },
+    mkMarketIcon: function(){ return 'market'; }
+  };
+  window._cultureWrapPins = function(){
+    if (window._culturePinsWrapped) return;
+    window._culturePinsWrapped = true;
+    Object.keys(window.CULTURE_PIN_KIND).forEach(function(n){
+      var orig = window[n]; if (typeof orig !== 'function') return;
+      var kindOf = window.CULTURE_PIN_KIND[n];
+      window[n] = function(){
+        var ic = orig.apply(this, arguments);
+        try {
+          if (window._isCulture() && ic && ic.options && ic.options.html)
+            ic.options.html = window._cultureInkPin(ic.options.html, kindOf.apply(null, arguments));
+        } catch(e){}
+        return ic;
+      };
+    });
   };
   window._cultureCardEl = function(){
     var el = document.getElementById('cultureCard');
@@ -5738,6 +5840,7 @@ function initMap(){
         }
       } catch(e){}
       window._cultureTabGlyphs(true);
+      window._cultureWrapPins();
       window._cultureWrapSubtabs();
       window._cultureRibbon(true);
       window._cultureDefaultSub();
@@ -5834,6 +5937,7 @@ function initMap(){
         // Panes keep Leaflet's default pointer rules: only layers marked interactive (the sections, the labels)
         // take taps; the plate never does, so drags and pin taps behave as before.
         if (!map.getPane('culturePlate')){ var pp = map.createPane('culturePlate'); pp.style.zIndex = 206; }
+        if (!map.getPane('cultureRoads')){ var pr = map.createPane('cultureRoads'); pr.style.zIndex = 208; }
         if (!map.getPane('culture')){ var p = map.createPane('culture'); p.style.zIndex = 210; }
         if (!map.getPane('cultureLabels')){ var pl = map.createPane('cultureLabels'); pl.style.zIndex = 215; }
         if (window._cultureLines){ window._culturePlateOn(); window._cultureLines.addTo(map); window._cultureLabelsOn(true); }
@@ -5854,6 +5958,7 @@ function initMap(){
       root.removeAttribute('data-plate');
       if (window._culturePlate && window.map) map.removeLayer(window._culturePlate);
       if (window._culturePlateR && window.map) map.removeLayer(window._culturePlateR);
+      if (window._cultureRoads && window.map){ map.removeLayer(window._cultureRoadsCase); map.removeLayer(window._cultureRoads); map.removeLayer(window._cultureRoadsR); }
       if (window._cultureLines && window.map) map.removeLayer(window._cultureLines);
       window._cultureLabelsOn(false);
       window._cultureCloseCard();
