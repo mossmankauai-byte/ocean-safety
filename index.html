@@ -1728,7 +1728,7 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 #cultureRibbon .cr-pill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #cultureRibbon .cr-pill>svg:first-child{width:16px;height:16px;flex-shrink:0}
 #cultureCard .cp-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
-#cultureCard .cc-band{height:8px;margin:11px 0 2px;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'><path d='M0 8L6 1.6l6 6.4 6-6.4 6 6.4' fill='none' stroke='%235a4630' stroke-opacity='.32' stroke-width='1.1'/></svg>") repeat-x center}
+#cultureCard .cc-band,.cc-block .cc-band{height:8px;margin:11px 0 2px;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'><path d='M0 8L6 1.6l6 6.4 6-6.4 6 6.4' fill='none' stroke='%235a4630' stroke-opacity='.32' stroke-width='1.1'/></svg>") repeat-x center}
 #cultureCard .cp-strip{display:flex;align-items:center;justify-content:center}
 #cultureCard .cp-strip .cs{position:relative;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:rgba(63,46,28,.4)}
 #cultureCard .cp-strip .cs svg{position:relative}
@@ -1758,6 +1758,12 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 .cc-block .cc-credit{font-size:11.5px;color:#6b5a3e;margin-top:6px}
 .cc-block .cc-say{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(90,70,48,.35);background:#fff;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:600;color:#3f2e1c;cursor:pointer}
 .cc-block .cc-link{background:none;border:0;padding:0;color:#0f4c5c;font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline}
+.cc-block .cc-say svg,.cc-block .cc-link svg{width:16px;height:16px;flex-shrink:0}
+.cc-block .cc-link svg{vertical-align:-4px;margin-right:5px}
+.cc-block .cc-plan-head{display:flex;align-items:center;gap:8px;color:#5a4630}
+.cc-block .cc-plan-head h4{margin:0}
+.cc-block .cc-plan-head svg{width:22px;height:22px}
+.cc-block .cc-band{margin:8px 0 10px}
 details.cc-proto-block summary{display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#6b5a3e;font-weight:600}
 details.cc-proto-block summary::-webkit-details-marker{display:none}
 details.cc-proto-block summary small{margin-left:auto;font-size:11px;letter-spacing:0;text-transform:none}
@@ -5283,6 +5289,22 @@ function initMap(){
     window._cultureHikeMapCache = out; return out;
   };
   window._cultureHikeEntry = function(h){ var idx = window._cultureIdx; if (!idx) return null; var hm = window._cultureHikeMap(); return hm[h.id] ? idx.byId[hm[h.id]] : null; };
+  window._cultureEntryAt = function(o){
+    // Any place with a pin: a Town row, or a vendor that shares its venue's pin.
+    var idx = window._cultureIdx; if (!idx || !o) return null;
+    var lat = o.lat, lon = o.lon;
+    if ((typeof lat !== 'number' || typeof lon !== 'number') && o.venue && typeof VENUES !== 'undefined'){ var v = VENUES.find(function(x){ return x.id === o.venue; }); if (v){ lat = v.lat; lon = v.lon; } }
+    var id = window._cultureLandAt(lat, lon); return id ? idx.byId[id] : null;
+  };
+  window._cultureEvChips = function(opts){
+    // The GoHawaii event chips in the theme: parchment and ink, the picked one filled. Lei carries the maile
+    // glyph because a lei is a plant. Hula and Makahiki carry no glyph: any mark for them would be ours.
+    var esc = window._cultureEsc, I = window.CULTURE_ICON;
+    return opts.map(function(o){
+      var on = o[0] === window._ghEvRange, glyph = o[0] === 'lei' ? I.maile.replace('width="18" height="18"', 'width="14" height="14"') : '';
+      return '<button type="button" onclick="_ghSetEvRange(\'' + esc(o[0]) + '\')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ' + (on ? '#3f2e1c' : 'rgba(63,46,28,.45)') + ';background:' + (on ? '#3f2e1c' : '#f6efdf') + ';color:' + (on ? '#f6efdf' : '#3f2e1c') + ';border-radius:999px;padding:6px 11px;font:600 12px \'DM Sans\',system-ui,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.08)">' + glyph + esc(o[1]) + '</button>';
+    }).join('');
+  };
   window._cultureAhuMarks = function(){
     // Which sections hold a beach and which hold a Cultural place, read from the app's own data so the
     // wedge icon's variants are chosen from what is there, never from a name. Point in polygon, the same
@@ -5465,10 +5487,16 @@ function initMap(){
     return h;
   };
   window._culturePlanHTML = function(){
-    // Plan's Learn slot: the island's moku, each a tap into its group card.
+    // Plan's Learn slot: the island mark, where you stand if located, the island's moku (each a tap into its
+    // group card), and a way into the start-here path.
     if (!(window._isCulture && window._isCulture()) || !window._cultureIdx) return '';
-    var esc = window._cultureEsc, names = Object.keys(window._cultureIdx.byMoku).sort();
-    return '<div class="cc-block cc-plan"><h4>Learn</h4><p>The land your days cross, by moku. Tap one for its ahupuaʻa.</p><div style="display:flex;gap:6px;flex-wrap:wrap">' + names.map(function(n){ return '<button class="cc-say" onclick="closeSheet();setTimeout(function(){_cultureOpenMoku(' + esc(JSON.stringify(n)) + ')},320)">' + esc(n) + '</button>'; }).join('') + '</div></div>';
+    var esc = window._cultureEsc, I = window.CULTURE_ICON, names = Object.keys(window._cultureIdx.byMoku).sort();
+    var island = (window.ACTIVE && ACTIVE.name) || '', here = window._cultureWhereAmI ? window._cultureWhereAmI() : null;
+    return '<div class="cc-block cc-plan"><div class="cc-plan-head">' + window._cultureIslandMark() + '<h4>Learn · ' + esc(island) + '</h4></div><div class="cc-band"></div>'
+      + '<p>The land your days cross, by moku. Tap one for its ahupuaʻa.</p>'
+      + (here ? window._cultureLandRow('You are here', here, 2) : '')
+      + '<div class="cc-nearby">' + names.map(function(n){ return '<button class="cc-say" onclick="closeSheet();setTimeout(function(){_cultureOpenMoku(' + esc(JSON.stringify(n)) + ')},320)">' + I.moku + esc(n) + '</button>'; }).join('') + '</div>'
+      + '<p class="cc-credit" style="margin:10px 0 0"><button class="cc-link" onclick="closeSheet();setTimeout(function(){_culturePathOpen(1)},320)">' + I.mokupuni + 'Start here: the land, step by step</button></p></div>';
   };
   window._cultureEvMatch = function(a, kw){
     var t = [a.name, a.n, a.desc, a.tip, a.type, (a.tags || []).join(' ')].join(' ').toLowerCase();
@@ -9603,13 +9631,13 @@ function openTownList(){
         <div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${rows.length} ${rows.length === 1 ? 'place' : 'places'} on the map</div>
       </div>
     </div>
-    ${rows.length ? rows.map(({x, open, kind}) => `
+    ${rows.length ? (()=>{ const rowHTML = ({x, open, kind}) => `
       <div class="town-row" onclick="closeSheet();setTimeout(()=>${open}('${x.id}'),320)">
         ${townThumb(kind, x)}
         <span class="town-row-t"><b>${x.name}</b><span>${_townRowSub(x)}</span></span>
         ${heartButton(kind, x.id)}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="color:var(--mute);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>`).join('')
+      </div>`; const grouped = window._cultureOutlookGroups ? window._cultureOutlookGroups(rows, rowHTML, p => window._cultureEntryAt(p.x)) : null; return grouped === null ? rows.map(rowHTML).join('') : grouped; })()
       : `<div style="padding:18px 2px;color:var(--mute);font-size:12px">Nothing on the map for this filter.</div>`}
     ${OS_DISCLAIMER}`;
   document.getElementById('sheet').classList.add('on', 'sheet-town');
@@ -12528,6 +12556,7 @@ function _ghEventChips(show){
   try { var sb=document.getElementById('subtabs'); var r=sb.getBoundingClientRect(); el.style.top=(r.bottom+8)+'px'; } catch(e){ el.style.top='240px'; }
   var opts=[['all','All'],['today','Today'],['tomorrow','Tomorrow'],['weekend','This weekend']];
   if(window._isCulture && window._isCulture()) opts=[['hula','Hula'],['lei','Lei'],['makahiki','Makahiki']].concat(opts);   // Culture theme: these lead
+  if(window._cultureEvChips && window._isCulture && window._isCulture()){ el.innerHTML=window._cultureEvChips(opts); return; }   // Culture theme: parchment chips
   el.innerHTML=opts.map(function(o){ var on=o[0]===window._ghEvRange; return '<button type="button" onclick="_ghSetEvRange(\''+o[0]+'\')" style="border:1px solid '+(on?'var(--ocean)':'var(--border)')+';background:'+(on?'var(--ocean)':'#fff')+';color:'+(on?'#fff':'var(--ink)')+';border-radius:999px;padding:6px 11px;font:600 12px \'DM Sans\',system-ui,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.08)">'+o[1]+'</button>'; }).join('');
 }
 // Town > Wellness pins (their spas). Cleared on every other tab or subtab.

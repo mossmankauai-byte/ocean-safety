@@ -83,11 +83,32 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
         };
       });
     };
+    // Town (crafts), the Plan Learn card and the GoHawaii event chips: theme off they are the app's own bytes
+    // (no card, navy chips); theme on the crafts rows sit under headers exactly once, the card lists every moku,
+    // and the chips take the parchment style.
+    const grabMore = async () => page.evaluate(() => {
+      const src = (typeof TOWN_SUB_SRC !== 'undefined' && TOWN_SUB_SRC.crafts) ? TOWN_SUB_SRC.crafts : null;
+      const rows = src ? src() : [];
+      const out = window._cultureOutlookGroups ? window._cultureOutlookGroups(rows, (p) => `<i data-id="${p.x.id}"></i>`, (p) => window._cultureEntryAt(p.x)) : undefined;
+      const box = document.createElement('div'); if (typeof out === 'string') box.innerHTML = out;
+      const prev = window._activeSub; window._activeSub = 'crafts'; let html = '';
+      try { openTownList(); html = document.getElementById('sc').innerHTML; closeSheet(); } catch (e) { html = 'ERR ' + e; }
+      window._activeSub = prev;
+      const plan = window._culturePlanHTML ? window._culturePlanHTML() : '';
+      const pbox = document.createElement('div'); pbox.innerHTML = plan;
+      let chips = ''; try { _ghEventChips(true); chips = document.getElementById('ghEvChips').innerHTML; _ghEventChips(false); } catch (e) { chips = 'ERR ' + e; }
+      return { flat: out === null, n: rows.length, ids: [...box.querySelectorAll('i[data-id]')].map((e) => e.getAttribute('data-id')), heads: box.querySelectorAll('.cb-moku, .cb-ahu').length,
+        html, plan, planChips: pbox.querySelectorAll('.cc-say').length, nMoku: window._cultureIdx ? Object.keys(window._cultureIdx.byMoku).length : 0, chips };
+    });
     const offList = await grabList();
     ok(offList.flat, `${isl} off: beach list stays the flat list, no grouping applied`);
     ok(!/cb-moku|cb-ahu/.test(offList.html), `${isl} off: beach list HTML carries no culture header`);
     ok(offList.tflat, `${isl} off: trail list stays the flat list, no grouping applied`);
     ok(!/cb-moku|cb-ahu/.test(offList.thtml), `${isl} off: trail list HTML carries no culture header`);
+    const offMore = await grabMore();
+    ok(offMore.flat && !/cb-moku|cb-ahu/.test(offMore.html), `${isl} off: Town crafts list stays flat, no culture header`);
+    ok(offMore.plan === '', `${isl} off: Plan has no Learn card`);
+    ok(!/hula|#3f2e1c/.test(offMore.chips), `${isl} off: event chips are the app's own`);
 
     const offText = {};
     for (const id of sample) { const g = await grab(id); offText[id] = g.text; ok(g.cult === 0, `${isl} off: ${id} sheet has no culture block`); }
@@ -133,6 +154,12 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     ok(!onList.tflat && !tdupes.length && onList.tids.length === onList.tn,
       `${isl} on: grouped trail list holds every trail exactly once (${onList.tids.length} of ${onList.tn})` + (tdupes.length ? `\n     duplicated: ${tdupes.join(',')}` : ''));
     if (onList.tn) ok(onList.theads > 0, `${isl} on: trail list carries moku and ahupuaʻa headers (${onList.theads})`);
+    const onMore = await grabMore();
+    const cdupes = onMore.ids.filter((id, i) => onMore.ids.indexOf(id) !== i);
+    ok(!onMore.flat && !cdupes.length && onMore.ids.length === onMore.n, `${isl} on: grouped crafts list holds every row exactly once (${onMore.ids.length} of ${onMore.n})`);
+    if (onMore.n) ok(onMore.heads > 0 && /cb-ahu/.test(onMore.html), `${isl} on: Town sheet carries the headers (${onMore.heads})`);
+    ok(/cc-plan/.test(onMore.plan) && onMore.planChips === onMore.nMoku && /_culturePathOpen\(1\)/.test(onMore.plan), `${isl} on: Plan Learn card lists every moku (${onMore.planChips} of ${onMore.nMoku}) and opens the path`);
+    ok(/Hula/.test(onMore.chips) && /#f6efdf/.test(onMore.chips), `${isl} on: event chips lead with Hula in the parchment style`);
     for (const id of sample) {
       const g = await grab(id);
       ok(g.text === offText[id], `${isl} same: ${id} safety text identical with the theme on` + (g.text === offText[id] ? '' : `\n     off: ${offText[id].slice(0, 160)}\n     on:  ${g.text.slice(0, 160)}`));
@@ -142,6 +169,8 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     const backList = await grabList();
     ok(backList.flat && backList.html === offList.html, `${isl} off again: beach list HTML unchanged, byte for byte`);
     ok(backList.tflat && backList.thtml === offList.thtml, `${isl} off again: trail list HTML unchanged, byte for byte`);
+    const backMore = await grabMore();
+    ok(backMore.html === offMore.html && backMore.chips === offMore.chips && backMore.plan === '', `${isl} off again: Town sheet and event chips unchanged, byte for byte; no Learn card`);
     const back = await page.evaluate(() => ({ theme: document.documentElement.getAttribute('data-theme'), ribbon: !!document.getElementById('cultureRibbon'), lines: !!(window._cultureLines && map.hasLayer(window._cultureLines)) }));
     ok(back.theme === null && !back.ribbon && !back.lines, `${isl} off again: theme, ribbon and sections gone`);
   }
