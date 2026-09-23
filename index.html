@@ -1776,6 +1776,7 @@ p.cc-credit .cc-link{font-size:12.5px}
 .cc-land .cs+.cs::before{content:'';position:absolute;left:-4px;top:50%;width:8px;border-top:1px solid rgba(90,70,48,.32)}
 .cc-land .cs.on{color:#3f2e1c}
 .cc-land .cs.on .cf{fill:currentColor}
+.cc-land[role="button"]{cursor:pointer}
 .cc-nearby{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
 .cc-block .cc-what{display:block;margin:0 0 8px}
 .os-ahu-label{font-size:11px;line-height:1.15;letter-spacing:.03em}
@@ -5250,28 +5251,38 @@ function initMap(){
     if (!el){ el = document.createElement('div'); el.id = 'cultureCard'; el.setAttribute('role','dialog'); el.setAttribute('aria-label','Land division'); document.body.appendChild(el); }
     return el;
   };
-  window._cultureBeachMap = function(){
-    // Nearest ahupuaʻa per beach, computed once per island load. Inside a polygon wins; otherwise the nearest
-    // boundary vertex within about a kilometre, because the State layer stops at a 19th-century shoreline
-    // while many beach pins sit on today's sand.
-    if (window._cultureBeachMapCache) return window._cultureBeachMapCache;
-    var idx = window._cultureIdx || {byId:{}}, out = {};
+  window._cultureLandAt = function(lat, lon){
+    // The ahupuaʻa a point sits in. Inside a polygon wins; otherwise the nearest boundary vertex within about a
+    // kilometre, because the State layer stops at a 19th-century shoreline while many pins sit on today's sand.
+    if (typeof lat !== 'number' || typeof lon !== 'number') return null;
+    var idx = window._cultureIdx || {byId:{}};
     var pip = function(x, y, ring){ var inside = false; for (var i = 0, j = ring.length - 1; i < ring.length; j = i++){ var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside; } return inside; };
-    (typeof B !== 'undefined' ? B : []).forEach(function(b){
-      if (typeof b.lat !== 'number' || typeof b.lon !== 'number') return;
-      var best = null, bestD = 0.01, k = Math.cos(b.lat * Math.PI / 180), ids = Object.keys(idx.byId);
-      for (var n = 0; n < ids.length && bestD > 0; n++){
-        var e = idx.byId[ids[n]], geom = e.layer.feature.geometry, polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
-        for (var p = 0; p < polys.length && bestD > 0; p++){
-          var ring = polys[p][0];
-          if (pip(b.lon, b.lat, ring)){ best = ids[n]; bestD = 0; break; }
-          for (var i = 0; i < ring.length; i++){ var dx = (ring[i][0] - b.lon) * k, dy = ring[i][1] - b.lat, d = Math.sqrt(dx*dx + dy*dy); if (d < bestD){ bestD = d; best = ids[n]; } }
-        }
+    var best = null, bestD = 0.01, k = Math.cos(lat * Math.PI / 180), ids = Object.keys(idx.byId);
+    for (var n = 0; n < ids.length && bestD > 0; n++){
+      var e = idx.byId[ids[n]], geom = e.layer.feature.geometry, polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+      for (var p = 0; p < polys.length && bestD > 0; p++){
+        var ring = polys[p][0];
+        if (pip(lon, lat, ring)){ best = ids[n]; bestD = 0; break; }
+        for (var i = 0; i < ring.length; i++){ var dx = (ring[i][0] - lon) * k, dy = ring[i][1] - lat, d = Math.sqrt(dx*dx + dy*dy); if (d < bestD){ bestD = d; best = ids[n]; } }
       }
-      if (best) out[b.id] = best;
-    });
+    }
+    return best;
+  };
+  window._cultureBeachMap = function(){
+    // Nearest ahupuaʻa per beach, computed once per page (the island switch reloads the page).
+    if (window._cultureBeachMapCache) return window._cultureBeachMapCache;
+    var out = {};
+    (typeof B !== 'undefined' ? B : []).forEach(function(b){ var id = window._cultureLandAt(b.lat, b.lon); if (id) out[b.id] = id; });
     window._cultureBeachMapCache = out; return out;
   };
+  window._cultureHikeMap = function(){
+    // The same for trails, by the trailhead pin.
+    if (window._cultureHikeMapCache) return window._cultureHikeMapCache;
+    var out = {};
+    (typeof HIKES !== 'undefined' ? HIKES : []).forEach(function(h){ var id = window._cultureLandAt(h.lat, h.lon); if (id) out[h.id] = id; });
+    window._cultureHikeMapCache = out; return out;
+  };
+  window._cultureHikeEntry = function(h){ var idx = window._cultureIdx; if (!idx) return null; var hm = window._cultureHikeMap(); return hm[h.id] ? idx.byId[hm[h.id]] : null; };
   window._cultureAhuMarks = function(){
     // Which sections hold a beach and which hold a Cultural place, read from the app's own data so the
     // wedge icon's variants are chosen from what is there, never from a name. Point in polygon, the same
@@ -5632,15 +5643,25 @@ function initMap(){
     if (/[A-Za-z]['][A-Za-z]/.test(n)) return full;
     return n;
   };
+  window._cultureLandRow = function(name, e, lit){
+    // The ridge to shore strip with one level lit, then where the place sits. Tapping it opens the section card.
+    var esc = window._cultureEsc;
+    var strip = '<span class="cl-strip" aria-hidden="true">' + window.CULTURE_ICON.step.map(function(sv, i){
+      return '<span class="cs' + (i === lit ? ' on' : '') + '">' + sv + '</span>';
+    }).join('') + '</span>';
+    return '<div class="cc-land" role="button" tabindex="0" onclick="closeSheet();setTimeout(function(){_cultureOpenAhupuaa(' + esc(JSON.stringify(e.id)) + ')},320)">' + strip + '<span>' + esc(name)
+      + ' · ' + esc(e.name) + ' ahupuaʻa · moku of ' + esc(e.moku) + '</span></div>';
+  };
   window._cultureLandLine = function(b){
     if (!(window._isCulture && window._isCulture())) return '';
     var e = window._cultureBeachEntry(b); if (!e) return '';
-    var esc = window._cultureEsc;
-    var strip = '<span class="cl-strip" aria-hidden="true">' + window.CULTURE_ICON.step.map(function(sv, i){
-      return '<span class="cs' + (i === 3 ? ' on' : '') + '">' + sv + '</span>';
-    }).join('') + '</span>';
-    return '<div class="cc-land">' + strip + '<span>' + esc(window._cultureShortName(b))
-      + ' · ' + esc(e.name) + ' ahupuaʻa · moku of ' + esc(e.moku) + '</span></div>';
+    return window._cultureLandRow(window._cultureShortName(b), e, 3);
+  };
+  window._cultureTrailLine = function(hk){
+    // A trail sits on the land side of the same strip, so the ridge end is the lit one.
+    if (!(window._isCulture && window._isCulture())) return '';
+    var e = window._cultureHikeEntry(hk); if (!e) return '';
+    return window._cultureLandRow(hk.name, e, 0);
   };
   window._cultureNearbyHTML = function(b, e){
     // The other beaches inside the same ahupuaʻa, so a guest sees that two beaches share one piece of land.
@@ -5651,13 +5672,14 @@ function initMap(){
     return '<div class="cc-credit">Also in ' + esc(e.name) + ' ahupuaʻa</div><div class="cc-nearby">'
       + others.map(function(o){ return '<button class="cc-say" onclick="closeSheet();setTimeout(function(){openSheet(' + esc(JSON.stringify(o.id)) + ')},320)">' + window.CULTURE_ICON.wave + esc(window._cultureShortName(o)) + '</button>'; }).join('') + '</div>';
   };
-  window._cultureOutlookGroups = function(picks, rowHTML){
-    // Same beaches, same rows, same order: only the headers are new, so the calmer beaches still lead and
-    // every beach the flat list shows appears exactly once.
+  window._cultureOutlookGroups = function(picks, rowHTML, entryOf){
+    // Same beaches (or trails), same rows, same order: only the headers are new, so the calmer beaches still
+    // lead and every row the flat list shows appears exactly once. entryOf maps a pick to its ahupuaʻa; the
+    // default is the beach pick shape {b}.
     if (!(window._isCulture && window._isCulture()) || !window._cultureIdx) return null;
     var esc = window._cultureEsc, order = [], by = {}, out = '', lastMoku = null;
     picks.forEach(function(p){
-      var e = window._cultureBeachEntry(p.b), k = e ? e.id : '';
+      var e = entryOf ? entryOf(p) : window._cultureBeachEntry(p.b), k = e ? e.id : '';
       if (!by[k]){ by[k] = {e:e, rows:[]}; order.push(k); }
       by[k].rows.push(p);
     });
@@ -6283,6 +6305,7 @@ function openHikeSheet(id){
       <div><div class="poi-hero-name" style="color:#fff">${hk.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${hk.r} • Trail</div></div>
     </div>
     ${photoCreditLine(hk)}
+    ${window._cultureTrailLine?_cultureTrailLine(hk):''}
     <div style="display:inline-block;background:${diffCol};color:#fff;padding:5px 12px;border-radius:12px;font-size:12px;font-weight:600;text-transform:capitalize;margin-bottom:10px">${hk.difficulty}</div>
     <div class="poi-grid">
       <div class="poi-cell"><div class="poi-cell-l">Distance</div><div class="poi-cell-v">${hk.length_mi} mi</div></div>
@@ -9822,7 +9845,8 @@ function renderOutlookSheet(){
       return `
         <div class="slbl" style="margin-top:18px">Best trails now</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
-          ${trailPicks.map(h => {
+          ${(()=>{
+            const rowHTML = h => {
             const col = dCol[h.difficulty] || '#9ca3af';
             const lbl = dLbl[h.difficulty] || h.difficulty;
             return `
@@ -9834,7 +9858,10 @@ function renderOutlookSheet(){
                 ${cardHeartButton('hike', h.id)}
                 <div style="font-size:18px;color:var(--mute);flex-shrink:0">›</div>
               </div>`;
-          }).join('')}
+            };
+            const grouped = window._cultureOutlookGroups ? window._cultureOutlookGroups(trailPicks, rowHTML, window._cultureHikeEntry) : null;
+            return grouped === null ? trailPicks.map(rowHTML).join('') : grouped;
+          })()}
         </div>`;
     })()}
     ${tourPickCard}
