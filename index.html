@@ -13028,12 +13028,17 @@ function _ghNearestBeach(lat, lon){
 // GoHawaii advisories (public ref only). The engine and the visitor UI live in /gh/, so no other
 // load fetches or parses them. ?b= changes with each build: /gh/ scripts ride the service worker's
 // stale-while-revalidate shell cache, so without it a returning visitor runs the previous build once.
-var GH_ADV_BUILD = '2026-09-23-adv11';
+var GH_ADV_BUILD = '2026-09-23-adv12';
 function _ghAdvLoad(){
-  if(window.GH_ADV || document.getElementById('ghAdvJs')) return;
-  var a = document.createElement('script'); a.id = 'ghAdvJs'; a.src = '/gh/advisories.js?b=' + GH_ADV_BUILD;
-  a.onload = function(){ var u = document.createElement('script'); u.src = '/gh/app-ui.js?b=' + GH_ADV_BUILD; document.head.appendChild(u); };
-  document.head.appendChild(a);
+  if(window.GH_ADV || document.getElementById('ghAdvJs') || document.getElementById('ghCfgJs')) return;
+  // gh/config.js names the GoHawaii backend (empty in the review build); it loads first so the engine sees it.
+  var c = document.createElement('script'); c.id = 'ghCfgJs'; c.src = '/gh/config.js?b=' + GH_ADV_BUILD;
+  c.onload = c.onerror = function(){
+    var a = document.createElement('script'); a.id = 'ghAdvJs'; a.src = '/gh/advisories.js?b=' + GH_ADV_BUILD;
+    a.onload = function(){ var u = document.createElement('script'); u.src = '/gh/app-ui.js?b=' + GH_ADV_BUILD; document.head.appendChild(u); };
+    document.head.appendChild(a);
+  };
+  document.head.appendChild(c);
 }
 // The one sheet for every GoHawaii row, whatever array it lives in. No booking, no price.
 function openGhSheet(id){

@@ -1,0 +1,17 @@
+# GoHawaii backend: its own Worker and its own D1 database. It shares nothing with the
+# partner telemetry worker (concierge-guide-api), so deploying one never touches the other.
+# Setup steps are in README.md.
+name = "gohawaii-api"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gohawaii"
+# Paste the id that `wrangler d1 create gohawaii` prints. Local dev (`wrangler dev --local`) runs without it.
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[vars]
+# Sites allowed to call the staff and stats routes (comma-separated). The visitor count and the
+# public read accept any origin, since the app can be embedded.
+STAFF_ORIGINS = "https://htagohawaii.netlify.app,http://127.0.0.1:4694,http://localhost:8787"

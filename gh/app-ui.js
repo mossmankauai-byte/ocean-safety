@@ -752,10 +752,35 @@
   function placesRedo(){
     try { var L = window.GH_LAYER && window.GH_LAYER[isl()]; if(L) window._ghInject(L.rows); } catch(e){}
   }
+  // ---- the shared backend (gh/config.js): live posts and place changes, and visit totals ----
+  // Off in the review build, where A.API is empty and none of this runs.
+  function liveBoot(){
+    if(!A.API) return;
+    var pull = function(){ A.pullPublic().then(function(changed){ if(changed){ placesRedo(); paint(); if(!showRed()) pops(); promoSig = null; promoApply(); hubRefresh(); } }); };
+    pull(); setInterval(pull, 60 * 1000);
+    var I = function(){ return isl(); };
+    try { if(!ss('gh_cnt_visit_' + I())){ ss('gh_cnt_visit_' + I(), '1'); A.count(I(), 'visit', '');
+      A.count(I(), 'lang', String(navigator.language || '').slice(0, 2));
+      A.count(I(), 'dev', /iPad|iPhone|iPod/i.test(navigator.userAgent) ? 'ios' : /Android/i.test(navigator.userAgent) ? 'android' : 'desktop');
+      A.count(I(), 'hour', String(new Date(Date.now() - 10 * 3600e3).getUTCHours())); } } catch(e){}
+    try { if(window.OSA){ var t0 = OSA.tab, i0 = OSA.item;
+      OSA.tab = function(n){ A.count(I(), 'tab', n); return t0.apply(this, arguments); };
+      OSA.item = function(kind, id){ if(kind === 'beach') A.count(I(), 'beach', id); return i0.apply(this, arguments); }; } } catch(e){}
+    try { if(typeof window.openGhSheet === 'function' && !window.openGhSheet._cnt){ var g0 = window.openGhSheet;
+      window.openGhSheet = function(id){ A.count(I(), 'place', id); return g0.apply(this, arguments); }; window.openGhSheet._cnt = true; } } catch(e){}
+    var m0 = A.markSeen; A.markSeen = function(id){ A.count(I(), 'adv', 'shown'); return m0.apply(this, arguments); };
+    document.addEventListener('click', function(e){
+      var a = e.target && e.target.closest && e.target.closest('a[href]'); if(!a) return;
+      var h = ''; try { h = new URL(a.href, location.href).hostname.replace(/^www\./, ''); } catch(x){ return; }
+      if(h === location.hostname) return;
+      A.count(I(), 'link', h === 'gohawaii.com' ? 'gohawaii' : a.classList.contains('dirbtn') ? 'directions' : 'website');
+    }, true);
+  }
   function start(){
     placesHook();
     postVerdicts();
     if(PROBE) return;
+    liveBoot();
     css(); strip(); promoBoot();
     // Staff posts need no feed: show them now, then again as each feed lands.
     afterFeeds();

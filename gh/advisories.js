@@ -7,9 +7,9 @@
  *          because that feed sends no CORS header)
  *   staff  what GoHawaii staff post from their Dashboard
  *
- * Review build: staff posts live in this browser's localStorage (key gh_notices_v1), so a post
- * shows in the app only on the browser that made it. The live version swaps load()/save() for
- * a server table; nothing else here changes.
+ * Review build (gh/config.js api empty): staff posts live in this browser's localStorage (key
+ * gh_notices_v1), so a post shows in the app only on the browser that made it. With the backend
+ * named in gh/config.js, the same load()/save() read and write through it; see the sync block.
  *
  * Levels. red: full screen until the visitor taps "I understand", again every visit until it
  * ends. yellow: banner at the top plus one pop-up per visit. info: GoHawaii page only.
@@ -150,10 +150,6 @@
       return s;
     } catch(e){ return blank(); }
   }
-  function save(s){
-    try { s.log = (s.log || []).slice(-300); localStorage.setItem(KEY, JSON.stringify(s)); return true; }
-    catch(e){ return false; }
-  }
 
   function inWindow(it, now){
     if(it.starts && Date.parse(it.starts) > now) return false;
@@ -283,25 +279,33 @@
   function seen(id){ try { return (JSON.parse(localStorage.getItem('gh_adv_seen') || '{}')[id]) || 0; } catch(e){ return 0; } }
 
   // ---- Places: what State and county staff change in the GoHawaii listings (Nick, 2026-09-23) ----
-  // One overlay per browser in the review build (key gh_places_v1), applied on top of the pulled layer:
+  // An overlay per island, applied on top of the pulled layer (key gh_places_v1 holds all four):
   //   edits[id]  fields that replace the listing's own (name, tip, hours, address, website, img, r, lat, lon, owner)
   //   hidden[id] a listing taken off the app
-  //   added[isl] places staff put on the map; ids start gh_staff_ so the app's gh_ guards accept them
+  //   added[]    places staff put on the map; ids start gh_staff_ so the app's gh_ guards accept them
   // Beaches are not in here: a beach verdict and its safety data never come from this store.
   var PKEY = 'gh_places_v1';
   var PLACE_FIELDS = ['name','n','tip','hours','address','website','img','r','lat','lon','owner','target','type','theme','gh_sub'];
   // Who looks after a place. GoHawaii's own listings default to the State.
   var OWNERS = { state:'State of Hawaiʻi', kauai:'County of Kauaʻi', oahu:'City and County of Honolulu', maui:'County of Maui', hawaii:'County of Hawaiʻi' };
-  function placesLoad(){
+  function placeBlank(){ return { edits: {}, hidden: {}, added: [] }; }
+  function placesAll(){
     var d = null; try { d = JSON.parse(localStorage.getItem(PKEY)); } catch(e){}
     d = d && typeof d === 'object' ? d : {};
-    return { edits: d.edits || {}, hidden: d.hidden || {}, added: d.added || {} };
+    var out = {};
+    ORDER.forEach(function(i){ var x = d[i] || {}; out[i] = { edits: x.edits || {}, hidden: x.hidden || {}, added: Array.isArray(x.added) ? x.added : [] }; });
+    return out;
   }
-  function placesSave(d){ try { localStorage.setItem(PKEY, JSON.stringify(d)); } catch(e){} }
+  function placesLoad(isl){ return placesAll()[isl] || placeBlank(); }
+  function placesWrite(all){ try { localStorage.setItem(PKEY, JSON.stringify(all)); } catch(e){} }
+  function placesSave(isl, d, note){
+    var all = placesAll(); all[isl] = d; placesWrite(all);
+    if(staffOn()) push('places:' + isl, d, note);
+  }
   // The rows the app should show on this island: the layer's rows with edits laid over them, hidden ones
   // dropped, added ones last. Every returned row is a copy, so the layer file itself never changes.
   function applyPlaces(isl, rows, d){
-    d = d || placesLoad();
+    d = d || placesLoad(isl);
     var out = [];
     (Array.isArray(rows) ? rows : []).forEach(function(r){
       if(!r || d.hidden[r.id]) return;
@@ -310,12 +314,99 @@
       if(e) c.staff = true;
       out.push(c);
     });
-    (d.added[isl] || []).forEach(function(r){ if(!d.hidden[r.id]){ var c = {}; for(var k in r) c[k] = r[k]; c.staff = true; out.push(c); } });
+    (d.added || []).forEach(function(r){ if(!d.hidden[r.id]){ var c = {}; for(var k in r) c[k] = r[k]; c.staff = true; out.push(c); } });
     return out;
+  }
+
+  // ---- The shared backend (backend-gohawaii/). Off until gh/config.js names it. ----
+  // Off: everything above lives in this browser, as in the review build. On: visitors read the live posts
+  // and place changes from /gh/public, staff read and save through their own sign-in key, and the app sends
+  // visit totals. localStorage stays the working copy either way, so every screen reads the same place.
+  var API = (function(){ try { return String((window.GH_CONFIG && window.GH_CONFIG.api) || '').replace(/\/+$/, ''); } catch(e){ return ''; } })();
+  var SKEY = 'gh_staff_key';
+  var vers = {};
+  function staffKey(){ try { return sessionStorage.getItem(SKEY) || ''; } catch(e){ return ''; } }
+  function staffOn(){ return !!(API && staffKey()); }
+  function emit(type, detail){ try { window.dispatchEvent(new CustomEvent(type, { detail: detail })); } catch(e){} }
+  function sreq(path, opt){
+    opt = opt || {};
+    opt.headers = Object.assign({ 'Authorization': 'Bearer ' + staffKey(), 'Content-Type': 'application/json' }, opt.headers || {});
+    return fetch(API + path, opt).then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ j._status = r.status; return j; }); });
+  }
+  function adopt(name, body){
+    if(name === 'notices'){ var s = load(); s.items = body.items || []; s.hta = body.hta || {}; s.log = body.log || []; try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+    else { var all = placesAll(); all[name.slice(7)] = { edits: body.edits || {}, hidden: body.hidden || {}, added: body.added || [] }; placesWrite(all); }
+  }
+  var queue = {}, busy = {};
+  function push(name, body, note){
+    queue[name] = { body: body, note: note || '' };
+    if(busy[name]) return;
+    busy[name] = true;
+    var job = queue[name]; delete queue[name];
+    sreq('/gh/doc/' + name, { method: 'PUT', body: JSON.stringify({ ver: vers[name] || 0, body: job.body, note: job.note }) }).then(function(j){
+      if(j._status === 200){ vers[name] = j.ver; adopt(name, j.body); emit('gh-synced', { name: name }); }
+      else if(j._status === 409){ vers[name] = j.ver; adopt(name, j.body); emit('gh-sync-error', { name: name, error: 'conflict', by: j.updated_by }); }
+      else { emit('gh-sync-error', { name: name, error: j.error || ('http ' + j._status), id: j.id }); pullStaff(); }
+    }).catch(function(){ emit('gh-sync-error', { name: name, error: 'offline' }); })
+      .then(function(){ busy[name] = false; if(queue[name]){ var q = queue[name]; delete queue[name]; push(name, q.body, q.note); } });
+  }
+  function signIn(key){
+    try { sessionStorage.setItem(SKEY, key); } catch(e){}
+    return sreq('/gh/me').then(function(j){ if(j._status !== 200){ signOut(); throw new Error(j.error || 'sign_in'); } return pullStaff().then(function(){ return j; }); });
+  }
+  function signOut(){ try { sessionStorage.removeItem(SKEY); } catch(e){} }
+  function me(){ return staffOn() ? sreq('/gh/me').then(function(j){ return j._status === 200 ? j : null; }) : Promise.resolve(null); }
+  function pullStaff(){
+    var names = ['notices'].concat(ORDER.map(function(i){ return 'places:' + i; }));
+    return Promise.all(names.map(function(n){ return sreq('/gh/doc/' + n).then(function(j){ if(j._status === 200){ vers[n] = j.ver; adopt(n, j.body); } }); }))
+      .then(function(){ emit('gh-synced', { name: 'all' }); });
+  }
+  function save(s){
+    try { s.log = (s.log || []).slice(-300); localStorage.setItem(KEY, JSON.stringify(s)); }
+    catch(e){ return false; }
+    if(staffOn()) push('notices', { items: s.items, hta: s.hta, log: s.log });
+    return true;
+  }
+  // Visitors: the public read. Only live posts come back; a staff member's own browser uses pullStaff.
+  function pullPublic(){
+    if(!API) return Promise.resolve(false);
+    return fetch(API + '/gh/public').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      if(!j) return false;
+      var before = localStorage.getItem(KEY) + '|' + localStorage.getItem(PKEY);
+      try { localStorage.setItem(KEY, JSON.stringify({ items: j.items || [], hta: j.hta || {}, log: [] })); } catch(e){}
+      var all = {}; ORDER.forEach(function(i){ all[i] = (j.places && j.places[i]) || placeBlank(); }); placesWrite(all);
+      return before !== localStorage.getItem(KEY) + '|' + localStorage.getItem(PKEY);
+    }).catch(function(){ return false; });
+  }
+  function stats(days){ return staffOn() ? sreq('/gh/stats?days=' + (days || 30)) : Promise.resolve(null); }
+  function audit(){ return staffOn() ? sreq('/gh/audit') : Promise.resolve(null); }
+
+  // Visit totals. Added up in the page and sent as totals when the visitor leaves or every 30 seconds;
+  // nothing names the visitor, their device, or where they are. Off unless the backend is on.
+  var tally = {}, tallyIsl = '';
+  function count(isl, metric, k){
+    if(!API) return;
+    try { if(navigator.doNotTrack === '1' || window.doNotTrack === '1') return; } catch(e){}
+    tallyIsl = isl; var key = metric + '\u0001' + String(k == null ? '' : k).toLowerCase().slice(0, 64);
+    tally[key] = (tally[key] || 0) + 1;
+  }
+  function flush(){
+    var keys = Object.keys(tally); if(!API || !keys.length || !tallyIsl) return;
+    var rows = keys.map(function(key){ var p = key.split('\u0001'); return [p[0], p[1], tally[key]]; });
+    tally = {};
+    var body = JSON.stringify({ island: tallyIsl, rows: rows });
+    try { if(navigator.sendBeacon && navigator.sendBeacon(API + '/gh/e', new Blob([body], { type: 'text/plain' }))) return; } catch(e){}
+    try { fetch(API + '/gh/e', { method: 'POST', body: body, headers: { 'Content-Type': 'text/plain' }, keepalive: true }).catch(function(){}); } catch(e){}
+  }
+  if(API){
+    setInterval(flush, 30000);
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') flush(); });
   }
 
   window.GH_ADV = {
     PKEY: PKEY, OWNERS: OWNERS, placesLoad: placesLoad, placesSave: placesSave, applyPlaces: applyPlaces,
+    API: API, staffOn: staffOn, signIn: signIn, signOut: signOut, me: me, pullStaff: pullStaff, pullPublic: pullPublic, stats: stats, audit: audit, count: count, flush: flush,
     KEY: KEY, ISL: ISL, ORDER: ORDER, NWS_LEVEL: NWS_LEVEL, HTA_SHOW_HOURS: HTA_SHOW_HOURS,
     load: load, save: save, refresh: refresh, last: last, active: active, features: features, promos: promos, inDaily: inDaily, hoursLabel: hoursLabel,
     inWindow: inWindow, onIsland: onIsland, nwsLevel: nwsLevel,

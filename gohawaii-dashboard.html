@@ -261,6 +261,21 @@
   .pldot{width:12px;height:12px;border-radius:50%;background:var(--sea);border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
   .pldot.st{background:var(--gold)}.pldot.off{background:#9aa9ae}.pldot.new{background:#b45309;width:16px;height:16px}
   .picking #plMap{outline:3px solid var(--gold);outline-offset:2px;cursor:crosshair}
+  .signin{position:fixed;inset:0;background:rgba(8,32,40,.55);z-index:1100;display:flex;align-items:center;justify-content:center;padding:16px}
+  .signin[hidden]{display:none}
+  .signin .card{width:100%;max-width:420px}
+  input[type=password]{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;font-size:14px}
+  .lvgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 0 14px}
+  .lvgrid .k{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;cursor:pointer;text-align:left;font:inherit}
+  .lvgrid .k[aria-pressed="true"]{border-color:var(--sea);box-shadow:inset 0 0 0 1px var(--sea)}
+  .lvgrid .k b{display:block;font-size:22px;letter-spacing:-.02em}
+  .lvgrid .k span{font-size:12px;color:var(--mute)}
+  .lvbars{display:flex;align-items:flex-end;gap:2px;height:90px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .lvbars i{flex:1;background:var(--sea2);border-radius:3px 3px 0 0;min-height:1px}
+  .lvtops{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
+  .lvtops h3{font-size:12.5px;margin:0 0 6px;color:var(--ink2)}
+  .lvtops ol{margin:0;padding-left:18px;font-size:13px;line-height:1.6}
+  .lvtops ol span{color:var(--mute)}
   .formfoot{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px}
   .msg{margin-top:10px;font-size:13px;border-radius:9px;padding:9px 12px;display:none}
   .msg.on{display:block}.msg.ok{background:#e2efe8;color:var(--good)}.msg.err{background:var(--redbg);color:var(--red)}
@@ -352,6 +367,8 @@
     .side2{display:grid;grid-template-columns:1fr 1fr}
   }
   @media (max-width:760px){
+    .lvgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .lvtops{grid-template-columns:1fr}
     .pl .ed{padding-left:0}
     .plgrid{grid-template-columns:1fr}
     .app{grid-template-columns:1fr;background:none}
@@ -423,12 +440,24 @@
       </div>
       <div class="acts">
         <span class="rb">Review build · posts save in this browser only</span>
+        <span class="rb" id="whoChip" hidden></span><button type="button" class="btn ghost" id="btnOut" hidden>Sign out</button>
         <div class="seg" role="group" aria-label="Signed in as (simulated)"><span>Signed in as</span><button type="button" data-role="Editor" aria-pressed="true">Editor</button><button type="button" data-role="Approver" aria-pressed="false">Approver</button></div>
         <button type="button" class="btn" id="btnCheck"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>Check sources</button>
         <button type="button" class="btn gold" id="btnNew"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New advisory</button>
       </div>
     </header>
     <div class="islbar" id="islPick" role="group" aria-label="Island" hidden></div>
+    <div class="signin" id="signIn" hidden role="dialog" aria-modal="true" aria-labelledby="siH">
+      <form class="card" id="siForm" autocomplete="off">
+        <h2 id="siH">Sign in to the GoHawaii Dashboard</h2>
+        <p class="sub">Paste the staff key you were given. It stays in this browser tab only and goes when you close it.</p>
+        <label class="f" for="siKey">Staff key</label>
+        <input type="password" id="siKey" required autocomplete="off" spellcheck="false">
+        <div class="formfoot"><button type="submit" class="btn pri">Sign in</button></div>
+        <div class="msg" id="siMsg" role="status"></div>
+      </form>
+    </div>
+    <div class="msg" id="syncMsg" role="status" style="position:fixed;right:16px;bottom:16px;z-index:1200;max-width:360px"></div>
 
     <!-- OVERVIEW -->
     <section class="view" id="v-now" aria-label="Right now">
@@ -631,6 +660,7 @@
         <span class="rb samp">Sample data. Illustrative figures, not a report. This review build counts nothing, so live numbers begin once counting is switched on for the GoHawaii link.</span>
         <div class="seg" role="group" aria-label="Data mode"><button type="button" aria-pressed="true">Preview</button><button type="button" aria-pressed="false" disabled title="This review build counts nothing. Switch counting on for the GoHawaii link to see live numbers.">Live data · switch on counting</button></div>
       </div>
+      <div class="card" id="liveCard" style="margin-bottom:16px"></div>
       <div class="card" style="margin-bottom:16px">
         <div class="uh"><div><h2>All four islands</h2><p class="sub" style="margin-bottom:0">The state set: checks a day on each of the four islands the GoHawaii link runs on. A check is one visitor opening one beach in the app. Pick an island for its graphs.</p></div><span class="chip sample">Sample</span></div>
         <div class="ugrid" id="uState"></div>
@@ -854,16 +884,19 @@
 <iframe id="probe" title="Beach verdict reader" aria-hidden="true" tabindex="-1" style="position:absolute;left:-10000px;top:0;width:390px;height:844px;border:0;visibility:hidden"></iframe>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/gh/advisories.js?b=2026-09-23-adv11"></script>
+<script src="/gh/config.js?b=2026-09-23-adv12"></script>
+<script src="/gh/advisories.js?b=2026-09-23-adv12"></script>
 <script>
 (function(){
   'use strict';
   var A = window.GH_ADV;
   var esc = A.esc, ISL = A.ISL, ORDER = A.ORDER;
   var $ = function(id){ return document.getElementById(id); };
-  var BUILD = '2026-09-23-adv11', LAYER_BUILD = '2026-09-18-photos-adv3';
+  var BUILD = '2026-09-23-adv12', LAYER_BUILD = '2026-09-18-photos-adv3';
   var state = { isl: 'kauai', view: 'now', role: 'Editor', feeds: { nws: null, hta: null }, beaches: null, layers: {}, evKind: 'event', start: 'now', end: '24', cEnd: '168', previewId: '', tbl: 'all', verd: {} };
   try { state.role = sessionStorage.getItem('ghd_role') || 'Editor'; } catch(e){}
+  // Review build: "who" is the role switch. Live (gh/config.js names the backend): the signed-in person.
+  state.who = state.role; state.live = !!A.API; state.org = 'state';
   try { var q = new URLSearchParams(location.search); if(ISL[q.get('island')]) state.isl = q.get('island'); if(q.get('view')) state.view = q.get('view'); } catch(e){}
   try { state.verd = JSON.parse(sessionStorage.getItem('ghd_verdicts') || '{}') || {}; } catch(e){}
   var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', promo: 'Promotions', place: 'Places', use: 'Visitors and intent', rep: 'Monthly report', prev: 'Visitor preview', log: 'Activity log' };
@@ -874,7 +907,7 @@
   // datetime-local values are read as Hawaiʻi time (UTC-10, no daylight saving), whatever the device zone.
   function fromHst(v){ var t = Date.parse(v + ':00-10:00'); return isFinite(t) ? t : NaN; }
   function toHstInput(t){ var d = new Date(t - 10 * 3600e3); return d.toISOString().slice(0, 16); }
-  function log(st, what, it){ st.log.push({ at: iso(now()), who: state.role, what: what, id: it ? it.id : '', title: it ? it.title : '' }); }
+  function log(st, what, it){ st.log.push({ at: iso(now()), who: state.who, what: what, id: it ? it.id : '', title: it ? it.title : '' }); }
   function status(it){
     if(it.status === 'pending') return 'pend';
     if(it.status === 'draft') return 'draft';
@@ -890,11 +923,13 @@
 
   // ---- islands ----
   function islPick(){
-    $('islPick').innerHTML = ORDER.map(function(k){ return '<button type="button" data-isl="' + k + '" aria-pressed="' + (k === state.isl) + '">' + ISL[k] + '</button>'; }).join('');
+    $('islPick').innerHTML = ORDER.filter(function(k){ return !(state.live && state.org && state.org !== 'state') || k === state.org; }).map(function(k){ return '<button type="button" data-isl="' + k + '" aria-pressed="' + (k === state.isl) + '">' + ISL[k] + '</button>'; }).join('');
     $('pvDots').innerHTML = ORDER.map(function(k){ return '<button type="button" data-isl="' + k + '" aria-pressed="' + (k === state.isl) + '" aria-label="' + ISL[k] + '" title="' + ISL[k] + '"></button>'; }).join('');
   }
   function pickIsland(k){
     if(!ISL[k]) return;
+    // County staff work on their own island; the server refuses the rest anyway.
+    if(state.live && state.org && state.org !== 'state' && k !== state.org){ msg('syncMsg', 'err', 'Your key is for ' + ISL[state.org] + '. Only State staff switch islands.'); return; }
     state.isl = k; islPick(); renderNow(); paintMap();
     if(state.view === 'now') loadNowFrame();
     if(state.view === 'prev') loadPreview();
@@ -919,7 +954,7 @@
   function rolePaint(){ Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function(b){ b.setAttribute('aria-pressed', String(b.dataset.role === state.role)); }); }
   document.querySelector('.seg').addEventListener('click', function(e){
     var b = e.target.closest('button[data-role]'); if(!b) return;
-    state.role = b.dataset.role; try { sessionStorage.setItem('ghd_role', state.role); } catch(x){}
+    state.role = b.dataset.role; state.who = state.role; try { sessionStorage.setItem('ghd_role', state.role); } catch(x){}
     rolePaint(); renderAll();
   });
 
@@ -1080,7 +1115,7 @@
     $('stamp').innerHTML = at ? 'Sources checked <b>' + esc(A.hst(iso(at))) + '</b>' : 'Checking the sources...';
     var pend = A.load().items.filter(function(i){ return i.status === 'pending'; });
     $('pendingNow').innerHTML = pend.length ? pend.map(function(it){
-      var mine = it.by === state.role;
+      var mine = it.by === state.who;
       return '<div class="item"><b>' + esc(it.title) + smp(it) + '</b><span class="m">' + lvChip(it.level) + ' ' + esc(A.islandNames(it.islands)) + ' · posted by ' + esc(it.by) + ', ' + esc(A.hst(it.created)) + '</span>'
         + '<div class="row2">' + (mine ? '<button class="btn" disabled title="The person who posted it cannot approve it. Switch to the other role to try it.">Needs the other person</button>' : '<button class="btn red" data-act="approve" data-id="' + it.id + '">Approve</button>')
         + '<button class="btn" data-act="reject" data-id="' + it.id + '">Send back</button></div></div>';
@@ -1142,7 +1177,7 @@
 
   // ---- item rows + actions (shared by the lists) ----
   function rowHtml(it){
-    var s = status(it), canApprove = s === 'pend' && it.by !== state.role;
+    var s = status(it), canApprove = s === 'pend' && it.by !== state.who && (!state.live || state.role === 'Approver');
     var acts = [];
     if(s === 'pend') acts.push(canApprove ? '<button class="btn red" data-act="approve" data-id="' + it.id + '">Approve</button>' : '<button class="btn" disabled title="The person who posted it cannot approve it. Switch to the other role to try it.">Needs the other person</button>');
     if(s === 'pend') acts.push('<button class="btn" data-act="reject" data-id="' + it.id + '">Send back</button>');
@@ -1166,7 +1201,7 @@
     var a = b.dataset.act;
     if(a === 'preview'){ state.previewId = it.status === 'live' ? '' : it.id; state.isl = (it.islands && it.islands[0] && ISL[it.islands[0]]) ? it.islands[0] : state.isl; islPick(); show('prev'); return; }
     if(a === 'dup'){ promoFill(it); show('promo'); msg('pMsg', 'ok', 'Copied into the form. Change what you need and post it.'); return; }
-    if(a === 'approve'){ if(it.by === state.role) return; it.status = 'live'; it.approvedBy = state.role; it.approvedAt = iso(now()); log(st, 'Approved red advisory', it); }
+    if(a === 'approve'){ if(it.by === state.who) return; it.status = 'live'; it.approvedBy = state.who; it.approvedAt = iso(now()); log(st, 'Approved red advisory', it); }
     if(a === 'reject'){ it.status = 'draft'; log(st, 'Sent back to draft', it); }
     if(a === 'end'){ it.status = 'ended'; it.endedAt = iso(now()); log(st, it.kind === 'feature' ? 'Ended feature' : it.kind === 'promo' ? 'Ended promotion' : 'Ended advisory', it); }
     if(a === 'publish'){ if(it.level === 'red' && it.kind === 'advisory'){ it.status = 'pending'; log(st, 'Sent red advisory for approval', it); } else { it.status = 'live'; log(st, 'Posted', it); } }
@@ -1272,7 +1307,7 @@
     return { it: {
       id: uid(), kind: 'advisory', src: 'staff', srcName: 'GoHawaii', level: lv(), title: title, body: $('fBody').value.trim(), where: $('fWhere').value.trim(),
       islands: islands, beaches: beaches, link: link, starts: iso(st), ends: iso(en), sent: iso(now()), created: iso(now()),
-      by: state.role, sample: $('advForm').dataset.sample === '1', from: draftFrom
+      by: state.who, sample: $('advForm').dataset.sample === '1', from: draftFrom
     } };
   }
   function resetForm(){ $('advForm').reset(); fillForm({ level: 'yellow', islands: [state.isl] }); $('fStartAt').style.display = 'none'; $('fEndAt').style.display = 'none'; }
@@ -1343,7 +1378,7 @@
     var st = A.load();
     var end = g.when ? Date.parse(g.when + 'T23:59:00-10:00') : now() + 14 * 24 * 3600e3;
     var it = { id: uid(), kind: 'feature', src: 'staff', sub: g.type === 'event' ? 'Event' : 'Mālama', ref: g.id, title: g.name, when: g.when || '', venue: g.venue || '',
-      img: g.img || '', link: g.src_url || '', body: '', islands: [state.isl], starts: iso(now()), ends: iso(end), status: 'live', by: state.role, created: iso(now()) };
+      img: g.img || '', link: g.src_url || '', body: '', islands: [state.isl], starts: iso(now()), ends: iso(end), status: 'live', by: state.who, created: iso(now()) };
     st.items.push(it); log(st, it.sub === 'Event' ? 'Featured event' : 'Featured Mālama program', it); A.save(st); renderAll();
   });
   // ---- Promotions: GoHawaii's own timed notices, kind 'promo' in the shared engine (Nick, 2026-09-19) ----
@@ -1380,7 +1415,7 @@
     if(state.pWin === 'set'){ win = { start: $('pWinStart').value, end: $('pWinEnd').value }; if(!/^\d{2}:\d{2}$/.test(win.start) || !/^\d{2}:\d{2}$/.test(win.end) || win.start === win.end){ msg('pMsg', 'err', 'Set a start and an end hour.'); return; } }
     var st = A.load();
     var it = { id: uid(), kind: 'promo', src: 'staff', srcName: 'GoHawaii', title: title, body: $('pBody').value.trim(), link: link, islands: islands, beaches: [],
-      window: win, days: days.length === 7 ? null : days, starts: iso(now()), ends: iso(now() + (+state.pEnd) * 3600e3), status: 'live', by: state.role, created: iso(now()), sample: promoSampleFlag };
+      window: win, days: days.length === 7 ? null : days, starts: iso(now()), ends: iso(now() + (+state.pEnd) * 3600e3), status: 'live', by: state.who, created: iso(now()), sample: promoSampleFlag };
     promoSampleFlag = false;
     st.items.push(it); log(st, 'Posted promotion', it); A.save(st);
     $('promoForm').reset(); islChecks('pIsl', [state.isl]); dayChecks([0,1,2,3,4,5,6]); winSet(null); chipSet('pEnd', 'pEnd', '168');
@@ -1395,7 +1430,7 @@
     if(!islands.length){ msg('cMsg', 'err', 'Pick at least one island.'); return; }
     var st = A.load();
     var it = { id: uid(), kind: 'feature', src: 'staff', sub: 'Campaign', ref: '', title: title, body: $('cBody').value.trim(), link: link, img: '', islands: islands,
-      starts: iso(now()), ends: iso(now() + (+state.cEnd) * 3600e3), status: 'live', by: state.role, created: iso(now()) };
+      starts: iso(now()), ends: iso(now() + (+state.cEnd) * 3600e3), status: 'live', by: state.who, created: iso(now()) };
     st.items.push(it); log(st, 'Posted campaign', it); A.save(st);
     $('campForm').reset(); islChecks('cIsl', [state.isl]); msg('cMsg', 'ok', 'Featured. It is at the top of the GoHawaii page on this browser now.'); renderAll();
   });
@@ -1475,6 +1510,7 @@
     return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
   }
   function renderUse(){
+    renderLive(); if(state.live && A.staffOn() && (!state.liveStats || state.liveStats.days !== state.liveDays)) loadLive();
     // Beach names come from the same list the app uses; load it once, then paint.
     if(!state.beaches){ loadBeaches().then(function(){ if(state.view === 'use') renderUse(); }); return; }
     var k = state.isl, u = USE[k], f = factor(k), name = ISL[k];
@@ -1834,7 +1870,7 @@
   function plInBox(lat, lon){ var b = PL_BOX[state.isl]; return isFinite(lat) && isFinite(lon) && lat >= b[0] && lat <= b[1] && lon >= b[2] && lon <= b[3]; }
   // Every place on this island, as the app would get it, tagged with what staff did to it.
   function plRows(){
-    var d = A.placesLoad(), base = (state.layers[state.isl] && state.layers[state.isl].rows) || [];
+    var d = A.placesLoad(state.isl), base = (state.layers[state.isl] && state.layers[state.isl].rows) || [];
     var byId = {}; A.applyPlaces(state.isl, base, { edits: d.edits, hidden: {}, added: d.added }).forEach(function(r){ byId[r.id] = r; });
     return Object.keys(byId).map(function(id){
       var r = byId[id], added = id.indexOf('gh_staff_') === 0;
@@ -1848,7 +1884,7 @@
     var ae = document.activeElement;
     if(ae && $('plList').contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return;
     $('plH').textContent = 'Places on ' + ISL[state.isl];
-    $('plOwner').innerHTML = plOwnerOpts($('plOwner').value || A.OWNERS.state);
+    $('plOwner').innerHTML = plOwnerOpts($('plOwner').value || (state.live && ISL[state.org] ? A.OWNERS[state.org] : A.OWNERS.state));
     if(!$('plCat').options.length) $('plCat').innerHTML = plCatOpts('scenic');
     var all = plRows(), q = $('plQ').value.trim().toLowerCase();
     var areas = {}; all.forEach(function(x){ if(x.r.r) areas[x.r.r] = 1; });
@@ -1892,7 +1928,7 @@
       + (r.src_url ? '<a class="btn ghost" href="' + esc(r.src_url) + '" target="_blank" rel="noopener">Open on gohawaii.com</a>' : '') + '</div>'
       + '<div class="msg" role="status"></div></div></details>';
   }
-  function plLog(what, id, title){ var st = A.load(); st.log.push({ at: iso(now()), who: state.role, what: what, id: id, title: title }); A.save(st); }
+  function plLog(what, id, title){ var st = A.load(); st.log.push({ at: iso(now()), who: state.who, what: what, id: id, title: title }); A.save(st); }
   function plMsg(el, kind, text){ el.className = 'msg on ' + kind; el.textContent = text; clearTimeout(el._t); el._t = setTimeout(function(){ el.className = 'msg'; }, 6000); }
   // Read an open row's fields; null (with the reason shown) when something is off.
   function plRead(box, m){
@@ -1908,23 +1944,23 @@
   $('plList').addEventListener('toggle', function(e){ var d = e.target; if(!d.classList || !d.classList.contains('pl')) return; if(d.open){ state.plOpen = d.dataset.id; plFocus(d.dataset.id); } else if(state.plOpen === d.dataset.id){ state.plOpen = ''; if(state.plPick !== 'add') plPickSet('add'); } }, true);
   $('plList').addEventListener('click', function(e){
     var b = e.target.closest('button[data-pl]'); if(!b) return;
-    var box = b.closest('.pl'), id = box.dataset.id, m = box.querySelector('.msg'), act = b.dataset.pl, d = A.placesLoad();
+    var box = b.closest('.pl'), id = box.dataset.id, m = box.querySelector('.msg'), act = b.dataset.pl, d = A.placesLoad(state.isl);
     var x = plRows().filter(function(y){ return y.r.id === id; })[0]; if(!x) return;
     if(act === 'pick'){ plPickSet(id); return; }
     if(act === 'hide' || act === 'show'){
-      if(act === 'hide') d.hidden[id] = { at: iso(now()), by: state.role }; else delete d.hidden[id];
-      A.placesSave(d); plLog(act === 'hide' ? 'Hid place from the app' : 'Put place back in the app', id, x.r.name); renderAll(); return;
+      if(act === 'hide') d.hidden[id] = { at: iso(now()), by: state.who }; else delete d.hidden[id];
+      A.placesSave(state.isl, d); plLog(act === 'hide' ? 'Hid place from the app' : 'Put place back in the app', id, x.r.name); renderAll(); return;
     }
-    if(act === 'undo'){ delete d.edits[id]; A.placesSave(d); plLog('Undid place changes', id, x.r.name); renderAll(); return; }
+    if(act === 'undo'){ delete d.edits[id]; A.placesSave(state.isl, d); plLog('Undid place changes', id, x.r.name); renderAll(); return; }
     if(act === 'del'){
       if(!confirm('Remove ' + x.r.name + ' from the app? It was added here, so this takes it off for good.')) return;
-      d.added[state.isl] = (d.added[state.isl] || []).filter(function(r){ return r.id !== id; }); delete d.hidden[id];
-      A.placesSave(d); plLog('Removed added place', id, x.r.name); state.plOpen = ''; plPickSet('add'); renderAll(); return;
+      d.added = d.added.filter(function(r){ return r.id !== id; }); delete d.hidden[id];
+      A.placesSave(state.isl, d); plLog('Removed added place', id, x.r.name); state.plOpen = ''; plPickSet('add'); renderAll(); return;
     }
     if(act === 'save'){
       var o = plRead(box, m); if(!o) return;
       if(x.added){
-        d.added[state.isl] = (d.added[state.isl] || []).map(function(r){ if(r.id !== id) return r; var n = {}; for(var k in r) n[k] = r[k]; for(var k2 in o) if(o[k2] !== undefined) n[k2] = o[k2]; n.n = n.name; return n; });
+        d.added = d.added.map(function(r){ if(r.id !== id) return r; var n = {}; for(var k in r) n[k] = r[k]; for(var k2 in o) if(o[k2] !== undefined) n[k2] = o[k2]; n.n = n.name; return n; });
       } else {
         // Keep only what differs from GoHawaii's listing, so a later pull still updates the rest.
         var diff = {}, orig = x.orig || {};
@@ -1932,7 +1968,7 @@
         if(diff.name) diff.n = diff.name;
         if(Object.keys(diff).length) d.edits[id] = diff; else delete d.edits[id];
       }
-      A.placesSave(d); plLog(x.added ? 'Changed added place' : 'Changed place details', id, o.name); state.plOpen = id; plPickSet('add'); renderAll();
+      A.placesSave(state.isl, d); plLog(x.added ? 'Changed added place' : 'Changed place details', id, o.name); state.plOpen = id; plPickSet('add'); renderAll();
       var nb = document.querySelector('.pl[data-id="' + id + '"] .msg'); if(nb) plMsg(nb, 'ok', 'Saved. The app on this browser shows it now.');
     }
   });
@@ -1993,11 +2029,89 @@
     if(!$('plLat').value || !plInBox(lat, lon)){ plMsg(m, 'err', 'Tap the map on ' + ISL[state.isl] + ' to set the pin.'); return; }
     var r = { id: 'gh_staff_' + uid(), name: name, n: name, r: $('plArea').value.trim(), lat: lat, lon: lon, target: c[1], type: c[2], theme: c[3] || undefined, tags: ['gohawaii'],
       tip: $('plTip').value.trim(), hours: $('plHours').value.trim(), address: $('plAddr').value.trim(), website: site, img: img, owner: $('plOwner').value, src: 'gohawaii', src_url: '',
-      by: state.role, created: iso(now()) };
-    var d = A.placesLoad(); (d.added[state.isl] = d.added[state.isl] || []).push(r); A.placesSave(d);
+      by: state.who, created: iso(now()) };
+    var d = A.placesLoad(state.isl); d.added.push(r); A.placesSave(state.isl, d);
     plLog('Added place', r.id, r.name);
     $('plForm').reset(); $('plCat').value = 'scenic'; if(plDraft && plMap){ plMap.removeLayer(plDraft); plDraft = null; }
     plMsg(m, 'ok', 'Added. It is in the app\'s ' + c[4].toLowerCase() + ' list and on its map on this browser now.'); renderAll();
+  });
+
+  // ---- Live: the shared backend named in gh/config.js (backend-gohawaii/). Off in the review build. ----
+  // Signed-in staff read and save through it; the server fills every "who" from the key, holds a red
+  // until a second person who is an Approver approves it, and keeps county staff to their own island.
+  state.liveDays = 30; state.liveStats = null; state.liveErr = '';
+  function syncMsg(kind, text){ msg('syncMsg', kind, text); }
+  function liveMe(j){
+    state.who = j.name; state.role = j.role; state.org = j.org;
+    $('whoChip').textContent = j.name + ' · ' + j.role + ' · ' + j.orgLabel; $('whoChip').hidden = false; $('btnOut').hidden = false;
+    document.querySelector('.seg[aria-label="Signed in as (simulated)"]').hidden = true;
+    document.querySelector('.rb').textContent = 'Live · shared with every signed-in browser';
+    if(j.org !== 'state' && ISL[j.org]){ state.isl = j.org; $('plOwner').innerHTML = ''; }
+    // Review-build wording goes: when live, a post or a place change reaches every browser.
+    Array.prototype.forEach.call(document.querySelectorAll('p.sub, .note'), function(n){
+      if(/review build/i.test(n.textContent) && !n.children.length) n.textContent = n.textContent.replace(/\s*In the review build[^.]*\.\s*/g, ' ').trim();
+    });
+    var rb = document.querySelector('#v-use .rb.samp'); if(rb) rb.textContent = 'The first card is live totals from the GoHawaii link. The cards below it are still sample figures.';
+    $('signIn').hidden = true; islPick(); renderAll();
+  }
+  function liveStart(){
+    if(!state.live) return;
+    $('siForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      var k = $('siKey').value.trim(); if(!k) return;
+      A.signIn(k).then(function(j){ $('siKey').value = ''; liveMe(j); }).catch(function(){ msg('siMsg', 'err', 'That key did not work. Check it, or ask for a new one.'); });
+    });
+    $('btnOut').addEventListener('click', function(){ A.signOut(); location.reload(); });
+    window.addEventListener('gh-synced', function(){ renderAll(); });
+    window.addEventListener('gh-sync-error', function(e){
+      var d = e.detail || {}, why = { conflict: 'Someone else saved first' + (d.by ? ' (' + d.by + ')' : '') + '. Their version is showing; make your change again.',
+        red_needs_approver: 'A red advisory goes live only when an Approver approves it.', red_needs_second_person: 'A red advisory needs a second person to approve it.',
+        county_island: 'County staff can change only their own island.', offline: 'Could not reach the server. Your change is on this screen only; try again.' }[d.error] || 'The server did not save that (' + d.error + ').';
+      syncMsg('err', why); renderAll();
+    });
+    if(!A.staffOn()){ $('signIn').hidden = false; setTimeout(function(){ $('siKey').focus(); }, 50); return; }
+    A.me().then(function(j){ if(!j){ A.signOut(); $('signIn').hidden = false; return; } A.pullStaff().then(function(){ liveMe(j); }); });
+    setInterval(function(){ if(A.staffOn()) A.pullStaff(); }, 60 * 1000);
+  }
+  function loadLive(){
+    if(!state.live || !A.staffOn()) return;
+    A.stats(state.liveDays).then(function(j){
+      if(!j || j._status !== 200){ state.liveErr = 'Could not read the totals.'; state.liveStats = null; }
+      else { state.liveErr = ''; state.liveStats = j; }
+      if(state.view === 'use') renderLive();
+    });
+  }
+  function renderLive(){
+    var el = $('liveCard'); if(!el) return;
+    if(!state.live){
+      el.innerHTML = '<div class="uh"><div><h2>Live visitor counts</h2><p class="sub" style="margin-bottom:0">Off in this review copy. When the GoHawaii backend is connected, this card shows real totals from the GoHawaii link: visits a day on each island, the beaches and places opened, the tabs used, the languages read, and taps through to gohawaii.com. Totals only: nothing is kept about any one visitor.</p></div><span class="chip sample">Not connected</span></div>';
+      return;
+    }
+    var j = state.liveStats;
+    var head = '<div class="uh"><div><h2>Live visitor counts</h2><p class="sub" style="margin-bottom:0">Real totals from the GoHawaii link, by Hawaiʻi calendar day. A visit is one visitor opening the app on one island in one browser session. Totals only: nothing is kept about any one visitor.</p></div>'
+      + '<div class="chips" id="lvDays">' + [7, 30, 90].map(function(n){ return '<button type="button" data-v="' + n + '" aria-pressed="' + (n === state.liveDays) + '">' + n + ' days</button>'; }).join('') + '</div></div>';
+    if(!j){ el.innerHTML = head + '<div class="empty">' + (state.liveErr || 'Reading the totals...') + '</div>'; return; }
+    var per = {}; ORDER.forEach(function(k){ per[k] = 0; }); (j.visits || []).forEach(function(r){ per[r.island] = (per[r.island] || 0) + r.n; });
+    var days = []; for(var t = Date.parse(j.from + 'T12:00:00Z'); t <= Date.parse(j.to + 'T12:00:00Z'); t += 864e5) days.push(new Date(t).toISOString().slice(0, 10));
+    var byDay = {}; (j.visits || []).forEach(function(r){ if(r.island === state.isl) byDay[r.day] = r.n; });
+    var mx = Math.max.apply(null, days.map(function(d){ return byDay[d] || 0; }).concat([1]));
+    var tops = function(metric, name, n){
+      var rows = (j.top || []).filter(function(r){ return r.island === state.isl && r.metric === metric; }).slice(0, n || 6);
+      return rows.length ? '<ol>' + rows.map(function(r){ return '<li>' + esc(name ? name(r.k) : r.k) + ' <span>' + r.n + '</span></li>'; }).join('') + '</ol>' : '<div class="note">None yet.</div>';
+    };
+    var bname = function(k){ var b = state.beaches && state.beaches[state.isl]; var hit = Array.isArray(b) ? b.filter(function(x){ return x.id === k; })[0] : (b && b[k]); return (hit && (hit.name || hit.n)) || k; };
+    var pname = function(k){ var L0 = state.layers[state.isl]; var hit = L0 && (L0.rows || []).filter(function(x){ return x.id === k; })[0]; if(hit) return hit.name; var d = A.placesLoad(state.isl); var ad = d.added.filter(function(x){ return x.id === k; })[0]; return ad ? ad.name : k; };
+    var LNK = { gohawaii: 'gohawaii.com', website: 'A listing\'s own website', directions: 'Directions' };
+    el.innerHTML = head
+      + '<div class="lvgrid">' + ORDER.map(function(k){ return '<button type="button" class="k" data-isl="' + k + '" aria-pressed="' + (k === state.isl) + '"><b>' + per[k].toLocaleString('en-US') + '</b><span>visits · ' + ISL[k] + '</span></button>'; }).join('') + '</div>'
+      + '<div class="lvbars" role="img" aria-label="Visits a day on ' + esc(ISL[state.isl]) + '">' + days.map(function(d){ var v = byDay[d] || 0; return '<i style="height:' + Math.round(v / mx * 100) + '%" title="' + d + ': ' + v + '"></i>'; }).join('') + '</div>'
+      + '<div class="note">Visits a day on ' + esc(ISL[state.isl]) + ', ' + esc(j.from) + ' to ' + esc(j.to) + '.</div>'
+      + '<div class="lvtops"><div><h3>Beaches opened</h3>' + tops('beach', bname) + '</div><div><h3>GoHawaii places opened</h3>' + tops('place', pname) + '</div><div><h3>Tabs used</h3>' + tops('tab') + '</div>'
+      + '<div><h3>Taps out</h3>' + tops('link', function(k){ return LNK[k] || k; }) + '</div><div><h3>Languages</h3>' + tops('lang', function(k){ return k.toUpperCase(); }) + '</div><div><h3>Devices</h3>' + tops('dev', function(k){ return { ios: 'iPhone and iPad', android: 'Android', desktop: 'Computer' }[k] || k; }) + '</div></div>';
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('#lvDays button[data-v]'); if(b){ state.liveDays = +b.dataset.v; state.liveStats = null; renderLive(); loadLive(); return; }
+    var k = e.target.closest('#liveCard .k[data-isl]'); if(k) pickIsland(k.dataset.isl);
   });
 
   function renderAll(){
@@ -2011,6 +2125,7 @@
   islPick(); rolePaint(); islChecks('fIsl', [state.isl]); islChecks('cIsl', [state.isl]); islChecks('pIsl', [state.isl]); dayChecks([0,1,2,3,4,5,6]); lvPaint();
   initMap();
   show(state.view);
+  liveStart();
   renderAll(); check();
   // Listings for the per-island event counts, then the beach verdicts, after the page has painted.
   setTimeout(function(){ Promise.all(ORDER.map(loadLayer)).then(function(){ renderLegend(); if(state.view === 'feat') renderEvents(); }); }, 400);
