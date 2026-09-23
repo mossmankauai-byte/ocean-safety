@@ -3390,9 +3390,16 @@ let ACTS=[
    tip:'2.5-hour guided walk through movie-set valley (the giant Jurassic Park fig trees) and historic estate gardens. Reserve in advance — tours sell out.',
    tags:['cultural','garden','reservations','school_age','teen']},
   {id:'wailua_heiau',photo:'https://commons.wikimedia.org/wiki/Special:FilePath/Holoholok%C5%AB_Heiau_(14730222126).jpg?width=1600',photo_credit:'Teemu008 / CC BY-SA 2.0',name:'Wailua Heiau Complex',n:'Wailua Heiau',r:'East Side',lat:22.0470,lon:-159.3372,
-   type:'cultural',price:'Free',hours:"Daily during daylight hours; non-resident entry fee $5/person + $10/vehicle parking (credit card only at on-site kiosks, effective Feb 22 2026)",duration_min:30,
-   tip:'String of seven sacred sites along the Wailua River — Hawaiian royalty\'s spiritual capital. Hikinaakalā Heiau and Holoholokū Heiau are roadside-accessible.',
-   tags:['cultural','free','school_age','teen','parking_easy']},
+   type:'cultural',price:'Free',hours:"Daily 7:00am to 7:45pm; non-resident entry $5/person + $10/vehicle parking",duration_min:30,
+   tip:'String of seven sacred sites along the Wailua River, Hawaiian royalty\'s spiritual capital. Hikinaakalā Heiau and Holoholokū Heiau are roadside-accessible.',
+   tags:['cultural','free','school_age','teen','parking_easy'],heiau:{"kind":"Heiau complex","steward":"Hawaiʻi State Parks (Wailua River State Park)","access":"Roadside stops from the Wailua River mouth up Kuamoʻo Road","entry":"Free for Hawaiʻi residents. Visitors $5 per person, $10 parking","hours":"Daily 7:00am to 7:45pm","booking":"","state_list":true,"src":"https://dlnr.hawaii.gov/dsp/parks/kauai/wailua-river-state-park/","pin":"Wailua River mouth"}},
+  // HEIAU (culture/heiau/build_heiau.py)
+  {"id":"heiau_hikinaakala","name":"Hikinaakalā Heiau","n":"Hikinaakalā Heiau","r":"East Side","lat":22.04291,"lon":-159.3356,"type":"cultural","price":"Free for Hawaiʻi residents","hours":"Daily 7:00am to 7:45pm","duration_min":30,"tip":"Part of the Wailua Complex of Heiau, a National Historic Landmark. The same site holds Hauola, a place of refuge, and petroglyphs at the river mouth.","tags":["cultural","parking_easy","restrooms","school_age","teen"],"website":"https://dlnr.hawaii.gov/dsp/parks/kauai/wailua-river-state-park/","heiau":{"kind":"Heiau and place of refuge","steward":"Hawaiʻi State Parks (Wailua River State Park)","access":"Next to Lydgate Park, at the mouth of the Wailua River","entry":"Free for Hawaiʻi residents. Visitors $5 per person, $10 parking","hours":"Daily 7:00am to 7:45pm","booking":"","state_list":true,"src":"https://dlnr.hawaii.gov/dsp/parks/kauai/wailua-river-state-park/","pin":"OpenStreetMap"}},
+  {"id":"heiau_holoholoku","name":"Holoholokū Heiau","n":"Holoholokū Heiau","r":"East Side","lat":22.04901,"lon":-159.33959,"type":"cultural","price":"Free for Hawaiʻi residents","hours":"Daily 7:00am to 7:45pm","duration_min":20,"tip":"Also known as Kalaeokamanu. The birthing stone and the navel stone sit about 65 feet inland from the heiau.","tags":["cultural","parking_easy","school_age","teen"],"website":"https://dlnr.hawaii.gov/dsp/parks/kauai/wailua-river-state-park/","heiau":{"kind":"Heiau and royal birth site","steward":"Hawaiʻi State Parks (Wailua River State Park)","access":"Roadside on the south side of Kuamoʻo Road (Route 580), just past the old Coco Palms","entry":"Free for Hawaiʻi residents. Visitors $5 per person, $10 parking","hours":"Daily 7:00am to 7:45pm","booking":"","state_list":true,"src":"https://dlnr.hawaii.gov/dsp/parks/kauai/wailua-river-state-park/","pin":"National Register nomination (UTM, shifted to WGS84)","aka":"Kalaeokamanu"}},
+  {"id":"heiau_poliahu","name":"Poliʻahu Heiau","n":"Poliʻahu Heiau","r":"East Side","lat":22.04627,"lon":-159.35585,"type":"cultural","price":"Free for Hawaiʻi residents","hours":"Daily 7:00am to 7:45pm","duration_min":20,"tip":"A large heiau of more than an acre on the north bank of the Wailua River, part of the Wailua Complex of Heiau.","tags":["cultural","parking_easy","school_age","teen"],"website":"https://dlnr.hawaii.gov/dsp/parks/kauai/wailua-river-state-park/","heiau":{"kind":"Heiau","steward":"Hawaiʻi State Parks (Wailua River State Park)","access":"Off Kuamoʻo Road, on the bluff above the Wailua River, before the ʻŌpaekaʻa Falls lookout","entry":"Free for Hawaiʻi residents. Visitors $5 per person, $10 parking","hours":"Daily 7:00am to 7:45pm","booking":"","state_list":true,"src":"https://dlnr.hawaii.gov/dsp/parks/kauai/wailua-river-state-park/","pin":"National Register nomination (UTM, shifted to WGS84)"}},
+  {"id":"heiau_kauluapaoa","name":"Kauluapāʻoa Heiau","n":"Kauluapāʻoa Heiau","r":"North Shore","lat":22.2221,"lon":-159.5827,"type":"cultural","price":"Free for Hawaiʻi residents","hours":"Daily 7:00am to 7:45pm (winter to 6:45pm)","duration_min":30,"tip":"At the end of the road on the north shore. Book the park before you drive; there is no walk-up entry for visitors.","tags":["cultural","reservations","restrooms","school_age","teen"],"website":"https://dlnr.hawaii.gov/dsp/parks/kauai/haena-state-park/","heiau":{"kind":"Heiau","steward":"Hawaiʻi State Parks (Hāʻena State Park)","access":"Near Keʻe Beach, inside Hāʻena State Park","entry":"Free for Hawaiʻi residents. Visitors $5 per person, $10 parking, booked ahead","hours":"Daily 7:00am to 7:45pm (winter to 6:45pm)","booking":"Visitors need an entry and parking reservation at gohaena.com, up to 30 days ahead","state_list":true,"src":"https://dlnr.hawaii.gov/dsp/parks/kauai/haena-state-park/","pin":"Access point: Keʻe Beach"}},
+  {"id":"heiau_kaneiolouma","name":"Kāneiolouma","n":"Kāneiolouma","r":"South Shore","lat":21.8754,"lon":-159.45285,"type":"cultural","price":"Free","hours":"Daylight hours","duration_min":30,"tip":"A 13-acre village site from the 1400s with house sites, fishponds, loʻi, and a Makahiki sporting ground. Four carved kiʻi face the cardinal directions.","tags":["cultural","free","parking_easy","little_kid","school_age","teen"],"website":"https://en.wikipedia.org/wiki/K%C4%81neiolouma_Complex","heiau":{"kind":"Village and heiau complex","steward":"Hui Mālama O Kāneiolouma, on County of Kauaʻi land","access":"Across the street from Poʻipū Beach Park; park at the beach park and walk over","entry":"Free","hours":"Daylight hours","booking":"","state_list":false,"src":"https://en.wikipedia.org/wiki/K%C4%81neiolouma_Complex","pin":"OpenStreetMap"}},
+  // END HEIAU
   {id:'grove_farm',name:'Grove Farm Homestead Museum',n:'Grove Farm',r:'East Side',lat:21.9789,lon:-159.3880,
    type:'cultural',price:'$25 adults / $10 kids',hours:'Tours 10am & 1pm Mon, Wed, Thu',duration_min:120,
    tip:'Preserved 1864 sugar plantation home — original furnishings, kitchens, outbuildings. 2-hour guided tour, reservations required. Good rainy day option.',
@@ -7491,6 +7498,36 @@ function renderToursSheetContent(){
   document.head.appendChild(gs);
 }
 
+// HEIAU CARD: the attribute grid and the visiting block for a heiau or wahi pana pin (a.heiau, written by
+// culture/heiau/build_heiau.py). Protocol lines follow the State Parks brochure "Nā Wahi Pana", which is also
+// the State's own list of sites to visit. Meaning and moʻolelo stay with the cultural review partner.
+const HEIAU_BROCHURE='https://dlnr.hawaii.gov/dsp/files/2022/12/Wahi-Pana-brochure-1.pdf';
+function _heiauGrid(a){
+  const h=a.heiau, cell=(l,v,wide)=>v?`<div class="poi-cell"${wide?' style="grid-column:1/-1"':''}><div class="poi-cell-l">${l}</div><div class="poi-cell-v" style="font-size:12px">${v}</div></div>`:'';
+  return `<div class="poi-grid">
+      ${cell('What it is', h.kind + (h.aka ? ` <span style="font-weight:400;color:var(--mute)">· also called ${h.aka}</span>` : ''))}
+      ${cell('Cared for by', h.steward)}
+      ${cell('Entry', h.entry)}
+      ${cell('Hours', h.hours)}
+      ${cell('Getting there', h.access, true)}
+      ${cell('Booking', h.booking || 'None needed', true)}
+    </div>`;
+}
+function _heiauVisit(a){
+  const h=a.heiau, cult=window._isCulture && _isCulture();
+  const landId=cult && window._cultureLandAt ? _cultureLandAt(a.lat, a.lon) : null, land=landId && window._cultureIdx ? _cultureIdx.byId[landId] : null;
+  const rows=['Stay outside the walls. Do not walk on or over the stones; they are stacked without mortar and can collapse.',
+    'Arrive as a guest. Keep voices low and give the place your attention.',
+    'Leave no offering unless you know the protocol. If unsure, offer nothing spoken and nothing physical.',
+    'Take nothing. Moving or removing stones at a historic site on state land is against the law (HRS 6E-11).'];
+  return `<div class="poi-includes" style="margin-top:14px">
+      <div class="poi-cell-l" style="margin-bottom:4px">Visiting a heiau</div>
+      ${rows.map(t=>`<div class="poi-inc-item"><span class="poi-inc-dot"></span><span>${t}</span></div>`).join('')}
+      <div style="font-size:11px;color:var(--mute);margin-top:6px;line-height:1.4">${h.state_list ? 'On the State of Hawaiʻi list of heiau and sacred sites to visit. ' : ''}Guidance from <a href="${HEIAU_BROCHURE}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Hawaiʻi State Parks, Nā Wahi Pana</a>.${/^Access point/.test(h.pin||'') ? ' The pin marks the public way in.' : ''}</div>
+    </div>
+    ${land && window._cultureLandRow ? _cultureLandRow(a.name, land, 2) : ''}
+    ${cult && window._cultureSheetBlock ? _cultureSheetBlock(a,'about') : ''}`;
+}
 function openActSheet(id){
   if(typeof id==='string' && id.indexOf('gh_')===0){ return openGhSheet(id); }   // GoHawaii row: the shared sheet
   const a=ACTS.find(x=>x.id===id);if(!a)return;
@@ -7513,17 +7550,18 @@ function openActSheet(id){
       <div><div class="poi-hero-name" style="color:#fff">${a.name}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${a.r} • ${a.type}</div></div>
     </div>
     ${photoCreditLine(a)}
-    <div class="poi-grid">
+    ${a.heiau ? _heiauGrid(a) : `<div class="poi-grid">
       <div class="poi-cell"><div class="poi-cell-l">Price</div><div class="poi-cell-v">${a.price||'—'}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Hours</div><div class="poi-cell-v" style="font-size:11px">${a.hours||'—'}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Duration</div><div class="poi-cell-v">~${a.duration_min} min</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Best for</div><div class="poi-cell-v" style="font-size:11px;text-transform:capitalize">${ages}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Access</div><div class="poi-cell-v" style="font-size:11px">${accStr}</div></div>
       <div class="poi-cell"><div class="poi-cell-l">Weather</div><div class="poi-cell-v" style="font-size:11px">${weatherStr}</div></div>
-    </div>
+    </div>`}
     <div class="poi-local-tip" style="margin-top:14px"><span style="font-size:14px;flex-shrink:0">◈</span><span>${a.tip}</span></div>
+    ${a.heiau ? _heiauVisit(a) : ''}
     <div class="poi-cta-row">
-      <a href="${dirUrl(a.name, a.lat, a.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>
+      <a href="${dirUrl(a.name, a.lat, a.lon)}" target="_blank" rel="noopener" class="poi-cta-main">Get Directions</a>${a.heiau && a.heiau.src ? `<a href="${a.heiau.src}" target="_blank" rel="noopener" class="poi-cta-dir">Site page</a>` : ''}
     </div>`;
   document.getElementById('sheet').classList.add('on', 'sheet-poi');
   document.getElementById('overlay').classList.add('on');
