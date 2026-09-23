@@ -112,28 +112,23 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
 
     // The plate and the drawn tab glyphs are the two surfaces that replace something the app already
     // draws, so both are checked off, on and off again: the photo icons must come back untouched.
+    // The theme must NOT touch the tab bar or the map pins: the drawn set belongs to the tour and the
+    // cultural lists, and the app's own icons stay everywhere else. Checked in both states.
     const tabs = () => page.evaluate(() => {
-      // The pin swap is checked through the builder, not the map: which markers are on screen depends on
-      // the hour and the filters, but mkIcon's own output does not. The status colour must survive it.
       let pin = null;
-      try {
-        const h = mkIcon(B[0], {}).options.html;
-        const key = (/data-glyph="[a-z]+-([a-z]+)"/.exec(h) || [])[1];
-        const ink = (/class="mk-ink" style="color:(#[0-9a-f]+)"/.exec(h) || [])[1];
-        pin = { drawn: /mk-ink/.test(h), png: /data:image\/png/.test(h), key, ink,
-                inkMatches: !key || !ink || window.CULTURE_PIN_INK[key] === ink };
-      } catch (e) { pin = { err: String(e).slice(0, 60) }; }
-      const hz = (() => { try { return /data:image\/png/.test(mkActIcon({ type: 'hazard', n: 'x' }).options.html); } catch (e) { return null; } })();
+      try { const h = mkIcon(B[0], {}).options.html; pin = { png: /data:image\/png/.test(h), drawn: /mk-ink/.test(h) }; }
+      catch (e) { pin = { err: String(e).slice(0, 60) }; }
       return {
-        glyphs: document.querySelectorAll('#tabs .tab-glyph').length,
+        glyphs: document.querySelectorAll('#tabs .tab-glyph, #tabs .mk-ink').length,
         shown: [...document.querySelectorAll('#tabs img.tab-ico')].filter((i) => i.style.display !== 'none').length,
         plate: !!(window._culturePlate && map.hasLayer(window._culturePlate)),
         roads: !!(window._cultureRoads && map.hasLayer(window._cultureRoads)),
-        pin, hz
+        diagram: window._cultureDiagram ? window._cultureDiagram(3) : '',
+        pin
       };
     });
     const offTabs = await tabs();
-    ok(offTabs.glyphs === 0 && !offTabs.plate && !offTabs.roads, `${isl} off: no drawn glyph, no plate, no roads`);
+    ok(offTabs.glyphs === 0 && !offTabs.plate && !offTabs.roads, `${isl} off: no plate and no roads`);
     ok(offTabs.pin.png && !offTabs.pin.drawn, `${isl} off: the beach pin is the app's own disk`);
 
     const offText = {};
@@ -187,9 +182,9 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     ok(/cc-plan/.test(onMore.plan) && onMore.planChips === onMore.nMoku && /_culturePathOpen\(1\)/.test(onMore.plan), `${isl} on: Plan Learn card lists every moku (${onMore.planChips} of ${onMore.nMoku}) and opens the path`);
     ok(/Hula/.test(onMore.chips) && /#f6efdf/.test(onMore.chips), `${isl} on: event chips lead with Hula in the parchment style`);
     const onTabs = await tabs();
-    ok(onTabs.glyphs > 0 && onTabs.shown === 0 && onTabs.plate && onTabs.roads, `${isl} on: the plate and its roads are drawn and ${onTabs.glyphs} tab glyphs replace the photo icons`);
-    ok(onTabs.pin.drawn && !onTabs.pin.png && onTabs.pin.inkMatches, `${isl} on: the beach pin is redrawn and keeps its ${onTabs.pin.key} colour ${onTabs.pin.ink}`);
-    ok(onTabs.hz === true, `${isl} on: the hazard pin is left exactly as the app drew it`);
+    ok(onTabs.plate && onTabs.roads, `${isl} on: the plate and its roads are drawn`);
+    ok(onTabs.glyphs === 0 && onTabs.shown === offTabs.shown && onTabs.pin.png && !onTabs.pin.drawn, `${isl} on: the tab bar and the map pins are still the app's own icons`);
+    ok(/cd-hach/.test(onTabs.diagram) && /cd-rip/.test(onTabs.diagram) && (onTabs.diagram.match(/cd-plant/g) || []).length === 3, `${isl} on: the ridge-to-shore picture carries the hachure, the ripples and three plants`);
     for (const id of sample) {
       const g = await grab(id);
       ok(g.text === offText[id], `${isl} same: ${id} safety text identical with the theme on` + (g.text === offText[id] ? '' : `\n     off: ${offText[id].slice(0, 160)}\n     on:  ${g.text.slice(0, 160)}`));
@@ -204,7 +199,7 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     const back = await page.evaluate(() => ({ theme: document.documentElement.getAttribute('data-theme'), ribbon: !!document.getElementById('cultureRibbon'), lines: !!(window._cultureLines && map.hasLayer(window._cultureLines)) }));
     ok(back.theme === null && !back.ribbon && !back.lines, `${isl} off again: theme, ribbon and sections gone`);
     const backTabs = await tabs();
-    ok(backTabs.glyphs === 0 && backTabs.shown === offTabs.shown && !backTabs.plate && !backTabs.roads, `${isl} off again: plate and roads gone, every photo tab icon back (${backTabs.shown})`);
+    ok(backTabs.glyphs === 0 && backTabs.shown === offTabs.shown && !backTabs.plate && !backTabs.roads, `${isl} off again: plate and roads gone, tab bar untouched (${backTabs.shown})`);
     ok(backTabs.pin.png && !backTabs.pin.drawn, `${isl} off again: the beach pin is the app's own disk`);
   }
   await browser.close();

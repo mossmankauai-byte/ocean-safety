@@ -1701,9 +1701,6 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 .leaflet-cultureRoads-pane{opacity:1;transition:opacity .35s linear;pointer-events:none}
 :root[data-plate="close"] .leaflet-cultureRoads-pane{opacity:0}
 :root[data-theme="culture"] #map::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:401;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(74,53,32,.32) 100%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='1' seed='9'/><feColorMatrix values='0 0 0 0 .52 0 0 0 0 .33 0 0 0 0 .14 0 0 0 2.2 -1.72'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>"),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .10 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
-.mk-ink{display:block;line-height:0;filter:drop-shadow(0 2px 3px rgba(74,55,32,.3))}
-.tab-glyph{display:block;line-height:0}
-.tab-glyph svg{width:24px;height:24px;display:block;margin:0 auto}
 #cultureCard h3 .cc-h3i{display:inline-block;vertical-align:-3px;margin-right:6px;line-height:0;opacity:.75}
 #cultureCard h3 .cc-h3i svg{width:16px;height:16px}
 .leaflet-culture-pane svg path{mix-blend-mode:multiply}
@@ -1754,8 +1751,10 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 #cultureCard .cd-area{fill:#3f2e1c;fill-opacity:0;stroke:rgba(63,46,28,.26);stroke-width:1.2}
 #cultureCard .cd-area.cd-on{fill-opacity:.16;stroke:#3f2e1c;stroke-width:1.6}
 #cultureCard .cd-line{stroke:rgba(90,70,48,.3);stroke-width:1}
+#cultureCard .cd-hach{stroke:rgba(90,70,48,.34);stroke-width:.7}
+#cultureCard .cd-rip{stroke:rgba(90,70,48,.55);stroke-width:.7}
 #cultureCard .cd-ridge{stroke:#5a4630;stroke-width:1.6}
-#cultureCard .cd-plant{color:#5a4630;opacity:.7}
+#cultureCard .cd-plant{color:#4a3720;opacity:.9}
 #cultureCard .cd-t{font:600 8px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.14em;text-transform:uppercase;fill:#6b5a3e;stroke:none}
 #cultureCard .cp-chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
 #cultureCard .cc-say{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(63,46,28,.45);background:#f6efdf;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:600;color:#3f2e1c;cursor:pointer}
@@ -5378,81 +5377,11 @@ function initMap(){
   // culture card and the start-here pill. Birds and the other plants are in the set for the review partner
   // and are wired to nothing until a data field asks for them.
   window._cultureIslandMark = function(){ var I = window.CULTURE_ICON, k = (window.ACTIVE && ACTIVE.slug) || ''; return (I.island && I.island[k]) || I.mokupuni; };
-  // The drawn set takes over the tab bar while the theme is on: the app's photo icons are hidden, not
-  // replaced, so turning the theme off puts every one of them back untouched. Kalo and hibiscus lead,
-  // the rest of the set fills in where a glyph genuinely fits. Labels, order and behaviour are unchanged.
-  window.CULTURE_TABS = {beaches:'wave', hikes:'moku', acts:'hibiscus', tours:'koae', activities:'kalo', shopping:'hala', shop:'hala', stays:'niu'};
-  window._cultureTabGlyphs = function(on){
-    var tabs = document.querySelectorAll('#tabs .tab');
-    Array.prototype.forEach.call(tabs, function(t){
-      var img = t.querySelector('img.tab-ico'), had = t.querySelector('.tab-glyph');
-      if (had) had.parentNode.removeChild(had);
-      if (img) img.style.display = '';
-      if (!on) return;
-      var key = window.CULTURE_TABS[t.getAttribute('data-tab')], svg = key && window.CULTURE_ICON[key];
-      if (!svg) return;
-      var sp = document.createElement('span'); sp.className = 'tab-glyph'; sp.setAttribute('aria-hidden','true');
-      sp.innerHTML = svg;
-      t.insertBefore(sp, t.firstChild);
-      if (img) img.style.display = 'none';
-    });
-  };
   // A heading in the card carries the glyph its subject already owns in the set.
   window._cultureH3 = function(label, key){
     // ahupuaa is a builder, not a string: it takes the beach and site flags. Called bare here.
     var g = window.CULTURE_ICON[key], svg = typeof g === 'function' ? g({}) : (g || '');
     return '<h3>' + (svg ? '<span class="cc-h3i" aria-hidden="true">' + svg + '</span>' : '') + window._cultureEsc(label) + '</h3>';
-  };
-  // THE PINS. Every map marker is a brand disk PNG with the status colour baked into the disk. In the
-  // theme the disk is redrawn instead: parchment, an ink ring in the SAME status colour the app chose,
-  // and the set's glyph for what the pin is. The colour is never recomputed here, only read back off the
-  // data-glyph key the builder already wrote, so a red beach stays red. The hazard pin is not touched.
-  window.CULTURE_PINS = {beach:'wave', trail:'moku', cultural:'kalo', scenic:'mokupuni', wildlife:'nene',
-                         playground:'hibiscus', town:'hala', stay:'niu', tour:'koae', market:'hala'};
-  window.CULTURE_PIN_INK = {green:'#2f6b45', amber:'#9a5f1c', red:'#992a16', night:'#4b5563', teal:'#1f5d63'};
-  window._cultureInkPin = function(html, kind){
-    if (kind === 'hazard') return html;                       // safety glyph, left exactly as the app drew it
-    var key = window.CULTURE_PINS[kind]; if (!key) return html;
-    var g = window.CULTURE_ICON[key], glyph = typeof g === 'function' ? g({}) : g;
-    if (!glyph) return html;
-    // The builder bakes the status into the disk art and names it on the wrapper; read it back, never
-    // recompute it, so a red beach stays red and an amber one stays amber.
-    var st = /data-glyph="[a-z]+-([a-z]+)"/.exec(html);
-    var ink = (st && window.CULTURE_PIN_INK[st[1]]) || '#4a3720';
-    return html.replace(/<img src="data:image\/png[^"]*"[^>]*style="width:(\d+)px[^"]*"[^>]*>/, function(_, w){
-      var d = +w, r = d / 2, gs = Math.round(d * 0.46), off = (d - gs) / 2;
-      return '<span class="mk-ink" style="color:' + ink + '">'
-        + '<svg viewBox="0 0 ' + d + ' ' + d + '" width="' + d + '" height="' + d + '" aria-hidden="true">'
-        + '<circle cx="' + r + '" cy="' + r + '" r="' + (r - 1.6) + '" fill="#f4ead2" stroke="currentColor" stroke-width="1.8"/>'
-        + '<g transform="translate(' + off + ',' + off + ') scale(' + (gs / 18) + ')">' + glyph + '</g></svg></span>';
-    });
-  };
-  // Wrapped once, the way the subtabs are: each builder keeps its own markup, label and anchor, and only
-  // the disk inside it changes. The kind comes from the builder that was called, not from the markup,
-  // because the activity pins carry no glyph key. Off, the wrapper passes straight through and the
-  // repaint that follows rebuilds every marker from the app's own PNG.
-  window.CULTURE_PIN_KIND = {
-    mkIcon:       function(){ return 'beach'; },
-    mkHikeIcon:   function(){ return 'trail'; },
-    mkActIcon:    function(a){ return (a && a.type) || 'cultural'; },
-    mkTourIcon:   function(){ return 'tour'; },
-    mkMarketIcon: function(){ return 'market'; }
-  };
-  window._cultureWrapPins = function(){
-    if (window._culturePinsWrapped) return;
-    window._culturePinsWrapped = true;
-    Object.keys(window.CULTURE_PIN_KIND).forEach(function(n){
-      var orig = window[n]; if (typeof orig !== 'function') return;
-      var kindOf = window.CULTURE_PIN_KIND[n];
-      window[n] = function(){
-        var ic = orig.apply(this, arguments);
-        try {
-          if (window._isCulture() && ic && ic.options && ic.options.html)
-            ic.options.html = window._cultureInkPin(ic.options.html, kindOf.apply(null, arguments));
-        } catch(e){}
-        return ic;
-      };
-    });
   };
   window._cultureCardEl = function(){
     var el = document.getElementById('cultureCard');
@@ -5738,25 +5667,46 @@ function initMap(){
   // wedges that run from ridge to shore, and the water. The level the step is on is the filled one, so the
   // stepper teaches the system instead of counting dots. Geometry and plants only, no text but Ridge and Shore.
   window._cultureDiagram = function(level){
-    var RIDGE = 'M6 28L40 14 80 22 118 10 152 20 190 12 230 22 268 14 294 28';
-    var LAND  = RIDGE + 'V66C150 76 70 74 6 70Z';
-    var SEA   = 'M6 70C70 74 150 76 294 66V88H6Z';
-    var MOKU  = 'M118 10L152 20 190 12 230 22 248 68C200 72 150 72 104 69Z';
-    var AHU   = 'M152 20L190 12 200 68C184 70 166 70 150 69Z';
-    var fan = [[40,14,14],[80,22,58],[118,10,104],[152,20,150],[190,12,200],[230,22,248],[268,14,290]];
-    var crest = function(y){ var d = 'M8 ' + y; for (var i = 0; i < 12; i++) d += 'c4-3 8-3 12 0s8 3 12 0'; return '<path d="' + d + '" class="cd-line"/>'; };
+    // Drawn the way the plate is drawn, so the picture and the map teach the same thing: a ridge with
+    // hachure running off it, the wedges that fall from ridge to shore, and the sea with the same
+    // concentric ripples. The level the step is on is the lit one, and the plants stand where they are
+    // grown, ʻulu upland, kalo on the flat, niu at the shore, instead of floating in the middle.
+    var pts = [[6,34],[34,18],[66,26],[96,12],[128,22],[160,10],[196,20],[228,12],[262,24],[294,34]];
+    var ridgeY = function(x){
+      for (var i = 1; i < pts.length; i++){
+        if (x <= pts[i][0]){ var p0 = pts[i-1], p1 = pts[i]; return p0[1] + (x - p0[0]) / (p1[0] - p0[0]) * (p1[1] - p0[1]); }
+      }
+      return pts[pts.length-1][1];
+    };
+    var RIDGE = 'M' + pts.map(function(p){ return p[0] + ' ' + p[1]; }).join('L');
+    var SHORE = 'M6 84C80 90 190 92 294 84';
+    var LAND  = RIDGE + 'V84C190 92 80 90 6 84Z';
+    var SEA   = SHORE + 'V116H6Z';
+    var MOKU  = 'M96 12L128 22 160 10 196 20 228 12L236 87C180 90 120 90 88 87Z';
+    var AHU   = 'M160 10L196 20L200 88C186 89 172 89 158 88Z';
+    var fan = [[34,18,20],[66,26,56],[96,12,88],[128,22,122],[160,10,158],[196,20,200],[228,12,236],[262,24,270]];
     var lit = function(n){ return level === n ? ' cd-on' : ''; };
-    var s = '<svg class="cd" viewBox="0 0 300 100" width="100%" height="76" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+    var s = '<svg class="cd" viewBox="0 0 300 120" width="100%" height="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
     s += '<path d="' + LAND + '" class="cd-area' + lit(1) + '"/>';
     s += '<path d="' + SEA + '" class="cd-area cd-sea' + (level === 1 || level === 4 ? ' cd-on' : '') + '"/>';
+    // Hachure: a stroke hanging off the ridge every few pixels, length wandering, the way a burin cuts relief.
+    var hach = '';
+    for (var x = 11; x < 291; x += 4.5){
+      var y = ridgeY(x) + 2.2, len = 9 + ((x * 7) % 11) * 0.9;
+      hach += 'M' + x.toFixed(1) + ' ' + y.toFixed(1) + 'l1.1 ' + len.toFixed(1);
+    }
+    s += '<path d="' + hach + '" class="cd-hach"/>';
     s += '<path d="' + MOKU + '" class="cd-area' + lit(2) + '"/>';
     s += '<path d="' + AHU + '" class="cd-area' + lit(3) + '"/>';
-    s += fan.map(function(f){ return '<path d="M' + f[0] + ' ' + f[1] + 'L' + f[2] + ' 69" class="cd-line"/>'; }).join('');
+    s += fan.map(function(f){ return '<path d="M' + f[0] + ' ' + f[1] + 'L' + f[2] + ' 88" class="cd-line"/>'; }).join('');
     s += '<path d="' + RIDGE + '" class="cd-ridge"/>';
-    s += crest(76) + crest(83);
-    s += '<g transform="translate(156,24) scale(1.05)" class="cd-plant">' + window.CULTURE_ICON.ulu + '</g>';
-    s += '<g transform="translate(168,44) scale(1.05)" class="cd-plant">' + window.CULTURE_ICON.kalo + '</g>';
-    s += '<text x="6" y="8" class="cd-t">Ridge</text><text x="294" y="98" text-anchor="end" class="cd-t">Shore</text>';
+    s += '<path d="' + SHORE + '" class="cd-ridge"/>';
+    // The plate's shore ripples, four hairlines parallel to the coast and fading out to sea.
+    for (var r = 1; r <= 4; r++) s += '<path d="' + SHORE + '" class="cd-rip" transform="translate(0,' + (r * 6.5) + ')" style="opacity:' + (0.5 - r * 0.09).toFixed(2) + '"/>';
+    s += '<g transform="translate(169,24) scale(.95)" class="cd-plant">' + window.CULTURE_ICON.ulu + '</g>';
+    s += '<g transform="translate(167,46) scale(.95)" class="cd-plant">' + window.CULTURE_ICON.kalo + '</g>';
+    s += '<g transform="translate(169,68) scale(.95)" class="cd-plant">' + window.CULTURE_ICON.niu + '</g>';
+    s += '<text x="6" y="8" class="cd-t">Ridge</text><text x="294" y="114" text-anchor="end" class="cd-t">Shore</text>';
     return s + '</svg>';
   };
   window._cultureStrip = function(step){
@@ -5839,14 +5789,11 @@ function initMap(){
           HIKES.splice.apply(HIKES, [0, HIKES.length].concat(s));
         }
       } catch(e){}
-      window._cultureTabGlyphs(true);
-      window._cultureWrapPins();
       window._cultureWrapSubtabs();
       window._cultureRibbon(true);
       window._cultureDefaultSub();
     } else {
       try { if (window._cultureHikesOrig){ HIKES.splice.apply(HIKES, [0, HIKES.length].concat(window._cultureHikesOrig)); window._cultureHikesOrig = null; } } catch(e){}
-      window._cultureTabGlyphs(false);
       window._cultureRibbon(false);
       if (/^(hula|lei|makahiki)$/.test(String(window._ghEvRange || ''))) window._ghEvRange = 'all';
     }
