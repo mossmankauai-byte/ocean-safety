@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 BROCHURE = 'https://dlnr.hawaii.gov/dsp/files/2022/12/Wahi-Pana-brochure-1.pdf'
 
 WAILUA_HOURS = 'Daily 7:00am to 7:45pm'
-WAILUA_ENTRY = 'Free for Hawaiʻi residents. Visitors $5 per person, $10 parking'
+WAILUA_ENTRY = 'Free for Hawaiʻi residents. Visitors pay an entry fee and a parking fee'
 WAILUA_SRC = 'https://dlnr.hawaii.gov/dsp/parks/kauai/wailua-river-state-park/'
 
 SITES = {
@@ -45,7 +45,7 @@ SITES = {
   dict(id='heiau_kauluapaoa', name='Kauluapāʻoa Heiau', r='North Shore', lat=22.2221, lon=-159.5827,
        kind='Heiau', steward='Hawaiʻi State Parks (Hāʻena State Park)',
        access='Near Keʻe Beach, inside Hāʻena State Park',
-       entry='Free for Hawaiʻi residents. Visitors $5 per person, $10 parking, booked ahead',
+       entry='Free for Hawaiʻi residents. Visitors pay entry and parking fees when they book',
        hours='Daily 7:00am to 7:45pm (winter to 6:45pm)',
        booking='Visitors need an entry and parking reservation at gohaena.com, up to 30 days ahead',
        state_list=True, src='https://dlnr.hawaii.gov/dsp/parks/kauai/haena-state-park/',
@@ -100,7 +100,7 @@ SITES = {
   dict(id='heiau_haleolono', name='Hale o Lono Heiau', r='North Shore', lat=21.63389, lon=-158.05167,
        kind='Heiau', steward='Waimea Valley',
        access='Inside Waimea Valley, with paid valley entry',
-       entry='$25 adults, $18 kids 4 to 12 (Waimea Valley entry)', hours='9am to 5pm daily (check waimeavalley.net)',
+       entry='Included in paid Waimea Valley admission', hours='9am to 5pm daily (check waimeavalley.net)',
        booking='', state_list=True, src='https://www.waimeavalley.net/cultural-sites',
        pin='Access point: Waimea Valley', dur=20,
        tip='A heiau dedicated to Lono, the god of agriculture, rain, and peace. Seen as part of a Waimea Valley visit.',
@@ -116,7 +116,7 @@ SITES = {
   dict(id='heiau_ohala', name='Ohala Heiau', r='East/Hāna', lat=20.78263, lon=-155.99529,
        kind='Heiau', steward='Hawaiʻi State Parks (Waiʻānapanapa State Park)',
        access='Inside Waiʻānapanapa State Park',
-       entry='Free for Hawaiʻi residents. Visitors $5 per person, $10 parking, booked ahead',
+       entry='Free for Hawaiʻi residents. Visitors pay entry and parking fees when they book',
        hours='Daily 7:00am to 6:00pm', booking='Visitors need a reservation at gostateparks.hawaii.gov/waianapanapa',
        state_list=True, src='https://dlnr.hawaii.gov/dsp/parks/maui/waianapanapa-state-park/', pin='OpenStreetMap', dur=30,
        tip='A heiau on the black lava coast of Waiʻānapanapa. Book the park before the drive to Hāna.',
@@ -124,7 +124,7 @@ SITES = {
   dict(id='heiau_piilanihale', name='Piʻilanihale Heiau', r='East/Hāna', lat=20.80385, lon=-156.03973,
        kind='Heiau', steward='National Tropical Botanical Garden (Kahanu Garden)',
        access='Inside Kahanu Garden, near Hāna',
-       entry='$18 adults, $10 kamaʻāina, free 12 and under and Hāna residents', hours='Mon to Fri 9am to 3pm, last entry 2pm. Closed weekends',
+       entry='Paid garden admission. Free for 12 and under and Hāna residents', hours='Mon to Fri 9am to 3pm, last entry 2pm. Closed weekends',
        booking='Online reservations encouraged; guided tours Fridays 9:30am by reservation',
        state_list=True, src='https://ntbg.org/gardens/kahanu/', pin='OpenStreetMap', dur=90,
        tip='A massive stone platform heiau inside Kahanu Garden, on the road to Hāna.',
@@ -192,7 +192,7 @@ EXISTING = {
    'hi_puukohola_heiau': dict(kind='Heiau', steward='National Park Service', access='Paved path from the visitor center; wheelchair path to the base of the heiau',
      entry='Free', hours='Daily 8:30am to 4:30pm', booking='', state_list=True, src='https://www.nps.gov/puhe/', pin='App data'),
    'hi_puuhonua_honaunau': dict(kind='Place of refuge and Hale o Keawe', steward='National Park Service',
-     access='Flat self-guided loop from the visitor center to Hale o Keawe', entry='$20 per vehicle (7-day pass)',
+     access='Flat self-guided loop from the visitor center to Hale o Keawe', entry='National park entrance fee, per vehicle',
      hours='Daily 8:15am until sunset', booking='', state_list=True, src='https://www.nps.gov/puho/', pin='App data'),
  },
 }
@@ -235,7 +235,8 @@ def patch_kauai(path):
     ent = src[i:k]
     ent = re.sub(r",heiau:\{.*?\}(?=\})", '', ent)
     ent = ent.replace("Daily during daylight hours; non-resident entry fee $5/person + $10/vehicle parking (credit card only at on-site kiosks, effective Feb 22 2026)",
-                      "Daily 7:00am to 7:45pm; non-resident entry $5/person + $10/vehicle parking")
+                      "Daily 7:00am to 7:45pm")
+    ent = ent.replace("Daily 7:00am to 7:45pm; non-resident entry $5/person + $10/vehicle parking", "Daily 7:00am to 7:45pm")
     ent = ent.replace("along the Wailua River " + chr(0x2014) + " Hawaiian", "along the Wailua River, Hawaiian")
     ent = ent[:-1] + ',heiau:' + js_obj(EXISTING['kauai']['wailua_heiau']) + '}'
     src = src[:i] + ent + src[k:]

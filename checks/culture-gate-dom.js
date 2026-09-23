@@ -43,6 +43,8 @@ async function visible(pg){
       window._cultureCloseCard(); window._cultureOpenMoku(moku); await sleep(500);
       parts.push('<section data-copy="moku-card">' + grab() + '</section>');
       window._cultureCloseCard();
+      // Every heiau and wahi pana card, so the gate reads their fees, hours and protocol lines.
+      for (const a of (typeof ACTS !== "undefined" ? ACTS : []).filter(x => x.heiau)){ window.openActSheet(a.id); await sleep(250); parts.push('<section data-copy="heiau-' + a.id + '">' + document.getElementById('sc').innerHTML + '</section>'); window.closeSheet && window.closeSheet(); await sleep(200); }
       const plan = window._culturePlanHTML ? window._culturePlanHTML() : '';
       parts.push('<section data-copy="plan-learn">' + plan + '</section>');
       const ribbon = document.getElementById('cultureRibbon');
