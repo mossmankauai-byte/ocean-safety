@@ -1686,12 +1686,23 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 #cultureToggle svg{width:22px;height:22px}
 body[data-tab="acts"] #cultureToggle{top:188px}
 #cultureToggle.on{background:#2f6b45;color:#fff;border-color:#2f6b45}
-/* Vintage: the street basemap goes sepia so its roads and names read like faint print under the sheet, the sea
-   outside the sheet is parchment, a soft vignette + paper grain sit over the whole map (z401, above every
-   pane, so pins near the edge dim a touch, nothing else changes), and the ahupuaʻa washes multiply like ink. */
-:root[data-theme="culture"] .os-basemap{filter:sepia(.75) saturate(.45) contrast(.88) brightness(1.06)}
-:root[data-theme="culture"] .leaflet-container{background:#e6d9bf}
-:root[data-theme="culture"] #map::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:401;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(74,53,32,.32) 100%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .10 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+/* Vintage: the map is a plate on aged paper. The sea is the paper itself, the street basemap is off while
+   the plate is up and fades in past z13 (sepia, so its roads read as faint print), the plate pane carries the
+   one engraving filter, and a vignette + paper grain + foxing sit over the whole map (z401, above every pane,
+   so pins near the edge dim a touch, nothing else changes). The ahupuaʻa washes multiply like ink. */
+:root[data-theme="culture"] .os-basemap{filter:sepia(.75) saturate(.45) contrast(.88) brightness(1.06);opacity:0!important;transition:opacity .35s linear}
+/* Close in, the plate is gone and the guest needs a map, not a picture: the tint lightens and the sea
+   goes back to water, so a beach at z14 reads exactly as it does with the theme off, only warmer. */
+:root[data-theme="culture"][data-plate="close"] .os-basemap{opacity:1!important;filter:sepia(.35) saturate(.7) contrast(.95) brightness(1.02)}
+:root[data-theme="culture"][data-plate="close"] #map.leaflet-container{background:#b8d8e8!important;background-image:none!important}
+:root[data-theme="culture"] #map.leaflet-container{background:#e9dcc0!important;background-image:radial-gradient(ellipse 120% 90% at 32% 22%,#f3e8cc 0%,#e8daba 58%,#dcc9a1 100%)!important}
+.leaflet-culturePlate-pane{opacity:1;transition:opacity .35s linear;pointer-events:none}
+:root[data-plate="close"] .leaflet-culturePlate-pane{opacity:0}
+:root[data-theme="culture"] #map::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:401;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(74,53,32,.32) 100%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='1' seed='9'/><feColorMatrix values='0 0 0 0 .52 0 0 0 0 .33 0 0 0 0 .14 0 0 0 2.2 -1.72'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>"),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .10 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.tab-glyph{display:block;line-height:0}
+.tab-glyph svg{width:24px;height:24px;display:block;margin:0 auto}
+#cultureCard h3 .cc-h3i{display:inline-block;vertical-align:-3px;margin-right:6px;line-height:0;opacity:.75}
+#cultureCard h3 .cc-h3i svg{width:16px;height:16px}
 .leaflet-culture-pane svg path{mix-blend-mode:multiply}
 .os-culture-label-anchor{background:none;border:0}
 .os-ahu-label,.os-moku-label{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;color:#3f2e1c;text-shadow:0 0 2px #f1e7d2,0 0 4px #f1e7d2,0 0 8px #f1e7d2;cursor:pointer}
@@ -5081,22 +5092,17 @@ function initMap(){
   window._isSat = false;
 
   // CULTURE THEME, map layer only. One gate, window._isCulture(), the way _isPublicRef() gates the
-  // public ref. On: the island's georeferenced 1885-1903 Hawaiian Government / Territory Survey sheet
-  // (UH Mānoa Library MAGIS, already EPSG:3857) as an image overlay plus the State GIS ahupuaʻa lines,
-  // both in one pane at z210: above the basemap (200), below the rain blobs (250), swell waves and every
-  // marker. Nothing here touches hazard rules, verdicts or flags. Off: no asset is requested at all.
-  // Preference: ?theme=culture on the URL wins, else localStorage os_theme. Island switches reload the
-  // page, so the sheet is picked per load from ACTIVE.slug; there is no cross-island layer to swap.
-  window.CULTURE_MAPS = {
-    kauai:  {src:'culture/maps/kauai-1903.webp',  bounds:[[21.777819,-159.915072],[22.327009,-159.184384]], title:'Kauaʻi, Hawaii Territory Survey 1903 (Donn, Wall)'},
-    oahu:   {src:'culture/maps/oahu-1902.webp',   bounds:[[21.169354,-158.371494],[21.795169,-157.553816]], title:'Oʻahu, Hawaii Territory Survey 1902 (Donn, Wall)'},
-    maui:   {src:'culture/maps/maui-1885.webp',   bounds:[[20.43655,-156.76858],[21.134063,-155.89339]],   title:'Maui, Hawaiian Government Survey 1885 (Dodge, Alexander)'},
-    hawaii: {src:'culture/maps/hawaii-1901.webp', bounds:[[18.766178,-156.220653],[20.436262,-154.643036]], title:'Hawaiʻi, Hawaii Territory Survey 1901 (Donn, Alexander, Wall)'}
-  };
-  // Short on purpose: it joins the CARTO credit control, which must stay one line on a phone. The full
-  // credit ("Hawaiian Government Survey sheet georeferenced by UH Mānoa Library MAGIS; ahupuaʻa: State of
-  // Hawaiʻi GIS") belongs on the Culture sheet's About panel when that is built.
-  window.CULTURE_CREDIT = 'Sheet: UH Mānoa MAGIS';
+  // public ref. On: the island is DRAWN, not photographed. One silhouette layer of the State GIS
+  // ahupuaʻa polygons (pane culturePlate, z206) runs through a single SVG filter that gives it a
+  // wobbled scalloped ink coast, concentric shore ripples, a paper land fill and a stipple relief,
+  // and the same polygons ride above it (pane culture, z210) as the tappable sections whose shared
+  // boundaries are the ridge lines. Above the basemap (200), below the rain blobs (250), swell waves
+  // and every marker. Nothing here touches hazard rules, verdicts or flags. Off: no asset is requested.
+  // Preference: ?theme=culture on the URL wins, else localStorage os_theme.
+  // Short on purpose: it joins the CARTO credit control, which must stay one line on a phone. The
+  // boundaries drawn on the plate are the State GIS ahupuaʻa layer; no survey sheet is drawn any more,
+  // so no sheet is credited.
+  window.CULTURE_CREDIT = 'Ahupuaʻa: State of Hawaiʻi GIS';
   window._isCulture = function(){ return document.documentElement.getAttribute('data-theme') === 'culture'; };
   // Sections: every ahupuaʻa is a tinted, bounded, named piece of the island. The tint family follows the
   // moku, so neighbours in one moku read as kin. Names are the State GIS spellings (ʻokina, kahakō).
@@ -5114,6 +5120,75 @@ function initMap(){
     });
     return best;
   };
+  // THE PLATE. The island as an engraver would cut it: one silhouette of every ahupuaʻa, filled flat,
+  // with all of the look coming from a single SVG filter so there is exactly one pass over one layer.
+  // In order: turbulence wobbles the silhouette into a scalloped coast; a flood fills the land in paper;
+  // a fine fractal grain stipples the relief inside it; a blur of the silhouette is a distance field that
+  // feComponentTransfer slices into concentric shore ripples, wobbled again and pushed off the land, and
+  // faded outward by that same field; feMorphology minus the silhouette is the heavy coast line.
+  // The filter region is userSpaceOnUse and tracks the viewport, so the cost never grows with the zoom.
+  window.CULTURE_PLATE_Z = 13;   // past this the plate steps aside and the street basemap fades in
+  window._cultureEngrave = function(){
+    if (document.getElementById('osPlateDefs')) return;
+    var ring = []; for (var i = 0; i < 64; i++) ring.push(i % 4 === 1 ? 1 : 0);
+    var d = document.createElement('div');
+    d.id = 'osPlateDefs'; d.setAttribute('aria-hidden','true');
+    d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    d.innerHTML = '<svg width="0" height="0"><defs>'
+      + '<filter id="osPlateF" filterUnits="userSpaceOnUse" x="-2000" y="-2000" width="4000" height="4000" color-interpolation-filters="sRGB">'
+      +   '<feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11" result="w1"/>'
+      +   '<feDisplacementMap in="SourceAlpha" in2="w1" scale="7" xChannelSelector="R" yChannelSelector="G" result="isl"/>'
+      +   '<feFlood flood-color="#f3e8cd" result="landC"/>'
+      +   '<feComposite in="landC" in2="isl" operator="in" result="land"/>'
+      +   '<feTurbulence type="fractalNoise" baseFrequency="0.035 0.75" numOctaves="3" seed="5" result="g1"/>'
+      +   '<feColorMatrix in="g1" type="matrix" values="0 0 0 0 .33  0 0 0 0 .24 0 0 0 0 .12  1.5 .7 0 0 -1.02" result="g2"/>'
+      +   '<feComposite in="g2" in2="isl" operator="in" result="relief"/>'
+      +   '<feGaussianBlur in="isl" stdDeviation="17" result="dist"/>'
+      +   '<feComponentTransfer in="dist" result="bands"><feFuncA type="discrete" tableValues="' + ring.join(' ') + '"/></feComponentTransfer>'
+      +   '<feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="4" result="w2"/>'
+      +   '<feDisplacementMap in="bands" in2="w2" scale="4" xChannelSelector="R" yChannelSelector="G" result="bandsW"/>'
+      +   '<feComposite in="bandsW" in2="isl" operator="out" result="seaA"/>'
+      +   '<feComposite in="seaA" in2="dist" operator="in" result="seaB"/>'
+      +   '<feFlood flood-color="#5f4a28" result="seaC"/>'
+      +   '<feComposite in="seaC" in2="seaB" operator="in" result="sea"/>'
+      +   '<feMorphology in="isl" operator="dilate" radius="2" result="dil"/>'
+      +   '<feComposite in="dil" in2="isl" operator="out" result="coastA"/>'
+      +   '<feFlood flood-color="#45331c" result="coastC"/>'
+      +   '<feComposite in="coastC" in2="coastA" operator="in" result="coast"/>'
+      +   '<feMerge><feMergeNode in="sea"/><feMergeNode in="land"/><feMergeNode in="relief"/><feMergeNode in="coast"/></feMerge>'
+      + '</filter></defs></svg>';
+    document.body.appendChild(d);
+  };
+  // The filter works in screen pixels, so its box is the viewport grown by half a screen on each side:
+  // enough to cover a drag between repaints, small enough that a z16 island costs no more than a z9 one.
+  window._culturePlateRegion = function(){
+    var f = document.getElementById('osPlateDefs'); f = f && f.querySelector('#osPlateF');
+    if (!f || !window.map) return;
+    var sz = map.getSize(), tl = map.containerPointToLayerPoint([-sz.x / 2, -sz.y / 2]);
+    f.setAttribute('x', Math.round(tl.x)); f.setAttribute('y', Math.round(tl.y));
+    f.setAttribute('width', Math.round(sz.x * 2)); f.setAttribute('height', Math.round(sz.y * 2));
+  };
+  // Close in, a drawn island is no help: the plate fades out and the sepia street basemap fades in.
+  window._culturePlateZoom = function(){
+    if (!window.map) return;
+    var root = document.documentElement, close = window._isCulture() && map.getZoom() >= window.CULTURE_PLATE_Z;
+    if (close) root.setAttribute('data-plate','close'); else root.removeAttribute('data-plate');
+  };
+  window._cultureBuildPlate = function(g){
+    window._cultureEngrave();
+    var r = window._culturePlateR = L.svg({pane:'culturePlate', padding:0.6});
+    window._culturePlate = L.geoJSON(g, {pane:'culturePlate', renderer:r, interactive:false,
+      attribution:window.CULTURE_CREDIT,
+      style:function(){ return {stroke:false, fill:true, fillColor:'#000', fillOpacity:1}; }});
+    map.on('moveend zoomend', window._culturePlateRegion);
+    map.on('zoomend', window._culturePlateZoom);
+  };
+  window._culturePlateOn = function(){
+    if (!window._culturePlate) return;
+    window._culturePlate.addTo(map);
+    try { window._culturePlateR._rootGroup.setAttribute('filter','url(#osPlateF)'); } catch(e){}
+    window._culturePlateRegion(); window._culturePlateZoom();
+  };
   window._cultureBuildSections = function(g){
     var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); };
     var mokus = []; (g.features || []).forEach(function(f){ var m = f.properties && f.properties.moku; if (m && mokus.indexOf(m) < 0) mokus.push(m); });
@@ -5122,7 +5197,7 @@ function initMap(){
     var idx = {byId:{}, byMoku:{}};
     // Every section and every label is tappable: an ahupuaʻa opens its card, a moku name opens the group.
     window._cultureLines = L.geoJSON(g, {pane:'culture', interactive:true,
-      style:function(f){ var i = Math.max(0, mokus.indexOf(f.properties.moku)); return {color:'#5a4630', weight:1.4, opacity:.9, fillColor:window.CULTURE_TINTS[i % window.CULTURE_TINTS.length], fillOpacity:.3}; },
+      style:function(f){ var i = Math.max(0, mokus.indexOf(f.properties.moku)); return {color:'#4a3a22', weight:1, opacity:.85, fillColor:window.CULTURE_TINTS[i % window.CULTURE_TINTS.length], fillOpacity:.14}; },
       onEachFeature:function(f, layer){
         var s = window._culturePolyStats(f.geometry); if (!s) return;
         var p = f.properties || {}, name = p.ahupuaa || '', moku = p.moku || '', id = String(p.id != null ? p.id : name);
@@ -5252,6 +5327,31 @@ function initMap(){
   // culture card and the start-here pill. Birds and the other plants are in the set for the review partner
   // and are wired to nothing until a data field asks for them.
   window._cultureIslandMark = function(){ var I = window.CULTURE_ICON, k = (window.ACTIVE && ACTIVE.slug) || ''; return (I.island && I.island[k]) || I.mokupuni; };
+  // The drawn set takes over the tab bar while the theme is on: the app's photo icons are hidden, not
+  // replaced, so turning the theme off puts every one of them back untouched. Kalo and hibiscus lead,
+  // the rest of the set fills in where a glyph genuinely fits. Labels, order and behaviour are unchanged.
+  window.CULTURE_TABS = {beaches:'wave', hikes:'moku', acts:'hibiscus', tours:'koae', activities:'kalo', shopping:'hala', shop:'hala', stays:'niu'};
+  window._cultureTabGlyphs = function(on){
+    var tabs = document.querySelectorAll('#tabs .tab');
+    Array.prototype.forEach.call(tabs, function(t){
+      var img = t.querySelector('img.tab-ico'), had = t.querySelector('.tab-glyph');
+      if (had) had.parentNode.removeChild(had);
+      if (img) img.style.display = '';
+      if (!on) return;
+      var key = window.CULTURE_TABS[t.getAttribute('data-tab')], svg = key && window.CULTURE_ICON[key];
+      if (!svg) return;
+      var sp = document.createElement('span'); sp.className = 'tab-glyph'; sp.setAttribute('aria-hidden','true');
+      sp.innerHTML = svg;
+      t.insertBefore(sp, t.firstChild);
+      if (img) img.style.display = 'none';
+    });
+  };
+  // A heading in the card carries the glyph its subject already owns in the set.
+  window._cultureH3 = function(label, key){
+    // ahupuaa is a builder, not a string: it takes the beach and site flags. Called bare here.
+    var g = window.CULTURE_ICON[key], svg = typeof g === 'function' ? g({}) : (g || '');
+    return '<h3>' + (svg ? '<span class="cc-h3i" aria-hidden="true">' + svg + '</span>' : '') + window._cultureEsc(label) + '</h3>';
+  };
   window._cultureCardEl = function(){
     var el = document.getElementById('cultureCard');
     if (!el){ el = document.createElement('div'); el.id = 'cultureCard'; el.setAttribute('role','dialog'); el.setAttribute('aria-label','Land division'); document.body.appendChild(el); }
@@ -5327,13 +5427,13 @@ function initMap(){
   window._cultureHighlight = function(entries){
     (window._cultureLit || []).forEach(function(e){ try { window._cultureLines.resetStyle(e.layer); } catch(x){} });
     window._cultureLit = entries || [];
-    window._cultureLit.forEach(function(e){ e.layer.setStyle({weight:2.6, color:'#0f4c5c', fillOpacity:.5}); if (e.layer.bringToFront) e.layer.bringToFront(); });
+    window._cultureLit.forEach(function(e){ e.layer.setStyle({weight:2.4, color:'#7a2f12', fillOpacity:.34}); if (e.layer.bringToFront) e.layer.bringToFront(); });
   };
   window._cultureCloseCard = function(){ var el = document.getElementById('cultureCard'); if (el) el.classList.remove('open'); window._cultureHighlight([]); try { window._cultureRibbon(!!window._isCulture()); } catch(e){} };
   window._cultureLearnHTML = function(){
     var Lr = window.CULTURE_LEARN;
-    return '<h3>The land system</h3><p>' + Lr.system.text + '</p><p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p>'
-         + '<h3>These boundaries</h3><p class="cc-cite">' + Lr.bounds.quote + '</p><p>' + Lr.bounds.note + '</p><p class="cc-cite">' + Lr.bounds.cite + '</p>';
+    return window._cultureH3('The land system','kalo') + '<p>' + Lr.system.text + '</p><p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p>'
+         + window._cultureH3('These boundaries','moku') + '<p class="cc-cite">' + Lr.bounds.quote + '</p><p>' + Lr.bounds.note + '</p><p class="cc-cite">' + Lr.bounds.cite + '</p>';
   };
   window._cultureHead = function(title, sub){
     return '<div class="cc-head"><span class="cc-mark">' + window._cultureIslandMark() + '</span><div><h2>' + window._cultureEsc(title) + '</h2><div class="cc-sub">' + window._cultureEsc(sub) + '</div></div><button class="cc-x" aria-label="Close" onclick="_cultureCloseCard()">' + window.CULTURE_ICON.x + '</button></div><div class="cc-band" aria-hidden="true"></div>';
@@ -5348,10 +5448,10 @@ function initMap(){
       + '<div class="cc-facts"><div class="cc-fact"><b>' + window._cultureNum(e.acres) + '</b><span>acres</span></div>'
       + '<div class="cc-fact"><b>' + (e.acres * 0.00404686).toFixed(1) + '</b><span>km²</span></div>'
       + '<div class="cc-fact"><b>' + window._cultureOrd(rank) + ' of ' + sibs.length + '</b><span>by size in ' + esc(e.moku) + '</span></div></div>'
-      + '<h3>In this ahupuaʻa</h3>'
+      + window._cultureH3('In this ahupuaʻa','land')
       + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ var row = window._culturePlaceRow ? window._culturePlaceRow(b.id) : null, nm = window._cultureShortName ? window._cultureShortName(b) : b.name; return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(nm) + '</span><small>' + (row && /^y/i.test(row.wahi_pana || '') ? 'wahi pana · ' : '') + esc(b.r || '') + '</small></div>'; }).join('') + '</div>'
                        : '<div class="cc-empty">No beach in this app sits inside this ahupuaʻa.</div>')
-      + '<h3>About this place</h3><div class="cc-empty">Awaiting cultural review. The meaning of the name, its moʻolelo, and guest protocol for ' + esc(e.name) + ' come from the cultural review partner, not from us.</div>'
+      + window._cultureH3('About this place','hibiscus') + '<div class="cc-empty">Awaiting cultural review. The meaning of the name, its moʻolelo, and guest protocol for ' + esc(e.name) + ' come from the cultural review partner, not from us.</div>'
       + window._cultureLearnHTML()
       + '<p style="margin-top:12px"><button class="cc-link" onclick="_cultureOpenMoku(' + esc(JSON.stringify(e.moku)) + ')">All ' + sibs.length + ' ahupuaʻa of ' + esc(e.moku) + '</button></p>';
     var el = window._cultureCardEl(); el.innerHTML = html; el.classList.add('open'); el.scrollTop = 0;
@@ -5365,7 +5465,7 @@ function initMap(){
     window._cultureCount('culture_card', 'moku|' + name);
     var html = window._cultureHead(name, 'Moku · ' + island)
       + '<div class="cc-facts"><div class="cc-fact"><b>' + sorted.length + '</b><span>ahupuaʻa</span></div><div class="cc-fact"><b>' + window._cultureNum(acres) + '</b><span>acres</span></div><div class="cc-fact"><b>' + nb + '</b><span>beaches in app</span></div></div>'
-      + '<h3>Its ahupuaʻa, largest first</h3><div class="cc-list">' + sorted.map(function(e){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureZoomTo(' + esc(JSON.stringify(e.id)) + ')">' + window._cultureAhuIcon(e.id) + '<span>' + esc(e.name) + '</span><small>' + window._cultureNum(e.acres) + ' ac</small></div>'; }).join('') + '</div>'
+      + window._cultureH3('Its ahupuaʻa, largest first','ahupuaa') + '<div class="cc-list">' + sorted.map(function(e){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureZoomTo(' + esc(JSON.stringify(e.id)) + ')">' + window._cultureAhuIcon(e.id) + '<span>' + esc(e.name) + '</span><small>' + window._cultureNum(e.acres) + ' ac</small></div>'; }).join('') + '</div>'
       + window._cultureLearnHTML();
     var el = window._cultureCardEl(); el.innerHTML = html; el.classList.add('open'); el.scrollTop = 0;
     window._cultureHighlight(list);
@@ -5637,11 +5737,13 @@ function initMap(){
           HIKES.splice.apply(HIKES, [0, HIKES.length].concat(s));
         }
       } catch(e){}
+      window._cultureTabGlyphs(true);
       window._cultureWrapSubtabs();
       window._cultureRibbon(true);
       window._cultureDefaultSub();
     } else {
       try { if (window._cultureHikesOrig){ HIKES.splice.apply(HIKES, [0, HIKES.length].concat(window._cultureHikesOrig)); window._cultureHikesOrig = null; } } catch(e){}
+      window._cultureTabGlyphs(false);
       window._cultureRibbon(false);
       if (/^(hula|lei|makahiki)$/.test(String(window._ghEvRange || ''))) window._ghEvRange = 'all';
     }
@@ -5723,25 +5825,25 @@ function initMap(){
   /* culture-lint:end */
   window._cultureApply = function(on){
     var root = document.documentElement, btn = document.getElementById('cultureToggle');
-    var slug = (window.ACTIVE && ACTIVE.slug) || 'kauai', cfg = window.CULTURE_MAPS[slug];
+    var slug = (window.ACTIVE && ACTIVE.slug) || 'kauai';
     if (on){
       root.setAttribute('data-theme','culture');
       if (btn){ btn.classList.add('on'); btn.setAttribute('aria-pressed','true'); }
       try { localStorage.setItem('os_theme','culture'); } catch(e){}
-      if (cfg && window.map){
+      if (window.map){
         // Panes keep Leaflet's default pointer rules: only layers marked interactive (the sections, the labels)
-        // take taps; the sheet image never does, so drags and pin taps behave as before.
+        // take taps; the plate never does, so drags and pin taps behave as before.
+        if (!map.getPane('culturePlate')){ var pp = map.createPane('culturePlate'); pp.style.zIndex = 206; }
         if (!map.getPane('culture')){ var p = map.createPane('culture'); p.style.zIndex = 210; }
         if (!map.getPane('cultureLabels')){ var pl = map.createPane('cultureLabels'); pl.style.zIndex = 215; }
-        if (!window._cultureSheet) window._cultureSheet = L.imageOverlay(cfg.src, cfg.bounds, {opacity:.8, pane:'culture', interactive:false, alt:cfg.title, attribution:window.CULTURE_CREDIT});
-        window._cultureSheet.addTo(map);
-        if (window._cultureLines){ window._cultureLines.addTo(map); window._cultureLabelsOn(true); }
+        if (window._cultureLines){ window._culturePlateOn(); window._cultureLines.addTo(map); window._cultureLabelsOn(true); }
         else if (!window._cultureLinesLoading){
           window._cultureLinesLoading = true;
           fetch('culture/ahupuaa/' + slug + '.geojson').then(function(r){ return r.ok ? r.json() : null; }).then(function(g){
             if (!g) return;
+            window._cultureBuildPlate(g);
             window._cultureBuildSections(g);
-            if (window._isCulture()){ window._cultureLines.addTo(map); window._cultureLabelsOn(true); }
+            if (window._isCulture()){ window._culturePlateOn(); window._cultureLines.addTo(map); window._cultureLabelsOn(true); }
           }).catch(function(){});
         }
       }
@@ -5749,7 +5851,9 @@ function initMap(){
       root.removeAttribute('data-theme');
       if (btn){ btn.classList.remove('on'); btn.setAttribute('aria-pressed','false'); }
       try { localStorage.setItem('os_theme','default'); } catch(e){}
-      if (window._cultureSheet && window.map) map.removeLayer(window._cultureSheet);
+      root.removeAttribute('data-plate');
+      if (window._culturePlate && window.map) map.removeLayer(window._culturePlate);
+      if (window._culturePlateR && window.map) map.removeLayer(window._culturePlateR);
       if (window._cultureLines && window.map) map.removeLayer(window._cultureLines);
       window._cultureLabelsOn(false);
       window._cultureCloseCard();

@@ -110,6 +110,16 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     ok(offMore.plan === '', `${isl} off: Plan has no Learn card`);
     ok(!/hula|#3f2e1c/.test(offMore.chips), `${isl} off: event chips are the app's own`);
 
+    // The plate and the drawn tab glyphs are the two surfaces that replace something the app already
+    // draws, so both are checked off, on and off again: the photo icons must come back untouched.
+    const tabs = () => page.evaluate(() => ({
+      glyphs: document.querySelectorAll('#tabs .tab-glyph').length,
+      shown: [...document.querySelectorAll('#tabs img.tab-ico')].filter((i) => i.style.display !== 'none').length,
+      plate: !!(window._culturePlate && map.hasLayer(window._culturePlate))
+    }));
+    const offTabs = await tabs();
+    ok(offTabs.glyphs === 0 && !offTabs.plate, `${isl} off: no drawn glyph and no plate`);
+
     const offText = {};
     for (const id of sample) { const g = await grab(id); offText[id] = g.text; ok(g.cult === 0, `${isl} off: ${id} sheet has no culture block`); }
 
@@ -160,6 +170,8 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     if (onMore.n) ok(onMore.heads > 0 && /cb-ahu/.test(onMore.html), `${isl} on: Town sheet carries the headers (${onMore.heads})`);
     ok(/cc-plan/.test(onMore.plan) && onMore.planChips === onMore.nMoku && /_culturePathOpen\(1\)/.test(onMore.plan), `${isl} on: Plan Learn card lists every moku (${onMore.planChips} of ${onMore.nMoku}) and opens the path`);
     ok(/Hula/.test(onMore.chips) && /#f6efdf/.test(onMore.chips), `${isl} on: event chips lead with Hula in the parchment style`);
+    const onTabs = await tabs();
+    ok(onTabs.glyphs > 0 && onTabs.shown === 0 && onTabs.plate, `${isl} on: the plate is drawn and ${onTabs.glyphs} tab glyphs replace the photo icons`);
     for (const id of sample) {
       const g = await grab(id);
       ok(g.text === offText[id], `${isl} same: ${id} safety text identical with the theme on` + (g.text === offText[id] ? '' : `\n     off: ${offText[id].slice(0, 160)}\n     on:  ${g.text.slice(0, 160)}`));
@@ -173,6 +185,8 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     ok(backMore.html === offMore.html && backMore.chips === offMore.chips && backMore.plan === '', `${isl} off again: Town sheet and event chips unchanged, byte for byte; no Learn card`);
     const back = await page.evaluate(() => ({ theme: document.documentElement.getAttribute('data-theme'), ribbon: !!document.getElementById('cultureRibbon'), lines: !!(window._cultureLines && map.hasLayer(window._cultureLines)) }));
     ok(back.theme === null && !back.ribbon && !back.lines, `${isl} off again: theme, ribbon and sections gone`);
+    const backTabs = await tabs();
+    ok(backTabs.glyphs === 0 && backTabs.shown === offTabs.shown && !backTabs.plate, `${isl} off again: plate gone, every photo tab icon back (${backTabs.shown})`);
   }
   await browser.close();
   console.log(fails ? `HOLD, ${fails} failure(s)` : 'PASS, theme off is the app as it was; safety text identical on');
