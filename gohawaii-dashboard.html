@@ -239,6 +239,28 @@
   .chips{display:flex;gap:6px;flex-wrap:wrap}
   .chips button{appearance:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer}
   .chips button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  /* Places view: GoHawaii listings State and county staff can edit, hide, or add to (2026-09-23) */
+  .pltool{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .pltool input[type=search]{flex:1 1 200px;width:auto}
+  .pltool .chips{flex:0 0 auto}
+  .pl{border-top:1px solid var(--hair)}
+  .pl:first-child{border-top:0}
+  .pl>summary{list-style:none;display:flex;gap:10px;align-items:center;padding:9px 0;cursor:pointer}
+  .pl>summary::-webkit-details-marker{display:none}
+  .pl .th{width:44px;height:44px;border-radius:9px;background:var(--tint);color:var(--sea);flex-shrink:0;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .pl .th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .pl .nm{flex:1;min-width:0}
+  .pl .nm b{display:block;font-size:14px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pl .nm span{display:block;font-size:12px;color:var(--mute);margin-top:1px}
+  .pl.off .nm b{color:var(--mute);text-decoration:line-through}
+  .pl .ed{padding:2px 0 14px 54px}
+  .pl .ed label.f:first-child{margin-top:4px}
+  .plgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+  textarea{font:inherit;min-height:64px;resize:vertical}
+  #plMap{height:300px;border-radius:12px;border:1px solid var(--line);margin-bottom:6px}
+  .pldot{width:12px;height:12px;border-radius:50%;background:var(--sea);border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+  .pldot.st{background:var(--gold)}.pldot.off{background:#9aa9ae}.pldot.new{background:#b45309;width:16px;height:16px}
+  .picking #plMap{outline:3px solid var(--gold);outline-offset:2px;cursor:crosshair}
   .formfoot{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px}
   .msg{margin-top:10px;font-size:13px;border-radius:9px;padding:9px 12px;display:none}
   .msg.on{display:block}.msg.ok{background:#e2efe8;color:var(--good)}.msg.err{background:var(--redbg);color:var(--red)}
@@ -330,13 +352,18 @@
     .side2{display:grid;grid-template-columns:1fr 1fr}
   }
   @media (max-width:760px){
+    .pl .ed{padding-left:0}
+    .plgrid{grid-template-columns:1fr}
     .app{grid-template-columns:1fr;background:none}
     .row{flex-wrap:wrap}
     .row .acts2{width:100%;justify-content:flex-start}
-    .rail{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;flex-direction:row;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:900}
+    .rail{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;flex-direction:row;justify-content:space-around;padding:6px 1px calc(6px + env(safe-area-inset-bottom,0px));z-index:900}
     .rail .rmark{display:none}
     .crumb .cmark{display:block}
-    .rail button{width:auto;flex:1}
+    .rail button{width:auto;flex:1;min-width:0;padding-left:0;padding-right:0}
+    .rail button .lbl[data-s]{font-size:0}
+    .rail button .lbl[data-s]::after{content:attr(data-s);font-size:8.5px}
+    .rail button .lbl{font-size:8.5px;letter-spacing:-.01em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .rail .dot{right:calc(50% - 16px)}
     main{padding:14px 14px 96px}
     .top h1{font-size:21px}
@@ -376,10 +403,11 @@
 <div class="app">
   <nav class="rail" aria-label="Dashboard">
     <span class="rmark" role="img" aria-label="OceanSafety"></span>
-    <button type="button" data-view="now" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lbl">Overview</span></button>
-    <button type="button" data-view="adv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span class="lbl">Advisories</span><span class="dot" id="advDot" hidden></span></button>
+    <button type="button" data-view="now" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lbl" data-s="Now">Overview</span></button>
+    <button type="button" data-view="adv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span class="lbl" data-s="Alerts">Advisories</span><span class="dot" id="advDot" hidden></span></button>
     <button type="button" data-view="feat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="lbl">Events</span></button>
-    <button type="button" data-view="promo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span class="lbl">Promotions</span></button>
+    <button type="button" data-view="promo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span class="lbl" data-s="Promos">Promotions</span></button>
+    <button type="button" data-view="place"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span class="lbl">Places</span></button>
     <button type="button" data-view="use"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M6 16V9M11 16V4M16 16v-6M21 16v-3"/></svg><span class="lbl">Visitors</span></button>
     <button type="button" data-view="rep"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="lbl">Report</span></button>
     <button type="button" data-view="prev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg><span class="lbl">Preview</span></button>
@@ -543,6 +571,56 @@
             <div class="chips" id="pEnd"><button type="button" data-v="24" aria-pressed="false">1 day</button><button type="button" data-v="72" aria-pressed="false">3 days</button><button type="button" data-v="168" aria-pressed="true">1 week</button><button type="button" data-v="336" aria-pressed="false">2 weeks</button><button type="button" data-v="720" aria-pressed="false">30 days</button></div>
             <div class="formfoot"><button type="submit" class="btn pri">Post now</button><button type="button" class="btn ghost" id="pSample">Fill in a sample</button></div>
             <div class="msg" id="pMsg" role="status"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLACES: State and county staff edit, hide, or add places in the app (Nick, 2026-09-23) -->
+    <section class="view" id="v-place" aria-label="Places" hidden>
+      <div class="g2">
+        <div class="card">
+          <h2 id="plH">Places</h2>
+          <p class="sub">GoHawaii's listings in the app, plus places State or county staff added. Open one to change its details, hide it from the app, or move its pin. Beaches are not here: beach safety information stays with OceanSafety.</p>
+          <div class="pltool">
+            <input type="search" id="plQ" placeholder="Search by name, area or kind" aria-label="Search places">
+            <div class="chips" id="plShow"><button type="button" data-v="all" aria-pressed="true">All</button><button type="button" data-v="edit" aria-pressed="false">Changed</button><button type="button" data-v="add" aria-pressed="false">Added</button><button type="button" data-v="off" aria-pressed="false">Hidden</button></div>
+          </div>
+          <div class="pltool"><span class="note">Kept by</span><div class="chips" id="plOwn"><button type="button" data-v="any" aria-pressed="true">Anyone</button><button type="button" data-v="state" aria-pressed="false">State</button><button type="button" data-v="county" aria-pressed="false">County</button></div></div>
+          <div id="plList"></div>
+          <div class="note" id="plMore" style="margin-top:8px"></div>
+        </div>
+        <div class="card" id="plAddCard">
+          <h2>Add a place</h2>
+          <p class="sub">A park, a lookout, a program, a place visitors should find. It shows in the app's tabs and on its map for the island picked above. In the review build a change stays in this browser.</p>
+          <div id="plMap" role="application" aria-label="Map of the island. Tap to set the pin."></div>
+          <div class="note" id="plPickNote">Tap the map to drop the new place's pin.</div>
+          <form id="plForm" autocomplete="off">
+            <label class="f" for="plName">Name</label>
+            <input type="text" id="plName" maxlength="80" required placeholder="Kōkeʻe State Park lookout">
+            <div class="plgrid">
+              <div><label class="f" for="plCat">Kind of place</label><select id="plCat"></select></div>
+              <div><label class="f" for="plArea">Area <small>(shown under the name)</small></label><input type="text" id="plArea" maxlength="40" list="plAreas"></div>
+            </div>
+            <datalist id="plAreas"></datalist>
+            <label class="f" for="plTip">What visitors should know</label>
+            <textarea id="plTip" maxlength="400" placeholder="Open daily. Paved path to the lookout; bring a layer, it is cooler up here."></textarea>
+            <div class="plgrid">
+              <div><label class="f" for="plHours">Hours</label><input type="text" id="plHours" maxlength="60" placeholder="Daily, 6am to 6:45pm"></div>
+              <div><label class="f" for="plOwner">Kept by</label><select id="plOwner"></select></div>
+            </div>
+            <label class="f" for="plAddr">Address</label>
+            <input type="text" id="plAddr" maxlength="120">
+            <div class="plgrid">
+              <div><label class="f" for="plSite">Website <small>(https)</small></label><input type="url" id="plSite" maxlength="300" placeholder="https://"></div>
+              <div><label class="f" for="plImg">Photo link <small>(https)</small></label><input type="url" id="plImg" maxlength="400" placeholder="https://"></div>
+            </div>
+            <div class="plgrid">
+              <div><label class="f" for="plLat">Latitude</label><input type="text" id="plLat" inputmode="decimal"></div>
+              <div><label class="f" for="plLon">Longitude</label><input type="text" id="plLon" inputmode="decimal"></div>
+            </div>
+            <div class="formfoot"><button type="submit" class="btn pri">Add place</button><button type="button" class="btn ghost" id="plSample">Fill in a sample</button></div>
+            <div class="msg" id="plMsg" role="status"></div>
           </form>
         </div>
       </div>
@@ -776,19 +854,19 @@
 <iframe id="probe" title="Beach verdict reader" aria-hidden="true" tabindex="-1" style="position:absolute;left:-10000px;top:0;width:390px;height:844px;border:0;visibility:hidden"></iframe>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/gh/advisories.js?b=2026-09-18-adv9"></script>
+<script src="/gh/advisories.js?b=2026-09-23-adv11"></script>
 <script>
 (function(){
   'use strict';
   var A = window.GH_ADV;
   var esc = A.esc, ISL = A.ISL, ORDER = A.ORDER;
   var $ = function(id){ return document.getElementById(id); };
-  var BUILD = '2026-09-18-adv9', LAYER_BUILD = '2026-09-18-photos-adv3';
+  var BUILD = '2026-09-23-adv11', LAYER_BUILD = '2026-09-18-photos-adv3';
   var state = { isl: 'kauai', view: 'now', role: 'Editor', feeds: { nws: null, hta: null }, beaches: null, layers: {}, evKind: 'event', start: 'now', end: '24', cEnd: '168', previewId: '', tbl: 'all', verd: {} };
   try { state.role = sessionStorage.getItem('ghd_role') || 'Editor'; } catch(e){}
   try { var q = new URLSearchParams(location.search); if(ISL[q.get('island')]) state.isl = q.get('island'); if(q.get('view')) state.view = q.get('view'); } catch(e){}
   try { state.verd = JSON.parse(sessionStorage.getItem('ghd_verdicts') || '{}') || {}; } catch(e){}
-  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', promo: 'Promotions', use: 'Visitors and intent', rep: 'Monthly report', prev: 'Visitor preview', log: 'Activity log' };
+  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', promo: 'Promotions', place: 'Places', use: 'Visitors and intent', rep: 'Monthly report', prev: 'Visitor preview', log: 'Activity log' };
 
   function now(){ return Date.now(); }
   function uid(){ return 's' + now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -823,6 +901,7 @@
     if(state.view === 'use') renderUse();
     if(state.view === 'rep') renderReport();
     if(state.view === 'feat') loadLayer(state.isl).then(renderEvents);
+    if(state.view === 'place') loadLayer(state.isl).then(renderPlaces);
     if(state.view === 'adv' && !$('fTitle').value) { islChecks('fIsl', [state.isl]); beachPick(); }
   }
   $('islPick').addEventListener('click', function(e){ var b = e.target.closest('button[data-isl]'); if(b) pickIsland(b.dataset.isl); });
@@ -849,7 +928,7 @@
     if(!TITLES[v]) v = 'now';
     state.view = v;
     Array.prototype.forEach.call(document.querySelectorAll('.rail button[data-view]'), function(b){ if(b.dataset.view === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
-    ['now','adv','feat','promo','use','rep','prev','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
+    ['now','adv','feat','promo','place','use','rep','prev','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
     $('viewTitle').textContent = TITLES[v];
     $('islPick').hidden = v === 'now' || v === 'log';
     if(v === 'now'){ setTimeout(function(){ if(map) map.invalidateSize(); }, 50); loadNowFrame(); }
@@ -857,6 +936,7 @@
     if(v === 'use') renderUse();
     if(v === 'rep') renderReport();
     if(v === 'promo') renderPromos();
+    if(v === 'place') loadLayer(state.isl).then(renderPlaces);
     if(v === 'feat') loadLayer(state.isl).then(renderEvents);
     window.scrollTo(0, 0);
   }
@@ -1340,8 +1420,8 @@
       : '<tr><td colspan="4" class="note">Nothing yet.</td></tr>';
   }
   $('btnClear').addEventListener('click', function(){
-    if(!confirm('Clear every post, feature and log entry saved in this browser?')) return;
-    try { localStorage.removeItem(A.KEY); localStorage.removeItem('gh_adv_seen'); } catch(e){}
+    if(!confirm('Clear every post, feature, place change and log entry saved in this browser?')) return;
+    try { localStorage.removeItem(A.PKEY); localStorage.removeItem(A.KEY); localStorage.removeItem('gh_adv_seen'); } catch(e){}
     renderAll();
   });
 
@@ -1717,11 +1797,214 @@
     setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(u); }, 800);
   }
 
+  // ---- Places: State and county staff edit, hide, or add places in the app (Nick, 2026-09-23) ----
+  // The overlay lives in gh/advisories.js (placesLoad / applyPlaces), so the app and this view read it the same way.
+  // GoHawaii's own listings are never rewritten: a change is stored beside the listing and laid over it.
+  var PL_CATS = [
+    ['scenic',  'ACTS', 'scenic',  '', 'Scenic spot or lookout'],
+    ['cultural','ACTS', 'cultural','', 'Cultural site'],
+    ['malama',  'ACTS', 'malama',  '', 'Mālama (give-back) program'],
+    ['town',    'ACTS', 'town',    '', 'Town or main street'],
+    ['tour',    'TOURS','tour',    '', 'Tour or activity'],
+    ['golf',    'TOURS','golf',    '', 'Golf'],
+    ['venue',   'VENUES','venue',  '', 'Venue'],
+    ['food',    'FOODS','hawaii regional','', 'Place to eat'],
+    ['coffee',  'FOODS','coffee',  '', 'Coffee'],
+    ['drinks',  'DRINKS','drinks', '', 'Drinks'],
+    ['shop',    'LOCAL_CRAFTS','shop','', 'Local shop'],
+    ['wellness','GHTOWN','wellness','', 'Wellness or spa'],
+    ['stay',    'STAYS','stay',    'hotel', 'Place to stay']
+  ];
+  var PL_BOX = { kauai: [21.8, 22.3, -159.85, -159.25], oahu: [21.2, 21.75, -158.3, -157.6], maui: [20.55, 21.05, -156.75, -155.95], hawaii: [18.85, 20.3, -156.1, -154.75] };
+  var SVG_PIN = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  state.plShow = 'all'; state.plOwn = 'any'; state.plPick = 'add'; state.plOpen = '';
+  var plMap = null, plLayer = null, plDraft = null;
+  function plCatOf(r){
+    for(var i = 0; i < PL_CATS.length; i++){ var c = PL_CATS[i]; if(c[1] === r.target && c[2] === r.type) return c; }
+    if(r.target === 'FOODS') return PL_CATS[7];
+    return null;
+  }
+  function plCatLabel(r){ if(r.type === 'event') return 'Event'; var c = plCatOf(r); return c ? c[4] : (r.gh_sub || r.type || ''); }
+  function plOwnerOpts(sel){
+    return ['state', state.isl].map(function(k){ return '<option value="' + esc(A.OWNERS[k]) + '"' + (sel === A.OWNERS[k] ? ' selected' : '') + '>' + esc(A.OWNERS[k]) + '</option>'; }).join('')
+      + (sel && [A.OWNERS.state, A.OWNERS[state.isl]].indexOf(sel) < 0 ? '<option selected>' + esc(sel) + '</option>' : '');
+  }
+  function plCatOpts(key){ return PL_CATS.map(function(c){ return '<option value="' + c[0] + '"' + (c[0] === key ? ' selected' : '') + '>' + esc(c[4]) + '</option>'; }).join(''); }
+  function plHttps(v){ return !v || /^https:\/\/[^\s]+$/i.test(v); }
+  function plInBox(lat, lon){ var b = PL_BOX[state.isl]; return isFinite(lat) && isFinite(lon) && lat >= b[0] && lat <= b[1] && lon >= b[2] && lon <= b[3]; }
+  // Every place on this island, as the app would get it, tagged with what staff did to it.
+  function plRows(){
+    var d = A.placesLoad(), base = (state.layers[state.isl] && state.layers[state.isl].rows) || [];
+    var byId = {}; A.applyPlaces(state.isl, base, { edits: d.edits, hidden: {}, added: d.added }).forEach(function(r){ byId[r.id] = r; });
+    return Object.keys(byId).map(function(id){
+      var r = byId[id], added = id.indexOf('gh_staff_') === 0;
+      return { r: r, added: added, edited: !added && !!d.edits[id], off: !!d.hidden[id], orig: added ? null : base.filter(function(x){ return x.id === id; })[0] };
+    });
+  }
+  function plOwnerKind(o){ return !o || o === A.OWNERS.state ? 'state' : 'county'; }
+  function renderPlaces(){
+    if(state.view !== 'place') return;
+    // The five-minute source check repaints everything; never wipe a row someone is typing in.
+    var ae = document.activeElement;
+    if(ae && $('plList').contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return;
+    $('plH').textContent = 'Places on ' + ISL[state.isl];
+    $('plOwner').innerHTML = plOwnerOpts($('plOwner').value || A.OWNERS.state);
+    if(!$('plCat').options.length) $('plCat').innerHTML = plCatOpts('scenic');
+    var all = plRows(), q = $('plQ').value.trim().toLowerCase();
+    var areas = {}; all.forEach(function(x){ if(x.r.r) areas[x.r.r] = 1; });
+    $('plAreas').innerHTML = Object.keys(areas).sort().map(function(a){ return '<option value="' + esc(a) + '">'; }).join('');
+    var rows = all.filter(function(x){
+      if(state.plShow === 'edit' && !x.edited) return false;
+      if(state.plShow === 'add' && !x.added) return false;
+      if(state.plShow === 'off' && !x.off) return false;
+      if(state.plOwn !== 'any' && plOwnerKind(x.r.owner) !== state.plOwn) return false;
+      if(q && (x.r.name + ' ' + (x.r.r || '') + ' ' + plCatLabel(x.r) + ' ' + (x.r.gh_sub || '')).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    // Staff work first (added, changed, hidden), then GoHawaii's listings by name.
+    rows.sort(function(a, b){ var wa = a.added ? 0 : a.edited || a.off ? 1 : 2, wb = b.added ? 0 : b.edited || b.off ? 1 : 2; return (wa - wb) || a.r.name.localeCompare(b.r.name); });
+    var CAP = 60;
+    $('plList').innerHTML = rows.slice(0, CAP).map(plRowHtml).join('') || '<div class="empty">' + (all.length ? 'Nothing matches. Clear the search or pick All.' : 'No places loaded for this island yet.') + '</div>';
+    $('plMore').textContent = rows.length > CAP ? 'Showing ' + CAP + ' of ' + rows.length + '. Search to find the rest.' : rows.length + ' place' + (rows.length === 1 ? '' : 's') + ' shown · ' + all.filter(function(x){ return x.off; }).length + ' hidden from the app';
+    plPaintMap(all);
+  }
+  function plRowHtml(x){
+    var r = x.r, img = r.img && /^https:\/\//.test(r.img) ? r.img : '';
+    var tags = (x.added ? '<span class="lvl feat">Added</span> ' : '') + (x.edited ? '<span class="lvl info">Changed</span> ' : '') + (x.off ? '<span class="lvl ended">Hidden</span> ' : '');
+    var meta = [plCatLabel(r), r.r, r.owner || (x.added ? '' : 'GoHawaii listing')].filter(Boolean).join(' · ');
+    var cat = plCatOf(r), isEv = r.type === 'event';
+    var f = function(lbl, cls, v, extra){ return '<label class="f">' + lbl + '</label><input type="text" class="' + cls + '" value="' + esc(v || '') + '"' + (extra || '') + '>'; };
+    return '<details class="pl' + (x.off ? ' off' : '') + '" data-id="' + esc(r.id) + '"' + (state.plOpen === r.id ? ' open' : '') + '>'
+      + '<summary><span class="th">' + SVG_PIN + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : '') + '</span>'
+      + '<span class="nm"><b>' + esc(r.name) + '</b><span>' + esc(meta) + '</span></span>' + tags + '</summary>'
+      + '<div class="ed">'
+      + f('Name', 'e-name', r.name, ' maxlength="80"')
+      + '<div class="plgrid"><div><label class="f">Kind of place</label>' + (isEv ? '<input type="text" value="Event" disabled>' : '<select class="e-cat" data-was="' + (cat ? cat[0] : '') + '">' + plCatOpts(cat ? cat[0] : '') + (cat ? '' : '<option value="" selected>' + esc(plCatLabel(r) || 'As listed') + '</option>') + '</select>') + '</div>'
+      + '<div>' + f('Area', 'e-r', r.r, ' maxlength="40" list="plAreas"') + '</div></div>'
+      + '<label class="f">What visitors should know</label><textarea class="e-tip" maxlength="400">' + esc(r.tip || '') + '</textarea>'
+      + '<div class="plgrid"><div>' + f('Hours', 'e-hours', r.hours, ' maxlength="60"') + '</div><div><label class="f">Kept by</label><select class="e-owner">' + (x.added ? '' : '<option value=""' + (r.owner ? '' : ' selected') + '>GoHawaii listing</option>') + plOwnerOpts(r.owner || (x.added ? A.OWNERS.state : '')) + '</select></div></div>'
+      + f('Address', 'e-address', r.address, ' maxlength="120"')
+      + '<div class="plgrid"><div>' + f('Website <small>(https)</small>', 'e-website', r.website, ' maxlength="300" inputmode="url"') + '</div><div>' + f('Photo link <small>(https)</small>', 'e-img', r.img, ' maxlength="400" inputmode="url"') + '</div></div>'
+      + '<div class="plgrid"><div>' + f('Latitude', 'e-lat', r.lat, ' inputmode="decimal"') + '</div><div>' + f('Longitude', 'e-lon', r.lon, ' inputmode="decimal"') + '</div></div>'
+      + '<div class="formfoot"><button type="button" class="btn pri" data-pl="save">Save</button><button type="button" class="btn" data-pl="pick">Move pin on the map</button>'
+      + (x.added ? '<button type="button" class="btn red" data-pl="del">Remove place</button>' : '<button type="button" class="btn" data-pl="' + (x.off ? 'show' : 'hide') + '">' + (x.off ? 'Put back in the app' : 'Hide from the app') + '</button>')
+      + (x.edited ? '<button type="button" class="btn ghost" data-pl="undo">Undo changes</button>' : '')
+      + (r.src_url ? '<a class="btn ghost" href="' + esc(r.src_url) + '" target="_blank" rel="noopener">Open on gohawaii.com</a>' : '') + '</div>'
+      + '<div class="msg" role="status"></div></div></details>';
+  }
+  function plLog(what, id, title){ var st = A.load(); st.log.push({ at: iso(now()), who: state.role, what: what, id: id, title: title }); A.save(st); }
+  function plMsg(el, kind, text){ el.className = 'msg on ' + kind; el.textContent = text; clearTimeout(el._t); el._t = setTimeout(function(){ el.className = 'msg'; }, 6000); }
+  // Read an open row's fields; null (with the reason shown) when something is off.
+  function plRead(box, m){
+    var v = function(c){ var e = box.querySelector('.' + c); return e ? e.value.trim() : undefined; };
+    var o = { name: v('e-name'), r: v('e-r'), tip: v('e-tip'), hours: v('e-hours'), owner: v('e-owner'), address: v('e-address'), website: v('e-website'), img: v('e-img'), lat: +v('e-lat'), lon: +v('e-lon') };
+    var ck = box.querySelector('.e-cat');
+    if(ck && ck.value && ck.value !== ck.dataset.was){ var c = PL_CATS.filter(function(x){ return x[0] === ck.value; })[0]; if(c){ o.target = c[1]; o.type = c[2]; o.theme = c[3] || ''; } }
+    if(!o.name){ plMsg(m, 'err', 'A place needs a name.'); return null; }
+    if(!plHttps(o.website) || !plHttps(o.img)){ plMsg(m, 'err', 'Links have to start with https://'); return null; }
+    if(!plInBox(o.lat, o.lon)){ plMsg(m, 'err', 'The pin has to be on ' + ISL[state.isl] + '. Use Move pin on the map.'); return null; }
+    return o;
+  }
+  $('plList').addEventListener('toggle', function(e){ var d = e.target; if(!d.classList || !d.classList.contains('pl')) return; if(d.open){ state.plOpen = d.dataset.id; plFocus(d.dataset.id); } else if(state.plOpen === d.dataset.id){ state.plOpen = ''; if(state.plPick !== 'add') plPickSet('add'); } }, true);
+  $('plList').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-pl]'); if(!b) return;
+    var box = b.closest('.pl'), id = box.dataset.id, m = box.querySelector('.msg'), act = b.dataset.pl, d = A.placesLoad();
+    var x = plRows().filter(function(y){ return y.r.id === id; })[0]; if(!x) return;
+    if(act === 'pick'){ plPickSet(id); return; }
+    if(act === 'hide' || act === 'show'){
+      if(act === 'hide') d.hidden[id] = { at: iso(now()), by: state.role }; else delete d.hidden[id];
+      A.placesSave(d); plLog(act === 'hide' ? 'Hid place from the app' : 'Put place back in the app', id, x.r.name); renderAll(); return;
+    }
+    if(act === 'undo'){ delete d.edits[id]; A.placesSave(d); plLog('Undid place changes', id, x.r.name); renderAll(); return; }
+    if(act === 'del'){
+      if(!confirm('Remove ' + x.r.name + ' from the app? It was added here, so this takes it off for good.')) return;
+      d.added[state.isl] = (d.added[state.isl] || []).filter(function(r){ return r.id !== id; }); delete d.hidden[id];
+      A.placesSave(d); plLog('Removed added place', id, x.r.name); state.plOpen = ''; plPickSet('add'); renderAll(); return;
+    }
+    if(act === 'save'){
+      var o = plRead(box, m); if(!o) return;
+      if(x.added){
+        d.added[state.isl] = (d.added[state.isl] || []).map(function(r){ if(r.id !== id) return r; var n = {}; for(var k in r) n[k] = r[k]; for(var k2 in o) if(o[k2] !== undefined) n[k2] = o[k2]; n.n = n.name; return n; });
+      } else {
+        // Keep only what differs from GoHawaii's listing, so a later pull still updates the rest.
+        var diff = {}, orig = x.orig || {};
+        Object.keys(o).forEach(function(k){ if(o[k] === undefined) return; var was = orig[k] == null ? '' : orig[k]; if(k === 'lat' || k === 'lon' ? Math.abs(+was - o[k]) > 1e-6 : String(was) !== String(o[k])) diff[k] = o[k]; });
+        if(diff.name) diff.n = diff.name;
+        if(Object.keys(diff).length) d.edits[id] = diff; else delete d.edits[id];
+      }
+      A.placesSave(d); plLog(x.added ? 'Changed added place' : 'Changed place details', id, o.name); state.plOpen = id; plPickSet('add'); renderAll();
+      var nb = document.querySelector('.pl[data-id="' + id + '"] .msg'); if(nb) plMsg(nb, 'ok', 'Saved. The app on this browser shows it now.');
+    }
+  });
+  function plPickSet(target){
+    state.plPick = target;
+    $('v-place').classList.toggle('picking', target !== 'add');
+    var r = target !== 'add' && plRows().filter(function(y){ return y.r.id === target; })[0];
+    $('plPickNote').textContent = r ? 'Tap the map to move the pin for ' + r.r.name + ', then Save.' : 'Tap the map to drop the new place\'s pin.';
+    if(r) $('plMap').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+  function plInitMap(){
+    if(plMap || typeof L === 'undefined') return;
+    plMap = L.map('plMap', { zoomControl: true, scrollWheelZoom: false, attributionControl: true });
+    plMap.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri', maxZoom: 18 }).addTo(plMap);
+    plLayer = L.layerGroup().addTo(plMap);
+    plMap.on('click', function(e){
+      var lat = +e.latlng.lat.toFixed(6), lon = +e.latlng.lng.toFixed(6);
+      if(state.plPick === 'add'){ $('plLat').value = lat; $('plLon').value = lon; plDraftAt(lat, lon); return; }
+      var box = document.querySelector('.pl[data-id="' + state.plPick + '"]');
+      if(box){ box.querySelector('.e-lat').value = lat; box.querySelector('.e-lon').value = lon; plDraftAt(lat, lon); plMsg(box.querySelector('.msg'), 'ok', 'Pin moved. Save to keep it.'); }
+    });
+  }
+  function plDraftAt(lat, lon){
+    if(!plMap) return;
+    var icon = L.divIcon({ className: '', html: '<div class="pldot new"></div>', iconSize: [16, 16], iconAnchor: [8, 8] });
+    if(plDraft) plDraft.setLatLng([lat, lon]); else plDraft = L.marker([lat, lon], { icon: icon, interactive: false }).addTo(plMap);
+  }
+  var plMapIsl = '';
+  function plPaintMap(all){
+    plInitMap(); if(!plMap) return;
+    setTimeout(function(){ plMap.invalidateSize(); }, 30);
+    if(plMapIsl !== state.isl){ var b = PL_BOX[state.isl]; plMap.fitBounds([[b[0], b[2]], [b[1], b[3]]]); plMapIsl = state.isl; if(plDraft){ plMap.removeLayer(plDraft); plDraft = null; } }
+    plLayer.clearLayers();
+    all.forEach(function(x){
+      var cls = x.off ? 'off' : (x.added || x.edited) ? 'st' : '';
+      var mk = L.marker([x.r.lat, x.r.lon], { icon: L.divIcon({ className: '', html: '<div class="pldot ' + cls + '"></div>', iconSize: [12, 12], iconAnchor: [6, 6] }), title: x.r.name, keyboard: false }).addTo(plLayer);
+      mk.on('click', function(){ if(state.plPick !== 'add') return; state.plOpen = x.r.id; $('plQ').value = ''; chipSetPl('plShow', 'plShow', 'all'); renderPlaces(); var el = document.querySelector('.pl[data-id="' + x.r.id + '"]'); if(el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); });
+    });
+  }
+  function plFocus(id){ var x = plRows().filter(function(y){ return y.r.id === id; })[0]; if(x && plMap) plMap.setView([x.r.lat, x.r.lon], Math.max(plMap.getZoom(), 13)); }
+  function chipSetPl(id, key, v){ Array.prototype.forEach.call($(id).querySelectorAll('button[data-v]'), function(x){ x.setAttribute('aria-pressed', String(x.dataset.v === v)); }); state[key] = v; }
+  ['plShow', 'plOwn'].forEach(function(id){ $(id).addEventListener('click', function(e){ var b = e.target.closest('button[data-v]'); if(!b) return; chipSetPl(id, id, b.dataset.v); renderPlaces(); }); });
+  $('plQ').addEventListener('input', renderPlaces);
+  $('plSample').addEventListener('click', function(){
+    var S = { kauai: ['Sample: Kalalau Lookout', 'Kōkeʻe', 22.1515, -159.6462, 'Daily, sunrise to sunset'], oahu: ['Sample: Nuʻuanu Pali Lookout', 'Windward', 21.3669, -157.7934, 'Daily, 6am to 6pm'],
+      maui: ['Sample: Nakalele Blowhole lookout', 'West Maui', 21.0270, -156.5895, 'Daylight hours'], hawaii: ['Sample: Waipiʻo Valley Lookout', 'Hāmākua Coast', 20.1176, -155.5840, 'Daylight hours'] }[state.isl];
+    $('plName').value = S[0]; $('plArea').value = S[1]; $('plLat').value = S[2]; $('plLon').value = S[3]; $('plHours').value = S[4];
+    $('plCat').value = 'scenic'; $('plTip').value = 'Park at the lot and walk the short path to the rail. Stay behind the rail; the edge is loose rock.';
+    $('plOwner').value = A.OWNERS.state; plDraftAt(S[2], S[3]); plMsg($('plMsg'), 'ok', 'Sample filled in. Add it to see it in the app on this browser.');
+  });
+  $('plForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var m = $('plMsg'), name = $('plName').value.trim(), lat = +$('plLat').value, lon = +$('plLon').value;
+    var site = $('plSite').value.trim(), img = $('plImg').value.trim(), c = PL_CATS.filter(function(x){ return x[0] === $('plCat').value; })[0] || PL_CATS[0];
+    if(!name){ plMsg(m, 'err', 'A place needs a name.'); return; }
+    if(!plHttps(site) || !plHttps(img)){ plMsg(m, 'err', 'Links have to start with https://'); return; }
+    if(!$('plLat').value || !plInBox(lat, lon)){ plMsg(m, 'err', 'Tap the map on ' + ISL[state.isl] + ' to set the pin.'); return; }
+    var r = { id: 'gh_staff_' + uid(), name: name, n: name, r: $('plArea').value.trim(), lat: lat, lon: lon, target: c[1], type: c[2], theme: c[3] || undefined, tags: ['gohawaii'],
+      tip: $('plTip').value.trim(), hours: $('plHours').value.trim(), address: $('plAddr').value.trim(), website: site, img: img, owner: $('plOwner').value, src: 'gohawaii', src_url: '',
+      by: state.role, created: iso(now()) };
+    var d = A.placesLoad(); (d.added[state.isl] = d.added[state.isl] || []).push(r); A.placesSave(d);
+    plLog('Added place', r.id, r.name);
+    $('plForm').reset(); $('plCat').value = 'scenic'; if(plDraft && plMap){ plMap.removeLayer(plDraft); plDraft = null; }
+    plMsg(m, 'ok', 'Added. It is in the app\'s ' + c[4].toLowerCase() + ' list and on its map on this browser now.'); renderAll();
+  });
+
   function renderAll(){
     var st = A.load();
     var pend = st.items.filter(function(i){ return i.status === 'pending'; }).length;
     $('advDot').hidden = !pend;
-    renderNow(); paintMap(); renderAdvLists(); renderEvents(); renderPromos(); renderLog();
+    renderNow(); paintMap(); renderAdvLists(); renderEvents(); renderPromos(); renderLog(); renderPlaces();
   }
 
   window.addEventListener('storage', function(e){ if(e.key === A.KEY) renderAll(); });

@@ -12992,7 +12992,7 @@ function _ghInject(rows){
     var lat=+r.lat, lon=+r.lon; if(!isFinite(lat)||!isFinite(lon)||(lat===0&&lon===0)) return;
     var rec = { id:r.id, name:r.name, n:r.n||r.name, r:r.r||'', lat:lat, lon:lon, type:r.type||'', theme:r.theme, tags:Array.isArray(r.tags)?r.tags:['gohawaii'],
                 tip:r.tip||'', website:r.website, address:r.address, img:r.img, when:r.when, venue:r.venue, gh_sub:r.gh_sub||'', src:'gohawaii', src_url:r.src_url||'',
-                duration_min:undefined, price:undefined, hours:undefined };
+                duration_min:undefined, price:undefined, hours:undefined, gh_hours:r.hours||'', owner:r.owner||'', staff:!!r.staff };
     if(r.yards) rec.yards = r.yards; if(r.course_type) rec.course_type = r.course_type;
     // A row that sells (a Malama package flagged by the layer build, or any listing whose own text carries a price,
     // a discount or a booking line): kept off red and yellow beach sheets and their nearby lists (ruled 2026-09-18).
@@ -13028,7 +13028,7 @@ function _ghNearestBeach(lat, lon){
 // GoHawaii advisories (public ref only). The engine and the visitor UI live in /gh/, so no other
 // load fetches or parses them. ?b= changes with each build: /gh/ scripts ride the service worker's
 // stale-while-revalidate shell cache, so without it a returning visitor runs the previous build once.
-var GH_ADV_BUILD = '2026-09-19-adv10';
+var GH_ADV_BUILD = '2026-09-23-adv11';
 function _ghAdvLoad(){
   if(window.GH_ADV || document.getElementById('ghAdvJs')) return;
   var a = document.createElement('script'); a.id = 'ghAdvJs'; a.src = '/gh/advisories.js?b=' + GH_ADV_BUILD;
@@ -13041,7 +13041,8 @@ function openGhSheet(id){
   var _sc=document.getElementById('sc'); _sc.style.display='';
   // Single quotes inside url(): the value lands in a double-quoted style attribute. The gradient sits
   // under the photo, so a photo that fails to load still leaves the no-photo look, never a blank hero.
-  var img = (g.img && String(g.img).indexOf('https://www.gohawaii.com/')===0) ? String(g.img).replace(/&/g,'&amp;').replace(/'/g,'%27').replace(/"/g,'%22') : '';
+  // A place State or county staff edited may carry their own https photo; a listing as pulled keeps gohawaii.com only.
+  var img = (g.img && (String(g.img).indexOf('https://www.gohawaii.com/')===0 || (g.staff && /^https:\/\//.test(String(g.img))))) ? String(g.img).replace(/&/g,'&amp;').replace(/'/g,'%27').replace(/"/g,'%22') : '';
   var hero = img ? "background:url('"+img+"') center/cover,linear-gradient(135deg,#0f4c5c,#1a7a8a)" : 'background:linear-gradient(135deg,#0f4c5c,#1a7a8a)';
   var kind = g.gh_sub || g.type || '';
   _sc.innerHTML = '<div class="poi-hero" style="'+hero+';color:#fff;min-height:150px;position:relative;overflow:hidden">'
@@ -13052,11 +13053,12 @@ function openGhSheet(id){
     + (g.when ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">◷</span><span>Next date: '+_pesc(_ghDayLabel(g.when))+(g.venue?' at '+_pesc(g.venue):'')+'</span></div>' + _ghForecastNote(g.when) : '')
     + (g.type==='golf' ? (function(){ var f=[]; if(g.yards) f.push(_pesc(g.yards)+' yards'); if(g.course_type) f.push(_pesc(g.course_type)); try { var c=getIslandConditions(); if(typeof c.wind==='number') f.push('wind today about '+Math.round(c.wind)+' mph'); } catch(e){} return f.length ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">'+GH_ICON.flag+'</span><span>'+f.join(' · ')+'</span></div>' : ''; })() : '')
     + (g.tip ? '<div class="poi-local-tip" style="margin-top:12px"><span style="flex-shrink:0">◈</span><span>'+_pesc(g.tip)+'</span></div>' : '')
+    + (g.gh_hours ? '<div style="margin-top:10px;font-size:13px;color:var(--ink)">Hours: '+_pesc(g.gh_hours)+'</div>' : '')
     + (g.address ? '<div style="margin-top:10px;font-size:13px;color:var(--ink)">'+_pesc(g.address)+'</div>' : '')
     + contactRow(g)
     + '<a href="'+dirUrl(g.name, g.lat, g.lon)+'" target="_blank" rel="noopener" class="dirbtn" style="margin-top:10px">Get Directions</a>'
     + _ghNearestBeach(g.lat, g.lon)
-    + '<div style="margin-top:16px;font-size:11px;color:var(--mute)">Listing by GoHawaii (Hawaii Visitors and Convention Bureau). '
+    + '<div style="margin-top:16px;font-size:11px;color:var(--mute)">'+(g.owner && !g.src_url ? 'Place added by the '+_pesc(g.owner)+'. ' : 'Listing by GoHawaii (Hawaii Visitors and Convention Bureau). '+(g.owner ? 'Details kept by the '+_pesc(g.owner)+'. ' : ''))
     + (g.src_url ? '<a href="'+_pesc(g.src_url)+'" target="_blank" rel="noopener" style="color:var(--ocean);text-decoration:underline">Open on gohawaii.com</a>' : '') + '</div>';
   // The credit appears only once the photo has actually loaded; a refused photo leaves the gradient uncredited.
   if(img){ var credit=_sc.querySelector('.gh-credit'), probe=new Image(); probe.onload=function(){ if(credit) credit.style.display=''; }; probe.src=String(g.img); }

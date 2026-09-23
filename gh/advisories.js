@@ -282,7 +282,40 @@
   }
   function seen(id){ try { return (JSON.parse(localStorage.getItem('gh_adv_seen') || '{}')[id]) || 0; } catch(e){ return 0; } }
 
+  // ---- Places: what State and county staff change in the GoHawaii listings (Nick, 2026-09-23) ----
+  // One overlay per browser in the review build (key gh_places_v1), applied on top of the pulled layer:
+  //   edits[id]  fields that replace the listing's own (name, tip, hours, address, website, img, r, lat, lon, owner)
+  //   hidden[id] a listing taken off the app
+  //   added[isl] places staff put on the map; ids start gh_staff_ so the app's gh_ guards accept them
+  // Beaches are not in here: a beach verdict and its safety data never come from this store.
+  var PKEY = 'gh_places_v1';
+  var PLACE_FIELDS = ['name','n','tip','hours','address','website','img','r','lat','lon','owner','target','type','theme','gh_sub'];
+  // Who looks after a place. GoHawaii's own listings default to the State.
+  var OWNERS = { state:'State of Hawaiʻi', kauai:'County of Kauaʻi', oahu:'City and County of Honolulu', maui:'County of Maui', hawaii:'County of Hawaiʻi' };
+  function placesLoad(){
+    var d = null; try { d = JSON.parse(localStorage.getItem(PKEY)); } catch(e){}
+    d = d && typeof d === 'object' ? d : {};
+    return { edits: d.edits || {}, hidden: d.hidden || {}, added: d.added || {} };
+  }
+  function placesSave(d){ try { localStorage.setItem(PKEY, JSON.stringify(d)); } catch(e){} }
+  // The rows the app should show on this island: the layer's rows with edits laid over them, hidden ones
+  // dropped, added ones last. Every returned row is a copy, so the layer file itself never changes.
+  function applyPlaces(isl, rows, d){
+    d = d || placesLoad();
+    var out = [];
+    (Array.isArray(rows) ? rows : []).forEach(function(r){
+      if(!r || d.hidden[r.id]) return;
+      var e = d.edits[r.id], c = {}; for(var k in r) c[k] = r[k];
+      if(e) PLACE_FIELDS.forEach(function(f){ if(e[f] !== undefined) c[f] = e[f]; });
+      if(e) c.staff = true;
+      out.push(c);
+    });
+    (d.added[isl] || []).forEach(function(r){ if(!d.hidden[r.id]){ var c = {}; for(var k in r) c[k] = r[k]; c.staff = true; out.push(c); } });
+    return out;
+  }
+
   window.GH_ADV = {
+    PKEY: PKEY, OWNERS: OWNERS, placesLoad: placesLoad, placesSave: placesSave, applyPlaces: applyPlaces,
     KEY: KEY, ISL: ISL, ORDER: ORDER, NWS_LEVEL: NWS_LEVEL, HTA_SHOW_HOURS: HTA_SHOW_HOURS,
     load: load, save: save, refresh: refresh, last: last, active: active, features: features, promos: promos, inDaily: inDaily, hoursLabel: hoursLabel,
     inWindow: inWindow, onIsland: onIsland, nwsLevel: nwsLevel,

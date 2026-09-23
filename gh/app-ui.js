@@ -736,7 +736,24 @@
     } catch(e){}
   }
   function promoBoot(){ if(!window._partnerCfg){ if(++promoTries < 80) setTimeout(promoBoot, 500); return; } promoApply(); setInterval(promoApply, 60 * 1000); }
+  // ---- places: the State and county edits from the Dashboard, laid over GoHawaii's listings ----
+  // index.html's _ghInject builds the tabs and pins from a row list; wrapping it here means every inject,
+  // first load or island change, goes through the overlay, and a Dashboard save in another tab re-injects.
+  function placesHook(){
+    try {
+      if(typeof _isPublicRef !== 'function' || !_isPublicRef() || typeof window._ghInject !== 'function' || window._ghInject._places) return;
+      var orig = window._ghInject;
+      var wrapped = function(rows){ return orig(A.applyPlaces(isl(), rows)); };
+      wrapped._places = true;
+      window._ghInject = wrapped;
+      placesRedo();
+    } catch(e){}
+  }
+  function placesRedo(){
+    try { var L = window.GH_LAYER && window.GH_LAYER[isl()]; if(L) window._ghInject(L.rows); } catch(e){}
+  }
   function start(){
+    placesHook();
     postVerdicts();
     if(PROBE) return;
     css(); strip(); promoBoot();
@@ -745,7 +762,7 @@
     A.refresh(function(r){ feeds.nws = r.nws; feeds.hta = r.hta; afterFeeds(); });
     setInterval(tick, 10 * 60 * 1000);
     // A post from the Dashboard in another tab of this browser lands here at once.
-    window.addEventListener('storage', function(e){ if(e.key === A.KEY){ paint(); if(!showRed()) pops(); promoSig = null; promoApply(); } });
+    window.addEventListener('storage', function(e){ if(e.key === A.PKEY){ placesRedo(); hubRefresh(); return; } if(e.key === A.KEY){ paint(); if(!showRed()) pops(); promoSig = null; promoApply(); } });
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

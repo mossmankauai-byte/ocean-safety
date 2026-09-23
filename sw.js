@@ -20,7 +20,7 @@
 // v289 was claimed twice on the same day. Forward, never backward.
 // v319 is claimed on work/reserve-links; this branch skips to v320.
 // v345 was claimed twice on 2026-09-19 (gh-promotions and the tsunami map): tsunami resolves forward to v346.
-const CACHE_VERSION = 'v376-2026-09-23-culture-heiau';   // commerce line 657dd7f (promotions) + tsunami way-out map
+const CACHE_VERSION = 'v377-2026-09-23-app-update';   // commerce line 657dd7f (promotions) + tsunami way-out map
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
