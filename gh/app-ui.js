@@ -756,6 +756,14 @@
   // Off in the review build, where A.API is empty and none of this runs.
   function liveBoot(){
     if(!A.API) return;
+    // index.html's localizeSafety() says this build counts nothing; with the backend on it does, so the two
+    // notices change here, before the first total is added up.
+    try {
+      var lnk = '<a href="/gohawaii-privacy" style="color:#0f4c5c;text-decoration:underline;font-weight:600">privacy in the GoHawaii version</a>';
+      var pl = document.getElementById('privLeaves'), dp = document.getElementById('disPrivacy');
+      if(pl) pl.innerHTML = 'If you tap <b>Locate Me</b>, a position rounded to about 1&nbsp;km is sent to our server to fetch your local forecast and is not kept; your exact position stays on your device. No analytics and no crash reports. This version sends GoHawaii daily visit totals: the island, beaches and places opened, tabs used, taps out, advisory pop-ups shown, the hour, your language and the kind of device, added up with no id and no location, and none of it if your browser sends Do Not Track. Photos and map tiles load straight from the sites that host them, gohawaii.com included, so those sites see your IP address and that you came from this site. Full list: ' + lnk + '.';
+      if(dp) dp.innerHTML = 'No accounts and no signup: we never learn your name. No analytics and no crash reports in this build. It sends GoHawaii daily visit totals with no id and no location, and none under Do Not Track. If you tap Locate&nbsp;Me, a position rounded to about 1&nbsp;km goes to our server to fetch your local forecast and is not kept. Full detail: ' + lnk + '.';
+    } catch(e){}
     var pull = function(){ A.pullPublic().then(function(changed){ if(changed){ placesRedo(); paint(); if(!showRed()) pops(); promoSig = null; promoApply(); hubRefresh(); } }); };
     pull(); setInterval(pull, 60 * 1000);
     var I = function(){ return isl(); };

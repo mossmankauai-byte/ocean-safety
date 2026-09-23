@@ -63,4 +63,17 @@ ok(!st.top.some((x) => x.metric === 'bogus'), 'unknown kinds of count are droppe
 ok((await call('/gh/stats')).s === 401, 'totals need a staff key');
 const au = (await call('/gh/audit', { headers: as(ap.key) })).j;
 ok(au.rows.some((x) => x.who === co.name && x.doc === 'places:kauai'), 'server audit names who saved places');
+// allowlists, preflight, rate limit
+const w0 = (await call('/gh/stats?days=1', { headers: as(ed.key) })).j;
+await call('/gh/e', { method: 'POST', body: JSON.stringify({ island: 'oahu', rows: [['tab', 'free money', 1], ['lang', 'english', 1], ['dev', 'toaster', 1], ['link', 'evil.example', 1], ['place', 'nope', 1], ['hour', '25', 1], ['tab', 'beaches', 999]] }) });
+const w1 = (await call('/gh/stats?days=1', { headers: as(ed.key) })).j;
+const oTop = (j) => j.top.filter((x) => x.island === 'oahu');
+ok(!oTop(w1).some((x) => /free|english|toaster|evil|nope|^25$/.test(x.k)), 'made-up words and values never reach the lists');
+const tb = (j) => (oTop(j).find((x) => x.metric === 'tab' && x.k === 'beaches') || { n: 0 }).n;
+ok(tb(w1) - tb(w0) === 20, 'one row adds at most 20');
+const pre = await fetch(B + '/gh/doc/notices', { method: 'OPTIONS', headers: { Origin: 'https://evil.example', 'Access-Control-Request-Method': 'PUT' } });
+ok(!pre.headers.get('access-control-allow-origin'), 'preflight from an unknown site gets no Allow-Origin');
+let limited = false;
+for (let i = 0; i < 40 && !limited; i++) { const r = await fetch(B + '/gh/e', { method: 'POST', body: JSON.stringify({ island: 'hawaii', rows: [] }) }); if (r.status === 429) limited = true; }
+ok(limited, 'the counter slows down one address after 30 batches a minute');
 console.log(fails ? fails + ' FAIL' : 'ALL PASS'); process.exit(fails ? 1 : 0);

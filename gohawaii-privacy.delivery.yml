@@ -1,0 +1,6 @@
+# Delivery spec for gohawaii-privacy.html, the privacy page of the GoHawaii version. Written 2026-09-23.
+recipient: Nick first; then State (HTA/HVCB) and county staff, each signing in with a personal staff key Nick issues. Visitors reach the app through the GoHawaii link. Review site only (htagohawaii.netlify.app, Netlify 5da479a8), never production.
+segment: public
+tier: free
+fulfillment: none. A policy page.
+must_be_true_after: it lists exactly what the app sends to gohawaii-api (gh/advisories.js count(), backend-gohawaii/worker.js KEY_OK): visit, island, beaches and places opened, tabs, taps out by kind, advisory pop-ups shown, hour, two-letter language, device type; says no id, no location, not stored per visitor, off under Do Not Track; names every party that sees a visit in this version (Netlify, the GoHawaii server on Cloudflare, Esri and CARTO, gohawaii.com, photo hosts, Open-Meteo, National Weather Service, Clearbit); no commission, partner-link or tour-widget wording; no em dashes.

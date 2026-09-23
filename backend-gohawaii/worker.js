@@ -18,11 +18,26 @@
 const ISLANDS = ['kauai', 'oahu', 'maui', 'hawaii'];
 const ORGS = ['state'].concat(ISLANDS);
 const METRICS = new Set(['visit', 'tab', 'beach', 'place', 'link', 'adv', 'lang', 'dev', 'hour']);
+// What each kind of count may carry. Anything else is dropped, so nobody can put their own words
+// into the lists staff read. Beach and place ids are shape-checked here; the Dashboard shows only
+// ids it finds in the app's own lists.
+const TABS = new Set(['activities', 'acts', 'beaches', 'hikes', 'shop', 'shopping', 'stays', 'tours']);
+const KEY_OK = {
+  visit: (k) => k === '',
+  tab: (k) => TABS.has(k),
+  beach: (k) => /^[a-z0-9_-]{1,40}$/.test(k),
+  place: (k) => /^gh_[a-z0-9_]{1,40}$/.test(k),
+  link: (k) => k === 'gohawaii' || k === 'website' || k === 'directions',
+  adv: (k) => k === 'shown',
+  lang: (k) => /^[a-z]{2}$/.test(k),
+  dev: (k) => k === 'ios' || k === 'android' || k === 'desktop',
+  hour: (k) => /^([0-9]|1[0-9]|2[0-3])$/.test(k),
+};
 const DOCS = new Set(['notices'].concat(ISLANDS.map((i) => 'places:' + i)));
 const DOC_MAX = 900 * 1024;
 
-const cors = (origin) => ({
-  'Access-Control-Allow-Origin': origin || '*',
+// No origin, no Allow-Origin: a staff route never answers a site that is not on STAFF_ORIGINS.
+const cors = (origin) => Object.assign(origin ? { 'Access-Control-Allow-Origin': origin } : {}, {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Max-Age': '86400',
@@ -59,20 +74,27 @@ function orgLabel(org) {
 // Body: { island, rows: [[metric, key, n], ...] }. The app adds up a visit before it sends, so one
 // visit is a handful of upserts. Totals only: the server never sees who sent them.
 async function ingest(req, env) {
-  let b; try { b = await req.json(); } catch (e) { return json({ error: 'bad_json' }, 400); }
+  // One visitor sends about two batches a minute; 30 a minute per address leaves room for a hotel
+  // lobby on one connection. The address is used for this check only and is not stored.
+  if (env.GH_RL) {
+    const ip = req.headers.get('CF-Connecting-IP') || 'none';
+    const { success } = await env.GH_RL.limit({ key: ip });
+    if (!success) return json({ error: 'slow_down' }, 429, '*');
+  }
+  let b; try { b = await req.json(); } catch (e) { return json({ error: 'bad_json' }, 400, '*'); }
   const island = clean(b && b.island, 12);
-  if (ISLANDS.indexOf(island) < 0) return json({ error: 'bad_island' }, 400);
-  const rows = Array.isArray(b.rows) ? b.rows.slice(0, 60) : [];
+  if (ISLANDS.indexOf(island) < 0) return json({ error: 'bad_island' }, 400, '*');
+  const rows = Array.isArray(b.rows) ? b.rows.slice(0, 30) : [];
   const day = hstDay();
   const stmts = [];
   for (const r of rows) {
     if (!Array.isArray(r)) continue;
-    const m = clean(r[0], 8), k = clean(r[1], 64), n = Math.max(1, Math.min(50, parseInt(r[2], 10) || 1));
-    if (!METRICS.has(m)) continue;
+    const m = clean(r[0], 8), k = clean(r[1], 64), n = Math.max(1, Math.min(20, parseInt(r[2], 10) || 1));
+    if (!METRICS.has(m) || !KEY_OK[m](k)) continue;
     stmts.push(env.DB.prepare('INSERT INTO counts (day, island, metric, k, n) VALUES (?, ?, ?, ?, ?) ON CONFLICT(day, island, metric, k) DO UPDATE SET n = n + excluded.n').bind(day, island, m, k, n));
   }
   if (stmts.length) await env.DB.batch(stmts);
-  return json({ ok: true, n: stmts.length }, 200);
+  return json({ ok: true, n: stmts.length }, 200, '*');
 }
 
 // ---- documents ----
