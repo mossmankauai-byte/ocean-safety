@@ -9,7 +9,7 @@ compatibility_date = "2026-09-01"
 binding = "DB"
 database_name = "gohawaii"
 # Paste the id that `wrangler d1 create gohawaii` prints. Local dev (`wrangler dev --local`) runs without it.
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "c3d47d07-320d-465e-a5d3-fb64614837c5"
 
 [vars]
 # Sites allowed to call the staff and stats routes (comma-separated). The visitor count and the
