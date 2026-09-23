@@ -884,15 +884,15 @@
 <iframe id="probe" title="Beach verdict reader" aria-hidden="true" tabindex="-1" style="position:absolute;left:-10000px;top:0;width:390px;height:844px;border:0;visibility:hidden"></iframe>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/gh/config.js?b=2026-09-23-adv12"></script>
-<script src="/gh/advisories.js?b=2026-09-23-adv12"></script>
+<script src="/gh/config.js?b=2026-09-23-adv13"></script>
+<script src="/gh/advisories.js?b=2026-09-23-adv13"></script>
 <script>
 (function(){
   'use strict';
   var A = window.GH_ADV;
   var esc = A.esc, ISL = A.ISL, ORDER = A.ORDER;
   var $ = function(id){ return document.getElementById(id); };
-  var BUILD = '2026-09-23-adv12', LAYER_BUILD = '2026-09-18-photos-adv3';
+  var BUILD = '2026-09-23-adv13', LAYER_BUILD = '2026-09-18-photos-adv3';
   var state = { isl: 'kauai', view: 'now', role: 'Editor', feeds: { nws: null, hta: null }, beaches: null, layers: {}, evKind: 'event', start: 'now', end: '24', cEnd: '168', previewId: '', tbl: 'all', verd: {} };
   try { state.role = sessionStorage.getItem('ghd_role') || 'Editor'; } catch(e){}
   // Review build: "who" is the role switch. Live (gh/config.js names the backend): the signed-in person.
