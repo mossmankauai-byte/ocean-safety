@@ -1739,6 +1739,8 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 #cultureRibbon .cr-pill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #cultureRibbon .cr-pill>svg:first-child{width:16px;height:16px;flex-shrink:0}
 #cultureCard .cp-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+/* The card scrolls, so Back and Next stick to its foot instead of falling below the fold. */
+#cultureCard.cp-open .cp-nav{position:sticky;bottom:-28px;margin:14px -16px -28px;padding:10px 16px calc(14px + env(safe-area-inset-bottom, 0px));background:linear-gradient(rgba(246,239,223,0),#f6efdf 22%);z-index:2}
 #cultureCard .cc-band,.cc-block .cc-band{height:8px;margin:11px 0 2px;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'><path d='M0 8L6 1.6l6 6.4 6-6.4 6 6.4' fill='none' stroke='%235a4630' stroke-opacity='.32' stroke-width='1.1'/></svg>") repeat-x center}
 #cultureCard .cp-strip{display:flex;align-items:center;justify-content:center}
 #cultureCard .cp-strip .cs{position:relative;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:rgba(63,46,28,.4)}
@@ -1748,6 +1750,7 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 #cultureCard .cp-strip .cs.on{color:#3f2e1c}
 #cultureCard .cp-strip .cs.done .cf,#cultureCard .cp-strip .cs.on .cf{fill:currentColor}
 #cultureCard .cd{display:block;margin:2px 0 10px;color:#3f2e1c}
+#cultureCard.cp-open .cd{height:76px}
 #cultureCard .cd-area{fill:#3f2e1c;fill-opacity:0;stroke:rgba(63,46,28,.26);stroke-width:1.2}
 #cultureCard .cd-area.cd-on{fill-opacity:.16;stroke:#3f2e1c;stroke-width:1.6}
 #cultureCard .cd-line{stroke:rgba(90,70,48,.3);stroke-width:1}
@@ -1756,6 +1759,33 @@ body[data-tab="acts"] #cultureToggle{top:188px}
 #cultureCard .cd-ridge{stroke:#5a4630;stroke-width:1.6}
 #cultureCard .cd-plant{color:#4a3720;opacity:.9}
 #cultureCard .cd-t{font:600 8px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.14em;text-transform:uppercase;fill:#6b5a3e;stroke:none}
+#cultureCard.cp-open{max-height:52vh}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* One row that scrolls sideways instead of a wall that wraps: the choice stays one gesture wide. */
+#cultureCard .cp-row{display:flex;gap:6px;margin:10px -16px 8px;padding:2px 16px 6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#cultureCard .cp-row::-webkit-scrollbar{display:none}
+#cultureCard .cp-row .cc-say{flex:0 0 auto;white-space:nowrap}
+#cultureCard .cp-row .cc-say svg{width:16px;height:16px;flex-shrink:0}
+#cultureCard .cp-row .cc-say.here{border-color:#0f4c5c}
+#cultureCard .cp-row .cc-say i{font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+#cultureCard .cp-hero{width:100%;justify-content:flex-start;margin:4px 0 2px;padding:11px 14px;font-size:13px;text-align:left}
+#cultureCard .cp-hero svg{width:20px;height:20px;flex-shrink:0}
+#cultureCard .cp-all{display:inline-block;margin:0 0 6px}
+#cultureCard .cp-now{font-size:13px;color:#4a3720;margin:6px 0 0}
+#cultureCard .cp-note{font-size:12.5px;line-height:1.45;color:#6b5a3e;margin:10px 0 0}
+#cultureCard .cp-st{width:9px;height:9px;border-radius:50%;flex:0 0 auto;margin-left:auto}
+#cultureCard .cp-green{background:#2f6b45}#cultureCard .cp-amber{background:#9a5f1c}#cultureCard .cp-red{background:#992a16}#cultureCard .cp-night{background:#4b5563}
+/* Four named levels, not four dots. */
+#cultureCard .cp-steps{margin:14px 0 0}
+#cultureCard .cp-labels{display:flex;justify-content:center;gap:12px;margin-top:2px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(63,46,28,.45)}
+#cultureCard .cp-labels .on{color:#3f2e1c;font-weight:700}
+#cultureCard .cp-src{margin-top:12px}
+#cultureCard .cp-src .cc-cite{margin-top:6px}
+#cultureCard .cp-in{animation:cpIn .26s cubic-bezier(.16,1,.3,1)}
+#cultureCard .cp-back{animation:cpBack .26s cubic-bezier(.16,1,.3,1)}
+@keyframes cpIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes cpBack{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#cultureCard .cp-in,#cultureCard .cp-back{animation:none}}
 #cultureCard .cp-chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
 #cultureCard .cc-say{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(63,46,28,.45);background:#f6efdf;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:600;color:#3f2e1c;cursor:pointer}
 #cultureCard .cp-chips .cc-say svg{width:16px;height:16px;flex-shrink:0}
@@ -5460,7 +5490,7 @@ function initMap(){
     window._cultureLit = entries || [];
     window._cultureLit.forEach(function(e){ e.layer.setStyle({weight:2.4, color:'#7a2f12', fillOpacity:.34}); if (e.layer.bringToFront) e.layer.bringToFront(); });
   };
-  window._cultureCloseCard = function(){ var el = document.getElementById('cultureCard'); if (el) el.classList.remove('open'); window._cultureHighlight([]); try { window._cultureRibbon(!!window._isCulture()); } catch(e){} };
+  window._cultureCloseCard = function(){ var el = document.getElementById('cultureCard'); if (el){ el.classList.remove('open'); el.classList.remove('cp-open'); } window._culturePath.step = 0; window._cultureHighlight([]); try { window._cultureRibbon(!!window._isCulture()); } catch(e){} };
   window._cultureLearnHTML = function(){
     var Lr = window.CULTURE_LEARN;
     return window._cultureH3('The land system','kalo') + '<p>' + Lr.system.text + '</p><p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p>'
@@ -5471,6 +5501,8 @@ function initMap(){
   };
   window._cultureOpenAhupuaa = function(id){
     var idx = window._cultureIdx, e = idx && idx.byId[id]; if (!e) return;
+    if (window._cultureTourTap('ahu', id)) return;   // the tour is open: this tap is the answer to its step
+    window._culturePath.step = 0; try { window._cultureCardEl().classList.remove('cp-open'); } catch(e){}
     var esc = window._cultureEsc, sibs = (idx.byMoku[e.moku] || []).slice().sort(function(a, b){ return b.acres - a.acres; }), rank = sibs.indexOf(e) + 1;
     var bm = window._cultureBeachMap(), beaches = (typeof B !== 'undefined' ? B : []).filter(function(b){ return bm[b.id] === id; });
     var island = (window.ACTIVE && ACTIVE.name) || '';
@@ -5489,6 +5521,8 @@ function initMap(){
     window._cultureHighlight([e]);
   };
   window._cultureOpenMoku = function(name){
+    if (window._cultureTourTap('moku', name)) return;   // same for a moku label while the tour is running
+    window._culturePath.step = 0; try { window._cultureCardEl().classList.remove('cp-open'); } catch(e){}
     var idx = window._cultureIdx, list = idx && idx.byMoku[name]; if (!list || !list.length) return;
     var esc = window._cultureEsc, sorted = list.slice().sort(function(a, b){ return b.acres - a.acres; }), acres = 0; sorted.forEach(function(e){ acres += e.acres; });
     var bm = window._cultureBeachMap(), nb = (typeof B !== 'undefined' ? B : []).filter(function(b){ return list.some(function(e){ return bm[b.id] === e.id; }); }).length;
@@ -5717,47 +5751,133 @@ function initMap(){
       return '<span class="cs' + (n === step ? ' on' : (n < step ? ' done' : '')) + '">' + sv + '</span>';
     }).join('') + '</div>';
   };
-  window._culturePath = {step:0, moku:null, ahu:null};
-  window._culturePathHere = function(){ var h = window._cultureWhereAmI(); if (!h) return window._culturePathOpen(1); window._culturePath.moku = h.moku; window._culturePath.ahu = h.id; window._culturePathOpen(3); };
-  window._culturePathPick = function(kind, v){ if (kind === 'moku'){ window._culturePath.moku = v; window._culturePath.ahu = null; window._culturePathOpen(2); } else { window._culturePath.ahu = v; window._culturePathOpen(3); } };
+  // ── START HERE. A descent, not a picker. The map is the instrument: while the tour is open a tap on a
+  //    moku label or an ahupuaʻa section IS the answer to the step you are on, and the card stays short
+  //    so the land you just lit is still on screen. Each step has its own shape rather than the same
+  //    paragraph-plus-chip-wall four times, the shortlists lead with where you are standing, and the two
+  //    citations live in one Sources disclosure at the foot instead of a block of small print per step.
+  window.CULTURE_STEPS = ['Island', 'Moku', 'Ahupuaʻa', 'Shore'];
+  window._culturePath = {step:0, moku:null, ahu:null, all:false, src:false};
+  window._cultureTourOpen = function(){ return window._culturePath.step > 0 && (document.getElementById('cultureCard') || {}).classList && document.getElementById('cultureCard').classList.contains('open') && document.getElementById('cultureCard').classList.contains('cp-open'); };
+  window._culturePathHere = function(){
+    var h = window._cultureWhereAmI();
+    if (!h){ try { if (typeof locateMe === 'function') locateMe(); } catch(e){} return window._culturePathOpen(1); }
+    window._culturePath.moku = h.moku; window._culturePath.ahu = h.id; window._culturePathOpen(3);
+  };
+  window._culturePathPick = function(kind, v){
+    var P = window._culturePath;
+    if (kind === 'moku'){ P.moku = v; P.ahu = null; P.all = false; window._culturePathOpen(3); }
+    else { P.ahu = v; window._culturePathOpen(4); }
+  };
+  window._culturePathAll = function(){ window._culturePath.all = !window._culturePath.all; window._culturePathOpen(window._culturePath.step); };
+  window._culturePathSrc = function(){ window._culturePath.src = !window._culturePath.src; window._culturePathOpen(window._culturePath.step); };
+  // A tap on the map while the tour is open answers the step instead of opening a card of its own.
+  window._cultureTourTap = function(kind, v){
+    if (!window._cultureTourOpen()) return false;
+    var P = window._culturePath;
+    if (kind === 'moku'){ window._culturePathPick('moku', v); return true; }
+    var e = window._cultureIdx && window._cultureIdx.byId[v]; if (!e) return false;
+    if (e.moku !== P.moku){ P.moku = e.moku; P.all = false; }
+    window._culturePathPick('ahu', v); return true;
+  };
+  // One row that scrolls sideways, never a wall that wraps. Where you are standing comes first and says so.
+  window._cultureScroller = function(items){
+    return '<div class="cp-row">' + items.map(function(it){
+      return '<button class="cc-say' + (it.on ? ' on' : '') + (it.here ? ' here' : '') + '" onclick="' + it.act + '">'
+        + it.icon + '<span>' + window._cultureEsc(it.label) + '</span>' + (it.here ? '<i>you</i>' : '') + '</button>';
+    }).join('') + '</div>';
+  };
+  window._cultureSources = function(){
+    var Lr = window.CULTURE_LEARN, open = window._culturePath.src;
+    return '<div class="cp-src"><button class="cc-link" aria-expanded="' + open + '" onclick="_culturePathSrc()">Sources</button>'
+      + (open ? '<p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p><p class="cc-cite">' + Lr.bounds.quote + ' ' + Lr.bounds.cite + '</p>' : '') + '</div>';
+  };
   window._culturePathOpen = function(step){
     var idx = window._cultureIdx; if (!idx) return;
-    var esc = window._cultureEsc, P = window._culturePath, island = (window.ACTIVE && ACTIVE.name) || 'Kauaʻi', here = window._cultureWhereAmI();
+    var esc = window._cultureEsc, P = window._culturePath, I = window.CULTURE_ICON;
+    var island = (window.ACTIVE && ACTIVE.name) || 'Kauaʻi', here = window._cultureWhereAmI();
     var mokus = Object.keys(idx.byMoku).sort();
     if (!P.moku || !idx.byMoku[P.moku]) P.moku = here ? here.moku : mokus.slice().sort(function(a, b){ return idx.byMoku[b].length - idx.byMoku[a].length; })[0];
     var list = (idx.byMoku[P.moku] || []).slice().sort(function(a, b){ return b.acres - a.acres; });
     var ahu = (P.ahu && idx.byId[P.ahu]) || (here && here.moku === P.moku ? here : list[0]); if (!ahu) return; P.ahu = ahu.id;
-    P.step = Math.max(1, Math.min(4, step));
+    var prev = P.step; P.step = Math.max(1, Math.min(4, step));
     window._cultureCount('culture_path', 'step' + P.step);
-    var Lr = window.CULTURE_LEARN, body = '', title = '', onMap = null, pad = {paddingTopLeft:[16, 80], paddingBottomRight:[16, Math.round(map.getSize().y * .45)]};
-    var nav = '<div class="cp-nav">' + (P.step > 1 ? '<button class="cc-say" onclick="_culturePathOpen(' + (P.step - 1) + ')">Back</button>' : '<span></span>')
-      + window._cultureStrip(P.step)
-      + (P.step < 4 ? '<button class="cc-say cp-next" onclick="_culturePathOpen(' + (P.step + 1) + ')">Next</button>' : '<button class="cc-say cp-next" onclick="_cultureOpenAhupuaa(' + esc(JSON.stringify(ahu.id)) + ')">Open the card</button>') + '</div>';
+    var body = '', title = '', onMap = null;
+    var pad = {paddingTopLeft:[16, 80], paddingBottomRight:[16, Math.round(map.getSize().y * .5)]};
+
     if (P.step === 1){
+      // The island, and the one thing worth doing first: find out where you are standing on it.
       title = island;
-      body = '<p><b>' + esc(island) + '</b> is a mokupuni, an island. It is divided into ' + mokus.length + ' moku.</p><p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p>';
-      onMap = function(){ window._cultureHighlight([]); if (typeof frameIsland === 'function') frameIsland(true); };
+      var nAhu = Object.keys(idx.byId).length, nB = (typeof B !== 'undefined' ? B : []).length;
+      body = '<p><b>' + esc(island) + '</b> is a mokupuni. It is cut into ' + mokus.length + ' moku, and those into ahupuaʻa that each run from the ridge to the sea.</p>'
+        + '<div class="cc-facts"><div class="cc-fact"><b>' + mokus.length + '</b><span>moku</span></div>'
+        + '<div class="cc-fact"><b>' + window._cultureNum(nAhu) + '</b><span>ahupuaʻa</span></div>'
+        + '<div class="cc-fact"><b>' + nB + '</b><span>beaches in app</span></div></div>'
+        + (here
+            ? '<button class="cc-say cp-hero" onclick="_culturePathHere()">' + window._cultureAhuIcon(here.id) + '<span>You are in ' + esc(here.name) + ', moku of ' + esc(here.moku) + '</span></button>'
+            : '<button class="cc-say cp-hero" onclick="_culturePathHere()">' + I.mokupuni + '<span>Find where I am standing</span></button>');
+      onMap = function(){ window._cultureHighlight([]);
+        // Fit the island into the half of the map the card leaves visible, not the whole map.
+        try { map.fitBounds(window._cultureLines.getBounds(), pad); }
+        catch(e){ if (typeof frameIsland === 'function') frameIsland(true); } };
+
     } else if (P.step === 2){
       title = 'Moku';
-      body = '<p>Each moku is a district of the island. ' + esc(island) + ' has ' + mokus.length + '. Pick one to follow.</p><div class="cp-chips">' + mokus.map(function(n){ return '<button class="cc-say' + (n === P.moku ? ' on' : '') + '" onclick="_culturePathPick(\'moku\',' + esc(JSON.stringify(n)) + ')">' + window.CULTURE_ICON.moku + esc(n) + (here && here.moku === n ? ' · you' : '') + '</button>'; }).join('') + '</div>';
+      body = '<p>A moku is a district. <b>' + esc(island) + '</b> has ' + mokus.length + '. <b>Tap one on the map</b>, or pick it here.</p>'
+        + window._cultureScroller(mokus.slice().sort(function(a, b){ return (here && here.moku === a ? -1 : 0) - (here && here.moku === b ? -1 : 0); }).map(function(n){
+            return {label:n, icon:I.moku, on:n === P.moku, here:!!(here && here.moku === n), act:'_culturePathPick(\'moku\',' + esc(JSON.stringify(n)) + ')'};
+          }));
       onMap = function(){ window._cultureHighlight(list); map.fitBounds(L.featureGroup(list.map(function(e){ return e.layer; })).getBounds(), pad); };
+
     } else if (P.step === 3){
-      title = 'Ahupuaʻa';
+      title = P.moku;
       var rank = list.indexOf(ahu) + 1;
-      body = '<p><b>' + esc(P.moku) + '</b> holds ' + list.length + ' ahupuaʻa. <b>' + esc(ahu.name) + '</b> is ' + window._cultureOrd(rank) + ' of ' + list.length + ' by size, ' + window._cultureNum(ahu.acres) + ' acres.' + (here && here.id === ahu.id ? ' You are standing in it.' : '') + '</p>'
-        + '<div class="cp-chips">' + list.slice(0, 12).map(function(e){ return '<button class="cc-say' + (e.id === ahu.id ? ' on' : '') + '" onclick="_culturePathPick(\'ahu\',' + esc(JSON.stringify(e.id)) + ')">' + window._cultureAhuIcon(e.id) + esc(e.name) + '</button>'; }).join('') + (list.length > 12 ? '<span class="cc-credit">and ' + (list.length - 12) + ' more</span>' : '') + '</div>'
-        + '<p class="cc-cite">' + Lr.bounds.quote + ' ' + Lr.bounds.cite + '</p>';
+      var shown = P.all ? list : list.slice(0, 8);
+      body = '<p><b>' + esc(P.moku) + '</b> holds ' + list.length + ' ahupuaʻa, each one a slice of the district from ridge to shore. <b>Tap one on the map</b>, or pick it here.</p>'
+        + window._cultureScroller(shown.map(function(e){
+            return {label:e.name, icon:window._cultureAhuIcon(e.id), on:e.id === ahu.id, here:!!(here && here.id === e.id), act:'_culturePathPick(\'ahu\',' + esc(JSON.stringify(e.id)) + ')'};
+          }))
+        + (list.length > 8 ? '<button class="cc-link cp-all" onclick="_culturePathAll()">' + (P.all ? 'Show the largest eight' : 'Show all ' + list.length) + '</button>' : '')
+        + '<p class="cp-now"><b>' + esc(ahu.name) + '</b> · ' + window._cultureNum(ahu.acres) + ' acres · ' + window._cultureOrd(rank) + ' of ' + list.length + ' by size</p>';
       onMap = function(){ window._cultureHighlight([ahu]); map.fitBounds(ahu.layer.getBounds(), Object.assign({maxZoom:13}, pad)); };
+
     } else {
-      title = 'The beach';
+      // The end of the descent is the water, so the step is the beaches of this ahupuaʻa and how they
+      // read right now. Every status word below is the app's own string, passed through untouched.
+      title = ahu.name;
       var bm = window._cultureBeachMap(), beaches = (typeof B !== 'undefined' ? B : []).filter(function(b){ return bm[b.id] === ahu.id; });
-      body = '<p>' + Lr.bounds.note + '</p><p>' + (here && here.id === ahu.id ? 'You are in <b>' + esc(ahu.name) + '</b>. ' : '') + (beaches.length ? 'In ' + esc(ahu.name) + ':' : 'No beach in this app sits inside ' + esc(ahu.name) + '.') + '</p>'
-        + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(window._cultureShortName(b)) + '</span><small>' + esc(b.r || '') + '</small></div>'; }).join('') + '</div>' : '');
+      body = '<p>' + (here && here.id === ahu.id ? 'You are standing in <b>' + esc(ahu.name) + '</b>. ' : '')
+        + 'Its lower end is the shore, and the sea off that shore belonged to it too.</p>'
+        + (beaches.length
+            ? '<div class="cc-list">' + beaches.map(function(b){
+                var r = (typeof scored !== 'undefined' && scored[b.id]) || null;
+                var st = r && r.status ? r.status : '';
+                return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">'
+                  + I.wave + '<span>' + esc(window._cultureShortName(b)) + '</span>'
+                  + (st ? '<em class="cp-st cp-' + esc(st) + '"></em>' : '') + '<small>' + esc(b.r || '') + '</small></div>';
+              }).join('') + '</div>'
+            : '<div class="cc-empty">No beach in this app sits inside ' + esc(ahu.name) + '.</div>')
+        + '<p class="cp-note">' + window.CULTURE_LEARN.bounds.note + '</p>';
       onMap = function(){ window._cultureHighlight([ahu]); map.fitBounds(ahu.layer.getBounds(), Object.assign({maxZoom:14}, pad)); };
     }
+
+    // The stepper reads as four named levels, not four dots, and says which one you are on out loud.
+    var strip = '<div class="cp-steps">' + window._cultureStrip(P.step)
+      + '<div class="cp-labels">' + window.CULTURE_STEPS.map(function(n, i){
+          return '<span' + (i + 1 === P.step ? ' class="on"' : '') + '>' + esc(n) + '</span>'; }).join('') + '</div></div>';
+    var nav = '<div class="cp-nav">' + (P.step > 1 ? '<button class="cc-say" onclick="_culturePathOpen(' + (P.step - 1) + ')">Back</button>' : '<span></span>')
+      + (P.step < 4 ? '<button class="cc-say cp-next" onclick="_culturePathOpen(' + (P.step + 1) + ')">Next</button>'
+                    : '<button class="cc-say cp-next" onclick="_cultureOpenAhupuaa(' + esc(JSON.stringify(ahu.id)) + ')">Open the card</button>') + '</div>';
+
     var el = window._cultureCardEl();
-    el.innerHTML = window._cultureHead(title, 'Start here · step ' + P.step + ' of 4 · ' + island) + '<div class="cp-body">' + window._cultureDiagram(P.step) + body + '</div>' + nav;
+    el.classList.add('cp-open');
+    el.innerHTML = window._cultureHead(title, 'Start here · step ' + P.step + ' of 4 · ' + island)
+      + '<div class="cp-body' + (prev && prev !== P.step ? (P.step > prev ? ' cp-in' : ' cp-back') : '') + '">'
+      + window._cultureDiagram(P.step) + body + strip + window._cultureSources() + '</div>' + nav;
     el.classList.add('open'); el.scrollTop = 0;
+    var live = document.getElementById('cpLive');
+    if (!live){ live = document.createElement('div'); live.id = 'cpLive'; live.className = 'sr-only'; live.setAttribute('aria-live','polite'); document.body.appendChild(live); }
+    live.textContent = 'Step ' + P.step + ' of 4, ' + window.CULTURE_STEPS[P.step - 1] + ': ' + title;
     try { onMap(); } catch(e){}
   };
   window._cultureDefaultSub = function(){

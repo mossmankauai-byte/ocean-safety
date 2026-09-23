@@ -124,6 +124,27 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
         plate: !!(window._culturePlate && map.hasLayer(window._culturePlate)),
         roads: !!(window._cultureRoads && map.hasLayer(window._cultureRoads)),
         diagram: window._cultureDiagram ? window._cultureDiagram(3) : '',
+        // The tour: four named steps, a sideways row instead of a chip wall, one Sources disclosure,
+        // and a map tap that answers the step instead of opening a card of its own.
+        tour: (() => {
+          try {
+            _culturePathOpen(2);
+            const el = document.getElementById('cultureCard');
+            const rows = el.querySelectorAll('.cp-row').length, walls = el.querySelectorAll('.cp-chips').length;
+            const src = el.querySelectorAll('.cp-src').length, labels = el.querySelectorAll('.cp-labels span').length;
+            const short = el.classList.contains('cp-open');
+            const moku = window._culturePath.moku;
+            const other = Object.keys(window._cultureIdx.byMoku).find((m) => m !== moku);
+            const some = window._cultureIdx.byMoku[other][0];
+            _cultureOpenAhupuaa(some.id);           // a tap on the map while the tour is open
+            const jumped = window._culturePath.step === 4 && window._culturePath.ahu === some.id;
+            _cultureCloseCard();
+            _cultureOpenAhupuaa(some.id);           // the same tap with the tour closed opens its card
+            const opened = !document.getElementById('cultureCard').classList.contains('cp-open');
+            _cultureCloseCard();
+            return { rows, walls, src, labels, short, jumped, opened };
+          } catch (e) { return { err: String(e).slice(0, 70) }; }
+        })(),
         pin
       };
     });
@@ -185,6 +206,9 @@ const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FAIL ') + msg); if (!c) fai
     ok(onTabs.plate && onTabs.roads, `${isl} on: the plate and its roads are drawn`);
     ok(onTabs.glyphs === 0 && onTabs.shown === offTabs.shown && onTabs.pin.png && !onTabs.pin.drawn, `${isl} on: the tab bar and the map pins are still the app's own icons`);
     ok(/cd-hach/.test(onTabs.diagram) && /cd-rip/.test(onTabs.diagram) && (onTabs.diagram.match(/cd-plant/g) || []).length === 3, `${isl} on: the ridge-to-shore picture carries the hachure, the ripples and three plants`);
+    ok(onTabs.tour.rows === 1 && onTabs.tour.walls === 0 && onTabs.tour.src === 1 && onTabs.tour.labels === 4 && onTabs.tour.short, `${isl} on: the tour step is a sideways row, four named levels and one Sources disclosure`);
+    ok(onTabs.tour.jumped, `${isl} on: a map tap during the tour answers the step`);
+    ok(onTabs.tour.opened, `${isl} on: the same tap with the tour closed opens the section card`);
     for (const id of sample) {
       const g = await grab(id);
       ok(g.text === offText[id], `${isl} same: ${id} safety text identical with the theme on` + (g.text === offText[id] ? '' : `\n     off: ${offText[id].slice(0, 160)}\n     on:  ${g.text.slice(0, 160)}`));
