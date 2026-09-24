@@ -54,9 +54,16 @@ def lexicology(lx):
     spell, src, gloss = m.group('spell').strip(), m.group('src'), (m.group('gloss') or '').strip()
     gloss = re.split(r'\.["”]?\s+\[', gloss, maxsplit=1)[0]          # Soehren's own note after the gloss
     gloss = re.split(r'\s+PE:\s', gloss, maxsplit=1)[0]                # a second source on the same line
+    gloss = re.split(r'(?<=[a-z\)\]])\.\s+(?=[A-Z])', gloss, maxsplit=1)[0]   # Soehren's own sentence after the gloss
     gloss = gloss.strip().rstrip('.').strip().strip('"“”').strip().rstrip('.')
     if not gloss or re.search(r'not translated|meaning unknown|uncertain|\?', gloss, re.I): gloss, src = None, (src if gloss else None)
-    if gloss and (DASH.search(gloss) or len(gloss) > 110 or '$' in gloss or re.search(r'\bancient\b|big island', gloss, re.I)): gloss = None   # a quote is never edited, so one that breaks a rule is left out
+    # A quote is never edited, so one that breaks a rule is left out: a dash or $, a Maʻemaʻe word, a
+    # story or a note naming someone (moʻolelo is the review partner's), or the catalog's own notes run in.
+    if gloss and (DASH.search(gloss) or len(gloss) > 110 or '$' in gloss or re.search(r'\bancient\b|big island', gloss, re.I)
+                  or re.search(r'\([^)]*[A-ZĀĒĪŌŪ][^)]*\)', gloss)          # a note naming someone: a story, not a meaning
+                  or re.search(r'(^|\s)1\.\s', gloss)                           # numbered dictionary senses
+                  or re.search(r'ravish|victim|sacrific|\bkill|slain|legend|said to|story|goddess|\bgods?\b|demigod|chief|battle|\bdied\b|death|ghost|spirit', gloss, re.I)
+                  or re.search(r'q\.v\.|\bCf\.|\bSee\b|Misspel|\.\.\.|…|["“”]|writes|offers no', gloss)): gloss = None
     return spell, (src if gloss else None), gloss
 
 def respell(ascii_name, spell):
