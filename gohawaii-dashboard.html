@@ -63,7 +63,7 @@
   .btn.pri{background:var(--sea);border-color:var(--sea);color:#fff}
   .btn.red{background:var(--red);border-color:var(--red);color:#fff}
   .btn.ghost{background:transparent}
-  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .btn[disabled],.btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed;pointer-events:none}
 
   .islbar{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 14px}
   .islbar button{appearance:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer}
@@ -383,16 +383,14 @@
   .asmcard .asmi small{display:block;font-size:11.5px;color:var(--mute)}
   .asmcard .btn{margin-top:10px}
   .asmcard .hd2{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .asmcard .tog{appearance:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;font-family:inherit}
+  .asmcard .tog{appearance:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600}
   .asmcard .tog svg{transition:transform .15s}
   .asmcard .tog[aria-expanded="false"] svg{transform:rotate(-90deg)}
   .asmcard[data-open="false"] .body{display:none}
   .per{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0 10px}
-  .per .chips button{padding:4px 10px;font-size:12px}
   .per .rng{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--mute)}
-  .per input[type=date]{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 8px;font-size:12.5px;color:var(--ink);font-family:inherit;max-width:150px}
+  .per input[type=date]{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 8px;font-size:13px;color:var(--ink);max-width:150px}
   .logtools{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin:6px 0 4px}
-  .logtools .acts{display:flex;gap:6px;flex-wrap:wrap}
   .logtools .per{margin:0}
   @media (max-width:1100px){
     .stage,.bottom{grid-template-columns:1fr}
@@ -1504,6 +1502,7 @@
     $('logCount').textContent = P.err ? P.err : (rows.length ? nEntries(rows.length) + ' for ' + P.label + ', newest first.' : 'No entries for ' + P.label + '.');
     $('logBody').innerHTML = rows.length ? rows.slice(0, 500).map(function(r){ return '<tr><td style="white-space:nowrap">' + esc(A.hst(r.at, true)) + '</td><td>' + esc(r.who) + '</td><td>' + esc(r.what) + '</td><td>' + esc(r.title || '') + '</td></tr>'; }).join('')
       : '<tr><td colspan="4" class="note">' + (P.err ? 'Pick a period above.' : 'Nothing in this period.') + '</td></tr>';
+    $('logCopy').disabled = $('logCsv').disabled = !!P.err;
     var m = $('logMail'); if(P.err){ m.setAttribute('href', '#'); m.setAttribute('aria-disabled', 'true'); } else { m.removeAttribute('aria-disabled'); m.setAttribute('href', 'mailto:?subject=' + encodeURIComponent('GoHawaii Dashboard log, ' + P.label) + '&body=' + encodeURIComponent(logText(rows, P, 1800))); }
   }
   perBind($('logPer'), function(){ return state.logp; }, logSave, renderLog);

@@ -209,6 +209,10 @@ const sec = (pg) => pg.evaluate(() => {
     const expR = await t.pg.evaluate((f, tt) => { const all = window.GH_ADV.load().log, hd = (iso) => new Date(Date.parse(iso) - 10 * 3600e3).toISOString().slice(0, 10); return all.filter((r) => hd(r.at) >= f && hd(r.at) <= tt).length; }, rd.from, rd.to);
     lg = await rowsOf();
     check(lg.n === expR && expR >= 2, 'Log set range: ' + lg.n + ' entries between ' + rd.from + ' and ' + rd.to);
+    await setRange('#logPer', rd.to, rd.from); await sleep(300);
+    const dis = await t.pg.evaluate(() => ({ copy: document.getElementById('logCopy').disabled, csv: document.getElementById('logCsv').disabled, mail: document.getElementById('logMail').getAttribute('aria-disabled'), href: document.getElementById('logMail').getAttribute('href'), pe: getComputedStyle(document.getElementById('logMail')).pointerEvents, count: document.getElementById('logCount').textContent }));
+    check(dis.copy && dis.csv && dis.mail === 'true' && dis.href === '#' && dis.pe === 'none' && /before the start date/.test(dis.count), 'an invalid log range disables all three exports and says why');
+    await setRange('#logPer', rd.from, rd.to); await sleep(300);
     const ov3 = await t.pg.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
     check(ov3.sw <= ov3.cw + 1, 'no horizontal overflow on the Log view with the range inputs open at ' + w);
     await t.pg.screenshot({ path: path.join(OUT, 'asm-5-log-export-' + w + '.png') });
