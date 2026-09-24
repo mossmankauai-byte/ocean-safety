@@ -56,6 +56,7 @@ def lexicology(lx):
     gloss = re.split(r'\.\s+[^.]{1,40}?\.\s+PEM?:', gloss, maxsplit=1)[0]   # the next reading's headword and source
     gloss = re.split(r'\s+PEM?:\s', gloss, maxsplit=1)[0]                        # a second source on the same line
     gloss = re.split(r'(?<=[a-z\)\]])\.\s+(?=[A-Z])', gloss, maxsplit=1)[0]   # Soehren's own sentence after the gloss
+    if re.search(r'\.\.\.|…', gloss): return spell, None, None                 # the catalog cut this quote short
     gloss = gloss.strip().rstrip('.').strip().strip('"“”').strip().rstrip('.')
     if not gloss or re.search(r'not translated|meaning unknown|uncertain|\?', gloss, re.I): gloss, src = None, (src if gloss else None)
     # A quote is never edited, so one that breaks a rule is left out: a dash or $, a Maʻemaʻe word, a
@@ -91,7 +92,7 @@ def respell(ascii_name, spell):
 # A meaning that breaks any of these is left out, never edited. checks/culture-lint.py holds the same rules.
 #   a parenthetical note (where Place Names of Hawaii puts context and stories), numbered dictionary senses,
 #   a second sentence (the next reading run in), and anatomy or excretion, held for the review partner.
-MEANING_NEVER = re.compile(r'\(|(^|\s)\d+\.\s|\.\s|\bPEM?:|penis|vagina|vulva|genital|testic|scrot|clitor|excrement|feces|faeces|dung|urin|buttock|anus\b|copulat|sexual|intercourse|pubic|menstru', re.I)
+MEANING_NEVER = re.compile(r'\(|(^|\s)\d+\.\s|\.\s|\bPEM?:|penis|vagina|vulva|genital|testic|scrot|clitor|excrement|feces|faeces|dung|urin|buttock|anus\b|copulat|sexual|intercourse|pubic|menstru|corpse|bones|burial|grave', re.I)
 
 # ── the 1848 Māhele ───────────────────────────────────────────────────────────────────────────────
 NAME = r"[A-Z][A-Za-zāēīōūʻ\.\s]*?"

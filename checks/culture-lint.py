@@ -66,7 +66,7 @@ def strings(o):
         for v in o: yield from strings(v)
 # A quoted meaning is one phrase from the source: no parenthetical note, no numbered senses, no second
 # sentence or source run in, no story words, and no anatomy or excretion (held for the review partner).
-MEANING = re.compile(r'\(|(^|\s)\d+\.\s|\.\s|\bPEM?:|ravish|victim|sacrific|\bkill|slain|legend|said to|story|goddess|\bgods?\b|demigod|chief|battle|\bdied\b|death|ghost|spirit|penis|vagina|vulva|genital|testic|scrot|clitor|excrement|feces|faeces|dung|urin|buttock|anus\b|copulat|sexual|intercourse|pubic|menstru', re.I)
+MEANING = re.compile(r'\(|(^|\s)\d+\.\s|\.\s|\bPEM?:|ravish|victim|sacrific|\bkill|slain|legend|said to|story|goddess|\bgods?\b|demigod|chief|battle|\bdied\b|death|ghost|spirit|penis|vagina|vulva|genital|testic|scrot|clitor|excrement|feces|faeces|dung|urin|buttock|anus\b|copulat|sexual|intercourse|pubic|menstru|corpse|bones|burial|grave|\.\.\.|…', re.I)
 def meanings(o):
     if isinstance(o, dict):
         for k, v in o.items():
