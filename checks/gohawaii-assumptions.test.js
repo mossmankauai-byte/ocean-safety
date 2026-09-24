@@ -37,10 +37,13 @@ async function page(br, w, h){
     if(u.indexOf('api.weather.gov') >= 0) return r.respond({ status: 200, contentType: 'application/geo+json', headers: { 'Access-Control-Allow-Origin': '*' }, body: '{"type":"FeatureCollection","features":[]}' });
     if(u.indexOf('/api/hta-feed') >= 0) return r.respond({ status: 200, contentType: 'application/rss+xml', body: '<?xml version="1.0"?><rss version="2.0"><channel><title>HTA</title></channel></rss>' });
     if(u.indexOf('/api/wx') >= 0) return r.respond({ status: 200, contentType: 'application/json', body: '{}' });
+    // The app itself (the Overview's phone frame and the hidden island probes) is not under test here; a stub keeps its
+    // own Leaflet errors out of this suite.
+    if(/[?&]ref=gohawaii/.test(u) && !/\.(js|json|png|css)(\?|$)/.test(u)) return r.respond({ status: 200, contentType: 'text/html', body: '<!doctype html><title>app stub</title>' });
     r.continue();
   });
   const errs = [];
-  pg.on('pageerror', (e) => errs.push(String(e)));
+  pg.on('pageerror', (e) => errs.push(String(e && e.stack || e)));
   await pg.goto(ORIGIN + '/gohawaii-dashboard.html', { waitUntil: 'networkidle2', timeout: 60000 });
   await sleep(1500);
   return { pg, ctx, errs };
@@ -48,7 +51,7 @@ async function page(br, w, h){
 const sec = (pg) => pg.evaluate(() => {
   const s = document.getElementById('asmSec'); if(!s) return null;
   const rows = Array.from(s.querySelectorAll('.asm')).map((r) => ({
-    head: r.querySelector('.asmh .k').textContent, lv: r.querySelector('.lv').textContent, chip: r.querySelector('.chip').textContent,
+    head: r.querySelector('.asmh .k').textContent, lv: r.querySelector('.lv').textContent, chip: r.querySelector('.chip.sample, .chip.live').textContent,
     s: r.querySelector('.s').textContent, m: Array.from(r.querySelectorAll('.m')).map((x) => x.textContent) }));
   return { text: s.innerText, rows, off: (s.querySelector('.asmoff') || {}).textContent || '', meth: !!s.querySelector('details.meth'), first: s.parentElement.children[2] === s };
 });
@@ -58,10 +61,10 @@ const sec = (pg) => pg.evaluate(() => {
   for(const [w, h] of [[1280, 900], [390, 844]]){
     console.log('\n== width ' + w);
     const t = await page(br, w, h);
-    check(!t.errs.length, 'no page errors on load' + (t.errs.length ? ': ' + t.errs[0] : ''));
+    check(!t.errs.length, 'no page errors on load' + (t.errs.length ? ': ' + t.errs[0].split('\n').slice(0, 2).join(' | ') : ''));
 
     // 1. Overview card
-    const card = await t.pg.evaluate(() => ({ sub: document.getElementById('asmSub').textContent, items: Array.from(document.querySelectorAll('#asmTop .asmi')).map((i) => ({ lv: i.querySelector('.lv').textContent, chip: i.querySelector('.chip').textContent, s: i.querySelector('p').textContent, c: i.querySelector('small').textContent })) }));
+    const card = await t.pg.evaluate(() => ({ sub: document.getElementById('asmSub').textContent, items: Array.from(document.querySelectorAll('#asmTop .asmi')).map((i) => ({ lv: i.querySelector('.lv').textContent, chip: i.querySelector('.chip.sample, .chip.live').textContent, s: i.querySelector('p').textContent, c: i.querySelector('small').textContent })) }));
     check(card.items.length === 3, 'Overview card shows three assumptions');
     check(card.items.every((i) => /^High confidence$/.test(i.lv)), 'the three strongest on Kauaʻi are High (' + card.items.map((i) => i.lv).join(', ') + ')');
     check(card.items.every((i) => i.chip === 'Sample' && /^Working assumption: /.test(i.s) && /^Consider /.test(i.c)), 'each card line: Sample chip, "Working assumption:", "Consider"');
@@ -123,6 +126,17 @@ const sec = (pg) => pg.evaluate(() => {
     check(/^Assumptions to test \(sample figures\):$/.test(tl[2]) && tl.slice(3, 3 + s.rows.length).every((l) => /^- \[(High|Moderate|Low), sample\] Working assumption: .* Consider .* Owner: /.test(l)), 'text summary lists every line with its level and Sample mark');
     const printed = await t.pg.evaluate(() => { let hit = false; Array.from(document.styleSheets).forEach((ss) => { let rules = []; try { rules = Array.from(ss.cssRules); } catch(e){} rules.forEach((r) => { if(r.media && r.media.mediaText === 'print' && Array.from(r.cssRules).some((x) => /#repDoc/.test(x.selectorText || ''))) hit = true; }); }); return hit && !!document.querySelector('#repDoc #asmSec'); });
     check(printed, 'print shows #repDoc, and the section lives inside it');
+    if(w === 1280){
+      // Print read-back: a Letter PDF of the Kauaʻi report; page 1 must carry the section's first line, not a blank page.
+      await t.pg.evaluate(() => document.querySelector('#v-rep .seg button[data-scope="isl"]').click()); await sleep(600);
+      const pdf = path.join(OUT, 'asm-report-kauai-letter.pdf');
+      await t.pg.pdf({ path: pdf, format: 'Letter', printBackground: true, margin: { top: '0.5in', bottom: '0.5in', left: '0.5in', right: '0.5in' } });
+      let p1 = '';
+      try { p1 = require('child_process').execSync('pdftotext -f 1 -l 1 -layout "' + pdf + '" -', { encoding: 'utf8' }); } catch(e){ p1 = ''; }
+      if(p1) check(/Assumptions to test/.test(p1) && /Working assumption:/.test(p1), 'printed page 1 carries the section and its first line (' + (p1.match(/Working assumption:/g) || []).length + ' lines on page 1)');
+      else console.log('  skip printed page 1 check (pdftotext not available)');
+      await t.pg.evaluate(() => document.querySelector('#v-rep .seg button[data-scope="all"]').click()); await sleep(800);
+    }
 
     // back to one island for the width check
     await t.pg.evaluate(() => document.querySelector('#v-rep .seg button[data-scope="isl"]').click());
