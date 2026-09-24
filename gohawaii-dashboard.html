@@ -382,6 +382,18 @@
   .asmcard .asmi p{margin:6px 0 4px;font-size:13px;line-height:1.4}
   .asmcard .asmi small{display:block;font-size:11.5px;color:var(--mute)}
   .asmcard .btn{margin-top:10px}
+  .asmcard .hd2{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .asmcard .tog{appearance:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;font-family:inherit}
+  .asmcard .tog svg{transition:transform .15s}
+  .asmcard .tog[aria-expanded="false"] svg{transform:rotate(-90deg)}
+  .asmcard[data-open="false"] .body{display:none}
+  .per{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0 10px}
+  .per .chips button{padding:4px 10px;font-size:12px}
+  .per .rng{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--mute)}
+  .per input[type=date]{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 8px;font-size:12.5px;color:var(--ink);font-family:inherit;max-width:150px}
+  .logtools{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin:6px 0 4px}
+  .logtools .acts{display:flex;gap:6px;flex-wrap:wrap}
+  .logtools .per{margin:0}
   @media (max-width:1100px){
     .stage,.bottom{grid-template-columns:1fr}
     .rep{grid-template-columns:1fr}
@@ -496,7 +508,7 @@
             <div class="dots" id="pvDots" role="group" aria-label="Island shown"></div>
           </div>
           <div class="card dec"><h2>Needs a decision</h2><p class="sub">Red goes live only after a second person approves.</p><div id="pendingNow"></div></div>
-          <div class="card asmcard"><h2>Assumptions to test</h2><p class="sub" id="asmSub">The three strongest this month.</p><div id="asmTop"></div><button type="button" class="btn" id="asmMore">All of them, in the Monthly report</button></div>
+          <div class="card asmcard" id="asmCard" data-open="true"><div class="hd2"><h2>Assumptions to test</h2><button type="button" class="tog" id="asmTog" aria-expanded="true" aria-controls="asmBody">Hide<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div><p class="sub" id="asmSub">The three strongest.</p><div id="asmBody" class="body"><div class="per" id="asmPer"></div><div id="asmTop"></div><button type="button" class="btn" id="asmMore">All of them, in the Monthly report</button></div></div>
         </div>
       </div>
       <div class="bottom">
@@ -896,6 +908,8 @@
       <div class="card">
         <h2>Activity log</h2>
         <p class="sub">Every post, approval, feature and end, with who did it. In the review build, "who" is the role switch.</p>
+        <div class="logtools"><div class="per" id="logPer"></div><div class="acts"><button type="button" class="btn" id="logCopy">Copy for email</button><button type="button" class="btn" id="logCsv">Download CSV</button><a class="btn" id="logMail" href="#">Email this log</a></div></div>
+        <p class="note" id="logCount"></p>
         <div class="tblwrap"><table class="log"><thead><tr><th>When (Hawaiʻi)</th><th>Who</th><th>What</th><th>Item</th></tr></thead><tbody id="logBody"></tbody></table></div>
         <div class="formfoot"><button type="button" class="btn ghost" id="btnClear">Clear this browser's review data</button></div>
       </div>
@@ -1474,11 +1488,27 @@
   });
 
   // ---- Log ----
-  function renderLog(){
-    var L0 = A.load().log.slice().reverse().slice(0, 150);
-    $('logBody').innerHTML = L0.length ? L0.map(function(r){ return '<tr><td style="white-space:nowrap">' + esc(A.hst(r.at, true)) + '</td><td>' + esc(r.who) + '</td><td>' + esc(r.what) + '</td><td>' + esc(r.title || '') + '</td></tr>'; }).join('')
-      : '<tr><td colspan="4" class="note">Nothing yet.</td></tr>';
+  // The log for a period, newest first, on Hawaiʻi calendar days; exports as text for an email, CSV, or a mailto link.
+  function logRows(){ var P = period(state.logp); if(P.err) return { P: P, rows: [] }; return { P: P, rows: A.load().log.filter(function(r){ var d = hstDay(r.at); return d >= P.from && d <= P.to; }).reverse() }; }
+  function logLine(r){ return A.hst(r.at, true) + ' · ' + r.who + ' · ' + r.what + (r.title ? ' · ' + r.title : ''); }
+  function nEntries(n){ return n + ' entr' + (n === 1 ? 'y' : 'ies'); }
+  function logText(rows, P, cap){
+    var head = 'GoHawaii Dashboard activity log, ' + P.label + ' (' + nEntries(rows.length) + '). Hawaiʻi time.', lines = rows.map(logLine), out = [head, ''].concat(lines).join('\n');
+    if(cap && out.length > cap){ var keep = [], len = head.length + 2; for(var i = 0; i < lines.length; i++){ if(len + lines[i].length + 1 > cap - 90) break; keep.push(lines[i]); len += lines[i].length + 1; } out = [head, ''].concat(keep, ['... and ' + nEntries(lines.length - keep.length) + ' more. The CSV download carries every entry.']).join('\n'); }
+    return out;
   }
+  function logCsv(rows){ return ['when_hawaii,who,what,item'].concat(rows.map(function(r){ return [A.hst(r.at, true), r.who, r.what, r.title || ''].map(csvCell).join(','); })).join('\n') + '\n'; }
+  function renderLog(){
+    var q = logRows(), P = q.P, rows = q.rows;
+    $('logPer').innerHTML = perHtml(state.logp);
+    $('logCount').textContent = P.err ? P.err : (rows.length ? nEntries(rows.length) + ' for ' + P.label + ', newest first.' : 'No entries for ' + P.label + '.');
+    $('logBody').innerHTML = rows.length ? rows.slice(0, 500).map(function(r){ return '<tr><td style="white-space:nowrap">' + esc(A.hst(r.at, true)) + '</td><td>' + esc(r.who) + '</td><td>' + esc(r.what) + '</td><td>' + esc(r.title || '') + '</td></tr>'; }).join('')
+      : '<tr><td colspan="4" class="note">' + (P.err ? 'Pick a period above.' : 'Nothing in this period.') + '</td></tr>';
+    var m = $('logMail'); if(P.err){ m.setAttribute('href', '#'); m.setAttribute('aria-disabled', 'true'); } else { m.removeAttribute('aria-disabled'); m.setAttribute('href', 'mailto:?subject=' + encodeURIComponent('GoHawaii Dashboard log, ' + P.label) + '&body=' + encodeURIComponent(logText(rows, P, 1800))); }
+  }
+  perBind($('logPer'), function(){ return state.logp; }, logSave, renderLog);
+  $('logCopy').addEventListener('click', function(){ var q = logRows(), b = this, done = function(ok){ b.textContent = ok ? 'Copied' : 'Could not copy'; setTimeout(function(){ b.textContent = 'Copy for email'; }, 1600); }; if(q.P.err) return done(false); var t = logText(q.rows, q.P, 0); if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ done(true); }, function(){ done(false); }); else done(false); });
+  $('logCsv').addEventListener('click', function(){ var q = logRows(); if(q.P.err) return; dl('gohawaii-log-' + q.P.from + '-to-' + q.P.to + '.csv', 'text/csv;charset=utf-8', logCsv(q.rows)); });
   $('btnClear').addEventListener('click', function(){
     if(!confirm('Clear every post, feature, place change and log entry saved in this browser?')) return;
     try { localStorage.removeItem(A.PKEY); localStorage.removeItem(A.KEY); localStorage.removeItem('gh_adv_seen'); } catch(e){}
@@ -1737,6 +1767,47 @@
   var ST_LBL = { L: 'Counting', B: 'In build', C: 'Agency', H: 'Agency' };
   var ST_LONG = { L: 'counting today', B: 'in build', C: 'needs the County', H: 'needs HTA' };
 
+  // ---- Periods: the last 7 days, the month to date, the year to date, or a range the reader sets. Hawaiʻi calendar days. ----
+  var PER_LBL = { week: 'Week', month: 'Month', ytd: 'Year to date', range: 'Set range' };
+  function perToday(){ var d = new Date(now() - 10 * 3600e3); return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())); }   // today in Hawaiʻi as a UTC-midnight Date (hstToday above returns the string)
+  function hstDay(isoStr){ var t = Date.parse(isoStr); return isFinite(t) ? new Date(t - 10 * 3600e3).toISOString().slice(0, 10) : ''; }
+  function ymd(d){ return d.toISOString().slice(0, 10); }
+  function dlab(d, withYear){ var o = { timeZone: 'UTC', month: 'long', day: 'numeric' }; if(withYear) o.year = 'numeric'; return d.toLocaleDateString('en-US', o); }
+  // A pick { per, from, to } becomes { from, to (inclusive Hawaiʻi days), days, label, endsToday } or { err }.
+  function period(p){
+    var t = perToday(), to = t, from;
+    if(p.per === 'week') from = new Date(t.getTime() - 6 * 864e5);
+    else if(p.per === 'ytd') from = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    else if(p.per === 'range'){
+      var ok = /^\d{4}-\d{2}-\d{2}$/, a = ok.test(p.from || '') ? new Date(p.from + 'T00:00:00Z') : null, b = ok.test(p.to || '') ? new Date(p.to + 'T00:00:00Z') : null;
+      if(!a || !b || isNaN(a) || isNaN(b)) return { err: 'Pick a start and an end date.' };
+      if(b < a) return { err: 'The end date is before the start date.' };
+      if(b > t) return { err: 'The end date is after today. Counting stops today.' };
+      if((b - a) / 864e5 > 399) return { err: 'A range runs at most 400 days.' };
+      from = a; to = b;
+    }
+    else from = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), 1));
+    var label = p.per === 'week' ? 'the last 7 days' : p.per === 'month' ? from.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'long', year: 'numeric' }) + ' to date'
+      : p.per === 'ytd' ? t.getUTCFullYear() + ' to date' : dlab(from, from.getUTCFullYear() !== to.getUTCFullYear()) + ' to ' + dlab(to, true);
+    return { per: p.per, from: ymd(from), to: ymd(to), days: Math.round((to - from) / 864e5) + 1, label: label, endsToday: ymd(to) === ymd(t) };
+  }
+  function perHtml(p){
+    var mx = ymd(perToday());
+    return '<div class="chips" role="group" aria-label="Period">' + ['week', 'month', 'ytd', 'range'].map(function(k){ return '<button type="button" data-per="' + k + '" aria-pressed="' + (p.per === k) + '">' + PER_LBL[k] + '</button>'; }).join('') + '</div>'
+      + (p.per === 'range' ? '<div class="rng"><label>From <input type="date" data-rng="from" value="' + esc(p.from || '') + '" max="' + mx + '" aria-label="Start date"></label><label>to <input type="date" data-rng="to" value="' + esc(p.to || '') + '" max="' + mx + '" aria-label="End date"></label></div>' : '');
+  }
+  function perBind(el, get, save, onChange){
+    el.addEventListener('click', function(e){ var b = e.target.closest('button[data-per]'); if(!b) return; get().per = b.dataset.per; save(); onChange(); });
+    el.addEventListener('change', function(e){ var i = e.target; if(!i.dataset.rng) return; get()[i.dataset.rng] = i.value; save(); onChange(); });
+  }
+  function perLoad(key, dflt){ try { var v = JSON.parse(localStorage.getItem(key) || 'null'); if(v && PER_LBL[v.per]) return { open: v.open !== false, per: v.per, from: v.from || '', to: v.to || '' }; } catch(e){} return dflt; }
+  state.asm = perLoad('ghd_asm_v1', { open: true, per: 'month', from: '', to: '' });
+  state.logp = perLoad('ghd_log_v1', { open: true, per: 'month', from: '', to: '' });
+  function asmSave(){ try { localStorage.setItem('ghd_asm_v1', JSON.stringify(state.asm)); } catch(e){} }
+  function logSave(){ try { localStorage.setItem('ghd_log_v1', JSON.stringify(state.logp)); } catch(e){} }
+  state.liveByDays = {};
+  function liveFor(days, cb){ if(!state.live || !A.staffOn() || state.liveByDays[days] === null) return; state.liveByDays[days] = null; A.stats(days).then(function(j){ state.liveByDays[days] = (j && j._status === 200) ? j : undefined; cb(); }); }
+
   // ---- Assumptions to test: a deterministic rule table over the datasets above. No AI at runtime. ----
   // Nick approved the logic 2026-09-23; the sources and the reasoning are in ~/Desktop/OceanSafe/gohawaii/ASSUMPTIONS-LOGIC.md.
   // Every line is a working assumption, never a finding: exposure and behavior only, aggregate only, "about" for counts,
@@ -1775,9 +1846,9 @@
   function tagged(k, id){ return (NOTOWER[k] || []).indexOf(id) >= 0; }
 
   // What each rule reads, for one island (or statewide), from the sample set; live totals overlay it where a metric is counted.
-  function asmData(k){
-    var days = rpDays(), u = USE[k], per = u.perDay, checks = per * days, st = stateTotal(), S = ASM_SAMPLE;
-    var d = { island: k, days: days, perDay: per, checks: checks, live: {}, weeksOn: 0, weeks: null, month: rpLabel(),
+  function asmData(k, P){
+    var days = P ? P.days : rpDays(), u = USE[k], per = u.perDay, checks = per * days, st = stateTotal(), S = ASM_SAMPLE;
+    var d = { island: k, days: days, perDay: per, checks: checks, live: {}, weeksOn: 0, weeks: null, month: P ? P.label : rpLabel(),
       beaches: beachRows(k).filter(function(r){ return r.cls !== 'steel'; }), unguarded: k === 'kauai' ? USE.kauai.unguardedPct / 100 : null,
       districts: u.districts, hazShare: HAZ.share / 100, hazRows: hazRows(k), deflect: { haz: 0.37, calm: 0.09 }, flows: u.flows || null,
       cap: CAP_SITE[k], hours: HOURS.values, dow: dow(k), rainDays: S.rainDays, wx: WEATHER, adv: S.advisories, reach: REACH,
@@ -1786,12 +1857,13 @@
       firstOpens: Math.round(st * days * S.sessionShare * S.firstOpenShare), entry: ENTRY,
       campaign: { title: CAMPAIGN.title, before: +CAMPAIGN.rows[0][1].replace(/,/g, ''), during: +CAMPAIGN.rows[0][2].replace(/,/g, ''), pcBefore: parseFloat(CAMPAIGN.rows[1][1]) / 100, pcDuring: parseFloat(CAMPAIGN.rows[1][2]) / 100, days: S.campaignDays, register: '' },
       stateDay: ORDER.map(function(x){ return [x, USE[x].perDay]; }), trails: TRAILS[k] };
-    if(state.live && state.liveStats) asmLive(d);
+    var j = P ? (P.endsToday ? state.liveByDays[P.days] : null) : state.liveStats;
+    if(state.live && j) asmLive(d, j);
     return d;
   }
   // Live overlay: real totals from /gh/stats replace the sample where the metric is counted (visit, hour, beach, lang), never elsewhere.
-  function asmLive(d){
-    var j = state.liveStats, k = d.island, per = {}, first = null; ORDER.forEach(function(x){ per[x] = 0; });
+  function asmLive(d, j){
+    var k = d.island, per = {}, first = null; ORDER.forEach(function(x){ per[x] = 0; });
     (j.visits || []).forEach(function(r){ per[r.island] = (per[r.island] || 0) + r.n; if(!first || r.day < first) first = r.day; });
     var days = Math.max(1, j.days || d.days); d.month = 'the last ' + days + ' days';
     if(per[k] >= 10){ d.checks = per[k]; d.perDay = per[k] / days; d.days = days; d.live.checks = true; }
@@ -2015,11 +2087,11 @@
     out.margin = g1;
     return out;
   }
-  function asmIsland(k){ var d = asmData(k); return ASM.filter(function(r){ return r.island; }).map(function(r){ return asmEval(r, d); }); }
-  function asmState(){ var d = asmData(state.isl); return ASM.filter(function(r){ return !r.island; }).map(function(r){ return asmEval(r, d); }); }
+  function asmIsland(k, P){ var d = asmData(k, P); return ASM.filter(function(r){ return r.island; }).map(function(r){ return asmEval(r, d); }); }
+  function asmState(P){ var d = asmData(state.isl, P); return ASM.filter(function(r){ return !r.island; }).map(function(r){ return asmEval(r, d); }); }
   function asmScope(){ var out = []; (rpScopeAll() ? ORDER : [state.isl]).forEach(function(k){ out = out.concat(asmIsland(k)); }); return out.concat(asmState()); }
-  function asmTop(k, n){
-    return asmIsland(k).concat(asmState()).filter(function(a){ return a.fired; })
+  function asmTop(k, n, P){
+    return asmIsland(k, P).concat(asmState(P)).filter(function(a){ return a.fired; })
       .sort(function(a, b){ return (b.level - a.level) || (b.margin - a.margin) || (dsOf(a.reads[0]).tier - dsOf(b.reads[0]).tier); }).slice(0, n || 3);
   }
   function asmChip(a){ return '<span class="chip lv l' + a.level + '">' + ASM_LEVEL[a.level] + (a.level ? ' confidence' : '') + '</span>' + (a.sample ? '<span class="chip sample">Sample</span>' : '<span class="chip live">Counting</span>'); }
@@ -2045,13 +2117,21 @@
   }
   function renderAsmCard(){
     var el = $('asmTop'); if(!el) return;
-    var top = asmTop(state.isl, 3);
-    $('asmSub').textContent = 'The three strongest this month on ' + ISL[state.isl] + (state.live ? '' : ' · sample figures') + '. Working assumptions, never findings.';
+    var p = state.asm, P = period(p), tg = $('asmTog');
+    $('asmCard').dataset.open = String(p.open); tg.setAttribute('aria-expanded', String(p.open)); tg.firstChild.nodeValue = p.open ? 'Hide' : 'Show';
+    $('asmPer').innerHTML = perHtml(p);
+    if(P.err){ $('asmSub').textContent = 'Working assumptions for ' + ISL[state.isl] + ', never findings.'; el.innerHTML = '<div class="empty">' + esc(P.err) + '</div>'; return; }
+    if(state.live && P.endsToday && state.liveByDays[P.days] === undefined) liveFor(P.days, renderAsmCard);
+    var top = asmTop(state.isl, 3, P), n = asmIsland(state.isl, P).concat(asmState(P)).filter(function(a){ return a.fired; }).length, liveOn = state.live && P.endsToday && !!state.liveByDays[P.days];
+    $('asmSub').textContent = 'The three strongest of ' + n + ' for ' + P.label + ' on ' + ISL[state.isl] + (liveOn ? '' : ' · sample figures') + '. Working assumptions, never findings.';
     el.innerHTML = top.length ? top.map(function(a){ return '<div class="asmi"><div class="hd">' + asmChip(a) + '</div><p>' + esc(a.statement) + '</p><small>' + esc(a.consider) + '</small></div>'; }).join('')
-      : '<div class="empty">Nothing clears the gates this month.</div>';
+      : '<div class="empty">Nothing clears the gates for ' + esc(P.label) + '. A longer period gives the rules more to count.</div>';
   }
+  $('asmTog').addEventListener('click', function(){ state.asm.open = !state.asm.open; asmSave(); renderAsmCard(); });
+  perBind($('asmPer'), function(){ return state.asm; }, asmSave, renderAsmCard);
   window.GH_ASM = { rules: ASM, data: asmData, evaluate: asmEval, island: asmIsland, statewide: asmState, top: asmTop, wilson: wilson, newcombe: newcombe, lead: lead, about: about, levels: ASM_LEVEL, method: ASM_METHOD,
-    exports: { csv: function(){ return rpCsv(); }, json: function(){ return rpJson(); }, text: function(){ return rpText(); } } };
+    exports: { csv: function(){ return rpCsv(); }, json: function(){ return rpJson(); }, text: function(){ return rpText(); } },
+    period: period, log: { rows: function(){ return logRows(); }, text: function(cap){ var q = logRows(); return logText(q.rows, q.P, cap || 0); }, csv: function(){ return logCsv(logRows().rows); } } };
   var PRESETS = {
     safety: ['intent', 'hazard', 'deflect', 'flows', 'reach', 'trails'],
     dmap: ['dow', 'hours', 'districts', 'overflow', 'weather', 'categ', 'xisland'],

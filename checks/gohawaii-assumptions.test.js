@@ -144,6 +144,75 @@ const sec = (pg) => pg.evaluate(() => {
     const ov = await t.pg.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, sec: document.getElementById('asmSec').getBoundingClientRect().width, doc: document.getElementById('repDoc').getBoundingClientRect().width }));
     check(ov.sw <= ov.cw + 1 && ov.sec <= ov.doc, 'no horizontal overflow at ' + w + ' (page ' + ov.sw + ' of ' + ov.cw + ', section ' + Math.round(ov.sec) + ' in ' + Math.round(ov.doc) + ')');
 
+    // 7. Overview card: collapsible and period-aware (week, month to date, year to date, a set range)
+    await t.pg.evaluate(() => document.querySelector('.rail button[data-view="now"]').click()); await sleep(500);
+    const yr = new Date(Date.now() - 10 * 3600e3).getUTCFullYear();
+    const per0 = await t.pg.evaluate(() => ({ chips: Array.from(document.querySelectorAll('#asmPer .chips button')).map((b) => b.textContent + ':' + b.getAttribute('aria-pressed')).join('|'), sub: document.getElementById('asmSub').textContent, open: document.getElementById('asmCard').dataset.open, n: document.querySelectorAll('#asmTop .asmi').length }));
+    check(per0.chips === 'Week:false|Month:true|Year to date:false|Set range:false', 'card period chips: Week, Month (default), Year to date, Set range');
+    check(/The three strongest of 16 for \w+ \d{4} to date on Kauaʻi/.test(per0.sub) && per0.open === 'true' && per0.n === 3, 'card subtitle names the month to date and the count (' + per0.sub.slice(0, 64) + ')');
+    await t.pg.evaluate(() => document.getElementById('asmTog').click()); await sleep(200);
+    const col = await t.pg.evaluate(() => ({ open: document.getElementById('asmCard').dataset.open, exp: document.getElementById('asmTog').getAttribute('aria-expanded'), vis: getComputedStyle(document.getElementById('asmBody')).display, lbl: document.getElementById('asmTog').textContent.trim() }));
+    check(col.open === 'false' && col.exp === 'false' && col.vis === 'none' && col.lbl === 'Show', 'the card collapses: body hidden, toggle reads Show');
+    await t.pg.reload({ waitUntil: 'networkidle2' }); await sleep(1500);
+    const col2 = await t.pg.evaluate(() => ({ open: document.getElementById('asmCard').dataset.open, sub: document.getElementById('asmSub').textContent }));
+    check(col2.open === 'false' && /never findings/.test(col2.sub), 'the collapsed state survives a reload and the subtitle still shows');
+    await t.pg.evaluate(() => document.getElementById('asmTog').click()); await sleep(200);
+    await t.pg.evaluate(() => document.querySelector('#asmPer button[data-per="week"]').click()); await sleep(300);
+    const wk = await t.pg.evaluate(() => ({ sub: document.getElementById('asmSub').textContent, n: document.querySelectorAll('#asmTop .asmi').length }));
+    const wkN = +(wk.sub.match(/strongest of (\d+)/) || [0, 0])[1];
+    check(/for the last 7 days on/.test(wk.sub) && wkN > 0 && wkN < 16 && wk.n === 3, 'Week: label "the last 7 days", fewer rules clear the gates (' + wkN + ' of 16), three shown');
+    await t.pg.evaluate(() => document.querySelector('#asmPer button[data-per="ytd"]').click()); await sleep(300);
+    check(new RegExp('for ' + yr + ' to date on').test(await t.pg.evaluate(() => document.getElementById('asmSub').textContent)), 'Year to date: label "' + yr + ' to date"');
+    await t.pg.evaluate(() => document.querySelector('#asmPer button[data-per="range"]').click()); await sleep(300);
+    const rng0 = await t.pg.evaluate(() => ({ inputs: document.querySelectorAll('#asmPer input[type=date]').length, empty: document.getElementById('asmTop').textContent }));
+    check(rng0.inputs === 2 && /Pick a start and an end date/.test(rng0.empty), 'Set range: two date inputs appear and the card asks for both dates');
+    const setRange = (sel, from, to) => t.pg.evaluate((q, f, tt) => { const a = document.querySelector(q + ' input[data-rng="from"]'); a.value = f; a.dispatchEvent(new Event('change', { bubbles: true })); const b = document.querySelector(q + ' input[data-rng="to"]'); b.value = tt; b.dispatchEvent(new Event('change', { bubbles: true })); }, sel, from, to);
+    await setRange('#asmPer', yr + '-01-05', yr + '-01-01'); await sleep(300);
+    check(/before the start date/.test(await t.pg.evaluate(() => document.getElementById('asmTop').textContent)), 'a range whose end is before its start is refused with a plain message');
+    await setRange('#asmPer', yr + '-01-01', (yr + 1) + '-01-01'); await sleep(300);
+    check(/after today/.test(await t.pg.evaluate(() => document.getElementById('asmTop').textContent)), 'a range that ends after today is refused');
+    await setRange('#asmPer', yr + '-01-01', yr + '-01-15'); await sleep(300);
+    const rg = await t.pg.evaluate(() => ({ sub: document.getElementById('asmSub').textContent, n: document.querySelectorAll('#asmTop .asmi').length }));
+    check(new RegExp('for January 1 to January 15, ' + yr + ' on').test(rg.sub) && rg.n === 3, 'a set range labels the period and recomputes (' + rg.sub.slice(0, 70) + ')');
+    const ov2 = await t.pg.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
+    check(ov2.sw <= ov2.cw + 1, 'no horizontal overflow on the Overview with the range inputs open at ' + w + ' (' + ov2.sw + ' of ' + ov2.cw + ')');
+    await t.pg.evaluate(() => window.scrollTo(0, document.getElementById('asmCard').getBoundingClientRect().top + window.scrollY - 60));
+    await t.pg.screenshot({ path: path.join(OUT, 'asm-4-card-range-' + w + '.png') });
+    await t.pg.evaluate(() => document.querySelector('#asmPer button[data-per="month"]').click()); await sleep(200);
+
+    // 8. Log view: the same periods, and an export that fits an email
+    await t.pg.evaluate(() => {
+      const K = window.GH_ADV.KEY, st = JSON.parse(localStorage.getItem(K) || '{"items":[],"hta":{},"log":[]}');
+      const mk = (ago, what, title) => ({ at: new Date(Date.now() - ago * 864e5).toISOString(), who: 'Editor', what: what, id: 'seed' + ago, title: title });
+      st.log = (st.log || []).concat([mk(0, 'Posted advisory', 'Seed: today'), mk(3, 'Approved', 'Seed: three days ago'), mk(20, 'Ended', 'Seed: twenty days ago'), mk(100, 'Posted feature', 'Seed: a hundred days ago')]);
+      localStorage.setItem(K, JSON.stringify(st));
+    });
+    await t.pg.reload({ waitUntil: 'networkidle2' }); await sleep(1500);
+    await t.pg.evaluate(() => document.querySelector('.rail button[data-view="log"]').click()); await sleep(400);
+    const expect = await t.pg.evaluate(() => { const G = window.GH_ASM, all = window.GH_ADV.load().log, hd = (iso) => new Date(Date.parse(iso) - 10 * 3600e3).toISOString().slice(0, 10); const cnt = (per) => { const P = G.period({ per }); return all.filter((r) => hd(r.at) >= P.from && hd(r.at) <= P.to).length; }; return { week: cnt('week'), month: cnt('month'), ytd: cnt('ytd'), all: all.length }; });
+    const rowsOf = () => t.pg.evaluate(() => ({ n: document.querySelector('#logBody td.note') ? 0 : document.querySelectorAll('#logBody tr').length, count: document.getElementById('logCount').textContent, pressed: (document.querySelector('#logPer button[aria-pressed="true"]') || {}).textContent }));
+    let lg = await rowsOf();
+    check(lg.pressed === 'Month' && lg.n === expect.month && new RegExp('^' + expect.month + ' entr').test(lg.count), 'Log defaults to the month to date and lists its entries (' + lg.n + ' of ' + expect.all + ')');
+    await t.pg.evaluate(() => document.querySelector('#logPer button[data-per="week"]').click()); await sleep(200); lg = await rowsOf();
+    check(lg.n === expect.week && expect.week >= 2 && expect.week < expect.all, 'Log week filter: ' + lg.n + ' entries (today and three days ago among them)');
+    await t.pg.evaluate(() => document.querySelector('#logPer button[data-per="ytd"]').click()); await sleep(200); lg = await rowsOf();
+    check(lg.n === expect.ytd && expect.ytd >= expect.month, 'Log year-to-date filter: ' + lg.n + ' entries');
+    const ex2 = await t.pg.evaluate(() => ({ text: window.GH_ASM.log.text(0), capped: window.GH_ASM.log.text(150), csv: window.GH_ASM.log.csv(), mail: decodeURIComponent(document.getElementById('logMail').getAttribute('href')), labels: ['logCopy', 'logCsv', 'logMail'].map((i) => document.getElementById(i).textContent).join('|') }));
+    check(/^GoHawaii Dashboard activity log, \d{4} to date \(\d+ entries\)\. Hawaiʻi time\./.test(ex2.text) && ex2.text.split('\n').length === expect.ytd + 2 && /Seed: today/.test(ex2.text), 'the email text carries a heading, the period, the count and one line per entry');
+    check(/^mailto:\?subject=GoHawaii Dashboard log, \d{4} to date&body=GoHawaii Dashboard activity log/.test(ex2.mail) && /Seed: today/.test(ex2.mail), 'the Email button is a mailto with the subject and the log in the body');
+    check(ex2.csv.split('\n')[0] === 'when_hawaii,who,what,item' && ex2.csv.trim().split('\n').length === expect.ytd + 1 && /Seed: today/.test(ex2.csv), 'the CSV has a header and one row per entry');
+    check(/\.\.\. and \d+ entr(y|ies) more\. The CSV download carries every entry\./.test(ex2.capped), 'a long log is cut for the email body with a pointer to the CSV');
+    check(ex2.labels === 'Copy for email|Download CSV|Email this log', 'export buttons: Copy for email, Download CSV, Email this log');
+    const rd = await t.pg.evaluate(() => { const d = (n) => new Date(Date.now() - 10 * 3600e3 - n * 864e5).toISOString().slice(0, 10); return { from: d(40), to: d(2) }; });
+    await t.pg.evaluate(() => document.querySelector('#logPer button[data-per="range"]').click()); await sleep(200);
+    await setRange('#logPer', rd.from, rd.to); await sleep(300);
+    const expR = await t.pg.evaluate((f, tt) => { const all = window.GH_ADV.load().log, hd = (iso) => new Date(Date.parse(iso) - 10 * 3600e3).toISOString().slice(0, 10); return all.filter((r) => hd(r.at) >= f && hd(r.at) <= tt).length; }, rd.from, rd.to);
+    lg = await rowsOf();
+    check(lg.n === expR && expR >= 2, 'Log set range: ' + lg.n + ' entries between ' + rd.from + ' and ' + rd.to);
+    const ov3 = await t.pg.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
+    check(ov3.sw <= ov3.cw + 1, 'no horizontal overflow on the Log view with the range inputs open at ' + w);
+    await t.pg.screenshot({ path: path.join(OUT, 'asm-5-log-export-' + w + '.png') });
+
     // 5. the engine: every rule fires on the sample set and every rule has a path that does not fire
     if(w === 1280){
       const eng = await t.pg.evaluate(() => {

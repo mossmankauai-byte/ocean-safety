@@ -1,18 +1,18 @@
-// Service worker for Ocean Safe — Kauaʻi Beach Guide.
-// Powered by Workbox v7 (loaded from Google's CDN — no build step required).
+// Service worker for Ocean Safe: Kauaʻi Beach Guide.
+// Powered by Workbox v7 (loaded from Google's CDN: no build step required).
 //
 // Strategy summary:
-//   - OpenStreetMap tiles      → CacheFirst (30 days)        — tiles never change
-//   - Open-Meteo weather       → StaleWhileRevalidate (1 hr) — keep fresh, fall back to cached when offline
-//   - NOAA tides               → StaleWhileRevalidate (6 hr) — same idea, slower-changing data
-//   - GetYourGuide & affiliate widgets → NetworkFirst (3s)   — get fresh listings, cache if offline
-//   - HTML / JS / CSS / icons  → StaleWhileRevalidate         — fast loads, deploys land within minutes
+//   - OpenStreetMap tiles      → CacheFirst (30 days)       : tiles never change
+//   - Open-Meteo weather       → StaleWhileRevalidate (1 hr): keep fresh, fall back to cached when offline
+//   - NOAA tides               → StaleWhileRevalidate (6 hr): same idea, slower-changing data
+//   - GetYourGuide & affiliate widgets → NetworkFirst (3s)  : get fresh listings, cache if offline
+//   - HTML / JS / CSS / icons  → StaleWhileRevalidate        : fast loads, deploys land within minutes
 //
 // CACHE NAMING (important): runtime caches use STABLE names with NO version suffix,
 // so a deploy does NOT wipe cached map tiles, beach photos, fonts, or weather.
 // Returning visitors stay fast instead of re-downloading everything on every publish
 // (that was the cause of the Largest-Contentful-Paint spikes on deploy days).
-// Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION — so bumping
+// Only the precached app shell (HTML + icons) is keyed to CACHE_VERSION: so bumping
 // it still ships new code on next launch; every other cache self-expires on its timer.
 
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
@@ -20,13 +20,13 @@
 // v289 was claimed twice on the same day. Forward, never backward.
 // v319 is claimed on work/reserve-links; this branch skips to v320.
 // v345 was claimed twice on 2026-09-19 (gh-promotions and the tsunami map): tsunami resolves forward to v346.
-const CACHE_VERSION = 'v390-2026-09-23-assumptions';   // assumptions to test on the GoHawaii Dashboard, on the drawn-icons line (v388); v389 is claimed by work/culture-sources
+const CACHE_VERSION = 'v391-2026-09-23-assumptions-periods';   // assumptions to test + period picker on the Overview card + log export, on the drawn-icons line (v388)
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
 if (workbox) {
   workbox.setConfig({ debug: false });
-  // Stable prefix only — NO version suffix, so runtime caches survive deploys.
+  // Stable prefix only: NO version suffix, so runtime caches survive deploys.
   workbox.core.setCacheNameDetails({ prefix: 'os' });
 
   // ---- Precache the app shell so first-visit-offline shows the app ----
@@ -77,12 +77,12 @@ if (workbox) {
 
   // ---- Open-Meteo weather/forecast ----
   // NetworkFirst, NOT StaleWhileRevalidate. SWR answers from cache first, so a cold launch
-  // was served the PREVIOUS payload — days old if the app hadn't been opened — while the app
+  // was served the PREVIOUS payload: days old if the app hadn't been opened: while the app
   // stamped it as a fresh fetch. That is how every pin turned night-grey in daylight (the
   // sunrise/sunset in that payload was 3 days stale) and how old surf could read as current.
   // NetworkFirst with a short timeout keeps the offline story intact (cache is still the
   // fallback, and fetchLive already has its own 8s abort + SNAP path) while guaranteeing that
-  // any usable connection yields today's conditions. Conditions are safety data — a slow
+  // any usable connection yields today's conditions. Conditions are safety data: a slow
   // correct answer beats an instant stale one.
   workbox.routing.registerRoute(
     /^https:\/\/api\.open-meteo\.com\//,
@@ -130,7 +130,7 @@ if (workbox) {
     })
   );
 
-  // ---- Affiliate widgets (GetYourGuide, Viator) — network-first so listings stay current ----
+  // ---- Affiliate widgets (GetYourGuide, Viator): network-first so listings stay current ----
   workbox.routing.registerRoute(
     /^https:\/\/(widget\.getyourguide|www\.viator)\.com\//,
     new workbox.strategies.NetworkFirst({
@@ -160,26 +160,26 @@ if (workbox) {
     })
   );
 
-  // NOTE: /partner-config/*.json deliberately has NO route here — a fetch()
+  // NOTE: /partner-config/*.json deliberately has NO route here: a fetch()
   // for JSON has request.destination "" so the app-shell route below never
   // matches, and it must stay that way: a stale partner config means stale
   // promos/affiliate IDs for a hotel. If a same-origin catch-all is ever
   // added, exclude /partner-config/ explicitly.
   // ---- Sales tools, signup pages + partner dashboards: always fresh ----
   // /jade*.html, /sales.html, and the /hotel-signup & /timeshare-signup pages change often
-  // and must never render a stale build for Jade, Nick, or a prospect — NetworkFirst
+  // and must never render a stale build for Jade, Nick, or a prospect: NetworkFirst
   // (fetch fresh online, fall back to cache offline) instead of the StaleWhileRevalidate below.
   //
   // /d/<token> is matched by PREFIX, not by the .html alternation: _redirects rewrites
   // /d/* -> /d.html with a 200, so the pathname the SW actually sees is /d/<token> and a
   // "\.html$" pattern never fires. A partner's dashboard shows their QR codes, their plan and
-  // their prices — a stale one hands them last week's artwork and last week's pricing.
+  // their prices: a stale one hands them last week's artwork and last week's pricing.
   //
   // The creator surfaces are matched by PREFIX for the same reason as /d/, and it is not
   // hypothetical: _redirects maps /creator -> /creator-dash.html and /creator-print ->
   // /creator-print.html, so the pathname the SW sees is /creator and /creator-print. The
   // "creator-dash\.html$" alternation below only ever fired for someone who typed the .html
-  // URL directly — every creator arriving at the canonical /creator was being served by the
+  // URL directly: every creator arriving at the canonical /creator was being served by the
   // app-shell SWR, i.e. the previous build. /^\/creator/ covers /creator, /creator-print,
   // /creators(.html) and /creator-terms in one.
   //
@@ -191,7 +191,7 @@ if (workbox) {
       /^\/d\//.test(url.pathname) ||
       /^\/creator/.test(url.pathname) ||
       url.pathname === '/join' || url.pathname === '/join.html' ||
-      // CLEAN routes — _redirects rewrites these to .html, but the request URL the service
+      // CLEAN routes: _redirects rewrites these to .html, but the request URL the service
       // worker sees is the clean path, so the \.html$ list below never matches them. /join
       // was already fixed for exactly this reason; these are the same trap.
       /^\/(set-password|partner-terms|hotel|rental|fleet|townad|timeshare|concierge)$/.test(url.pathname) ||
@@ -242,7 +242,7 @@ if (workbox) {
     })
   );
 
-  // ---- Per-island data (/data/<slug>.js) — runtime SWR, NOT precached ----
+  // ---- Per-island data (/data/<slug>.js): runtime SWR, NOT precached ----
   // Deliberately kept out of the precache list so Kauaʻi-only visitors never download other
   // islands. Registered BEFORE the app-shell route (whose 'script' matcher would otherwise
   // catch these). STABLE cache name (no -vNN-date suffix) so the activate-time LEGACY_CACHE
@@ -279,7 +279,7 @@ if (workbox) {
   );
 }
 
-// Take control immediately on update — so a deploy doesn't require closing all tabs.
+// Take control immediately on update: so a deploy doesn't require closing all tabs.
 self.addEventListener('install', () => self.skipWaiting());
 
 // One-time cleanup: reclaim space from OLD version-suffixed caches left by earlier
