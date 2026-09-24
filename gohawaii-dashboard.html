@@ -1487,7 +1487,7 @@
 
   // ---- Log ----
   // The log for a period, newest first, on Hawaiʻi calendar days; exports as text for an email, CSV, or a mailto link.
-  function logRows(){ var P = period(state.logp); if(P.err) return { P: P, rows: [] }; return { P: P, rows: A.load().log.filter(function(r){ var d = hstDay(r.at); return d >= P.from && d <= P.to; }).reverse() }; }
+  function logRows(){ var P = period(state.logp); if(P.err) return { P: P, rows: [] }; return { P: P, rows: A.load().log.filter(function(r){ var d = hstDay(r.at); return d >= P.from && d <= P.to; }).sort(function(a, b){ return (Date.parse(b.at) || 0) - (Date.parse(a.at) || 0); }) }; }
   function logLine(r){ return A.hst(r.at, true) + ' · ' + r.who + ' · ' + r.what + (r.title ? ' · ' + r.title : ''); }
   function nEntries(n){ return n + ' entr' + (n === 1 ? 'y' : 'ies'); }
   function logText(rows, P, cap){
