@@ -20,7 +20,7 @@
 // v289 was claimed twice on the same day. Forward, never backward.
 // v319 is claimed on work/reserve-links; this branch skips to v320.
 // v345 was claimed twice on 2026-09-19 (gh-promotions and the tsunami map): tsunami resolves forward to v346.
-const CACHE_VERSION = 'v383-2026-09-23-map-chrome';   // review line + culture map chrome (3d45c0f)
+const CACHE_VERSION = 'v388-2026-09-23-drawn-icons';   // past culture-sources v387 and the two rival v384s
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
