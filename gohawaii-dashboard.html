@@ -383,7 +383,8 @@
   .asmcard .asmi small{display:block;font-size:11.5px;color:var(--mute)}
   .asmcard .btn{margin-top:10px}
   .asmcard .hd2{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .asmcard .tog{appearance:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600}
+  .asmcard .tog{appearance:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--ink);display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .asmcard .tog[aria-expanded="false"]{background:var(--tint);border-color:#bcd9e2;color:var(--sea)}
   .asmcard .tog svg{transition:transform .15s}
   .asmcard .tog[aria-expanded="false"] svg{transform:rotate(-90deg)}
   .asmcard[data-open="false"] .body{display:none}
@@ -506,7 +507,7 @@
             <div class="dots" id="pvDots" role="group" aria-label="Island shown"></div>
           </div>
           <div class="card dec"><h2>Needs a decision</h2><p class="sub">Red goes live only after a second person approves.</p><div id="pendingNow"></div></div>
-          <div class="card asmcard" id="asmCard" data-open="true"><div class="hd2"><h2>Assumptions to test</h2><button type="button" class="tog" id="asmTog" aria-expanded="true" aria-controls="asmBody">Hide<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div><p class="sub" id="asmSub">The three strongest.</p><div id="asmBody" class="body"><div class="per" id="asmPer"></div><div id="asmTop"></div><button type="button" class="btn" id="asmMore">All of them, in the Monthly report</button></div></div>
+          <div class="card asmcard" id="asmCard" data-open="false"><div class="hd2"><h2>Assumptions to test</h2><button type="button" class="tog" id="asmTog" aria-expanded="false" aria-controls="asmBody">Show assumptions<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div><p class="sub" id="asmSub">The three strongest.</p><div id="asmBody" class="body"><div class="per" id="asmPer"></div><div id="asmTop"></div><button type="button" class="btn" id="asmMore">All of them, in the Monthly report</button></div></div>
         </div>
       </div>
       <div class="bottom">
@@ -1800,8 +1801,8 @@
     el.addEventListener('click', function(e){ var b = e.target.closest('button[data-per]'); if(!b) return; get().per = b.dataset.per; save(); onChange(); });
     el.addEventListener('change', function(e){ var i = e.target; if(!i.dataset.rng) return; get()[i.dataset.rng] = i.value; save(); onChange(); });
   }
-  function perLoad(key, dflt){ try { var v = JSON.parse(localStorage.getItem(key) || 'null'); if(v && PER_LBL[v.per]) return { open: v.open !== false, per: v.per, from: v.from || '', to: v.to || '' }; } catch(e){} return dflt; }
-  state.asm = perLoad('ghd_asm_v1', { open: true, per: 'month', from: '', to: '' });
+  function perLoad(key, dflt){ try { var v = JSON.parse(localStorage.getItem(key) || 'null'); if(v && PER_LBL[v.per]) return { open: v.open === true, per: v.per, from: v.from || '', to: v.to || '' }; } catch(e){} return dflt; }
+  state.asm = perLoad('ghd_asm_v1', { open: false, per: 'month', from: '', to: '' });
   state.logp = perLoad('ghd_log_v1', { open: true, per: 'month', from: '', to: '' });
   function asmSave(){ try { localStorage.setItem('ghd_asm_v1', JSON.stringify(state.asm)); } catch(e){} }
   function logSave(){ try { localStorage.setItem('ghd_log_v1', JSON.stringify(state.logp)); } catch(e){} }
@@ -2118,7 +2119,7 @@
   function renderAsmCard(){
     var el = $('asmTop'); if(!el) return;
     var p = state.asm, P = period(p), tg = $('asmTog');
-    $('asmCard').dataset.open = String(p.open); tg.setAttribute('aria-expanded', String(p.open)); tg.firstChild.nodeValue = p.open ? 'Hide' : 'Show';
+    $('asmCard').dataset.open = String(p.open); tg.setAttribute('aria-expanded', String(p.open)); tg.firstChild.nodeValue = p.open ? 'Hide' : 'Show assumptions';
     $('asmPer').innerHTML = perHtml(p);
     if(P.err){ $('asmSub').textContent = 'Working assumptions for ' + ISL[state.isl] + ', never findings.'; el.innerHTML = '<div class="empty">' + esc(P.err) + '</div>'; return; }
     if(state.live && P.endsToday && state.liveByDays[P.days] === undefined) liveFor(P.days, renderAsmCard);
