@@ -387,6 +387,7 @@
   function count(isl, metric, k){
     if(!API) return;
     try { if(navigator.doNotTrack === '1' || window.doNotTrack === '1') return; } catch(e){}
+    if(tallyIsl && tallyIsl !== isl) flush();   // a batch belongs to one island
     tallyIsl = isl; var key = metric + '\u0001' + String(k == null ? '' : k).toLowerCase().slice(0, 64);
     tally[key] = (tally[key] || 0) + 1;
   }

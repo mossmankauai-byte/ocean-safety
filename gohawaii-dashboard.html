@@ -450,7 +450,7 @@
     <div class="signin" id="signIn" hidden role="dialog" aria-modal="true" aria-labelledby="siH">
       <form class="card" id="siForm" autocomplete="off">
         <h2 id="siH">Sign in to the GoHawaii Dashboard</h2>
-        <p class="sub">Paste the staff key you were given. It stays in this browser tab only and goes when you close it.</p>
+        <p class="sub">Paste the staff key you were given. It stays in this browser tab only and is cleared when you close it.</p>
         <label class="f" for="siKey">Staff key</label>
         <input type="password" id="siKey" required autocomplete="off" spellcheck="false">
         <div class="formfoot"><button type="submit" class="btn pri">Sign in</button></div>
@@ -642,7 +642,7 @@
             <input type="text" id="plAddr" maxlength="120">
             <div class="plgrid">
               <div><label class="f" for="plSite">Website <small>(https)</small></label><input type="url" id="plSite" maxlength="300" placeholder="https://"></div>
-              <div><label class="f" for="plImg">Photo link <small>(https)</small></label><input type="url" id="plImg" maxlength="400" placeholder="https://"></div>
+              <div><label class="f" for="plImg">Photo link <small>(https, a photo you have the rights to use)</small></label><input type="url" id="plImg" maxlength="400" placeholder="https://"></div>
             </div>
             <div class="plgrid">
               <div><label class="f" for="plLat">Latitude</label><input type="text" id="plLat" inputmode="decimal"></div>
@@ -2070,7 +2070,7 @@
     window.addEventListener('gh-sync-error', function(e){
       var d = e.detail || {}, why = { conflict: 'Someone else saved first' + (d.by ? ' (' + d.by + ')' : '') + '. Their version is showing; make your change again.',
         red_needs_approver: 'A red advisory goes live only when an Approver approves it.', red_needs_second_person: 'A red advisory needs a second person to approve it.',
-        county_island: 'County staff can change only their own island.', offline: 'Could not reach the server. Your change is on this screen only; try again.' }[d.error] || 'The server did not save that (' + d.error + ').';
+        county_island: 'County staff can change only their own island.', offline: 'Could not reach the server. Your change is on this screen only; try again.' }[d.error] || 'The server did not save that. Try again. If it keeps failing, send us this code: ' + d.error + '.';
       syncMsg('err', why); renderAll();
     });
     if(!A.staffOn()){ $('signIn').hidden = false; setTimeout(function(){ $('siKey').focus(); }, 50); return; }
@@ -2116,7 +2116,7 @@
       + '<div class="lvgrid">' + ORDER.map(function(k){ return '<button type="button" class="k" data-isl="' + k + '" aria-pressed="' + (k === state.isl) + '"><b>' + (per[k] ? shown(per[k]) : '0') + '</b><span>visits · ' + ISL[k] + '</span></button>'; }).join('') + '</div>'
       + '<div class="lvbars" role="img" aria-label="Visits a day on ' + esc(ISL[state.isl]) + '">' + days.map(function(d){ var v = byDay[d] || 0; return '<i style="height:' + (few(v) ? 4 : Math.round(v / mx * 100)) + '%" title="' + d + ': ' + (v ? shown(v) : 0) + '"></i>'; }).join('') + '</div>'
       + '<div class="note">Visits a day on ' + esc(ISL[state.isl]) + ', ' + esc(j.from) + ' to ' + esc(j.to) + '.</div>'
-      + '<div class="lvtops"><div><h3>Beaches opened</h3>' + tops('beach', bname, 6, function(k){ return !!bfind(k); }) + '</div><div><h3>GoHawaii places opened</h3>' + tops('place', pname, 6, function(k){ return !!pfind(k); }) + '</div><div><h3>Tabs used</h3>' + tops('tab') + '</div>'
+      + '<div class="lvtops"><div><h3>Beaches opened</h3>' + tops('beach', bname, 6, function(k){ return !!bfind(k); }) + '</div><div><h3>GoHawaii places opened</h3>' + tops('place', pname, 6, function(k){ return !!pfind(k); }) + '</div><div><h3>Tabs used</h3>' + tops('tab', function(k){ return { beaches: 'Beaches', hikes: 'Trails', acts: 'Family', activities: 'Plan', shopping: 'Town', shop: 'Shop', stays: 'Stays', tours: 'Tours' }[k] || k; }) + '</div>'
       + '<div><h3>Taps out</h3>' + tops('link', function(k){ return LNK[k] || k; }) + '</div><div><h3>Languages</h3>' + tops('lang', function(k){ return k.toUpperCase(); }) + '</div><div><h3>Devices</h3>' + tops('dev', function(k){ return { ios: 'iPhone and iPad', android: 'Android', desktop: 'Computer' }[k] || k; }) + '</div></div>';
   }
   document.addEventListener('click', function(e){
