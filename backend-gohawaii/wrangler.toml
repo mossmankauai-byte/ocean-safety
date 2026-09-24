@@ -20,4 +20,4 @@ simple = { limit = 30, period = 60 }
 [vars]
 # Sites allowed to call the staff and stats routes (comma-separated). The visitor count and the
 # public read accept any origin, since the app can be embedded.
-STAFF_ORIGINS = "https://htagohawaii.netlify.app,http://127.0.0.1:4694,http://localhost:8787"
+STAFF_ORIGINS = "https://htagohawaii.netlify.app"
