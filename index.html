@@ -1767,6 +1767,7 @@ body[data-tab="acts"] .saved-chip{top:calc(243px + var(--os-map-dy,0px))}
 #cultureCard .cc-srcs{margin:0;padding-left:20px;font-size:12px;line-height:1.45;color:#4a3720}
 #cultureCard .cc-srcs li{margin-bottom:6px;border-radius:6px;transition:background .3s}
 #cultureCard .cc-srcs li.hit{background:rgba(15,76,92,.12)}
+#cultureCard .cc-srcs .cc-also{font-weight:600;white-space:nowrap}
 /* Culture chrome: serif island name and sheet title, a kapa band behind the side chips, earth-tone chips.
    Colors and type only; every label, verdict and number is the same text as with the theme off. */
 :root[data-theme="culture"] .brand-text,:root[data-theme="culture"] .sname{font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif}
@@ -5408,12 +5409,12 @@ function initMap(){
     pe:    {t:'Mary Kawena Pukui and Samuel H. Elbert, Hawaiian Dictionary. University of Hawaiʻi Press, 1986. Word meanings as the Soehren catalog quotes them.', u:'https://uhpress.hawaii.edu/title/hawaiian-dictionary/'},
     mah:   {t:'Māhele Book, 1848, and Land Commission Award records, Hawaiʻi State Archives, as indexed in the Soehren catalog. People are named as the record spells them.', u:'https://manoa.hawaii.edu/hawaiiancollection/soehren/'},
     usgs:  {t:'U.S. Geological Survey, 3D Elevation Program: lowest and highest ground inside the State boundary.', u:'https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer'},
-    rain:  {t:'Rainfall Atlas of Hawaiʻi (Giambelluca and others, 2013), mean yearly rain lines, via the Hawaiʻi Statewide GIS Program.', u:'https://rainfall.geography.hawaii.edu/'},
+    rain:  {t:'Rainfall Atlas of Hawaiʻi (Giambelluca and others, 2013), mean yearly rain lines, via the Hawaiʻi Statewide GIS Program.', u:'https://rainfall.geography.hawaii.edu/', also:[['The State layer', 'https://files.hawaii.gov/dbedt/op/gis/data/isohyets.pdf']]},
     dar:   {t:'DLNR Division of Aquatic Resources, streams layer (2008), via the Hawaiʻi Statewide GIS Program.', u:'https://files.hawaii.gov/dbedt/op/gis/data/streams_dar.pdf'},
     gis:   {t:'Hawaiʻi Statewide GIS Program, Ahupuaa layer and notes. Office of Hawaiian Affairs 2009; names edited by the State Historic Preservation Division, 2017 to 2026.', u:'https://files.hawaii.gov/dbedt/op/gis/data/ahupuaa.pdf'},
     bg:    {t:'Kamanamaikalani Beamer and Lorenz Gonschor, “Toward an Inventory of Ahupuaʻa in the Hawaiian Kingdom.” The Hawaiian Journal of History 48 (2014): 53 to 88.', u:'https://evols.library.manoa.hawaii.edu/server/api/core/bitstreams/12aa1365-53ea-4b5d-9bdc-0510d85ec418/content'},
-    malo:  {t:'David Malo, Hawaiian Antiquities (Moolelo Hawaii), translated by N. B. Emerson. Honolulu, 1903. Chapter VII.', u:'https://archive.org/details/hawaiianantiquit00malo'},
-    con:   {t:'Constitution of the State of Hawaiʻi, Article XII, Section 7 (added 1978).', u:'https://lrb.hawaii.gov/constitution'},
+    malo:  {t:'David Malo, Hawaiian Antiquities (Moolelo Hawaii), translated by N. B. Emerson. Honolulu, 1903. Chapter VII, pages 36 to 38.', u:'https://archive.org/details/hawaiianantiquit00malo/page/37/mode/1up'},
+    con:   {t:'Constitution of the State of Hawaiʻi, Article XII, Section 7 (added 1978).', u:'https://lrb.hawaii.gov/constitution#articlexii'},
     hrs7:  {t:'Hawaiʻi Revised Statutes §7-1.', u:'https://www.capitol.hawaii.gov/hrscurrent/Vol01_Ch0001-0042F/HRS0007/HRS_0007-0001.htm'},
     hrs187:{t:'Hawaiʻi Revised Statutes §187A-23.', u:'https://www.capitol.hawaii.gov/hrscurrent/Vol03_Ch0121-0200D/HRS0187A/HRS_0187A-0023.htm'},
     oha:   {t:'Office of Hawaiian Affairs, Kīpuka Database.', u:'https://www.kipukadatabase.com/kipuka/'}
@@ -5431,7 +5432,12 @@ function initMap(){
   window._cultureSourcesHTML = function(ctx){
     if (!ctx.used.length) return '';
     var esc = window._cultureEsc, S = window.CULTURE_SRC;
-    return window._cultureH3('Sources', 'shore') + '<ol class="cc-srcs">' + ctx.used.map(function(k, i){ var o = S[k]; return '<li id="cc-src-' + (i + 1) + '"><a href="' + esc(o.u) + '" target="_blank" rel="noopener">' + esc(o.t) + '</a></li>'; }).join('') + '</ol>';
+    return window._cultureH3('Sources', 'shore') + '<ol class="cc-srcs">' + ctx.used.map(function(k, i){
+      var o = S[k], deep = (k === 'soe' || k === 'mah') && ctx.soeUrl, also = (o.also || []).slice();
+      if ((k === 'pem' || k === 'pe') && ctx.soeUrl) also.push(['The quote in the catalog', ctx.soeUrl]);
+      return '<li id="cc-src-' + (i + 1) + '"><a href="' + esc(deep ? ctx.soeUrl : o.u) + '" target="_blank" rel="noopener">' + esc(o.t) + (deep ? ' Entries for this ahupuaʻa.' : '') + '</a>'
+        + also.map(function(a){ return ' <a class="cc-also" href="' + esc(a[1]) + '" target="_blank" rel="noopener">' + esc(a[0]) + '</a>'; }).join('') + '</li>';
+    }).join('') + '</ol>';
   };
   window._cultureAggHTML = function(){
     return '<div class="cc-agg"><b>Gathered from published sources.</b> Each line is numbered to its source at the end. The cultural review partner has not checked this card yet.</div>';
@@ -5452,6 +5458,7 @@ function initMap(){
     var row = S.ahupuaa[e.id]; if (!row) return '';
     var esc = window._cultureEsc, C = function(k){ return window._cultureCite(ctx, k); }, q = function(m){ return '“' + esc(m) + '”'; };
     var parts = row.s || [], h = '', many = parts.length > 1;
+    var withQ = parts.filter(function(p){ return p.q; }); if (withQ.length) ctx.soeUrl = withQ[0].q;
     var meant = parts.filter(function(p){ return p.mean; });
     if (meant.length){
       h += window._cultureH3(meant.length > 1 ? 'The names' : 'The name', 'ahupuaa')
