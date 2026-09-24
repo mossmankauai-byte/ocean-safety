@@ -54,5 +54,23 @@ else:
             fails += 1; print('FAIL index.html L%d: %s' % (i, h))
     print('OK   index.html culture block: %d lines checked' % block.count('\n'))
 
+# 3. the sourced facts (culture/sources/*.json): the same three rules, plus no dash, no $ figure and no
+#    review claim, because these strings reach the card verbatim.
+EXTRA = re.compile(r'[\u2013\u2014]|\$|verified by|reviewed by a local|signed off', re.I)
+import json
+def strings(o):
+    if isinstance(o, str): yield o
+    elif isinstance(o, dict):
+        for v in o.values(): yield from strings(v)
+    elif isinstance(o, list):
+        for v in o: yield from strings(v)
+for f in sorted(glob.glob(os.path.join(ROOT, 'culture', 'sources', '*.json'))):
+    n = 0
+    for t in strings(json.load(open(f, encoding='utf-8'))):
+        n += 1
+        for h in lint(t) + (['dash, $ or review claim'] if EXTRA.search(t) else []):
+            fails += 1; print('FAIL %s: %s in %r' % (os.path.relpath(f, ROOT), h, t[:80]))
+    print('OK   %s: %d strings checked' % (os.path.relpath(f, ROOT), n))
+
 print('HOLD, %d hit(s)' % fails if fails else 'PASS, Maʻemaʻe lint clean')
 sys.exit(1 if fails else 0)

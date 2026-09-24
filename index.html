@@ -1748,6 +1748,25 @@ body[data-tab="acts"] .saved-chip{top:calc(243px + var(--os-map-dy,0px))}
 #cultureCard .cc-row small{margin-left:auto;color:#6b5a3e;font-size:12px;white-space:nowrap}
 #cultureCard .cc-empty{border:1px dashed rgba(47,36,22,.3);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4;color:#6b5a3e;background:rgba(255,255,255,.4)}
 #cultureCard .cc-link{background:none;border:0;padding:0;color:#0f4c5c;font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline}
+#cultureCard .cc-agg{margin:16px 0 4px;padding:9px 12px;border-left:3px solid #8a6a3f;background:rgba(255,255,255,.5);border-radius:0 10px 10px 0;font-size:12.5px;line-height:1.45;color:#4a3a26}
+#cultureCard .cc-agg b{color:#2f2416}
+#cultureCard .cc-n{font-size:10px;font-weight:700;color:#0f4c5c;margin-left:2px;padding:0 1px;cursor:pointer;vertical-align:super;line-height:0}
+#cultureCard .cc-kv{margin:0 0 6px}
+#cultureCard .cc-kv b,#cultureCard .cc-pl b{font-weight:600;color:#2f2416}
+#cultureCard .cc-kv i,#cultureCard .cc-pl i{color:#4a3a26}
+#cultureCard .cc-pl{padding:7px 10px;background:rgba(255,255,255,.55);border:1px solid rgba(47,36,22,.1);border-radius:9px;font-size:13.5px;line-height:1.35}
+#cultureCard .cc-pl small{display:block;margin-top:2px;color:#6b5a3e;font-size:11.5px}
+#cultureCard .cc-more{font-size:12.5px;margin-top:8px}
+#cultureCard .cc-more a,#cultureCard .cc-srcs a{color:#0f4c5c}
+#cultureCard .cc-det{border-top:1px solid rgba(47,36,22,.14)}
+#cultureCard .cc-det:last-of-type{border-bottom:1px solid rgba(47,36,22,.14)}
+#cultureCard .cc-det summary{cursor:pointer;padding:10px 0;font-size:14px;font-weight:600;color:#3f2e1c;list-style:none;display:flex;justify-content:space-between}
+#cultureCard .cc-det summary::-webkit-details-marker{display:none}
+#cultureCard .cc-det summary::after{content:'+';color:#6b5a3e;font-weight:400}
+#cultureCard .cc-det[open] summary::after{content:'\2212'}
+#cultureCard .cc-srcs{margin:0;padding-left:20px;font-size:12px;line-height:1.45;color:#4a3a26}
+#cultureCard .cc-srcs li{margin-bottom:6px;border-radius:6px;transition:background .3s}
+#cultureCard .cc-srcs li.hit{background:rgba(15,76,92,.12)}
 /* Culture chrome: serif island name and sheet title, a kapa band behind the side chips, earth-tone chips.
    Colors and type only; every label, verdict and number is the same text as with the theme off. */
 :root[data-theme="culture"] .brand-text,:root[data-theme="culture"] .sname{font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif}
@@ -5369,17 +5388,105 @@ function initMap(){
     if (!window._cultureLabelGroup) return;
     if (on){ window._cultureLabelGroup.addTo(map); window._cultureRelabel(); } else { map.removeLayer(window._cultureLabelGroup); }
   };
-  // THE SECTION CARD. Facts come from the State layer (acres, moku, rank) and from the app's own beach list
-  // (which beaches sit in this ahupuaʻa). The two learn passages are quotations from OHA and from the State
-  // GIS metadata, cited in place. Meaning, moʻolelo and guest protocol for a place are a slot that only the
-  // cultural review partner fills; until then the card says so. Nothing on the card is written by us.
+  // THE SECTION CARD. Facts come from the State layer (acres, moku, rank), the app's own beach list, and
+  // culture/sources/<island>.json (built by culture/sources/build_sources.py), which holds only what named
+  // sources say about each ahupuaʻa. Every sourced line carries a number into the card's Sources list, and the
+  // card says up front that it is gathered from published sources and not yet reviewed. Moʻolelo and guest
+  // protocol stay a slot that only the cultural review partner fills. Nothing on the card is in our own voice.
   window.CULTURE_LEARN = {
     system: {text:'Each island (mokupuni) is divided into moku, each moku into ahupuaʻa, and those into ʻili and kuleana.',
              quote:'“The foundation of Kīpuka is the traditional land system, mokupuni divided into moku, ahupuaʻa, ili and kuleana.”',
              cite:'Office of Hawaiian Affairs, Kīpuka Database.'},
     bounds: {quote:'“Although not survey grade, and not checked for legal validity, the boundaries correspond to the 19th century survey maps.”',
-             note:'Traditional ahupuaʻa boundaries extended into the ocean. The layer does not draw that seaward part, so the sea off a beach belonged to the ahupuaʻa behind it.',
+             note:'The State layer stops at the shore. Its notes add: “Ahupuaa boundaries extend into the ocean and do not end at the coastline as depicted here.”',
              cite:'State of Hawaiʻi Statewide GIS Program, Ahupuaa layer metadata. Names per Pukui, Elbert and Mookini, diacritical notations edited by the State Historic Preservation Division, 2017 to 2026.'}
+  };
+  // Every source a card can cite. A card numbers the ones it uses in the order it first uses them.
+  window.CULTURE_SRC = {
+    soe:   {t:'Lloyd J. Soehren, Catalog of Hawaiʻi Place Names. University of Hawaiʻi at Mānoa Library.', u:'https://manoa.hawaii.edu/hawaiiancollection/soehren/'},
+    pem:   {t:'Mary Kawena Pukui, Samuel H. Elbert and Esther T. Mookini, Place Names of Hawaii. University of Hawaiʻi Press, 1974. Meanings as the Soehren catalog quotes them.', u:'https://uhpress.hawaii.edu/title/place-names-of-hawaii/'},
+    pe:    {t:'Mary Kawena Pukui and Samuel H. Elbert, Hawaiian Dictionary. University of Hawaiʻi Press, 1986. Word meanings as the Soehren catalog quotes them.', u:'https://uhpress.hawaii.edu/title/hawaiian-dictionary/'},
+    mah:   {t:'Māhele Book, 1848, and Land Commission Award records, Hawaiʻi State Archives, as indexed in the Soehren catalog. People are named as the record spells them.', u:'https://manoa.hawaii.edu/hawaiiancollection/soehren/'},
+    usgs:  {t:'U.S. Geological Survey, 3D Elevation Program: lowest and highest ground inside the State boundary.', u:'https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer'},
+    rain:  {t:'Rainfall Atlas of Hawaiʻi (Giambelluca and others, 2013), mean yearly rain lines, via the Hawaiʻi Statewide GIS Program.', u:'https://rainfall.geography.hawaii.edu/'},
+    dar:   {t:'DLNR Division of Aquatic Resources, streams layer (2008), via the Hawaiʻi Statewide GIS Program.', u:'https://files.hawaii.gov/dbedt/op/gis/data/streams_dar.pdf'},
+    gis:   {t:'Hawaiʻi Statewide GIS Program, Ahupuaa layer and notes. Office of Hawaiian Affairs 2009; names edited by the State Historic Preservation Division, 2017 to 2026.', u:'https://files.hawaii.gov/dbedt/op/gis/data/ahupuaa.pdf'},
+    bg:    {t:'Kamanamaikalani Beamer and Lorenz Gonschor, “Toward an Inventory of Ahupuaʻa in the Hawaiian Kingdom.” The Hawaiian Journal of History 48 (2014): 53 to 88.', u:'https://evols.library.manoa.hawaii.edu/server/api/core/bitstreams/12aa1365-53ea-4b5d-9bdc-0510d85ec418/content'},
+    malo:  {t:'David Malo, Hawaiian Antiquities (Moolelo Hawaii), translated by N. B. Emerson. Honolulu, 1903. Chapter VII.', u:'https://archive.org/details/hawaiianantiquit00malo'},
+    con:   {t:'Constitution of the State of Hawaiʻi, Article XII, Section 7 (added 1978).', u:'https://lrb.hawaii.gov/constitution'},
+    hrs7:  {t:'Hawaiʻi Revised Statutes §7-1.', u:'https://www.capitol.hawaii.gov/hrscurrent/Vol01_Ch0001-0042F/HRS0007/HRS_0007-0001.htm'},
+    hrs187:{t:'Hawaiʻi Revised Statutes §187A-23.', u:'https://www.capitol.hawaii.gov/hrscurrent/Vol03_Ch0121-0200D/HRS0187A/HRS_0187A-0023.htm'},
+    oha:   {t:'Office of Hawaiian Affairs, Kīpuka Database.', u:'https://www.kipukadatabase.com/kipuka/'}
+  };
+  window.CULTURE_REC = {award:'Land Commission record', boundary:'Boundary Commission', survey:'Government Survey map', grant:'royal land grant', usgs:'USGS map', geology:'geologic map'};
+  window._cultureCtx = function(){ return {used:[]}; };
+  window._cultureCite = function(ctx, key){
+    var i = ctx.used.indexOf(key); if (i < 0){ ctx.used.push(key); i = ctx.used.length - 1; }
+    return '<sup class="cc-n" role="link" tabindex="0" aria-label="Source ' + (i + 1) + '" onclick="_cultureToSrc(' + (i + 1) + ')">[' + (i + 1) + ']</sup>';
+  };
+  window._cultureToSrc = function(n){
+    var el = document.getElementById('cc-src-' + n), card = document.getElementById('cultureCard'); if (!el || !card) return;
+    card.scrollTo({top: Math.max(0, el.offsetTop - 16), behavior: 'smooth'}); el.classList.add('hit'); setTimeout(function(){ el.classList.remove('hit'); }, 1600);
+  };
+  window._cultureSourcesHTML = function(ctx){
+    if (!ctx.used.length) return '';
+    var esc = window._cultureEsc, S = window.CULTURE_SRC;
+    return window._cultureH3('Sources', '') + '<ol class="cc-srcs">' + ctx.used.map(function(k, i){ var o = S[k]; return '<li id="cc-src-' + (i + 1) + '"><a href="' + esc(o.u) + '" target="_blank" rel="noopener">' + esc(o.t) + '</a></li>'; }).join('') + '</ol>';
+  };
+  window._cultureAggHTML = function(){
+    return '<div class="cc-agg"><b>Gathered from published sources.</b> Records, maps and scholarship, each line numbered to its source at the end. The cultural review partner has not checked this card yet.</div>';
+  };
+  window._cultureLoadSources = function(slug){
+    if (window._cultureSrc || window._cultureSrcLoading) return;
+    window._cultureSrcLoading = true;
+    fetch('culture/sources/' + slug + '.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      window._cultureSrc = (d && d.ahupuaa) ? d : {ahupuaa:{}};
+      var el = document.getElementById('cultureCard');
+      if (el && el.classList.contains('open') && window._cultureCardAhu != null) window._cultureOpenAhupuaa(window._cultureCardAhu, true);
+    }).catch(function(){ window._cultureSrc = {ahupuaa:{}}; });
+  };
+  // What the sources say about one ahupuaʻa: the name, the Māhele, ridge to shore, and the names inside.
+  window._cultureSourcedHTML = function(ctx, e){
+    var S = window._cultureSrc;
+    if (!S) return '<div class="cc-empty">Loading the published record for ' + window._cultureEsc(e.name) + '.</div>';
+    var row = S.ahupuaa[e.id]; if (!row) return '';
+    var esc = window._cultureEsc, C = function(k){ return window._cultureCite(ctx, k); }, q = function(m){ return '“' + esc(m) + '”'; };
+    var parts = row.s || [], h = window._cultureAggHTML(), many = parts.length > 1;
+    var meant = parts.filter(function(p){ return p.mean; });
+    if (meant.length){
+      h += window._cultureH3(meant.length > 1 ? 'The names' : 'The name', 'ahupuaa')
+        + meant.map(function(p){ return '<p class="cc-kv"><b>' + esc(p.n) + '</b> <i>' + q(p.mean) + '</i>' + C(p.by === 'PE' ? 'pe' : 'pem') + '</p>'; }).join('')
+        + '<p class="cc-cite">' + (meant.every(function(p){ return p.by === 'PE'; }) ? 'The meaning of the words, from the Hawaiian Dictionary.' : 'The meaning Place Names of Hawaii gives for the name.') + ' A place’s own moʻolelo can say more; that part comes from the cultural review partner.</p>';
+    }
+    parts.filter(function(p){ return p.okana; }).forEach(function(p){
+      h += '<p>Called an ahupuaʻa today, ' + esc(p.n) + ' is recorded as an ʻokana, a larger division' + (typeof p.okana === 'string' ? ' holding ' + esc(p.okana) + ' lands' : ' holding several lands') + '.' + C('soe') + '</p>';
+    });
+    var mh = parts.filter(function(p){ return p.mahele; });
+    if (mh.length){
+      h += window._cultureH3('At the 1848 Māhele', 'mokupuni') + mh.map(function(p){
+        var m = p.mahele, who = esc(m.who), it = many ? esc(p.n) : 'this land';
+        return '<p>' + (m.k === 'gov' ? who + ' returned ' + it + ' to the King, and it became Government land.'
+          : m.k === 'crown' ? (m.who ? who + ' returned ' + it + ' to the King, who kept it as Crown land.' : (many ? esc(p.n) : 'It') + ' was claimed as Crown land.')
+          : (many ? esc(p.n) : 'It') + ' stayed with ' + who + (m.lca ? ', confirmed as Land Commission Award ' + esc(m.lca) : '') + (m.kul ? ', apart from ' + m.kul + ' kuleana' : '') + '.') + C('mah') + '</p>';
+      }).join('') + '<p class="cc-cite">In the Māhele the King and 252 konohiki divided the lands between them, and most ahupuaʻa became Crown, Government or konohiki land.' + (mh.some(function(p){ return p.mahele.kul; }) ? ' Kuleana were small plots awarded to native tenants.' : '') + C('bg') + '</p>';
+    }
+    var env = [], n = function(x){ return window._cultureNum(Math.round(x / 10) * 10); };
+    if (row.ft){ var lo = row.ft[0], hi = row.ft[1];
+      env.push((lo < 20 ? 'Ground rises from the shore to about ' + n(hi) + ' ft.' : 'Ground runs from about ' + n(lo) + ' to ' + n(hi) + ' ft.' + (lo >= 100 ? ' It does not reach the shore.' : '')) + C('usgs')); }
+    if (row.rain) env.push((row.rain[0] === row.rain[1] ? 'Mean yearly rain is about ' + row.rain[0] + ' inches.' : 'Mean yearly rain runs from under ' + row.rain[0] + ' inches where it is driest to over ' + row.rain[1] + ' where it is wettest.') + C('rain'));
+    if (row.wai && row.wai.length) env.push('Streams: ' + row.wai.map(function(w){ return esc(w.n) + (w.p ? ' (flows all year)' : ' (not year-round)'); }).join(', ') + '.' + C('dar'));
+    if (env.length) h += window._cultureH3('From ridge to shore', 'moku') + env.map(function(t){ return '<p>' + t + '</p>'; }).join('');
+    var withPl = parts.filter(function(p){ return p.places && p.places.length; });
+    if (withPl.length){
+      var total = 0; parts.forEach(function(p){ total += p.count || 0; });
+      h += window._cultureH3('Names recorded inside', 'ahupuaa_site')
+        + '<p>The Soehren catalog lists ' + total + ' place name' + (total === 1 ? '' : 's') + ' inside ' + esc(e.name) + '. Some of them, each with the record it survives in:' + C('soe') + '</p>'
+        + '<div class="cc-list">' + withPl.map(function(p){ return p.places.map(function(x){
+            return '<div class="cc-pl"><div><b>' + esc(x.n) + '</b>' + (x.mean ? ' <i>' + q(x.mean) + '</i>' + C(x.by === 'PE' ? 'pe' : 'pem') : '') + '</div><small>' + esc([x.f, window.CULTURE_REC[x.r]].filter(Boolean).join(' · ')) + '</small></div>';
+          }).join(''); }).join('') + '</div>'
+        + '<p class="cc-more">' + withPl.map(function(p){ return '<a href="' + esc(p.q) + '" target="_blank" rel="noopener">Every name recorded in ' + esc(p.n) + '</a>'; }).join(' · ') + '</p>';
+    }
+    return h;
   };
   window._cultureEsc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); };
   window._cultureNum = function(n){ return Math.round(n).toLocaleString('en-US'); };
@@ -5553,23 +5660,42 @@ function initMap(){
     window._cultureLit = entries || [];
     window._cultureLit.forEach(function(e){ e.layer.setStyle({weight:2.4, color:'#7a2f12', fillOpacity:.34}); if (e.layer.bringToFront) e.layer.bringToFront(); });
   };
-  window._cultureCloseCard = function(){ var el = document.getElementById('cultureCard'); if (el){ el.classList.remove('open'); el.classList.remove('cp-open'); } window._culturePath.step = 0; window._cultureHighlight([]); try { window._cultureRibbon(!!window._isCulture()); } catch(e){} };
-  window._cultureLearnHTML = function(){
-    var Lr = window.CULTURE_LEARN;
-    return window._cultureH3('The land system','kalo') + '<p>' + Lr.system.text + '</p><p class="cc-cite">' + Lr.system.quote + ' ' + Lr.system.cite + '</p>'
-         + window._cultureH3('These boundaries','moku') + '<p class="cc-cite">' + Lr.bounds.quote + '</p><p>' + Lr.bounds.note + '</p><p class="cc-cite">' + Lr.bounds.cite + '</p>';
+  window._cultureCloseCard = function(){ window._cultureCardAhu = null; var el = document.getElementById('cultureCard'); if (el){ el.classList.remove('open'); el.classList.remove('cp-open'); } window._culturePath.step = 0; window._cultureHighlight([]); try { window._cultureRibbon(!!window._isCulture()); } catch(e){} };
+  window._cultureLearnHTML = function(ctx){
+    ctx = ctx || window._cultureCtx();
+    var Lr = window.CULTURE_LEARN, C = function(k){ return window._cultureCite(ctx, k); };
+    var d = function(title, body){ return '<details class="cc-det"><summary>' + title + '</summary>' + body + '</details>'; };
+    return window._cultureH3('How the land system works', 'kalo')
+      + d('How the land is divided',
+          '<p>David Malo set out the order of the land: the island (mokupuni), its districts (moku), sections called ʻokana or kalana, then the ahupuaʻa, divided into ʻili, and those into moʻo, paukū and kīhāpai, down to a single farm plot.' + C('malo') + '</p>'
+        + '<p>The word joins ahu, an altar, and puaʻa, a pig: the altar at the boundary where tribute and hoʻokupu were laid during the yearly makahiki. Konohiki, resource managers appointed by the ruler, looked after each ahupuaʻa. Tradition credits rulers who unified an island, such as Māʻilikūkahi on Oʻahu and ʻUmi on Hawaiʻi Island, with setting the divisions in order.' + C('bg') + '</p>'
+        + '<p class="cc-cite">' + Lr.system.quote + C('oha') + '</p>')
+      + d('From the ridge to the reef',
+          '<p>Malo named the belts of land from the top down: the kuahiwi, the mountain backbone, and its kualono ridges; forest belts called wao, among them the wao akua; the wao kanaka, where people farmed; the open kula near the houses; and the kahakai at the edge of the sea.' + C('malo') + '</p>'
+        + '<p>Surveyor C. J. Lyons wrote in 1875: “The main idea of the Ahupuaa, or primary division, was to run a strip from the shore to the summit of the mountain, in order to give equitable share of all the different products of the soil and sea.”' + C('bg') + '</p>'
+        + '<p>Most ahupuaʻa, about 8 in 10, run from the uplands to the sea. About 1 in 7 are cut off from the coast, and only about 1 in 20 follow a single watershed, so an ahupuaʻa is not simply a stream valley.' + C('bg') + '</p>')
+      + d('How these lines were drawn',
+          '<p>Knowledge of the boundaries was kept in memory and passed on by word of mouth. In the 1848 Māhele the King and the konohiki divided the lands. From 1862 the Boundary Commission settled lines by taking testimony from kamaʻāina who knew them, and from 1870 the Hawaiian Government Survey mapped them. All of it drew on traditional knowledge of the land divisions.' + C('bg') + '</p>'
+        + '<p>The lines on this map are the State layer, which says: ' + Lr.bounds.quote + ' Its shoreline is the 19th century one, drawn when fishponds still lined the coast.' + C('gis') + '</p>')
+      + d('The sea beyond the shore',
+          '<p>' + Lr.bounds.note + C('gis') + '</p>'
+        + '<p>Hawaiʻi fishing law still carries the rule for a konohiki fishery: the fishing grounds out to the reef, or one geographical mile from the low-water mark where there is no reef, belong to the land behind them, held for the equal use of the konohiki and the tenants of that land.' + C('hrs187') + '</p>')
+      + d('Still in Hawaiʻi law',
+          '<p>The State Constitution protects the customary and traditional rights of ahupuaʻa tenants who descend from Native Hawaiians living in the islands before 1778, for subsistence, cultural and religious purposes, subject to State regulation.' + C('con') + '</p>'
+        + '<p>A law carried since the Kingdom’s Civil Code of 1859 keeps the right of people on a land to take firewood, house timber, aho cord, thatch and kī leaf from the land where they live, for their own use.' + C('hrs7') + '</p>');
   };
   window._cultureHead = function(title, sub){
     return '<div class="cc-head"><span class="cc-mark">' + window._cultureIslandMark() + '</span><div><h2>' + window._cultureEsc(title) + '</h2><div class="cc-sub">' + window._cultureEsc(sub) + '</div></div><button class="cc-x" aria-label="Close" onclick="_cultureCloseCard()">' + window.CULTURE_ICON.x + '</button></div><div class="cc-band" aria-hidden="true"></div>';
   };
-  window._cultureOpenAhupuaa = function(id){
+  window._cultureOpenAhupuaa = function(id, again){
     var idx = window._cultureIdx, e = idx && idx.byId[id]; if (!e) return;
-    if (window._cultureTourTap('ahu', id)) return;   // the tour is open: this tap is the answer to its step
+    if (!again && window._cultureTourTap('ahu', id)) return;   // the tour is open: this tap is the answer to its step
     window._culturePath.step = 0; try { window._cultureCardEl().classList.remove('cp-open'); } catch(e){}
+    window._cultureCardAhu = id; var ctx = window._cultureCtx(), keep = again ? window._cultureCardEl().scrollTop : 0;
     var esc = window._cultureEsc, sibs = (idx.byMoku[e.moku] || []).slice().sort(function(a, b){ return b.acres - a.acres; }), rank = sibs.indexOf(e) + 1;
     var bm = window._cultureBeachMap(), beaches = (typeof B !== 'undefined' ? B : []).filter(function(b){ return bm[b.id] === id; });
     var island = (window.ACTIVE && ACTIVE.name) || '';
-    window._cultureCount('culture_card', 'ahupuaa|' + e.name);
+    if (!again) window._cultureCount('culture_card', 'ahupuaa|' + e.name);
     var html = window._cultureHead(e.name, 'Ahupuaʻa · moku of ' + e.moku + ' · ' + island)
       + '<div class="cc-facts"><div class="cc-fact"><b>' + window._cultureNum(e.acres) + '</b><span>acres</span></div>'
       + '<div class="cc-fact"><b>' + (e.acres * 0.00404686).toFixed(1) + '</b><span>km²</span></div>'
@@ -5577,15 +5703,18 @@ function initMap(){
       + window._cultureH3('In this ahupuaʻa','ahupuaa')
       + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ var row = window._culturePlaceRow ? window._culturePlaceRow(b.id) : null, nm = window._cultureShortName ? window._cultureShortName(b) : b.name; return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(nm) + '</span><small>' + (row && /^y/i.test(row.wahi_pana || '') ? 'wahi pana · ' : '') + esc(b.r || '') + '</small></div>'; }).join('') + '</div>'
                        : '<div class="cc-empty">No beach in this app sits inside this ahupuaʻa.</div>')
-      + window._cultureH3('About this place','hibiscus') + '<div class="cc-empty">Awaiting cultural review. The meaning of the name, its moʻolelo, and guest protocol for ' + esc(e.name) + ' come from the cultural review partner, not from us.</div>'
-      + window._cultureLearnHTML()
+      + window._cultureSourcedHTML(ctx, e)
+      + window._cultureH3('Moʻolelo and protocol','hibiscus') + '<div class="cc-empty">Awaiting cultural review. The moʻolelo of ' + esc(e.name) + ' and guest protocol here come from the cultural review partner, not from us.</div>'
+      + window._cultureLearnHTML(ctx)
+      + window._cultureSourcesHTML(ctx)
       + '<p style="margin-top:12px"><button class="cc-link" onclick="_cultureOpenMoku(' + esc(JSON.stringify(e.moku)) + ')">All ' + sibs.length + ' ahupuaʻa of ' + esc(e.moku) + '</button></p>';
-    var el = window._cultureCardEl(); el.innerHTML = html; el.classList.add('open'); el.scrollTop = 0;
+    var el = window._cultureCardEl(); el.innerHTML = html; el.classList.add('open'); el.scrollTop = keep;
     window._cultureHighlight([e]);
   };
   window._cultureOpenMoku = function(name){
     if (window._cultureTourTap('moku', name)) return;   // same for a moku label while the tour is running
     window._culturePath.step = 0; try { window._cultureCardEl().classList.remove('cp-open'); } catch(e){}
+    window._cultureCardAhu = null; var ctx = window._cultureCtx();
     var idx = window._cultureIdx, list = idx && idx.byMoku[name]; if (!list || !list.length) return;
     var esc = window._cultureEsc, sorted = list.slice().sort(function(a, b){ return b.acres - a.acres; }), acres = 0; sorted.forEach(function(e){ acres += e.acres; });
     var bm = window._cultureBeachMap(), nb = (typeof B !== 'undefined' ? B : []).filter(function(b){ return list.some(function(e){ return bm[b.id] === e.id; }); }).length;
@@ -5594,7 +5723,7 @@ function initMap(){
     var html = window._cultureHead(name, 'Moku · ' + island)
       + '<div class="cc-facts"><div class="cc-fact"><b>' + sorted.length + '</b><span>ahupuaʻa</span></div><div class="cc-fact"><b>' + window._cultureNum(acres) + '</b><span>acres</span></div><div class="cc-fact"><b>' + nb + '</b><span>beaches in app</span></div></div>'
       + window._cultureH3('Its ahupuaʻa, largest first','ahupuaa') + '<div class="cc-list">' + sorted.map(function(e){ return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureZoomTo(' + esc(JSON.stringify(e.id)) + ')">' + window._cultureAhuIcon(e.id) + '<span>' + esc(e.name) + '</span><small>' + window._cultureNum(e.acres) + ' ac</small></div>'; }).join('') + '</div>'
-      + window._cultureLearnHTML();
+      + window._cultureAggHTML() + window._cultureLearnHTML(ctx) + window._cultureSourcesHTML(ctx);
     var el = window._cultureCardEl(); el.innerHTML = html; el.classList.add('open'); el.scrollTop = 0;
     window._cultureHighlight(list);
   };
@@ -6088,6 +6217,7 @@ function initMap(){
             if (!g) return;
             window._cultureBuildPlate(g);
             window._cultureBuildSections(g);
+            window._cultureLoadSources(slug);
             if (window._isCulture()){ window._culturePlateOn(); window._cultureLines.addTo(map); window._cultureLabelsOn(true); }
           }).catch(function(){});
         }
