@@ -69,7 +69,7 @@ const sec = (pg) => pg.evaluate(() => {
     check(card.items.every((i) => /^High confidence$/.test(i.lv)), 'the three strongest on Kauaʻi are High (' + card.items.map((i) => i.lv).join(', ') + ')');
     check(card.items.every((i) => i.chip === 'Sample' && /^Working assumption: /.test(i.s) && /^Consider /.test(i.c)), 'each card line: Sample chip, "Working assumption:", "Consider"');
     check(/sample figures/.test(card.sub) && /never findings/.test(card.sub), 'card subtitle names sample figures and never findings');
-    await t.pg.evaluate(() => window.scrollTo(0, document.getElementById('asmTop').getBoundingClientRect().top + window.scrollY - 80));
+    await t.pg.evaluate(() => window.scrollTo(0, document.getElementById('asmCard').getBoundingClientRect().top + window.scrollY - 80));
     await t.pg.screenshot({ path: path.join(OUT, 'asm-1-overview-card-' + w + '.png') });
 
     // 2. Report section
