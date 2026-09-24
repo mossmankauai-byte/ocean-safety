@@ -5451,7 +5451,7 @@ function initMap(){
     if (!S) return '<div class="cc-empty">Loading the published record for ' + window._cultureEsc(e.name) + '.</div>';
     var row = S.ahupuaa[e.id]; if (!row) return '';
     var esc = window._cultureEsc, C = function(k){ return window._cultureCite(ctx, k); }, q = function(m){ return '“' + esc(m) + '”'; };
-    var parts = row.s || [], h = window._cultureAggHTML(), many = parts.length > 1;
+    var parts = row.s || [], h = '', many = parts.length > 1;
     var meant = parts.filter(function(p){ return p.mean; });
     if (meant.length){
       h += window._cultureH3(meant.length > 1 ? 'The names' : 'The name', 'ahupuaa')
@@ -5703,7 +5703,7 @@ function initMap(){
       + window._cultureH3('In this ahupuaʻa','ahupuaa')
       + (beaches.length ? '<div class="cc-list">' + beaches.map(function(b){ var row = window._culturePlaceRow ? window._culturePlaceRow(b.id) : null, nm = window._cultureShortName ? window._cultureShortName(b) : b.name; return '<div class="cc-row" role="button" tabindex="0" onclick="_cultureCloseCard();openSheet(' + esc(JSON.stringify(b.id)) + ')">' + window.CULTURE_ICON.wave + '<span>' + esc(nm) + '</span><small>' + (row && /^y/i.test(row.wahi_pana || '') ? 'wahi pana · ' : '') + esc(b.r || '') + '</small></div>'; }).join('') + '</div>'
                        : '<div class="cc-empty">No beach in this app sits inside this ahupuaʻa.</div>')
-      + window._cultureSourcedHTML(ctx, e)
+      + window._cultureAggHTML() + window._cultureSourcedHTML(ctx, e)
       + window._cultureH3('Moʻolelo and protocol','hibiscus') + '<div class="cc-empty">Awaiting cultural review. The moʻolelo of ' + esc(e.name) + ' and guest protocol here come from the cultural review partner, not from us.</div>'
       + window._cultureLearnHTML(ctx)
       + window._cultureSourcesHTML(ctx)

@@ -18,7 +18,7 @@ Inputs are fetched once, politely, and cached outside the repo:
 Then: python3 culture/sources/build_sources.py --soehren <cache>/soehren.json --env <cache>
 Rerun all four after the State ahupuaʻa layer changes (it was last updated by SHPD in July 2026).
 """
-import json, re, sys, unicodedata, collections, argparse, os
+import json, re, sys, unicodedata, collections, argparse, os, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -107,7 +107,13 @@ def mahele(comments):
     return None
 
 # ── the names inside ──────────────────────────────────────────────────────────────────────────────
-NEVER = re.compile(r'heiau|burial|ilina|cemetery|grave|cave|\bana\b|shrine|altar|\bahu\b|kūʻula|kuula|koʻa|puʻuhonua|wahi pana|stone|rock|pōhaku|lua\b|iwi|pit\b|tomb', re.I)
+NEVER = re.compile(r'heiau|luakini|burial|bones|ilina|kupapau|cemetery|grave|tomb|cave|\bana\b|shrine|altar|\bahu\b|kuula|puuhonua|wahi pana|stone|rock|pohaku|\blua\b|\biwi\b|\bpit\b|\bunu\b', re.I)
+NEVER_RAW = re.compile(r'koʻa|kūʻula', re.I)   # koʻa folded is koa, the tree, so it is matched with its ʻokina
+def plain(s):
+    s = unicodedata.normalize('NFD', s or '')
+    return ''.join(ch for ch in s if not unicodedata.combining(ch)).replace('ʻ', '').replace("'", '')
+def never(feature):
+    return bool(NEVER_RAW.search(feature or '') or NEVER.search(plain(feature)))
 GROUPS = [
     ('ili',   'ʻili, land sections',   re.compile(r"^ʻili\b|ʻili kū|ʻili kūpono", re.I)),
     ('hill',  'hills and ridges',      re.compile(r'puʻu|hill|cone|ridge|pali|knoll|mountain|āhua|crater|vent|kualapa|peak', re.I)),
@@ -118,7 +124,7 @@ GROUPS = [
     ('valley','valleys and gulches',   re.compile(r'valley|gulch|awāwa|awawa', re.I)),
 ]
 def group_of(feature):
-    if NEVER.search(feature or ''): return None
+    if never(feature): return None
     for key, _, rx in GROUPS:
         if rx.search(feature or ''): return key
     return None
@@ -126,7 +132,7 @@ def group_of(feature):
 def feature_label(feature):
     for t in re.split(r',\s*', feature or ''):
         t = t.strip().rstrip('?')
-        if t and t not in ('bp', 'ts', 'place') and not NEVER.search(t): return t
+        if t and t not in ('bp', 'ts', 'place') and not never(t): return t
     return ''
 
 def record_kind(src):
@@ -151,8 +157,8 @@ def stream_name(nm):
     base = ' '.join(parts[:-1]) if tail else nm
     return base, tail
 
-def soehren_url(ascii_name):
-    return 'https://manoa.hawaii.edu/hawaiiancollection/soehren/process.php?terms1=' + ascii_name.replace(' ', '+') + '&boolean1=1'
+def soehren_url(name):
+    return 'https://manoa.hawaii.edu/hawaiiancollection/soehren/process.php?terms1=' + urllib.parse.quote_plus(plain(name)) + '&boolean1=1'
 
 def build(soe, envdir):
     report = {}
