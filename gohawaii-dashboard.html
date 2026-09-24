@@ -1492,10 +1492,11 @@
   function nEntries(n){ return n + ' entr' + (n === 1 ? 'y' : 'ies'); }
   function logText(rows, P, cap){
     var head = 'GoHawaii Dashboard activity log, ' + P.label + ' (' + nEntries(rows.length) + '). Hawaiʻi time.', lines = rows.map(logLine), out = [head, ''].concat(lines).join('\n');
-    if(cap && out.length > cap){ var keep = [], len = head.length + 2; for(var i = 0; i < lines.length; i++){ if(len + lines[i].length + 1 > cap - 90) break; keep.push(lines[i]); len += lines[i].length + 1; } out = [head, ''].concat(keep, ['... and ' + nEntries(lines.length - keep.length) + ' more. The CSV download carries every entry.']).join('\n'); }
+    if(cap && out.length > cap){ var keep = [], len = head.length + 2; for(var i = 0; i < lines.length; i++){ if(len + lines[i].length + 1 > cap - 90) break; keep.push(lines[i]); len += lines[i].length + 1; } var left = lines.length - keep.length; out = [head, ''].concat(keep, ['... and ' + left + ' more entr' + (left === 1 ? 'y' : 'ies') + '. The full log is in the Dashboard\'s CSV download.']).join('\n'); }
     return out;
   }
-  function logCsv(rows){ return ['when_hawaii,who,what,item'].concat(rows.map(function(r){ return [A.hst(r.at, true), r.who, r.what, r.title || ''].map(csvCell).join(','); })).join('\n') + '\n'; }
+  function hstStamp(isoStr){ var t = Date.parse(isoStr); if(!isFinite(t)) return ''; try { return new Date(t).toLocaleString('sv-SE', { timeZone: 'Pacific/Honolulu', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', ''); } catch(e){ return new Date(t - 10 * 3600e3).toISOString().slice(0, 16).replace('T', ' '); } }
+  function logCsv(rows){ return ['when_hawaii,who,what,item'].concat(rows.map(function(r){ return [hstStamp(r.at), r.who, r.what, r.title || ''].map(csvCell).join(','); })).join('\n') + '\n'; }
   function renderLog(){
     var q = logRows(), P = q.P, rows = q.rows;
     $('logPer').innerHTML = perHtml(state.logp);
@@ -1503,7 +1504,7 @@
     $('logBody').innerHTML = rows.length ? rows.slice(0, 500).map(function(r){ return '<tr><td style="white-space:nowrap">' + esc(A.hst(r.at, true)) + '</td><td>' + esc(r.who) + '</td><td>' + esc(r.what) + '</td><td>' + esc(r.title || '') + '</td></tr>'; }).join('')
       : '<tr><td colspan="4" class="note">' + (P.err ? 'Pick a period above.' : 'Nothing in this period.') + '</td></tr>';
     $('logCopy').disabled = $('logCsv').disabled = !!P.err;
-    var m = $('logMail'); if(P.err){ m.setAttribute('href', '#'); m.setAttribute('aria-disabled', 'true'); } else { m.removeAttribute('aria-disabled'); m.setAttribute('href', 'mailto:?subject=' + encodeURIComponent('GoHawaii Dashboard log, ' + P.label) + '&body=' + encodeURIComponent(logText(rows, P, 1800))); }
+    var m = $('logMail'); if(P.err){ m.setAttribute('href', '#'); m.setAttribute('aria-disabled', 'true'); } else { m.removeAttribute('aria-disabled'); m.setAttribute('href', 'mailto:?subject=' + encodeURIComponent('GoHawaii Dashboard activity log, ' + P.label) + '&body=' + encodeURIComponent(logText(rows, P, 1800))); }
   }
   perBind($('logPer'), function(){ return state.logp; }, logSave, renderLog);
   $('logCopy').addEventListener('click', function(){ var q = logRows(), b = this, done = function(ok){ b.textContent = ok ? 'Copied' : 'Could not copy'; setTimeout(function(){ b.textContent = 'Copy for email'; }, 1600); }; if(q.P.err) return done(false); var t = logText(q.rows, q.P, 0); if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ done(true); }, function(){ done(false); }); else done(false); });
@@ -1781,7 +1782,7 @@
       var ok = /^\d{4}-\d{2}-\d{2}$/, a = ok.test(p.from || '') ? new Date(p.from + 'T00:00:00Z') : null, b = ok.test(p.to || '') ? new Date(p.to + 'T00:00:00Z') : null;
       if(!a || !b || isNaN(a) || isNaN(b)) return { err: 'Pick a start and an end date.' };
       if(b < a) return { err: 'The end date is before the start date.' };
-      if(b > t) return { err: 'The end date is after today. Counting stops today.' };
+      if(b > t) return { err: 'The end date is after today. Pick today or earlier.' };
       if((b - a) / 864e5 > 399) return { err: 'A range runs at most 400 days.' };
       from = a; to = b;
     }
@@ -2122,7 +2123,8 @@
     if(P.err){ $('asmSub').textContent = 'Working assumptions for ' + ISL[state.isl] + ', never findings.'; el.innerHTML = '<div class="empty">' + esc(P.err) + '</div>'; return; }
     if(state.live && P.endsToday && state.liveByDays[P.days] === undefined) liveFor(P.days, renderAsmCard);
     var top = asmTop(state.isl, 3, P), n = asmIsland(state.isl, P).concat(asmState(P)).filter(function(a){ return a.fired; }).length, liveOn = state.live && P.endsToday && !!state.liveByDays[P.days];
-    $('asmSub').textContent = 'The three strongest of ' + n + ' for ' + P.label + ' on ' + ISL[state.isl] + (liveOn ? '' : ' · sample figures') + '. Working assumptions, never findings.';
+    var lead0 = n >= 4 ? 'The three strongest of ' + n : n === 3 ? 'All three that clear the gates' : n === 2 ? 'Both that clear the gates' : 'The one that clears the gates';
+    $('asmSub').textContent = n ? lead0 + ' for ' + P.label + ' on ' + ISL[state.isl] + (liveOn ? '' : ' · sample figures') + '. Working assumptions, never findings.' : 'Working assumptions for ' + P.label + ' on ' + ISL[state.isl] + ', never findings.';
     el.innerHTML = top.length ? top.map(function(a){ return '<div class="asmi"><div class="hd">' + asmChip(a) + '</div><p>' + esc(a.statement) + '</p><small>' + esc(a.consider) + '</small></div>'; }).join('')
       : '<div class="empty">Nothing clears the gates for ' + esc(P.label) + '. A longer period gives the rules more to count.</div>';
   }

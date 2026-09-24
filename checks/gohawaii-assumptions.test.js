@@ -174,6 +174,9 @@ const sec = (pg) => pg.evaluate(() => {
     await setRange('#asmPer', yr + '-01-01', yr + '-01-15'); await sleep(300);
     const rg = await t.pg.evaluate(() => ({ sub: document.getElementById('asmSub').textContent, n: document.querySelectorAll('#asmTop .asmi').length }));
     check(new RegExp('for January 1 to January 15, ' + yr + ' on').test(rg.sub) && rg.n === 3, 'a set range labels the period and recomputes (' + rg.sub.slice(0, 70) + ')');
+    await setRange('#asmPer', yr + '-01-01', yr + '-01-01'); await sleep(300);
+    const one = await t.pg.evaluate(() => ({ sub: document.getElementById('asmSub').textContent, n: document.querySelectorAll('#asmTop .asmi').length }));
+    check(!/strongest of [0-3] /.test(one.sub) && (one.n >= 3 ? /^The three strongest of \d+ for/.test(one.sub) : one.n === 0 ? /^Working assumptions for January 1 to January 1, \d{4} on/.test(one.sub) : /^(All three that clear|Both that clear|The one that clears) the gates for/.test(one.sub)), 'a one-day range never says "three strongest of " + a smaller count (' + one.n + ' shown: ' + one.sub.slice(0, 50) + ')');
     const ov2 = await t.pg.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
     check(ov2.sw <= ov2.cw + 1, 'no horizontal overflow on the Overview with the range inputs open at ' + w + ' (' + ov2.sw + ' of ' + ov2.cw + ')');
     await t.pg.evaluate(() => window.scrollTo(0, document.getElementById('asmCard').getBoundingClientRect().top + window.scrollY - 60));
@@ -199,9 +202,9 @@ const sec = (pg) => pg.evaluate(() => {
     check(lg.n === expect.ytd && expect.ytd >= expect.month, 'Log year-to-date filter: ' + lg.n + ' entries');
     const ex2 = await t.pg.evaluate(() => ({ text: window.GH_ASM.log.text(0), capped: window.GH_ASM.log.text(150), csv: window.GH_ASM.log.csv(), mail: decodeURIComponent(document.getElementById('logMail').getAttribute('href')), labels: ['logCopy', 'logCsv', 'logMail'].map((i) => document.getElementById(i).textContent).join('|') }));
     check(/^GoHawaii Dashboard activity log, \d{4} to date \(\d+ entries\)\. Hawaiʻi time\./.test(ex2.text) && ex2.text.split('\n').length === expect.ytd + 2 && /Seed: today/.test(ex2.text), 'the email text carries a heading, the period, the count and one line per entry');
-    check(/^mailto:\?subject=GoHawaii Dashboard log, \d{4} to date&body=GoHawaii Dashboard activity log/.test(ex2.mail) && /Seed: today/.test(ex2.mail), 'the Email button is a mailto with the subject and the log in the body');
-    check(ex2.csv.split('\n')[0] === 'when_hawaii,who,what,item' && ex2.csv.trim().split('\n').length === expect.ytd + 1 && /Seed: today/.test(ex2.csv), 'the CSV has a header and one row per entry');
-    check(/\.\.\. and \d+ entr(y|ies) more\. The CSV download carries every entry\./.test(ex2.capped), 'a long log is cut for the email body with a pointer to the CSV');
+    check(/^mailto:\?subject=GoHawaii Dashboard activity log, \d{4} to date&body=GoHawaii Dashboard activity log/.test(ex2.mail) && /Seed: today/.test(ex2.mail), 'the Email button is a mailto with the subject and the log in the body');
+    check(ex2.csv.split('\n')[0] === 'when_hawaii,who,what,item' && ex2.csv.trim().split('\n').length === expect.ytd + 1 && /Seed: today/.test(ex2.csv) && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2},/m.test(ex2.csv), 'the CSV has a header, one row per entry, and dated Hawaiʻi stamps');
+    check(/\.\.\. and \d+ more entr(y|ies)\. The full log is in the Dashboard's CSV download\./.test(ex2.capped), 'a long log is cut for the email body with a pointer to the CSV');
     check(ex2.labels === 'Copy for email|Download CSV|Email this log', 'export buttons: Copy for email, Download CSV, Email this log');
     const rd = await t.pg.evaluate(() => { const d = (n) => new Date(Date.now() - 10 * 3600e3 - n * 864e5).toISOString().slice(0, 10); return { from: d(40), to: d(2) }; });
     await t.pg.evaluate(() => document.querySelector('#logPer button[data-per="range"]').click()); await sleep(200);
