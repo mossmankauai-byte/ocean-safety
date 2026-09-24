@@ -1859,7 +1859,8 @@
         var nh = Math.round(d.checks * d.hazShare), nc = d.checks - nh; if(nh < 30 || nc < 30) return { na: 'at least 30 checks in each group' };
         var r = newcombe(Math.round(nh * d.deflect.haz), nh, Math.round(nc * d.deflect.calm), nc); r.w = r.hi - r.lo; if(r.w >= 0.30) return { na: 'more checks; the gap\'s range is wider than 30 points' };
         if(!gap(r) || Math.abs(r.d) < 0.05) return { off: 'no gap of 5 points or more between hazard-verdict days and calm days' };
-        return { s: 'Visitors who saw a hazard verdict changed their plan more often than visitors on a calm day: about ' + pc(d.deflect.haz) + ' against ' + pc(d.deflect.calm) + ', a gap of ' + pts(r) + '.',
+        var wh = wilson(Math.round(nh * d.deflect.haz), nh), wc = wilson(Math.round(nc * d.deflect.calm), nc);
+        return { s: 'A plan change followed about ' + pc(d.deflect.haz) + ' (' + rng(wh) + ') of checks that showed a hazard verdict, against ' + pc(d.deflect.calm) + ' (' + rng(wc) + ') of checks on a calm day, a gap of ' + pts(r) + '.',
           based: about(nh) + ' checks after a hazard verdict and ' + about(nc) + ' on calm days in ' + d.month, prec: gWidth(r.w),
           confirm: 'The gap holds in 3 of 4 weeks once counting is on.', overturn: 'The range includes zero for 4 weeks.',
           consider: 'pairing every red or yellow verdict with a named alternative beach.' };

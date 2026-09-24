@@ -25,7 +25,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const fails = [];
 function check(cond, msg){ if(cond) console.log('  ok   ' + msg); else { console.log('  FAIL ' + msg); fails.push(msg); } }
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-const BANNED = /\b(drown\w*|rescue\w*|incident\w*|prevent\w*|saved|safer|likely|probably|unlikely)\b|\$|All islands|[—–]/i;
+const BANNED = /\b(drown\w*|rescue\w*|incident\w*|prevent\w*|saved|safer|likely|probably|unlikely|visitors)\b|\$|All islands|[—–]/i;
 
 async function page(br, w, h){
   const ctx = await br.createBrowserContext();
@@ -83,7 +83,7 @@ const sec = (pg) => pg.evaluate(() => {
     check(s.rows.every((r) => /^(High|Moderate|Low) confidence$/.test(r.lv) && r.chip === 'Sample'), 'every line carries a confidence chip and a Sample chip');
     check(s.rows.every((r) => r.m.length >= 3 && /^Based on /.test(r.m[0]) && /^Confirm .*Overturn /.test(r.m[1]) && /^Owner .*Action Consider /.test(r.m[2])), 'every line has Based on, Confirm, Overturn, Owner and a Consider action');
     check(s.rows.every((r) => /County \d|State \d/.test(r.m[0]) && /(counting today|in build|needs)/.test(r.m[0])), 'every Based on line names the dataset with its catalogue rank and status');
-    check(!BANNED.test(s.text), 'no outcome word, likelihood word, dollar figure, "All islands" or dash in the section' + (BANNED.test(s.text) ? ' (hit: ' + s.text.match(BANNED)[0] + ')' : ''));
+    check(!BANNED.test(s.text), 'no outcome word, likelihood word, "visitors" as a count, dollar figure, "All islands" or dash in the section' + (BANNED.test(s.text) ? ' (hit: ' + s.text.match(BANNED)[0] + ')' : ''));
     check(/within 1 point|\d+ to \d+/.test(s.text) && !/\(\s*(\d+) to \1\s*\)/.test(s.text), 'ranges print as a span or "within 1 point", never "(41 to 41)"');
     check(/One area is under ten scans and is not shown/.test(s.text), 'the suppressed retail area reads as under ten');
     check(/too close to call/.test(s.text), 'a lead that fails the pair test reads "too close to call"');
