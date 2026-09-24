@@ -64,13 +64,28 @@ def strings(o):
         for v in o.values(): yield from strings(v)
     elif isinstance(o, list):
         for v in o: yield from strings(v)
+# A quoted meaning is one phrase from the source: no parenthetical note, no numbered senses, no second
+# sentence or source run in, no story words, and no anatomy or excretion (held for the review partner).
+MEANING = re.compile(r'\(|(^|\s)\d+\.\s|\.\s|\bPEM?:|ravish|victim|sacrific|\bkill|slain|legend|said to|story|goddess|\bgods?\b|demigod|chief|battle|\bdied\b|death|ghost|spirit|penis|vagina|vulva|genital|testic|scrot|clitor|excrement|feces|faeces|dung|urin|buttock|anus\b|copulat|sexual|intercourse|pubic|menstru', re.I)
+def meanings(o):
+    if isinstance(o, dict):
+        for k, v in o.items():
+            if k == 'mean' and isinstance(v, str): yield v
+            else: yield from meanings(v)
+    elif isinstance(o, list):
+        for v in o: yield from meanings(v)
 for f in sorted(glob.glob(os.path.join(ROOT, 'culture', 'sources', '*.json'))):
-    n = 0
-    for t in strings(json.load(open(f, encoding='utf-8'))):
+    n = 0; data = json.load(open(f, encoding='utf-8'))
+    for t in strings(data):
         n += 1
         for h in lint(t) + (['dash, $ or review claim'] if EXTRA.search(t) else []):
             fails += 1; print('FAIL %s: %s in %r' % (os.path.relpath(f, ROOT), h, t[:80]))
-    print('OK   %s: %d strings checked' % (os.path.relpath(f, ROOT), n))
+    m = 0
+    for t in meanings(data):
+        m += 1
+        if MEANING.search(t):
+            fails += 1; print('FAIL %s: meaning breaks the quote rules: %r' % (os.path.relpath(f, ROOT), t[:80]))
+    print('OK   %s: %d strings, %d meanings checked' % (os.path.relpath(f, ROOT), n, m))
 
 print('HOLD, %d hit(s)' % fails if fails else 'PASS, Maʻemaʻe lint clean')
 sys.exit(1 if fails else 0)
