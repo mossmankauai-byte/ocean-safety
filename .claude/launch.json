@@ -4,8 +4,22 @@
     {
       "name": "culture",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8799"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8799"
+      ],
       "port": 8799
+    },
+    {
+      "name": "assumptions",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4632"
+      ],
+      "port": 4632
     }
   ]
 }

@@ -361,6 +361,27 @@
   .rsec .uf{margin-top:6px}
   .repfoot{margin-top:18px;padding-top:12px;border-top:1px solid var(--hair);font-size:11.5px;color:var(--mute)}
   .repempty{padding:24px;text-align:center;color:var(--mute)}
+  /* Assumptions to test (Report section, Overview card) */
+  .asmsec{border-top:0;padding-top:0}
+  .asmsec h3 .r,.asm .asmh .r{display:inline-flex;gap:6px;align-items:center}
+  .asm{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;break-inside:avoid}
+  .asm .asmh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .asm .asmh .k{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .asm .s{margin:6px 0 8px;font-size:14px;line-height:1.45}
+  .asm .m{font-size:12px;color:var(--ink2);margin-top:3px;line-height:1.45}
+  .asm .m b{color:var(--mute);font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;margin-right:2px}
+  .asm .m.g{color:var(--mute)}
+  .lv{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.03em;padding:2px 8px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+  .lv.l3{color:#0b5a2a;background:#e2efe8;border-color:#bfe0cc}
+  .lv.l2{color:var(--sea);background:var(--tint);border-color:#bcd9e2}
+  .lv.l1{color:var(--yel);background:var(--yelbg);border-color:#f2dfa5}
+  .lv.l0{color:var(--mute);background:transparent;border-color:var(--line)}
+  .asmoff{font-size:12px;color:var(--mute);margin-top:10px;line-height:1.5}
+  .asmcard .asmi{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+  .asmcard .asmi .hd{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .asmcard .asmi p{margin:6px 0 4px;font-size:13px;line-height:1.4}
+  .asmcard .asmi small{display:block;font-size:11.5px;color:var(--mute)}
+  .asmcard .btn{margin-top:10px}
   @media (max-width:1100px){
     .stage,.bottom{grid-template-columns:1fr}
     .rep{grid-template-columns:1fr}
@@ -475,6 +496,7 @@
             <div class="dots" id="pvDots" role="group" aria-label="Island shown"></div>
           </div>
           <div class="card dec"><h2>Needs a decision</h2><p class="sub">Red goes live only after a second person approves.</p><div id="pendingNow"></div></div>
+          <div class="card asmcard"><h2>Assumptions to test</h2><p class="sub" id="asmSub">The three strongest this month.</p><div id="asmTop"></div><button type="button" class="btn" id="asmMore">All of them, in the Monthly report</button></div>
         </div>
       </div>
       <div class="bottom">
@@ -833,6 +855,7 @@
           <div class="card">
             <h3>Include</h3>
             <div class="tg">
+              <label><input type="checkbox" id="rpAsm" checked><span>Assumptions to test, at the top</span><span class="st"></span></label>
               <label><input type="checkbox" id="rpSum" checked><span>Summary numbers at the top</span><span class="st"></span></label>
               <label><input type="checkbox" id="rpOwn" checked><span>Owner and status from the catalogues</span><span class="st"></span></label>
               <label><input type="checkbox" id="rpMeth"><span>How each figure is computed</span><span class="st"></span></label>
@@ -1091,6 +1114,7 @@
         + '<span class="i">' + intentLine(k) + '</span>'
         + '<span class="m">' + verdLine(k) + '</span></div>';
     }).join('');
+    renderAsmCard();
     // Beach names for the intent line come from the app's own list; paint again once it lands.
     if(!state.beaches && !state._bLoading){ state._bLoading = true; loadBeaches().then(function(){ renderLegend(); }); }
   }
@@ -1101,6 +1125,7 @@
     return 'Most checked: <b>' + esc(bname(k, top)) + '</b> · ' + (k === 'kauai' ? '<b>' + u.unguardedPct + '%</b> at shoreline with no tower' : '<b>' + u.districts[0][1] + '%</b> in ' + esc(u.districts[0][0]));
   }
   $('islCards').addEventListener('click', function(e){ var u = e.target.closest('[data-use]'); if(u){ pickIsland(u.dataset.use); show('use'); return; } var c = e.target.closest('[data-isl]'); if(c) pickIsland(c.dataset.isl); });
+  $('asmMore').addEventListener('click', function(){ show('rep'); });
   $('islCards').addEventListener('keydown', function(e){ if(e.key !== 'Enter' && e.key !== ' ') return; var c = e.target.closest('[data-isl]'); if(c){ e.preventDefault(); pickIsland(c.dataset.isl); } });
   function nowUrl(){ return '/?ref=gohawaii&island=' + state.isl; }
   function loadNowFrame(){
@@ -1711,6 +1736,319 @@
   var TIER_NAMES = { 1: 'Life safety', 2: 'Crowd, capacity and dispersal', 3: 'Reef, advisories and environment', 4: 'Movement and economy', 5: 'Programs, comms and reporting' };
   var ST_LBL = { L: 'Counting', B: 'In build', C: 'Agency', H: 'Agency' };
   var ST_LONG = { L: 'counting today', B: 'in build', C: 'needs the County', H: 'needs HTA' };
+
+  // ---- Assumptions to test: a deterministic rule table over the datasets above. No AI at runtime. ----
+  // Nick approved the logic 2026-09-23; the sources and the reasoning are in ~/Desktop/OceanSafe/gohawaii/ASSUMPTIONS-LOGIC.md.
+  // Every line is a working assumption, never a finding: exposure and behavior only, aggregate only, "about" for counts,
+  // any cell under ten reads "under ten", areas never a store. Confidence is High / Moderate / Low, rated down from High by
+  // four gates: precision (the 95% interval behind the figure), source (dataset status L / B / agency, proxies), agreement
+  // (independent lines of evidence), stability (the last four complete weeks, once counting is on).
+  var ASM_LEVEL = ['Not enough data', 'Low', 'Moderate', 'High'], ASM_Z = 1.959964;
+  // The sample set has no rainy-day, advisory, scan or session counts of its own; these stand in for them, labeled sample.
+  var ASM_SAMPLE = { rainDays: 7, advisories: [7, 6, 5, 5], scanRate: 0.04, sessionShare: 0.4, firstOpenShare: 0.35, campaignDays: 14,
+    otherLang: [['Korean', 3], ['Chinese', 2], ['Spanish', 2], ['German', 1], ['French', 1]] };
+  // T1, one share: the Wilson score interval (Brown, Cai and DasGupta 2001). Never leaves 0 to 1, never collapses at 0% or 100%.
+  function wilson(x, n){
+    if(!(n > 0)) return null;
+    var p = x / n, z = ASM_Z, d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d, h = z / d * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n));
+    return { p: p, lo: Math.max(0, c - h), hi: Math.min(1, c + h), w: 2 * h };
+  }
+  // T2, two shares: Newcombe's hybrid score interval for the difference (method 10, 1998), built from two Wilson intervals.
+  function newcombe(x1, n1, x2, n2){
+    var a = wilson(x1, n1), b = wilson(x2, n2); if(!a || !b) return null;
+    var d = a.p - b.p;
+    return { d: d, lo: d - Math.sqrt(Math.pow(a.p - a.lo, 2) + Math.pow(b.hi - b.p, 2)), hi: d + Math.sqrt(Math.pow(a.hi - a.p, 2) + Math.pow(b.p - b.lo, 2)), w: 0 };
+  }
+  // T3, a lead between two counts: the top one's share of the pair, tested with T1. Real when the lower bound clears a half and the lead is 1.1x.
+  function lead(a, b){ var w = wilson(a, a + b); return { ok: !!w && a + b >= 30 && w.lo > 0.5 && a >= 1.1 * b, w: w ? w.w : 1, thin: a + b < 30 }; }
+  // Counts are always "about" and coarsened: under ten is never shown, nearest 5 under 100, then two significant figures.
+  function about(n){ n = Math.round(n); if(n < 10) return 'under ten'; if(n < 100) return 'about ' + Math.round(n / 5) * 5; var m = Math.pow(10, Math.floor(Math.log(n) / Math.LN10) - 1); return 'about ' + fmt(Math.round(n / m) * m); }
+  function pc(v){ return Math.round(v * 100) + '%'; }
+  function rng(w){ var a = Math.round(w.lo * 100), b = Math.round(w.hi * 100); return b - a <= 1 ? 'within 1 point' : a + ' to ' + b; }
+  function pts(r){ var s = function(v){ return (v > 0 ? '+' : '') + Math.round(v * 100); }; return s(r.lo) + ' to ' + s(r.hi) + ' points'; }
+  function gWidth(w){ return w <= 0.10 ? 3 : w <= 0.20 ? 2 : w < 0.30 ? 1 : 0; }      // gate 1 for shares and differences
+  function gCount(n){ return n >= 400 ? 3 : n >= 100 ? 2 : n >= 30 ? 1 : 0; }         // gate 1 for counts (Poisson RSE 5%, 10%, 18%)
+  function gap(r){ return r && (r.lo > 0 || r.hi < 0); }                             // the difference's range excludes zero
+  function dsOf(id){ return DS.filter(function(d){ return d.id === id; })[0]; }
+  function nearest(rows, id, k){ return rows.filter(function(r){ return r.lab === bname(k, id); })[0]; }
+  function tagged(k, id){ return (NOTOWER[k] || []).indexOf(id) >= 0; }
+
+  // What each rule reads, for one island (or statewide), from the sample set; live totals overlay it where a metric is counted.
+  function asmData(k){
+    var days = rpDays(), u = USE[k], per = u.perDay, checks = per * days, st = stateTotal(), S = ASM_SAMPLE;
+    var d = { island: k, days: days, perDay: per, checks: checks, live: {}, weeksOn: 0, weeks: null, month: rpLabel(),
+      beaches: beachRows(k).filter(function(r){ return r.cls !== 'steel'; }), unguarded: k === 'kauai' ? USE.kauai.unguardedPct / 100 : null,
+      districts: u.districts, hazShare: HAZ.share / 100, hazRows: hazRows(k), deflect: { haz: 0.37, calm: 0.09 }, flows: u.flows || null,
+      cap: CAP_SITE[k], hours: HOURS.values, dow: dow(k), rainDays: S.rainDays, wx: WEATHER, adv: S.advisories, reach: REACH,
+      scans: Math.round(checks * S.scanRate), avoid: ACT104[2][1] / 100, retail: RETAIL[k], reef: REEF[k],
+      sessions: Math.round(st * days * S.sessionShare), ja: LANG[1][1] / 100, otherLang: S.otherLang, jaMarket: MARKETS[2][1] / 100,
+      firstOpens: Math.round(st * days * S.sessionShare * S.firstOpenShare), entry: ENTRY,
+      campaign: { title: CAMPAIGN.title, before: +CAMPAIGN.rows[0][1].replace(/,/g, ''), during: +CAMPAIGN.rows[0][2].replace(/,/g, ''), pcBefore: parseFloat(CAMPAIGN.rows[1][1]) / 100, pcDuring: parseFloat(CAMPAIGN.rows[1][2]) / 100, days: S.campaignDays, register: '' },
+      stateDay: ORDER.map(function(x){ return [x, USE[x].perDay]; }), trails: TRAILS[k] };
+    if(state.live && state.liveStats) asmLive(d);
+    return d;
+  }
+  // Live overlay: real totals from /gh/stats replace the sample where the metric is counted (visit, hour, beach, lang), never elsewhere.
+  function asmLive(d){
+    var j = state.liveStats, k = d.island, per = {}, first = null; ORDER.forEach(function(x){ per[x] = 0; });
+    (j.visits || []).forEach(function(r){ per[r.island] = (per[r.island] || 0) + r.n; if(!first || r.day < first) first = r.day; });
+    var days = Math.max(1, j.days || d.days); d.month = 'the last ' + days + ' days';
+    if(per[k] >= 10){ d.checks = per[k]; d.perDay = per[k] / days; d.days = days; d.live.checks = true; }
+    var tot = ORDER.reduce(function(a, x){ return a + per[x]; }, 0);
+    if(tot >= 10){ d.stateDay = ORDER.map(function(x){ return [x, per[x] / days]; }); d.sessions = tot; d.live.state = true; }
+    var hrs = []; for(var h = 5; h <= 20; h++) hrs.push(0); var anyH = false;
+    (j.top || []).forEach(function(r){ if(r.island === k && r.metric === 'hour'){ var i = +r.k - 5; if(i >= 0 && i < 16){ hrs[i] = r.n; anyH = true; } } });
+    if(anyH){ d.hours = hrs; d.live.hours = true; }
+    var bs = (j.top || []).filter(function(r){ return r.island === k && r.metric === 'beach' && r.n >= 10 && state.beaches && bname(k, r.k) !== r.k; })
+      .sort(function(a, b){ return b.n - a.n; }).map(function(r){ return { lab: bname(k, r.k), v: r.n, tag: tagged(k, r.k) ? 'no tower' : '', cls: tagged(k, r.k) ? 'red' : '' }; });
+    if(bs.length >= 2){ d.beaches = bs; d.live.beaches = true; }
+    var lg = {}; (j.top || []).forEach(function(r){ if(r.metric === 'lang') lg[r.k] = (lg[r.k] || 0) + r.n; });
+    var ls = Object.keys(lg).map(function(c){ return [c, lg[c]]; }).sort(function(a, b){ return b[1] - a[1]; }), lsum = ls.reduce(function(a, x){ return a + x[1]; }, 0);
+    if(lsum >= 30){ var ja = lg.ja || 0; d.ja = ja / lsum; d.sessions = lsum; d.otherLang = ls.filter(function(x){ return x[0] !== 'en' && x[0] !== 'ja'; }).map(function(x){ return [x[0].toUpperCase(), x[1] / lsum * 100]; }); d.live.lang = true; }
+    if(first){ d.weeksOn = Math.floor((Date.parse(j.to + 'T12:00:00Z') - Date.parse(first + 'T12:00:00Z')) / (7 * 864e5)); }
+    // Stability for the statewide share, the one rule with a per-day count: does the top island lead in each of the last four complete weeks.
+    if(d.weeksOn >= 4){
+      var byWeek = {}; (j.visits || []).forEach(function(r){ var w = Math.floor((Date.parse(j.to + 'T12:00:00Z') - Date.parse(r.day + 'T12:00:00Z')) / (7 * 864e5)); if(w >= 1 && w <= 4){ byWeek[w] = byWeek[w] || {}; byWeek[w][r.island] = (byWeek[w][r.island] || 0) + r.n; } });
+      var top = d.stateDay.slice().sort(function(a, b){ return b[1] - a[1]; })[0][0];
+      d.weeks = [1, 2, 3, 4].map(function(w){ var m = byWeek[w] || {}; var best = Object.keys(m).sort(function(a, b){ return m[b] - m[a]; })[0]; return best === top && lead(m[best] || 0, Object.keys(m).filter(function(x){ return x !== best; }).reduce(function(a, x){ return Math.max(a, m[x]); }, 0)).ok; });
+    }
+  }
+
+  // The rule table. reads = dataset ids (the first one's agency column is the owner); lines = independent lines of evidence
+  // (a second cut of the same count stream is not a second line); needs = live metrics the rule can run on; proxy = a
+  // stand-in signal (device language for market). run(d) returns { na } (not enough data), { off } (ran, no pattern this
+  // month) or the fired line: statement s, the figures it rests on, prec (gate 1), confirm, overturn, consider, optional cap.
+  var ASM = [
+    { id: 'R1', t: 'Unguarded shoreline share', reads: ['intent'], lines: 1, island: true, needs: ['checks', 'beaches'],
+      run: function(d){
+        if(d.unguarded == null) return { na: 'tower tags for ' + ISL[d.island] + ' (Kauaʻi has them today)' };
+        if(d.checks < 30) return { na: 'at least 30 beach checks' };
+        var w = wilson(Math.round(d.checks * d.unguarded), d.checks); if(w.w >= 0.30) return { na: 'more checks; the range is wider than 30 points' };
+        if(w.p < 0.20) return { off: 'under 20% of checks point at shoreline with no tower' };
+        var top = d.beaches.filter(function(r){ return r.tag === 'no tower'; })[0];
+        return { s: 'About ' + pc(w.p) + ' (' + rng(w) + ') of beach checks on ' + ISL[d.island] + ' point at shoreline with no lifeguard tower' + (top ? '; ' + top.lab + ' carries the most.' : '.'),
+          based: about(d.checks) + ' beach checks in ' + d.month, prec: gWidth(w.w),
+          confirm: 'The share stays within 5 points in 3 of the next 4 weeks.', overturn: 'Under 20% for 4 weeks, or the tower list changes.',
+          consider: 'whether signage and patrol reach at ' + (top ? top.lab : 'the top untagged beach') + ' match where checks point.' };
+      } },
+    { id: 'R2', t: 'Top beach and district', reads: ['intent', 'districts'], lines: 1, island: true, needs: ['checks', 'beaches'],
+      run: function(d){
+        var b = d.beaches; if(b.length < 2) return { na: 'two ranked beaches' };
+        var L0 = lead(b[0].v, b[1].v); if(L0.thin) return { na: 'at least 30 checks across the top two beaches' };
+        if(!L0.ok) return { off: b[0].lab + ' and ' + b[1].lab + ' are too close to call' };
+        var ds = d.districts[0], wd = wilson(Math.round(d.checks * ds[1] / 100), d.checks);
+        return { s: b[0].lab + ' draws the most checks on ' + ISL[d.island] + ', ' + about(b[0].v) + ' in ' + d.month + ', ahead of ' + b[1].lab + ' at ' + about(b[1].v) + '; ' + ds[0] + ' carries about ' + ds[1] + '% (' + rng(wd) + ') of the island\'s checks.',
+          based: about(b[0].v) + ' and ' + about(b[1].v) + ' checks on the top two beaches, ' + about(d.checks) + ' checks in the month', prec: Math.min(gWidth(L0.w), gWidth(wd.w)),
+          confirm: b[0].lab + ' leads in 3 of 4 weeks.', overturn: 'The lead flips for 3 weeks, or the pair test fails for 4.',
+          consider: 'whether parking, restroom and tower hours at ' + b[0].lab + ' match the morning window.' };
+      } },
+    { id: 'R3', t: 'Hazard-verdict exposure', reads: ['hazard', 'intent'], lines: 2, island: true, needs: ['checks', 'beaches', 'verdict'],
+      run: function(d){
+        var n = Math.round(d.checks * d.hazShare); if(n < 30) return { na: 'at least 30 checks at a red or yellow beach' };
+        var w = wilson(n, d.checks); if(w.w >= 0.30) return { na: 'more checks' };
+        if(w.p < 0.05) return { off: 'under 5% of checks opened a beach while it was red or yellow' };
+        var top = d.hazRows[0];
+        return { s: 'About ' + about(n).replace('about ', '') + ' checks (' + pc(w.p) + ', ' + rng(w) + ') on ' + ISL[d.island] + ' opened a beach while it was red or yellow; ' + top.lab + ' carried the most.',
+          based: about(n) + ' flagged checks of ' + about(d.checks) + ' in ' + d.month, prec: gWidth(w.w),
+          confirm: 'The share stays within 3 points in 3 of 4 weeks.', overturn: 'Under 5% for 4 weeks, or the top beach changes 3 weeks running.',
+          consider: 'timing the day\'s advisory and signage for ' + top.lab + ' on flagged days.' };
+      } },
+    { id: 'R4', t: 'Plan change after a hazard verdict', reads: ['deflect'], lines: 1, island: true, needs: ['checks', 'verdict', 'plan'],
+      run: function(d){
+        var nh = Math.round(d.checks * d.hazShare), nc = d.checks - nh; if(nh < 30 || nc < 30) return { na: 'at least 30 checks in each group' };
+        var r = newcombe(Math.round(nh * d.deflect.haz), nh, Math.round(nc * d.deflect.calm), nc); r.w = r.hi - r.lo; if(r.w >= 0.30) return { na: 'more checks; the gap\'s range is wider than 30 points' };
+        if(!gap(r) || Math.abs(r.d) < 0.05) return { off: 'no gap of 5 points or more between hazard-verdict days and calm days' };
+        return { s: 'Visitors who saw a hazard verdict changed their plan more often than visitors on a calm day: about ' + pc(d.deflect.haz) + ' against ' + pc(d.deflect.calm) + ', a gap of ' + pts(r) + '.',
+          based: about(nh) + ' checks after a hazard verdict and ' + about(nc) + ' on calm days in ' + d.month, prec: gWidth(r.w),
+          confirm: 'The gap holds in 3 of 4 weeks once counting is on.', overturn: 'The range includes zero for 4 weeks.',
+          consider: 'pairing every red or yellow verdict with a named alternative beach.' };
+      } },
+    { id: 'R5', t: 'Where plan changes go', reads: ['flows'], lines: 1, island: true, needs: ['checks', 'verdict', 'plan'],
+      run: function(d){
+        if(!d.flows) return { na: 'named beach-to-beach flows for ' + ISL[d.island] + ' (Kauaʻi has the County sample set)' };
+        var f = d.flows.slice().sort(function(a, b){ return b[2] - a[2]; })[0], k = d.island, A = bname(k, f[0]), B = bname(k, f[1]);
+        var hz = nearest(d.hazRows, f[0], k), n = hz ? Math.round(hz.v * d.deflect.haz) : 0; if(n < 30) return { na: 'at least 30 plan changes away from ' + A };
+        var w = wilson(Math.round(n * f[2] / 100), n); if(w.w >= 0.30) return { na: 'more plan changes away from ' + A };
+        if(w.lo <= 0.20) return { off: 'no single beach takes a clear fifth of the plan changes away from ' + A };
+        return { s: 'When ' + A + ' turns dangerous, about ' + f[2] + '% (' + rng(w) + ') of the plan changes go to ' + B + '.',
+          based: about(n) + ' plan changes away from ' + A + ' in ' + d.month, prec: gWidth(w.w),
+          confirm: B + ' leads in 3 of 4 flagged weeks.', overturn: 'The destination flips for 3 weeks.',
+          consider: 'staffing or signage at ' + B + ' on days ' + A + ' is flagged.' };
+      } },
+    { id: 'R6', t: 'Capped-site overflow', reads: ['overflow', 'intent'], lines: 2, island: true, needs: ['checks', 'beaches', 'cap'],
+      run: function(d){
+        var c = d.cap, k = d.island, n = c.intent * d.days; if(n < 100) return { na: 'at least 100 checks of intent for ' + c.site };
+        var r = c.intent / c.cap; if(r < 1.5) return { off: 'intent for ' + c.site + ' is under 1.5 times its cap' };
+        var alts = c.alt.slice().sort(function(a, b){ return b[1] - a[1]; }), over = Math.round((c.intent - c.cap) * d.days);
+        var L0 = lead(Math.round(over * alts[0][1] / 100), Math.round(over * alts[1][1] / 100)), a1 = bname(k, alts[0][0]), a2 = bname(k, alts[1][0]);
+        return { s: 'Intent for ' + c.site + ' runs about ' + (Math.round(r * 10) / 10) + ' times its daily cap (' + about(c.intent) + ' against ' + fmt(c.cap) + ' a day)' + (L0.ok ? '; the overflow lands first at ' + a1 + ' (' + alts[0][1] + '%).' : '; where the overflow lands is too close to call between ' + a1 + ' and ' + a2 + '.'),
+          based: about(n) + ' checks of intent against a cap of ' + fmt(c.cap) + ' a day in ' + d.month + '. ' + c.note, prec: Math.min(gCount(n), L0.ok ? gWidth(L0.w) : 3),
+          confirm: 'The ratio stays at or above 1.5 in 3 of 4 weeks.', overturn: 'Under 1.2 for 4 weeks, or the cap changes.',
+          consider: 'a same-day alternative message for ' + c.site + ' that names ' + a1 + ' and its parking.' };
+      } },
+    { id: 'R7', t: 'Morning planning window', reads: ['hours', 'dow'], lines: 2, island: true, needs: ['checks', 'hours'],
+      run: function(d){
+        var v = d.hours, sum = v.reduce(add, 0), m = v.slice(2, 5).reduce(add, 0); if(d.checks < 30 || !sum) return { na: 'at least 30 checks with an hour' };
+        var w = wilson(Math.round(d.checks * m / sum), d.checks); if(w.w >= 0.30) return { na: 'more checks' };
+        if(w.p < 0.30) return { off: 'the 7 to 10am window is under 30% of the day' };
+        var dw = d.dow, pk = dw.indexOf(Math.max.apply(null, dw)), rest = dw.slice(); rest.splice(pk, 1); var L0 = lead(dw[pk], Math.max.apply(null, rest));
+        return { s: 'Visitors on ' + ISL[d.island] + ' plan between 7 and 10am, about ' + pc(w.p) + ' (' + rng(w) + ') of the day\'s checks' + (L0.ok ? ', and the week peaks on ' + DOWL[pk] + ' at ' + about(dw[pk]) + ' a day.' : '; no single weekday stands out.'),
+          based: about(d.checks) + ' checks in ' + d.month + ' by hour and weekday', prec: Math.min(gWidth(w.w), L0.ok ? gWidth(L0.w) : 3),
+          confirm: 'The window share stays within 5 points in 3 of 4 weeks.', overturn: 'Under 25% for 4 weeks.',
+          consider: 'posting the day\'s advisory before 7am and a refresh before 1pm.' };
+      } },
+    { id: 'R8', t: 'Rainy-day shift', reads: ['weather', 'categ'], lines: 2, island: true, needs: ['checks', 'tabs', 'forecast'],
+      run: function(d){
+        if(d.rainDays < 3) return { na: 'at least 3 rainy days in the month (' + d.rainDays + ' so far)' };
+        var nr = Math.round(d.perDay * d.rainDays), nd = Math.round(d.perDay * (d.days - d.rainDays)); if(nr < 30 || nd < 30) return { na: 'at least 30 checks on rainy days and on dry days' };
+        var wx = d.wx, r = newcombe(Math.round(nr * wx.rain[0] / 100), nr, Math.round(nd * wx.dry[0] / 100), nd); r.w = r.hi - r.lo; if(r.w >= 0.30) return { na: 'more checks on rainy days' };
+        if(!gap(r) || Math.abs(r.d) < 0.05) return { off: 'the beach share on rainy days is within 5 points of dry days' };
+        return { s: 'On rainy days on ' + ISL[d.island] + ' the beach share of checks is about ' + wx.rain[0] + '% against ' + wx.dry[0] + '% on dry days (a gap of ' + pts(r) + '), and Town is about ' + wx.rain[2] + '% against ' + wx.dry[2] + '%.',
+          based: about(nr) + ' checks on ' + d.rainDays + ' rainy days and ' + about(nd) + ' on dry days in ' + d.month, prec: gWidth(r.w),
+          confirm: 'The gap holds in 3 of 4 weeks that had a rainy day.', overturn: 'The range includes zero for 4 such weeks.',
+          consider: 'timing indoor and Town promotions to the forecast.' };
+      } },
+    { id: 'R9', t: 'Advisory lead time', reads: ['reach'], lines: 1, island: false, needs: ['state', 'advisory', 'posted'],
+      run: function(d){
+        var adv = d.adv, per = d.stateDay.reduce(function(a, x){ return a + x[1]; }, 0); if(adv[0] < 5 || adv[3] < 5) return { na: 'at least 5 advisories in each lead-time group (' + adv[0] + ' and ' + adv[3] + ' so far)' };
+        var n0 = Math.round(adv[0] * per), n3 = Math.round(adv[3] * per); if(n0 < 30 || n3 < 30) return { na: 'at least 30 sessions on advisory days' };
+        var p0 = d.reach[0][1] / 100, p3 = d.reach[3][1] / 100, r = newcombe(Math.round(n0 * p0), n0, Math.round(n3 * p3), n3); r.w = r.hi - r.lo; if(r.w >= 0.30) return { na: 'more advisory days' };
+        if(!gap(r) || Math.abs(r.d) < 0.10) return { off: 'lead time makes under 10 points of difference to reach' };
+        return { s: 'An advisory posted 12 hours ahead reaches about ' + pc(p0) + ' of that day\'s visitors; posted under 2 hours ahead, about ' + pc(p3) + ' (a gap of ' + pts(r) + ').',
+          based: adv[0] + ' advisories posted 12 to 24 hours ahead and ' + adv[3] + ' under 2 hours ahead, ' + about(n0 + n3) + ' sessions on those days, all four islands', prec: gWidth(r.w),
+          confirm: 'The gap holds in 3 of 4 weeks with advisories.', overturn: 'The range includes zero for 4 such weeks.',
+          consider: 'a posting deadline the evening before for planned closures.' };
+      } },
+    { id: 'R10', t: 'Sunscreen scans by area', reads: ['act104', 'retail'], lines: 2, island: true, needs: ['scans'],
+      run: function(d){
+        var n = d.scans; if(n < 30) return { na: 'at least 30 sunscreen scans (' + (n < 10 ? 'under ten' : n) + ' so far)' };
+        var w = wilson(Math.round(n * d.avoid), n); if(w.w >= 0.30) return { na: 'more scans' };
+        if(w.p < 0.10) return { off: 'under 10% of scans carry a banned filter' };
+        var rows = d.retail.filter(function(r){ return !r[2]; }).sort(function(a, b){ return b[1] - a[1]; }), hid = d.retail.length - rows.length, av = Math.round(n * d.avoid);
+        var L0 = lead(Math.round(av * rows[0][1] / 100), Math.round(av * rows[1][1] / 100));
+        return { s: 'About ' + pc(w.p) + ' (' + rng(w) + ') of sunscreen scanned on ' + ISL[d.island] + ' carries a filter banned from sale in Hawaiʻi' + (L0.ok ? '; ' + rows[0][0] + ' carries the largest share of avoid verdicts, about ' + rows[0][1] + '%.' : '; the avoid verdicts are too close to call between ' + rows[0][0] + ' and ' + rows[1][0] + '.') + (hid ? ' One area is under ten scans and is not shown.' : ''),
+          based: about(n) + ' scans in ' + d.month + ', areas only, no store named', prec: Math.min(gWidth(w.w), L0.ok ? gWidth(L0.w) : 3),
+          confirm: (L0.ok ? rows[0][0] + ' leads' : 'The order holds') + ' in 3 of 4 weeks.', overturn: 'The lead flips for 3 weeks, or under 10% of scans carry a banned filter.',
+          consider: 'retailer outreach in ' + rows[0][0] + ' first.' };
+      } },
+    { id: 'R11', t: 'Reef sampling order', reads: ['reef', 'intent', 'act104'], lines: 1, island: true, needs: ['checks', 'scans'],
+      run: function(d){
+        var r = d.reef; if(d.checks < 100) return { na: 'at least 100 checks near the reefs' };
+        if(r[0][1] - r[1][1] < 15) return { off: r[0][0] + ' and ' + r[1][0] + ' are within 15 index points' };
+        return { s: r[0][0] + ' carries the most visitor intent weighted by nearby avoid verdicts on ' + ISL[d.island] + '; ' + r[1][0] + ' and ' + r[2][0] + ' follow (index ' + r[1][1] + ' and ' + r[2][1] + ' against 100).',
+          based: about(d.checks) + ' checks and ' + about(d.scans) + ' scans in ' + d.month + ', indexed to the top reef', prec: gCount(d.checks),
+          confirm: 'The same top reef in 3 of 4 weeks.', overturn: 'The top reef changes for 3 weeks.',
+          consider: 'sampling ' + r[0][0] + ' first in the next water-quality round.' };
+      } },
+    { id: 'R12', t: 'Next language', reads: ['lang', 'markets'], lines: 1, island: false, proxy: true, needs: ['lang'],
+      run: function(d){
+        var n = d.sessions; if(n < 30) return { na: 'at least 30 sessions' };
+        var nx = d.otherLang.slice().sort(function(a, b){ return b[1] - a[1]; })[0], a = Math.round(n * d.ja), b = Math.round(n * nx[1] / 100), L0 = lead(a, b), w = wilson(a, n);
+        if(L0.thin) return { na: 'at least 30 sessions in a language other than English' };
+        if(!L0.ok) return { off: 'Japanese and ' + nx[0] + ' are too close to call' };
+        return { s: 'Japanese is the largest language other than English the app is read in across all four islands, about ' + pc(d.ja) + ' (' + rng(w) + ') of sessions, ahead of ' + nx[0] + '; the Japan market proxy from device language and clock reads about ' + pc(d.jaMarket) + '.',
+          based: about(n) + ' sessions in ' + d.month + ', all four islands', prec: Math.min(gWidth(w.w), gWidth(L0.w)),
+          confirm: 'Japanese leads in 3 of 4 weeks.', overturn: 'Another language passes it for 3 weeks.',
+          consider: 'Japanese as the next language for advisories and the GoHawaii page.' };
+      } },
+    { id: 'R13', t: 'Entry points', reads: ['entry'], lines: 1, island: false, needs: ['state', 'placement'],
+      run: function(d){
+        var n = d.firstOpens, e = d.entry.slice().sort(function(a, b){ return b[1] - a[1]; }); if(n < 30) return { na: 'at least 30 first opens' };
+        var w = wilson(Math.round(n * e[0][1] / 100), n), L0 = lead(Math.round(n * e[0][1] / 100), Math.round(n * e[1][1] / 100)); if(w.w >= 0.30) return { na: 'more first opens' };
+        if(!L0.ok) return { off: e[0][0] + ' and ' + e[1][0] + ' are too close to call' };
+        var air = d.entry.filter(function(x){ return /airport/i.test(x[0]); })[0];
+        return { s: 'The gohawaii.com link brings about ' + pc(w.p) + ' (' + rng(w) + ') of first opens across all four islands, ahead of the ' + e[1][0] + (air ? '; airport placards about ' + air[1] + '%.' : '.'),
+          based: about(n) + ' first opens in ' + d.month + ', all four islands', prec: Math.min(gWidth(w.w), gWidth(L0.w)),
+          confirm: 'The same top entry in 3 of 4 weeks.', overturn: 'The order flips for 3 weeks.',
+          consider: 'whether placards at towers and rental counters are worth expanding.' };
+      } },
+    { id: 'R14', t: 'Campaign window', reads: ['campaign'], lines: 1, island: false, needs: ['state', 'campaign'],
+      run: function(d){
+        var c = d.campaign, nb = Math.round(c.before * c.days * d.hazShare), nd = Math.round(c.during * c.days * d.hazShare); if(nb < 30 || nd < 30) return { na: 'at least 30 checks after a hazard verdict before and during the campaign' };
+        var r = newcombe(Math.round(nd * c.pcDuring), nd, Math.round(nb * c.pcBefore), nb); r.w = r.hi - r.lo; if(r.w >= 0.30) return { na: 'more checks in the two windows' };
+        var lift = c.during / c.before; if(!gap(r) || Math.abs(r.d) < 0.05 || lift < 1.1) return { off: 'no lift of 10% in checks and 5 points in plan changes during the campaign' };
+        return { s: 'During ' + c.title.replace(/^Sample: /, '') + ', checks on the named beaches ran about ' + Math.round((lift - 1) * 100) + '% above the ' + c.days + ' days before, and plan changes after a hazard verdict about ' + Math.round(r.d * 100) + ' points higher (' + pts(r) + '). A signal, not proof. What else changed in the window: ' + (c.register || 'not recorded') + '.',
+          based: about(c.before * c.days) + ' checks before and ' + about(c.during * c.days) + ' during, ' + c.days + ' days each, all four islands', prec: gWidth(r.w), cap: c.register ? 2 : 1,
+          confirm: 'The same lift in a second campaign with a staggered start across islands.', overturn: 'The same lift in a matched window with no campaign.',
+          consider: 'a staggered start across islands for the next campaign so the comparison has a control.' };
+      } },
+    { id: 'R15', t: 'Statewide share', reads: ['xisland', 'dow'], lines: 1, island: false, needs: ['state'],
+      run: function(d){
+        var s = d.stateDay.slice().sort(function(a, b){ return b[1] - a[1]; }), tot = s.reduce(function(a, x){ return a + x[1]; }, 0), n = Math.round(tot * d.days); if(n < 30) return { na: 'at least 30 checks statewide' };
+        var w = wilson(Math.round(s[0][1] * d.days), n), L0 = lead(Math.round(s[0][1] * d.days), Math.round(s[1][1] * d.days));
+        if(!L0.ok) return { off: ISL[s[0][0]] + ' and ' + ISL[s[1][0]] + ' are too close to call' };
+        return { s: 'About ' + about(tot).replace('about ', '') + ' checks a day across all four islands; ' + ISL[s[0][0]] + ' carries about ' + pc(w.p) + ' (' + rng(w) + ') of them, ahead of ' + ISL[s[1][0]] + ' at about ' + pc(s[1][1] / tot) + '.',
+          based: about(n) + ' checks in ' + d.month + ', all four islands', prec: Math.min(gWidth(w.w), gWidth(L0.w)),
+          confirm: 'The order holds in 3 of 4 weeks.', overturn: 'The order flips for 3 weeks.',
+          consider: 'weighting statewide messaging by where checks land.' };
+      } },
+    { id: 'R16', t: 'Trail intent', reads: ['trails'], lines: 1, island: true, needs: ['trail'],
+      run: function(d){
+        var t = d.trails.slice().sort(function(a, b){ return b[1] - a[1]; }), L0 = lead(t[0][1], t[1][1]); if(L0.thin) return { na: 'at least 30 trail opens' };
+        if(!L0.ok) return { off: t[0][0] + ' and ' + t[1][0] + ' are too close to call' };
+        var k = t.slice(0, 5).filter(function(x){ return x[2]; }).length;
+        return { s: t[0][0] + ' leads trail intent on ' + ISL[d.island] + ', ' + about(t[0][1]) + ' opens in ' + d.month + '; ' + k + ' of the top five are tagged remote or steep.',
+          based: about(t[0][1]) + ' and ' + about(t[1][1]) + ' opens on the top two trails in ' + d.month, prec: gWidth(L0.w),
+          confirm: 'The same top trail in 3 of 4 weeks.', overturn: 'The lead flips for 3 weeks.',
+          consider: 'trailhead messaging at ' + t[0][0] + ' in the morning window.' };
+      } }
+  ];
+  var ASM_METHOD = 'Each line starts at High and is rated down by four gates; the lowest gate wins. 1. Precision: the 95% range behind the figure (Wilson for one share, Newcombe for a gap between two shares): 10 points or less is High, 20 or less Moderate, under 30 Low, wider is not shown; a count needs about 400 for High, 100 for Moderate, 30 for Low. 2. Source: every dataset counting today allows High; one in build, or a stand-in signal, caps at Moderate; one waiting on the agency caps at Low. 3. Agreement: two or more independent lines of evidence allow High; one line caps at Moderate. 4. Stability: the test must pass in 3 of the last 4 complete weeks for High; fewer than 4 weeks of counting caps at Moderate; in this sample build it is not measured. A gap is real only when its range excludes zero and it is at least 5 points; a lead only when the top share of the pair clears a half with a 1.1x margin. Any cell under ten reads "under ten", counts are rounded and say "about", and no total is printed beside a suppressed cell.';
+  function asmEval(rule, d){
+    var r = rule.run(d), sts = rule.reads.map(function(id){ return (dsOf(id) || {}).st || 'B'; }), first = dsOf(rule.reads[0]) || {};
+    var out = { id: rule.id, t: rule.t, island: rule.island ? d.island : null, reads: rule.reads, owner: first.own || '', also: rule.reads.slice(1).map(function(id){ return (dsOf(id) || {}).own; }).filter(function(o){ return o && o !== first.own; }).join('; '),
+      sample: !rule.needs.every(function(m){ return d.live[m]; }), fired: false, level: 0 };
+    out.tags = rule.reads.map(function(id){ var x = dsOf(id); return x ? x.t + (x.c ? ', County ' + x.c : '') + (x.s ? ', State ' + x.s : '') + ', ' + ST_LONG[x.st] : id; }).join('; ');
+    if(r.na){ out.why = 'needs ' + r.na; out.statement = 'Not enough data yet to grade ' + rule.t.toLowerCase() + (rule.island ? ' on ' + ISL[d.island] : '') + '. This needs ' + r.na + '.'; return out; }
+    if(r.off){ out.why = r.off; return out; }
+    var g1 = r.prec, g2 = sts.some(function(s){ return s === 'C' || s === 'H'; }) ? 1 : (sts.some(function(s){ return s === 'B'; }) || rule.proxy) ? 2 : 3, g3 = rule.lines >= 2 ? 3 : 2;
+    var g4 = 3, g4t = 'not measured (sample)';
+    if(!out.sample){ if(d.weeks){ var ok = d.weeks.filter(Boolean).length; g4 = ok >= 3 ? 3 : ok === 2 ? 2 : ok === 1 ? 1 : 0; g4t = ok + ' of the last 4 weeks'; } else { g4 = 2; g4t = d.weeksOn >= 4 ? 'not measured for this rule yet' : 'counting for ' + d.weeksOn + ' week' + (d.weeksOn === 1 ? '' : 's'); } }
+    out.level = Math.min(g1, g2, g3, g4, r.cap == null ? 3 : r.cap);
+    out.fired = out.level > 0;
+    if(!out.fired){ out.why = g4 === 0 ? 'not this month' : 'the range is too wide to grade'; return out; }
+    out.statement = 'Working assumption: ' + r.s; out.based = r.based + ' (' + out.tags + ')'; out.confirm = r.confirm; out.overturn = r.overturn; out.consider = 'Consider ' + r.consider;
+    out.gates = 'Graded ' + ASM_LEVEL[out.level] + ': precision ' + ASM_LEVEL[g1] + ', source ' + ASM_LEVEL[g2] + ', agreement ' + ASM_LEVEL[g3] + ' (' + rule.lines + ' line' + (rule.lines === 1 ? '' : 's') + ' of evidence), stability ' + g4t + (r.cap != null && r.cap < 3 ? ', capped at ' + ASM_LEVEL[r.cap] + (r.cap === 1 ? ' until the confound register is filled' : '') : '') + '.';
+    out.margin = g1;
+    return out;
+  }
+  function asmIsland(k){ var d = asmData(k); return ASM.filter(function(r){ return r.island; }).map(function(r){ return asmEval(r, d); }); }
+  function asmState(){ var d = asmData(state.isl); return ASM.filter(function(r){ return !r.island; }).map(function(r){ return asmEval(r, d); }); }
+  function asmScope(){ var out = []; (rpScopeAll() ? ORDER : [state.isl]).forEach(function(k){ out = out.concat(asmIsland(k)); }); return out.concat(asmState()); }
+  function asmTop(k, n){
+    return asmIsland(k).concat(asmState()).filter(function(a){ return a.fired; })
+      .sort(function(a, b){ return (b.level - a.level) || (b.margin - a.margin) || (dsOf(a.reads[0]).tier - dsOf(b.reads[0]).tier); }).slice(0, n || 3);
+  }
+  function asmChip(a){ return '<span class="lv l' + a.level + '">' + ASM_LEVEL[a.level] + (a.level ? ' confidence' : '') + '</span>' + (a.sample ? '<span class="chip sample">Sample</span>' : '<span class="chip live">Counting</span>'); }
+  function asmRow(a){
+    if(!a.fired) return '';
+    return '<div class="asm"><div class="asmh"><span class="k">' + esc(a.t) + ' · ' + (a.island ? esc(ISL[a.island]) : 'All four islands') + '</span><span class="r">' + asmChip(a) + '</span></div>'
+      + '<p class="s">' + esc(a.statement) + '</p>'
+      + '<div class="m"><b>Based on</b> ' + esc(a.based) + '</div>'
+      + '<div class="m"><b>Confirm</b> ' + esc(a.confirm) + ' <b>Overturn</b> ' + esc(a.overturn) + '</div>'
+      + '<div class="m"><b>Owner</b> ' + esc(a.owner) + (a.also ? ' (also ' + esc(a.also) + ')' : '') + ' <b>Action</b> ' + esc(a.consider) + '</div>'
+      + (state.rp.meth ? '<div class="m g">' + esc(a.gates) + '</div>' : '') + '</div>';
+  }
+  function asmSection(){
+    var items = asmScope(), on = items.filter(function(a){ return a.fired; }), off = items.filter(function(a){ return !a.fired; });
+    var h = '<div class="rsec asmsec" id="asmSec"><h3><span>Assumptions to test</span><span class="r">' + (state.live ? '' : '<span class="chip sample">Sample</span>') + '<span class="chip build">' + on.length + ' this month</span></span></h3>';
+    h += '<div class="own">Working conclusions the datasets below support, each with the figures behind it, how sure we are, what would confirm or overturn it, who owns it, and one thing to consider. Never a finding. '
+      + (state.live ? 'Lines marked Counting rest on live totals from the GoHawaii link; lines marked Sample still rest on the sample set. Any cell under ten is not shown.' : 'Sample figures: the confidence shown is how each rule grades these numbers; it is recomputed from live totals when counting is on.') + '</div>';
+    on.forEach(function(a){ h += asmRow(a); });
+    if(!on.length) h += '<div class="asmoff">No assumption clears the gates this month.</div>';
+    if(off.length) h += '<div class="asmoff"><b>Not this month:</b> ' + off.map(function(a){ return esc(a.t + (a.island ? ' (' + ISL[a.island] + ')' : '') + ', ' + a.why); }).join(' · ') + '.</div>';
+    if(state.rp.meth) h += '<details class="meth"><summary>How these are graded</summary><div class="body">' + esc(ASM_METHOD) + '</div></details>';
+    return h + '</div>';
+  }
+  function renderAsmCard(){
+    var el = $('asmTop'); if(!el) return;
+    var top = asmTop(state.isl, 3);
+    $('asmSub').textContent = 'The three strongest this month on ' + ISL[state.isl] + (state.live ? '' : ' · sample figures') + '. Working assumptions, never findings.';
+    el.innerHTML = top.length ? top.map(function(a){ return '<div class="asmi"><div class="hd">' + asmChip(a) + '</div><p>' + esc(a.statement) + '</p><small>' + esc(a.consider) + '</small></div>'; }).join('')
+      : '<div class="empty">Nothing clears the gates this month.</div>';
+  }
+  window.GH_ASM = { rules: ASM, data: asmData, evaluate: asmEval, island: asmIsland, statewide: asmState, top: asmTop, wilson: wilson, newcombe: newcombe, lead: lead, about: about, levels: ASM_LEVEL, method: ASM_METHOD,
+    exports: { csv: function(){ return rpCsv(); }, json: function(){ return rpJson(); }, text: function(){ return rpText(); } } };
   var PRESETS = {
     safety: ['intent', 'hazard', 'deflect', 'flows', 'reach', 'trails'],
     dmap: ['dow', 'hours', 'districts', 'overflow', 'weather', 'categ', 'xisland'],
@@ -1720,8 +2058,8 @@
     none: []
   };
   var rpReady = false;
-  state.rp = { month: '', scope: 'isl', sel: null, sum: true, own: true, meth: false };
-  try { var rpSaved = JSON.parse(localStorage.getItem('ghd_rep_v1') || 'null'); if(rpSaved && rpSaved.sel){ state.rp.sel = rpSaved.sel; state.rp.scope = rpSaved.scope === 'all' ? 'all' : 'isl'; state.rp.sum = rpSaved.sum !== false; state.rp.own = rpSaved.own !== false; state.rp.meth = !!rpSaved.meth; state.rp.month = rpSaved.month || ''; } } catch(e){}
+  state.rp = { month: '', scope: 'isl', sel: null, sum: true, own: true, meth: false, asm: true };
+  try { var rpSaved = JSON.parse(localStorage.getItem('ghd_rep_v1') || 'null'); if(rpSaved && rpSaved.sel){ state.rp.sel = rpSaved.sel; state.rp.scope = rpSaved.scope === 'all' ? 'all' : 'isl'; state.rp.sum = rpSaved.sum !== false; state.rp.own = rpSaved.own !== false; state.rp.meth = !!rpSaved.meth; state.rp.asm = rpSaved.asm !== false; state.rp.month = rpSaved.month || ''; } } catch(e){}
   function rpSave(){ try { localStorage.setItem('ghd_rep_v1', JSON.stringify(state.rp)); } catch(e){} }
   function rpMonths(){
     // Six months ending with the current one, Hawaiʻi time. Default is the last full month.
@@ -1743,13 +2081,13 @@
       h += '<label><input type="checkbox" data-ds="' + d.id + '"' + (state.rp.sel[d.id] ? ' checked' : '') + '><span>' + esc(d.t) + '</span><span class="st ' + d.st + '">' + ST_LBL[d.st] + '</span></label>';
     });
     $('rpTg').innerHTML = h;
-    $('rpSum').checked = state.rp.sum; $('rpOwn').checked = state.rp.own; $('rpMeth').checked = state.rp.meth;
+    $('rpSum').checked = state.rp.sum; $('rpOwn').checked = state.rp.own; $('rpMeth').checked = state.rp.meth; $('rpAsm').checked = state.rp.asm;
     Array.prototype.forEach.call(document.querySelectorAll('#v-rep .seg button[data-scope]'), function(b){ b.setAttribute('aria-pressed', String(b.dataset.scope === state.rp.scope)); });
     $('rpMonth').addEventListener('change', function(){ state.rp.month = this.value; renderReport(); });
     document.querySelector('#v-rep .seg').addEventListener('click', function(e){ var b = e.target.closest('button[data-scope]'); if(!b) return; state.rp.scope = b.dataset.scope; Array.prototype.forEach.call(this.querySelectorAll('button'), function(x){ x.setAttribute('aria-pressed', String(x === b)); }); renderReport(); });
     document.querySelector('#v-rep .presets').addEventListener('click', function(e){ var b = e.target.closest('button[data-preset]'); if(!b) return; var ids = PRESETS[b.dataset.preset] || []; state.rp.sel = {}; ids.forEach(function(id){ state.rp.sel[id] = true; }); Array.prototype.forEach.call($('rpTg').querySelectorAll('input[data-ds]'), function(i){ i.checked = !!state.rp.sel[i.dataset.ds]; }); renderReport(); });
     $('rpTg').addEventListener('change', function(e){ var i = e.target; if(!i.dataset.ds) return; state.rp.sel[i.dataset.ds] = i.checked; renderReport(); });
-    ['rpSum', 'rpOwn', 'rpMeth'].forEach(function(id){ $(id).addEventListener('change', function(){ state.rp[id.slice(2).toLowerCase()] = this.checked; renderReport(); }); });
+    ['rpSum', 'rpOwn', 'rpMeth', 'rpAsm'].forEach(function(id){ $(id).addEventListener('change', function(){ state.rp[id.slice(2).toLowerCase()] = this.checked; renderReport(); }); });
     $('rpPrint').addEventListener('click', function(){ window.print(); });
     $('rpCsv').addEventListener('click', function(){ dl(rpName('csv'), 'text/csv;charset=utf-8', rpCsv()); });
     $('rpJson').addEventListener('click', function(){ dl(rpName('json'), 'application/json;charset=utf-8', JSON.stringify(rpJson(), null, 2)); });
@@ -1790,6 +2128,7 @@
     var checks = (all ? stateTotal() : USE[k].perDay) * days;
     var h = '<div class="rh"><div><h2>Beach safety, visitors and intent</h2><div class="k">Monthly report · ' + esc(period) + ' · ' + esc(rpScopeLabel()) + ' · generated ' + esc(gen) + '</div></div><div class="mark">OceanSafety · GoHawaii<br><span class="chip sample">Sample data</span></div></div>';
     h += '<p class="note" style="margin:0">' + (state.live ? 'Illustrative figures. Counting is on for the GoHawaii link, but this report still draws on the sample set; live totals are in the first card of the Visitors view.' : 'Illustrative figures. This review build counts nothing; the layout, datasets and exports are what a live month produces once counting is switched on for the GoHawaii link.') + '</p>';
+    if(state.rp.asm) h += asmSection();
     if(state.rp.sum) h += '<div class="repsum"><div><b>About ' + fmt(checks) + '</b><span>beach checks in ' + esc(period) + ', ' + esc(rpScopeLabel()) + '</span></div><div><b>' + (all || k === 'kauai' ? USE.kauai.unguardedPct + '%' : 'in build') + '</b><span>of checks at shoreline with no tower' + (all ? ' (Kauaʻi)' : '') + '</span></div><div><b>37%</b><span>changed plan after a hazard verdict' + (all || k !== 'kauai' ? ' (Kauaʻi sample)' : '') + '</span></div><div><b>' + REACH[0][1] + '%</b><span>reached by an advisory posted 12 hours ahead</span></div></div>';
     if(!sel.length) h += '<div class="repempty">No datasets selected. Pick a preset or tick datasets on the left.</div>';
     sel.forEach(function(d){ h += rpBlock(d); });
@@ -1801,6 +2140,7 @@
   function rpName(ext){ return 'gohawaii-report-' + (state.rp.month || 'month') + '-' + (rpScopeAll() ? 'all-four-islands' : state.isl) + '.' + ext; }
   function rpRows(){
     var all = rpScopeAll(), out = [];
+    if(state.rp.asm) asmScope().forEach(function(a){ if(a.fired) out.push({ dataset: 'Assumptions to test', id: a.id, island: a.island ? ISL[a.island] : 'All four islands', label: a.statement, value: ASM_LEVEL[a.level] + ' confidence' + (a.sample ? ', sample' : ''), unit: 'based on ' + a.based + '; confirm: ' + a.confirm + ' overturn: ' + a.overturn + '; owner: ' + a.owner + '; ' + a.consider }); });
     rpSelected().forEach(function(d){
       (all && d.island ? ORDER : [state.isl]).forEach(function(x){
         var g = d.get(x), isl = d.island ? ISL[x] : 'All four islands';
@@ -1819,11 +2159,13 @@
   function rpJson(){
     var all = rpScopeAll();
     return { title: 'Beach safety, visitors and intent', period: rpLabel(), month: state.rp.month, scope: rpScopeLabel(), generated: new Date().toISOString(), sample: true, source: state.live ? 'GoHawaii Dashboard (sample set)' : 'GoHawaii Dashboard, review build', privacy: 'Aggregate counts and percentages only; cells under ten suppressed.',
+      assumptions: state.rp.asm ? asmScope().map(function(a){ return { id: a.id, title: a.t, island: a.island ? ISL[a.island] : 'All four islands', fired: a.fired, confidence: a.fired ? ASM_LEVEL[a.level] : '', sample: a.sample, statement: a.statement || '', why_not: a.fired ? '' : a.why, based_on: a.based || '', confirm: a.confirm || '', overturn: a.overturn || '', owner: a.owner, consider: a.consider || '', grading: a.gates || '' }; }) : [], assumptions_method: state.rp.asm ? ASM_METHOD : '',
       datasets: rpSelected().map(function(d){ return { id: d.id, title: d.t, tier: TIER_NAMES[d.tier], county_rank: d.c, state_rank: d.s, status: ST_LONG[d.st], owner: d.own, method: METH[d.id] || '',
         islands: (all && d.island ? ORDER : [state.isl]).map(function(x){ var g = d.get(x); return { island: d.island ? ISL[x] : 'All four islands', headline: g.head, top: g.top, unit: g.unit, rows: d.id === 'xisland' ? ORDER.map(function(y){ return { label: ISL[y], value: USE[y].perDay, unit: 'checks a day' }; }) : (g.rows || []).map(function(r){ return Array.isArray(r) ? { label: r[0], value: r[1] } : { label: r.lab, value: r.v, note: r.txt || r.tag || '' }; }) }; }) }; }) };
   }
   function rpText(){
     var lines = ['Beach safety, visitors and intent. Monthly report, ' + rpLabel() + ', ' + rpScopeLabel() + '. Sample data.', ''];
+    if(state.rp.asm){ lines.push('Assumptions to test' + (state.live ? '' : ' (sample figures)') + ':'); asmScope().forEach(function(a){ if(a.fired) lines.push('- [' + ASM_LEVEL[a.level] + (a.sample ? ', sample' : '') + '] ' + a.statement + ' ' + a.consider + ' Owner: ' + a.owner + '.'); }); lines.push(''); }
     rpSelected().forEach(function(d){ var g = d.get(rpScopeAll() && d.island ? 'kauai' : state.isl); lines.push(d.t + (d.c ? ' (County ' + d.c + ', State ' + d.s + ')' : ' (State ' + d.s + ')') + ': ' + g.head + (rpScopeAll() && d.island ? ' [Kauaʻi]' : '')); });
     lines.push('', 'Aggregate counts and percentages only; no individual is stored or reported. Generated from the GoHawaii Dashboard review build.');
     return lines.join('\n');
