@@ -5470,7 +5470,7 @@ function initMap(){
     else if (count) t.push(tile(n(count), 'place names on record', 'soe'));
     var mh = parts.filter(function(p){ return p.mahele; })[0];
     if (mh) t.push(tile({gov:'Government land', crown:'Crown land', kept:'Konohiki land'}[mh.mahele.k], (many ? mh.n + ' in 1848' : 'in the 1848 Māhele'), 'mah'));
-    else if (row.wai && row.wai.length){ var yr = row.wai.filter(function(w){ return w.p; }).length; t.push(tile(row.wai.length + (row.wai.length === 1 ? ' stream' : ' streams'), yr ? yr + ' flow' + (yr === 1 ? 's' : '') + ' all year' : 'none flows all year', 'dar')); }
+    else if (row.wai && row.wai.length){ var yr = row.wai.filter(function(w){ return w.p; }).length; t.push(tile(row.wai.length + (row.wai.length === 1 ? ' stream' : ' streams'), row.wai.length === 1 ? (yr ? 'flows all year' : 'not year-round') : (yr ? yr + ' flow' + (yr === 1 ? 's' : '') + ' all year' : 'none flows all year'), 'dar')); }
     else if (named && count) t.push(tile(n(count), 'place names on record', 'soe'));
     if (row.ft){ var lo = row.ft[0], hi = row.ft[1], r = function(x){ return n(Math.round(x / 10) * 10); };
       t.push(lo < 20 ? tile('Shore to ' + r(hi) + ' ft', 'ridge to shore', 'usgs') : tile(r(lo) + ' to ' + r(hi) + ' ft', 'inland, no shore', 'usgs')); }
