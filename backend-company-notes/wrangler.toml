@@ -9,7 +9,7 @@ compatibility_date = "2026-09-01"
 binding = "DB"
 database_name = "company-notes"
 # Filled in by finish-notes-deploy.sh from `wrangler d1 create company-notes`.
-database_id = "REPLACE_ME"
+database_id = "a5131512-4de5-489e-88c0-371e0e801bb1"
 
 [vars]
 # Pages allowed to call the notes routes (comma-separated).
