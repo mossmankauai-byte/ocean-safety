@@ -52,8 +52,9 @@ const sec = (pg) => pg.evaluate(() => {
   const s = document.getElementById('asmSec'); if(!s) return null;
   const rows = Array.from(s.querySelectorAll('.asm')).map((r) => ({
     head: r.querySelector('.asmh .k').textContent, lv: r.querySelector('.lv').textContent, chip: r.querySelector('.chip.sample, .chip.live').textContent,
-    s: r.querySelector('.s').textContent, m: Array.from(r.querySelectorAll('.m')).map((x) => x.textContent) }));
-  return { text: s.innerText, rows, off: (s.querySelector('.asmoff') || {}).textContent || '', meth: !!s.querySelector('details.meth'), first: s.parentElement.children[2] === s };
+    s: r.querySelector('.s').textContent, dts: Array.from(r.querySelectorAll('.rows dt')).map((x) => x.textContent), m: Array.from(r.querySelectorAll('.rows dd')).map((x) => x.textContent),
+    det: !!r.querySelector('details.grade'), meth: 0, grows: Array.from(r.querySelectorAll('details.grade .gt tr')).map((tr) => Array.from(tr.children).map((c) => c.textContent)), gn: (r.querySelector('details.grade .gn') || {}).textContent || '' }));
+  return { text: s.innerText, all: s.textContent, rows, off: (s.querySelector('.asmoff') || {}).textContent || '', meth: !!s.querySelector('details.meth'), methText: (s.querySelector('details.meth .body') || {}).textContent || '', first: s.parentElement.children[2] === s };
 });
 
 (async () => {
@@ -81,8 +82,15 @@ const sec = (pg) => pg.evaluate(() => {
     check(s.rows.length === 16, 'Kauaʻi: 16 rules fire on the sample set (' + s.rows.length + ')');
     check(s.rows.every((r) => /^Working assumption: /.test(r.s)), 'every line opens "Working assumption:"');
     check(s.rows.every((r) => /^(High|Moderate|Low) confidence$/.test(r.lv) && r.chip === 'Sample'), 'every line carries a confidence chip and a Sample chip');
-    check(s.rows.every((r) => r.m.length >= 3 && /^Based on /.test(r.m[0]) && /^Confirm .*Overturn /.test(r.m[1]) && /^Owner .*Action Consider /.test(r.m[2])), 'every line has Based on, Confirm, Overturn, Owner and a Consider action');
-    check(s.rows.every((r) => /County \d|State \d/.test(r.m[0]) && /(counting today|in build|needs)/.test(r.m[0])), 'every Based on line names the dataset with its catalogue rank and status');
+    check(s.rows.every((r) => r.dts.length === 6 && /^Why (High|Moderate|Low)$/.test(r.dts[0]) && r.dts.slice(1).join('|') === 'Based on|Confirmed if|Overturned if|Owner|Action' && r.m.every((x) => x.trim().length > 0) && /^Consider /.test(r.m[5])), 'every line has Why, Based on, Confirmed if, Overturned if, Owner and an Action that opens Consider, one row each');
+    check(s.rows.every((r) => r.dts[0] === 'Why ' + r.lv.replace(' confidence', '')), 'the Why row names the same level as the chip');
+    check(s.rows.every((r) => r.lv === 'High confidence' ? /^Tight range, every dataset counting today, and (two|three|four) independent lines of evidence agree\./.test(r.m[0]) : /(It rests on one line of evidence|still in build|stand-in signal|waiting on the agency|The range( behind the lead)? spans \d+ points?|Only about|held in|before-and-after)/.test(r.m[0]) && /(High|Moderate) needs |High is not open/.test(r.m[0])), 'every Why line names the check that set the grade and what would raise it (or, for High, that all four pass)');
+    check(s.rows.every((r) => /(counting today|in build|waiting on the agency)/.test(r.m[1]) && !/County \d|State \d/.test(r.m[1])), 'every Based on row names the dataset and its status, with the catalogue ranks moved out of the sentence');
+    check(s.rows.every((r) => r.det && r.grows.length >= 4 && ['Precision', 'Source', 'Agreement', 'Stability'].every((g, i) => r.grows[i][0] === g && /^(High|Moderate|Low|Not measured|Not enough data)$/.test(r.grows[i][1]) && r.grows[i][2].length > 10) && /County \d|State \d/.test(r.gn) && /lowest of the four/.test(r.gn)), 'every line carries "How this was graded": four checks, a level and a plain-word reason each, the catalogue ranks, and the lowest-wins rule');
+    check(!/\b(because|means|shows|proves|confirms|drives|causes|led to)\b/i.test(s.rows.map((r) => r.m[0] + ' ' + r.grows.map((g) => g[2]).join(' ')).join(' ')), 'the Why lines and the check reasons keep wording law rule 5 (no because, means, shows)');
+    check(/set by the weakest of four checks/.test(s.text) && /every check that can run passes/.test(s.text) && /one check short of High/.test(s.text) && /A lead to watch/.test(s.text) && /Counts are rounded/.test(s.text), 'the section key says how a grade is set and what High, Moderate and Low stand for');
+    check(s.rows.every((r) => /\(range \d+ to \d+\)|, range \d+ to \d+\)|\d+ to \d+ points|carries the most visitor intent|leads trail intent/.test(r.s)), 'every share prints its range labelled "range" beside the point figure (a comparison prints the gap span)');
+    check(s.rows.every((r) => !/; /.test(r.s.replace(/^Working assumption: /, ''))), 'one idea per sentence: no statement carries a semicolon clause');
     check(!BANNED.test(s.text), 'no outcome word, likelihood word, "visitors" as a count, dollar figure, "All islands" or dash in the section' + (BANNED.test(s.text) ? ' (hit: ' + s.text.match(BANNED)[0] + ')' : ''));
     check(/within 1 point|\d+ to \d+/.test(s.text) && !/\(\s*(\d+) to \1\s*\)/.test(s.text), 'ranges print as a span or "within 1 point", never "(41 to 41)"');
     check(/One area is under ten scans and is not shown/.test(s.text), 'the suppressed retail area reads as under ten');
@@ -96,7 +104,7 @@ const sec = (pg) => pg.evaluate(() => {
     // toggles: method note, section off and on
     await t.pg.evaluate(() => { const c = document.getElementById('rpMeth'); c.checked = true; c.dispatchEvent(new Event('change', { bubbles: true })); });
     await sleep(400); s = await sec(t.pg);
-    check(s.meth && /How these are graded/.test(s.text) && /Graded (High|Moderate|Low): precision/.test(s.text), 'the method note and the per-line grading show with the computed toggle');
+    check(s.meth && /How every line is graded/.test(s.text) && /range 10 points or under; a count of 400 or more/.test(s.methText) && /3 or 4 of the last 4 complete weeks/.test(s.methText), 'the thresholds table shows with the computed toggle');
     await t.pg.evaluate(() => { const c = document.getElementById('rpAsm'); c.checked = false; c.dispatchEvent(new Event('change', { bubbles: true })); });
     await sleep(400);
     check(!(await sec(t.pg)), 'the section toggle removes the section');
@@ -109,7 +117,7 @@ const sec = (pg) => pg.evaluate(() => {
     // scope: all four islands
     await t.pg.evaluate(() => document.querySelector('#v-rep .seg button[data-scope="all"]').click());
     await sleep(800); s = await sec(t.pg);
-    const isl = ['Kauaʻi', 'Oʻahu', 'Maui', 'Hawaiʻi Island'].map((n) => s.rows.filter((r) => r.head.indexOf('· ' + n) >= 0).length);
+    const isl = ['Kauaʻi', 'Oʻahu', 'Maui', 'Hawaiʻi Island'].map((n) => s.rows.filter((r) => r.head.indexOf(n + ' · ') === 0).length);
     check(s.rows.length >= 8 && isl.every((n) => n >= 8), 'All four islands: at least 8 lines per island (' + isl.join(', ') + ') and ' + s.rows.filter((r) => /All four islands/.test(r.head)).length + ' statewide');
     check(/Not this month:/.test(s.off) && /named beach-to-beach flows/.test(s.off), 'islands without the County flow set read "not enough data" in the not-this-month line');
     check(!BANNED.test(s.text), 'no banned word across all four islands');
@@ -130,11 +138,16 @@ const sec = (pg) => pg.evaluate(() => {
       // Print read-back: a Letter PDF of the Kauaʻi report; page 1 must carry the section's first line, not a blank page.
       await t.pg.evaluate(() => document.querySelector('#v-rep .seg button[data-scope="isl"]').click()); await sleep(600);
       const pdf = path.join(OUT, 'asm-report-kauai-letter.pdf');
+      // The page opens every closed <details> in the report on beforeprint (a closed details cannot be opened by print CSS); page.pdf() does not fire it, so the suite does.
+      await t.pg.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
       await t.pg.pdf({ path: pdf, format: 'Letter', printBackground: true, margin: { top: '0.5in', bottom: '0.5in', left: '0.5in', right: '0.5in' } });
+      await t.pg.evaluate(() => window.dispatchEvent(new Event('afterprint')));
       let p1 = '';
       try { p1 = require('child_process').execSync('pdftotext -f 1 -l 1 -layout "' + pdf + '" -', { encoding: 'utf8' }); } catch(e){ p1 = ''; }
       if(p1) check(/Assumptions to test/.test(p1) && /Working assumption:/.test(p1), 'printed page 1 carries the section and its first line (' + (p1.match(/Working assumption:/g) || []).length + ' lines on page 1)');
       else console.log('  skip printed page 1 check (pdftotext not available)');
+      let pall = ''; try { pall = require('child_process').execSync('pdftotext "' + pdf + '" -', { encoding: 'utf8' }); } catch(e){ pall = ''; }
+      if(pall) check((pall.match(/lowest of the four/g) || []).length >= 16 && (pall.match(/Precision/g) || []).length >= 16, 'the printed report opens every "How this was graded" block (' + (pall.match(/lowest of the four/g) || []).length + ' of 16)');
       await t.pg.evaluate(() => document.querySelector('#v-rep .seg button[data-scope="all"]').click()); await sleep(800);
     }
 
