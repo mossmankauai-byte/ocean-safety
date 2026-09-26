@@ -1,0 +1,16 @@
+# Company map notes: its own Worker and its own D1 database. Shares nothing with the
+# partner telemetry worker or gohawaii-api, so deploying one never touches another.
+# Setup: bash ~/oceansafe-wt/company-map/backend-company-notes/finish-notes-deploy.sh
+name = "os-company-notes"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "company-notes"
+# Filled in by finish-notes-deploy.sh from `wrangler d1 create company-notes`.
+database_id = "REPLACE_ME"
+
+[vars]
+# Pages allowed to call the notes routes (comma-separated).
+ORIGINS = "https://oceansafety.app,https://ocean-safety.netlify.app,http://localhost:4321"

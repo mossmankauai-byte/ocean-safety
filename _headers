@@ -123,6 +123,12 @@
   X-Robots-Tag: noindex, nofollow
 /sales
   X-Robots-Tag: noindex, nofollow
+# sales-pipeline.html = the Ocean-gated pipeline dashboard, moved off /sales on 2026-09-25
+# when /sales became the company map (its own password, Andy and Nick).
+/sales-pipeline.html
+  X-Robots-Tag: noindex, nofollow
+/sales-pipeline
+  X-Robots-Tag: noindex, nofollow
 
 # Sales-dashboard payloads — allow cross-origin fetch so the unlock gate can fall
 # back between oceansafety.app and the ocean-safety.netlify.app mirror when one is
@@ -130,4 +136,6 @@
 /sales.bin
   Access-Control-Allow-Origin: *
 /jade-sales.bin
+  Access-Control-Allow-Origin: *
+/company-map.bin
   Access-Control-Allow-Origin: *

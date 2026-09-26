@@ -1,0 +1,8 @@
+# Delivery spec for the company map at /sales (sales.html wrapper + company-map.bin payload). Written 2026-09-25.
+recipient: Andy Evers, Aloha Hospitality Advisors (advisor, not a buyer), and Nick. Nick gives Andy the password himself; nothing is sent by Claude.
+segment: gov
+note: advisor proxy, same ruling as the 2026-09-03 onboarding package (--segment gov --free). No OceanSafe price, fee, commission, term or term sheet anywhere (ruled 2026-09-02). The Nick-only pipeline dashboard moved to /sales-pipeline behind its own password and is hidden from the Andy view.
+tier: free
+surface: https://ocean-safety.netlify.app/sales and https://oceansafety.app/sales (password gate), notes via https://os-company-notes.oceansafe-hi.workers.dev
+fulfillment: none. A map of documents with a notes box; nothing is paid, signed or enrolled by using it.
+must_be_true_after: Andy can reach every document in three taps from the tree on a phone and on a laptop; every note he saves shows for Nick in the corner panel and can be marked done; no price, commission or pipeline data is visible under the Andy view; every link is same-origin or Google Drive, so the mirror works when the apex is blocked; only Kauaʻi, Oʻahu, Maui, Hawaiʻi Island.
