@@ -205,7 +205,7 @@ if (workbox) {
       // pathname here has no .html and the alternation below never fired. Worse than stale
       // for these two: their SALT/IV live in the wrapper and their ciphertext in a separate
       // .bin that carries no SW route, so a stale wrapper makes the password itself look wrong.
-      /^\/(sales|jade-sales)$/.test(url.pathname) ||
+      /^\/(sales|sales-pipeline|jade-sales)$/.test(url.pathname) ||
       // The GoHawaii Dashboard (review build): a staff page, so a stale copy is never acceptable.
       /^\/gohawaii-dashboard(\.html)?$/.test(url.pathname) ||
       /^\/p\//.test(url.pathname) ||
@@ -216,7 +216,7 @@ if (workbox) {
       /^\/@/.test(url.pathname) ||
       url.pathname === '/demo/dashboard' || /^\/demo\/dashboard\//.test(url.pathname) ||
       url.pathname === '/assets/creator-kit.js' ||
-      (/^\/(jade[a-z-]*|sales|hotel-signup|car-signup|stay-close-signup|timeshare-signup|dashboard|setup|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)
+      (/^\/(jade[a-z-]*|sales|sales-pipeline|hotel-signup|car-signup|stay-close-signup|timeshare-signup|dashboard|setup|townad-demo|set-password|creators|creator-dash|creator-print)\.html$/.test(url.pathname)
        // OD-12: operators are given the CLEAN routes, whose pathname has no .html,
        // so they used to fall through to the stale-while-revalidate catch-all.
        || /^\/(hotel|timeshare|rental|concierge|fleet)$/.test(url.pathname))),
