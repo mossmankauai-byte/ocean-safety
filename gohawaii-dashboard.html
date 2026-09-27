@@ -362,7 +362,12 @@
   .repfoot{margin-top:18px;padding-top:12px;border-top:1px solid var(--hair);font-size:11.5px;color:var(--mute)}
   .repempty{padding:24px;text-align:center;color:var(--mute)}
   /* Assumptions to test (Report section, Overview card) */
-  .rsec.asmsec{border-top:0;padding-top:0;break-inside:auto}
+  .rsec.asmsec{break-inside:auto}
+  .asmsec>summary{list-style:none;cursor:pointer}
+  .asmsec>summary::-webkit-details-marker{display:none}
+  .asmsec>summary h3>span:first-child{display:inline-flex;gap:6px;align-items:center;color:var(--sea)}
+  .asmsec .chev{transition:transform .15s;transform:rotate(-90deg)}
+  .asmsec[open] .chev{transform:none}
   .asmsec h3 .r,.asm .asmh .r{display:inline-flex;gap:6px;align-items:center}
   .asm{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;break-inside:avoid}
   .asm .asmh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
@@ -462,6 +467,7 @@
     .meth summary{display:none}
     .meth .body{display:block}
     .asm details.grade summary{display:none}
+    .asmsec .chev{display:none}
   }
 </style>
 </head>
@@ -883,7 +889,7 @@
           <div class="card">
             <h3>Include</h3>
             <div class="tg">
-              <label><input type="checkbox" id="rpAsm" checked><span>Assumptions to test, at the top</span><span class="st"></span></label>
+              <label><input type="checkbox" id="rpAsm" checked><span>Assumptions to test, at the bottom</span><span class="st"></span></label>
               <label><input type="checkbox" id="rpSum" checked><span>Summary numbers at the top</span><span class="st"></span></label>
               <label><input type="checkbox" id="rpOwn" checked><span>Owner and status from the catalogues</span><span class="st"></span></label>
               <label><input type="checkbox" id="rpMeth"><span>How each figure is computed</span><span class="st"></span></label>
@@ -2193,9 +2199,10 @@
       + '<details class="grade"><summary>How this was graded</summary><table class="gt">' + rows + '</table>'
       + '<div class="gn">The lowest of the four sets the grade. ' + esc(a.ranks) + '.</div></details></div>';
   }
+  var asmSecOpen = false, SVG_CHEV = '<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
   function asmSection(){
     var items = asmScope(), on = items.filter(function(a){ return a.fired; }), off = items.filter(function(a){ return !a.fired; });
-    var h = '<div class="rsec asmsec" id="asmSec"><h3><span>Assumptions to test</span><span class="r">' + (state.live ? '' : '<span class="chip sample">Sample</span>') + '<span class="chip build">' + on.length + ' this month</span></span></h3>';
+    var h = '<details class="rsec asmsec" id="asmSec"' + (asmSecOpen ? ' open' : '') + '><summary><h3><span>' + SVG_CHEV + 'Assumptions to test</span><span class="r">' + (state.live ? '' : '<span class="chip sample">Sample</span>') + '<span class="chip build">' + on.length + ' this month</span></span></h3></summary>';
     h += '<div class="own asmkey"><p>Working assumptions the datasets below support, never findings. Each carries a confidence grade set by the weakest of four checks: a tight range behind the figure, every dataset counting today, a second, independent line of evidence agreeing, and holding in 3 of the last 4 weeks. Every line says which check set its grade. "How this was graded" opens all four.</p>'
       + '<dl class="lvkey">' + [3, 2, 1].map(function(l){ var m = ASM_MEANING[l]; return '<dt><span class="chip lv l' + l + '">' + ASM_LEVEL[l] + '</span></dt><dd>' + esc(m.slice(m.indexOf(': ') + 2)) + '</dd>'; }).join('') + '</dl>'
       + '<p>The range in brackets is where the figure lands 19 times in 20. Counts are rounded. '
@@ -2204,7 +2211,7 @@
     if(!on.length) h += '<div class="asmoff">No assumption clears the gates this month.</div>';
     if(off.length) h += '<div class="asmoff"><b>Not this month:</b> ' + off.map(function(a){ return esc(a.t + (a.island ? ' (' + ISL[a.island] + ')' : '') + ', ' + a.why); }).join(' · ') + '.</div>';
     if(state.rp.meth) h += '<details class="meth"><summary>How every line is graded</summary><div class="body"><table class="gt mt"><tr><th></th><th>High</th><th>Moderate</th><th>Low</th><th>Not shown</th></tr>' + ASM_METHOD_ROWS.map(function(r){ return '<tr>' + r.map(function(c, i){ return i ? '<td>' + esc(c) + '</td>' : '<th>' + esc(c) + '</th>'; }).join('') + '</tr>'; }).join('') + '</table><p>The lowest of the four sets the grade. A gap is real only when its range excludes zero and it is at least 5 points; a lead only when the top share of the pair clears a half with a 1.1x margin. Any cell under ten reads "under ten", counts are rounded and say "about", and no total is printed beside a suppressed cell.</p></div></details>';
-    return h + '</div>';
+    return h + '</details>';
   }
   function renderAsmCard(){
     var el = $('asmTop'); if(!el) return;
@@ -2221,6 +2228,7 @@
   }
   $('asmTog').addEventListener('click', function(){ state.asm.open = !state.asm.open; asmSave(); renderAsmCard(); });
   perBind($('asmPer'), function(){ return state.asm; }, asmSave, renderAsmCard);
+  $('repDoc').addEventListener('toggle', function(e){ if(e.target.id === 'asmSec' && !e.target.hasAttribute('data-po')) asmSecOpen = e.target.open; }, true);
   window.addEventListener('beforeprint', function(){ Array.prototype.forEach.call(document.querySelectorAll('#repDoc details:not([open])'), function(x){ x.setAttribute('data-po', '1'); x.open = true; }); });
   window.addEventListener('afterprint', function(){ Array.prototype.forEach.call(document.querySelectorAll('#repDoc details[data-po]'), function(x){ x.removeAttribute('data-po'); x.open = false; }); });
   window.GH_ASM = { rules: ASM, data: asmData, evaluate: asmEval, island: asmIsland, statewide: asmState, top: asmTop, wilson: wilson, newcombe: newcombe, lead: lead, about: about, levels: ASM_LEVEL, method: ASM_METHOD,
@@ -2305,10 +2313,10 @@
     var checks = (all ? stateTotal() : USE[k].perDay) * days;
     var h = '<div class="rh"><div><h2>Beach safety, visitors and intent</h2><div class="k">Monthly report · ' + esc(period) + ' · ' + esc(rpScopeLabel()) + ' · generated ' + esc(gen) + '</div></div><div class="mark">OceanSafety · GoHawaii<br><span class="chip sample">Sample data</span></div></div>';
     h += '<p class="note" style="margin:0">' + (state.live ? 'Illustrative figures. Counting is on for the GoHawaii link, but this report still draws on the sample set; live totals are in the first card of the Visitors view.' : 'Illustrative figures. This review build counts nothing; the layout, datasets and exports are what a live month produces once counting is switched on for the GoHawaii link.') + '</p>';
-    if(state.rp.asm) h += asmSection();
     if(state.rp.sum) h += '<div class="repsum"><div><b>About ' + fmt(checks) + '</b><span>beach checks in ' + esc(period) + ', ' + esc(rpScopeLabel()) + '</span></div><div><b>' + (all || k === 'kauai' ? USE.kauai.unguardedPct + '%' : 'in build') + '</b><span>of checks at shoreline with no tower' + (all ? ' (Kauaʻi)' : '') + '</span></div><div><b>37%</b><span>changed plan after a hazard verdict' + (all || k !== 'kauai' ? ' (Kauaʻi sample)' : '') + '</span></div><div><b>' + REACH[0][1] + '%</b><span>reached by an advisory posted 12 hours ahead</span></div></div>';
     if(!sel.length) h += '<div class="repempty">No datasets selected. Pick a preset or tick datasets on the left.</div>';
     sel.forEach(function(d){ h += rpBlock(d); });
+    if(state.rp.asm) h += asmSection();
     h += '<div class="repfoot"><b>OceanSafety</b> for GoHawaii. Everything here is visitors as a group: counts and percentages. No individual is stored or reported, and any cell under ten is suppressed. Rank tags are positions in the County of Kauaʻi catalogue (33 datasets) and the HTA state catalogue (38). Status: counting today, in build, or waiting on the agency.</div>';
     $('repDoc').innerHTML = h;
     $('rpCount').textContent = sel.length + ' of ' + DS.length + ' datasets';

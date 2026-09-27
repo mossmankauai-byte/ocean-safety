@@ -4,7 +4,7 @@
  * What it proves (ASSUMPTIONS-LOGIC.md, approved 2026-09-23):
  *   1. The Overview card shows the three strongest assumptions for the island, each with a confidence chip and
  *      a Sample chip, opening "Working assumption:" with an action that opens "Consider".
- *   2. The Report view carries the section at the top, before the summary numbers, with its own toggle; every
+ *   2. The Report view carries the section at the bottom, under the dataset charts, collapsed until opened, with its own toggle; every
  *      line has the statement, Based on, Confirm, Overturn, Owner and Action; the method note appears with the
  *      "How each figure is computed" toggle; the scope "All four islands" renders the island rules per island.
  *   3. The text never carries an outcome word, a likelihood word, a dollar figure, "All islands", or an em dash.
@@ -54,7 +54,7 @@ const sec = (pg) => pg.evaluate(() => {
     head: r.querySelector('.asmh .k').textContent, lv: r.querySelector('.lv').textContent, chip: r.querySelector('.chip.sample, .chip.live').textContent,
     s: r.querySelector('.s').textContent, dts: Array.from(r.querySelectorAll('.rows dt')).map((x) => x.textContent), m: Array.from(r.querySelectorAll('.rows dd')).map((x) => x.textContent),
     det: !!r.querySelector('details.grade'), meth: 0, grows: Array.from(r.querySelectorAll('details.grade .gt tr')).map((tr) => Array.from(tr.children).map((c) => c.textContent)), gn: (r.querySelector('details.grade .gn') || {}).textContent || '' }));
-  return { text: s.innerText, all: s.textContent, rows, off: (s.querySelector('.asmoff') || {}).textContent || '', meth: !!s.querySelector('details.meth'), methText: (s.querySelector('details.meth .body') || {}).textContent || '', first: s.parentElement.children[2] === s };
+  return { text: s.innerText, all: s.textContent, rows, off: (s.querySelector('.asmoff') || {}).textContent || '', meth: !!s.querySelector('details.meth'), methText: (s.querySelector('details.meth .body') || {}).textContent || '', last: !!s.nextElementSibling && s.nextElementSibling.classList.contains('repfoot') && !!s.previousElementSibling && s.previousElementSibling.classList.contains('rsec'), open: s.open };
 });
 
 (async () => {
@@ -78,7 +78,12 @@ const sec = (pg) => pg.evaluate(() => {
     await sleep(800);
     let s = await sec(t.pg);
     check(!!s, 'Report view carries the Assumptions section');
-    check(s.first, 'the section sits at the top of the report, before the summary numbers');
+    check(s.last, 'the section sits at the bottom of the report, under the dataset charts, above the footer');
+    check(s.open === false, 'the section starts collapsed');
+    await t.pg.evaluate(() => document.querySelector('#asmSec > summary').click());
+    await sleep(200);
+    s = await sec(t.pg);
+    check(s.open === true, 'clicking the heading opens the section');
     check(s.rows.length === 16, 'Kauaʻi: 16 rules fire on the sample set (' + s.rows.length + ')');
     check(s.rows.every((r) => /^Working assumption: /.test(r.s)), 'every line opens "Working assumption:"');
     check(s.rows.every((r) => /^(High|Moderate|Low) confidence$/.test(r.lv) && r.chip === 'Sample'), 'every line carries a confidence chip and a Sample chip');
@@ -135,7 +140,7 @@ const sec = (pg) => pg.evaluate(() => {
     const printed = await t.pg.evaluate(() => { let hit = false; Array.from(document.styleSheets).forEach((ss) => { let rules = []; try { rules = Array.from(ss.cssRules); } catch(e){} rules.forEach((r) => { if(r.media && r.media.mediaText === 'print' && Array.from(r.cssRules).some((x) => /#repDoc/.test(x.selectorText || ''))) hit = true; }); }); return hit && !!document.querySelector('#repDoc #asmSec'); });
     check(printed, 'print shows #repDoc, and the section lives inside it');
     if(w === 1280){
-      // Print read-back: a Letter PDF of the Kauaʻi report; page 1 must carry the section's first line, not a blank page.
+      // Print read-back: a Letter PDF of the Kauaʻi report; the section prints after the datasets, opened, every line in it.
       await t.pg.evaluate(() => document.querySelector('#v-rep .seg button[data-scope="isl"]').click()); await sleep(600);
       const pdf = path.join(OUT, 'asm-report-kauai-letter.pdf');
       // The page opens every closed <details> in the report on beforeprint (a closed details cannot be opened by print CSS); page.pdf() does not fire it, so the suite does.
@@ -144,7 +149,7 @@ const sec = (pg) => pg.evaluate(() => {
       await t.pg.evaluate(() => window.dispatchEvent(new Event('afterprint')));
       let p1 = '';
       try { p1 = require('child_process').execSync('pdftotext -f 1 -l 1 -layout "' + pdf + '" -', { encoding: 'utf8' }); } catch(e){ p1 = ''; }
-      if(p1) check(/Assumptions to test/.test(p1) && /Working assumption:/.test(p1), 'printed page 1 carries the section and its first line (' + (p1.match(/Working assumption:/g) || []).length + ' lines on page 1)');
+      if(p1) check(!/Working assumption:/.test(p1), 'printed page 1 opens on the datasets; the assumptions print after them');
       else console.log('  skip printed page 1 check (pdftotext not available)');
       let pall = ''; try { pall = require('child_process').execSync('pdftotext "' + pdf + '" -', { encoding: 'utf8' }); } catch(e){ pall = ''; }
       if(pall) check((pall.match(/lowest of the four/g) || []).length >= 16 && (pall.match(/Precision/g) || []).length >= 16, 'the printed report opens every "How this was graded" block (' + (pall.match(/lowest of the four/g) || []).length + ' of 16)');
