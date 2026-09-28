@@ -20,7 +20,7 @@
 // v289 was claimed twice on the same day. Forward, never backward.
 // v319 is claimed on work/reserve-links; this branch skips to v320.
 // v345 was claimed twice on 2026-09-19 (gh-promotions and the tsunami map): tsunami resolves forward to v346.
-const CACHE_VERSION = 'v396-2026-09-27-assumptions-bottom';   // Report: Assumptions section moved under the dataset charts, collapsed until opened
+const CACHE_VERSION = 'v397-2026-09-27-culture-art';   // Start here: the drawn ridge diagram becomes two plates (ahupuaʻa, loko iʻa)
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 

@@ -1771,16 +1771,7 @@ body[data-tab="acts"] .saved-chip{top:calc(243px + var(--os-map-dy,0px))}
 #cultureCard .cp-strip .cs.done{color:#5a4630}
 #cultureCard .cp-strip .cs.on{color:#3f2e1c}
 #cultureCard .cp-strip .cs.done .cf,#cultureCard .cp-strip .cs.on .cf{fill:currentColor}
-#cultureCard .cd{display:block;margin:2px 0 10px;color:#3f2e1c}
-#cultureCard.cp-open .cd{height:76px}
-#cultureCard .cd-area{fill:#3f2e1c;fill-opacity:0;stroke:rgba(63,46,28,.26);stroke-width:1.2}
-#cultureCard .cd-area.cd-on{fill-opacity:.16;stroke:#3f2e1c;stroke-width:1.6}
-#cultureCard .cd-line{stroke:rgba(90,70,48,.3);stroke-width:1}
-#cultureCard .cd-hach{stroke:rgba(90,70,48,.34);stroke-width:.7}
-#cultureCard .cd-rip{stroke:rgba(90,70,48,.55);stroke-width:.7}
-#cultureCard .cd-ridge{stroke:#5a4630;stroke-width:1.6}
-#cultureCard .cd-plant{color:#4a3720;opacity:.9}
-#cultureCard .cd-t{font:600 8px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.14em;text-transform:uppercase;fill:#6b5a3e;stroke:none}
+#cultureCard .cd{display:block;width:100%;height:auto;aspect-ratio:3/1;margin:2px 0 10px;border-radius:6px}
 #cultureCard.cp-open{max-height:52vh}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 /* One row that scrolls sideways instead of a wall that wraps: the choice stays one gesture wide. */
@@ -5767,51 +5758,12 @@ function initMap(){
     }
     if (!window._cultureRibbonTimer) window._cultureRibbonTimer = setInterval(function(){ if (window._isCulture && window._isCulture()) window._cultureRibbon(true); }, 3000);   // Locate Me can land later
   };
-  // The land system as one picture, ridge at the top, shore at the bottom: the island, its districts, the
-  // wedges that run from ridge to shore, and the water. The level the step is on is the filled one, so the
-  // stepper teaches the system instead of counting dots. Geometry and plants only, no text but Ridge and Shore.
+  // The land system as one plate, drawn in the culture theme's ink on cream: steps one to three show the
+  // wedges that run from ridge to shore with one lit, step four is the shore itself, a loko iʻa wall at the
+  // water. No text in the art, so nothing in it can misspell a Hawaiian word.
   window._cultureDiagram = function(level){
-    // Drawn the way the plate is drawn, so the picture and the map teach the same thing: a ridge with
-    // hachure running off it, the wedges that fall from ridge to shore, and the sea with the same
-    // concentric ripples. The level the step is on is the lit one, and the plants stand where they are
-    // grown, ʻulu upland, kalo on the flat, niu at the shore, instead of floating in the middle.
-    var pts = [[6,34],[34,18],[66,26],[96,12],[128,22],[160,10],[196,20],[228,12],[262,24],[294,34]];
-    var ridgeY = function(x){
-      for (var i = 1; i < pts.length; i++){
-        if (x <= pts[i][0]){ var p0 = pts[i-1], p1 = pts[i]; return p0[1] + (x - p0[0]) / (p1[0] - p0[0]) * (p1[1] - p0[1]); }
-      }
-      return pts[pts.length-1][1];
-    };
-    var RIDGE = 'M' + pts.map(function(p){ return p[0] + ' ' + p[1]; }).join('L');
-    var SHORE = 'M6 84C80 90 190 92 294 84';
-    var LAND  = RIDGE + 'V84C190 92 80 90 6 84Z';
-    var SEA   = SHORE + 'V116H6Z';
-    var MOKU  = 'M96 12L128 22 160 10 196 20 228 12L236 87C180 90 120 90 88 87Z';
-    var AHU   = 'M160 10L196 20L200 88C186 89 172 89 158 88Z';
-    var fan = [[34,18,20],[66,26,56],[96,12,88],[128,22,122],[160,10,158],[196,20,200],[228,12,236],[262,24,270]];
-    var lit = function(n){ return level === n ? ' cd-on' : ''; };
-    var s = '<svg class="cd" viewBox="0 0 300 120" width="100%" height="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
-    s += '<path d="' + LAND + '" class="cd-area' + lit(1) + '"/>';
-    s += '<path d="' + SEA + '" class="cd-area cd-sea' + (level === 1 || level === 4 ? ' cd-on' : '') + '"/>';
-    // Hachure: a stroke hanging off the ridge every few pixels, length wandering, the way a burin cuts relief.
-    var hach = '';
-    for (var x = 11; x < 291; x += 4.5){
-      var y = ridgeY(x) + 2.2, len = 9 + ((x * 7) % 11) * 0.9;
-      hach += 'M' + x.toFixed(1) + ' ' + y.toFixed(1) + 'l1.1 ' + len.toFixed(1);
-    }
-    s += '<path d="' + hach + '" class="cd-hach"/>';
-    s += '<path d="' + MOKU + '" class="cd-area' + lit(2) + '"/>';
-    s += '<path d="' + AHU + '" class="cd-area' + lit(3) + '"/>';
-    s += fan.map(function(f){ return '<path d="M' + f[0] + ' ' + f[1] + 'L' + f[2] + ' 88" class="cd-line"/>'; }).join('');
-    s += '<path d="' + RIDGE + '" class="cd-ridge"/>';
-    s += '<path d="' + SHORE + '" class="cd-ridge"/>';
-    // The plate's shore ripples, four hairlines parallel to the coast and fading out to sea.
-    for (var r = 1; r <= 4; r++) s += '<path d="' + SHORE + '" class="cd-rip" transform="translate(0,' + (r * 6.5) + ')" style="opacity:' + (0.5 - r * 0.09).toFixed(2) + '"/>';
-    s += '<g transform="translate(169,24) scale(.95)" class="cd-plant">' + window.CULTURE_ICON.ulu + '</g>';
-    s += '<g transform="translate(167,46) scale(.95)" class="cd-plant">' + window.CULTURE_ICON.kalo + '</g>';
-    s += '<g transform="translate(169,68) scale(.95)" class="cd-plant">' + window.CULTURE_ICON.niu + '</g>';
-    s += '<text x="6" y="8" class="cd-t">Ridge</text><text x="294" y="114" text-anchor="end" class="cd-t">Shore</text>';
-    return s + '</svg>';
+    var art = level === 4 ? 'loko-ia' : 'ahupuaa';
+    return '<img class="cd" src="/culture/art/' + art + '.webp" width="1200" height="400" alt="" decoding="async">';
   };
   window._cultureStrip = function(step){
     // The four levels in place of four dots: the one you are on is filled in ink, the ones behind you in
