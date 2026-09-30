@@ -28,6 +28,7 @@ async function visible(pg){
     await pg.goto(`${ORIGIN}/?ref=gohawaii&island=${isl}&theme=culture`, { waitUntil: 'networkidle2', timeout: 60000 });
     await pg.evaluate(() => { const b = [...document.querySelectorAll('button')].find(x => /I Understand/.test(x.textContent)); if (b) b.click(); });
     await pg.waitForFunction(() => window._cultureIdx && window._isCulture && window._isCulture(), { timeout: 30000 }).catch(() => {});
+    await pg.waitForFunction(() => window._cultureSrc, { timeout: 20000 }).catch(() => {});
     await sleep(2500);
     fs.writeFileSync(path.join(OUT, `culture-${isl}-visible.html`), await visible(pg));
     // Everything the layer can put on screen, in one copy the gate can read at once.
@@ -36,9 +37,11 @@ async function visible(pg){
       const parts = [];
       const grab = () => document.getElementById('cultureCard') ? document.getElementById('cultureCard').innerHTML : '';
       for (let s = 1; s <= 4; s++){ window._culturePathOpen(s); await sleep(500); parts.push('<section data-copy="tour-step' + s + '">' + grab() + '</section>\n<hr>'); }
-      const id = Object.keys(window._cultureIdx.byId)[0];
-      window._cultureCloseCard(); window._cultureOpenAhupuaa(id); await sleep(500);
-      parts.push('<section data-copy="ahupuaa-card">' + grab() + '</section>');
+      const ids = Object.keys(window._cultureIdx.byId), id = ids[0];
+      // The first card, plus the twelve with the most sourced lines, so every section the sources can fill is read.
+      const S = (window._cultureSrc && window._cultureSrc.ahupuaa) || {};
+      const rich = ids.slice().sort((a, b) => JSON.stringify(S[b] || '').length - JSON.stringify(S[a] || '').length).slice(0, 12);
+      for (const x of [id].concat(rich.filter(r => r !== id))){ window._cultureCloseCard(); window._cultureOpenAhupuaa(x); await sleep(400); parts.push('<section data-copy="ahupuaa-card-' + x + '">' + grab() + '</section>'); }
       const moku = window._cultureIdx.byId[id].moku;
       window._cultureCloseCard(); window._cultureOpenMoku(moku); await sleep(500);
       parts.push('<section data-copy="moku-card">' + grab() + '</section>');

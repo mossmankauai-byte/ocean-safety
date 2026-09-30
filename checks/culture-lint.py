@@ -54,5 +54,38 @@ else:
             fails += 1; print('FAIL index.html L%d: %s' % (i, h))
     print('OK   index.html culture block: %d lines checked' % block.count('\n'))
 
+# 3. the sourced facts (culture/sources/*.json, culture/life/*.json): the same three rules, plus no dash, no $ figure and no
+#    review claim, because these strings reach the card verbatim.
+EXTRA = re.compile(r'[\u2013\u2014]|\$|verified by|reviewed by a local|signed off', re.I)
+import json
+def strings(o):
+    if isinstance(o, str): yield o
+    elif isinstance(o, dict):
+        for v in o.values(): yield from strings(v)
+    elif isinstance(o, list):
+        for v in o: yield from strings(v)
+# A quoted meaning is one phrase from the source: no parenthetical note, no numbered senses, no second
+# sentence or source run in, no story words, and no anatomy or excretion (held for the review partner).
+MEANING = re.compile(r'\(|(^|\s)\d+\.\s|\.\s|\bPEM?:|ravish|victim|sacrific|\bkill|slain|legend|said to|story|goddess|\bgods?\b|demigod|chief|battle|\bdied\b|death|ghost|spirit|penis|vagina|vulva|genital|testic|scrot|clitor|excrement|feces|faeces|dung|urin|buttock|anus\b|copulat|sexual|intercourse|pubic|menstru|corpse|bones|burial|grave|\.\.\.|…', re.I)
+def meanings(o):
+    if isinstance(o, dict):
+        for k, v in o.items():
+            if k == 'mean' and isinstance(v, str): yield v
+            else: yield from meanings(v)
+    elif isinstance(o, list):
+        for v in o: yield from meanings(v)
+for f in sorted(glob.glob(os.path.join(ROOT, 'culture', 'sources', '*.json')) + glob.glob(os.path.join(ROOT, 'culture', 'life', '*.json'))):
+    n = 0; data = json.load(open(f, encoding='utf-8'))
+    for t in strings(data):
+        n += 1
+        for h in lint(t) + (['dash, $ or review claim'] if EXTRA.search(t) else []):
+            fails += 1; print('FAIL %s: %s in %r' % (os.path.relpath(f, ROOT), h, t[:80]))
+    m = 0
+    for t in meanings(data):
+        m += 1
+        if MEANING.search(t):
+            fails += 1; print('FAIL %s: meaning breaks the quote rules: %r' % (os.path.relpath(f, ROOT), t[:80]))
+    print('OK   %s: %d strings, %d meanings checked' % (os.path.relpath(f, ROOT), n, m))
+
 print('HOLD, %d hit(s)' % fails if fails else 'PASS, Maʻemaʻe lint clean')
 sys.exit(1 if fails else 0)

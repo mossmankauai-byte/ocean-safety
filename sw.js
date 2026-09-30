@@ -20,7 +20,7 @@
 // v289 was claimed twice on the same day. Forward, never backward.
 // v319 is claimed on work/reserve-links; this branch skips to v320.
 // v345 was claimed twice on 2026-09-19 (gh-promotions and the tsunami map): tsunami resolves forward to v346.
-const CACHE_VERSION = 'v399-2026-09-29-ahu-facts';   // Ahupuaʻa card: clearer size tiles (Largest of N, share of moku)
+const CACHE_VERSION = 'v400-2026-09-29-culture-about';   // Ahupuaʻa card: review banner on top, name/rain/beaches tiles, About this place, species found only in Hawaiʻi
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
