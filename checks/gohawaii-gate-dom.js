@@ -81,7 +81,7 @@ async function visible(pg){
   for (const w of [390, 1280]) {
     const ctx = await br.createBrowserContext(); const pg = await ctx.newPage();
     await pg.setViewport({ width: w, height: 900, deviceScaleFactor: 2 });
-    await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); } catch(e){} }, JSON.stringify(seed('kauai')));
+    await pg.evaluateOnNewDocument((v) => { try { localStorage.setItem('gh_notices_v1', v); localStorage.setItem('ghd_tour_v1', '{"all":1}'); } catch(e){} }, JSON.stringify(seed('kauai')));   // the tour has its own gate copy
     if(API && w === 390) await publish('kauai');
     await pg.goto(ORIGIN + '/gohawaii-dashboard?view=adv', { waitUntil: 'networkidle2', timeout: 60000 }); await sleep(2500);
     if(API){ await pg.type('#siKey', KEY_A); await pg.click('#siForm button[type=submit]'); await pg.waitForFunction(() => !document.getElementById('whoChip').hidden, { timeout: 15000 }); await sleep(1500); }

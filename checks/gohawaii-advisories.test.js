@@ -77,6 +77,7 @@ async function page(br, url, opts){
   const errs = [];
   pg.on('pageerror', (e) => errs.push(String(e)));
   if(opts.seed) await pg.evaluateOnNewDocument((k, v) => { try { localStorage.setItem(k, v); } catch(e){} }, 'gh_notices_v1', JSON.stringify(opts.seed));
+  await pg.evaluateOnNewDocument(() => { try { localStorage.setItem('ghd_tour_v1', '{"all":1}'); } catch(e){} });   // the per-tab Dashboard tour (2026-09-29) is its own suite
   await pg.goto(ORIGIN + url, { waitUntil: 'networkidle2', timeout: 60000 });
   return { ctx, pg, reqs, errs };
 }

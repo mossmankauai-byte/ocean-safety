@@ -459,6 +459,35 @@
     .u3{grid-template-columns:1fr}
     .ur{grid-template-columns:96px 1fr 54px}
   }
+  /* ---- Tour: one engine, one short tour per tab. The card and ring use the page's own tokens. ---- */
+  .rail .tourbtn{margin-top:auto}
+  #ghTour{position:fixed;inset:0;z-index:1300;display:none}
+  #ghTour.on{display:block}
+  .tor-block{position:absolute;inset:0;transition:background .2s}
+  #ghTour.center .tor-block{background:rgba(10,39,49,.55)}
+  .tor-hi{position:fixed;border-radius:14px;pointer-events:none;box-shadow:0 0 0 2px #fff,0 0 0 4000px rgba(10,39,49,.55);transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1),opacity .2s}
+  .tor-hi.off{opacity:0}
+  .tor-card{position:fixed;width:min(360px,calc(100vw - 28px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px 14px;box-shadow:0 8px 18px rgba(10,39,49,.18),0 24px 60px rgba(10,39,49,.25);transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1);outline:0}
+  .tor-card.center{left:50%!important;top:50%!important;transform:translate(-50%,-50%);width:min(420px,calc(100vw - 28px));text-align:center;padding:24px 24px 20px}
+  .tor-card .tc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .tor-card .tc-step{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .tor-card .tc-skip{appearance:none;background:none;border:0;font:inherit;font-size:11.5px;font-weight:600;color:var(--mute);cursor:pointer;padding:2px 4px;border-radius:6px}
+  .tor-card .tc-skip:first-of-type{margin-left:auto}
+  .tor-card .tc-skip:hover{color:var(--ink2);text-decoration:underline}
+  .tor-card .tc-mark{display:none;width:44px;height:44px;border-radius:11px;margin:0 auto 12px;background:var(--mark) center/cover}
+  .tor-card.center .tc-mark{display:block}
+  .tor-card h4{margin:0 0 6px;font-size:16px;letter-spacing:-.01em;color:var(--ink)}
+  .tor-card p{margin:0;font-size:13px;line-height:1.55;color:var(--ink2)}
+  .tor-card p b{color:var(--ink);font-weight:700}
+  .tor-card .tc-foot{display:flex;align-items:center;gap:8px;margin-top:14px}
+  .tor-card.center .tc-foot{justify-content:center}
+  .tor-dots{display:flex;gap:5px;margin-right:auto}
+  .tor-card.center .tor-dots{margin-right:0}
+  .tor-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
+  .tor-dots i.on{background:var(--sea);transform:scale(1.25)}
+  @media (max-width:760px){.tor-card{width:calc(100vw - 20px)}.tor-card .tc-top{flex-wrap:wrap}}
+  @media (prefers-reduced-motion:reduce){.tor-block,.tor-hi,.tor-card,.tor-dots i{transition:none}}
+  @media print{#ghTour,.rail .tourbtn{display:none!important}}
   @media print{
     body *{visibility:hidden}
     #repDoc,#repDoc *{visibility:visible}
@@ -484,6 +513,7 @@
     <button type="button" data-view="rep"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="lbl">Report</span></button>
     <button type="button" data-view="prev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg><span class="lbl">Preview</span></button>
     <button type="button" data-view="log"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="lbl">Log</span></button>
+    <button type="button" class="tourbtn" id="btnTour" title="Tour this tab" aria-label="Tour this tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.2a2.9 2.9 0 0 1 5.6.9c0 1.9-2.8 2.4-2.8 4.1M12 17.3h.01"/></svg><span class="lbl">Tour</span></button>
   </nav>
 
   <main>
@@ -1033,6 +1063,7 @@
     if(v === 'place') loadLayer(state.isl).then(renderPlaces);
     if(v === 'feat') loadLayer(state.isl).then(renderEvents);
     window.scrollTo(0, 0);
+    try { document.dispatchEvent(new CustomEvent('ghdview', { detail: { view: v } })); } catch(e){}
   }
   document.querySelector('.rail').addEventListener('click', function(e){ var b = e.target.closest('button[data-view]'); if(b) show(b.dataset.view); });
   $('btnNew').addEventListener('click', function(){ show('adv'); setTimeout(function(){ $('fTitle').focus(); }, 60); });
@@ -2668,6 +2699,239 @@
   setTimeout(function(){ Promise.all(ORDER.map(loadLayer)).then(function(){ renderLegend(); if(state.view === 'feat') renderEvents(); }); }, 400);
   setTimeout(probeNext, 2500);
   setInterval(check, 5 * 60 * 1000);
+})();
+</script>
+<script>
+/* ---- Tour: one engine, one short tour per tab (2026-09-29). Steps point at ids and classes the page already has, so a
+ * step whose target is hidden or missing is skipped, never shown as an empty box. Each tab's tour runs once per browser
+ * the first time the tab opens (ghd_tour_v1) and replays from the Tour button in the rail. It never posts, approves,
+ * clears, sends, switches the role, or changes a saved preference; ?tour=off stops the automatic run for scripted shots. ---- */
+(function(){
+  'use strict';
+  var KEY = 'ghd_tour_v1';
+  var VIEWS = ['now', 'adv', 'feat', 'promo', 'place', 'use', 'rep', 'prev', 'log'];
+  var TOURS = {
+    now: [
+      { center: true, title: 'Welcome to the GoHawaii Dashboard', body: 'Nine tabs, each with a short tour like this one. It runs once per tab in this browser, and the <b>Tour</b> button in the rail replays it. This is a review build: posts save in this browser only, so a colleague on another computer will not see them.' },
+      { sel: '#map', title: 'The live level on each island', body: 'Each marker shows the highest red or yellow level live on that island right now, from your posts and the National Weather Service. Tap an island to switch the phone and the cards to it.' },
+      { sel: '.legend', title: 'Islands today', body: 'One card per island: its level, what is live, and its sample figures. The chip on the heading says why: this review build counts nothing, so the checks a day and the intent line are illustrative until counting is switched on.' },
+      { sel: '#pvTitle', up: '.card', title: 'What a visitor sees', body: 'The real app, with this browser\'s posts in it. The dots switch the island. Post an advisory and it shows here within a second.' },
+      { sel: '.card.dec', title: 'Needs a decision', body: 'A red advisory goes live only after a second person approves it, and the poster cannot approve their own. Anything waiting sits here until an Approver acts.' },
+      { sel: '#asmCard', title: 'Assumptions to test', body: 'Working assumptions drawn from the sample figures, never findings. <b>Show assumptions</b> opens the strongest, up to three, for the last 7 days, the month to date, the year to date or a range you set.' },
+      { sel: '#tblTabs', up: '.card', title: 'Everything that is live', body: 'The advisories in the app across all four islands: yours, the National Weather Service\'s and the latest six from HTA. The tabs filter to Live, Waiting, NWS or HTA.' },
+      { sel: '.card.srcs', title: 'Sources', body: 'This page checks both feeds every 5 minutes and shows when each last answered. <b>Check sources</b> in the header reads them again now. A feed that cannot be reached is named here, not hidden.' }
+    ],
+    adv: [
+      { sel: '#lvPick', title: 'Pick the level by what a visitor sees', body: 'Red fills the screen on open and needs a second person\'s approval. Yellow is a bar at the top plus one pop-up per visit. Info shows on the GoHawaii page only.' },
+      { sel: '#fTitle', title: 'Headline, up to 90 characters', body: 'Visitors read your words as written, so say what is happening in plain terms. The details box below takes the rest: what to do instead, and when it should reopen.' },
+      { sel: '#fIsl', title: 'Islands', body: 'Tick the islands it applies to. Pick one island and you can also name specific beaches; each one gets a ring on the app\'s map.' },
+      { sel: '#fEnd', title: 'Every advisory ends', body: 'Pick the shortest honest window. The app takes the advisory down at the end on its own, so nothing stays up after it stops being true. Times are Hawaiʻi time.' },
+      { sel: '#fLink', title: 'Link for more', body: 'Optional, and it must start with https. Visitors get it as a link on the advisory.' },
+      { sel: '#advForm .formfoot', title: 'Preview before you post', body: '<b>Preview first</b> opens the app with this advisory in it. <b>Post now</b> saves it; in the review build it stays in this browser. <b>Fill in a sample</b> shows a finished one.' },
+      { sel: '#advList', up: '.card', title: 'Your advisories', body: 'Waiting for approval, live, scheduled and recently ended. A live or scheduled one has End now; anything not ended has Preview. Switch to Approver in the header to approve a red one.' },
+      { sel: '#nwsList', up: '.card', title: 'The weather feed', body: 'National Weather Service alerts reach the app on their own and cannot be hidden or softened from here. The HTA card below is the other feed: its alert posts show as Info on the GoHawaii page for 72 hours, and reposting one raises it.' }
+    ],
+    feat: [
+      { sel: '#featList', up: '.card', title: 'Featured now', body: 'Featured items sit at the top of the GoHawaii page and pop up once per visit, after any advisory. End one here when it is done.' },
+      { sel: '#evList', up: '.card', title: 'Events and Mālama programs', body: 'Upcoming events from the GoHawaii listings for the island picked above. Filter by name or place, open one, and feature it.' },
+      { sel: '#campForm', up: '.card', title: 'Post a campaign', body: 'A State program or seasonal message: a headline, one line and a link. Events and programs only; nothing that reads as a sale.' },
+      { sel: '#cEnd', title: 'Runs for', body: 'Three days, a week or 30 days. It comes down on its own at the end.' }
+    ],
+    promo: [
+      { sel: '#promoList', up: '.card', title: 'Your promotions', body: 'On now, outside their hours, scheduled and recently ended. While its hours are on, a promotion shows on the app\'s Town tab as a chip, once per visit as a pop-up, and on the GoHawaii page. <b>End now</b> takes one down and <b>Duplicate</b> copies one into the form.' },
+      { sel: '#pWin', title: 'Hours, Hawaiʻi time', body: 'All day, or set hours. With set hours the promotion shows only inside them, in Hawaiʻi time, whatever clock the visitor\'s phone keeps.' },
+      { sel: '#pDays', title: 'Days', body: 'Untick the days it does not run. A weekend shuttle runs Saturday and Sunday only.' },
+      { sel: '#pIsl', title: 'Islands', body: 'Tick the islands it applies to.' },
+      { sel: '#pEnd', title: 'Runs for', body: 'One day to 30 days. The promotion ends on its own at the end, so nothing stays up by accident.' },
+      { sel: '#promoForm .formfoot', title: 'Post it', body: '<b>Post now</b> saves it; in the review build it stays in this browser. <b>Fill in a sample</b> shows a finished promotion.' }
+    ],
+    place: [
+      { sel: '#plQ', title: 'Search', body: 'By name, area or kind. The results are the GoHawaii listings for the island picked above, plus places State or county staff added.' },
+      { sel: '#plShow', title: 'Filter by what changed', body: 'All, Changed, Added or Hidden. A hidden place stays in this list and leaves the app.' },
+      { sel: '#plOwn', title: 'Kept by', body: 'Who keeps the place: anyone, the State or the county. In this list an added place shows the office that keeps it, never as a GoHawaii listing.' },
+      { sel: '#plList', up: '.card', title: 'Open one to edit', body: 'Change its details, hide it from the app, or move its pin. GoHawaii\'s own listing is never rewritten; only your changes are stored, and in the review build they stay in this browser.' },
+      { sel: '#plAddCard', title: 'Add a place', body: 'A park, a lookout or a program visitors should find. Tap the map to drop the pin, fill in the details, and it shows in the app\'s tabs and on its map for the island picked above. Beaches are not here: beach safety stays with OceanSafety.' }
+    ],
+    use: [
+      { sel: '#v-use .umode', title: 'Sample data', body: 'Every figure on this tab is illustrative until counting is switched on for the GoHawaii link. The Live data switch stays off in this review build on purpose.' },
+      { sel: '#liveCard', title: 'Live counts', body: 'Off in this review build. Once counting is switched on for the GoHawaii link, this card turns real first: sessions a day per island. The cards below it stay samples until their own counts are built.' },
+      { sel: '#islPick', title: 'Pick an island', body: 'The island picker drives every graph on this tab.' },
+      { sel: '#uState', up: '.card', title: 'What a check is', body: 'A check is one visitor opening one beach in the app. The state set is checks a day on each of the four islands.' },
+      { sel: '#v-use .dstag', title: 'Catalogue ranks', body: 'The tag on a card is its rank in the County of Kauaʻi catalogue (33 datasets) and the HTA state catalogue (38). The chip beside it says Counting or In build; Sample means the figure is still illustrative.' },
+      { sel: '#v-use details.meth', title: 'How this is computed', body: 'Open it under any graph for the exact rule behind the figure.' },
+      { sel: '.priv', title: 'Groups only', body: 'Everything here is counts and percentages for visitors as a group. No individual is stored or reported, and any cell under ten is suppressed.' }
+    ],
+    rep: [
+      { sel: '#v-rep .umode', title: 'Sample data', body: 'The report is built here in the browser from the same illustrative figures as the Visitors tab. Nothing is sent anywhere.' },
+      { sel: '#rpMonth', title: 'Period', body: 'Pick the month. The report covers whole Hawaiʻi calendar months.' },
+      { sel: '#rpScopeIsl', up: '.seg', title: 'Scope', body: 'This island, or all four islands side by side.' },
+      { sel: '.presets', title: 'Presets', body: 'A preset picks a set of datasets: Safety brief, Dispersal and capacity, Reef and advisories, Counting today, or Everything. Clear unticks them all.' },
+      { sel: '#rpTg', title: 'Datasets in the report', body: 'Tick or untick any dataset. Your choice is remembered in this browser.' },
+      { sel: '#rpAsm', up: '.tg', title: 'Include', body: 'The assumptions to test at the bottom, the summary numbers at the top, the owner and status from the catalogues, and how each figure is computed.' },
+      { sel: '.repbar', title: 'Take it to the meeting', body: '<b>Print or save as PDF</b> for the meeting, <b>Download CSV</b> or <b>Download JSON</b> for a spreadsheet, or <b>Copy text summary</b> to paste into an email. All of it is built here in the browser.' }
+    ],
+    prev: [
+      { sel: '#prevFrame', up: '.phwrap', title: 'The real app', body: 'The GoHawaii app on the island picked above, with this browser\'s posts in it. Whatever you post from any tab shows here within a second.' },
+      { sel: '#btnReset', title: 'Show dismissed pop-ups again', body: 'A visitor sees a red advisory full screen until they tap I understand, and a yellow one once per visit. This resets that, so you can watch it again.' },
+      { sel: '#btnOpen', title: 'Open in a new tab', body: 'The same app in a full tab of this browser. Post from here and it picks the post up on its own.' }
+    ],
+    log: [
+      { sel: '#logPer', title: 'Period', body: 'The last 7 days, the month to date, the year to date, or a range you set, in Hawaiʻi calendar days.' },
+      { sel: '.logtools .acts', title: 'Take it with you', body: '<b>Copy for email</b> puts the entries on the clipboard. <b>Download CSV</b> is the full log. <b>Email this log</b> opens your mail app with as many entries as fit in 1,800 characters; use the CSV for a busy month.' },
+      { sel: '#logBody', up: '.tblwrap', title: 'Who did what', body: 'Every post, approval, feature and end, newest first. In the review build the Who column is whichever role the Signed in as switch was set to, Editor or Approver.' },
+      { sel: '#btnClear', title: 'Clear this browser\'s review data', body: 'Removes the test posts, place changes and log entries saved in this browser. It asks first. Nothing on any other computer is touched.' }
+    ]
+  };
+
+  function load(){ try { var j = JSON.parse(localStorage.getItem(KEY) || '{}'); return (j && typeof j === 'object') ? j : {}; } catch(e){ return {}; } }
+  function save(j){ try { localStorage.setItem(KEY, JSON.stringify(j)); } catch(e){} }
+  function seen(v){ var j = load(); return !!(j.all || (j.seen && j.seen[v])); }
+  function markSeen(v){ var j = load(); j.seen = j.seen || {}; j.seen[v] = 1; save(j); }
+  function markAll(){ var j = load(); j.seen = {}; VIEWS.forEach(function(v){ j.seen[v] = 1; }); j.all = 1; save(j); }
+  function curView(){ var b = document.querySelector('.rail button[data-view][aria-current="page"]'); return b ? b.dataset.view : 'now'; }
+  var offByUrl = /(?:^|[?&])tour=off(?:&|$)/.test(location.search);
+
+  // ---- overlay ----
+  var root = document.createElement('div'); root.id = 'ghTour';
+  root.innerHTML = '<div class="tor-block"></div><div class="tor-hi off"></div>'
+    + '<div class="tor-card" role="dialog" aria-modal="true" aria-labelledby="torT" aria-describedby="torB" tabindex="-1">'
+    + '<div class="tc-top"><span class="tc-step"></span><button type="button" class="tc-skip" data-k="one">Skip</button><button type="button" class="tc-skip" data-k="all">Skip all tours</button></div>'
+    + '<span class="tc-mark" aria-hidden="true"></span><h4 id="torT"></h4><p id="torB"></p>'
+    + '<div class="tc-foot"><span class="tor-dots" aria-hidden="true"></span><button type="button" class="btn tc-back">Back</button><button type="button" class="btn pri tc-next">Next</button></div></div>';
+  document.body.appendChild(root);
+  var hi = root.querySelector('.tor-hi'), card = root.querySelector('.tor-card'), stepEl = root.querySelector('.tc-step'),
+      titleEl = root.querySelector('#torT'), bodyEl = root.querySelector('#torB'), dotsEl = root.querySelector('.tor-dots'),
+      backBtn = root.querySelector('.tc-back'), nextBtn = root.querySelector('.tc-next'),
+      skipBtn = root.querySelector('.tc-skip[data-k="one"]'), allBtn = root.querySelector('.tc-skip[data-k="all"]');
+
+  var active = false, auto = false, view = '', plan = [], idx = -1, curEl = null, wasFocused = null;
+
+  function target(s){
+    var el = s.sel ? document.querySelector(s.sel) : null;
+    if(el && s.up) el = el.closest(s.up);
+    if(!el || !el.getClientRects().length) return null;
+    var r = el.getBoundingClientRect(); if(r.width < 2 || r.height < 2) return null;
+    return el;
+  }
+  function railH(){ if(innerWidth > 760) return 0; var r = document.querySelector('.rail'); return r ? r.getBoundingClientRect().height : 0; }
+  function position(){
+    if(!active || !curEl) return;
+    var r = curEl.getBoundingClientRect(), pad = 8;
+    hi.style.top = (r.top - pad) + 'px'; hi.style.left = (r.left - pad) + 'px'; hi.style.width = (r.width + pad * 2) + 'px'; hi.style.height = (r.height + pad * 2) + 'px';
+    var ch = card.offsetHeight, cw = card.offsetWidth, vw = innerWidth, vh = innerHeight;
+    if(vw <= 760){                                    // phone: the card docks above the rail, never over the ring
+      card.style.left = '10px'; card.style.right = '10px'; card.style.top = 'auto'; card.style.bottom = (railH() + 10) + 'px';
+      card.style.width = 'auto'; card.style.maxHeight = '46vh'; card.style.overflowY = 'auto';
+      var cardTop = card.getBoundingClientRect().top;
+      var hiTop = Math.max(8, r.top - pad), hiBot = Math.min(r.bottom + pad, cardTop - 8);
+      hi.style.top = hiTop + 'px'; hi.style.height = Math.max(0, hiBot - hiTop) + 'px';
+      return;
+    }
+    card.style.right = 'auto'; card.style.bottom = 'auto'; card.style.width = ''; card.style.maxHeight = ''; card.style.overflowY = '';
+    var gap = pad + 14, left = Math.min(Math.max(12, r.left), vw - cw - 12), top;
+    if(r.bottom + gap + ch < vh) top = r.bottom + gap;                                   // below
+    else if(r.top - gap - ch > 12) top = r.top - gap - ch;                                // above
+    else if(r.right + gap + cw < vw){ left = r.right + gap; top = Math.min(Math.max(12, r.top), vh - ch - 12); }   // beside, right
+    else if(r.left - gap - cw > 12){ left = r.left - gap - cw; top = Math.min(Math.max(12, r.top), vh - ch - 12); } // beside, left
+    else {                                                                                 // corner, ring clamped above the card
+      left = vw - cw - 16; top = vh - ch - 16;
+      var ht = Math.max(8, r.top - pad), hb = Math.min(r.bottom + pad, top - 8);
+      hi.style.top = ht + 'px'; hi.style.height = Math.max(0, hb - ht) + 'px';
+    }
+    card.style.top = top + 'px'; card.style.left = left + 'px';
+  }
+  function clearCard(){ card.style.top = ''; card.style.left = ''; card.style.right = ''; card.style.bottom = ''; card.style.width = ''; card.style.maxHeight = ''; card.style.overflowY = ''; }
+  function setStep(i, dir){
+    dir = dir || 1;
+    while(i >= 0 && i < plan.length && !plan[i].center && !target(plan[i])) i += dir;   // a target that has gone is skipped
+    if(i < 0){ i = idx; if(i < 0) return; }
+    if(i >= plan.length){ end(true); return; }
+    idx = i; var s = plan[i];
+    stepEl.textContent = 'Step ' + (i + 1) + ' of ' + plan.length;
+    titleEl.innerHTML = s.title; bodyEl.innerHTML = s.body;
+    Array.prototype.forEach.call(dotsEl.children, function(d, j){ d.className = j === i ? 'on' : ''; });
+    backBtn.hidden = i === 0;
+    nextBtn.textContent = i === plan.length - 1 ? 'Done' : (s.center ? 'Show me' : 'Next');
+    if(s.center){ curEl = null; card.classList.add('center'); root.classList.add('center'); hi.classList.add('off'); clearCard(); nextBtn.focus({ preventScroll: true }); return; }
+    card.classList.remove('center'); root.classList.remove('center');
+    curEl = target(s); hi.classList.remove('off'); watch(curEl);
+    if(innerWidth <= 760){
+      position();                                     // dock the card first, then scroll the target into the band above it
+      var cardH = card.offsetHeight || 200, rr = curEl.getBoundingClientRect();
+      var absTop = rr.top + (window.pageYOffset || document.documentElement.scrollTop || 0);
+      var top0 = 70, bandH = innerHeight - top0 - (cardH + 24 + railH());
+      var desired = (rr.height >= bandH) ? top0 : top0 + (bandH - rr.height) / 2;
+      window.scrollTo(0, Math.max(0, absTop - desired));
+      setTimeout(position, 260);
+    } else {
+      curEl.scrollIntoView({ block: 'center' });
+      setTimeout(position, 250);
+    }
+    nextBtn.focus({ preventScroll: true });
+  }
+  function start(v, isAuto){
+    var steps = TOURS[v]; if(!steps || active) return;
+    view = v; auto = !!isAuto;
+    plan = steps.filter(function(s){ return s.center || target(s); });
+    if(!plan.length) return;
+    wasFocused = document.activeElement;
+    dotsEl.innerHTML = ''; plan.forEach(function(){ dotsEl.appendChild(document.createElement('i')); });
+    allBtn.hidden = !auto;
+    active = true; root.classList.add('on'); document.body.classList.add('gh-tour-on');
+    setStep(0, 1);
+  }
+  function end(markDone){
+    if(!active) return;
+    active = false; root.classList.remove('on'); document.body.classList.remove('gh-tour-on');
+    curEl = null; hi.classList.add('off'); card.classList.remove('center'); root.classList.remove('center'); clearCard(); if(ro) ro.disconnect();
+    if(markDone) markSeen(view);
+    window.scrollTo(0, 0);
+    try { if(wasFocused && document.contains(wasFocused) && wasFocused !== document.body) wasFocused.focus({ preventScroll: true }); } catch(e){}
+    wasFocused = null;
+  }
+  nextBtn.addEventListener('click', function(){ if(idx >= plan.length - 1) end(true); else setStep(idx + 1, 1); });
+  backBtn.addEventListener('click', function(){ if(idx > 0) setStep(idx - 1, -1); });
+  skipBtn.addEventListener('click', function(){ end(true); });
+  allBtn.addEventListener('click', function(){ markAll(); end(true); });
+  document.addEventListener('keydown', function(e){
+    if(!active) return;
+    if(e.key === 'Escape'){ e.preventDefault(); end(true); return; }
+    if(e.key === 'ArrowRight'){ e.preventDefault(); nextBtn.click(); return; }
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); if(!backBtn.hidden) backBtn.click(); return; }
+    if(e.key === 'Tab'){                              // keep focus inside the card
+      var f = Array.prototype.filter.call(card.querySelectorAll('button'), function(b){ return !b.hidden; });
+      if(!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+      else if(!card.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+    }
+  });
+  var raf = false;
+  function onMove(){ if(raf) return; raf = true; requestAnimationFrame(function(){ raf = false; position(); }); }
+  addEventListener('scroll', onMove, true); addEventListener('resize', onMove);
+  var ro = window.ResizeObserver ? new ResizeObserver(onMove) : null;   // a late reflow (a list filling in, a map resizing) moves the ring too
+  function watch(el){ if(!ro) return; ro.disconnect(); ro.observe(document.body); if(el) ro.observe(el); }
+
+  // ---- when it runs ----
+  var pending = null;
+  function maybeAuto(v, delay){
+    if(offByUrl || active || !TOURS[v] || seen(v)) return;
+    var si = document.getElementById('signIn'); if(si && !si.hidden) return;
+    clearTimeout(pending);
+    pending = setTimeout(function(){ if(!active && curView() === v && !seen(v)) start(v, true); }, delay || 700);
+  }
+  document.addEventListener('ghdview', function(e){ var v = e.detail && e.detail.view; if(active) end(false); maybeAuto(v); });
+  var tourBtn = document.getElementById('btnTour');
+  if(tourBtn) tourBtn.addEventListener('click', function(){ clearTimeout(pending); start(curView(), false); });
+  maybeAuto(curView(), 1400);
+
+  window.GH_TOUR = {
+    tours: TOURS, views: VIEWS, key: KEY,
+    start: function(v){ start(v || curView(), false); }, end: function(){ end(false); }, seen: seen,
+    state: function(){ return { active: active, auto: auto, view: view, idx: idx, n: plan.length, title: titleEl.textContent, body: bodyEl.textContent, target: curEl ? (curEl.id ? '#' + curEl.id : curEl.className) : '' }; },
+    reset: function(){ try { localStorage.removeItem(KEY); } catch(e){} }
+  };
 })();
 </script>
 </body>

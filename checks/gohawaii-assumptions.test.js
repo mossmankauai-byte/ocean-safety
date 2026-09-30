@@ -31,6 +31,7 @@ async function page(br, w, h){
   const ctx = await br.createBrowserContext();
   const pg = await ctx.newPage();
   await pg.setViewport({ width: w, height: h, deviceScaleFactor: 2 });
+  await pg.evaluateOnNewDocument(() => { try { localStorage.setItem('ghd_tour_v1', '{"all":1}'); } catch(e){} });   // the per-tab tour (2026-09-29) is its own suite
   await pg.setRequestInterception(true);
   pg.on('request', (r) => {
     const u = r.url();
