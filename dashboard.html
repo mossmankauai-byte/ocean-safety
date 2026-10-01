@@ -32,7 +32,7 @@ window.OS_SEGMENTS = {
     freePrice:'Free', paidPrice:'Pricing on request',
     pcFoot:'Free shows one amenity. Pricing on request for the paid plan.',
     portfolioNote:'Pricing on request.',
-    tabs:['home','stayclose','promos','guests','places','desk','shop'],
+    tabs:['home','today','stayclose','promos','guests','places','desk','shop'],
     deskLabel:'Tours', deskKind:'affiliate'
   },
   timeshare: {
@@ -1242,6 +1242,42 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   @media (max-width:900px){ .cc-kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .cc-mid{grid-template-columns:minmax(0,1fr)} }
   @media (max-width:420px){ .cc-k .v{font-size:22px} .cc-upd{margin-left:0;width:100%} }
 
+  /* ---- Today at the desk (2026-10-01): the concierge outlook. Main column + sticky rail ---- */
+  .td{display:grid;grid-template-columns:minmax(0,1fr) 332px;gap:14px;align-items:start;margin:18px 0 26px}
+  .td-main{display:grid;gap:12px;min-width:0}
+  .td-rail{position:sticky;top:14px;min-width:0}
+  .td-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .td-head h2{margin:0;font-size:20px;color:var(--ink)}
+  .td-head .cc-upd{margin-left:auto}
+  .td-btn{appearance:none;font:inherit;font-size:12.5px;font-weight:700;color:var(--sea);background:transparent;border:1px solid rgba(14,110,140,.35);border-radius:999px;padding:5px 12px;cursor:pointer}
+  .td-btn:hover{background:var(--sea-tint);border-color:var(--sea)}
+  .td-wx{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+  .td-wx div{background:var(--tint);border-radius:10px;padding:9px 11px;min-width:0}
+  .td-wx b{display:block;font-size:17px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .td-wx span{font-size:11.5px;color:var(--muted);font-weight:600}
+  .td-shore{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .td-shore span{font-size:12.5px;font-weight:600;color:var(--ink-2);background:var(--tint);border-radius:999px;padding:4px 11px}
+  .td-shore span b{color:var(--ink)}
+  .td-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--hair-soft)}
+  .td-row:first-of-type{border-top:0}
+  .td-lv{display:inline-flex;align-items:center;justify-content:center;min-width:76px;font-size:11.5px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;border-radius:999px;padding:4px 9px;white-space:nowrap;margin-top:1px}
+  .td-lv.good{background:rgba(22,163,74,.12);color:var(--good)}
+  .td-lv.fair{background:var(--gold-tint);color:var(--gold-ink)}
+  .td-lv.skip{background:rgba(181,85,47,.12);color:var(--risk)}
+  .td-lv.na{background:var(--hair-soft);color:var(--muted)}
+  .td-nm{font-size:13.5px;color:var(--ink);font-weight:700;display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+  .td-nm svg{width:14px;height:14px;color:var(--gold-ink);flex:none}
+  .td-nm .tg{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--sea);background:var(--sea-tint);border-radius:5px;padding:1px 6px}
+  .td-nm .tg.warn{color:var(--risk);background:rgba(181,85,47,.12)}
+  .td-why{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:2px}
+  .td-empty{font-size:13px;color:var(--muted);padding:8px 0 4px;line-height:1.5}
+  .td-rail .cc-card{border-top:3px solid var(--sea)}
+  .td-rail .td-sec{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px}
+  .td-rail .td-row{padding:7px 0}
+  .td-rail .td-lv{min-width:64px;font-size:10.5px;padding:3px 7px}
+  @media (max-width:1000px){ .td{grid-template-columns:minmax(0,1fr)} .td-rail{position:static;order:-1} }
+  @media (max-width:640px){ .td-wx{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
   /* ---- pinned phone rail: the editor on the left, the guest's phone on the right ---- */
   .ph-split{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
   .ph-main{min-width:0}
@@ -1646,6 +1682,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     <!-- VIEW SWITCHER -->
     <nav class="viewtabs" role="tablist" aria-label="Console view">
       <button role="tab" aria-selected="true" data-view="home">Home</button>
+      <button role="tab" aria-selected="false" data-view="today">Today</button>
       <button role="tab" aria-selected="false" data-view="stayclose">Stay-Close <span class="vb-badge" id="vbStay">—</span></button>
       <button role="tab" aria-selected="false" data-view="promos">Promotions <span class="vb-badge" id="vbPromos">—</span></button>
       <button role="tab" aria-selected="false" data-view="guests">Guest activity</button>
@@ -1773,6 +1810,25 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     </section>
 
     </div><!-- /view-home -->
+
+    <!-- ============ TODAY AT THE DESK (2026-10-01) ============
+         The concierge outlook: live island readings and a ranked read of the beaches, trails and
+         tour kinds for today, built only from the places this property Features or Lists on the
+         Places tab. Filled by the Today script near the end of the file. -->
+    <div id="view-today" hidden>
+      <section class="td" aria-label="Today at the desk">
+        <div class="td-main">
+          <div class="cc-card" id="tdHead"></div>
+          <div class="cc-card" id="tdBeaches"></div>
+          <div class="cc-card" id="tdTrails"></div>
+          <div class="cc-card" id="tdTours"></div>
+          <p class="cc-foot">Picks come only from the places you <b>Feature</b> or <b>List</b> on the Places tab. A place you hid, or left at Not recommended, never shows here. The guide makes the beach-by-beach safety call for each guest; this page is the desk&rsquo;s starting point, not a verdict.</p>
+        </div>
+        <aside class="td-rail" aria-label="Today's outlook">
+          <div class="cc-card" id="tdRail"></div>
+        </aside>
+      </section>
+    </div><!-- /view-today -->
 
     <div id="view-guests" hidden>
     <!-- Guest-activity numbers mirror hotel-insights-demo.html canonical DATA — keep in sync (2026-07-09) -->
@@ -2697,9 +2753,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     // The data-dictionary footer only belongs where Sample tiles live — keep it
     // off the image-led Home and the drop-a-promo view.
     var df = document.getElementById('dataFoot');
-    if(df) df.style.display = (view==='home'||view==='promos') ? 'none' : '';
+    if(df) df.style.display = (view==='home'||view==='promos'||view==='today') ? 'none' : '';
     var fb = document.getElementById('freshBanner');
-    if(fb) fb.style.display = (view==='home'||view==='promos') ? 'none' : '';
+    if(fb) fb.style.display = (view==='home'||view==='promos'||view==='today') ? 'none' : '';
     if(view==='places' && !rendered){ render(); rendered=true; }
     window.scrollTo(0,0);
   }
@@ -3518,6 +3574,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       body:'A short list of things worth a minute: an offer about to end, no house picks yet, a QR code that has gone quiet. Each row has a button that takes you straight to the fix.' },
     { view:'home', sel:'#ccTours', desk:'affiliate', title:'Tours guests tapped',
       body:'The tours your guests open most in your guide. Counts only, never an individual guest, and a tap is interest, not a booking.' },
+    { view:'today', sel:'#tdRail', title:'Today at the desk',
+      body:'Live readings for your island and a ranked read of the beaches, trails and tour kinds for today, built only from the places you Feature or List. A place you hid never shows here.' },
     { view:'stayclose', sel:'#mgAmenities', title:'Your amenity menu',
       body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. Edits save as a draft in this browser. <b>Export config</b> downloads the file that goes into your guide.',
       free:{ body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. The free plan shows one amenity; the paid plan shows your whole menu. <b>Export config</b> downloads the file that goes into your guide.' } },
@@ -6221,6 +6279,339 @@ window.osParseAff = function(v){
   /* each segment hides its undeclared tabs during load; the to-do list only names tabs it shows */
   window.addEventListener('load', renderTodo);
   resolveIsland();
+})();
+</script>
+<script>
+/* ============ TODAY AT THE DESK (2026-10-01) ============
+   The concierge outlook. The island's readings right now and a ranked read of the beaches,
+   trails and tour kinds for today. Picks come only from the Places tab: a place the operator
+   hid or left at Not recommended never shows here, and a Featured place ranks first on a tie.
+   Beach reads mirror the guide's exposure math (facing against each sea-state partition, the
+   reef damp, onshore wind, stream-mouth runoff after rain) and stop there: the guide itself
+   makes the beach-by-beach safety call for a guest. Readings come live from /api/wx on every
+   open, demo included, so nothing on this tab is Sample. */
+(function(){
+  var view = document.getElementById('view-today'); if(!view) return;
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function num(v){ return (typeof v === 'number' && isFinite(v)) ? v : null; }
+  function pad(n){ return (n<10?'0':'')+n; }
+  function slug(){ return String(window.OS_SLUG || '').trim().toLowerCase(); }
+  function isLive(){ var s = slug(); return !!s && s !== 'demo' && !window.OS_GROUP; }
+  function compass(d){ return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((d%360)+360)%360/45)%8]; }
+  function clock(iso){ var m = /T(\d{2}):(\d{2})/.exec(String(iso||'')); if(!m) return ''; var h = +m[1]; return ((h%12)||12)+':'+m[2]+(h<12?' am':' pm'); }
+  function inches(mm){ return mm==null ? null : (mm/25.4); }
+
+  var IC = {
+    star:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>',
+    wave:'<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2"/><path d="M3 17c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2"/><path d="M3 7c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2"/></svg>',
+    trail:'<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20 9 8l4 7 3-4 5 9z"/></svg>',
+    boat:'<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15h16l-2 4H6z"/><path d="M12 4v11"/><path d="M12 4c4 2 6 5 7 11"/><path d="M12 4C8 6 6 9 5 15"/></svg>',
+    sun:'<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    pin:'<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>'
+  };
+
+  /* ---- the island and its feed, resolved the same way the Home conditions card does ---- */
+  var ISL = { kauai:{n:'Kauaʻi',lat:21.98,lon:-159.37}, maui:{n:'Maui',lat:20.89,lon:-156.47}, oahu:{n:'Oʻahu',lat:21.28,lon:-157.83}, hawaii:{n:'Hawaiʻi Island',lat:19.64,lon:-155.99} };
+  var island = null, islandKnown = false, wx = null, wxErr = false, wxAt = null, timer = null;
+
+  /* ---- exposure per beach, copied from the guide's own beach records (index.html, B[]):
+     f facing in degrees, reef, stream (a stream mouth), rmm the daily rain in mm that fires the
+     runoff call, kid (sandy, family entry), tidal, west (sunset shore). A beach with no row
+     gets no reading, never a calm one. ---- */
+  var EXP = {anini:{f:0,reef:1,rmm:40,kid:1},poipu:{f:180,reef:1,rmm:45,kid:1},salt_pond:{f:200,reef:1,rmm:50,kid:1,west:1},hanalei:{f:355,stream:1,rmm:25,kid:1},lydgate:{f:90,reef:1,stream:1,rmm:40,kid:1},kee:{f:330,reef:1,rmm:20},queens_bath:{f:0,rmm:5,tidal:1},brennecke:{f:180,rmm:45},lumahai:{f:0,stream:1,rmm:80},secret:{f:0,rmm:50},kalihiwai:{f:0,stream:1,rmm:55},polihale:{f:270,rmm:5,west:1},tunnels:{f:0,reef:1,rmm:55,kid:1,tidal:1},kealia:{f:90,rmm:40,kid:1},kalapaki:{f:135,rmm:35,kid:1},mahaulepu:{f:180,rmm:25},wailua:{f:90,stream:1,rmm:50},kekaha:{f:225,rmm:35,west:1},pakala:{f:200,reef:1,rmm:30,west:1},shipwreck:{f:160,rmm:40},donkey:{f:90,rmm:35}};
+
+  /* ---- the guide's calibration constants (index.html FEED_CAL, REEF, EXPOSURE_FLOOR) ---- */
+  var SURF_FACTOR = 1.12, WIND_ADD = 4, FLOOR = 0.30, RAIN72_MM = 10;
+  var REEF = {base:.4,max:1,T0:8,T1:14,swLo:140,swHi:235,faceLo:135,faceHi:225};
+  var STREAM_Q = { 'North Shore':{key:'north',cfs:1000}, 'East Side':{key:'east',cfs:800} };
+  function cosOn(dir, facing){ var a = (dir-facing+360)%360, n = a>180 ? a-360 : a; return Math.cos(n*Math.PI/180); }
+  function proj(dir, b){ return Math.max(FLOOR, cosOn(dir, b.f)) * (b.reef ? .4 : 1); }
+  function hCal(h){ return Math.max(h, h*SURF_FACTOR); }
+  function reefFactor(dir, T, cos, b){
+    if(!b.reef) return 1;
+    if(!(cos>0) || T==null || dir<REEF.swLo || dir>REEF.swHi || b.f<REEF.faceLo || b.f>REEF.faceHi) return REEF.base;
+    var r = Math.max(0, Math.min(1, (T-REEF.T0)/(REEF.T1-REEF.T0)));
+    return REEF.base + r*(REEF.max-REEF.base);
+  }
+  function eff(R, b){
+    var v = R.surf*proj(R.sd, b);
+    if(R.sw_h!=null && R.sw_d!=null){ var c = cosOn(R.sw_d, b.f); v = Math.max(v, hCal(R.sw_h)*Math.max(FLOOR,c)*reefFactor(R.sw_d, R.sw_t, c, b)); }
+    if(R.ww_h!=null && R.ww_d!=null) v = Math.max(v, hCal(R.ww_h)*proj(R.ww_d, b));
+    return v;
+  }
+  function onshore(R, b){ return (R.wind==null || R.wd==null) ? null : R.wind*cosOn(R.wd, b.f); }
+  function runoff(R, b, region){
+    if(!b.stream) return false;
+    if(R.rainToday >= (b.rmm||30)) return true;
+    if(R.rain72!=null && R.rain72 >= RAIN72_MM) return true;
+    var q = STREAM_Q[region]; return !!(q && R.q && typeof R.q[q.key] === 'number' && R.q[q.key] >= q.cfs);
+  }
+
+  /* ---- now, in Hawaiʻi time, whatever clock the browser is on ---- */
+  function hst(){
+    try{
+      var p = new Intl.DateTimeFormat('en-US',{timeZone:'Pacific/Honolulu',year:'numeric',month:'2-digit',day:'2-digit',hour:'numeric',minute:'2-digit',hour12:false}).formatToParts(new Date()), o = {};
+      p.forEach(function(x){ o[x.type] = x.value; });
+      return { date:o.year+'-'+o.month+'-'+o.day, hour:parseInt(o.hour,10)%24, minute:parseInt(o.minute,10) };
+    }catch(e){ var d = new Date(); return { date:d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()), hour:d.getHours(), minute:d.getMinutes() }; }
+  }
+  function readings(){
+    if(!wx || !wx.w) return null;
+    var w = wx.w, c = w.current||{}, d = w.daily||{}, hr = w.hourly||{}, s = (wx.s && wx.s.current)||{}, now = hst();
+    var di = (d.time||[]).indexOf(now.date); if(di < 0) di = Math.max(0, (d.time||[]).length-1);
+    var surfValid = num(s.wave_height) != null;
+    var R = {
+      now: now, surfValid: surfValid,
+      waveRaw: num(s.wave_height), per: num(s.wave_period),
+      surf: surfValid ? hCal(s.wave_height) : null, sd: surfValid ? (num(s.wave_direction)||0) : null,
+      sw_h: num(s.swell_wave_height), sw_d: num(s.swell_wave_direction), sw_t: num(s.swell_wave_period),
+      ww_h: num(s.wind_wave_height), ww_d: num(s.wind_wave_direction),
+      windRaw: num(c.wind_speed_10m), wind: num(c.wind_speed_10m)!=null ? c.wind_speed_10m + WIND_ADD : null, wd: num(c.wind_direction_10m),
+      cloud: num(c.cloud_cover), uv: num(c.uv_index), temp: num(c.temperature_2m),
+      rainToday: num((d.precipitation_sum||[])[di]) || 0, rainChance: num((d.precipitation_probability_max||[])[di]),
+      uvMax: num((d.uv_index_max||[])[di]), sunrise: (d.sunrise||[])[di], sunset: (d.sunset||[])[di],
+      rain72: null, q: wx.q || null, tideHi: null, tideLo: null
+    };
+    if(hr.time && hr.precipitation){
+      var i = hr.time.indexOf(now.date+'T'+pad(now.hour)+':00');
+      if(i >= 71){ var s72 = 0; for(var k=i-71;k<=i;k++) s72 += (typeof hr.precipitation[k]==='number' ? hr.precipitation[k] : 0); R.rain72 = s72; }
+    }
+    var preds = (wx.td && wx.td.predictions) || [], hi = null, lo = null;
+    preds.forEach(function(p){ var v = parseFloat(p.v); if(!isFinite(v)) return; if(!hi || v > hi.v) hi = {v:v,t:p.t}; if(!lo || v < lo.v) lo = {v:v,t:p.t}; });
+    if(hi) R.tideHi = clock(hi.t.replace(' ','T')); if(lo) R.tideLo = clock(lo.t.replace(' ','T'));
+    return R;
+  }
+
+  /* ---- what the operator chose on the Places tab ---- */
+  /* Hazard-locked spots (h:1, the ones Places pre-sets to Not recommended) never rank here,
+     even when an operator lists them: their warning stays on the guide, and ranking one for the
+     desk is a safety call this page does not make. They are named below the list instead. */
+  function picks(cat){
+    var P = window.OS_PLACES; if(!P) return { rows:[], locked:[] };
+    var rows = [], locked = [];
+    (P.DATA[cat]||[]).forEach(function(it){ var st = P.st(cat, it.id); if(st === 'off') return; if(it.h){ locked.push(it.n); return; } rows.push({ it:it, state:st }); });
+    return { rows:rows, locked:locked };
+  }
+  var LV = {good:3, fair:2, skip:1, na:0};
+  function waitLabel(){ return (islandKnown && !island) ? 'No island set' : wxErr ? 'No readings' : 'Loading'; }
+  var SHORE = {'North Shore':'North','North Shore End':'North','Princeville':'North','East Side':'East','South Shore':'South','West Side':'West'};
+
+  function beachRead(r, R){
+    var it = r.it, b = EXP[it.id], o = { it:it, feat:r.state==='feature', level:'na', label:waitLabel(), why:[], es:null };
+    if(!R){ return o; }
+    if(!b){ o.label = 'No shore reading'; o.why.push('This spot has no shore record in the guide yet.'); return o; }
+    if(!R.surfValid){ o.label = 'Surf unavailable'; o.why.push('The wave feed is down. Check the guide before sending anyone in.'); return o; }
+    var es = eff(R, b), oc = onshore(R, b), ro = runoff(R, b, it.r);
+    o.es = es;
+    if(ro){ o.level = 'skip'; o.label = 'Runoff'; o.why.push('Stream mouth after rain: murky water. Not a swim day here.'); }
+    /* the guide's own beach chip: Calm under 1.5 ft, Rough to 4, Big surf from 4 (index.html, outlook chips) */
+    else if(es >= 4){ o.level = 'skip'; o.label = 'Big surf'; o.why.push(es.toFixed(1)+' ft on this shore.'); }
+    else if(es >= 1.5){ o.level = 'fair'; o.label = 'Rough'; o.why.push(es.toFixed(1)+' ft on this shore.'); }
+    else { o.level = 'good'; o.label = 'Calm'; o.why.push(es.toFixed(1)+' ft on this shore.'); }
+    if(oc != null){ if(oc > 15) o.why.push('Onshore wind, choppy.'); else if(oc < -4) o.why.push('Sheltered from the wind.'); }
+    if(b.west && R.now.hour >= 14) o.why.push('Sunset shore.');
+    o.lgRank = it.lg==='full_time' ? 2 : it.lg==='seasonal_active' ? 1 : 0;
+    return o;
+  }
+
+  /* ---- trails: the guide's own warning per trail, read against today's rain. Thresholds
+     in mm: 5 mm today is a wet day on the trail, 10 mm over three days leaves mud. ---- */
+  var TRAIL = {
+    kalalau_2mi: function(R){ if(R.rainToday>=5 || (R.rainChance!=null && R.rainChance>=60)) return ['skip','Flash-flood risk','Stream crossings flood fast after rain. Keep guests off it today.']; if(R.rain72!=null && R.rain72>=10) return ['fair','Streams running','Rain in the last three days. Early start only.']; return ['good','Little rain lately','Go early. Strenuous, 4 miles round trip.']; },
+    awaawapuhi: function(R){ if(R.rainChance!=null && R.rainChance>=60) return ['fair','Wet and muddy','Kōkeʻe rain likely. Slick trail, views may be hidden.']; if(R.cloud!=null && R.cloud>=80) return ['fair','Views may be hidden','Heavy cloud over Kōkeʻe. Strenuous either way.']; return ['good','Clear up top','Early start. Strenuous, 6.5 miles, two liters of water each.']; },
+    canyon: function(R){ if(R.rainToday>=5) return ['fair','Slick red dirt','Rain today.']; if(R.cloud!=null && R.cloud>=80) return ['fair','Canyon may be socked in','Heavy cloud. Try after lunch.']; if(R.uvMax!=null && R.uvMax>=9) return ['good','Go before 10','No shade. Hats and water.']; return ['good','Open views','Moderate, 3.4 miles, no shade.']; },
+    sleeping_giant: function(R){ if(R.rainToday>=5) return ['fair','Slippery scramble','The final climb is exposed and slick when wet. Turn back at the picnic table.']; return ['good','Dry footing','Moderate, 3.5 miles. Turn back at the picnic table if unsure.']; },
+    pihea: function(R){ if(R.rainToday>=3 || (R.rainChance!=null && R.rainChance>=60)) return ['fair','Slick boardwalk','It rains most days up here. Grip shoes.']; return ['good','Drier day','Mid-morning start. Moderate, 3.7 miles.']; },
+    kuilau: function(R){ if(R.rain72!=null && R.rain72>=10) return ['fair','Muddy','Rain in the last three days. Easy, but shoes will get ruined.']; return ['good','Dry','Easy, 4.4 miles, a family walk.']; },
+    mahaulepu_trail: function(R){ if(R.wind!=null && R.wind>=25) return ['fair','Windy on the cliffs','Keep kids back from the edge.']; return ['good','Coastal walk','Easy, 2 miles. A good pick on a rough-ocean day.']; },
+    okolehao: function(R){ if(R.rainToday>=5 || (R.rain72!=null && R.rain72>=15)) return ['skip','Closed when very wet','Rope sections near the top. Not today.']; return ['good','Rain has held off','Moderate, 4 miles. Hanalei Bay views.']; }
+  };
+  function trailRead(r, R){
+    var it = r.it, o = { it:it, feat:r.state==='feature', level:'na', label:waitLabel(), why:[] };
+    if(!R) return o;
+    var f = TRAIL[it.id];
+    if(!f){ o.label = 'No reading'; o.why.push('No trail record in the guide yet.'); return o; }
+    var t = f(R); o.level = t[0]; o.label = {good:'Good',fair:'Maybe',skip:'Skip'}[t[0]]; o.why.push(t[1]+'. '+t[2]);
+    return o;
+  }
+
+  /* ---- tour kinds, with the guide's own rule thresholds (index.html TOURS_LIBRARY). Kinds,
+     not vendors: the Tours tab carries the partner link, not a catalog. ---- */
+  function hourIn(c,a,b){ return c.h >= a && c.h < b; }
+  var TOURS = [
+    { n:'Nā Pali boat and snorkel', rules:[
+      [function(c){ return c.brown; },'skip','Stream runoff after rain. Steer them to the canyon instead.'],
+      [function(c){ return c.es > 7; },'skip','Surf too big. Boats reroute or cancel.'],
+      [function(c){ return c.es > 4; },'fair','Moderate swell, expect a bumpy ride.'],
+      [function(c){ return c.wind > 22; },'fair','Windy, visibility may drop.'] ], def:['good','Calm water, good visibility.'] },
+    { n:'Helicopter', rules:[
+      [function(c){ return c.wind > 28; },'skip','Too windy, flights usually grounded.'],
+      [function(c){ return c.precip > 0.2; },'skip','Rain today. No flying through showers.'],
+      [function(c){ return c.precip_chance > 55; },'skip','High rain chance, the interior is likely socked in.'],
+      [function(c){ return c.cloud > 60; },'fair','Heavy cloud, interior views may be hidden.'],
+      [function(c){ return c.precip_chance > 30; },'fair','Marginal. Call the operator first.'],
+      [function(c){ return c.wind > 22; },'fair','Bumpy ride likely. Confirm with the operator.'] ], def:['good','Clear flying over the island.'] },
+    { n:'Waimea Canyon drive or tour', rules:[
+      [function(c){ return c.brown; },'good','Stream runoff today. A good day off the ocean.'],
+      [function(c){ return c.es > 6; },'good','High surf. A good day for the canyon.'],
+      [function(c){ return c.precip > 0.3; },'fair','Rain may hide the canyon.'] ], def:['fair','Beach day. Water tours rate higher.'] },
+    { n:'Lūʻau', rules:[
+      [function(c){ return hourIn(c,14,16); },'good','Most start around 5. Book by 3 for pickup.'],
+      [function(c){ return c.h >= 16; },'fair','Tonight is tight. Try tomorrow.'] ], def:['fair','Plan ahead. Most run nightly around 5.'] },
+    { n:'Wailua River kayak', rules:[
+      [function(c){ return c.precip > 0.4; },'skip','Heavy rain, the falls trail turns to mud.'],
+      [function(c){ return c.brown && c.precip > 0.1; },'fair','River may be high after rain.'],
+      [function(c){ return c.h >= 13; },'fair','Most paddles leave in the morning. Book tomorrow.'] ], def:['good','Calm river, a good paddle to the falls.'] },
+    { n:'Sunset sail', rules:[
+      [function(c){ return c.es > 6; },'skip','Too rough, the sunset run may cancel.'],
+      [function(c){ return c.wind > 22; },'fair','Windy, a chilly deck.'],
+      [function(c){ return c.cloud > 80; },'fair','Heavy cloud may dim the sunset.'],
+      [function(c){ return hourIn(c,12,17); },'good','Sails leave around 5. Book by 3.'],
+      [function(c){ return c.h < 12; },'good','Plenty of time to book tonight.'] ], def:['fair','Tonight is likely past booking. Try tomorrow.'] },
+    { n:'Zipline', rules:[
+      [function(c){ return c.wind > 28; },'skip','Too windy, lines pause in high wind.'],
+      [function(c){ return c.precip > 0.5; },'fair','Rain or shine, but they will get wet.'],
+      [function(c){ return c.es > 6 || c.brown; },'good','Ocean is rough. A good day in the trees.'] ], def:['good','Good conditions.'] },
+    { n:'Garden tour', rules:[
+      [function(c){ return c.precip > 0.2; },'good','Rain today. The garden stays open and quiet.'],
+      [function(c){ return hourIn(c,13,16); },'good','Afternoon tours. A good time to book.'] ], def:['fair','Beach first, garden later.'] }
+  ];
+  function islandCond(R){
+    var P = window.OS_PLACES, ids = Object.keys(EXP), es = [], brown = false;
+    var haz = {}; if(P) (P.DATA.beaches||[]).forEach(function(it){ if(it.h) haz[it.id] = 1; });
+    var region = {}; if(P) (P.DATA.beaches||[]).forEach(function(it){ region[it.id] = it.r; });
+    ids.forEach(function(id){ if(haz[id]) return; var b = EXP[id]; if(R.surfValid) es.push(eff(R, b)); if(runoff(R, b, region[id])) brown = true; });
+    return { es: es.length ? es.reduce(function(a,b){ return a+b; },0)/es.length : 99, wind: R.wind==null ? 0 : R.wind, precip: R.rainToday, precip_chance: R.rainChance||0, cloud: R.cloud==null ? 0 : R.cloud, brown: brown, h: R.now.hour };
+  }
+  function tourRead(t, c){
+    var o = { n:t.n, level:'na', label:waitLabel(), why:[] };
+    if(!c) return o;
+    var hit = null; for(var i=0;i<t.rules.length;i++){ if(t.rules[i][0](c)){ hit = t.rules[i]; break; } }
+    var lv = hit ? hit[1] : t.def[0], why = hit ? hit[2] : t.def[1];
+    o.level = lv; o.label = {good:'Good',fair:'Maybe',skip:'Skip'}[lv]; o.why.push(why);
+    return o;
+  }
+
+  /* ---- render ---- */
+  function lv(o){ return '<span class="td-lv '+o.level+'">'+esc(o.label)+'</span>'; }
+  function nm(o, tags){ return '<div class="td-nm">'+(o.feat ? IC.star : '')+esc(o.it ? o.it.n : o.n)+(tags||'')+'</div>'; }
+  function row(o, tags){ return '<div class="td-row">'+lv(o)+'<div>'+nm(o, tags)+(o.why.length ? '<div class="td-why">'+esc(o.why.filter(Boolean).join(' '))+'</div>' : '')+'</div></div>'; }
+  function lgTag(it){ return it.lg==='full_time' ? '<span class="tg">Lifeguard daily</span>' : it.lg==='seasonal_active' ? '<span class="tg">Lifeguard seasonal</span>' : '<span class="tg warn">No lifeguard</span>'; }
+  /* rank: the read first, then the operator's Featured star, then a lifeguard, then the calmer shore */
+  function byScore(a,b){
+    var d = LV[b.level]-LV[a.level]; if(d) return d;
+    d = (b.feat?1:0)-(a.feat?1:0); if(d) return d;
+    d = (b.lgRank||0)-(a.lgRank||0); if(d) return d;
+    if(a.es!=null && b.es!=null && a.es!==b.es) return a.es-b.es;
+    return String(a.it ? a.it.n : a.n).localeCompare(String(b.it ? b.it.n : b.n));
+  }
+  function openPlaces(){ var t = document.querySelector('.viewtabs button[data-view="places"]'); if(t) t.click(); }
+  function fmt1(v){ return v==null ? 'n/a' : v.toFixed(1); }
+  function fmt0(v){ return v==null ? 'n/a' : String(Math.round(v)); }
+
+  function renderHead(R){
+    var el = document.getElementById('tdHead');
+    var name = island ? ISL[island].n : 'your island';
+    var h = '<div class="td-head"><h2>Today on '+esc(name)+'</h2>' +
+      '<span class="cc-pill"><i></i>Live readings</span><span class="cc-pill"><i></i>Your Places picks</span>' +
+      (R ? '<span class="cc-upd">As of '+esc(((R.now.hour%12)||12)+':'+pad(R.now.minute)+(R.now.hour<12?' am':' pm'))+' HST</span>' : '') +
+      '<button type="button" class="td-btn" id="tdRefresh">Refresh</button></div>';
+    if(!island){ el.innerHTML = h + '<p class="cc-cap">'+(islandKnown ? 'Shows once your property&rsquo;s island is set.' : 'Finding your island&hellip;')+'</p>'; return; }
+    if(wxErr){ el.innerHTML = h + '<p class="cc-cap">Readings are unavailable right now. Your guide still has them.</p>'; return; }
+    if(!R){ el.innerHTML = h + '<p class="cc-cap">Loading the latest readings&hellip;</p>'; return; }
+    h += '<div class="td-wx">' +
+      '<div><span>Waves</span><b>'+fmt0(R.waveRaw)+' ft</b><span>'+(R.per!=null ? Math.round(R.per)+'s period' : '')+'</span></div>' +
+      '<div><span>Swell</span><b>'+fmt0(R.sw_h)+' ft</b><span>'+(R.sw_d!=null ? 'from the '+compass(R.sw_d) : '')+(R.sw_t!=null ? ', '+Math.round(R.sw_t)+'s' : '')+'</span></div>' +
+      '<div><span>Wind</span><b>'+fmt0(R.windRaw)+' mph</b><span>'+(R.wd!=null ? 'from the '+compass(R.wd) : '')+'</span></div>' +
+      '<div><span>Rain today</span><b>'+fmt1(inches(R.rainToday))+' in</b><span>'+(R.rain72!=null ? 'last 3 days '+fmt1(inches(R.rain72))+' in' : '')+'</span></div>' +
+      '<div><span>Rain chance</span><b>'+fmt0(R.rainChance)+'%</b><span>'+(R.cloud!=null ? R.cloud+'% cloud now' : '')+'</span></div>' +
+      '<div><span>UV now</span><b>'+fmt0(R.uv)+'</b><span>'+(R.temp!=null ? Math.round(R.temp)+'&deg;F' : '')+(R.uvMax!=null ? ', peak '+Math.round(R.uvMax) : '')+'</span></div>' +
+      '<div><span>Sunset</span><b>'+esc(clock(R.sunset)||'n/a')+'</b><span>'+(R.sunrise ? 'sunrise '+esc(clock(R.sunrise)) : '')+'</span></div>' +
+      '<div><span>Tide</span><b>'+(R.tideHi ? 'High '+esc(R.tideHi) : 'n/a')+'</b><span>'+(R.tideLo ? 'low '+esc(R.tideLo) : '')+'</span></div>' +
+    '</div>';
+    if(island !== 'kauai') h += '<p class="cc-cap">Readings are for '+esc(name)+'. The Places tab carries the Kauaʻi set for now, so the picks below are Kauaʻi places.</p>';
+    el.innerHTML = h;
+    var b = document.getElementById('tdRefresh'); if(b) b.addEventListener('click', function(){ loadWx(true); });
+  }
+  function shoreLine(reads){
+    var sum = {}, n = {};
+    reads.forEach(function(o){ if(o.es==null) return; var s = SHORE[o.it.r]; if(!s) return; sum[s] = (sum[s]||0)+o.es; n[s] = (n[s]||0)+1; });
+    var shores = Object.keys(sum).map(function(s){ return {s:s, es:sum[s]/n[s]}; }).sort(function(a,b){ return a.es-b.es; });
+    if(shores.length < 2) return '';
+    var lo = shores[0], hi = shores[shores.length-1];
+    return '<div class="td-shore"><span>Calmest shore: <b>'+esc(lo.s)+'</b>, about '+lo.es.toFixed(1)+' ft</span><span>Roughest: <b>'+esc(hi.s)+'</b>, about '+hi.es.toFixed(1)+' ft</span></div>';
+  }
+  function renderBeaches(R){
+    var el = document.getElementById('tdBeaches'), p = picks('beaches'), reads = p.rows.map(function(r){ return beachRead(r, R); }).sort(byScore);
+    var h = '<div class="cc-h">'+IC.wave+'Beaches<span class="note">'+reads.length+' you list or feature</span></div>';
+    var locked = p.locked.length ? '<p class="cc-cap">Not ranked: '+esc(p.locked.join(', '))+'. Hazard-locked spots keep their warning on the guide and never rank here, whatever you set them to.</p>' : '';
+    if(!reads.length){ el.innerHTML = h + '<div class="td-empty">No beaches are Featured or Listed yet. <button type="button" class="td-btn" data-td-places>Open Places</button></div>' + locked; return reads; }
+    h += (R ? shoreLine(reads) : '') + reads.map(function(o){ return row(o, lgTag(o.it)); }).join('') + locked;
+    el.innerHTML = h; return reads;
+  }
+  function renderTrails(R){
+    var el = document.getElementById('tdTrails'), reads = picks('hikes').rows.map(function(r){ return trailRead(r, R); }).sort(byScore);
+    var h = '<div class="cc-h">'+IC.trail+'Trails<span class="note">'+reads.length+' you list or feature</span></div>';
+    if(!reads.length){ el.innerHTML = h + '<div class="td-empty">No trails are Featured or Listed yet. <button type="button" class="td-btn" data-td-places>Open Places</button></div>'; return reads; }
+    h += reads.map(function(o){ return row(o); }).join('');
+    el.innerHTML = h; return reads;
+  }
+  function renderTours(R){
+    var el = document.getElementById('tdTours'), c = R ? islandCond(R) : null, reads = TOURS.map(function(t){ return tourRead(t, c); }).sort(byScore);
+    el.innerHTML = '<div class="cc-h">'+IC.boat+'Tour kinds<span class="note">By kind, not by vendor</span></div>' + reads.map(function(o){ return row(o); }).join('') +
+      '<p class="cc-cap">Guests book through the partner link on your Tours tab. These reads use the same rules the guide applies to its own tour cards.</p>';
+    return reads;
+  }
+  function renderRail(beaches, trails, tours, R){
+    var el = document.getElementById('tdRail');
+    function top(list, n, ok){ return list.filter(function(o){ return ok ? o.level === 'good' || o.level === 'fair' : true; }).slice(0, n); }
+    function mini(o){ return '<div class="td-row">'+lv(o)+'<div class="td-nm">'+(o.feat ? IC.star : '')+esc(o.it ? o.it.n : o.n)+'</div></div>'; }
+    var b = top(beaches, 3, true), t = top(trails, 2, true), k = top(tours, 3, true);
+    var h = '<div class="cc-h">'+IC.sun+'Today&rsquo;s outlook'+(R ? '<span class="note">'+esc(R.now.date.slice(5).replace('-','/'))+'</span>' : '')+'</div>';
+    h += '<div class="td-sec">Beaches</div>' + (b.length ? b.map(mini).join('') : '<div class="td-empty">'+(R ? 'No calm pick among your beaches today.' : 'Loading&hellip;')+'</div>');
+    h += '<div class="td-sec">Trails</div>' + (t.length ? t.map(mini).join('') : '<div class="td-empty">'+(R ? 'No trail pick today.' : 'Loading&hellip;')+'</div>');
+    h += '<div class="td-sec">Tours</div>' + (k.length ? k.map(mini).join('') : '<div class="td-empty">'+(R ? 'No tour kind rates well today.' : 'Loading&hellip;')+'</div>');
+    h += '<p class="cc-cap">Ranked from what you Feature or List on Places. Full reasons in the cards.</p>';
+    el.innerHTML = h;
+  }
+  function render(){
+    var R = readings();
+    renderHead(R);
+    var b = renderBeaches(R), t = renderTrails(R), k = renderTours(R);
+    renderRail(b, t, k, R);
+  }
+  view.addEventListener('click', function(e){ if(e.target.closest('[data-td-places]')) openPlaces(); });
+
+  /* ---- feed ---- */
+  function loadWx(force){
+    if(!island){ render(); return; }
+    if(!force && wxAt && Date.now()-wxAt < 5*60*1000) { render(); return; }
+    var I = ISL[island]; wxErr = false;
+    var WX = /(^|\.)oceansafety\.app$|\.netlify\.app$/.test(location.hostname) ? '' : 'https://ocean-safety.netlify.app';
+    fetch(WX+'/api/wx?k=live&island='+island+'&lat='+I.lat.toFixed(2)+'&lon='+I.lon.toFixed(2))
+      .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+      .then(function(d){ wx = d; wxAt = Date.now(); render(); })
+      .catch(function(){ wxErr = true; render(); });
+  }
+  function resolveIsland(){
+    if(!isLive()){ island = 'kauai'; islandKnown = true; loadWx(); return; }
+    fetch('partner-config/'+encodeURIComponent(slug())+'.json', { cache:'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cfg){ var i = cfg && typeof cfg.island === 'string' ? cfg.island.trim().toLowerCase() : ''; island = ISL[i] ? i : null; islandKnown = true; loadWx(); })
+      .catch(function(){ island = null; islandKnown = true; render(); });
+  }
+
+  /* first paint shows the picks at once; the readings fill in when the feed answers */
+  render();
+  var tab = document.querySelector('.viewtabs button[data-view="today"]');
+  var started = false;
+  function start(){ if(started){ loadWx(); return; } started = true; resolveIsland(); }
+  if(tab) tab.addEventListener('click', function(){ setTimeout(start, 0); });
+  if(tab && !tab.hidden) start();
+  window.addEventListener('load', function(){ if(tab && !tab.hidden) start(); });
+  window.addEventListener('os:places-changed', function(){ setTimeout(render, 0); });
+  window.addEventListener('storage', function(){ setTimeout(render, 0); });
+  timer = setInterval(function(){ if(!view.hidden && island) loadWx(true); }, 10*60*1000);
 })();
 </script>
 <script>
