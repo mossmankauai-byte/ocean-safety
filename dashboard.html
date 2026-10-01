@@ -6264,7 +6264,12 @@ if(DEMO){
   var Q = new URLSearchParams(location.search);
   if(Q.get('tour') !== 'present') return;
   /* the presenter always runs on the sample Dashboard: a real property's numbers never show on a call */
-  if((window.OS_SLUG || '').trim() && window.OS_SLUG !== 'demo') return;
+  function realProperty(){
+    var s = String(window.OS_SLUG || '').trim();
+    return (s && s !== 'demo') || !!window.OS_AUTH || !!Q.get('t') || !!Q.get('group') ||
+      ['ref','slug'].some(function(k){ var v = (Q.get(k) || '').trim(); return v && v !== 'demo'; });
+  }
+  if(realProperty()) return;
   var steps = [], i = 0, panel, stage, hl = null;
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function tab(v){ var b = document.querySelector('.viewtabs button[data-view="'+v+'"]'); if(b) b.click(); }
@@ -6315,7 +6320,7 @@ if(DEMO){
     else if(e.key === 'Escape') close();
   }
   function start(data){
-    steps = data.steps || []; if(!steps.length) return;
+    steps = data.steps || []; if(!steps.length || realProperty()) return;
     document.body.classList.add('pz-on');
     stage = document.createElement('div'); stage.className = 'pz-stage'; stage.hidden = true; document.body.appendChild(stage);
     panel = document.createElement('aside'); panel.className = 'pz-panel'; panel.setAttribute('aria-label','Presenter');
