@@ -38,7 +38,11 @@ jobs:
           node-version: "20"
 
       - name: Install Playwright
+        # The vendored checks load Playwright from .github/tools/node/node_modules, the
+        # same layout as the standards tree, so install it there rather than at the root.
         run: |
+          mkdir -p .github/tools/node
+          cd .github/tools/node
           npm init -y >/dev/null
           npm i -D playwright@1.62.0 >/dev/null
           npx playwright install --with-deps chromium
