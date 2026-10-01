@@ -11383,12 +11383,23 @@ window._partnerCfgReady = (function(){
       })
       .catch(() => null);
 
+  // The worker config also carries the tour affiliate IDs an operator saves from the
+  // Dashboard Tours tab, so it is fetched once, up front, and its IDs are laid over
+  // whichever config wins. A worker config holding nothing but those IDs is not a partner
+  // config and never stands in for one (that would skip the island-bearing synth below).
+  const _isObj = c => !!c && typeof c === 'object' && !Array.isArray(c);
+  const _worker = fetch('https://concierge-guide-api.oceansafe-hi.workers.dev/cfg/' + slug, opts)
+    .then(r => (r.ok ? r.json() : null))
+    .catch(() => null);
   return fetch('/partner-config/' + slug + '.json', opts)
     .then(r => (r.ok ? r.json() : Promise.reject(new Error('no committed config'))))
-    .catch(() => fetch('https://concierge-guide-api.oceansafe-hi.workers.dev/cfg/' + slug, opts)
-      .then(r => (r.ok ? r.json() : null))
-      .catch(() => null))
-    .then(cfg => (cfg && typeof cfg === 'object' && !Array.isArray(cfg)) ? cfg : _synthCfg())
+    .catch(() => _worker.then(w => (_isObj(w) && Object.keys(w).some(k => k !== 'affiliates')) ? w : null))
+    .then(cfg => _isObj(cfg) ? cfg : _synthCfg())
+    .then(cfg => _worker.then(w => {
+      if(_isObj(cfg) && _isObj(w) && _isObj(w.affiliates))
+        cfg.affiliates = Object.assign({}, cfg.affiliates, w.affiliates);
+      return cfg;
+    }))
     .then(cfg => {
       if(timer) clearTimeout(timer);
       if(cfg && typeof cfg === 'object' && !Array.isArray(cfg)){

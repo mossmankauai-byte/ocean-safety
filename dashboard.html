@@ -32,7 +32,8 @@ window.OS_SEGMENTS = {
     freePrice:'Free', paidPrice:'Pricing on request',
     pcFoot:'Free shows one amenity. Pricing on request for the paid plan.',
     portfolioNote:'Pricing on request.',
-    tabs:['home','stayclose','promos','guests','places','shop']
+    tabs:['home','stayclose','promos','guests','places','desk','shop'],
+    deskLabel:'Tours', deskKind:'affiliate'
   },
   timeshare: {
     h1:'Your Resort', slug:'your-resort', entity:'resort', unit:'units', count:220,
@@ -2352,15 +2353,15 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       <section style="margin-top:18px">
         <div class="sec-h">
           <h2>Tours &amp; activities</h2>
-          <p>The tours you steer guests to &mdash; routed through your own affiliate link, so every booking pays you.</p>
+          <p>The tours you steer guests to, booked through your own partner link so every booking pays you.</p>
         </div>
 
         <!-- Your affiliate link -->
         <div class="card">
           <div class="sec-h" style="margin-bottom:10px"><h3 style="margin:0;font-size:15px;color:var(--ink)">Your tour affiliate link</h3></div>
-          <p style="margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5">Paste your Viator, GetYourGuide or direct booking link. Every tour a guest taps in the guide routes through this &mdash; you keep the commission. Leave it blank to use OceanSafe&rsquo;s default.</p>
+          <p style="margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5">Paste any link from your Viator or GetYourGuide partner account. We find your partner ID in it, and every tour a guest books from your guide pays you. Save with the box empty to go back to OceanSafe&rsquo;s link.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <input id="affInput" aria-label="Your affiliate link" type="url" inputmode="url" placeholder="https://www.viator.com/?pid=YOUR_ID" style="flex:1;min-width:240px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line,#d9e2e6);border-radius:10px;background:var(--bg-2,#fff);color:var(--ink,#1a2b30)">
+            <input id="affInput" aria-label="Your affiliate link" type="url" inputmode="url" placeholder="Paste a Viator or GetYourGuide partner link" style="flex:1;min-width:240px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line,#d9e2e6);border-radius:10px;background:var(--bg-2,#fff);color:var(--ink,#1a2b30)">
             <button type="button" id="affSave" class="pl-btn primary" style="border:0;cursor:pointer">Save link</button>
           </div>
           <p id="affNote" style="margin:10px 0 0;font-size:12.5px;color:var(--muted)"></p>
@@ -2370,7 +2371,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         <div class="card" style="margin-top:14px">
           <div class="title"><span class="l">Tours guests tapped, this month</span><span><span class="chip live">Live now</span> <span class="chip sample">Sample</span></span></div>
           <div id="tourList" style="margin-top:8px"></div>
-          <div class="cap" style="margin-top:12px">Sample figures. Once your property is live, these become real taps and bookings from your co-branded guide &mdash; each attributed to your affiliate link.</div>
+          <div class="cap" style="margin-top:12px">Sample figures. Once your property is live, these become real taps and bookings from your co-branded guide, each attributed to your partner link.</div>
         </div>
       </section>
     </div><!-- /view-desk -->
@@ -3515,7 +3516,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     { view:'segments', sel:'#view-segments .card', title:'Three guests, three funnels',
       body:'Renters, repeat guests and owners each get their own QR and their own funnel — owners never see a sales pitch.' },
     { view:'desk', sel:'#affInput', title:'Tours & affiliate',
-      body:'Add your own tour affiliate link — Viator, GetYourGuide or a direct link — and every tour a guest taps routes through it, so you keep the commission.' },
+      body:'Paste a link from your Viator or GetYourGuide partner account. Every tour a guest books from your guide then pays you.' },
     { center:true, title:'It’s yours', last:true,
       body:'Everything you shape here saves as a browser draft as you go; Export sends it into your app build. Questions? Your OceanSafe contact is one text away. Replay with the <b>Tour</b> button.' }
   ];
@@ -5257,13 +5258,72 @@ if(DEMO){
   var inp=document.getElementById('affInput'), btn=document.getElementById('affSave'), note=document.getElementById('affNote');
   var KEY='os_pm_affiliate_link';
   function mark(t){ if(note) note.innerHTML=t; }
-  try{ var s=localStorage.getItem(KEY); if(s&&inp){ inp.value=s; mark('&#10003; Saved &mdash; tour taps route through your link.'); } }catch(e){}
+  /* 2026-10-01: Save used to write this browser only, so guests never got the operator's
+     link. Signed in, it now saves the partner ID to the property's config through
+     /api/ts-cfg, and the guest app lays it over its own. The un-signed-in demo keeps the
+     browser-only save. window.OS_TOUR_AFF is what the server confirmed; the
+     needs-attention row and the phone preview read it. */
+  var real = function(){ return !!(window.OS_AUTH && window.OS_SLUG && window.OS_KEY); };
+  function post(body){
+    body.slug = window.OS_SLUG; body.key = window.OS_KEY;
+    return fetch('/api/ts-cfg', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)})
+      .then(function(r){ return r.json(); });
+  }
+  function say(aff){
+    window.OS_TOUR_AFF = aff || {};
+    var bits = [];
+    if(aff && aff.viator_pid) bits.push('Viator <b>'+aff.viator_pid+'</b>');
+    if(aff && aff.gyg_partner_id) bits.push('GetYourGuide <b>'+aff.gyg_partner_id+'</b>');
+    mark(bits.length ? '&#10003; Live in your guide: '+bits.join(', ')+'. Tour bookings from your guests pay you.' : 'No link saved. Tours use OceanSafe&rsquo;s partner link.');
+    try{ window.dispatchEvent(new CustomEvent('os:tours-changed')); }catch(e){}
+  }
+  function load(){
+    if(!real()) return;
+    if(inp) inp.value = '';
+    post({}).then(function(j){ if(j && j.ok) say(j.affiliates); }).catch(function(){});
+  }
+  document.addEventListener('os-authed', load);
+  if(real()) load();
+  else { try{ var s=localStorage.getItem(KEY); if(s&&inp){ inp.value=s; mark('&#10003; Saved in this browser. This is a preview, so guests never see it.'); } }catch(e){} }
   if(btn&&inp){ btn.addEventListener('click', function(){
     var v=(inp.value||'').trim();
-    try{ if(v){ localStorage.setItem(KEY,v); mark('&#10003; Saved &mdash; tour taps route through your link.'); } else { localStorage.removeItem(KEY); mark('Cleared &mdash; using OceanSafe&rsquo;s default tour links.'); } }
-    catch(e){ mark('Saved for this session.'); }
+    if(!real()){
+      try{ if(v){ localStorage.setItem(KEY,v); mark('&#10003; Saved in this browser. This is a preview, so guests never see it.'); } else { localStorage.removeItem(KEY); mark('Cleared.'); } }
+      catch(e){ mark('Saved for this session.'); }
+      return;
+    }
+    var p = window.osParseAff(v), aff;
+    if(p.empty) aff = {viator_pid:'', gyg_partner_id:''};
+    else if(p.viator_pid) aff = {viator_pid:p.viator_pid};
+    else if(p.gyg_partner_id) aff = {gyg_partner_id:p.gyg_partner_id};
+    else { mark(p.msg); return; }
+    btn.disabled = true; mark('Saving&hellip;');
+    post({affiliates:aff}).then(function(j){
+      btn.disabled = false;
+      if(j && j.ok && (j.saved||[]).indexOf('affiliates') > -1){ inp.value=''; say(j.affiliates); }
+      else mark('That did not save. Try again, or text your OceanSafe contact.');
+    }).catch(function(){ btn.disabled = false; mark('That did not save. Check your connection and try again.'); });
   }); }
 })();
+/* Pull the partner ID out of whatever the operator pastes: a Viator link (pid=), a
+   GetYourGuide link (partner_id=), or a bare Viator ID. Shared with the phone preview. */
+window.osParseAff = function(v){
+  var OK = /^[A-Za-z0-9_-]{1,32}$/;
+  v = (v||'').trim();
+  if(!v) return {empty:true};
+  if(/^P\d{5,}$/i.test(v)) return {viator_pid:v.toUpperCase()};
+  var u; try{ u = new URL(/^https?:\/\//i.test(v) ? v : 'https://'+v); }catch(e){ u = null; }
+  var h = u ? u.hostname.replace(/^www\./,'') : '';
+  if(/(^|\.)viator\.com$/i.test(h)){
+    var pid = u.searchParams.get('pid');
+    return (pid && OK.test(pid)) ? {viator_pid:pid} : {msg:'That Viator link has no partner ID. Copy a link from your Viator partner account. It has <b>pid=</b> in it.'};
+  }
+  if(/(^|\.)getyourguide\.[a-z.]+$/i.test(h)){
+    var g = u.searchParams.get('partner_id');
+    return (g && OK.test(g)) ? {gyg_partner_id:g} : {msg:'That GetYourGuide link has no partner ID. Copy a link from your GetYourGuide partner account. It has <b>partner_id=</b> in it.'};
+  }
+  return {msg:'Paste a Viator or GetYourGuide partner link. Other booking sites are not supported yet.'};
+};
 </script>
 
 <script>
@@ -5972,7 +6032,9 @@ if(DEMO){
       if(!feat) rows.push([IC.star, 'No house picks yet. Featured places show first in your guide', 'places', 'Pick']);
     }
     if(tabShown('desk')){
-      var aff = ''; try{ aff = localStorage.getItem('os_pm_affiliate_link') || ''; }catch(e){}
+      var aff = '', ta = window.OS_TOUR_AFF;
+      if(window.OS_AUTH) aff = (ta && (ta.viator_pid || ta.gyg_partner_id)) || '';
+      else { try{ aff = localStorage.getItem('os_pm_affiliate_link') || ''; }catch(e){} }
       if(!aff) rows.push([IC.link, 'Tour taps use OceanSafe&rsquo;s link, not yours', 'desk', 'Add link']);
     }
     if(live && live.cur.any && live.prior.sessions > 0){
@@ -6090,7 +6152,7 @@ if(DEMO){
   markPeriod();
 
   window.osCCLive = function(d){ live = d; if(PERIODS.indexOf(d.period) >= 0){ period = d.period; markPeriod(); } renderAll(); };
-  ['os:promos-changed','os:amenities-changed','os:places-changed','storage'].forEach(function(ev){ window.addEventListener(ev, function(){ setTimeout(renderTodo, 0); }); });
+  ['os:promos-changed','os:amenities-changed','os:places-changed','os:tours-changed','storage'].forEach(function(ev){ window.addEventListener(ev, function(){ setTimeout(renderTodo, 0); }); });
 
   renderAll();
   /* a signed-in operator's slug and plan arrive with the session, after load (os-authed);
@@ -6188,15 +6250,20 @@ if(DEMO){
     var drawTours = function(){
       var el = document.getElementById('phTours'); if(!el) return;
       var names = [].map.call(document.querySelectorAll('#tourList > div > span:first-child'), function(s){ return s.textContent.trim(); }).filter(Boolean).slice(0,4);
-      var v = inp ? (inp.value||'').trim() : '', host = '';
-      try{ if(v) host = new URL(/^https?:\/\//i.test(v) ? v : 'https://'+v).hostname.replace(/^www\./,''); }catch(e){ host = ''; }
+      var v = inp ? (inp.value||'').trim() : '', pa = window.osParseAff ? window.osParseAff(v) : {empty:true}, ta = window.OS_TOUR_AFF || {};
+      var via = pa.viator_pid ? 'Book opens <b>Viator</b> with your ID <b>'+esc(pa.viator_pid)+'</b> once you save.'
+        : pa.gyg_partner_id ? 'Book opens <b>GetYourGuide</b> with your ID <b>'+esc(pa.gyg_partner_id)+'</b> once you save.'
+        : !pa.empty ? 'No partner ID in that link yet. Book uses OceanSafe&rsquo;s partner link until there is one.'
+        : (ta.viator_pid || ta.gyg_partner_id) ? 'Book opens '+(ta.viator_pid ? '<b>Viator</b>' : '<b>GetYourGuide</b>')+' through your partner ID.'
+        : 'Book uses OceanSafe&rsquo;s partner link until you add yours.';
       var h = '<div class="gp-head">'+esc(propName())+'</div><div class="gp-title">Tours and activities</div><div class="gp-sec">POPULAR WITH GUESTS</div>';
       h += names.map(function(n){ return '<div class="gp-row"><span class="t"><b>'+esc(n)+'</b></span><span class="gp-btn">Book</span></div>'; }).join('');
-      h += '<div class="gp-via">'+(host ? 'Book opens <b>'+esc(host)+'</b> through your link.' : (v ? 'That link does not look right yet. Book uses OceanSafe&rsquo;s partner link until it does.' : 'Book uses OceanSafe&rsquo;s partner link until you add yours.'))+'</div>';
+      h += '<div class="gp-via">'+via+'</div>';
       el.innerHTML = h;
     };
     if(inp) inp.addEventListener('input', drawTours);
     var save = document.getElementById('affSave'); if(save) save.addEventListener('click', function(){ setTimeout(drawTours,0); });
+    window.addEventListener('os:tours-changed', drawTours);
     drawTours();
     window.addEventListener('load', drawTours);
   }
