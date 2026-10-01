@@ -6492,11 +6492,11 @@ window.osParseAff = function(v){
     var two = s.img.length > 1, h = '';
     s.img.forEach(function(im){
       if(im.focus){ var f = im.focus, pc = function(v, d){ return (v / d * 100).toFixed(2) + '%'; };
-        h += '<div class="pz-ph"><div class="scr"><img src="' + DIR + im.src + '" alt="' + esc(s.caption) + '"><i class="fx" style="left:' + pc(f[0], im.w) + ';top:' + pc(f[1], im.h) + ';width:' + pc(f[2], im.w) + ';height:' + pc(f[3], im.h) + '"></i></div></div>';
+        h += '<div class="pz-ph"><div class="scr"><img src="' + DIR + im.src + '?v=' + im.v + '" alt="' + esc(s.caption) + '"><i class="fx" style="left:' + pc(f[0], im.w) + ';top:' + pc(f[1], im.h) + ';width:' + pc(f[2], im.w) + ';height:' + pc(f[3], im.h) + '"></i></div></div>';
       } else if(!s.desk){
-        h += '<div class="pz-ph"><div class="scr"><img src="' + DIR + im.src + '" alt="' + esc(s.caption) + '"></div></div>';
+        h += '<div class="pz-ph"><div class="scr"><img src="' + DIR + im.src + '?v=' + im.v + '" alt="' + esc(s.caption) + '"></div></div>';
       } else {
-        h += '<div class="pz-dk' + (s.side === 'lobby' ? ' tv' : '') + '"><div class="tb"><i></i><i></i><i></i></div><img src="' + DIR + im.src + '" alt="' + esc(s.caption) + '"></div>';
+        h += '<div class="pz-dk' + (s.side === 'lobby' ? ' tv' : '') + '"><div class="tb"><i></i><i></i><i></i></div><img src="' + DIR + im.src + '?v=' + im.v + '" alt="' + esc(s.caption) + '"></div>';
       }
     });
     return '<div class="pz-vis' + (two ? ' two' : '') + '">' + h + '<div class="pz-cap-src">' + esc(s.caption) + '</div></div>';
