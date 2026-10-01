@@ -3883,6 +3883,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var el = gpEl(); if(!el) return;
     el.innerHTML = gpAmenityHTML(gpItems.amenities);
   }
+  // The segment and the signed-in partner rename the header after this first draw; redraw then.
+  window.addEventListener('load', gpRender);
+  document.addEventListener('os-authed', function(){ setTimeout(gpRender, 0); });
   function gpPop(){
     var el = gpEl(); if(!el) return;
     el.classList.remove('gp-pop'); void el.offsetWidth; el.classList.add('gp-pop');
@@ -4435,7 +4438,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         '<div class="v">' + totalTxt + ' <small>amenity taps last month, with no offer live</small></div>' +
         '<ol class="rank" style="margin-top:12px">' + rank + '</ol>' +
         '<div class="cap">' + totalTxt + ' amenity taps last month. A tap is interest, never a booking.</div>' +
-        '<div class="note" id="pmNudge" style="margin-top:12px">Your guests showed ' + totalTxt + ' taps of interest in your amenities last month — with no offer live to catch them. Unlock Promotions to reach them.</div>' +
+        '<div class="note" id="pmNudge" style="margin-top:12px">Your guests showed ' + totalTxt + ' taps of interest in your amenities last month, with no offer live to catch them. Turn on Promotions to reach them.</div>' +
         btnsHTML +
       '</div>');
   }
@@ -5343,7 +5346,7 @@ if(DEMO){
    Sub-tab click swaps the iframe src, so each portal page loads on demand and
    the console never pays for six pages it may not open.
 
-   PLAN: paid by default — for a car fleet the store IS the per-vehicle unlock,
+   PLAN: paid by default. For a car fleet the store IS the per-vehicle add-on,
    and a demo must never open a prospect onto a locked box. ?plan=free swaps the
    whole frame for the lock card below (built by the free-tier engine). */
 (function(){
@@ -5918,11 +5921,11 @@ if(DEMO){
       }
       var top = Object.keys(c.top).map(function(k){ return { id:k.split('|')[1], n:c.top[k] }; }).sort(function(a,b){ return b.n-a.n; })[0];
       var share = top && c.poi_tap ? Math.round(top.n / c.poi_tap * 100) : 0;
-      h += tile('Guide opens counted', ct(c.sessions), delta(c.sessions, pr.sessions), spark(perDay(live.days,'sessions'),'#17805a'));
-      h += tile('Place taps counted', ct(c.poi_tap), delta(c.poi_tap, pr.poi_tap), spark(perDay(live.days,'poi_tap'),'#0e6e8c'));
+      h += tile('Guide opens, at least', ct(c.sessions), delta(c.sessions, pr.sessions), spark(perDay(live.days,'sessions'),'#17805a'));
+      h += tile('Place taps, at least', ct(c.poi_tap), delta(c.poi_tap, pr.poi_tap), spark(perDay(live.days,'poi_tap'),'#0e6e8c'));
       h += tile('Most-opened place', top ? esc(live.nameFor(top.id)) : '&mdash;', '<span class="d">'+(top ? ct(top.n)+' taps, '+share+'% of all' : 'No place taps yet')+'</span>', '<div class="bar"><i style="width:'+share+'%"></i></div>', true);
       if(free) h += tile('Stay-Close shown', ct(c.stay_close_render), delta(c.stay_close_render, pr.stay_close_render), spark(perDay(live.days,'stay_close_render'),'#0e6e8c'));
-      else { var o = sumKey(live.days,'promo_tap'), op = sumKey(live.priorDays,'promo_tap'); h += tile('Offer taps counted', ct(o), delta(o, op), spark(perDay(live.days,'promo_tap'),'#c9a84c')); }
+      else { var o = sumKey(live.days,'promo_tap'), op = sumKey(live.priorDays,'promo_tap'); h += tile('Offer taps, at least', ct(o), delta(o, op), spark(perDay(live.days,'promo_tap'),'#c9a84c')); }
     } else {
       var S = SAMPLE[period];
       h += tile('Guide opens', fmt(S.s), delta(S.s, S.sp), spark(sampleSeries(period>30?18:period, S.s),'#17805a'));
@@ -6176,6 +6179,7 @@ if(DEMO){
     };
     window.addEventListener('os:places-changed', function(e){ hot = e.detail || null; setTimeout(drawPlaces, 0); });
     drawPlaces();
+    window.addEventListener('load', drawPlaces);
   }
 
   /* ---- Tours: the tour cards and where Book goes, as you type the link ---- */
@@ -6194,6 +6198,7 @@ if(DEMO){
     if(inp) inp.addEventListener('input', drawTours);
     var save = document.getElementById('affSave'); if(save) save.addEventListener('click', function(){ setTimeout(drawTours,0); });
     drawTours();
+    window.addEventListener('load', drawTours);
   }
 
   /* ---- one Preview button for the bottom sheet, shown only on a tab that has a rail ---- */
