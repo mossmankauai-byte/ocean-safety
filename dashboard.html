@@ -6219,5 +6219,121 @@ if(DEMO){
   sync();
 })();
 </script>
+<style>
+/* ============ PRESENTER TOUR (?tour=present) 2026-10-01 ============
+   Walks the hotel feature sheet row by row on the sample Dashboard. Steps come from
+   assets/tour/hotel/tour.json, exported from the sheet's own rows (export-tour.py). */
+  body.pz-on{padding-right:430px}
+  body.pz-on .ph-fab,body.pz-on #tourBtn{display:none}
+  .pz-panel{position:fixed;top:0;right:0;bottom:0;width:430px;z-index:120;background:var(--card);border-left:1px solid var(--line);
+    box-shadow:-12px 0 36px rgba(15,59,73,.14);display:flex;flex-direction:column;font-size:14px;color:var(--ink)}
+  .pz-top{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line);font-size:12px;font-weight:700;color:var(--muted)}
+  .pz-top b{color:var(--ink)} .pz-top .x{margin-left:auto}
+  .pz-prog{height:3px;background:var(--hair-soft)} .pz-prog i{display:block;height:100%;background:var(--gold);transition:width .25s}
+  .pz-body{flex:1;overflow:auto;padding:18px 20px}
+  .pz-part{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gold-ink);text-transform:uppercase}
+  .pz-n{font-family:'Fraunces',Georgia,serif;font-size:40px;line-height:1;color:var(--gold);margin:10px 0 0}
+  .pz-name{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:500;line-height:1.2;margin:6px 0 8px}
+  .pz-meta{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--sea);text-transform:uppercase}
+  .pz-meta .nl{color:var(--warn)}
+  .pz-lab{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gold-ink);text-transform:uppercase;margin:16px 0 4px}
+  .pz-item{font-weight:700;font-size:15px;line-height:1.45;margin:14px 0 0}
+  .pz-how{font-size:13px;line-height:1.55;color:var(--ink-2)}
+  .pz-cap{font-size:12px;color:var(--muted);margin-top:10px}
+  .pz-nav{display:flex;gap:8px;align-items:center;padding:12px 18px;border-top:1px solid var(--line)}
+  .pz-nav button,.pz-top button{appearance:none;font:inherit;font-weight:700;border-radius:999px;cursor:pointer}
+  .pz-nav .pz-back:disabled{opacity:.4;cursor:default}
+  .pz-nav .pz-back{font-size:13px;padding:9px 16px;color:var(--sea);background:transparent;border:1px solid rgba(14,110,140,.35)}
+  .pz-nav .pz-next{font-size:13px;padding:9px 18px;color:var(--on-sea);background:var(--sea);border:0;margin-left:auto}
+  .pz-nav .k{font-size:11px;color:var(--muted)}
+  .pz-top button{font-size:12px;padding:5px 11px;color:var(--muted);background:var(--bg-2);border:0}
+  .pz-hl{outline:3px solid var(--gold);outline-offset:6px;border-radius:12px;scroll-margin-top:90px}
+  .pz-stage{position:fixed;top:0;left:0;right:430px;bottom:0;z-index:110;background:rgba(15,59,73,.78);display:flex;align-items:center;justify-content:center;gap:22px;padding:28px}
+  .pz-stage[hidden]{display:none}
+  .pz-stage img{display:block;max-height:calc(100vh - 80px);max-width:calc((100vw - 430px - 90px) / var(--n,1));border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.35);background:#fff}
+  .pz-stage.desk img{border-radius:12px}
+  @media (max-width:900px){
+    body.pz-on{padding-right:0;padding-bottom:46vh}
+    .pz-panel{top:auto;left:0;width:auto;height:46vh;border-left:0;border-top:1px solid var(--line)}
+    .pz-stage{right:0;bottom:46vh}
+    .pz-stage img{max-height:calc(54vh - 40px);max-width:calc((100vw - 60px) / var(--n,1))}
+  }
+</style>
+<script>
+(function(){
+  var Q = new URLSearchParams(location.search);
+  if(Q.get('tour') !== 'present') return;
+  /* the presenter always runs on the sample Dashboard: a real property's numbers never show on a call */
+  if((window.OS_SLUG || '').trim() && window.OS_SLUG !== 'demo') return;
+  var steps = [], i = 0, panel, stage, hl = null;
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function tab(v){ var b = document.querySelector('.viewtabs button[data-view="'+v+'"]'); if(b) b.click(); }
+  function find(sel){
+    if(sel.indexOf('sec:') !== 0) return document.querySelector(sel);
+    var t = sel.slice(4), c = [].filter.call(document.querySelectorAll('.sec-h h2,.title,h2,h3'), function(e){ return e.offsetParent && e.textContent.indexOf(t) >= 0; });
+    return c.length ? (c[0].closest('section') || c[0]) : null;
+  }
+  function show(k){
+    i = Math.max(0, Math.min(steps.length-1, k));
+    var s = steps[i];
+    if(hl){ hl.classList.remove('pz-hl'); hl = null; }
+    if(s.view){
+      tab(s.view);
+      setTimeout(function(){ var el = find(s.sel); if(el){ hl = el; el.classList.add('pz-hl'); el.scrollIntoView({block:'start', behavior:'smooth'}); } }, 120);
+    }
+    if(s.img){
+      stage.hidden = false; stage.className = 'pz-stage' + (s.desk ? ' desk' : '');
+      stage.style.setProperty('--n', s.img.length);
+      stage.innerHTML = s.img.map(function(f){ return '<img src="assets/tour/hotel/'+f+'" alt="'+esc(s.caption)+'">'; }).join('');
+    } else { stage.hidden = true; stage.innerHTML = ''; }
+    var built = s.status === 'Built, not live';
+    panel.querySelector('.pz-body').innerHTML =
+      '<div class="pz-part">Part '+s.part+' &middot; '+esc(s.partTitle)+'</div>' +
+      '<div class="pz-n">'+s.n+'</div><div class="pz-name">'+esc(s.name)+'</div>' +
+      '<div class="pz-meta">'+esc(s.plan)+' &middot; <span'+(built?' class="nl"':'')+'>'+esc(s.status)+'</span> &middot; '+esc(s.who.join(', '))+'</div>' +
+      '<div class="pz-lab">What it does</div><div class="pz-how">'+esc(s.does)+'</div>' +
+      '<div class="pz-item">'+esc(s.item)+'</div>' +
+      '<div class="pz-lab">How it works</div><div class="pz-how">'+esc(s.how)+'</div>' +
+      '<div class="pz-cap">'+esc(s.caption)+'</div>';
+    panel.querySelector('.pz-body').scrollTop = 0;
+    panel.querySelector('.pz-ct').innerHTML = '<b>'+s.n+'</b> of '+steps.length;
+    panel.querySelector('.pz-prog i').style.width = Math.round((i+1)/steps.length*100)+'%';
+    panel.querySelector('.pz-back').disabled = i === 0;
+    panel.querySelector('.pz-next').textContent = i === steps.length-1 ? 'Finish' : 'Next';
+    try{ var q = new URLSearchParams(location.search); q.set('step', s.n); history.replaceState(null, '', location.pathname + '?' + q.toString()); }catch(e){}
+  }
+  function close(){
+    document.body.classList.remove('pz-on'); if(panel) panel.remove(); if(stage) stage.remove();
+    if(hl) hl.classList.remove('pz-hl');
+    try{ var q = new URLSearchParams(location.search); q.delete('tour'); q.delete('step'); history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q.toString() : '')); }catch(e){}
+    document.removeEventListener('keydown', key);
+  }
+  function key(e){
+    if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if(['ArrowRight','PageDown',' '].indexOf(e.key) >= 0){ e.preventDefault(); if(i === steps.length-1) close(); else show(i+1); }
+    else if(['ArrowLeft','PageUp'].indexOf(e.key) >= 0){ e.preventDefault(); show(i-1); }
+    else if(e.key === 'Escape') close();
+  }
+  function start(data){
+    steps = data.steps || []; if(!steps.length) return;
+    document.body.classList.add('pz-on');
+    stage = document.createElement('div'); stage.className = 'pz-stage'; stage.hidden = true; document.body.appendChild(stage);
+    panel = document.createElement('aside'); panel.className = 'pz-panel'; panel.setAttribute('aria-label','Presenter');
+    panel.innerHTML = '<div class="pz-top"><span>'+esc(data.title)+'</span><span class="pz-ct"></span><button type="button" class="x">Exit</button></div>' +
+      '<div class="pz-prog"><i></i></div><div class="pz-body" aria-live="polite"></div>' +
+      '<div class="pz-nav"><button type="button" class="pz-back">Back</button><span class="k">Arrow keys or a clicker</span><button type="button" class="pz-next">Next</button></div>';
+    document.body.appendChild(panel);
+    panel.querySelector('.x').addEventListener('click', close);
+    panel.querySelector('.pz-back').addEventListener('click', function(){ show(i-1); });
+    panel.querySelector('.pz-next').addEventListener('click', function(){ if(i === steps.length-1) close(); else show(i+1); });
+    document.addEventListener('keydown', key);
+    var at = parseInt(Q.get('step'),10);
+    show(at > 0 ? at-1 : 0);
+  }
+  window.addEventListener('load', function(){
+    fetch('assets/tour/hotel/tour.json', {cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){ if(d) start(d); }).catch(function(){});
+  });
+})();
+</script>
 </body>
 </html>

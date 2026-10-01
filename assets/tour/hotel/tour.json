@@ -1,0 +1,683 @@
+{
+ "title": "Hotels, feature by feature",
+ "source": "graphics/hotel-timeshare-2026-09-30/line-items/rows_li.py",
+ "steps": [
+  {
+   "n": 1,
+   "part": 1,
+   "partTitle": "What every guest gets",
+   "partSub": "Everything in this band is on the free plan. Safety content is never gated or sold, on any plan.",
+   "name": "Live beach safety guide",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Guest"
+   ],
+   "does": "The full live guide for the island: a call on the beaches visitors go to, then surf, wind, tide, rain and lifeguard hours.",
+   "item": "Poʻipū Beach Park: Use caution, lifeguarded, falling tide, rip risk Lower",
+   "how": "The beach card leads with the call, then the reasons: the day's surf and wind, the tide and which way it is moving, and the rip risk, a modeled estimate that is labeled as one. Brown-water and bacteria notices appear when they apply. The paid plan never changes a verdict, and nothing on a safety card is for sale.",
+   "caption": "Guest app, demo property, free plan: the map (left) and the Poʻipū card below its photo (right)",
+   "img": [
+    "01a.jpg",
+    "01b.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 2,
+   "part": 1,
+   "partTitle": "What every guest gets",
+   "partSub": "Everything in this band is on the free plan. Safety content is never gated or sold, on any plan.",
+   "name": "Property QR code",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Front desk or staff"
+   ],
+   "does": "One code for the room card, the lobby and the welcome email. Each scan opens the guide tagged to the property.",
+   "item": "Scan for the full live guide on your phone",
+   "how": "The first scan stores the property tag on the phone, so every later visit counts toward the property with no login and no app to install. The Dashboard keeps a code for each placement, ready to print. There is one code per property and placement, not one per room.",
+   "caption": "Lobby board QR, demo property; the code is blurred in this print",
+   "img": [
+    "02a.jpg"
+   ],
+   "desk": true
+  },
+  {
+   "n": 3,
+   "part": 1,
+   "partTitle": "What every guest gets",
+   "partSub": "Everything in this band is on the free plan. Safety content is never gated or sold, on any plan.",
+   "name": "Lobby board",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Front desk or staff"
+   ],
+   "does": "A full-screen conditions board for a lobby or pool-deck TV, with a scan-to-open QR on every frame.",
+   "item": "The property's nearest beaches in rotation, each with its call, surf, wind and lifeguard hours",
+   "how": "It runs in any TV browser from a link tagged to the property and rotates through the beaches the property picks. The footer always shows when the data was read. If the wifi drops, the last good reading stays on screen, marked as refreshing. On the free plan the masthead reads OceanSafe; on the paid plan it carries the property name.",
+   "caption": "Lobby board, demo property, free plan; the code is blurred in this print",
+   "img": [
+    "03a.jpg"
+   ],
+   "desk": true
+  },
+  {
+   "n": 4,
+   "part": 1,
+   "partTitle": "What every guest gets",
+   "partSub": "Everything in this band is on the free plan. Safety content is never gated or sold, on any plan.",
+   "name": "One featured amenity",
+   "plan": "Free plan",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Manager"
+   ],
+   "does": "The free plan lists one amenity on the beach cards, below the safety verdict.",
+   "item": "Pool bar: swim-up seats and shaded tables, open 10a to 6p, Ask the front desk",
+   "how": "It sits under a neutral \"On the property\" label with its hours and two buttons, one to the front desk and one to call. Each amenity is set to show on red-flag days, brown-water days, rainy days or always, so it appears when it fits the day.",
+   "caption": "Guest app, demo property, free plan, Poʻipū card",
+   "img": [
+    "04a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 5,
+   "part": 1,
+   "partTitle": "What every guest gets",
+   "partSub": "Everything in this band is on the free plan. Safety content is never gated or sold, on any plan.",
+   "name": "Ask the tour desk",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Front desk or staff"
+   ],
+   "does": "A guest unsure what fits the day reaches the property's tour desk in one tap.",
+   "item": "Call, copy or email the tour desk, with the activity and today's conditions in the message",
+   "how": "The card appears when the property sets a tour-desk phone or email. A text arrives pre-filled with the activity and the day's condition color, so the desk can answer in one reply. The lead goes to the property's own desk.",
+   "caption": "Guest app, demo property; the number shown is the demo placeholder",
+   "img": [
+    "05a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 6,
+   "part": 1,
+   "partTitle": "What every guest gets",
+   "partSub": "Everything in this band is on the free plan. Safety content is never gated or sold, on any plan.",
+   "name": "Bad-ocean-day amenity swap",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Guest"
+   ],
+   "does": "When the beach turns red, brown or rainy, the amenity panel steps in with what is open on the property.",
+   "item": "\"A good rainy-day list, all on the property\": the line changes with the day",
+   "how": "The verdict is worked out first and the amenity panel only reads it, so an offer can never soften a warning. A red flag, runoff in the water or a rainy day, read from the live feeds, each brings up the amenities set for it, with a line that says why. Free shows one amenity; paid shows the full list.",
+   "caption": "Guest app, demo property, paid plan, on a rainy day",
+   "img": [
+    "06a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 7,
+   "part": 1,
+   "partTitle": "What every guest gets",
+   "partSub": "Everything in this band is on the free plan. Safety content is never gated or sold, on any plan.",
+   "name": "Tap-to-ask buttons",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Front desk or staff"
+   ],
+   "does": "Every amenity and offer ends at the front desk: a call, an email, or the property's booking link.",
+   "item": "Spa treatments: \"Ask at the front desk to book or check today's availability\"",
+   "how": "No offer or amenity has a price field, so the desk always quotes the live rate. A tap opens the phone's own mail or dialer, addressed to the destination the property set, and the tap is counted for the Dashboard.",
+   "caption": "Guest app, demo property, free plan",
+   "img": [
+    "07a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 8,
+   "part": 2,
+   "partTitle": "Paid hotel features",
+   "partSub": "What the paid plan adds on top of everything above. Nothing on the free plan is taken away.",
+   "name": "Unlimited amenities",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Manager"
+   ],
+   "does": "List every outlet: spa, dining, pool bar, cabanas, the shop.",
+   "item": "Five amenities, each with a line of detail, hours, a phone and a type",
+   "how": "The amenity menu takes a name, one line, hours, contact, a type (restaurant, tours, rentals, spa, room upgrades), a photo, and a box to add it as a promotion too. Edits save as a draft and export as a file that we apply to the property's guide, so nothing goes live by accident.",
+   "caption": "Operator Dashboard, sample preview: the menu on the left, the guest view updating live on the right; phone numbers are placeholders",
+   "view": "stayclose",
+   "sel": "#view-stayclose .ph-split"
+  },
+  {
+   "n": 9,
+   "part": 2,
+   "partTitle": "Paid hotel features",
+   "partSub": "What the paid plan adds on top of everything above. Nothing on the free plan is taken away.",
+   "name": "Your logo on the guide",
+   "plan": "Paid plan",
+   "status": "Built, not live",
+   "who": [
+    "Guest"
+   ],
+   "does": "On the paid plan the hotel's logo takes the place of the OceanSafe wave in the guide's header.",
+   "item": "Your Resort's logo in the header, where the free plan shows the OceanSafe wave",
+   "how": "The logo stands in for the welcome banner, since it already says whose guide this is, and the property name still appears as \"Provided by\" on the amenity panel and on the lobby board. Today the paid plan shows a welcome banner with the property name; the logo version is built and not yet on the served site. If a logo ever fails to load, the guide falls back to the banner on its own.",
+   "caption": "Guest app, build with the hotel logo; placeholder logo on a demo property",
+   "img": [
+    "09a.jpg"
+   ],
+   "desk": true
+  },
+  {
+   "n": 10,
+   "part": 2,
+   "partTitle": "Paid hotel features",
+   "partSub": "What the paid plan adds on top of everything above. Nothing on the free plan is taken away.",
+   "name": "Promotions",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Manager"
+   ],
+   "does": "A PDF flyer becomes an offer chip in the Town tab and a line in the offers sheet.",
+   "item": "The offer chip with its count in the Town tab (left), and the offers sheet it opens (right)",
+   "how": "Each promotion is a flyer with a title and an end date. The sheet says plainly that offers are separate from the safety report and that the ocean call never changes for an offer. Expired offers never render. The free plan shows no promotion surfaces at all.",
+   "caption": "Guest app, demo property, paid plan, Town tab",
+   "img": [
+    "10a.jpg",
+    "10b.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 11,
+   "part": 2,
+   "partTitle": "Paid hotel features",
+   "partSub": "What the paid plan adds on top of everything above. Nothing on the free plan is taken away.",
+   "name": "Pictures on offers",
+   "plan": "Paid plan",
+   "status": "Built, not live",
+   "who": [
+    "Guest",
+    "Manager"
+   ],
+   "does": "Each offer can carry a photo, so a guest sees the room, the dinner or the spa before asking.",
+   "item": "Sunset dinner and spa morning, each with its own photo and the photo credit",
+   "how": "The picture sits at the top of the offer card in the offers sheet; a licensed photo carries its credit line under it. An offer without a picture shows as it does today. Built and not yet on the served site.",
+   "caption": "Guest app, build with offer pictures, demo property; photos from the sample flyers",
+   "img": [
+    "11a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 12,
+   "part": 2,
+   "partTitle": "Paid hotel features",
+   "partSub": "What the paid plan adds on top of everything above. Nothing on the free plan is taken away.",
+   "name": "House picks",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Manager"
+   ],
+   "does": "The property marks the beaches and places it recommends; they carry a house badge and sort first.",
+   "item": "Poʻipū Beach Park, badged \"Your Resort's pick\"",
+   "how": "In the Places tab each place is Featured, Listed, Hidden or Not recommended. Hazardous beaches can be moved off the recommended list but never deleted: a guest who searches for one still sees its warning. Taps on house picks are counted.",
+   "caption": "Guest app, demo property, paid plan",
+   "view": "places",
+   "sel": "#view-places .ph-split",
+   "img": [
+    "12a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 13,
+   "part": 2,
+   "partTitle": "Paid hotel features",
+   "partSub": "What the paid plan adds on top of everything above. Nothing on the free plan is taken away.",
+   "name": "Portfolio view",
+   "plan": "Paid plan",
+   "status": "Sample",
+   "who": [
+    "Manager"
+   ],
+   "does": "One view across several properties, linked at signing.",
+   "item": "Three properties, adoption per 100 units against the group median",
+   "how": "A group is set up by us at signing, one contracting entity at a time, so no one can merge in another company's property. It shows rates only, never raw counts side by side. Weekly change appears once five or more properties are linked, and a rate needs at least 50 events behind it before it shows. Each property drills down to its own Dashboard.",
+   "caption": "Operator Dashboard, sample preview, a fictional sample group; its placeholder names are generic",
+   "img": [
+    "13a.jpg"
+   ],
+   "desk": true
+  },
+  {
+   "n": 14,
+   "part": 3,
+   "partTitle": "Pre-arrival",
+   "partSub": "Offers a guest sees at home before the trip. The swap happens on the phone's own clock: no location prompt and no booking data.",
+   "name": "A link tagged to your property",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Manager"
+   ],
+   "does": "One link in the pre-arrival email the property already sends.",
+   "item": "Opened from the property link: the guide knows the property from the first tap",
+   "how": "No PMS change: the link goes into a confirmation or pre-arrival email as it is. The first open stores the property tag on the phone, so the guest is counted to the property on every later visit, with no login and no app install. We never see booking data; we count only visits that came through the link.",
+   "caption": "Guest app, demo property, opened from its tagged link (paid plan shown; on the free plan the visit still counts, without the greeting)",
+   "img": [
+    "14a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 15,
+   "part": 3,
+   "partTitle": "Pre-arrival",
+   "partSub": "Offers a guest sees at home before the trip. The swap happens on the phone's own clock: no location prompt and no booking data.",
+   "name": "Pre-arrival offer card",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Guest"
+   ],
+   "does": "While the phone is off Hawaiʻi time, pre-arrival offers sort first.",
+   "item": "Ocean-view room upgrade and a spa morning, sorted above the everyday offers",
+   "how": "A pre-arrival offer has a title, one line of detail, and show-from and until dates. It shows only before arrival and stops when the phone switches to Hawaiʻi time. Weather and time of day are ignored before landing, because the forecast for the trip does not exist yet.",
+   "caption": "Guest app, build with offer pictures, demo property, phone on a mainland time zone; the pre-arrival card itself is live",
+   "img": [
+    "15a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 16,
+   "part": 3,
+   "partTitle": "Pre-arrival",
+   "partSub": "Offers a guest sees at home before the trip. The swap happens on the phone's own clock: no location prompt and no booking data.",
+   "name": "\"Book ahead of time\"",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Guest"
+   ],
+   "does": "A badge on offers that need notice.",
+   "item": "Book ahead of time",
+   "how": "Pre-arrival offers end at arrival, so the badge is what tells a guest that a transfer or a dinner needs a request before the flight.",
+   "caption": "Guest app, demo property, demo pre-arrival offer",
+   "img": [
+    "16a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 17,
+   "part": 3,
+   "partTitle": "Pre-arrival",
+   "partSub": "Offers a guest sees at home before the trip. The swap happens on the phone's own clock: no location prompt and no booking data.",
+   "name": "\"Email the front desk\"",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Front desk or staff"
+   ],
+   "does": "The offer button opens an email to the address the property set.",
+   "item": "Email the front desk",
+   "how": "Requests go to a property-wide address set at onboarding, or to a per-offer address when a transfer routes to a different vendor. The desk quotes the live rate in its reply.",
+   "caption": "Guest app, demo property, demo pre-arrival offer",
+   "img": [
+    "17a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 18,
+   "part": 3,
+   "partTitle": "Pre-arrival",
+   "partSub": "Offers a guest sees at home before the trip. The swap happens on the phone's own clock: no location prompt and no booking data.",
+   "name": "Before-you-fly amenity list",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Guest"
+   ],
+   "does": "Before arrival, only amenities that make sense from home appear.",
+   "item": "\"Worth sorting out before you fly. The front desk confirms the details.\"",
+   "how": "Red-flag and rainy-day amenities wait until the guest is on the island, because they describe a day the guest is not having yet. Amenities set to show always appear under this line.",
+   "caption": "Guest app, demo property, phone set to a mainland time zone",
+   "img": [
+    "18a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 19,
+   "part": 3,
+   "partTitle": "Pre-arrival",
+   "partSub": "Offers a guest sees at home before the trip. The swap happens on the phone's own clock: no location prompt and no booking data.",
+   "name": "Pre-arrival setting in the editor",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Manager"
+   ],
+   "does": "Each offer is set to On island, Pre-arrival or Both.",
+   "item": "Ocean-view room upgrade, typed as Room upgrades, shown Pre-arrival",
+   "how": "Choosing Pre-arrival hides the weather and time-of-day settings, so a combination that cannot work is never saved. One list holds both kinds of offer.",
+   "caption": "Operator Dashboard, sample preview; a draft typed for this capture, nothing saved",
+   "img": [
+    "19a.jpg"
+   ],
+   "desk": true
+  },
+  {
+   "n": 20,
+   "part": 4,
+   "partTitle": "Timed promotions",
+   "partSub": "How an offer turns on and off. Every rule runs on the guest's phone, and nothing pops over a safety screen.",
+   "name": "Pop-up window",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Manager"
+   ],
+   "does": "Set a start and end time, and the offer pops up once per visit inside that window.",
+   "item": "Sunset dinner, guests save 15%: \"Tonight until 11:59 PM\"",
+   "how": "The first offer inside its window appears a few seconds after the guide opens, once per visit. It never opens over another sheet, never on the lobby board and never on the free plan, and it sits above the tab bar so the safety tabs stay usable. It shows the real end time, never a countdown. A window can run past midnight.",
+   "caption": "Guest app, demo property, paid plan",
+   "img": [
+    "20a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 21,
+   "part": 4,
+   "partTitle": "Timed promotions",
+   "partSub": "How an offer turns on and off. Every rule runs on the guest's phone, and nothing pops over a safety screen.",
+   "name": "Start and end dates",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Manager"
+   ],
+   "does": "An offer shows from its start date and stops at its end date.",
+   "item": "Ends 08/30/2026: expired offers never show",
+   "how": "The card shows the end date, and an expired offer is dropped before it renders. Drafts save in the browser and export as a file, so a date change goes live only when we apply it.",
+   "caption": "Operator Dashboard, sample preview",
+   "img": [
+    "21a.jpg"
+   ],
+   "desk": true
+  },
+  {
+   "n": 22,
+   "part": 4,
+   "partTitle": "Timed promotions",
+   "partSub": "How an offer turns on and off. Every rule runs on the guest's phone, and nothing pops over a safety screen.",
+   "name": "Weather and time-of-day fit",
+   "plan": "Paid plan",
+   "status": "Live",
+   "who": [
+    "Guest",
+    "Manager"
+   ],
+   "does": "An offer tagged for rain, big surf, wind or clear skies, or for morning, midday or evening, shows only when the day fits.",
+   "item": "Pop-up window 4:00 PM to 6:00 PM, and fit tags for the day",
+   "how": "Big surf means six feet or more, wind 20 mph or more, and rain a rainy day read from the hourly forecast. If the feeds have not landed, weather-tagged offers stay visible: hiding one needs evidence the day is wrong for it.",
+   "caption": "Operator Dashboard, sample preview",
+   "img": [
+    "22a.jpg"
+   ],
+   "desk": true
+  },
+  {
+   "n": 23,
+   "part": 4,
+   "partTitle": "Timed promotions",
+   "partSub": "How an offer turns on and off. Every rule runs on the guest's phone, and nothing pops over a safety screen.",
+   "name": "Trip-stage swap",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Guest"
+   ],
+   "does": "Off Hawaiʻi time means pre-arrival; on Hawaiʻi time means on island.",
+   "item": "The same amenity panel on island (left) and before the flight (right)",
+   "how": "The phone's time zone decides; there is no location prompt and no coordinates are stored. The swap happens the next time the app opens. A guest who has been on the island and left is marked as departed and sees no more offers.",
+   "caption": "Guest app, demo property, paid plan",
+   "img": [
+    "23a.jpg",
+    "23b.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 24,
+   "part": 4,
+   "partTitle": "Timed promotions",
+   "partSub": "How an offer turns on and off. Every rule runs on the guest's phone, and nothing pops over a safety screen.",
+   "name": "Departed guests drop out",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Manager"
+   ],
+   "does": "After departure, offers stop, so offer taps come only from guests still on the trip.",
+   "item": "Sample: taps per 100 sessions, with the peak hour for each offer",
+   "how": "A phone that was on Hawaiʻi time and has left reads as post-departure. It sees no offers, so a room upgrade is never shown to someone at home and the property's offer counts are not padded.",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "guests",
+   "sel": "sec:Offers that land"
+  },
+  {
+   "n": 25,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "Dashboard home",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Manager"
+   ],
+   "does": "The first screen a manager sees: the property's numbers, what needs doing, and the island's conditions right now.",
+   "item": "Sample: guide opens, place taps, the most-opened place and offer taps, each against the prior period",
+   "how": "Four counted numbers switch between 7, 30 and 90 days. A short list names what needs the manager, such as an offer about to end or a pick with no photo, with a button straight to the fix. Conditions are the island's raw readings from the same feed the guide uses; beach-by-beach calls stay in the guide. Activity is counts only, never an individual guest. On the free plan the offer count gives way to Stay-Close views.",
+   "caption": "Operator Dashboard, sample preview; conditions are live, every other figure is sample",
+   "view": "home",
+   "sel": "#ccHome"
+  },
+  {
+   "n": 26,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "Guest sessions per day",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Manager"
+   ],
+   "does": "How often guests open the guide, by day.",
+   "item": "Sample: at least 180 sessions a day, peaking Saturday",
+   "how": "Counted live once a property is connected: the sample tiles flip to \"Measured\" and show the property's own guests, as a group. With no guests yet, the tile says so instead of showing a number.",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "guests",
+   "sel": "sec:Guest sessions per day"
+  },
+  {
+   "n": 27,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "Top beaches your guests check",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Manager"
+   ],
+   "does": "The beaches and places guests read up on, ranked.",
+   "item": "Sample: Poʻipū Beach Park first, then Brennecke's and Shipwreck",
+   "how": "Counted live from guest taps. A side list shows places guests check that the property has not featured yet.",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "guests",
+   "sel": "sec:The beaches your guests check"
+  },
+  {
+   "n": 28,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "Bad-ocean-day swaps",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Manager"
+   ],
+   "does": "How often the amenity panel stepped in, by trigger, and the amenity taps it drew.",
+   "item": "Sample: brown water, high surf, rain, wind and UV, ranked",
+   "how": "Panel views and amenity taps are counted live. A tap is reported as interest, never as a booking or revenue.",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "stayclose",
+   "sel": "sec:Bad-ocean-day saves"
+  },
+  {
+   "n": 29,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "Tour desk and self-serve taps",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Manager"
+   ],
+   "does": "Taps on the tour desk card and on self-serve links, counted raw.",
+   "item": "Call, copy and email taps on the tour desk card",
+   "how": "Counted live as raw numbers once a property is connected.",
+   "caption": "Guest app, demo property; the number shown is the demo placeholder",
+   "img": [
+    "29a.jpg"
+   ],
+   "desk": false
+  },
+  {
+   "n": 30,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "When guests plan",
+   "plan": "Free and paid plans",
+   "status": "Sample",
+   "who": [
+    "Manager"
+   ],
+   "does": "The hours guests open the guide.",
+   "item": "Sample: breakfast, poolside and the night before",
+   "how": "Shown with sample figures today.",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "guests",
+   "sel": "sec:When guests plan"
+  },
+  {
+   "n": 31,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "Offers that land",
+   "plan": "Free and paid plans",
+   "status": "Sample",
+   "who": [
+    "Manager"
+   ],
+   "does": "Taps on the property's amenities and offers, per 100 sessions, with the peak hour for each.",
+   "item": "Sample: beach bar happy hour, cabana, activity desk, lūʻau night, the spa",
+   "how": "Normalized per 100 sessions so a busy week does not flatter an offer. Shown with sample figures today.",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "guests",
+   "sel": "sec:Offers that land"
+  },
+  {
+   "n": 32,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "Staying close",
+   "plan": "Free and paid plans",
+   "status": "Sample",
+   "who": [
+    "Manager"
+   ],
+   "does": "The share of guest checks within ten minutes of the property.",
+   "item": "Sample: 46% of checks are close to home",
+   "how": "Shown with sample figures today.",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "guests",
+   "sel": "sec:Staying close"
+  },
+  {
+   "n": 33,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "Who is scanning your QR",
+   "plan": "Free and paid plans",
+   "status": "Sample",
+   "who": [
+    "Manager"
+   ],
+   "does": "Source markets and language mix.",
+   "item": "Sample: US West first; English, Japanese, other",
+   "how": "Not counted yet; marked In build on the card.",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "guests",
+   "sel": "sec:scanning your QR"
+  },
+  {
+   "n": 34,
+   "part": 5,
+   "partTitle": "Visitor data",
+   "partSub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "name": "Tomorrow's heads-up",
+   "plan": "Free and paid plans",
+   "status": "Sample",
+   "who": [
+    "Manager",
+    "Front desk or staff"
+   ],
+   "does": "A note the night before big surf is forecast: expect more guests near the property.",
+   "item": "Sample: a typical day against a big-surf day",
+   "how": "Shown with sample figures today; marked In build on the card.",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "stayclose",
+   "sel": "sec:Tomorrow"
+  }
+ ]
+}
