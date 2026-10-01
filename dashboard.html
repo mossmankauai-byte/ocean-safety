@@ -3501,33 +3501,59 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 (function(){
   var slugEl = document.querySelector('.property code');
   var SLUG = window.OS_SLUG || (slugEl ? slugEl.textContent.trim() : 'operator');
-  var KEY = 'os_tour2_done_' + SLUG;  // v2 (2026-07-09): remade tour — everyone sees it once
+  var KEY = 'os_tour2_done_' + SLUG;  // v2 (2026-07-09): remade tour, everyone sees it once
   var LOGO = (document.querySelector('link[rel="icon"]')||{}).href || '';
 
   // Each stop: which view tab to open, what to highlight, and what to say.
-  // v2 (2026-07-09): leads with the guest experience — shape first, data later.
-  var STEPS = [
-    { center:true, title:'Welcome: this is your guests’ guide',
-      body:'This is the guide your guests use on the beach, and this is where you shape it: your amenities, your offers, your picks. The data comes later, honestly labeled. Replay anytime with the <b>Tour</b> button up top.' },
-    { view:'home', sel:'#ccHome', title:'Your property at a glance',
-      body:'Your numbers first: guide opens, place taps, your most-opened place, and the short list of what needs you today. Every guest who scans your QR gets live surf, lifeguard and hazard calls with your property carried along. <b>Open your guide</b> shows exactly what they see.' },
+  // v3 (2026-10-01): remade for the command-center Home, the phone previews and the Tours
+  // link. A stop runs only where it exists: its tab must be shown for this segment, its
+  // target must not sit in a hidden block of its own, and seg/desk narrow it further.
+  // v2 showed the timeshare funnels to hotels because the hidden view still matched.
+  var ALL = [
+    { center:true, title:'Welcome to your Dashboard',
+      body:'This is where you shape the guide your guests carry to the beach: your amenities, your offers, your picks. This tour takes about a minute. Replay it any time with <b>Take the tour</b>.' },
+    { view:'home', sel:'#ccKpis', title:'Your numbers at a glance',
+      body:'Guide opens, place taps, your most-opened place and offer taps, compared with the period before. Switch between 7, 30 and 90 days up top. A new property shows <b>Sample data</b> until guests start using its guide.' },
+    { view:'home', sel:'#ccTodo', title:'What needs you today',
+      body:'A short list of things worth a minute: an offer about to end, no house picks yet, a QR code that has gone quiet. Each row has a button that takes you straight to the fix.' },
+    { view:'home', sel:'#ccTours', desk:'affiliate', title:'Tours guests tapped',
+      body:'The tours your guests open most in your guide. Counts only, never an individual guest, and a tap is interest, not a booking.' },
     { view:'stayclose', sel:'#mgAmenities', title:'Your amenity menu',
-      body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. Edits save as a draft in this browser; <b>Export config</b> sends the menu into your app build.' },
-    { view:'stayclose', sel:'#gpAmCard', title:'Watch it as a guest',
-      body:'This is the exact panel guests see, built live from your draft menu. Switch the ocean condition with the chips, and tap an amenity to expand its hours and phone — just like a guest.' },
+      body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. Edits save as a draft in this browser. <b>Export config</b> downloads the file that goes into your guide.',
+      free:{ body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. The free plan shows one amenity; the paid plan shows your whole menu. <b>Export config</b> downloads the file that goes into your guide.' } },
+    { view:'stayclose', sel:'#gpAmCard', title:'See it as a guest',
+      body:'The phone shows exactly what guests see, built live from your menu as you type. Switch the ocean condition to see how the guide changes on a rough day.' },
     { view:'promos', sel:'#pmDrop', title:'Drop a promotion',
-      body:'Drag a PDF flyer here and guests get an offer chip in the guide’s Town tab — the preview shows the exact card they’ll tap. Add a timed window and the offer pops up on guests’ phones during those hours, never over safety info. Drafts stay in this browser until you export.' },
-    { view:'guests', sel:'#view-guests section', title:'Then — and only then — the data',
-      body:'How many guests a day, when they plan, and which beaches and offers they open — the same read your guests give you by using the guide. Everything stays <b>Sample</b> until your telemetry is on; live mode only ever shows measured counts, and a tap is interest — never a booking.' },
-    { view:'places', sel:'.pl-safety', title:'Places, with safety pre-set',
-      body:'Curate what your guide recommends. Hazardous spots start as <b>⊘ Not recommended</b> and can’t be deleted from a safety app — their hazard warnings always stay visible to guests.' },
-    { view:'segments', sel:'#view-segments .card', title:'Three guests, three funnels',
-      body:'Renters, repeat guests and owners each get their own QR and their own funnel — owners never see a sales pitch.' },
-    { view:'desk', sel:'#affInput', title:'Tours & affiliate',
-      body:'Paste a link from your Viator or GetYourGuide partner account. Every tour a guest books from your guide then pays you.' },
-    { center:true, title:'It’s yours', last:true,
-      body:'Everything you shape here saves as a browser draft as you go; Export sends it into your app build. Questions? Your OceanSafe contact is one text away. Replay with the <b>Tour</b> button.' }
+      body:'Drag in a PDF flyer and guests get an offer in the guide. Add a time window and it pops up on their phones during those hours, never over safety information. Drafts stay in this browser until you export them.',
+      free:{ sel:'#pmLockCard', title:'Promotions, on the paid plan', body:'Timed offers that pop up on guests&rsquo; phones during the hours you choose are part of the paid plan. This card shows what you would get.' } },
+    { view:'guests', sel:'#view-guests section', title:'How guests use your guide',
+      body:'How many guests a day, when they plan, and which beaches and offers they open. It stays <b>Sample</b> until your guide is live. Live mode only ever shows measured counts.' },
+    { view:'places', sel:'.pl-safety', title:'Places, with safety built in',
+      body:'Choose what your guide recommends. Hazardous spots start as <b>Not recommended</b> and cannot be removed, so their warnings always stay in front of guests.' },
+    { view:'segments', sel:'#view-segments .card', seg:['timeshare'], title:'Three guests, three funnels',
+      body:'Renters, repeat guests and owners each get their own QR code and their own funnel. Owners never see a sales pitch.' },
+    { view:'desk', sel:'#affInput', desk:'affiliate', title:'Your tour link',
+      body:'Paste any link from your Viator or GetYourGuide partner account. It saves to your guide right away, and every tour a guest books from it pays you.' },
+    { view:'shop', sel:'#shopFrameWrap', title:'Your store',
+      body:'Gear guests can buy or rent straight from your guide. Money lands in your own Square account; OceanSafe never holds it.',
+      free:{ sel:'#shopLock', title:'Your store, on the paid plan', body:'Selling and renting gear from your guide is part of the paid plan. Money would land in your own Square account; OceanSafe never holds it.' } },
+    { center:true, title:'That&rsquo;s the tour', last:true,
+      body:'Amenities, promotions and places save as drafts in this browser until you export them. Your tour link saves to your guide the moment you hit Save. Questions? Your OceanSafe contact is one text away.' }
   ];
+  function applies(s){
+    if(s.center) return true;
+    if(s.seg && s.seg.indexOf(window.OS_SEG) < 0) return false;
+    if(s.desk && (window.OS_SEGCFG||{}).deskKind !== s.desk) return false;
+    var tab = document.querySelector('.viewtabs button[data-view="'+s.view+'"]');
+    if(!tab || tab.hidden) return false;
+    var el = document.querySelector(s.sel); if(!el) return false;
+    for(var n = el; n && n !== document.body; n = n.parentElement){
+      if(n.id === 'view-'+s.view) break;
+      if(n.hidden || getComputedStyle(n).display === 'none') return false;
+    }
+    return true;
+  }
+  var STEPS = ALL;
 
   // ---- overlay DOM ----
   var root = document.createElement('div'); root.id = 'osTour';
@@ -3543,7 +3569,6 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       backBtn = root.querySelector('.tc-back'), nextBtn = root.querySelector('.tc-next'),
       skipBtn = root.querySelector('.tc-skip'), logoEl = root.querySelector('.tc-logo');
   if(LOGO) logoEl.src = LOGO;
-  STEPS.forEach(function(){ dotsEl.appendChild(document.createElement('i')); });
 
   var idx = -1, curEl = null, active = false;
 
@@ -3618,6 +3643,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     }, 80);
   }
   function start(){
+    var free = document.body.classList.contains('plan-free');
+    STEPS = ALL.map(function(s){ return (free && s.free) ? Object.assign({}, s, s.free) : s; }).filter(applies);
+    dotsEl.innerHTML = ''; STEPS.forEach(function(){ dotsEl.appendChild(document.createElement('i')); });
     active = true; root.classList.add('on'); document.body.classList.add('os-tour-active'); setStep(0);
   }
   function end(markDone){
@@ -5252,7 +5280,7 @@ if(DEMO){
 (function(){
   var list = document.getElementById('tourList');
   if(list){
-    var TOURS = [['Nā Pali sunset catamaran cruise',44],['Snorkel sail — Lāwaʻi Bay',33],['Lūʻau for two',27],['Zipline canopy adventure',19],['Waimea Canyon + waterfalls tour',14]];
+    var TOURS = [['Nā Pali sunset catamaran cruise',44],['Snorkel sail, Lāwaʻi Bay',33],['Lūʻau for two',27],['Zipline canopy adventure',19],['Waimea Canyon + waterfalls tour',14]];
     var max=44;
     list.innerHTML = TOURS.map(function(t){
       var pct=Math.round(t[1]/max*100);
