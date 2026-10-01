@@ -6435,7 +6435,7 @@ if(DEMO){
       var paid = data.steps.filter(function(r){ return r.plan === 'Paid plan'; });
       stage.className = 'pz-stage dark';
       stage.innerHTML = '<div class="pz-slide one"><p class="pz-eyebrow">To close</p><h1>What the paid plan adds</h1>' +
-        '<p class="pz-line">Everything in Part 1 stays on the free plan. These are the rows the paid plan adds on top.</p>' +
+        '<p class="pz-line">Everything in Part 1 stays on the free plan. These are the features the paid plan adds on top.</p>' +
         '<ul class="pz-close">' + paid.map(function(r){ return '<li><span class="n">' + r.n + '</span>' + esc(r.name) + (r.status === 'Built, not live' ? ' <small style="color:var(--pz-sand-2)">(built, not live)</small>' : '') + '</li>'; }).join('') + '</ul>' +
         '<p class="pz-foot"><b>Nothing on the free plan is taken away.</b> Safety content is never gated or sold, on any plan. The ocean call never changes for an offer. Setup is done with the property; Dashboard edits save as a draft that we apply.<br>oceansafety.app</p>' + hint() + '</div>';
     } else {
@@ -6469,7 +6469,7 @@ if(DEMO){
     var k = kind(s);
     if(k === 'open') return '<div class="lead">Opening</div>' + data.parts.map(function(p){ return '<h3>Part ' + p.n + ': ' + esc(p.title) + '</h3><p>' + esc(p.sub) + '</p>'; }).join('');
     if(k === 'part') return '<div class="lead">Part ' + s.p.n + ': ' + esc(s.p.title) + '</div><p>' + esc(s.p.sub) + '</p>';
-    if(k === 'close') return '<div class="lead">Close</div><p>Recap the paid rows by name. No price on this screen; pricing is a separate conversation.</p>';
+    if(k === 'close') return '<div class="lead">Close</div><p>Recap the paid features by name. Nothing on this screen carries a number.</p>';
     return '<div class="lead">' + s.n + '. ' + esc(s.name) + '</div><p>' + esc(s.does) + '</p>' +
       '<h3>How it works</h3><p>' + esc(s.how) + '</p>' +
       '<h3>Where it lives</h3><p>' + esc(s.where) + '</p><h3>What feeds it</h3><p>' + esc(s.feeds) + '</p>' +
@@ -6494,7 +6494,7 @@ if(DEMO){
   function overview(on){
     ov.hidden = !on; ctl.querySelector('.ovb').setAttribute('aria-pressed', on ? 'true' : 'false');
     if(!on) return;
-    ov.innerHTML = '<h2>Every row, by part</h2><div class="ends"><button type="button" data-i="0">Opening</button><button type="button" data-i="' + (slides.length - 1) + '">Close</button></div><div class="cols">' +
+    ov.innerHTML = '<h2>Every feature, by part</h2><div class="ends"><button type="button" data-i="0">Opening</button><button type="button" data-i="' + (slides.length - 1) + '">Close</button></div><div class="cols">' +
       data.parts.map(function(p){ return '<div><h3><span>' + p.n + '</span>' + esc(p.title) + '</h3>' + p.rows.map(function(n){ var r = data.steps[n - 1], idx = slides.indexOf(r);
         return '<button type="button" data-i="' + idx + '"' + (idx === i ? ' class="cur"' : '') + '><span class="n">' + n + '</span><span>' + esc(r.name) + '</span></button>'; }).join('') + '</div>'; }).join('') + '</div>';
     [].forEach.call(ov.querySelectorAll('button[data-i]'), function(b){ if(+b.dataset.i === i) b.classList.add('cur'); b.addEventListener('click', function(){ overview(false); show(+b.dataset.i); }); });
