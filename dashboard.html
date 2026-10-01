@@ -6220,43 +6220,136 @@ if(DEMO){
 })();
 </script>
 <style>
-/* ============ PRESENTER TOUR (?tour=present) 2026-10-01 ============
-   Walks the hotel feature sheet row by row on the sample Dashboard. Steps come from
-   assets/tour/hotel/tour.json, exported from the sheet's own rows (export-tour.py). */
-  body.pz-on{padding-right:430px}
+/* ============ PRESENTER TOUR (?tour=present) v2 2026-10-01 ============
+   A sales walkthrough of the hotel feature sheet, run on the sample Dashboard. Slides come from
+   assets/tour/hotel/tour.json, exported from the sheet's own rows (export-tour.py). Opening slide,
+   one divider per part, one slide per sheet row (same numbers as the PDF), and a close.
+   Keys: arrows, PageUp/PageDown, Space, Esc, N notes, O overview, F full screen. */
   body.pz-on .ph-fab,body.pz-on #tourBtn{display:none}
-  .pz-panel{position:fixed;top:0;right:0;bottom:0;width:430px;z-index:120;background:var(--card);border-left:1px solid var(--line);
-    box-shadow:-12px 0 36px rgba(15,59,73,.14);display:flex;flex-direction:column;font-size:14px;color:var(--ink)}
-  .pz-top{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line);font-size:12px;font-weight:700;color:var(--muted)}
-  .pz-top b{color:var(--ink)} .pz-top .x{margin-left:auto}
-  .pz-prog{height:3px;background:var(--hair-soft)} .pz-prog i{display:block;height:100%;background:var(--gold);transition:width .25s}
-  .pz-body{flex:1;overflow:auto;padding:18px 20px}
-  .pz-part{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gold-ink);text-transform:uppercase}
-  .pz-n{font-family:'Fraunces',Georgia,serif;font-size:40px;line-height:1;color:var(--gold);margin:10px 0 0}
-  .pz-name{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:500;line-height:1.2;margin:6px 0 8px}
-  .pz-meta{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--sea);text-transform:uppercase}
-  .pz-meta .nl{color:var(--warn)}
-  .pz-lab{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gold-ink);text-transform:uppercase;margin:16px 0 4px}
-  .pz-item{font-weight:700;font-size:15px;line-height:1.45;margin:14px 0 0}
-  .pz-how{font-size:13px;line-height:1.55;color:var(--ink-2)}
-  .pz-cap{font-size:12px;color:var(--muted);margin-top:10px}
-  .pz-nav{display:flex;gap:8px;align-items:center;padding:12px 18px;border-top:1px solid var(--line)}
-  .pz-nav button,.pz-top button{appearance:none;font:inherit;font-weight:700;border-radius:999px;cursor:pointer}
-  .pz-nav .pz-back:disabled{opacity:.4;cursor:default}
-  .pz-nav .pz-back{font-size:13px;padding:9px 16px;color:var(--sea);background:transparent;border:1px solid rgba(14,110,140,.35)}
-  .pz-nav .pz-next{font-size:13px;padding:9px 18px;color:var(--on-sea);background:var(--sea);border:0;margin-left:auto}
-  .pz-nav .k{font-size:11px;color:var(--muted)}
-  .pz-top button{font-size:12px;padding:5px 11px;color:var(--muted);background:var(--bg-2);border:0}
-  .pz-hl{outline:3px solid var(--gold);outline-offset:6px;border-radius:12px;scroll-margin-top:90px}
-  .pz-stage{position:fixed;top:0;left:0;right:430px;bottom:0;z-index:110;background:rgba(15,59,73,.78);display:flex;align-items:center;justify-content:center;gap:22px;padding:28px}
+  body.pz-live{padding-bottom:var(--pz-cap,132px)}
+  .pz{font-family:Inter,system-ui,sans-serif;color:var(--ink);--pz-cap:148px;--pz-dark:#0f3b49;--pz-sand:#f6f1e7;--pz-sand-2:#cfd9dd}
+  .pz *{box-sizing:border-box}
+  .pz button{appearance:none;font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+  .pz-bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:131;background:rgba(15,59,73,.12);pointer-events:none}
+  .pz-bar i{display:block;height:100%;background:var(--gold);transition:width .25s}
+  /* full-bleed slides */
+  .pz-stage{position:fixed;inset:0;z-index:112;overflow:auto;background:var(--pz-sand)}
   .pz-stage[hidden]{display:none}
-  .pz-stage img{display:block;max-height:calc(100vh - 80px);max-width:calc((100vw - 430px - 90px) / var(--n,1));border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.35);background:#fff}
-  .pz-stage.desk img{border-radius:12px}
+  .pz-stage.dark{background:var(--pz-dark);color:var(--pz-sand)}
+  .pz-stage.dark::before{content:"";position:absolute;inset:0;background:radial-gradient(1200px 700px at 80% 110%,rgba(14,110,140,.55),transparent 60%)}
+  .pz-stage.light::before{content:"";position:absolute;inset:0;background:radial-gradient(900px 600px at 85% 50%,rgba(14,110,140,.08),transparent 65%)}
+  .pz-slide{position:relative;height:100%;display:grid;grid-template-columns:minmax(380px,42fr) 58fr;align-items:center;gap:40px;padding:56px 72px 110px;max-width:1720px;margin:0 auto}
+  .pz-slide.one{grid-template-columns:1fr;max-width:1080px;align-content:center;height:auto;min-height:100%;padding-bottom:120px}
+  .pz-anim .pz-slide{animation:pzIn .22s ease-out}
+  @keyframes pzIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .pz-k{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sea);padding:6px 12px 6px 9px;border:1px solid rgba(14,110,140,.3);border-radius:999px;background:rgba(255,255,255,.55)}
+  .pz-k svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .dark .pz-k{color:var(--gold);border-color:rgba(201,168,76,.45);background:rgba(255,255,255,.06)}
+  .pz-eyebrow{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);margin:0 0 12px}
+  .dark .pz-eyebrow{color:var(--gold)}
+  .pz-row{display:flex;align-items:baseline;gap:14px;margin:26px 0 6px}
+  .pz-row .n{font-family:'Fraunces',Georgia,serif;font-size:22px;color:var(--gold);font-weight:500}
+  .pz-row .n::after{content:"";display:inline-block;width:1px;height:18px;background:var(--line);margin-left:14px;vertical-align:-2px}
+  .pz-row .st{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .pz-row .st.nl{color:var(--warn)} .pz-row .st.sm{color:var(--sample)}
+  .pz h1{font-family:'Fraunces',Georgia,serif;font-weight:500;font-size:clamp(34px,3.6vw,56px);line-height:1.08;margin:0 0 18px;letter-spacing:-.01em}
+  .pz .pz-line{font-size:clamp(17px,1.35vw,22px);line-height:1.5;color:var(--ink-2);margin:0 0 26px;max-width:38ch}
+  .dark .pz-line{color:var(--pz-sand-2)}
+  .pz-ex{position:relative;padding:16px 20px 16px 24px;border-left:3px solid var(--gold);background:rgba(255,253,248,.9);border-radius:0 12px 12px 0;font-family:'Fraunces',Georgia,serif;font-size:clamp(17px,1.3vw,21px);line-height:1.4;color:var(--ink);max-width:40ch;box-shadow:0 1px 2px rgba(58,47,22,.05),0 10px 28px rgba(58,47,22,.07)}
+  .pz-ex small{display:block;font-family:Inter,system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);margin-bottom:6px}
+  .pz-vis{position:relative;display:flex;align-items:center;justify-content:center;gap:34px;min-width:0;height:100%}
+  .pz-cap-src{position:absolute;left:0;right:0;bottom:-34px;text-align:center;font-size:12px;color:var(--muted)}
+  /* phone frame: one whole guest screen, 390 x 844 points */
+  .pz-ph{--ph:min(74vh,calc((100vw - 72px * 2) * .58 * .92 * 844 / 390));position:relative;height:var(--ph);aspect-ratio:390/844;flex:none;background:#0f3b49;border-radius:11.5% / 5.3%;padding:2.9%;box-shadow:0 36px 70px rgba(15,59,73,.3),0 0 0 1px rgba(255,255,255,.08) inset}
+  .pz-vis.two .pz-ph{--ph:min(70vh,calc((100vw - 72px * 2) * .58 * .44 * 844 / 390))}
+  .pz-ph .scr{position:relative;width:100%;height:100%;border-radius:9% / 4.2%;overflow:hidden;background:#fff}
+  .pz-ph img{display:block;width:100%;height:100%;object-fit:cover}
+  .pz-ph .fx{position:absolute;border:2px solid var(--gold);border-radius:10px;box-shadow:0 0 0 3000px rgba(15,59,73,.45);transition:all .25s}
+  /* desk card: a Dashboard or lobby screen */
+  .pz-dk{position:relative;max-width:100%;max-height:72vh;background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 60px rgba(15,59,73,.22);display:flex;flex-direction:column}
+  .pz-dk .tb{flex:none;height:26px;background:#ece5d5;display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid var(--line)}
+  .pz-dk .tb i{width:9px;height:9px;border-radius:50%;background:#c9bfa6}
+  .pz-dk img{display:block;max-width:100%;max-height:calc(72vh - 26px);width:auto;height:auto;object-fit:contain}
+  .pz-dk.tv{border:10px solid #0f3b49;border-radius:10px;background:#0f3b49}
+  .pz-dk.tv .tb{display:none} .pz-dk.tv img{max-height:72vh}
+  /* opening, part and close slides */
+  .pz-brand{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+  .pz-brand img{width:40px;height:40px;border-radius:9px}
+  .pz-brand b{font-size:16px} .pz-brand span{display:block;font-size:12px;color:var(--pz-sand-2);letter-spacing:.06em;text-transform:uppercase}
+  .pz-parts{list-style:none;margin:34px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:14px;max-width:1100px}
+  .pz-parts li{padding:16px 16px 14px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.05)}
+  .pz-parts .n{display:block;font-family:'Fraunces',Georgia,serif;font-size:28px;color:var(--gold);line-height:1;margin-bottom:10px}
+  .pz-parts b{display:block;font-size:15px;line-height:1.3;margin-bottom:4px} .pz-parts span{font-size:12px;color:var(--pz-sand-2)}
+  .pz-rows{list-style:none;margin:30px 0 0;padding:0;columns:2;column-gap:40px;max-width:900px;font-size:16px;line-height:1.5}
+  .pz-rows li{break-inside:avoid;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.1);display:flex;gap:14px}
+  .pz-rows .n{color:var(--gold);font-family:'Fraunces',Georgia,serif;min-width:26px}
+  .pz-rows .side{margin-left:auto;font-size:11px;color:var(--pz-sand-2);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+  .pz-close{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:24px 0 0;max-width:1100px;list-style:none;padding:0}
+  .pz-close li{padding:10px 14px;border:1px solid rgba(201,168,76,.35);border-radius:12px;background:rgba(201,168,76,.08);font-size:15px;line-height:1.35;display:flex;gap:12px;align-items:baseline}
+  .pz-close .n{color:var(--gold);font-family:'Fraunces',Georgia,serif;font-size:18px;min-width:26px}
+  .pz-foot{margin-top:22px;font-size:15px;color:var(--pz-sand-2);line-height:1.55;max-width:70ch}
+  .pz-foot b{color:var(--pz-sand)}
+  .pz-hint{position:absolute;left:72px;bottom:34px;font-size:12px;color:var(--pz-sand-2);letter-spacing:.02em}
+  .light .pz-hint{color:var(--muted)}
+  .pz-hint kbd{font:inherit;font-weight:700;padding:1px 6px;border:1px solid rgba(255,255,255,.3);border-radius:5px;margin:0 2px}
+  .light .pz-hint kbd{border-color:var(--line)}
+  /* live Dashboard steps: spotlight on the section plus a caption bar */
+  .pz-spot{position:fixed;z-index:110;pointer-events:none;border:2px solid var(--gold);border-radius:14px;box-shadow:0 0 0 9999px rgba(15,59,73,.58);transition:top .25s,left .25s,width .25s,height .25s}
+  .pz-spot[hidden]{display:none}
+  .pz-cap{position:fixed;left:0;right:0;bottom:0;height:var(--pz-cap);z-index:115;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -12px 36px rgba(15,59,73,.14);display:grid;grid-template-columns:minmax(340px,40fr) 32fr 28fr;gap:36px;align-items:center;padding:16px 40px}
+  .pz-cap[hidden]{display:none}
+  .pz-anim .pz-cap{animation:pzIn .22s ease-out}
+  .pz-cap .pz-k{padding:4px 10px 4px 8px;font-size:11px} .pz-cap .pz-row{margin:6px 0 2px} .pz-cap .pz-row .n{font-size:18px} .pz-cap h2{font-family:'Fraunces',Georgia,serif;font-weight:500;font-size:26px;line-height:1.15;margin:0}
+  .pz-cap .pz-line{font-size:16px;margin:0;max-width:none} .pz-cap .pz-ex{font-size:16px;padding:10px 14px 10px 16px;max-width:none}
+  .pz-cap .pz-ex small{margin-bottom:3px}
+  /* controls, bottom right */
+  .pz-ctl{position:fixed;right:22px;bottom:18px;z-index:130;display:flex;align-items:center;gap:6px;padding:6px;border-radius:999px;background:rgba(15,59,73,.92);color:#fff;box-shadow:0 10px 30px rgba(15,59,73,.3);font-size:12px}
+  .pz-ctl button{padding:7px 12px;border-radius:999px;font-weight:600;color:#fff;opacity:.85}
+  .pz-ctl button:hover,.pz-ctl button[aria-pressed="true"]{background:rgba(255,255,255,.14);opacity:1}
+  .pz-ctl button:disabled{opacity:.3;cursor:default;background:none}
+  .pz-ctl .ct{padding:0 6px;font-variant-numeric:tabular-nums;opacity:.8;min-width:64px;text-align:center}
+  .pz-ctl .nx{background:var(--gold);color:var(--on-gold);opacity:1} .pz-ctl .nx:hover{background:#d8b85c}
+  .pz-ctl .sep{width:1px;height:18px;background:rgba(255,255,255,.2);margin:0 4px}
+  .pz-ctl kbd{font:inherit;font-size:10px;opacity:.6;margin-left:5px}
+  body.pz-live .pz-ctl{bottom:calc(var(--pz-cap,148px) + 12px)}   /* above the caption bar on live Dashboard steps */
+  /* presenter notes drawer (N) */
+  .pz-notes{position:fixed;top:0;right:0;bottom:0;width:min(420px,100vw);z-index:125;background:rgba(15,59,73,.97);color:var(--pz-sand);padding:28px 28px 90px;overflow:auto;font-size:14px;line-height:1.55;box-shadow:-12px 0 40px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .22s}
+  .pz-notes.on{transform:none}
+  .pz-notes h3{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:18px 0 5px}
+  .pz-notes h3:first-child{margin-top:0} .pz-notes p{margin:0 0 4px;color:var(--pz-sand-2)} .pz-notes p b{color:var(--pz-sand)}
+  .pz-notes .lead{font-family:'Fraunces',Georgia,serif;font-size:18px;color:var(--pz-sand);margin-bottom:6px}
+  /* overview (O) */
+  .pz-ov{position:fixed;inset:0;z-index:128;background:rgba(15,59,73,.97);color:var(--pz-sand);overflow:auto;padding:40px 56px 100px}
+  .pz-ov[hidden]{display:none}
+  .pz-ov h2{font-family:'Fraunces',Georgia,serif;font-weight:500;font-size:28px;margin:0 0 20px}
+  .pz-ov .cols{display:grid;grid-template-columns:repeat(5,1fr);gap:22px}
+  .pz-ov h3{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:0 0 8px;display:flex;gap:8px}
+  .pz-ov button{display:flex;gap:10px;width:100%;text-align:left;padding:7px 9px;border-radius:8px;font-size:13px;line-height:1.3;color:var(--pz-sand-2)}
+  .pz-ov button:hover{background:rgba(255,255,255,.08);color:#fff}
+  .pz-ov button.cur{background:rgba(201,168,76,.18);color:#fff}
+  .pz-ov button .n{color:var(--gold);min-width:20px;font-variant-numeric:tabular-nums}
+  .pz-ov .ends{display:flex;gap:10px;margin-bottom:22px} .pz-ov .ends button{width:auto;border:1px solid rgba(255,255,255,.2)}
+  @media (prefers-reduced-motion:reduce){.pz-anim .pz-slide,.pz-anim .pz-cap{animation:none}.pz-notes,.pz-spot,.pz-ph .fx,.pz-bar i{transition:none}}
+  /* phones and narrow windows: a simple stacked view */
   @media (max-width:900px){
-    body.pz-on{padding-right:0;padding-bottom:46vh}
-    .pz-panel{top:auto;left:0;width:auto;height:46vh;border-left:0;border-top:1px solid var(--line)}
-    .pz-stage{right:0;bottom:46vh}
-    .pz-stage img{max-height:calc(54vh - 40px);max-width:calc((100vw - 60px) / var(--n,1))}
+    .pz{--pz-cap:40vh}
+    .pz-slide{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:16px;padding:22px 20px 92px;align-items:start}
+    .pz-slide.one{padding:28px 20px 100px}
+    .pz h1{font-size:28px;margin-bottom:10px} .pz .pz-line{font-size:15px;margin-bottom:12px} .pz-ex{font-size:15px;padding:10px 14px}
+    .pz-row{margin:12px 0 4px}
+    .pz-vis{gap:14px;align-items:start}
+    .pz-ph,.pz-vis.two .pz-ph{--ph:min(46vh,calc((100vw - 40px) * .9 * 844 / 390))}
+    .pz-vis.two .pz-ph{--ph:min(42vh,calc((100vw - 54px) * .5 * 844 / 390))}
+    .pz-dk,.pz-dk img{max-height:46vh} .pz-dk img{max-height:calc(46vh - 26px)}
+    .pz-cap-src{display:none}
+    .pz-parts{grid-template-columns:1fr 1fr;gap:8px;margin-top:18px} .pz-parts li{padding:10px} .pz-parts .n{font-size:20px;margin-bottom:4px} .pz-parts b{font-size:13px}
+    .pz-rows{columns:1;font-size:14px;margin-top:16px} .pz-close{grid-template-columns:1fr;gap:8px;margin-top:16px} .pz-close li{padding:9px 12px;font-size:14px}
+    .pz-hint{display:none} .pz-brand{margin-bottom:18px}
+    .pz-cap{grid-template-columns:1fr;gap:10px;align-items:start;padding:14px 16px 70px;overflow:auto}
+    .pz-cap h2{font-size:20px} .pz-cap .pz-line{font-size:14px} .pz-cap .pz-ex{font-size:14px}
+    .pz-ctl,body.pz-live .pz-ctl{left:12px;right:12px;bottom:10px;justify-content:space-between;gap:2px;padding:5px}
+    .pz-ctl button{padding:7px 8px;font-size:11px;white-space:nowrap} .pz-ctl kbd,.pz-ctl .sep,.pz-ctl .fsb{display:none} .pz-ctl .ct{min-width:0}
+    .pz-ov{padding:22px 18px 90px} .pz-ov .cols{grid-template-columns:1fr}
   }
 </style>
 <script>
@@ -6270,73 +6363,198 @@ if(DEMO){
       ['ref','slug'].some(function(k){ var v = (Q.get(k) || '').trim(); return v && v !== 'demo'; });
   }
   if(realProperty()) return;
-  var steps = [], i = 0, panel, stage, hl = null;
-  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-  function tab(v){ var b = document.querySelector('.viewtabs button[data-view="'+v+'"]'); if(b) b.click(); }
-  function find(sel){
-    if(sel.indexOf('sec:') !== 0) return document.querySelector(sel);
-    var t = sel.slice(4), c = [].filter.call(document.querySelectorAll('.sec-h h2,.title,h2,h3'), function(e){ return e.offsetParent && e.textContent.indexOf(t) >= 0; });
-    return c.length ? (c[0].closest('section') || c[0]) : null;
+  var DIR = 'assets/tour/hotel/', data, slides = [], i = 0, seq = 0, root, stage, cap, spot, notes, ov, ctl, bar, cur = null, raf = 0, notesOn = false;
+  var ICON = {
+    guest: '<svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>',
+    dash: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M9 9v9M8 21h8"/></svg>',
+    lobby: '<svg viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>'
+  };
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function el(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html != null) e.innerHTML = html; return e; }
+  function tab(v){ var b = document.querySelector('.viewtabs button[data-view="' + v + '"]'); if(b && b.getAttribute('aria-selected') !== 'true') b.click(); }
+  /* the section a live step spotlights; before the tab switch the view is hidden, so `any` skips the visibility test */
+  function find(s, any){
+    var sel = s.sel, root = (s.view && s.view !== 'home' && document.querySelector('#view-' + s.view)) || document;
+    if(sel.indexOf('sec:') !== 0) return root.querySelector(sel);
+    var t = sel.slice(4), c = [].filter.call(root.querySelectorAll('.sec-h h2,.title,h2,h3'), function(e){ return (any || e.offsetParent) && e.textContent.indexOf(t) >= 0; });
+    return c.length ? (c[0].closest('section') || c[0].parentElement) : null;
   }
-  function show(k){
-    i = Math.max(0, Math.min(steps.length-1, k));
-    var s = steps[i];
-    if(hl){ hl.classList.remove('pz-hl'); hl = null; }
-    if(s.view){
+  function mark(){ var l = document.querySelector('link[rel="icon"]'); return l ? l.href : ''; }
+  function kind(s){ return s.kind || (s.view && find(s, true) ? 'live' : 'img'); }
+  function statusTag(s){
+    if(s.status === 'Built, not live') return '<span class="st nl">Built, not live</span>';
+    if(s.status === 'Sample') return '<span class="st sm">Sample figures</span>';
+    return '';
+  }
+  function pill(s){ return '<span class="pz-k">' + ICON[s.side] + esc(s.stage) + '</span>'; }
+  function head(s, h){ return pill(s) + '<div class="pz-row"><span class="n">' + s.n + '</span>' + statusTag(s) + '</div><' + h + '>' + esc(s.name) + '</' + h + '>' +
+    '<p class="pz-line">' + esc(s.line) + '</p><div class="pz-ex"><small>For example</small>' + esc(s.item) + '</div>'; }
+  function visual(s){
+    var two = s.img.length > 1, h = '';
+    s.img.forEach(function(im){
+      if(im.focus){ var f = im.focus, pc = function(v, d){ return (v / d * 100).toFixed(2) + '%'; };
+        h += '<div class="pz-ph"><div class="scr"><img src="' + DIR + im.src + '" alt="' + esc(s.caption) + '"><i class="fx" style="left:' + pc(f[0], im.w) + ';top:' + pc(f[1], im.h) + ';width:' + pc(f[2], im.w) + ';height:' + pc(f[3], im.h) + '"></i></div></div>';
+      } else if(!s.desk){
+        h += '<div class="pz-ph"><div class="scr"><img src="' + DIR + im.src + '" alt="' + esc(s.caption) + '"></div></div>';
+      } else {
+        h += '<div class="pz-dk' + (s.side === 'lobby' ? ' tv' : '') + '"><div class="tb"><i></i><i></i><i></i></div><img src="' + DIR + im.src + '" alt="' + esc(s.caption) + '"></div>';
+      }
+    });
+    return '<div class="pz-vis' + (two ? ' two' : '') + '">' + h + '<div class="pz-cap-src">' + esc(s.caption) + '</div></div>';
+  }
+  function hint(){ return '<div class="pz-hint"><kbd>&rarr;</kbd> next <kbd>&larr;</kbd> back <kbd>O</kbd> overview <kbd>N</kbd> notes <kbd>F</kbd> full screen <kbd>Esc</kbd> exit</div>'; }
+  function render(s){
+    var k = kind(s);
+    if(k === 'live'){
+      stage.hidden = true; stage.innerHTML = '';
+      document.body.classList.add('pz-live');
+      cap.hidden = false;
+      cap.innerHTML = '<div>' + pill(s) + '<div class="pz-row"><span class="n">' + s.n + '</span>' + statusTag(s) + '</div><h2>' + esc(s.name) + '</h2></div>' +
+        '<p class="pz-line">' + esc(s.line) + '</p><div class="pz-ex"><small>For example</small>' + esc(s.item) + '</div>';
       tab(s.view);
-      setTimeout(function(){ var el = find(s.sel); if(el){ hl = el; el.classList.add('pz-hl'); el.scrollIntoView({block:'start', behavior:'smooth'}); } }, 120);
+      var me = ++seq;
+      setTimeout(function(){ if(me !== seq) return; cur = find(s); scrollTo(cur, true); place();
+        [450, 900, 1500].forEach(function(t){ setTimeout(function(){ if(me === seq){ if(!inBand(cur)) scrollTo(cur, false); place(); } }, t); }); }, 140);
+      return;
     }
-    if(s.img){
-      stage.hidden = false; stage.className = 'pz-stage' + (s.desk ? ' desk' : '');
-      stage.style.setProperty('--n', s.img.length);
-      stage.innerHTML = s.img.map(function(f){ return '<img src="assets/tour/hotel/'+f+'" alt="'+esc(s.caption)+'">'; }).join('');
-    } else { stage.hidden = true; stage.innerHTML = ''; }
-    var built = s.status === 'Built, not live';
-    panel.querySelector('.pz-body').innerHTML =
-      '<div class="pz-part">Part '+s.part+' &middot; '+esc(s.partTitle)+'</div>' +
-      '<div class="pz-n">'+s.n+'</div><div class="pz-name">'+esc(s.name)+'</div>' +
-      '<div class="pz-meta">'+esc(s.plan)+' &middot; <span'+(built?' class="nl"':'')+'>'+esc(s.status)+'</span> &middot; '+esc(s.who.join(', '))+'</div>' +
-      '<div class="pz-lab">What it does</div><div class="pz-how">'+esc(s.does)+'</div>' +
-      '<div class="pz-item">'+esc(s.item)+'</div>' +
-      '<div class="pz-lab">How it works</div><div class="pz-how">'+esc(s.how)+'</div>' +
-      '<div class="pz-cap">'+esc(s.caption)+'</div>';
-    panel.querySelector('.pz-body').scrollTop = 0;
-    panel.querySelector('.pz-ct').innerHTML = '<b>'+s.n+'</b> of '+steps.length;
-    panel.querySelector('.pz-prog i').style.width = Math.round((i+1)/steps.length*100)+'%';
-    panel.querySelector('.pz-back').disabled = i === 0;
-    panel.querySelector('.pz-next').textContent = i === steps.length-1 ? 'Finish' : 'Next';
-    try{ var q = new URLSearchParams(location.search); q.set('step', s.n); history.replaceState(null, '', location.pathname + '?' + q.toString()); }catch(e){}
+    document.body.classList.remove('pz-live'); cap.hidden = true; spot.hidden = true; cur = null;
+    stage.hidden = false;
+    if(k === 'open'){
+      stage.className = 'pz-stage dark';
+      stage.innerHTML = '<div class="pz-slide one"><div class="pz-brand"><img src="' + mark() + '" alt=""><div><b>OceanSafe</b><span>Operator Dashboard</span></div></div>' +
+        '<p class="pz-eyebrow">Hotels</p><h1>' + esc(data.title) + '</h1>' +
+        '<p class="pz-line">A walk through the guest app and the operator Dashboard, on a sample property. Every figure on these screens is sample.</p>' +
+        '<ol class="pz-parts">' + data.parts.map(function(p){ return '<li><span class="n">' + p.n + '</span><b>' + esc(p.title) + '</b><span>' + p.rows.length + ' features</span></li>'; }).join('') + '</ol>' + hint() + '</div>';
+    } else if(k === 'part'){
+      var p = s.p;
+      stage.className = 'pz-stage dark';
+      stage.innerHTML = '<div class="pz-slide one"><p class="pz-eyebrow">Part ' + p.n + ' of ' + data.parts.length + '</p><h1>' + esc(p.title) + '</h1>' +
+        '<p class="pz-line">' + esc(p.sub) + '</p><ul class="pz-rows">' + p.rows.map(function(n){ var r = data.steps[n - 1];
+          return '<li><span class="n">' + n + '</span>' + esc(r.name) + '<span class="side">' + esc(r.side === 'guest' ? 'phone' : r.side === 'dash' ? 'Dashboard' : 'lobby') + '</span></li>'; }).join('') + '</ul>' + hint() + '</div>';
+    } else if(k === 'close'){
+      var paid = data.steps.filter(function(r){ return r.plan === 'Paid plan'; });
+      stage.className = 'pz-stage dark';
+      stage.innerHTML = '<div class="pz-slide one"><p class="pz-eyebrow">To close</p><h1>What the paid plan adds</h1>' +
+        '<p class="pz-line">Everything in Part 1 stays on the free plan. These are the rows the paid plan adds on top.</p>' +
+        '<ul class="pz-close">' + paid.map(function(r){ return '<li><span class="n">' + r.n + '</span>' + esc(r.name) + (r.status === 'Built, not live' ? ' <small style="color:var(--pz-sand-2)">(built, not live)</small>' : '') + '</li>'; }).join('') + '</ul>' +
+        '<p class="pz-foot"><b>Nothing on the free plan is taken away.</b> Safety content is never gated or sold, on any plan. The ocean call never changes for an offer. Setup is done with the property; Dashboard edits save as a draft that we apply.<br>oceansafety.app</p>' + hint() + '</div>';
+    } else {
+      stage.className = 'pz-stage light';
+      stage.innerHTML = '<div class="pz-slide"><div>' + head(s, 'h1') + '</div>' + visual(s) + hint() + '</div>';
+    }
+    stage.scrollTop = 0;
   }
+  /* live steps: scroll the section fully into view under the sticky tabs, then spotlight it */
+  function headerH(){ var vt = document.querySelector('.viewtabs'); return (vt ? vt.offsetHeight : 54) + 14; }
+  function band(){ var hh = headerH(), capH = cap.offsetHeight || 132; return {top: hh, h: window.innerHeight - hh - capH - 16}; }
+  function inBand(e){
+    if(!e) return true;
+    var r = e.getBoundingClientRect(), b = band();
+    return r.top >= b.top - 2 && (r.bottom <= b.top + b.h + 2 || (r.height >= b.h && r.top <= b.top + 2));
+  }
+  function scrollTo(e, smooth){
+    if(!e) return;
+    var r = e.getBoundingClientRect(), top = r.top + window.pageYOffset, b = band();
+    var y = r.height >= b.h ? top - b.top : top - b.top - (b.h - r.height) / 2;
+    window.scrollTo({top: Math.max(0, y), behavior: smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'auto'});
+  }
+  function place(){
+    if(!cur || !cur.offsetParent){ spot.hidden = true; return; }
+    var r = cur.getBoundingClientRect(), pad = 10;
+    spot.hidden = false;
+    spot.style.left = (r.left - pad) + 'px'; spot.style.top = (r.top - pad) + 'px'; spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
+  }
+  function onMove(){ if(raf) return; raf = requestAnimationFrame(function(){ raf = 0; place(); }); }
+  function noteHTML(s){
+    var k = kind(s);
+    if(k === 'open') return '<div class="lead">Opening</div>' + data.parts.map(function(p){ return '<h3>Part ' + p.n + ': ' + esc(p.title) + '</h3><p>' + esc(p.sub) + '</p>'; }).join('');
+    if(k === 'part') return '<div class="lead">Part ' + s.p.n + ': ' + esc(s.p.title) + '</div><p>' + esc(s.p.sub) + '</p>';
+    if(k === 'close') return '<div class="lead">Close</div><p>Recap the paid rows by name. No price on this screen; pricing is a separate conversation.</p>';
+    return '<div class="lead">' + s.n + '. ' + esc(s.name) + '</div><p>' + esc(s.does) + '</p>' +
+      '<h3>How it works</h3><p>' + esc(s.how) + '</p>' +
+      '<h3>Where it lives</h3><p>' + esc(s.where) + '</p><h3>What feeds it</h3><p>' + esc(s.feeds) + '</p>' +
+      '<h3>Plan, status, who</h3><p><b>' + esc(s.plan) + '</b> &middot; ' + esc(s.status) + ' &middot; ' + esc(s.who.join(', ')) + '</p>' +
+      '<h3>Screen</h3><p>' + esc(s.caption) + '</p>';
+  }
+  function urlFor(s){ var k = kind(s); return k === 'open' ? null : k === 'part' ? 'p' + s.p.n : k === 'close' ? 'end' : String(s.n); }
+  function show(k){
+    i = Math.max(0, Math.min(slides.length - 1, k));
+    var s = slides[i], rows = data.steps.length;
+    root.classList.remove('pz-anim'); void root.offsetWidth; root.classList.add('pz-anim');
+    render(s);
+    notes.innerHTML = noteHTML(s);
+    ctl.querySelector('.ct').textContent = s.n ? s.n + ' / ' + rows : (kind(s) === 'open' ? 'Start' : kind(s) === 'close' ? 'Close' : 'Part ' + s.p.n);
+    ctl.querySelector('.bk').disabled = i === 0;
+    ctl.querySelector('.nx').textContent = i === slides.length - 1 ? 'Finish' : 'Next';
+    bar.firstChild.style.width = Math.round(i / (slides.length - 1) * 100) + '%';
+    try{ var q = new URLSearchParams(location.search), u = urlFor(s); if(u) q.set('step', u); else q.delete('step'); history.replaceState(null, '', location.pathname + '?' + q.toString()); }catch(e){}
+    for(var j = i + 1; j <= i + 2 && j < slides.length; j++) (slides[j].img || []).forEach(function(im){ var p = new Image(); p.src = DIR + im.src + '?v=' + im.v; });
+    if(!ov.hidden) overview(true);
+  }
+  function overview(on){
+    ov.hidden = !on; ctl.querySelector('.ovb').setAttribute('aria-pressed', on ? 'true' : 'false');
+    if(!on) return;
+    ov.innerHTML = '<h2>Every row, by part</h2><div class="ends"><button type="button" data-i="0">Opening</button><button type="button" data-i="' + (slides.length - 1) + '">Close</button></div><div class="cols">' +
+      data.parts.map(function(p){ return '<div><h3><span>' + p.n + '</span>' + esc(p.title) + '</h3>' + p.rows.map(function(n){ var r = data.steps[n - 1], idx = slides.indexOf(r);
+        return '<button type="button" data-i="' + idx + '"' + (idx === i ? ' class="cur"' : '') + '><span class="n">' + n + '</span><span>' + esc(r.name) + '</span></button>'; }).join('') + '</div>'; }).join('') + '</div>';
+    [].forEach.call(ov.querySelectorAll('button[data-i]'), function(b){ if(+b.dataset.i === i) b.classList.add('cur'); b.addEventListener('click', function(){ overview(false); show(+b.dataset.i); }); });
+  }
+  function toggleNotes(){ notesOn = !notesOn; notes.classList.toggle('on', notesOn); ctl.querySelector('.ntb').setAttribute('aria-pressed', notesOn ? 'true' : 'false'); }
+  function fullscreen(){
+    try{ if(document.fullscreenElement) document.exitFullscreen(); else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }catch(e){}
+  }
+  function next(){ if(i === slides.length - 1) close(); else show(i + 1); }
   function close(){
-    document.body.classList.remove('pz-on'); if(panel) panel.remove(); if(stage) stage.remove();
-    if(hl) hl.classList.remove('pz-hl');
+    document.body.classList.remove('pz-on', 'pz-live'); if(root) root.remove();
+    try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){}
     try{ var q = new URLSearchParams(location.search); q.delete('tour'); q.delete('step'); history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q.toString() : '')); }catch(e){}
-    document.removeEventListener('keydown', key);
+    document.removeEventListener('keydown', key); removeEventListener('scroll', onMove, true); removeEventListener('resize', onMove);
   }
   function key(e){
     if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
-    if(['ArrowRight','PageDown',' '].indexOf(e.key) >= 0){ e.preventDefault(); if(i === steps.length-1) close(); else show(i+1); }
-    else if(['ArrowLeft','PageUp'].indexOf(e.key) >= 0){ e.preventDefault(); show(i-1); }
-    else if(e.key === 'Escape') close();
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if(['ArrowRight', 'PageDown', ' ', 'ArrowDown'].indexOf(k) >= 0){ e.preventDefault(); next(); }
+    else if(['ArrowLeft', 'PageUp', 'ArrowUp'].indexOf(k) >= 0){ e.preventDefault(); show(i - 1); }
+    else if(k === 'Home'){ e.preventDefault(); show(0); }
+    else if(k === 'End'){ e.preventDefault(); show(slides.length - 1); }
+    else if(k === 'Escape'){ if(!ov.hidden) overview(false); else if(notesOn) toggleNotes(); else close(); }
+    else if(k === 'n' || k === 'N') toggleNotes();
+    else if(k === 'o' || k === 'O') overview(ov.hidden);
+    else if(k === 'f' || k === 'F') fullscreen();
   }
-  function start(data){
-    steps = data.steps || []; if(!steps.length || realProperty()) return;
+  function start(d){
+    data = d; if(!(d.steps || []).length || realProperty()) return;
+    slides = [{kind: 'open'}];
+    d.parts.forEach(function(p){ slides.push({kind: 'part', p: p}); p.rows.forEach(function(n){ slides.push(d.steps[n - 1]); }); });
+    slides.push({kind: 'close'});
     document.body.classList.add('pz-on');
-    stage = document.createElement('div'); stage.className = 'pz-stage'; stage.hidden = true; document.body.appendChild(stage);
-    panel = document.createElement('aside'); panel.className = 'pz-panel'; panel.setAttribute('aria-label','Presenter');
-    panel.innerHTML = '<div class="pz-top"><span>'+esc(data.title)+'</span><span class="pz-ct"></span><button type="button" class="x">Exit</button></div>' +
-      '<div class="pz-prog"><i></i></div><div class="pz-body" aria-live="polite"></div>' +
-      '<div class="pz-nav"><button type="button" class="pz-back">Back</button><span class="k">Arrow keys or a clicker</span><button type="button" class="pz-next">Next</button></div>';
-    document.body.appendChild(panel);
-    panel.querySelector('.x').addEventListener('click', close);
-    panel.querySelector('.pz-back').addEventListener('click', function(){ show(i-1); });
-    panel.querySelector('.pz-next').addEventListener('click', function(){ if(i === steps.length-1) close(); else show(i+1); });
-    document.addEventListener('keydown', key);
-    var at = parseInt(Q.get('step'),10);
-    show(at > 0 ? at-1 : 0);
+    root = el('div', 'pz'); root.setAttribute('role', 'region'); root.setAttribute('aria-label', 'Presenter');
+    bar = el('div', 'pz-bar', '<i></i>'); stage = el('div', 'pz-stage'); stage.hidden = true;
+    spot = el('div', 'pz-spot'); spot.hidden = true; cap = el('div', 'pz-cap'); cap.hidden = true; cap.setAttribute('aria-live', 'polite');
+    notes = el('aside', 'pz-notes'); notes.setAttribute('aria-label', 'Presenter notes');
+    ov = el('div', 'pz-ov'); ov.hidden = true; ov.setAttribute('aria-label', 'Step overview');
+    ctl = el('nav', 'pz-ctl', '<button type="button" class="bk">Back</button><span class="ct"></span><button type="button" class="nx">Next</button><span class="sep"></span>' +
+      '<button type="button" class="ovb" aria-pressed="false">Overview<kbd>O</kbd></button><button type="button" class="ntb" aria-pressed="false">Notes<kbd>N</kbd></button>' +
+      '<button type="button" class="fsb">Full screen<kbd>F</kbd></button><button type="button" class="x">Exit<kbd>Esc</kbd></button>');
+    ctl.setAttribute('aria-label', 'Presenter controls');
+    [bar, stage, spot, cap, notes, ov, ctl].forEach(function(e){ root.appendChild(e); });
+    document.body.appendChild(root);
+    ctl.querySelector('.bk').addEventListener('click', function(){ show(i - 1); });
+    ctl.querySelector('.nx').addEventListener('click', next);
+    ctl.querySelector('.ovb').addEventListener('click', function(){ overview(ov.hidden); });
+    ctl.querySelector('.ntb').addEventListener('click', toggleNotes);
+    ctl.querySelector('.fsb').addEventListener('click', fullscreen);
+    ctl.querySelector('.x').addEventListener('click', close);
+    document.addEventListener('keydown', key); addEventListener('scroll', onMove, true); addEventListener('resize', onMove);
+    var at = Q.get('step'), k0 = 0;
+    if(at === 'end') k0 = slides.length - 1;
+    else if(/^p\d+$/.test(at || '')) k0 = Math.max(0, slides.map(function(s){ return s.kind === 'part' ? 'p' + s.p.n : ''; }).indexOf(at));
+    else if(parseInt(at, 10) > 0) k0 = Math.max(0, slides.indexOf(d.steps[parseInt(at, 10) - 1]));
+    show(k0);
   }
   window.addEventListener('load', function(){
-    fetch('assets/tour/hotel/tour.json', {cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){ if(d) start(d); }).catch(function(){});
+    fetch(DIR + 'tour.json', {cache: 'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){ if(d) start(d); }).catch(function(){});
   });
 })();
 </script>
