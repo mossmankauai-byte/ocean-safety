@@ -1618,8 +1618,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         var src = await fetch(location.pathname, {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
         var ORIGIN = location.origin;
         var dir = location.pathname.replace(/[^/]*$/,'');            // e.g. "/"
-        src = src.replace(/((?:src|href)=")assets\//g, '$1'+ORIGIN+dir+'assets/');
-        src = src.replace(/(url\((['"]?))assets\//g, '$1'+ORIGIN+dir+'assets/');
+        src = src.replace(/((?:src|href)=")assets\//g, function(m, a){ return a+ORIGIN+dir+'assets/'; });
+        src = src.replace(/(url\((['"]?))assets\//g, function(m, a){ return a+ORIGIN+dir+'assets/'; });
         var baked = 'slug:'+JSON.stringify(slug)+',key:'+JSON.stringify(key)+(api?(',api:'+JSON.stringify(api)):'');
         var shim = '\n<script>(function(){var B={'+baked+'};if(!/[?&](ref|slug)=/.test(location.search)){var q="?ref="+encodeURIComponent(B.slug)+(B.key?("&key="+encodeURIComponent(B.key)):"")+(B.api?("&api="+encodeURIComponent(B.api)):"");location.replace(location.pathname+q+location.hash);}else{try{document.documentElement.setAttribute("data-osdesktop","1");}catch(e){}}})();<\/scr'+'ipt>';
         src = src.replace(/<head[^>]*>/i, function(m){ return m+shim; });
@@ -2805,9 +2805,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var SEGN  = {renter:'Renter', exchange:'Repeat', owner:'Owner'};
   var REPS  = ['Leia','Kai','Mara']; var repI = 0;
   var GIFTS = {
-    renter:  [['Lūʻau for two',300],['Sunset cruise',180],['$200 credit',200]],
-    exchange:[['Snorkel sail',160],['$150 dining',150],['$175 spa',175]],
-    owner:   [['15k bonus points',300],['$250 dining',250]]
+    renter:  [['Lūʻau for two',300],['Sunset cruise',180],['Resort credit',200]],
+    exchange:[['Snorkel sail',160],['Dining credit',150],['Spa credit',175]],
+    owner:   [['15k bonus points',300],['Dining credit',250]]
   };
 
   /* local, tab-scoped horizontal-bar renderer — no dependency on any global helper */
@@ -4348,7 +4348,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
    Default (no ?plan) is untouched: the PAID demo, Jade's sales tool. ?plan=free
    renders the free-forever tier honestly — safety and every analytics tile stay
    fully ungated; the two paid surfaces (co-brand + Promotions) show as locked,
-   with the demo's own Sample numbers doing the persuading. No trial language:
+   with the demo's own Sample numbers doing the persuading. No time-limited framing:
    the free tier is free forever, paid is the paid-tier unlock. */
 (function(){
   if(window.OS_PLAN !== 'free') return;
@@ -4409,28 +4409,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     ['The Spa',              240,  38]
   ];
   var total = TAPS.reduce(function(s,t){ return s + t[1]; }, 0);           // 2,120
-  // Idle-demand floor — every input is a cited/modeled market benchmark, NOT the operator's
-  // measured data (MARKET-BENCHMARKS.md, firm-verified 2026-07-09). Floored on taps alone —
-  // no hotel-occupancy stat is used to normalize timeshare inventory; check + conversion are
-  // modeled and stated as such; the figure is an "at least" floor. A tap is interest, never a
-  // booking. The "How we get this" expander must always ship with the dollar number — it is
-  // never a black-box amount.
-  var CHECK = 40;                                                         // [modeled] conservative resort F&B check, low end casual
-  var CONV  = 0.02;                                                       // [modeled] passive-tap conversion floor (band 1–3%)
-  var est   = Math.round(total * CHECK * CONV / 100) * 100;               // ≈ $1,700/mo (at-least floor)
-  var estLo = Math.round(total * CHECK * 0.01 / 10) * 10;                 // ~$850 at 1%
-  var estHi = Math.round(total * CHECK * 0.03 / 10) * 10;                 // ~$2,540 at 3%
-  var totalTxt = total.toLocaleString('en-US'), estTxt = '$' + est.toLocaleString('en-US');
-  var estLoTxt = '$' + estLo.toLocaleString('en-US'), estHiTxt = '$' + estHi.toLocaleString('en-US');
-  var methHTML =
-    '<details class="meth"><summary>How we get this</summary><div class="body">' +
-      '<b>The floor, step by step:</b>' +
-      '<div style="margin:5px 0 0"><code>' + totalTxt + ' taps</code> <span class="chip build">measured once live</span> — amenity taps your guests made last month.</div>' +
-      '<div style="margin:4px 0 0">&times; <code>~$40 check</code> <span class="chip assumption">modeled</span> — a conservative ~$40 modeled dining check (low end of casual dining). An analyst estimate, not a cited authority.</div>' +
-      '<div style="margin:4px 0 0">&times; <code>2% conversion</code> <span class="chip assumption">modeled</span> — a modeled 1&ndash;3% conversion for a passive in-app tap, well below the ~8% that opted-in pre-arrival upsell emails see (Oaky/Plusgrade, 2024&ndash;25). That 8% is the <b>active-upsell ceiling</b>, shown only to frame this floor &mdash; never applied to taps.</div>' +
-      '<div style="margin:5px 0 0">= <b>~' + estTxt + '/mo</b>, an &ldquo;at least&rdquo; floor &mdash; band <b>' + estLoTxt + '&ndash;' + estHiTxt + '</b> at 1&ndash;3%.</div>' +
-      '<div style="margin:6px 0 0;color:var(--muted)">For scale, Hawaii visitors already spend ~$243/person/day on-property (Hawaii DBEDT, 2024). All figures here are modeled market benchmarks &mdash; <b>not your measured data</b>. Your real numbers replace these when your guide goes live.</div>' +
-    '</div></details>';
+  var totalTxt = total.toLocaleString('en-US');
 
   var promosSec = document.querySelector('#view-promos section');
   if(promosSec){
@@ -4453,11 +4432,10 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       '<div class="card" id="pmLockCard" style="margin-bottom:14px">' +
         '<div class="title"><span class="l">' + LOCK + ' Offers that land — locked</span><span><span class="chip sample">Sample</span></span></div>' +
         featHTML +
-        '<div class="v">~' + estTxt + ' <small>/ mo of guest interest you’re not capturing — at least</small></div>' +
+        '<div class="v">' + totalTxt + ' <small>amenity taps last month, with no offer live</small></div>' +
         '<ol class="rank" style="margin-top:12px">' + rank + '</ol>' +
-        '<div class="cap">' + totalTxt + ' amenity taps last month — a conservative floor on the on-property spend that interest represents. A tap is interest, the click — never a booking.</div>' +
-        methHTML +
-        '<div class="note" id="pmNudge" style="margin-top:12px">Your guests showed ' + totalTxt + ' taps of interest in your amenities last month — with no offer live, $0 captured. A conservative modeled floor puts that at ~' + estTxt + '/mo (see “How we get this”). Unlock Promotions to reach them.</div>' +
+        '<div class="cap">' + totalTxt + ' amenity taps last month. A tap is interest, never a booking.</div>' +
+        '<div class="note" id="pmNudge" style="margin-top:12px">Your guests showed ' + totalTxt + ' taps of interest in your amenities last month — with no offer live to catch them. Unlock Promotions to reach them.</div>' +
         btnsHTML +
       '</div>');
   }
@@ -5345,7 +5323,7 @@ if(DEMO){
           if(island === 'kauai'){
             var href = a.getAttribute('href') || '';
             if(href.indexOf('stay-close-v2') !== -1){
-              a.setAttribute('href', href.replace(/([?&]ref=)[^&]*/, '$1' + s));
+              a.setAttribute('href', href.replace(/([?&]ref=)[^&]*/, function(m, a){ return a + s; }));
               return;
             }
           }
@@ -5365,7 +5343,7 @@ if(DEMO){
    Sub-tab click swaps the iframe src, so each portal page loads on demand and
    the console never pays for six pages it may not open.
 
-   PLAN: paid by default — for a car fleet the store IS the $5/vehicle unlock,
+   PLAN: paid by default — for a car fleet the store IS the per-vehicle unlock,
    and a demo must never open a prospect onto a locked box. ?plan=free swaps the
    whole frame for the lock card below (built by the free-tier engine). */
 (function(){
