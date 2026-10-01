@@ -1188,6 +1188,85 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .hm-inner{padding:var(--sp-4)}
 }
 </style>
+<style>
+/* ============ HOME COMMAND CENTER + PINNED PHONE PREVIEWS (2026-10-01) ============
+   Home opens on the operator's numbers, not the pitch. The hero and the group pitch
+   step aside; the status bar, KPI strip, to-do list, conditions and activity lead. */
+  .hm-hero,#multiPropSec{display:none}
+  .cc{display:grid;gap:14px;margin:4px 0 26px}
+  .cc-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow)}
+  .cc-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;background:var(--sea-tint);color:var(--sea)}
+  .cc-pill i{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .cc-pill.wait{background:var(--gold-tint);color:var(--gold-ink)}
+  .cc-pill.sample{background:var(--sample-bg);color:var(--sample)}
+  .cc-upd{font-size:12px;color:var(--muted);margin-left:auto}
+  .cc-open{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--on-sea);background:var(--sea);border-radius:999px;padding:7px 13px;text-decoration:none}
+  .cc-open:hover{background:var(--sea-2)}
+  .cc-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .cc-k{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px 10px;box-shadow:var(--shadow);min-width:0}
+  .cc-k .l{font-size:12px;color:var(--muted);font-weight:600}
+  .cc-k .v{font-size:26px;font-weight:700;color:var(--ink);line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cc-k .v.sm{font-size:19px;padding:4px 0 3px}
+  .cc-k .d{font-size:12px;font-weight:600;color:var(--muted)}
+  .cc-k .d.up{color:var(--good)} .cc-k .d.dn{color:var(--risk)}
+  .cc-k svg.sp{display:block;width:100%;height:28px;margin-top:6px}
+  .cc-k .bar{height:6px;border-radius:4px;background:var(--hair-soft);margin:14px 0 8px;overflow:hidden}
+  .cc-k .bar i{display:block;height:100%;background:var(--sea);border-radius:4px}
+  .cc-mid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:12px}
+  .cc-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);min-width:0}
+  .cc-h{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--ink);margin:0 0 6px}
+  .cc-h .ct{margin-left:auto;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--gold-tint);color:var(--gold-ink)}
+  .cc-h .ct.zero{background:var(--sea-tint);color:var(--sea)}
+  .cc-h .note{margin-left:auto;font-size:11.5px;font-weight:500;color:var(--muted)}
+  .cc-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--hair-soft);font-size:13.5px;color:var(--ink-2)}
+  .cc-row:first-of-type{border-top:0}
+  .cc-row .ic{width:18px;height:18px;flex:none;color:var(--muted)}
+  .cc-row .ic.warn{color:var(--warn)} .cc-row .ic.risk{color:var(--risk)} .cc-row .ic.ok{color:var(--good)}
+  .cc-row .tx{flex:1;min-width:0}
+  .cc-row .when{width:64px;flex:none;font-size:12px;color:var(--muted)}
+  .cc-go{appearance:none;font:inherit;font-size:12.5px;font-weight:700;color:var(--sea);background:transparent;border:1px solid rgba(14,110,140,.35);border-radius:999px;padding:4px 11px;cursor:pointer;flex:none}
+  .cc-go:hover{background:var(--sea-tint);border-color:var(--sea)}
+  .cc-wx{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px}
+  .cc-wx div{background:var(--tint);border-radius:10px;padding:9px 11px}
+  .cc-wx b{display:block;font-size:17px;color:var(--ink)}
+  .cc-wx span{font-size:11.5px;color:var(--muted);font-weight:600}
+  .cc-cap{font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+  .cc-foot{font-size:13px;color:var(--muted);margin:0}
+  .cc-foot a{color:var(--sea);font-weight:600}
+  @media (max-width:900px){ .cc-kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .cc-mid{grid-template-columns:minmax(0,1fr)} }
+  @media (max-width:420px){ .cc-k .v{font-size:22px} .cc-upd{margin-left:0;width:100%} }
+
+  /* ---- pinned phone rail: the editor on the left, the guest's phone on the right ---- */
+  .ph-split{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+  .ph-main{min-width:0}
+  .ph-rail{position:sticky;top:12px;min-width:0}
+  .ph-rail .ph-lab{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted);margin:18px 2px 0}
+  .ph-rail .ph-lab i{width:7px;height:7px;border-radius:50%;background:var(--good)}
+  .ph-rail .gp-phone{margin-top:10px}
+  .ph-rail .card{margin:0}
+  .ph-close,.ph-fab{display:none}
+  .ph-list .gp-sec{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--mute);margin:12px 2px 6px}
+  .ph-list .gp-row{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:9px 10px;margin-bottom:6px;font-size:13px;transition:box-shadow .2s}
+  .ph-list .gp-row .t{flex:1;min-width:0}
+  .ph-list .gp-row .t b{display:block;font-weight:600;color:var(--ink)}
+  .ph-list .gp-row .t span{font-size:11.5px;color:var(--mute)}
+  .ph-list .gp-row .star{color:var(--gold);flex:none}
+  .ph-list .gp-row.hot{box-shadow:0 0 0 2px var(--ocean)}
+  .ph-list .gp-head{font-size:11px;color:var(--mute);margin:0 2px}
+  .ph-list .gp-title{font-size:16px;font-weight:700;color:var(--ocean);margin:0 2px 2px}
+  .ph-list .gp-btn{flex:none;font-size:11.5px;font-weight:700;color:#fff;background:var(--ocean);border-radius:999px;padding:5px 11px}
+  .ph-list .gp-via{font-size:11px;color:var(--mute);margin:8px 2px 0;word-break:break-all}
+  @media (max-width:1000px){
+    .ph-split{grid-template-columns:minmax(0,1fr)}
+    .ph-rail{display:none;position:fixed;left:0;right:0;bottom:0;top:auto;z-index:80;max-height:86vh;overflow:auto;
+      background:var(--bg);border-radius:20px 20px 0 0;padding:6px 16px 22px;box-shadow:0 -12px 40px rgba(15,59,73,.28)}
+    body.ph-sheet .ph-rail.on{display:block}
+    .ph-close{display:block;margin:6px 0 0 auto;appearance:none;font:inherit;font-size:13px;font-weight:700;color:var(--sea);background:var(--sea-tint);border:0;border-radius:999px;padding:6px 14px;cursor:pointer}
+    .ph-fab{display:inline-flex;position:fixed;right:16px;bottom:16px;z-index:70;align-items:center;gap:7px;appearance:none;font:inherit;font-size:13.5px;font-weight:700;
+      color:var(--on-sea);background:var(--sea);border:0;border-radius:999px;padding:11px 16px;box-shadow:0 8px 22px rgba(15,59,73,.3);cursor:pointer}
+    .ph-fab[hidden],body.ph-sheet .ph-fab{display:none}
+  }
+</style>
 </head>
 <body class="textured">
 <!-- Console sign-in ported from /hotel 2026-08-11 (same block, byte-identical). /rental
@@ -1539,8 +1618,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         var src = await fetch(location.pathname, {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
         var ORIGIN = location.origin;
         var dir = location.pathname.replace(/[^/]*$/,'');            // e.g. "/"
-        src = src.replace(/((?:src|href)=")assets\//g, '$1'+ORIGIN+dir+'assets/');
-        src = src.replace(/(url\((['"]?))assets\//g, '$1'+ORIGIN+dir+'assets/');
+        src = src.replace(/((?:src|href)=")assets\//g, function(m, a){ return a+ORIGIN+dir+'assets/'; });
+        src = src.replace(/(url\((['"]?))assets\//g, function(m, a){ return a+ORIGIN+dir+'assets/'; });
         var baked = 'slug:'+JSON.stringify(slug)+',key:'+JSON.stringify(key)+(api?(',api:'+JSON.stringify(api)):'');
         var shim = '\n<script>(function(){var B={'+baked+'};if(!/[?&](ref|slug)=/.test(location.search)){var q="?ref="+encodeURIComponent(B.slug)+(B.key?("&key="+encodeURIComponent(B.key)):"")+(B.api?("&api="+encodeURIComponent(B.api)):"");location.replace(location.pathname+q+location.hash);}else{try{document.documentElement.setAttribute("data-osdesktop","1");}catch(e){}}})();<\/scr'+'ipt>';
         src = src.replace(/<head[^>]*>/i, function(m){ return m+shim; });
@@ -1575,6 +1654,27 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     </nav>
 
     <div id="view-home">
+
+    <!-- HOME COMMAND CENTER (2026-10-01): numbers first. Filled by the CC script below;
+         the demo shows sample figures under the Sample tag, a ?slug shows its own. -->
+    <section class="cc" id="ccHome" aria-label="Your property at a glance">
+      <div class="cc-status" id="ccStatus">
+        <span class="cc-pill" id="ccState"><i></i>Loading</span>
+        <span class="cc-pill" id="ccPlan"><i></i>Plan</span>
+        <span class="cc-upd" id="ccUpd"></span>
+        <a class="cc-open" id="ccOpen" href="/" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L11 13"/><path d="M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
+          Open your guide
+        </a>
+      </div>
+      <div class="cc-kpis" id="ccKpis"></div>
+      <div class="cc-mid">
+        <div class="cc-card" id="ccTodo"></div>
+        <div class="cc-card" id="ccWx"></div>
+      </div>
+      <div class="cc-card" id="ccFeed"></div>
+      <p class="cc-foot">Run more than one property? <a href="mailto:aloha@oceansafety.app?subject=Link%20my%20properties">We link them into one portfolio view</a>.</p>
+    </section>
 
     <!-- HOME HERO — the guest guide itself, never a data grid -->
     <section class="hm-hero" aria-label="Your guest guide">
@@ -2430,7 +2530,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var state = {};
   try { state = JSON.parse(localStorage.getItem(LSKEY)) || {}; } catch(e){ state = {}; }
   function st(cat,id){ var v = state[key(cat,id)]; return v || defState(cat,id); }
+  window.OS_PLACES = { DATA: DATA, CATS: CATS, st: function(c,i){ return st(c,i); } };
   function setSt(cat,id,val){
+    try{ window.dispatchEvent(new CustomEvent('os:places-changed', { detail: { cat: cat, id: id } })); }catch(e){}
     if(val === defState(cat,id)) delete state[key(cat,id)]; else state[key(cat,id)] = val;
     try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch(e){}
   }
@@ -2703,9 +2805,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   var SEGN  = {renter:'Renter', exchange:'Repeat', owner:'Owner'};
   var REPS  = ['Leia','Kai','Mara']; var repI = 0;
   var GIFTS = {
-    renter:  [['Lūʻau for two',300],['Sunset cruise',180],['$200 credit',200]],
-    exchange:[['Snorkel sail',160],['$150 dining',150],['$175 spa',175]],
-    owner:   [['15k bonus points',300],['$250 dining',250]]
+    renter:  [['Lūʻau for two',300],['Sunset cruise',180],['Resort credit',200]],
+    exchange:[['Snorkel sail',160],['Dining credit',150],['Spa credit',175]],
+    owner:   [['15k bonus points',300],['Dining credit',250]]
   };
 
   /* local, tab-scoped horizontal-bar renderer — no dependency on any global helper */
@@ -3175,6 +3277,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       .then(function(res){ if(!res.ok) throw new Error('http ' + res.status); return res.json(); })
       .then(function(data){
         var cur = sumRolls(data.days);
+        if(window.osCCLive) window.osCCLive({ cur: sumRolls(data.days), prior: sumRolls(data.priorDays), days: data.days || [], priorDays: data.priorDays || [], period: (data.period > 0) ? data.period : period, nameFor: nameFor });
         var prior = sumRolls(data.priorDays);
         var effPeriod = (data.period > 0) ? data.period : period;
 
@@ -3395,12 +3498,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   // Each stop: which view tab to open, what to highlight, and what to say.
   // v2 (2026-07-09): leads with the guest experience — shape first, data later.
   var STEPS = [
-    { center:true, title:'Welcome — this is your guests’ guide',
-      body:'This is the guide your guests use on the beach — and this is where you shape it: your amenities, your offers, your picks. The data comes later, honestly labeled. Replay anytime with the <b>Tour</b> button up top.' },
-    { view:'home', sel:'.hm-hero', title:'Safety first, your property woven in',
-      body:'Every guest who scans the in-unit QR gets live surf, lifeguard and hazard calls for the island’s most-visited beaches — with your property carried along. <b>Open your live guide</b> shows you exactly what they see.' },
+    { center:true, title:'Welcome: this is your guests’ guide',
+      body:'This is the guide your guests use on the beach, and this is where you shape it: your amenities, your offers, your picks. The data comes later, honestly labeled. Replay anytime with the <b>Tour</b> button up top.' },
+    { view:'home', sel:'#ccHome', title:'Your property at a glance',
+      body:'Your numbers first: guide opens, place taps, your most-opened place, and the short list of what needs you today. Every guest who scans your QR gets live surf, lifeguard and hazard calls with your property carried along. <b>Open your guide</b> shows exactly what they see.' },
     { view:'stayclose', sel:'#mgAmenities', title:'Your amenity menu',
-      body:'When the ocean is the wrong call, the guide steers guests to what you offer instead — spa, dining, cabanas. Edits save as a draft in this browser; <b>Export config</b> sends the menu into your app build.' },
+      body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. Edits save as a draft in this browser; <b>Export config</b> sends the menu into your app build.' },
     { view:'stayclose', sel:'#gpAmCard', title:'Watch it as a guest',
       body:'This is the exact panel guests see, built live from your draft menu. Switch the ocean condition with the chips, and tap an amenity to expand its hours and phone — just like a guest.' },
     { view:'promos', sel:'#pmDrop', title:'Drop a promotion',
@@ -3771,7 +3874,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         '<div style="font-weight:700;font-size:13px;color:var(--ink)">'+(FREE ? 'On the property' : 'Provided by '+esc(gpName()))+'</div>'+
         '<span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);background:#fff;border:1px solid var(--border);border-radius:999px;padding:2px 7px">Property offer</span>'+
       '</div>'+
-      '<div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">'+(GP_CTX[gpCond]||GP_CTX.calm)+' Separate from the safety report above — the ocean call never changes for an offer.</div>'+
+      '<div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">'+(GP_CTX[gpCond]||GP_CTX.calm)+' Separate from the beach safety report. The ocean call never changes for an offer.</div>'+
       rows+
     '</div>';
   }
@@ -3780,6 +3883,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var el = gpEl(); if(!el) return;
     el.innerHTML = gpAmenityHTML(gpItems.amenities);
   }
+  // The segment and the signed-in partner rename the header after this first draw; redraw then.
+  window.addEventListener('load', gpRender);
+  document.addEventListener('os-authed', function(){ setTimeout(gpRender, 0); });
   function gpPop(){
     var el = gpEl(); if(!el) return;
     el.classList.remove('gp-pop'); void el.offsetWidth; el.classList.add('gp-pop');
@@ -4245,7 +4351,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
    Default (no ?plan) is untouched: the PAID demo, Jade's sales tool. ?plan=free
    renders the free-forever tier honestly — safety and every analytics tile stay
    fully ungated; the two paid surfaces (co-brand + Promotions) show as locked,
-   with the demo's own Sample numbers doing the persuading. No trial language:
+   with the demo's own Sample numbers doing the persuading. No time-limited framing:
    the free tier is free forever, paid is the paid-tier unlock. */
 (function(){
   if(window.OS_PLAN !== 'free') return;
@@ -4306,28 +4412,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     ['The Spa',              240,  38]
   ];
   var total = TAPS.reduce(function(s,t){ return s + t[1]; }, 0);           // 2,120
-  // Idle-demand floor — every input is a cited/modeled market benchmark, NOT the operator's
-  // measured data (MARKET-BENCHMARKS.md, firm-verified 2026-07-09). Floored on taps alone —
-  // no hotel-occupancy stat is used to normalize timeshare inventory; check + conversion are
-  // modeled and stated as such; the figure is an "at least" floor. A tap is interest, never a
-  // booking. The "How we get this" expander must always ship with the dollar number — it is
-  // never a black-box amount.
-  var CHECK = 40;                                                         // [modeled] conservative resort F&B check, low end casual
-  var CONV  = 0.02;                                                       // [modeled] passive-tap conversion floor (band 1–3%)
-  var est   = Math.round(total * CHECK * CONV / 100) * 100;               // ≈ $1,700/mo (at-least floor)
-  var estLo = Math.round(total * CHECK * 0.01 / 10) * 10;                 // ~$850 at 1%
-  var estHi = Math.round(total * CHECK * 0.03 / 10) * 10;                 // ~$2,540 at 3%
-  var totalTxt = total.toLocaleString('en-US'), estTxt = '$' + est.toLocaleString('en-US');
-  var estLoTxt = '$' + estLo.toLocaleString('en-US'), estHiTxt = '$' + estHi.toLocaleString('en-US');
-  var methHTML =
-    '<details class="meth"><summary>How we get this</summary><div class="body">' +
-      '<b>The floor, step by step:</b>' +
-      '<div style="margin:5px 0 0"><code>' + totalTxt + ' taps</code> <span class="chip build">measured once live</span> — amenity taps your guests made last month.</div>' +
-      '<div style="margin:4px 0 0">&times; <code>~$40 check</code> <span class="chip assumption">modeled</span> — a conservative ~$40 modeled dining check (low end of casual dining). An analyst estimate, not a cited authority.</div>' +
-      '<div style="margin:4px 0 0">&times; <code>2% conversion</code> <span class="chip assumption">modeled</span> — a modeled 1&ndash;3% conversion for a passive in-app tap, well below the ~8% that opted-in pre-arrival upsell emails see (Oaky/Plusgrade, 2024&ndash;25). That 8% is the <b>active-upsell ceiling</b>, shown only to frame this floor &mdash; never applied to taps.</div>' +
-      '<div style="margin:5px 0 0">= <b>~' + estTxt + '/mo</b>, an &ldquo;at least&rdquo; floor &mdash; band <b>' + estLoTxt + '&ndash;' + estHiTxt + '</b> at 1&ndash;3%.</div>' +
-      '<div style="margin:6px 0 0;color:var(--muted)">For scale, Hawaii visitors already spend ~$243/person/day on-property (Hawaii DBEDT, 2024). All figures here are modeled market benchmarks &mdash; <b>not your measured data</b>. Your real numbers replace these when your guide goes live.</div>' +
-    '</div></details>';
+  var totalTxt = total.toLocaleString('en-US');
 
   var promosSec = document.querySelector('#view-promos section');
   if(promosSec){
@@ -4348,13 +4433,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var dzCard = promosSec.querySelector('.card');
     if(dzCard) dzCard.insertAdjacentHTML('beforebegin',
       '<div class="card" id="pmLockCard" style="margin-bottom:14px">' +
-        '<div class="title"><span class="l">' + LOCK + ' Offers that land — locked</span><span><span class="chip sample">Sample</span></span></div>' +
+        '<div class="title"><span class="l">' + LOCK + ' Offers that land: locked</span><span><span class="chip sample">Sample</span></span></div>' +
         featHTML +
-        '<div class="v">~' + estTxt + ' <small>/ mo of guest interest you’re not capturing — at least</small></div>' +
+        '<div class="v">' + totalTxt + ' <small>amenity taps last month, with no offer live</small></div>' +
         '<ol class="rank" style="margin-top:12px">' + rank + '</ol>' +
-        '<div class="cap">' + totalTxt + ' amenity taps last month — a conservative floor on the on-property spend that interest represents. A tap is interest, the click — never a booking.</div>' +
-        methHTML +
-        '<div class="note" id="pmNudge" style="margin-top:12px">Your guests showed ' + totalTxt + ' taps of interest in your amenities last month — with no offer live, $0 captured. A conservative modeled floor puts that at ~' + estTxt + '/mo (see “How we get this”). Unlock Promotions to reach them.</div>' +
+        '<div class="cap">' + totalTxt + ' amenity taps last month. A tap is interest, never a booking.</div>' +
+        '<div class="note" id="pmNudge" style="margin-top:12px">Your guests showed ' + totalTxt + ' taps of interest in your amenities last month, with no offer live to catch them. Turn on Promotions to reach them.</div>' +
         btnsHTML +
       '</div>');
   }
@@ -5242,7 +5326,7 @@ if(DEMO){
           if(island === 'kauai'){
             var href = a.getAttribute('href') || '';
             if(href.indexOf('stay-close-v2') !== -1){
-              a.setAttribute('href', href.replace(/([?&]ref=)[^&]*/, '$1' + s));
+              a.setAttribute('href', href.replace(/([?&]ref=)[^&]*/, function(m, a){ return a + s; }));
               return;
             }
           }
@@ -5262,7 +5346,7 @@ if(DEMO){
    Sub-tab click swaps the iframe src, so each portal page loads on demand and
    the console never pays for six pages it may not open.
 
-   PLAN: paid by default — for a car fleet the store IS the $5/vehicle unlock,
+   PLAN: paid by default. For a car fleet the store IS the per-vehicle add-on,
    and a demo must never open a prospect onto a locked box. ?plan=free swaps the
    whole frame for the lock card below (built by the free-tier engine). */
 (function(){
@@ -5756,5 +5840,384 @@ if(DEMO){
 })();
 </script>
 
+<script>
+/* ============ HOME COMMAND CENTER (2026-10-01) ============
+   Four counted numbers, a to-do list read from the operator's own drafts, the island's
+   conditions right now, and the latest day of guest activity. No slug = the demo: sample
+   figures, tagged Sample. A ?slug = that property's own rollups via window.osCCLive,
+   which the live loader calls. Counts are what telemetry counted (OD-18), never impact.
+   Conditions are the raw /api/wx readings only: beach-by-beach calls belong to the guide's
+   own safety model, so this card never makes one (OD-26). */
+(function(){
+  var root = document.getElementById('ccHome');
+  if(!root) return;
+  var Q = new URLSearchParams(location.search);
+  function slug(){ return String(window.OS_SLUG || '').trim().toLowerCase(); }
+  function isLive(){ var s = slug(); return !!s && s !== 'demo' && !window.OS_GROUP; }
+  function isFree(){ return window.OS_PLAN === 'free' || document.body.classList.contains('plan-free'); }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function fmt(n){ return Math.round(n||0).toLocaleString('en-US'); }
+  function ct(n){ return n < 5 ? 'fewer than 5' : fmt(n); }
+  function read(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+  function draftSlug(){ return slug() || 'your-rentals'; }
+  var PERIODS = [7,30,90];
+  var period = parseInt(Q.get('period'),10); if(PERIODS.indexOf(period) < 0) period = 30;
+  var live = null;   // the rollups, once the live loader hands them over
+
+  var IC = {
+    warn:'<svg class="ic warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+    clock:'<svg class="ic warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    photo:'<svg class="ic warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="m21 17-5-5-8 8"/></svg>',
+    star:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>',
+    link:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
+    down:'<svg class="ic risk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 7 7 4-4 7 7"/><path d="M21 11v6h-6"/></svg>',
+    ok:'<svg class="ic ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>',
+    act:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>',
+    list:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>',
+    wave:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/><path d="M2 18c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/></svg>'
+  };
+
+  /* ---- sample figures for the demo, one set per period ---- */
+  var SAMPLE = {
+    7:  { s:298,  sp:261,  p:611,  pp:588,  o:22, op:23,  top:'ʻAnini Beach', share:31 },
+    30: { s:1284, sp:1088, p:2650, pp:2390, o:96, op:100, top:'ʻAnini Beach', share:31 },
+    90: { s:3712, sp:3390, p:7480, pp:7010, o:271, op:255, top:'ʻAnini Beach', share:29 }
+  };
+  function sampleSeries(n, total){
+    var out = [], sum = 0;
+    for(var i=0;i<n;i++){ var v = 1 + 0.35*Math.sin(i*0.9) + 0.25*Math.sin(i*0.31) + i/(n*2.2); out.push(v); sum += v; }
+    return out.map(function(v){ return v/sum*total; });
+  }
+
+  function spark(vals, color){
+    if(!vals || vals.length < 2) return '';
+    var max = Math.max.apply(null, vals) || 1, min = Math.min.apply(null, vals), rng = (max-min) || 1;
+    var pts = vals.map(function(v,i){ return (i/(vals.length-1)*100).toFixed(1)+','+(24-((v-min)/rng)*20).toFixed(1); }).join(' ');
+    return '<svg class="sp" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="'+color+'" stroke-width="1.6" vector-effect="non-scaling-stroke" points="'+pts+'"/></svg>';
+  }
+  function delta(cur, prior){
+    if(!(prior > 0)) return '<span class="d">No earlier period to compare</span>';
+    var pct = Math.round((cur-prior)/prior*100);
+    if(pct === 0) return '<span class="d">Same as the prior '+period+' days</span>';
+    return '<span class="d '+(pct>0?'up':'dn')+'">'+(pct>0?'Up ':'Down ')+Math.abs(pct)+'% vs prior '+period+' days</span>';
+  }
+  function tile(label, value, sub, extra, small){
+    return '<div class="cc-k"><div class="l">'+label+'</div><div class="v'+(small?' sm':'')+'" title="'+esc(String(value).replace(/<[^>]+>/g,''))+'">'+value+'</div>'+sub+(extra||'')+'</div>';
+  }
+
+  function sumKey(days, k){ var t = 0; (days||[]).forEach(function(d){ t += (d && d.roll && d.roll[k]) || 0; }); return t; }
+  function perDay(days, k){ return (days||[]).map(function(d){ return (d && d.roll && d.roll[k]) || 0; }); }
+
+  function renderKpis(){
+    var el = document.getElementById('ccKpis'), free = isFree(), h = '';
+    if(live){
+      var c = live.cur, pr = live.prior;
+      if(!c.any){
+        el.innerHTML = tile('Guide opens counted','0','<span class="d">Collecting. No guest data yet.</span>') +
+          tile('Place taps counted','0','<span class="d">Shows once guests use the guide</span>') +
+          tile('Most-opened place','None yet','<span class="d">Shows once guests use the guide</span>','',true) +
+          (free ? tile('Stay-Close shown','0','<span class="d">Shows on bad-ocean days</span>') : tile('Offer taps counted','0','<span class="d">Shows once guests tap an offer</span>'));
+        return;
+      }
+      var top = Object.keys(c.top).map(function(k){ return { id:k.split('|')[1], n:c.top[k] }; }).sort(function(a,b){ return b.n-a.n; })[0];
+      var share = top && c.poi_tap ? Math.round(top.n / c.poi_tap * 100) : 0;
+      h += tile('Guide opens, at least', ct(c.sessions), delta(c.sessions, pr.sessions), spark(perDay(live.days,'sessions'),'#17805a'));
+      h += tile('Place taps, at least', ct(c.poi_tap), delta(c.poi_tap, pr.poi_tap), spark(perDay(live.days,'poi_tap'),'#0e6e8c'));
+      h += tile('Most-opened place', top ? esc(live.nameFor(top.id)) : 'None yet', '<span class="d">'+(top ? ct(top.n)+' taps, '+share+'% of all' : 'No place taps yet')+'</span>', '<div class="bar"><i style="width:'+share+'%"></i></div>', true);
+      if(free) h += tile('Stay-Close shown', ct(c.stay_close_render), delta(c.stay_close_render, pr.stay_close_render), spark(perDay(live.days,'stay_close_render'),'#0e6e8c'));
+      else { var o = sumKey(live.days,'promo_tap'), op = sumKey(live.priorDays,'promo_tap'); h += tile('Offer taps, at least', ct(o), delta(o, op), spark(perDay(live.days,'promo_tap'),'#c9a84c')); }
+    } else {
+      var S = SAMPLE[period];
+      h += tile('Guide opens', fmt(S.s), delta(S.s, S.sp), spark(sampleSeries(period>30?18:period, S.s),'#17805a'));
+      h += tile('Place taps', fmt(S.p), delta(S.p, S.pp), spark(sampleSeries(period>30?18:period, S.p).reverse(),'#0e6e8c'));
+      h += tile('Most-opened place', S.top, '<span class="d">'+S.share+'% of all place taps</span>', '<div class="bar"><i style="width:'+S.share+'%"></i></div>', true);
+      if(free) h += tile('Stay-Close shown', fmt(Math.round(S.s*0.21)), delta(S.s*0.21, S.sp*0.2), spark(sampleSeries(period>30?18:period, S.s*0.21),'#0e6e8c'));
+      else h += tile('Offer taps', fmt(S.o), delta(S.o, S.op), spark(sampleSeries(period>30?18:period, S.o).map(function(v,i){ return v*(1-i/60); }),'#c9a84c'));
+    }
+    el.innerHTML = h;
+  }
+
+  /* ---- needs attention: read from the operator's own drafts ---- */
+  function tabShown(v){ var b = document.querySelector('.viewtabs button[data-view="'+v+'"]'); return !!b && !b.hidden; }
+  function daysUntil(iso){ var t = Date.parse(iso+'T23:59:59'); return isNaN(t) ? null : Math.ceil((t - Date.now())/864e5); }
+  function renderTodo(){
+    var el = document.getElementById('ccTodo'), rows = [], s = draftSlug(), free = isFree();
+    var promos = read('os_promos_'+s);
+    if(!free && tabShown('promos')){
+      if(Array.isArray(promos) && promos.length){
+        promos.forEach(function(p){
+          if(!p || !p.expires) return;
+          var d = daysUntil(p.expires);
+          if(d === null) return;
+          if(d < 0) rows.push([IC.clock, '&ldquo;'+esc(p.title||'An offer')+'&rdquo; has ended and no longer shows', 'promos', 'Update']);
+          else if(d <= 7) rows.push([IC.clock, '&ldquo;'+esc(p.title||'An offer')+'&rdquo; ends in '+d+' day'+(d===1?'':'s'), 'promos', 'Extend']);
+        });
+      } else if(Array.isArray(promos) || isLive()){
+        rows.push([IC.clock, 'No offers in your guide yet', 'promos', 'Add one']);
+      } else {
+        rows.push([IC.clock, '&ldquo;Sunset mai tai&rdquo; ends in 3 days', 'promos', 'Extend']);
+      }
+    }
+    var ams = read('os_amenities_'+s);
+    if(Array.isArray(ams)){
+      var noPhoto = ams.filter(function(a){ return a && a.a && !a.photo; }).length;
+      if(noPhoto) rows.push([IC.photo, noPhoto+' Stay-Close pick'+(noPhoto===1?' has':'s have')+' no photo', 'stayclose', 'Add photo']);
+      if(!ams.length) rows.push([IC.photo, 'Your Stay-Close menu is empty', 'stayclose', 'Add one']);
+    } else if(!isLive()){
+      rows.push([IC.photo, '1 Stay-Close pick has no photo', 'stayclose', 'Add photo']);
+    }
+    if(window.OS_PLACES && tabShown('places')){
+      var feat = 0;
+      window.OS_PLACES.CATS.forEach(function(c){ (window.OS_PLACES.DATA[c.key]||[]).forEach(function(it){ if(window.OS_PLACES.st(c.key,it.id)==='feature') feat++; }); });
+      if(!feat) rows.push([IC.star, 'No house picks yet. Featured places show first in your guide', 'places', 'Pick']);
+    }
+    if(tabShown('desk')){
+      var aff = ''; try{ aff = localStorage.getItem('os_pm_affiliate_link') || ''; }catch(e){}
+      if(!aff) rows.push([IC.link, 'Tour taps use OceanSafe&rsquo;s link, not yours', 'desk', 'Add link']);
+    }
+    if(live && live.cur.any && live.prior.sessions > 0){
+      var pct = Math.round((live.cur.sessions - live.prior.sessions)/live.prior.sessions*100);
+      if(pct <= -20) rows.push([IC.down, 'Guide opens down '+Math.abs(pct)+'%. Check your QR codes are still up', 'guests', 'See activity']);
+    } else if(!live){
+      rows.push([IC.down, 'Lobby QR scans down 22% this week', 'guests', 'See activity']);
+    }
+    var hdr = '<div class="cc-h">'+IC.list+'Needs attention<span class="ct'+(rows.length?'':' zero')+'">'+rows.length+'</span></div>';
+    el.innerHTML = hdr + (rows.length ? rows.map(function(r){
+      return '<div class="cc-row">'+r[0]+'<span class="tx">'+r[1]+'</span><button type="button" class="cc-go" data-goto="'+r[2]+'">'+r[3]+'</button></div>';
+    }).join('') : '<div class="cc-row">'+IC.ok+'<span class="tx">All set. Nothing needs you right now.</span></div>');
+  }
+  root.addEventListener('click', function(e){
+    var b = e.target.closest('[data-goto]'); if(!b) return;
+    var t = document.querySelector('.viewtabs button[data-view="'+b.dataset.goto+'"]');
+    if(t) t.click();
+  });
+
+  /* ---- conditions now: the island's raw readings, never a beach call ---- */
+  var ISL = { kauai:{n:'Kauaʻi',lat:21.98,lon:-159.37}, maui:{n:'Maui',lat:20.89,lon:-156.47}, oahu:{n:'Oʻahu',lat:21.28,lon:-157.83}, hawaii:{n:'Hawaiʻi Island',lat:19.64,lon:-155.99} };
+  var island = null, wx = null, wxErr = false;
+  function compass(d){ return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((d%360)+360)%360/45)%8]; }
+  function renderWx(){
+    var el = document.getElementById('ccWx');
+    var name = island ? ISL[island].n : 'your island';
+    var h = '<div class="cc-h">'+IC.wave+'Conditions now, '+esc(name)+'</div>';
+    if(!island){ el.innerHTML = h + '<p class="cc-cap">Shows once your property&rsquo;s island is set.</p>'; return; }
+    if(wxErr){ el.innerHTML = h + '<p class="cc-cap">Conditions are unavailable right now. Your guide still has them.</p>'; return; }
+    if(!wx){ el.innerHTML = h + '<p class="cc-cap">Loading the latest readings&hellip;</p>'; return; }
+    var w = (wx.w && wx.w.current) || {}, s = (wx.s && wx.s.current) || {};
+    function n(v, d){ return (typeof v === 'number') ? v.toFixed(d) : 'n/a'; }
+    h += '<div class="cc-wx">' +
+      '<div><span>Waves</span><b>'+n(s.wave_height,0)+' ft</b><span>'+(typeof s.wave_period==='number' ? Math.round(s.wave_period)+'s period' : '')+'</span></div>' +
+      '<div><span>Wind</span><b>'+n(w.wind_speed_10m,0)+' mph</b><span>'+(typeof w.wind_direction_10m==='number' ? 'from the '+compass(w.wind_direction_10m) : '')+'</span></div>' +
+      '<div><span>Rain, last 15 min</span><b>'+n(w.precipitation,1)+' in</b><span>'+(typeof w.cloud_cover==='number' ? w.cloud_cover+'% cloud' : '')+'</span></div>' +
+      '<div><span>UV index</span><b>'+n(w.uv_index,0)+'</b><span>'+(typeof w.temperature_2m==='number' ? Math.round(w.temperature_2m)+'&deg;F' : '')+'</span></div>' +
+    '</div>' +
+    '<p class="cc-cap">Island-wide readings from the same feed your guide uses. Beach-by-beach calls, flags and lifeguard status are in the guide itself.</p>';
+    el.innerHTML = h;
+  }
+  function loadWx(){
+    if(!island) { renderWx(); return; }
+    var I = ISL[island];
+    wxErr = false;
+    /* relative on the site itself; a downloaded copy or a local checkout has no /api, so it
+       asks the Netlify mirror, which serves the same function with CORS open */
+    var WX = /(^|\.)oceansafety\.app$|\.netlify\.app$/.test(location.hostname) ? '' : 'https://ocean-safety.netlify.app';
+    fetch(WX+'/api/wx?k=live&island='+island+'&lat='+I.lat.toFixed(2)+'&lon='+I.lon.toFixed(2))
+      .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+      .then(function(d){ wx = d; renderWx(); })
+      .catch(function(){ wxErr = true; renderWx(); });
+  }
+  function resolveIsland(){
+    if(!isLive()){ island = 'kauai'; loadWx(); setOpen(); return; }
+    fetch('partner-config/'+encodeURIComponent(slug())+'.json', { cache:'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cfg){ var i = cfg && typeof cfg.island === 'string' ? cfg.island.trim().toLowerCase() : ''; island = ISL[i] ? i : null; loadWx(); setOpen(); })
+      .catch(function(){ island = null; renderWx(); setOpen(); });
+  }
+
+  /* ---- latest activity: the newest day in the rollup, counts only ---- */
+  function renderFeed(){
+    var el = document.getElementById('ccFeed'), rows = [];
+    var h = '<div class="cc-h">'+IC.act+'Latest guest activity<span class="note">Counts only. Never an individual guest.</span></div>';
+    if(live){
+      var days = (live.days||[]).filter(function(d){ return d && d.roll; });
+      var last = days[days.length-1];
+      if(!last){ el.innerHTML = h + '<div class="cc-row">'+IC.ok+'<span class="tx">Nothing yet. Activity shows here as guests use your guide.</span></div>'; return; }
+      var r = last.roll, when = last.date ? esc(String(last.date).slice(5)) : 'Latest';
+      rows.push([when, ct(r.sessions||0)+' guide opens']);
+      var top = Object.keys(r.top||{}).reduce(function(acc,kind){ Object.keys(r.top[kind]||{}).forEach(function(id){ var n = r.top[kind][id]; if(!acc || n > acc.n) acc = {id:id,n:n}; }); return acc; }, null);
+      if(top) rows.push([when, ct(top.n)+' taps on '+esc(live.nameFor(top.id))]);
+      if(r.stay_close_render) rows.push([when, 'Stay-Close shown '+ct(r.stay_close_render)+' times']);
+      if(r.promo_tap && !isFree()) rows.push([when, ct(r.promo_tap)+' offer taps']);
+    } else {
+      rows = [['4 min','12 direction taps to ʻAnini Beach'],['11 min','5 opens of your &ldquo;Rainy day&rdquo; picks'],['26 min','3 taps on &ldquo;Sunset mai tai&rdquo;'],['48 min','Stay-Close shown 9 times']];
+      if(isFree()) rows.splice(2,1);
+    }
+    el.innerHTML = h + rows.map(function(r){ return '<div class="cc-row"><span class="when">'+r[0]+'</span><span class="tx">'+r[1]+'</span></div>'; }).join('');
+  }
+
+  /* ---- status bar ---- */
+  function setOpen(){
+    var a = document.getElementById('ccOpen');
+    if(a) a.href = isLive() && island ? '/?ref='+encodeURIComponent(slug())+'&island='+island : '/';
+  }
+  function renderStatus(){
+    var st = document.getElementById('ccState'), pl = document.getElementById('ccPlan'), up = document.getElementById('ccUpd');
+    if(!isLive()){ st.className = 'cc-pill sample'; st.innerHTML = '<i></i>Sample data'; }
+    else if(live && live.cur.any){ st.className = 'cc-pill'; st.innerHTML = '<i></i>Guide live &middot; counting'; }
+    else if(live){ st.className = 'cc-pill wait'; st.innerHTML = '<i></i>Connected &middot; waiting for first guests'; }
+    else { st.className = 'cc-pill wait'; st.innerHTML = '<i></i>Connecting'; }
+    pl.className = 'cc-pill' + (isFree() ? ' wait' : '');
+    pl.innerHTML = '<i></i>' + (isFree() ? 'Free plan' : 'Paid plan');
+    var t = new Date();
+    up.textContent = 'Last '+period+' days · updated ' + t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  }
+
+  function renderAll(){ renderStatus(); renderKpis(); renderTodo(); renderFeed(); }
+
+  /* ---- the 7d / 30d / 90d buttons: demo re-renders, a live property reloads its rollups ---- */
+  var pBtns = document.querySelectorAll('.period b');
+  function markPeriod(){ pBtns.forEach(function(b){ b.classList.toggle('sel', parseInt(b.textContent,10) === period); }); }
+  pBtns.forEach(function(b){
+    b.setAttribute('role','button'); b.setAttribute('tabindex','0'); b.style.cursor = 'pointer';
+    function pick(){
+      var p = parseInt(b.textContent,10); if(p === period) return;
+      if(isLive()){ var q = new URLSearchParams(location.search); q.set('period', p); location.search = q.toString(); return; }
+      period = p; markPeriod(); renderAll();
+    }
+    b.addEventListener('click', pick);
+    b.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } });
+  });
+  markPeriod();
+
+  window.osCCLive = function(d){ live = d; if(PERIODS.indexOf(d.period) >= 0){ period = d.period; markPeriod(); } renderAll(); };
+  ['os:promos-changed','os:amenities-changed','os:places-changed','storage'].forEach(function(ev){ window.addEventListener(ev, function(){ setTimeout(renderTodo, 0); }); });
+
+  renderAll();
+  /* a signed-in operator's slug and plan arrive with the session, after load (os-authed);
+     the demo and ?slug links already have them */
+  document.addEventListener('os-authed', function(){ renderAll(); resolveIsland(); });
+  /* each segment hides its undeclared tabs during load; the to-do list only names tabs it shows */
+  window.addEventListener('load', renderTodo);
+  resolveIsland();
+})();
+</script>
+<script>
+/* ============ PINNED PHONE PREVIEWS (2026-10-01) ============
+   On each tab with inputs the guest's phone sits beside the editor and follows every edit.
+   Stay-Close reuses its own live panel (#gpAmCard), moved into the rail. Places and Tours
+   get a phone drawn from the same drafts the editor writes. Promotions already draws a
+   phone per offer, and Shop's Products page carries its own. Under 1000px the rail becomes
+   a bottom sheet behind one "Preview" button. */
+(function(){
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  var STAR = '<svg class="star" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>';
+  var rails = {};
+
+  function split(viewId, railNode){
+    var view = document.getElementById('view-'+viewId);
+    if(!view || !railNode) return null;
+    var wrap = document.createElement('div'); wrap.className = 'ph-split';
+    var main = document.createElement('div'); main.className = 'ph-main';
+    var aside = document.createElement('aside'); aside.className = 'ph-rail'; aside.setAttribute('aria-label','What guests see');
+    while(view.firstChild) main.appendChild(view.firstChild);
+    var close = document.createElement('button'); close.type = 'button'; close.className = 'ph-close'; close.textContent = 'Close preview';
+    close.addEventListener('click', function(){ document.body.classList.remove('ph-sheet'); });
+    aside.appendChild(close); aside.appendChild(railNode);
+    wrap.appendChild(main); wrap.appendChild(aside); view.appendChild(wrap);
+    rails[viewId] = aside;
+    return aside;
+  }
+  function phone(id){
+    var d = document.createElement('div');
+    d.innerHTML = '<div class="ph-lab"><i></i>What guests see, live</div><div class="gp-phone"><div class="gp-screen"><div class="ph-list" id="'+id+'"></div></div></div>';
+    return d;
+  }
+  function propName(){ var h = document.querySelector('[data-os="h1"]'); return h ? h.textContent.trim() : 'Your property'; }
+
+  /* ---- Stay-Close: move the existing live panel into the rail ---- */
+  var gp = document.getElementById('gpAmCard');
+  if(gp){
+    var sec = gp.closest('section');
+    var holder = document.createElement('div');
+    holder.innerHTML = '<div class="ph-lab"><i></i>What guests see, live</div>';
+    if(sec){ sec.parentNode.removeChild(sec); holder.appendChild(gp); }
+    split('stayclose', holder);
+  }
+
+  /* ---- Places: featured first, listed next, hidden gone ---- */
+  var hot = null;
+  if(split('places', phone('phPlaces'))) {
+    var drawPlaces = function(){
+      var el = document.getElementById('phPlaces'), P = window.OS_PLACES;
+      if(!el || !P) return;
+      var feat = [], beaches = [], other = [], hidden = 0;
+      P.CATS.forEach(function(c){
+        (P.DATA[c.key]||[]).forEach(function(it){
+          var s = P.st(c.key, it.id), row = { cat:c.key, label:c.label, it:it };
+          if(s === 'off'){ hidden++; return; }
+          if(s === 'feature') feat.push(row);
+          else if(c.key === 'beaches') beaches.push(row);
+          else other.push(row);
+        });
+      });
+      function rowHTML(r, star){
+        var on = hot && hot.cat === r.cat && hot.id === r.it.id;
+        return '<div class="gp-row'+(on?' hot':'')+'">'+(star?STAR:'')+'<span class="t"><b>'+esc(r.it.n)+'</b><span>'+(r.it.r ? esc(r.it.r) : '')+'</span></span></div>';
+      }
+      var h = '<div class="gp-head">'+esc(propName())+'</div><div class="gp-title">Places near you</div>';
+      h += '<div class="gp-sec">YOUR PICKS</div>' + (feat.length ? feat.slice(0,6).map(function(r){ return rowHTML(r,true); }).join('') : '<div class="gp-empty" style="padding:14px 8px">Feature a place and it shows here first.</div>');
+      var rest = beaches.slice(0,4).concat(other.slice(0,2));
+      if(hot){
+        var inRest = rest.some(function(r){ return r.cat===hot.cat && r.it.id===hot.id; });
+        var hr = beaches.concat(other).filter(function(r){ return r.cat===hot.cat && r.it.id===hot.id; })[0];
+        if(hr && !inRest) rest.unshift(hr);
+      }
+      h += '<div class="gp-sec">MORE NEARBY</div>' + rest.map(function(r){ return rowHTML(r,false); }).join('');
+      var hiddenHot = hot && P.st(hot.cat, hot.id) === 'off';
+      h += '<div class="gp-via">'+(hiddenHot ? 'You just hid a place: guests no longer see it. ' : '')+hidden+' place'+(hidden===1?' is':'s are')+' hidden from your guide.</div>';
+      el.innerHTML = h;
+    };
+    window.addEventListener('os:places-changed', function(e){ hot = e.detail || null; setTimeout(drawPlaces, 0); });
+    drawPlaces();
+    window.addEventListener('load', drawPlaces);
+  }
+
+  /* ---- Tours: the tour cards and where Book goes, as you type the link ---- */
+  if(split('desk', phone('phTours'))) {
+    var inp = document.getElementById('affInput');
+    var drawTours = function(){
+      var el = document.getElementById('phTours'); if(!el) return;
+      var names = [].map.call(document.querySelectorAll('#tourList > div > span:first-child'), function(s){ return s.textContent.trim(); }).filter(Boolean).slice(0,4);
+      var v = inp ? (inp.value||'').trim() : '', host = '';
+      try{ if(v) host = new URL(/^https?:\/\//i.test(v) ? v : 'https://'+v).hostname.replace(/^www\./,''); }catch(e){ host = ''; }
+      var h = '<div class="gp-head">'+esc(propName())+'</div><div class="gp-title">Tours and activities</div><div class="gp-sec">POPULAR WITH GUESTS</div>';
+      h += names.map(function(n){ return '<div class="gp-row"><span class="t"><b>'+esc(n)+'</b></span><span class="gp-btn">Book</span></div>'; }).join('');
+      h += '<div class="gp-via">'+(host ? 'Book opens <b>'+esc(host)+'</b> through your link.' : (v ? 'That link does not look right yet. Book uses OceanSafe&rsquo;s partner link until it does.' : 'Book uses OceanSafe&rsquo;s partner link until you add yours.'))+'</div>';
+      el.innerHTML = h;
+    };
+    if(inp) inp.addEventListener('input', drawTours);
+    var save = document.getElementById('affSave'); if(save) save.addEventListener('click', function(){ setTimeout(drawTours,0); });
+    drawTours();
+    window.addEventListener('load', drawTours);
+  }
+
+  /* ---- one Preview button for the bottom sheet, shown only on a tab that has a rail ---- */
+  var fab = document.createElement('button');
+  fab.type = 'button'; fab.className = 'ph-fab'; fab.hidden = true;
+  fab.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>Preview';
+  document.body.appendChild(fab);
+  var active = null;
+  function sync(){
+    var b = document.querySelector('.viewtabs button[aria-selected="true"]');
+    active = b ? b.dataset.view : null;
+    document.body.classList.remove('ph-sheet');
+    Object.keys(rails).forEach(function(k){ rails[k].classList.toggle('on', k === active); });
+    fab.hidden = !rails[active];
+  }
+  fab.addEventListener('click', function(){ document.body.classList.add('ph-sheet'); });
+  document.querySelectorAll('.viewtabs button[data-view]').forEach(function(t){ t.addEventListener('click', function(){ setTimeout(sync,0); }); });
+  sync();
+})();
+</script>
 </body>
 </html>
