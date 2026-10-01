@@ -1,0 +1,13 @@
+# Delivery spec for tour.json, the hotel presenter tour (dashboard.html?tour=present on the sample Dashboard).
+# Exported from graphics/hotel-timeshare-2026-09-30/line-items/rows_li.py by export-tour.py; never hand-edited.
+
+recipient: Andy Evers and hotel prospects, in the room, on a presenter's laptop; nothing is sent
+segment: hotel
+tier: paid    # the walkthrough covers both plans; the close recaps the paid features by name, with no price by ruling
+fulfillment: >
+  None from this artifact. Nothing is bought, signed or provisioned from the tour; a hotel
+  that wants in is hand-onboarded. Finish and Exit strip the tour from the URL.
+must_be_true_after: >
+  The presenter walked 34 features on the sample Dashboard only (realProperty() aborts on a
+  slug, token, ref, group or signed-in session), every screen matched the served site or was
+  labeled Sample or Built, not live, and no price appeared on any slide.
