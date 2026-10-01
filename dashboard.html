@@ -3498,12 +3498,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   // Each stop: which view tab to open, what to highlight, and what to say.
   // v2 (2026-07-09): leads with the guest experience — shape first, data later.
   var STEPS = [
-    { center:true, title:'Welcome — this is your guests’ guide',
-      body:'This is the guide your guests use on the beach — and this is where you shape it: your amenities, your offers, your picks. The data comes later, honestly labeled. Replay anytime with the <b>Tour</b> button up top.' },
-    { view:'home', sel:'#ccHome', title:'Safety first, your property woven in',
-      body:'Every guest who scans the in-unit QR gets live surf, lifeguard and hazard calls for the island’s most-visited beaches — with your property carried along. <b>Open your live guide</b> shows you exactly what they see.' },
+    { center:true, title:'Welcome: this is your guests’ guide',
+      body:'This is the guide your guests use on the beach, and this is where you shape it: your amenities, your offers, your picks. The data comes later, honestly labeled. Replay anytime with the <b>Tour</b> button up top.' },
+    { view:'home', sel:'#ccHome', title:'Your property at a glance',
+      body:'Your numbers first: guide opens, place taps, your most-opened place, and the short list of what needs you today. Every guest who scans your QR gets live surf, lifeguard and hazard calls with your property carried along. <b>Open your guide</b> shows exactly what they see.' },
     { view:'stayclose', sel:'#mgAmenities', title:'Your amenity menu',
-      body:'When the ocean is the wrong call, the guide steers guests to what you offer instead — spa, dining, cabanas. Edits save as a draft in this browser; <b>Export config</b> sends the menu into your app build.' },
+      body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. Edits save as a draft in this browser; <b>Export config</b> sends the menu into your app build.' },
     { view:'stayclose', sel:'#gpAmCard', title:'Watch it as a guest',
       body:'This is the exact panel guests see, built live from your draft menu. Switch the ocean condition with the chips, and tap an amenity to expand its hours and phone — just like a guest.' },
     { view:'promos', sel:'#pmDrop', title:'Drop a promotion',
@@ -4433,7 +4433,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var dzCard = promosSec.querySelector('.card');
     if(dzCard) dzCard.insertAdjacentHTML('beforebegin',
       '<div class="card" id="pmLockCard" style="margin-bottom:14px">' +
-        '<div class="title"><span class="l">' + LOCK + ' Offers that land — locked</span><span><span class="chip sample">Sample</span></span></div>' +
+        '<div class="title"><span class="l">' + LOCK + ' Offers that land: locked</span><span><span class="chip sample">Sample</span></span></div>' +
         featHTML +
         '<div class="v">' + totalTxt + ' <small>amenity taps last month, with no offer live</small></div>' +
         '<ol class="rank" style="margin-top:12px">' + rank + '</ol>' +
@@ -5913,17 +5913,17 @@ if(DEMO){
     if(live){
       var c = live.cur, pr = live.prior;
       if(!c.any){
-        el.innerHTML = tile('Guide opens counted','&mdash;','<span class="d">Collecting. No guest data yet.</span>') +
-          tile('Place taps counted','&mdash;','<span class="d">Shows once guests use the guide</span>') +
-          tile('Most-opened place','&mdash;','<span class="d">Shows once guests use the guide</span>','',true) +
-          (free ? tile('Stay-Close shown','&mdash;','<span class="d">Shows on bad-ocean days</span>') : tile('Offer taps counted','&mdash;','<span class="d">Shows once guests tap an offer</span>'));
+        el.innerHTML = tile('Guide opens counted','0','<span class="d">Collecting. No guest data yet.</span>') +
+          tile('Place taps counted','0','<span class="d">Shows once guests use the guide</span>') +
+          tile('Most-opened place','None yet','<span class="d">Shows once guests use the guide</span>','',true) +
+          (free ? tile('Stay-Close shown','0','<span class="d">Shows on bad-ocean days</span>') : tile('Offer taps counted','0','<span class="d">Shows once guests tap an offer</span>'));
         return;
       }
       var top = Object.keys(c.top).map(function(k){ return { id:k.split('|')[1], n:c.top[k] }; }).sort(function(a,b){ return b.n-a.n; })[0];
       var share = top && c.poi_tap ? Math.round(top.n / c.poi_tap * 100) : 0;
       h += tile('Guide opens, at least', ct(c.sessions), delta(c.sessions, pr.sessions), spark(perDay(live.days,'sessions'),'#17805a'));
       h += tile('Place taps, at least', ct(c.poi_tap), delta(c.poi_tap, pr.poi_tap), spark(perDay(live.days,'poi_tap'),'#0e6e8c'));
-      h += tile('Most-opened place', top ? esc(live.nameFor(top.id)) : '&mdash;', '<span class="d">'+(top ? ct(top.n)+' taps, '+share+'% of all' : 'No place taps yet')+'</span>', '<div class="bar"><i style="width:'+share+'%"></i></div>', true);
+      h += tile('Most-opened place', top ? esc(live.nameFor(top.id)) : 'None yet', '<span class="d">'+(top ? ct(top.n)+' taps, '+share+'% of all' : 'No place taps yet')+'</span>', '<div class="bar"><i style="width:'+share+'%"></i></div>', true);
       if(free) h += tile('Stay-Close shown', ct(c.stay_close_render), delta(c.stay_close_render, pr.stay_close_render), spark(perDay(live.days,'stay_close_render'),'#0e6e8c'));
       else { var o = sumKey(live.days,'promo_tap'), op = sumKey(live.priorDays,'promo_tap'); h += tile('Offer taps, at least', ct(o), delta(o, op), spark(perDay(live.days,'promo_tap'),'#c9a84c')); }
     } else {
@@ -6004,7 +6004,7 @@ if(DEMO){
     if(wxErr){ el.innerHTML = h + '<p class="cc-cap">Conditions are unavailable right now. Your guide still has them.</p>'; return; }
     if(!wx){ el.innerHTML = h + '<p class="cc-cap">Loading the latest readings&hellip;</p>'; return; }
     var w = (wx.w && wx.w.current) || {}, s = (wx.s && wx.s.current) || {};
-    function n(v, d){ return (typeof v === 'number') ? v.toFixed(d) : '&mdash;'; }
+    function n(v, d){ return (typeof v === 'number') ? v.toFixed(d) : 'n/a'; }
     h += '<div class="cc-wx">' +
       '<div><span>Waves</span><b>'+n(s.wave_height,0)+' ft</b><span>'+(typeof s.wave_period==='number' ? Math.round(s.wave_period)+'s period' : '')+'</span></div>' +
       '<div><span>Wind</span><b>'+n(w.wind_speed_10m,0)+' mph</b><span>'+(typeof w.wind_direction_10m==='number' ? 'from the '+compass(w.wind_direction_10m) : '')+'</span></div>' +
