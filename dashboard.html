@@ -1361,7 +1361,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .td-tl-band{display:flex;height:28px;border-radius:8px;overflow:hidden;background:var(--tint)}
   .td-tl-seg{display:flex;flex-basis:0;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-right:2px solid var(--card);min-width:0;overflow:hidden;white-space:nowrap}
   .td-tl-seg:last-child{border-right:0}
-  .td-tl-seg.good{background:var(--good);color:var(--on-sea)} .td-tl-seg.fair{background:var(--gold);color:var(--on-gold)} .td-tl-seg.skip{background:var(--risk);color:var(--on-sea)} .td-tl-seg.na{background:var(--tint)}
+  .td-tl-seg.good{background:var(--good);color:var(--on-sea)} .td-tl-seg.fair{background:var(--gold);color:var(--on-gold)} .td-tl-seg.skip{background:var(--risk);color:var(--on-sea)} .td-tl-seg.na{background:var(--tint);color:var(--muted)}
+.td-tl-col.na{opacity:.55}
+.td-tl-col .ft.lv-na{color:var(--muted)}
   .td-tl-now{position:absolute;top:-7px;bottom:-7px;width:0;border-left:2px dashed var(--sea);pointer-events:none}
   .td-tl-now i{position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-style:normal;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--sea);color:var(--on-sea);border-radius:999px;padding:1px 6px}
   .td-tl-axis{position:relative;height:15px;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px}
@@ -6436,12 +6438,14 @@ window.osParseAff = function(v){
 </script>
 <script>
 /* ============ TODAY AT THE DESK (2026-10-01) ============
-   The concierge outlook. Controls on top: a shore wheel (the island's four shores colored by
-   today's sea state, with the swell and the wind drawn on it), what guests want to do, and when.
-   Under it the real guest guide runs in a phone (same build guests use, framed with desk=1).
-   On the right the outlook stays pinned, and desk notes fill under it for whatever place the
-   desk taps, in the phone or in the outlook: today's read, what to tell the guest, the guide's
-   own tip and caution, how to get there, and this property's Places status for the place.
+   The concierge outlook. The real guest guide runs full width on top (same build guests use,
+   framed with desk=1), live-cam buttons and the Guests want to / When chips under it, then the
+   readings and the shore wheel. On the right the outlook stays pinned: beaches, trails, tour
+   kinds, farmers' markets, parks, sights and culture, island events. A tap in the guide, the
+   outlook or a cam button opens Desk notes as a pop-up: a 6 am to sunset day band, what to tell
+   the guest, the guide's own tip and caution, how to get there, and this property's Places
+   status. Beaches, trails and tour kinds read the island feed; every other place reads the
+   forecast at its own spot.
    Picks come only from the Places tab: a place the operator hid or left at Not recommended
    never ranks, and hazard-locked spots never rank. Beach reads mirror the guide's exposure math
    and use the guide's own chip cut. The lifeguard read is the stricter of the Places record
@@ -6975,12 +6979,13 @@ window.osParseAff = function(v){
     if(x.cloud!=null) return x.cloud >= 75 ? 'cloud' : x.cloud >= 35 ? 'part' : 'sun';
     return null;
   }
-  function hoursToday(now){
-    if(!wx || !wx.w || !wx.w.hourly || !wx.w.hourly.time || !wx.w.hourly.temperature_2m) return null;
-    var hr = wx.w.hourly, sh = (wx.s && wx.s.hourly && wx.s.hourly.time) ? wx.s.hourly : null, out = [];
+  function hoursToday(now){ return hoursOn(wx, now.date); }
+  function hoursOn(src, date){
+    if(!src || !src.w || !src.w.hourly || !src.w.hourly.time || !src.w.hourly.temperature_2m) return null;
+    var hr = src.w.hourly, sh = (src.s && src.s.hourly && src.s.hourly.time) ? src.s.hourly : null, out = [];
     function g(a, k){ return a && typeof a[k]==='number' && isFinite(a[k]) ? a[k] : null; }
     for(var h=0; h<24; h++){
-      var key = now.date+'T'+pad(h)+':00', i = hr.time.indexOf(key); if(i < 0) continue;
+      var key = date+'T'+pad(h)+':00', i = hr.time.indexOf(key); if(i < 0) continue;
       var j = sh ? sh.time.indexOf(key) : -1;
       out.push({ h:h, temp:g(hr.temperature_2m,i), cloud:g(hr.cloud_cover,i), windRaw:g(hr.wind_speed_10m,i), wd:g(hr.wind_direction_10m,i), uv:g(hr.uv_index,i), code:g(hr.weather_code,i), mm:g(hr.precipitation,i), rainP:g(hr.precipitation_probability,i),
         wave: j>=0 ? g(sh.wave_height,j) : null, sd: j>=0 ? g(sh.wave_direction,j) : null, sw_h: j>=0 ? g(sh.swell_wave_height,j) : null, sw_d: j>=0 ? g(sh.swell_wave_direction,j) : null, sw_t: j>=0 ? g(sh.swell_wave_period,j) : null, ww_h: j>=0 ? g(sh.wind_wave_height,j) : null, ww_d: j>=0 ? g(sh.wind_wave_direction,j) : null });
@@ -6990,9 +6995,9 @@ window.osParseAff = function(v){
   function hourR(R, x){ return { surf: x.wave!=null ? hCal(x.wave) : null, sd: x.sd==null ? 0 : x.sd, sw_h:x.sw_h, sw_d:x.sw_d, sw_t:x.sw_t, ww_h:x.ww_h, ww_d:x.ww_d, wind: x.windRaw!=null ? x.windRaw + WIND_ADD : null, wd:x.wd, rainToday:R.rainToday, rain72:R.rain72, q:R.q }; }
   function isoHour(iso){ var m = /T(\d{2}):(\d{2})/.exec(String(iso||'')); return m ? (+m[1]) + (+m[2])/60 : null; }
   function clockH(h){ return ((h%12)||12)+(h<12 ? ' am' : ' pm'); }
-  function dayWindows(R){
-    var H = R.hours; if(!H) return null;
-    var sunset = isoHour(R.sunset), end = sunset!=null ? Math.max(17, Math.min(20, Math.ceil(sunset))) : 19;
+  function dayWindows(R){ return R.hours ? windowsFor(R.hours, R.sunset) : null; }
+  function windowsFor(H, sunsetIso){
+    var sunset = isoHour(sunsetIso), end = sunset!=null ? Math.max(17, Math.min(20, Math.ceil(sunset))) : 19;
     var cuts = [[6,9,'Early'],[9,11,'Morning'],[11,14,'Midday'],[14,16,'Afternoon'],[16,end,'Evening']];
     return cuts.map(function(c){ return { a:c[0], b:c[1], n:c[2], last:c[1]===end, hours:H.filter(function(x){ return x.h>=c[0] && x.h<c[1]; }) }; }).filter(function(w){ return w.hours.length; });
   }
@@ -7033,7 +7038,7 @@ window.osParseAff = function(v){
     if(best < 0){ var m = null; rows.forEach(function(r, k){ if(r.level!=='fair') return; var v = r.hi!=null ? r.hi : k; if(m==null || v < m){ m = v; best = k; } }); tone = best>=0 ? 'fair' : 'skip'; }
     var D = { rows:rows, best:best, tone:tone, headline:'', sub:'' };
     if(best >= 0){
-      var r = rows[best], lab = rangeLabel(r.w, R);
+      var r = rows[best], lab = r.range || rangeLabel(r.w, R);
       D.headline = (tone==='good' ? 'Best time: ' : o.ft ? 'Best of a rough day: ' : 'Best of the day: ')+lab+'.';
       if(o.ft){ var te = tideIn(r.w); D.sub = (tone==='good' ? 'Calm, ' : 'Rough, ')+ftRange(r.lo, r.hi)+' ft'+(te.length ? ', '+te[0].kind.toLowerCase()+' tide '+te[0].t : '')+'.'; }
       else D.sub = r.why;
@@ -7096,24 +7101,159 @@ window.osParseAff = function(v){
     var T0 = D.rows[0].w.a, T1 = D.rows[D.rows.length-1].w.b, span = T1 - T0;
     function pc(h){ return (Math.max(0, Math.min(1, (h-T0)/span))*100).toFixed(2)+'%'; }
     function grow(r){ return 'flex-grow:'+Math.round((r.w.b-r.w.a)*100); }
-    var ev = tideEvents().filter(function(e){ return e.h >= T0 && e.h <= T1; });
+    var ev = D.noTide ? [] : tideEvents().filter(function(e){ return e.h >= T0 && e.h <= T1; });
     var h = '<div class="td-tl"><p class="td-tl-best '+D.tone+'"><b>'+esc(D.headline)+'</b>'+(D.sub ? ' '+esc(D.sub) : '')+'</p>';
     h += '<div class="td-tl-marks">'+ev.map(function(e){ return '<span style="left:'+pc(e.h)+'"><b>'+e.kind+'</b> '+esc(e.t)+'</span>'; }).join('')+'</div>';
-    h += '<div class="td-tl-wrap"><div class="td-tl-band">'+D.rows.map(function(r, i){ return '<div class="td-tl-seg '+r.level+(i===D.best ? ' best' : '')+'" style="'+grow(r)+'">'+(i===D.best ? 'Best' : '')+'</div>'; }).join('')+'</div>';
-    var nowH = R.now.hour + R.now.minute/60; if(nowH >= T0 && nowH <= T1) h += '<div class="td-tl-now" style="left:'+pc(nowH)+'"><i>Now</i></div>';
+    h += '<div class="td-tl-wrap"><div class="td-tl-band">'+D.rows.map(function(r, i){ return '<div class="td-tl-seg '+r.level+(i===D.best ? ' best' : '')+'" style="'+grow(r)+'">'+(i===D.best ? 'Best' : esc(r.tag||''))+'</div>'; }).join('')+'</div>';
+    var nowH = R.now.hour + R.now.minute/60; if((!D.date || D.date === R.now.date) && nowH >= T0 && nowH <= T1) h += '<div class="td-tl-now" style="left:'+pc(nowH)+'"><i>Now</i></div>';
     h += '</div><div class="td-tl-axis">'; for(var t=T0; t<=T1; t+=2){ h += '<span class="'+(t===T0 ? 'l' : t+2>T1 ? 'r' : '')+'" style="left:'+pc(t)+'">'+clockH(t)+'</span>'; } h += '</div>';
     h += '<div class="td-tl-cols">'+D.rows.map(function(r, i){
       var s = r.s, best = i===D.best;
-      return '<div class="td-tl-col'+(best ? ' best '+D.tone : '')+'" style="'+grow(r)+'"><div class="nm">'+esc(r.w.n)+'</div>' +
+      return '<div class="td-tl-col'+(best ? ' best '+D.tone : '')+(r.level==='na' ? ' na' : '')+'" style="'+grow(r)+'"><div class="nm">'+esc(r.w.n)+'</div>' +
         (s.sky ? '<div class="sky">'+skyIcon(s.sky)+'<span>'+esc(SKY[s.sky])+'</span></div>' : '') +
-        (r.lo!=null ? '<div class="ft">'+ftRange(r.lo, r.hi)+'<small> ft</small></div>' : '<div class="ft lv-'+r.level+'">'+esc(LVL[r.level]||'')+'</div>') +
-        '<div class="rd">'+(s.tl!=null ? (Math.round(s.tl)===Math.round(s.th) ? Math.round(s.th) : Math.round(s.tl)+' to '+Math.round(s.th))+'&deg;F<br>' : '')+(s.wind!=null ? 'wind to '+Math.round(s.wind)+' mph<br>' : '')+(s.rainP!=null ? 'rain '+Math.round(s.rainP)+'%' : '')+'</div>' +
+        (r.big!=null ? '<div class="ft'+(r.level==='na' ? ' lv-na' : '')+'">'+r.big+'</div>' : r.lo!=null ? '<div class="ft">'+ftRange(r.lo, r.hi)+'<small> ft</small></div>' : '<div class="ft lv-'+r.level+'">'+esc(LVL[r.level]||'')+'</div>') +
+        '<div class="rd">'+(s.tl!=null && r.big==null ? (Math.round(s.tl)===Math.round(s.th) ? Math.round(s.th) : Math.round(s.tl)+' to '+Math.round(s.th))+'&deg;F<br>' : '')+(s.wind!=null ? 'wind to '+Math.round(s.wind)+' mph<br>' : '')+(s.rainP!=null ? 'rain '+Math.round(s.rainP)+'%' : '')+'</div>' +
         '<div class="why">'+esc(r.why)+'</div></div>';
     }).join('')+'</div>';
-    h += '<ul class="td-tl-why">'+D.rows.map(function(r, i){ return '<li'+(i===D.best ? ' class="best '+D.tone+'"' : '')+'><b>'+esc(rangeLabel(r.w, R))+'</b><span>'+esc(r.why)+'</span></li>'; }).join('')+'</ul>';
+    h += '<ul class="td-tl-why">'+D.rows.map(function(r, i){ return '<li'+(i===D.best ? ' class="best '+D.tone+'"' : '')+'><b>'+esc(r.range || rangeLabel(r.w, R))+'</b><span>'+esc(r.why)+'</span></li>'; }).join('')+'</ul>';
     return h + '</div>';
   }
   function sunLine(R){ return R && R.sunrise && R.sunset ? '<li>Sunrise '+esc(clock(R.sunrise))+', sunset '+esc(clock(R.sunset))+'.</li>' : ''; }
+
+  /* ---- every other place gets the same day band, weather only, read at the place's own spot.
+     /api/wx caches per ~1 km cell; a spot is fetched when its note opens, never on render.
+     A place with no coordinates, or coordinates off every island, reads the island forecast
+     and says so. ---- */
+  var ISL_BOX = { kauai:[21.7,22.4,-160.1,-159.2], maui:[20.5,21.05,-156.7,-155.98], oahu:[21.2,21.75,-158.32,-157.55], hawaii:[18.85,20.3,-156.15,-154.75] };
+  function islandAt(lat, lon){ for(var k in ISL_BOX){ var b = ISL_BOX[k]; if(lat>=b[0] && lat<=b[1] && lon>=b[2] && lon<=b[3]) return k; } return null; }
+  var spots = {};
+  function spotWx(lat, lon){
+    lat = num(lat); lon = num(lon);
+    var isl = lat!=null && lon!=null ? islandAt(lat, lon) : null;
+    if(!isl) return { d:wx, home:true };
+    var la = lat.toFixed(2), lo = lon.toFixed(2), k = isl+':'+la+','+lo, I = ISL[island];
+    if(I && isl === island && la === I.lat.toFixed(2) && lo === I.lon.toFixed(2)) return { d:wx };
+    var c = spots[k];
+    if(!c || (!c.busy && Date.now()-c.at > 10*60*1000)){
+      spots[k] = c = { at:Date.now(), busy:true, d: c ? c.d : null };
+      var WX = /(^|\.)oceansafety\.app$|\.netlify\.app$/.test(location.hostname) ? '' : 'https://ocean-safety.netlify.app';
+      fetch(WX+'/api/wx?k=live&island='+isl+'&lat='+la+'&lon='+lo)
+        .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+        .then(function(d){ spots[k] = { at:Date.now(), d:d }; refreshDesk(); })
+        .catch(function(){ spots[k] = { at:Date.now(), d:spots[k].d, err:true }; refreshDesk(); });
+    }
+    if(c.d) return { d:c.d };
+    if(c.busy) return { loading:true };
+    return { d:wx, home:true, fail:true };
+  }
+  function addDays(date, n){ var x = new Date(date+'T12:00:00'); x.setDate(x.getDate()+n); return x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate()); }
+  function hm(h, m, ap){ return ((+h)%12 + (ap === 'pm' ? 12 : 0))*60 + (+m||0); }
+  function openSpan(txt){
+    var m = /(\d{1,2})(?::(\d\d))?\s*(am|pm)\s+to\s+(\d{1,2})(?::(\d\d))?\s*(am|pm)/i.exec(String(txt||'')); if(!m) return null;
+    var a = hm(m[1], m[2], m[3].toLowerCase()), b = hm(m[4], m[5], m[6].toLowerCase());
+    return b > a ? [a, b] : null;
+  }
+  function spanLabel(a, b){ if(b >= 1440) return 'from '+minClock(a); var x = minClock(a), y = minClock(b); return (a<720) === (b<720) ? x.replace(/ [ap]m$/, '')+' to '+y : x+' to '+y; }
+  function landRow(w, cfg){
+    var s = winStats(w), r = { w:w, s:s, level:'good', why:'' };
+    if(cfg.span){
+      if(!(w.a*60 < cfg.span[1] && w.b*60 > cfg.span[0])){ r.level = 'na'; r.tag = 'Closed'; r.big = 'Closed'; r.why = 'Outside its hours.'; return r; }
+      r.range = spanLabel(Math.max(w.a*60, cfg.span[0]), Math.min(w.b*60, cfg.span[1]));
+    }
+    var why = [];
+    r.storm = s.sky === 'storm';
+    var heavy = s.mm >= 2 || (s.rainP!=null && s.rainP >= 60 && s.mm >= 0.5);
+    r.wet = r.storm || heavy || (s.rainP!=null && s.rainP >= 40) || s.sky === 'rain' || s.sky === 'drizzle';
+    if(cfg.indoor) why.push(r.wet ? 'Indoor, a good call in the rain.' : 'Indoor, any weather.');
+    else {
+      if(r.storm){ r.level = 'skip'; why.push('Storms.'); }
+      else if(heavy){ r.level = 'fair'; why.push('Rain likely, bring a layer.'); }
+      else if(r.wet) why.push('Showers likely.');
+      if(cfg.scenic && !r.storm && s.cloud!=null && s.cloud >= 80){ if(r.level === 'good') r.level = 'fair'; why.push('Heavy cloud, views may be hidden.'); }
+      if(s.wind!=null && s.wind >= 25){ if(r.level === 'good') r.level = 'fair'; why.push('Windy.'); }
+      if(s.uv!=null && s.uv >= 8) why.push('UV peaks at '+Math.round(s.uv)+'.');
+      if(!why.length) why.push(cfg.scenic ? 'Clear views.' : 'Dry.');
+    }
+    r.why = why.slice(0,3).join(' ');
+    if(s.th!=null) r.big = Math.round(s.th)+'<small>&deg;F</small>';
+    return r;
+  }
+  var WIN_WORD = { Early:'early', Morning:'in the morning', Midday:'midday', Afternoon:'in the afternoon', Evening:'in the evening' };
+  function andList(a){ return a.length < 2 ? a.join('') : a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
+  function wxSum(rows){
+    var on = rows.filter(function(r){ return r.level !== 'na'; }); if(!on.length) return '';
+    function when(list){ return list.length === on.length ? (on.length === rows.length ? 'all day' : 'the whole time') : andList(list.map(function(r){ return WIN_WORD[r.w.n] || r.w.n.toLowerCase(); })); }
+    var tl = null, th = null, sky = null;
+    on.forEach(function(r){ if(r.s.tl!=null){ tl = tl==null ? r.s.tl : Math.min(tl, r.s.tl); th = th==null ? r.s.th : Math.max(th, r.s.th); } if(r.s.sky && (sky==null || SKY_ORD.indexOf(r.s.sky) > SKY_ORD.indexOf(sky))) sky = r.s.sky; });
+    var temp = tl!=null ? ', '+(Math.round(tl)===Math.round(th) ? Math.round(th) : Math.round(tl)+' to '+Math.round(th))+'°F' : '';
+    var st = on.filter(function(r){ return r.storm; }), wet = on.filter(function(r){ return r.wet; });
+    if(st.length) return 'Storms possible '+when(st)+temp+'.';
+    if(wet.length) return 'Showers likely '+when(wet)+temp+'.';
+    return 'Dry'+(sky ? ', '+SKY[sky].toLowerCase() : '')+temp+'.';
+  }
+  function landDay(src, date, cfg){
+    var H = hoursOn(src, date); if(!H) return null;
+    var d = src.w.daily || {}, di = (d.time||[]).indexOf(date);
+    var Rl = { now:hst(), sunrise: di>=0 ? (d.sunrise||[])[di] : null, sunset: di>=0 ? (d.sunset||[])[di] : null };
+    var W = windowsFor(H, Rl.sunset), rows = W.map(function(w){ return landRow(w, cfg); });
+    if(!rows.length || rows.every(function(r){ return r.level === 'na'; })){
+      if(!cfg.span) return null;
+      var s = winStats({ hours: H.filter(function(x){ return x.h*60 + 60 > cfg.span[0] && x.h*60 < cfg.span[1]; }) });
+      if(s.th==null) return null;
+      return { Rl:Rl, line: cap(spanLabel(cfg.span[0], cfg.span[1]))+': '+(s.sky ? SKY[s.sky]+', ' : '')+Math.round(s.th)+'°F'+(s.wind!=null ? ', wind to '+Math.round(s.wind)+' mph' : '')+(s.rainP!=null ? ', rain '+Math.round(s.rainP)+'%' : '')+'.' };
+    }
+    var on = rows.filter(function(r){ return r.level !== 'na'; }), D;
+    if(cfg.best) D = finishDay(rows, Rl, { ft:false });
+    else D = { rows:rows, best:-1, tone: cfg.tone || (on.some(function(r){ return r.storm; }) ? 'skip' : on.some(function(r){ return r.level === 'fair'; }) ? 'fair' : 'good'), headline: cfg.title };
+    D.sub = wxSum(rows); D.noTide = true; D.date = date; D.Rl = Rl;
+    return D;
+  }
+  function nowHere(src){
+    var c = src && src.w && src.w.current; if(!c || num(c.temperature_2m)==null) return '';
+    var k = skyOf({ cloud:num(c.cloud_cover), mm:num(c.precipitation) });
+    return '<li><b>Right now:</b> '+Math.round(c.temperature_2m)+'&deg;F'+(k ? ', '+esc(SKY[k].toLowerCase()) : '')+(num(c.wind_speed_10m)!=null ? ', wind '+Math.round(c.wind_speed_10m)+' mph' : '')+'.</li>';
+  }
+  function landSec(lat, lon, cfg){
+    var title = cfg.sec || 'Weather today', sp = spotWx(lat, lon);
+    if(sp.loading) return sec(IC.sun, title, '<p class="cc-cap">Loading the forecast for this spot.</p>');
+    if(!sp.d) return sec(IC.sun, title, '<p class="cc-cap">'+(wxErr ? 'Readings are offline. Try Refresh in a minute.' : 'Loading readings.')+'</p>');
+    var D = landDay(sp.d, cfg.date, cfg), today = cfg.date === hst().date, li = [], body = '';
+    if(D && D.line) body += '<p>'+esc(D.line)+'</p>';
+    else if(D) body += bandHTML(D, D.Rl);
+    else body += '<p>'+(cfg.far ? esc(cfg.far) : today ? 'No hourly forecast for this spot yet.' : 'Too far out for an hourly forecast. Check back closer to the day.')+'</p>';
+    if(today) li.push(nowHere(sp.d));
+    if(D && D.Rl.sunrise && D.Rl.sunset) li.push('<li>Sunrise '+esc(clock(D.Rl.sunrise))+', sunset '+esc(clock(D.Rl.sunset))+'.</li>');
+    if(li.join('')) body += '<ul>'+li.join('')+'</ul>';
+    if(D) body += '<p class="cc-cap">'+(sp.fail ? 'This spot&rsquo;s forecast did not load, so this is the island forecast.' : sp.home ? 'Island forecast. This place has no spot on the map to read.' : 'Forecast for this spot&rsquo;s own location.')+'</p>';
+    return sec(IC.sun, title, body);
+  }
+  function poiCfg(kind, p, R){
+    var now = R ? R.now : hst(), tags = (p && p.tags) || [];
+    if(kind === 'market' && p && p.day!=null && p.start_min!=null){
+      var nowM = now.hour*60 + now.minute, add = (p.day - dowOf(now.date) + 7) % 7, span = [p.start_min, p.end_min!=null ? p.end_min : p.start_min+120];
+      if(add === 0 && nowM > span[1]) add = 7;
+      return { date:addDays(now.date, add), span:span, far: add === 7 ? 'Ended for today. The next one is '+DAYS[p.day]+', past the hourly forecast.' : '', title:(add === 0 ? 'Today' : add === 1 ? 'Tomorrow' : DAYS[p.day])+', '+spanLabel(span[0], span[1])+'.', sec: add === 0 ? 'Weather at the market' : 'Weather on market day' };
+    }
+    if(kind === 'act'){
+      if(tags.indexOf('indoor') >= 0 || tags.indexOf('rain_ok') >= 0) return { date:now.date, indoor:true, tone:'good', title:'Indoor, any weather.', sec:'Weather today' };
+      return { date:now.date, best:true, scenic: !!(p && p.type === 'scenic'), span: openSpan(p && p.hours), sec:'Weather today' };
+    }
+    return { date:now.date, title:'Weather here today.', sec:'Weather today' };
+  }
+  function eventCfg(ev, R){
+    var now = R ? R.now : hst(), sd = ev.start.slice(0,10), ed = ev.end.slice(0,10), date = sd > now.date ? sd : now.date, sm = evMin(ev.start), em = evMin(ev.end), span = null;
+    if(!ev.allDay && sm!=null){
+      if(sd === ed) span = [sm, em!=null && em > sm ? em : sm+120];
+      else if(date === sd) span = [sm, 1440];
+      else if(date === ed && em!=null && em > 0) span = [0, em];
+    }
+    return { date:date, span:span, title:(date === now.date ? 'Today' : evDate(date))+(span ? ', '+spanLabel(span[0], span[1]) : ', all day')+'.', sec:'Weather at the venue' };
+  }
+  function refreshDesk(){
+    var ov = document.getElementById('tdOv'); if(!last.desk || !ov || ov.hidden) return;
+    var dlg = ov.querySelector('.td-dlg'), y = dlg ? dlg.scrollTop : 0;
+    renderDesk(); if(dlg) dlg.scrollTop = y;
+  }
 
   function noteBeach(id, o, R){
     var rec = placeRec('beach', id), it = rec ? rec.it : { id:id, n:(INFO.B[id]||{}).name||id, r:'', lg:'none' };
@@ -7174,11 +7314,11 @@ window.osParseAff = function(v){
   function noteCam(id, R){
     var c = CAMS[id]; if(!c) return '';
     var rec = placeRec('beach', c.beach), it = rec ? rec.it : null, info = INFO.B[c.beach] || {};
-    var read = it && R ? beachRead(it, rec.state, R) : null;
+    var read = it && R ? beachRead(it, rec.state, R) : null, D = it && R ? beachDay(it, R) : null;
     return '<div class="td-sh-body">' +
       '<h3>'+IC.cam+'Live cam: '+esc(c.op)+'</h3><div class="kick">'+esc(info.name || c.beach)+' &middot; '+esc(c.host)+'</div>' +
       sec(IC.sun, 'What it shows', '<p>'+esc(c.view)+'</p>') +
-      (read ? sec(IC.wave, 'The guide\u2019s read on this beach', '<p>'+lv(read)+' '+(read.es!=null ? read.es.toFixed(1)+' ft on this shore. ' : '')+esc(read.why.filter(Boolean).join(' '))+'</p>') : '') +
+      (read ? sec(IC.wave, 'The guide\u2019s read on this beach', (D ? bandHTML(D, R) : '')+'<p>'+lv(read)+' '+(read.es!=null ? read.es.toFixed(1)+' ft on this shore. ' : '')+esc(read.why.filter(Boolean).join(' '))+'</p>') : '') +
       sec(IC.talk, 'Tell the guest', '<p>The picture is '+esc(c.op)+'&rsquo;s own public camera on their page. It shows what the water looks like right now; the guide&rsquo;s reading still stands.</p>' + linkRow(['<a href="'+esc(c.url)+'" target="_blank" rel="noopener">'+IC.cam+'Open live cam</a>', '<button type="button" class="alt" data-phone-open="beach:'+esc(c.beach)+'">'+IC.phone+esc(info.name || 'Beach')+' in guide</button>'])) +
       '</div>';
   }
@@ -7199,6 +7339,7 @@ window.osParseAff = function(v){
     if(p && p.look_for) tell.push('<li><b>Look for:</b> '+esc(p.look_for)+'.</li>');
     return '<div class="td-sh-body">' +
       head(title, null, esc(KIND_WORD[kind] || 'Place')+(p && p.r ? ' &middot; '+esc(p.r) : it && it.r ? ' &middot; '+esc(it.r) : '')+' '+statusTag(kind, id)) +
+      landSec(p ? p.lat : it && it.lat, p ? p.lon : it && it.lon, poiCfg(kind, p, R)) +
       (tell.length ? sec(IC.talk, 'Tell the guest', '<ul>'+tell.join('')+'</ul>') : '') +
       (p && p.tip ? sec(IC.tip, 'Local tip', '<p>'+esc(p.tip)+'</p>') : '') +
       sec(IC.pin, 'Getting there', (p && p.parking ? '<p>'+esc(p.parking)+'</p>' : '') + linkRow([p && p.lat ? '<a href="'+esc(dirUrl(p.lat, p.lon))+'" target="_blank" rel="noopener">'+IC.pin+'Directions</a>' : '', '<button type="button" class="alt" data-phone-open="'+esc(kind)+':'+esc(id)+'">'+IC.phone+'Show in guide</button>'])) +
@@ -7214,6 +7355,7 @@ window.osParseAff = function(v){
     return '<div class="td-sh-body">' +
       head(ev.title, o.level === 'na' ? null : o, 'Event'+(ev.venue && ev.venue.city ? ' &middot; '+esc(ev.venue.city) : '')) +
       sec(IC.event, 'When', '<p>'+esc(evWhen(ev))+'</p>') +
+      landSec(ev.venue ? ev.venue.lat : null, ev.venue ? ev.venue.lon : null, eventCfg(ev, R)) +
       (tell.length ? sec(IC.talk, 'Tell the guest', '<ul>'+tell.join('')+'</ul>') : '') +
       sec(IC.pin, 'Getting there', linkRow([ev.venue && ev.venue.lat!=null ? '<a href="'+esc(dirUrl(ev.venue.lat, ev.venue.lon))+'" target="_blank" rel="noopener">'+IC.pin+'Directions</a>' : '', ev.url ? '<a class="alt" href="'+esc(ev.url)+'" target="_blank" rel="noopener">'+IC.ext+'Event page</a>' : '', ev.website && !/kauaifestivals\.com/.test(ev.website) ? '<a class="alt" href="'+esc(ev.website)+'" target="_blank" rel="noopener">'+IC.ext+'Organizer site</a>' : '']) + '<p class="cc-cap">From kauaifestivals.com, the island calendar, a partnership of the Kauaʻi Visitors Bureau, the County of Kauaʻi and the Hawaiʻi Tourism Authority. Details and prices are on the event page.</p>') +
       '</div>';
