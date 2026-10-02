@@ -628,6 +628,7 @@ window.OS_ROUTE_SEG = {
   .mg-list{display:flex;flex-direction:column}
   .mg-row{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--hair-soft)}
   .mg-row:last-child{border-bottom:0}
+  .mg-row.am-fold{display:block}   /* an opened amenity stacks its edit form under it */
   .mg-nm{min-width:0;flex:1;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
   .mg-nm b{font-size:13.5px;font-weight:600;color:var(--ink)}
   .mg-nm span{font-size:11.5px;color:var(--muted)}
@@ -1404,6 +1405,37 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .ph-list .gp-title{font-size:16px;font-weight:700;color:var(--ocean);margin:0 2px 2px}
   .ph-list .gp-btn{flex:none;font-size:11.5px;font-weight:700;color:#fff;background:var(--ocean);border-radius:999px;padding:5px 11px}
   .ph-list .gp-via{font-size:11px;color:var(--mute);margin:8px 2px 0;word-break:break-all}
+  /* Stay-Close phone: the beach card a guest opens. The hero and safety report are a neutral slot
+     (never a mocked safety call); the offer panel below is the guest app's own. */
+  .gp-beach-hero{position:relative;height:128px;border-radius:14px;overflow:hidden;background:linear-gradient(165deg,#7cc3cf 0%,#2f8296 52%,#0f4c5c 100%)}
+  .gp-beach-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.04) 0%,rgba(0,0,0,0) 35%,rgba(0,0,0,.55) 100%)}
+  .gp-beach-badge{position:absolute;top:10px;left:10px;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 8px;border-radius:999px;
+    font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:11.5px;font-weight:600;background:rgba(253,242,214,.94);color:#4b5563;border:1.5px solid rgba(15,76,92,.2)}
+  .gp-beach-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:#9ca3af}
+  .gp-beach-txt{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:8px 12px 10px;color:#fff}
+  .gp-beach-txt b{display:block;font-size:17px;line-height:1.15;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+  .gp-beach-txt span{font-size:10.5px;opacity:.85}
+  .gp-beach-safe{margin-top:10px;padding:10px 12px 4px;background:#eef3f5;border:1px solid #d9e3e6;border-radius:10px}
+  .gp-beach-safe i{display:block;height:7px;border-radius:4px;background:#d3dee2;margin-bottom:6px}
+  .gp-beach-cap{font-size:10.5px;color:var(--mute);line-height:1.4;margin:5px 2px 0}
+  .gp-toast{position:absolute;left:10px;right:10px;bottom:12px;z-index:3;background:#0f2a33;color:#fff;font-size:11.5px;line-height:1.45;border-radius:10px;padding:9px 11px;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+  .gp-toast[hidden]{display:none}
+  .gp-it:focus-visible,[data-gpask]:focus-visible{outline:2px solid var(--ocean);outline-offset:2px}
+  /* Stay-Close (Nick, 2026-10-01): the guest's phone sits LEFT of the amenity editor and stays beside
+     it down to a 721px window. The amenity list scrolls inside the phone, like a real one, so the
+     pinned rail never runs off the bottom of the window. Under 721px it is the Preview sheet. */
+  /* The phone lays out at a real phone's width (375pt plus the bezel) and is scaled to fit the
+     rail, so text wraps and buttons size exactly as they do in a guest's hand. */
+  .ph-split.ph-left{--gpz:.85}
+  .ph-left #gpAmCard{padding:12px 10px}
+  .ph-left .gp-phone{width:397px;max-width:none;zoom:var(--gpz)}
+  .ph-left #gpAmenity{position:relative}
+  @media (min-width:1200px){ .ph-split.ph-left{grid-template-columns:420px minmax(0,1fr);--gpz:1} }
+  @media (min-width:1001px) and (max-width:1199px){ .ph-split.ph-left{grid-template-columns:360px minmax(0,1fr)} }
+  .ph-split.ph-left > .ph-rail{order:-1}
+  @media (min-width:721px){
+    .ph-left #gpAmenity{max-height:max(240px,calc((100vh - 330px) / var(--gpz) - 76px));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;margin:0 -4px;padding:0 4px}
+  }
   @media (max-width:1000px){
     .ph-split{grid-template-columns:minmax(0,1fr)}
     .ph-rail{display:none;position:fixed;left:0;right:0;bottom:0;top:auto;z-index:80;max-height:86vh;overflow:auto;
@@ -1413,6 +1445,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     .ph-fab{display:inline-flex;position:fixed;right:16px;bottom:16px;z-index:70;align-items:center;gap:7px;appearance:none;font:inherit;font-size:13.5px;font-weight:700;
       color:var(--on-sea);background:var(--sea);border:0;border-radius:999px;padding:11px 16px;box-shadow:0 8px 22px rgba(15,59,73,.3);cursor:pointer}
     .ph-fab[hidden],body.ph-sheet .ph-fab{display:none}
+  }
+  @media (min-width:721px) and (max-width:1000px){
+    .ph-split.ph-left{grid-template-columns:320px minmax(0,1fr);gap:16px;--gpz:.745}
+    .ph-split.ph-left > .ph-rail{display:block;position:sticky;top:12px;left:auto;right:auto;bottom:auto;z-index:auto;
+      max-height:none;overflow:visible;background:none;border-radius:0;padding:0;box-shadow:none}
+    .ph-split.ph-left .ph-close,body.ph-pin-left .ph-fab{display:none}
   }
 </style>
 </head>
@@ -2121,7 +2159,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     <div id="view-stayclose" hidden>
     <!-- AMENITY MANAGER -->
     <section>
-      <div class="sec-h"><h2>Your amenity menu</h2><p>What Stay-Close steers guests to when the ocean is the wrong call. Edits save as a draft in this browser; Export sends the menu into your app build.</p></div>
+      <div class="sec-h"><h2>Your amenity menu</h2><p>What Stay-Close steers guests to when the ocean is the wrong call. Tap an amenity to see it on the beach card guests open. Edits save as a draft in this browser; Export sends the menu into your app build.</p></div>
       <div class="card" id="mgAmenities">
         <div class="mg-list" id="amList"></div>
         <div class="mg-add">
@@ -2142,16 +2180,16 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           Contact info
         </button>
         <div class="mg-contact" id="amContact" hidden>
-          <input id="amPhone" placeholder="Phone (optional) — e.g. (808) 555-0142" autocomplete="off" inputmode="tel">
-          <input id="amHours" placeholder="Hours (optional) — e.g. 9a–7p daily" autocomplete="off">
-          <input id="amSite" placeholder="Website (optional) — e.g. https://yourspa.com" autocomplete="off" inputmode="url">
+          <input id="amPhone" placeholder="Phone (optional), e.g. (808) 555-0142" autocomplete="off" inputmode="tel">
+          <input id="amHours" placeholder="Hours (optional), e.g. 9a to 7p daily" autocomplete="off">
+          <input id="amSite" placeholder="Website (optional), e.g. https://yourspa.com" autocomplete="off" inputmode="url">
         </div>
         <div class="mg-foot"><span class="cap"><b id="amCount">0</b> amenities on your menu</span><span style="flex:1"></span><button class="pl-btn" id="amReset">Reset</button><button class="pl-btn primary" id="amExport">Export config</button></div>
       </div>
     </section>
-    <!-- WHAT GUESTS SEE — STAY-CLOSE PREVIEW (always-live guest panel, built from the draft menu) -->
+    <!-- WHAT GUESTS SEE: STAY-CLOSE PREVIEW (always-live guest panel, built from the draft menu; pinned LEFT of the editor by the phone-rail script) -->
     <section>
-      <div class="sec-h"><h2>What guests see</h2><p>How the guest app steers to your amenities when the ocean is the wrong call — live from your own draft menu.</p></div>
+      <div class="sec-h"><h2>What guests see</h2><p>How the guest app steers to your amenities when the ocean is the wrong call, live from your own draft menu.</p></div>
       <div class="card" id="gpAmCard">
         <div class="gp-top">
           <div class="gp-chips" role="group" aria-label="Preview ocean condition" id="gpAmChips">
@@ -2166,12 +2204,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           </button>
         </div>
         <div class="gp-phone" id="gpAmPhone"><div class="gp-screen"><div id="gpAmenity"></div></div></div>
-        <div class="gp-note">The exact panel guests see &mdash; built live from your draft menu above. Switch the ocean condition with the chips, and tap an amenity to expand its hours and phone, just like a guest. Not measured data.</div>
+        <div class="gp-note">The beach card guests open, with your offers built live from your menu as you type. Tap an offer in the phone to open it, and tap its buttons to see what a guest gets. Not measured data.</div>
       </div>
     </section>
     <!-- BAD OCEAN DAY SAVES -->
     <section>
-      <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the beach isn’t safe, what the app surfaced — and the on-property interest it captured.</p></div>
+      <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the beach isn’t safe, what the app surfaced, and the on-property interest it captured.</p></div>
       <div class="grid g3">
         <div class="card" style="grid-column:span 2">
           <div class="title"><span class="l"><span class="pv measured"></span> Stay-Close renders by trigger</span><span class="chip sample">Sample</span></div>
@@ -2188,8 +2226,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         <div class="card">
           <div class="title"><span class="l"><span class="pv measured"></span> Amenity interest &amp; render→click</span><span class="chip sample">Sample</span></div>
           <div class="v">~14% <small>render → click</small></div>
-          <div class="cap"><b>Bad-ocean-day steering only</b> — top labels: <b>Spa</b> ~22 · <b>On-site dining</b> ~18 · <b>Pool bar</b> ~11. Indoor amenities lead here because the ocean is the wrong call; the whole-month <b>Offers that land</b> in Guest activity ranks differently (beach bar and cabanas on top). A click = <b>amenity interest</b>, presented as interest — never “booked” or “revenue.”</div>
-          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts ÷ renders. This measured rate <b>replaces</b> any assumed funnel guess — no benchmark dressed up as your result. <b>Measured</b> once live.</div></details>
+          <div class="cap"><b>Bad-ocean-day steering only.</b> Top labels: <b>Spa</b> ~22 · <b>On-site dining</b> ~18 · <b>Pool bar</b> ~11. Indoor amenities lead here because the ocean is the wrong call; the whole-month <b>Offers that land</b> in Guest activity ranks differently (beach bar and cabanas on top). A click = <b>amenity interest</b>, presented as interest, never “booked” or “revenue.”</div>
+          <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts ÷ renders. This measured rate <b>replaces</b> any assumed funnel guess. No benchmark dressed up as your result. <b>Measured</b> once live.</div></details>
         </div>
       </div>
     </section>
@@ -2207,7 +2245,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
             <li><span class="n">4</span><span style="flex:1">Cabana rental</span><span class="bar" style="flex:0 0 110px"><i style="width:32%"></i></span><span class="ct">~7</span></li>
             <li><span class="n">5</span><span style="flex:1">Gift shop</span><span class="bar" style="flex:0 0 110px"><i style="width:23%"></i></span><span class="ct">~5</span></li>
           </ol>
-          <div class="cap">This is the <b>bad-ocean-day steering</b> mix, on trigger days only — a different scope from the whole-month <b>Offers that land</b> in Guest activity. A tap is <b>amenity interest</b> — we never present it as booked or as revenue.</div>
+          <div class="cap">This is the <b>bad-ocean-day steering</b> mix, on trigger days only. It is a different scope from the whole-month <b>Offers that land</b> in Guest activity. A tap is <b>amenity interest</b>. We never present it as booked or as revenue.</div>
           <details class="meth"><summary>How this is computed</summary><div class="body"><code>stayCloseClick</code> label counts from the daily rollup. Labels come from your amenity menu above. <b>Measured</b> once live.</div></details>
         </div>
         <div class="card">
@@ -2218,7 +2256,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         </div>
       </div>
     </section>
-<!-- B3 · Stay-Close tab augmentation cards — append INSIDE #view-stayclose, after the existing sections, before the closing "</div><!-- /view-stayclose -->" -->
+<!-- B3 · Stay-Close tab augmentation cards: append INSIDE #view-stayclose, after the existing sections, before the closing "</div><!-- /view-stayclose -->" -->
 <style>
   /* tsw- = new bar/table classes for the two Stay-Close augmentation cards (B3) */
   .tsw-twobar{display:flex;align-items:flex-end;gap:22px;height:104px;margin:12px 4px 4px;padding:0 4px}
@@ -2253,8 +2291,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         <div class="tsw-lab">High-surf advisory</div>
       </div>
     </div>
-    <div class="cap">Share of near-property owner/guest checks within ~10 minutes of your desk, by day type. High surf tomorrow means near-property planning nearly doubles — open the pool and spa early, add poolside coverage, and brief the cabana and beach-bar desks for a busier mid-morning.</div>
-    <details class="meth"><summary>How this is computed</summary><div class="body">Session location vs. front-desk distance, split by whether a high-surf advisory was active for that day's forecast. <b>In build</b> — needs a Worker schema change; ships alongside live telemetry.</div></details>
+    <div class="cap">Share of near-property owner/guest checks within ~10 minutes of your desk, by day type. High surf tomorrow means near-property planning nearly doubles. Open the pool and spa early, add poolside coverage, and brief the cabana and beach-bar desks for a busier mid-morning.</div>
+    <details class="meth"><summary>How this is computed</summary><div class="body">Session location vs. front-desk distance, split by whether a high-surf advisory was active for that day's forecast. <b>In build.</b> It needs a Worker schema change; ships alongside live telemetry.</div></details>
   </div>
 </section>
 
@@ -2266,7 +2304,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       <span class="l"><span class="pv measured"></span> What the guest sees, by plan</span>
       <span class="chip sample">Sample</span>
     </div>
-    <p class="cap" style="margin-top:2px">A high-surf or brown-water morning used to mean guests scatter. The guide reads the same live ocean feed that powers the safety verdict, and on a no-swim day its top card flips from a beach recommendation to what's open on-property — your spa, your pool, your 2pm snorkel tour. The safety call never changes for an offer; the offer just moves to the front when the water closes.</p>
+    <p class="cap" style="margin-top:2px">A high-surf or brown-water morning used to mean guests scatter. The guide reads the same live ocean feed that powers the safety verdict, and on a no-swim day its top card flips from a beach recommendation to what's open on-property: your spa, your pool, your 2pm snorkel tour. The safety call never changes for an offer; the offer just moves to the front when the water closes.</p>
     <table class="tsw-table">
       <tr>
         <td class="tsw-plan" data-os="freeHead"></td>
@@ -2277,7 +2315,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
         <td>Full amenity weather-swap plus a presentation push on trigger days</td>
       </tr>
     </table>
-    <div class="cap">Owners see their property&rsquo;s guide and updates &mdash; never a sales pitch.</div>
+    <div class="cap">Owners see their property&rsquo;s guide and updates, never a sales pitch.</div>
   </div>
 </section>
     </div><!-- /view-stayclose -->
@@ -3693,7 +3731,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. Edits save as a draft in this browser. <b>Export config</b> downloads the file that goes into your guide.',
       free:{ body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. The free plan shows one amenity; the paid plan shows your whole menu. <b>Export config</b> downloads the file that goes into your guide.' } },
     { view:'stayclose', sel:'#gpAmCard', title:'See it as a guest',
-      body:'The phone shows exactly what guests see, built live from your menu as you type. Switch the ocean condition to see how the guide changes on a rough day.' },
+      body:'The phone shows the beach card guests open, with your offers built live from your menu as you type. Tap an amenity in your menu to open it here, then tap its buttons to see what a guest gets.' },
     { view:'promos', sel:'#pmDrop', title:'Drop a promotion',
       body:'Drag in a PDF flyer and guests get an offer in the guide. Add a time window and it pops up on their phones during those hours, never over safety information. Drafts stay in this browser until you export them.',
       free:{ sel:'#pmLockCard', title:'Promotions, on the paid plan', body:'Timed offers that pop up on guests&rsquo; phones during the hours you choose are part of the paid plan. This card shows what you would get.' } },
@@ -3943,6 +3981,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           var it = items[+e.target.dataset.i]; if(!it) return;
           it[FIELD[cls]] = e.target.value;
           save();
+          if(cfg.onEdit) cfg.onEdit(+e.target.dataset.i);
           // Repaint only the summary, so the field the operator is typing in keeps focus.
           var sum = e.target.closest('details').querySelector('.mg-nm b');
           if(sum && FIELD[cls] === 'a') sum.textContent = e.target.value || 'Untitled';
@@ -4015,82 +4054,113 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var h = document.querySelector('.property h1');
     return ((h && h.textContent) || '').trim() || 'Your Rentals';
   }
-  // Context lines copied verbatim from the guest app's _amenityPanel (index.html).
+  /* The phone is the beach card a guest opens, with your offers where the guest app puts them:
+     under the beach's safety report. The offer panel follows the guest app's _amenityPanel
+     (index.html) line for line: the first offer opens by itself, the photo sits inside the
+     opened row, and an amenity with a phone gets "Ask the front desk" (a text) plus a call
+     button; one without gets the front-desk line. Change one, change the other.
+     The safety report is drawn as a blank slot on purpose: a beach's real call is never mocked. */
   var GP_CTX = {
-    red_flag: 'The ocean is the wrong call right now — these are on the property.',
+    red_flag: 'The ocean is the wrong call right now. These are on the property.',
     brown_water: 'With runoff in the water today, these are on the property.',
-    rain: 'A good rainy-day list — all on the property.',
+    rain: 'A good rainy-day list, all on the property.',
     calm: 'On the property, whenever you want a break from the beach.'
   };
-  /* Which categories a condition actually pushes people toward. The ocean call is
-     never changed by any of this; it only reorders what is offered alongside it. */
-  var GP_FIT = {
-    red_flag:    ['spa','dining','upgrades'],
-    brown_water: ['spa','dining','upgrades'],
-    rain:        ['spa','dining','upgrades'],
-    calm:        ['tours','rentals','dining']
-  };
-  var GP_WHY = {
-    red_flag:    'Suggested while the ocean is closed',
-    brown_water: 'Suggested while the water is brown',
-    rain:        'Suggested for a rainy day',
-    calm:        'Suggested on a calm day'
-  };
-  /* The first amenity whose category fits today. Untagged amenities never win the
-     slot, so a menu nobody has tagged simply shows no suggestion rather than a
-     wrong one. */
-  function gpSuggested(items){
-    var order = GP_FIT[gpCond] || GP_FIT.calm;
-    for(var k = 0; k < order.length; k++){
-      for(var j = 0; j < items.length; j++){
-        if(items[j] && items[j].cat === order[k]) return j;
-      }
-    }
-    return -1;
-  }
   var gpCond = 'calm';
   var gpItems = { amenities: [] };
+  /* gpSel: the amenity picked in your menu, or being edited. It opens and rings in the phone.
+     gpOpen: rows tapped open or shut inside the phone. With nothing picked the first offer is
+     open, as it is for a guest. What the add form holds shows as a dashed "Not added yet" row
+     at the end, where Add will put it. */
+  var gpSel = -1, gpOpen = {}, gpDraftPhoto = '';
+  function gpDraft(){
+    var a = document.getElementById('amA'); if(!a) return null;
+    var row = a.closest('.mg-add'); if(row && row.style.display === 'none') return null;   // free plan at its one-amenity cap
+    var name = a.value.trim(); if(!name) return null;
+    function v(id){ var f = document.getElementById(id); return f ? f.value.trim() : ''; }
+    var c = document.querySelector('#amCat .cat-b[aria-pressed="true"]');
+    return {a:name, b:v('amB'), phone:v('amPhone'), hours:v('amHours'), cat:c ? c.dataset.cat : '', photo:gpDraftPhoto, draft:true};
+  }
+  function gpList(){ var d = gpDraft(); return d ? gpItems.amenities.concat([d]) : gpItems.amenities; }
+  var GP_SVG = {
+    bldg:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ocean)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 21h18"/><path d="M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>',
+    chev:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>',
+    clock:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><polyline points="12 7.5 12 12 15 14"/></svg>',
+    sms:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
+    tel:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ocean)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
+  };
   function gpAmenityHTML(items){
-    var sugg = gpSuggested(items);
-    if(!items.length) return '<div class="gp-empty">Add an amenity above and watch it appear here.</div>';
+    var top = '<div class="gp-beach-hero"><span class="gp-beach-badge">Live safety call</span>'+
+        '<div class="gp-beach-txt"><b>Your nearest beach</b><span>Near '+esc(gpName())+'</span></div></div>'+
+      '<div class="gp-beach-safe" aria-hidden="true"><i></i><i></i><i style="width:58%"></i></div>'+
+      '<div class="gp-beach-cap">The live surf, rip and hazard report for the beach sits here. Your offers never change it.</div>';
+    if(!items.length) return top + '<div class="gp-empty" style="padding:22px 12px">Type an amenity name and watch it appear on the beach card.</div>';
     var rows = items.map(function(it, i){
-      // Expanded body, same contract + order as the guest app _amenityPanel (index.html):
-      // detail → hours (Open …) → phone (tel: Call …); front-desk fallback only when no phone.
+      var open = it.draft ? true : (i in gpOpen) ? gpOpen[i] : (gpSel >= 0 ? i === gpSel : i === 0);
+      var photo = it.photo ? '<img src="'+esc(it.photo)+'" alt="" style="display:block;width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:8px;background:var(--warm)">' : '';
       var detail = it.b ? '<div style="font-size:11.5px;color:var(--mute);line-height:1.45">'+esc(it.b)+'</div>' : '';
-      var hours = it.hours ? '<div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mute);margin-top:4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Open '+esc(it.hours)+'</div>' : '';
-      var phone = '';
-      if(it.phone){
-        var tel = String(it.phone).replace(/[^+0-9]/g,'');
-        phone = '<a href="tel:'+esc(tel)+'" onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ocean);text-decoration:none;margin-top:4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.68 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.24a2 2 0 0 1 2.11-.45c.74.32 1.53.55 2.34.68A2 2 0 0 1 22 16.92z"/></svg>Call '+esc(it.phone)+'</a>';
-      }
-      var fallback = it.phone ? '' : '<div style="font-size:11px;color:var(--mute);margin-top:'+((it.b||it.hours) ? '4px' : '0')+'">Ask at the front desk to book or check today&rsquo;s availability.</div>';
-      return '<button type="button" class="gp-it" data-gpam="'+i+'" aria-expanded="false" style="display:block;width:100%;min-height:44px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:10px;margin-top:8px;cursor:pointer;text-align:left;font-family:inherit;animation-delay:'+(80+i*40)+'ms">'+
-        '<span style="display:flex;align-items:center;gap:10px">'+
-          (it.photo ? '<img src="'+it.photo+'" alt="" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex-shrink:0">' : '') +
-          (it.photo ? '' : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ocean)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 21h18"/><path d="M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>') +
-          '<span style="flex:1;min-width:0">' +
-            '<span style="display:block;font-size:13px;font-weight:700;color:var(--ink)">'+esc(it.a)+'</span>' +
-            (i === sugg ? '<span style="display:block;font-size:10.5px;font-weight:700;color:var(--ocean);margin-top:1px">'+GP_WHY[gpCond]+'</span>' : '') +
-          '</span>'+
-          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>'+
-        '</span>'+
-        '<span class="gp-abody" style="display:none;padding:8px 2px 2px 25px">'+detail+hours+phone+fallback+'</span>'+
-      '</button>';
+      var hours = it.hours ? '<div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mute);margin-top:'+(it.b ? '4px' : '0')+'">'+GP_SVG.clock+'<span>Open '+esc(it.hours)+'</span></div>' : '';
+      var acts = it.phone
+        ? '<span style="display:flex;gap:8px;margin-top:10px">'+
+            '<span role="button" tabindex="0" data-gpask="text" data-i="'+i+'" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 14px;background:var(--ocean);color:#fff;border-radius:10px;font-size:13px;font-weight:700">'+GP_SVG.sms+'<span>Ask the front desk</span></span>'+
+            '<span role="button" tabindex="0" data-gpask="call" data-i="'+i+'" aria-label="Call '+esc(it.phone)+'" style="display:flex;align-items:center;justify-content:center;min-width:52px;min-height:44px;border:1.5px solid var(--ocean);border-radius:10px">'+GP_SVG.tel+'</span>'+
+          '</span>'
+        : '<div style="font-size:11px;color:var(--mute);margin-top:'+((it.b || it.hours) ? '4px' : '0')+'">Ask at the front desk to book or check today&rsquo;s availability.</div>';
+      var tag = it.draft ? '<span style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ocean);background:var(--ocean-lt);border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:2px">Not added yet</span>' : '';
+      var ring = (!it.draft && i === gpSel) ? 'box-shadow:0 0 0 2px var(--ocean);' : '';
+      return '<div role="button" tabindex="0" class="gp-it" '+(it.draft ? 'data-gpdraft="1"' : 'data-gpam="'+i+'"')+' aria-expanded="'+open+'" style="display:block;min-height:44px;padding:10px 12px;background:#fff;border:'+(it.draft ? '1.5px dashed var(--ocean)' : '1px solid var(--border)')+';border-radius:10px;margin-top:8px;cursor:pointer;text-align:left;'+ring+'animation-delay:'+(80+i*40)+'ms">'+
+        '<span style="display:flex;align-items:center;gap:10px">'+GP_SVG.bldg+
+          '<span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink)">'+esc(it.a)+tag+'</span>'+GP_SVG.chev+'</span>'+
+        '<span class="gp-abody" style="display:'+(open ? 'block' : 'none')+';padding:8px 2px 2px 25px">'+photo+detail+hours+acts+'</span>'+
+      '</div>';
     }).join('');
-    return '<div class="gp-panel" style="padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">'+
+    return top + '<div class="gp-panel" style="margin:10px 0 4px;padding:12px;background:var(--warm);border:1px solid var(--border);border-radius:12px">'+
       '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
         '<div style="font-weight:700;font-size:13px;color:var(--ink)">'+(FREE ? 'On the property' : 'Provided by '+esc(gpName()))+'</div>'+
         '<span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);background:#fff;border:1px solid var(--border);border-radius:999px;padding:2px 7px">Property offer</span>'+
       '</div>'+
-      '<div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">'+(GP_CTX[gpCond]||GP_CTX.calm)+' Separate from the beach safety report. The ocean call never changes for an offer.</div>'+
+      '<div style="font-size:11px;color:var(--mute);margin-top:2px;line-height:1.4">'+(GP_CTX[gpCond] || GP_CTX.calm)+' Separate from the safety report above. The ocean call never changes for an offer.</div>'+
       rows+
     '</div>';
   }
   function gpEl(){ return document.getElementById('gpAmenity'); }
   function gpRender(){
     var el = gpEl(); if(!el) return;
-    el.innerHTML = gpAmenityHTML(gpItems.amenities);
+    el.innerHTML = gpAmenityHTML(gpList());
+    // Bring the picked or half-typed amenity into view when the card scrolls inside the phone.
+    var t = el.querySelector('[data-gpdraft]') || (gpSel >= 0 ? el.querySelector('[data-gpam="'+gpSel+'"]') : null);
+    if(t && el.scrollHeight > el.clientHeight){
+      var y = t.offsetTop;   // #gpAmenity is the offset parent, so this is in the phone's own pixels
+      if(y < el.scrollTop || y + t.offsetHeight > el.scrollTop + el.clientHeight) el.scrollTop = Math.max(0, y - 12);
+    }
   }
+  /* What a tap does on a guest's phone. The preview never dials or texts from your computer. */
+  function gpToast(kind, i){
+    var el = gpEl(), it = gpList()[i]; if(!el || !it) return;
+    var scr = el.closest('.gp-screen') || el.parentNode, t = scr.querySelector('.gp-toast');
+    if(!t){ t = document.createElement('div'); t.className = 'gp-toast'; t.setAttribute('role','status'); scr.appendChild(t); }
+    t.innerHTML = kind === 'call'
+      ? 'On a guest&rsquo;s phone this calls <b>'+esc(it.phone)+'</b>.'
+      : 'On a guest&rsquo;s phone this opens a text to <b>'+esc(it.phone)+'</b> that reads: &ldquo;Aloha, I would like to ask about: '+esc(it.a)+'&rdquo;';
+    t.hidden = false;
+    clearTimeout(t._h); t._h = setTimeout(function(){ t.hidden = true; }, 4200);
+  }
+  ['amA','amB','amPhone','amHours'].forEach(function(id){
+    var f = document.getElementById(id); if(f) f.addEventListener('input', function(){ gpRender(); });
+  });
+  var amCatPick = document.getElementById('amCat');
+  if(amCatPick) amCatPick.addEventListener('click', function(){ setTimeout(gpRender, 0); });
+  window.addEventListener('os:am-draft-photo', function(e){ gpDraftPhoto = e.detail || ''; gpRender(); });
+  /* Open an amenity in your menu and the phone opens it on the beach card. 'toggle' does not
+     bubble, so this listens in the capture phase. */
+  var amListEl = document.getElementById('amList');
+  if(amListEl) amListEl.addEventListener('toggle', function(e){
+    var d = e.target; if(!d.classList || !d.classList.contains('am-fold')) return;
+    var ed = d.querySelector('.am-edit'); if(!ed) return;
+    var i = +ed.dataset.i;
+    if(d.open){ gpSel = i; gpOpen = {}; gpRender(); }
+    else if(gpSel === i){ gpSel = -1; gpOpen = {}; gpRender(); }
+  }, true);
   // The segment and the signed-in partner rename the header after this first draw; redraw then.
   window.addEventListener('load', gpRender);
   document.addEventListener('os-authed', function(){ setTimeout(gpRender, 0); });
@@ -4098,20 +4168,28 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var el = gpEl(); if(!el) return;
     el.classList.remove('gp-pop'); void el.offsetWidth; el.classList.add('gp-pop');
     // Drop the class once the animation is done, so later tab flips
-    // (display:none -> block restarts CSS animations) don't replay it —
-    // pop runs on first reveal per page load + Replay only.
+    // (display:none -> block restarts CSS animations) don't replay it.
+    // Pop runs on first reveal per page load, and on Replay.
     clearTimeout(el._gpT);
     var n = el.querySelectorAll('.gp-it').length;
     el._gpT = setTimeout(function(){ el.classList.remove('gp-pop'); }, 620 + n*40);
   }
   var gpAmWrap = document.getElementById('gpAmenity');
-  if(gpAmWrap) gpAmWrap.addEventListener('click', function(e){
-    var btn = e.target.closest('[data-gpam]'); if(!btn) return;
-    var body = btn.querySelector('.gp-abody'); if(!body) return;
-    var open = body.style.display !== 'none';
-    body.style.display = open ? 'none' : 'block';
-    btn.setAttribute('aria-expanded', String(!open));
-  });
+  if(gpAmWrap){
+    gpAmWrap.addEventListener('click', function(e){
+      var ask = e.target.closest('[data-gpask]');
+      if(ask){ gpToast(ask.dataset.gpask, +ask.dataset.i); return; }
+      var row = e.target.closest('.gp-it'); if(!row) return;
+      var body = row.querySelector('.gp-abody'); if(!body) return;
+      var open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : 'block';
+      row.setAttribute('aria-expanded', String(!open));
+      if(row.dataset.gpam != null) gpOpen[+row.dataset.gpam] = !open;
+    });
+    gpAmWrap.addEventListener('keydown', function(e){
+      if((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute('role') === 'button'){ e.preventDefault(); e.target.click(); }
+    });
+  }
   var gpChips = document.getElementById('gpAmChips');
   if(gpChips) gpChips.addEventListener('click', function(e){
     var c = e.target.closest('.gp-chip'); if(!c) return;
@@ -4145,8 +4223,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       ['Gift shop','Sundries, beach wear & local goods','','','assets/amenity/shop.jpg','rentals']
     ],
     // Export in the shared amenity contract {name,detail,price,phone,hours,showWhen} the guest app reads.
-    toExport:function(it){ return {name:it.a, detail:it.b, price:'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'', photo:it.photo||'', pdf:it.pdf||'', showWhen:'always'}; },
-    onChange:function(items){ gpItems.amenities = items; gpRender(); } });
+    // The guest app shows a photo from image (an https:// URL or a data:image URI), so the photo goes out
+    // under that name too, made absolute so a bundled asset path still passes the app's check.
+    toExport:function(it){ var img = ''; try{ img = it.photo ? (/^data:/.test(it.photo) ? it.photo : new URL(it.photo, location.href).href) : ''; }catch(e){}
+      return {name:it.a, detail:it.b, price:'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'', photo:it.photo||'', image:img, pdf:it.pdf||'', showWhen:'always'}; },
+    onChange:function(items){ if(items.length !== gpItems.amenities.length){ gpOpen = {}; gpSel = -1; } gpItems.amenities = items; gpRender(); },
+    onEdit:function(i){ if(gpSel !== i){ gpSel = i; gpOpen = {}; } gpRender(); } });
 })();
 </script>
 <!-- pdf.js (UMD) for real page-1 flyer previews; async + graceful — if it never loads, the filename cards stand in -->
@@ -5890,7 +5972,7 @@ window.osParseAff = function(v){
     var f = this.files && this.files[0]; if(!f) return;
     if(!/^image\//.test(f.type)) return err('That needs to be a PNG, JPG or WebP.');
     if(f.size > IMG_MAX) return err('That photo is over 1 MB. A smaller one keeps the menu quick to load.');
-    read(f, function(d){ pending.photo = d; photoLab.textContent = 'Photo attached'; });
+    read(f, function(d){ pending.photo = d; photoLab.textContent = 'Photo attached'; window.dispatchEvent(new CustomEvent('os:am-draft-photo', {detail:d})); });
   });
 
   function takePdf(f){
@@ -5957,6 +6039,7 @@ window.osParseAff = function(v){
       }
 
       pending = { photo:'', pdf:'', pdfName:'' };
+      window.dispatchEvent(new CustomEvent('os:am-draft-photo', {detail:''}));
       document.querySelectorAll('#amCat .cat-b').forEach(function(x){ x.removeAttribute('aria-pressed'); });
       photoLab.textContent = 'Add a photo';
       dzLab.textContent = 'Drag a PDF here, or tap to choose';
@@ -7222,7 +7305,8 @@ window.osParseAff = function(v){
     var holder = document.createElement('div');
     holder.innerHTML = '<div class="ph-lab"><i></i>What guests see, live</div>';
     if(sec){ sec.parentNode.removeChild(sec); holder.appendChild(gp); }
-    split('stayclose', holder);
+    var scRail = split('stayclose', holder);
+    if(scRail) scRail.parentNode.classList.add('ph-left');   // the phone sits left of the editor
   }
 
   /* ---- Places: featured first, listed next, hidden gone ---- */
@@ -7299,6 +7383,7 @@ window.osParseAff = function(v){
     document.body.classList.remove('ph-sheet');
     Object.keys(rails).forEach(function(k){ rails[k].classList.toggle('on', k === active); });
     fab.hidden = !rails[active];
+    document.body.classList.toggle('ph-pin-left', !!(rails[active] && rails[active].parentNode.classList.contains('ph-left')));
   }
   fab.addEventListener('click', function(){ document.body.classList.add('ph-sheet'); });
   document.querySelectorAll('.viewtabs button[data-view]').forEach(function(t){ t.addEventListener('click', function(){ setTimeout(sync,0); }); });
