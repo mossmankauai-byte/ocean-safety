@@ -6,6 +6,7 @@
 //   - Open-Meteo weather       → StaleWhileRevalidate (1 hr) — keep fresh, fall back to cached when offline
 //   - NOAA tides               → StaleWhileRevalidate (6 hr) — same idea, slower-changing data
 //   - GetYourGuide & affiliate widgets → NetworkFirst (3s)   — get fresh listings, cache if offline
+//   - The app page (/)         → NetworkFirst (4s), precache offline. Never shows the last build online
 //   - HTML / JS / CSS / icons  → StaleWhileRevalidate         — fast loads, deploys land within minutes
 //
 // CACHE NAMING (important): runtime caches use STABLE names with NO version suffix,
@@ -18,7 +19,7 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const CACHE_VERSION = 'v404-2026-10-01-stayclose-preview';
+const CACHE_VERSION = 'v407-2026-10-02-app-page-fresh';
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
@@ -26,6 +27,26 @@ if (workbox) {
   workbox.setConfig({ debug: false });
   // Stable prefix only — NO version suffix, so runtime caches survive deploys.
   workbox.core.setCacheNameDetails({ prefix: 'os' });
+
+  // ---- The app page itself: network first, precache only when offline ----
+  // Registered BEFORE precacheAndRoute because the first matching route wins. Without it the
+  // precache answered '/' from cache, so the first open after every deploy showed the PREVIOUS
+  // build and only a "New version available" toast hinted otherwise. That is how a partner
+  // screen-shared an old version on 2026-10-02. Online: always the deployed build. Offline or a
+  // slow network (4s): the precached copy, so the offline story is unchanged.
+  const appPageFirst = new workbox.strategies.NetworkFirst({
+    cacheName: 'app-page',
+    networkTimeoutSeconds: 4,
+    plugins: [
+      new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [200] }),
+      { handlerDidError: async () => workbox.precaching.matchPrecache('/index.html') }
+    ]
+  });
+  workbox.routing.registerRoute(
+    ({ request, url }) => request.mode === 'navigate' && url.origin === self.location.origin &&
+      (url.pathname === '/' || url.pathname === '/index.html'),
+    appPageFirst
+  );
 
   // ---- Precache the app shell so first-visit-offline shows the app ----
   // Keyed to CACHE_VERSION: bumping it ships new HTML/icons on next launch.
