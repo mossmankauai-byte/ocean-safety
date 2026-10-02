@@ -1,0 +1,11 @@
+# Delivery spec for index.html, the guest guide. Required by oscheck.py for a guest-facing file.
+recipient: guests of a Kauaʻi hotel's co-branded guide (?ref=<slug>) and the hotel desk framing it (&desk=1)
+segment: hotel
+tier: free
+fulfillment: >
+  None. No price, link or signup. Live-cam pins open the camera operator's own public
+  page in a new tab; nothing is embedded.
+must_be_true_after: >
+  A cam pin opens a sheet naming the beach and the operator and its link returns 200.
+  Framed with desk=1, a tapped place posts os:poi to the parent page and sends nothing
+  to the telemetry collector.

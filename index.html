@@ -6702,6 +6702,48 @@ function openGrocerySheet(id){
 }
 
 
+// LIVE CAMS (2026-10-01). Free public beach cams on Kauaʻi, each on its operator's own page.
+// Ozolio cams embed only on domains the owner whitelists and HDOnTap offers no embed code, so
+// the sheet links out instead of embedding. Verified live 2026-10-01.
+const CAMS=[
+  {id:'cam_hanalei_bay_resort',beach:'hanalei',op:'Hanalei Bay Resort',host:'HDOnTap',view:'Hanalei Bay from the Princeville bluff: the bay, the surf line and the mountains behind.',url:'https://hdontap.com/stream/703517/hanalei-bay-resort-kauai-hawaii-live-webcam/',dx:0.0022,dy:0.0014},
+  {id:'cam_hanalei_colony',beach:'tunnels',op:'Hanalei Colony Resort',host:'Ozolio',view:'The Hāʻena shoreline west of Hanalei: sand, surf and the north shore reef.',url:'https://www.ozolio.com/explore/LKOU000004E4',dx:0.0018,dy:0.0016},
+  {id:'cam_royal_sonesta',beach:'kalapaki',op:'Royal Sonesta Kauaʻi',host:'Ozolio',view:'Kalapakī Bay from the resort: the pool deck, the beach and the bay.',url:'https://www.ozolio.com/explore/IDWX000000A6',dx:0.0016,dy:0.0016},
+  {id:'cam_sheraton_poipu',beach:'poipu',op:'Sheraton Kauaʻi Resort',host:'Ozolio',view:'Poʻipū Beach from the resort: the shoreline, the surf and the sunset.',url:'https://www.ozolio.com/explore/LOUK00000052',dx:-0.0022,dy:0.0014},
+  {id:'cam_brenneckes',beach:'poipu',op:"Brennecke's Beach Broiler",host:'Restaurant webcam',view:'The lawn and the east end of Poʻipū Beach Park from the restaurant.',url:'https://www.brenneckes.com/beach-webcam',dx:0.0022,dy:0.0014}
+];
+let camMkrs={};
+function camsFor(beachId){ return CAMS.filter(c=>c.beach===beachId); }
+function renderCams(){
+  Object.values(camMkrs).forEach(m=>m.remove()); camMkrs={};
+  if(typeof map==='undefined' || !map) return;
+  CAMS.forEach(c=>{
+    const b=B.find(x=>x.id===c.beach); if(!b) return;
+    const glyph='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg>';
+    const html='<div class="mkw"><div style="width:26px;height:26px;border-radius:50%;background:#0f4c5c;border:2px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3)">'+glyph+'</div><div class="mklbl">Live cam</div></div>';
+    const mk=L.marker([b.lat+c.dy,b.lon+c.dx],{icon:L.divIcon({html,className:'',iconSize:[120,60],iconAnchor:[60,13]}),zIndexOffset:-50}).addTo(map);
+    mk.on('click',()=>openCamSheet(c.id));
+    camMkrs[c.id]=mk;
+  });
+}
+function openCamSheet(id){
+  const c=CAMS.find(x=>x.id===id); if(!c) return;
+  const b=B.find(x=>x.id===c.beach)||{};
+  const _sc=document.getElementById('sc'); _sc.style.display=''; _sc.innerHTML=`
+    <div class="poi-hero" style="background:linear-gradient(135deg,#0f4c5c,#2495b0);color:#fff">
+      <div class="poi-hero-icon" style="color:#fff"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg></div>
+      <div><div class="poi-hero-name" style="color:#fff">Live cam: ${c.op}</div><div class="poi-hero-type" style="color:rgba(255,255,255,.85)">${b.name||''} ${b.r?'• '+b.r:''}</div></div>
+    </div>
+    <div class="poi-local-tip" style="margin-top:14px"><span style="font-size:14px;flex-shrink:0">◉</span><span>${c.view}</span></div>
+    <div style="font-size:13px;color:var(--mute);margin-top:12px;line-height:1.5">The picture is ${c.op}'s own public camera, opened on their page (${c.host}). It shows what the water looks like right now; the guide's reading for ${b.name||'the beach'} still stands.</div>
+    <div class="poi-cta-row">
+      <a href="${c.url}" target="_blank" rel="noopener" class="poi-cta-main">Open live cam</a>
+      ${b.id?`<button type="button" class="poi-cta-main" style="background:transparent;color:var(--ocean);border:1px solid var(--ocean)" onclick="openSheet('${b.id}')">${b.name} conditions</button>`:''}
+    </div>`;
+  document.getElementById('sheet').classList.add('on','sheet-poi');
+  document.getElementById('overlay').classList.add('on');
+  pushItemRoute('cam', c.id, 'Live cam: '+c.op);
+}
 function renderMap(){
   Object.values(mkrs).forEach(m=>m.remove());mkrs={};
   let vis=0;
@@ -6741,6 +6783,7 @@ function renderMap(){
   window._mapPainted = true;
   // Re-render channels so they stay in sync and visible
   if(typeof renderChannels === 'function') renderChannels();
+  try{ renderCams(); }catch(e){}
   try{ declutterMarks(); }catch(e){}
   // The empty-state banner belongs to the Beaches tab only. renderMap skips its beach loop
   // on every other tab, so vis stays 0 there and the banner used to hang over Family/Trails.
@@ -7796,7 +7839,7 @@ function openSheet(id){
       </div>
     </div>
     ${photoCreditLine(b)}
-    <div class="dir-pill-row"><a class="dir-pill" href="${murl}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Get Directions</a></div>
+    <div class="dir-pill-row">${camsFor(b.id).map(c=>`<a class="dir-pill" href="${c.url}" target="_blank" rel="noopener" title="${c.op} live cam"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg> Live cam</a>`).join('')}<a class="dir-pill" href="${murl}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Get Directions</a></div>
     ${weatherBar(c)}
     ${_bigSurfNotice}
     ${_jellyNotice}
@@ -10048,19 +10091,33 @@ const _routeKinds = {
   food:  { open: 'openFoodSheet', label: 'Food' },
   market:{ open: 'openMarketSheet', label: 'Market' },
   tour:  { open: 'openToursSheet', label: 'Tours' },
-  channel:{ open: 'openChannelSheet', label: 'Rip Current' }
+  channel:{ open: 'openChannelSheet', label: 'Rip Current' },
+  cam:   { open: 'openCamSheet', label: 'Live cam' }
 };
+// DESK BRIDGE (2026-10-01). When the guide runs inside the operator Dashboard's Today tab
+// (framed, ?desk=1) it tells the page around it which place just opened or closed, and
+// opens a place the Dashboard asks for. Same origin only, both ways. Guests never see this.
+const DESK = (() => { try { return window.parent !== window && new URLSearchParams(location.search).get('desk') === '1'; } catch(e){ return false; } })();
+function deskPost(msg){ if(!DESK) return; try { window.parent.postMessage(msg, location.origin); } catch(e){} }
+if(DESK){
+  window.addEventListener('message', (e) => {
+    if(e.origin !== location.origin || !e.data || e.data.type !== 'os:open') return;
+    const cfg = _routeKinds[e.data.kind]; const fn = cfg && window[cfg.open];
+    if(typeof fn === 'function') fn(String(e.data.id));
+  });
+}
 function pushItemRoute(kind, id, name){
   try {
     const params = new URLSearchParams(location.search);
     // Drop any existing kind params so we keep the URL clean
     Object.keys(_routeKinds).forEach(k => params.delete(k));
     params.set(kind, id);
+    deskPost({ type:'os:poi', kind, id, name: name || '' });
     // Preserve ?ref / ?utm_source if present
     const qs = params.toString();
     history.pushState({ kind, id }, '', qs ? '?' + qs : location.pathname);
     if(name) document.title = name + ' — Ocean Safe';
-    if(window.OSA) OSA.item(kind, id, name);
+    if(window.OSA && !DESK) OSA.item(kind, id, name);
   } catch(e){}
 }
 function clearItemRoute(){
@@ -10069,6 +10126,7 @@ function clearItemRoute(){
     let changed = false;
     Object.keys(_routeKinds).forEach(k => { if(params.has(k)){ params.delete(k); changed = true; } });
     if(changed){
+      deskPost({ type:'os:poi-close' });
       const qs = params.toString();
       history.replaceState({}, '', qs ? '?' + qs : location.pathname);
       document.title = ((window.ACTIVE&&ACTIVE.name)||'Kauaʻi') + ' Beach Guide — Free Ocean Safety App';  // Layer 15: island-aware title reset
@@ -10536,6 +10594,7 @@ function _partnerTrack(type, label){
   try {
     const slug = (new URLSearchParams(location.search).get('ref') || '').trim().toLowerCase();
     if(!slug || !/^[a-z0-9-]{2,64}$/.test(slug)) return;
+    if(typeof DESK !== 'undefined' && DESK) return;   // the hotel desk tapping around is not a guest
     const u = _activeUnitId();
     fetch('https://concierge-guide-api.oceansafe-hi.workers.dev/e', {
       method: 'POST', headers: { 'Content-Type': 'text/plain' },
@@ -13030,6 +13089,7 @@ if('serviceWorker' in navigator){
     if(navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1') return;
     var slug = (new URLSearchParams(location.search).get('ref') || '').trim().toLowerCase();
     if(!slug || !/^[a-z0-9-]{2,64}$/.test(slug)) return;
+    if(typeof DESK !== 'undefined' && DESK) return;   // the hotel desk tapping around is not a guest
     var API = 'https://concierge-guide-api.oceansafe-hi.workers.dev/e';
     var sid = null;
     try{
