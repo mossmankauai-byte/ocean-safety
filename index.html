@@ -88,7 +88,9 @@
   // ▲▲▲ ───────────────────────────────────────── ▲▲▲
 
   var DNT = navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.msDoNotTrack === '1';
-  var ENABLED = !!OS_PH_KEY && OS_PH_KEY.indexOf('YOUR_') === -1 && !DNT && /(^|\.)oceansafety\.app$/i.test(location.hostname);
+  // Never inside the operator Dashboard's desk frame (?desk=1): the desk tapping around is not a guest.
+  var DESK_FRAME = (function(){ try { return window.parent !== window && new URLSearchParams(location.search).get('desk') === '1'; } catch(e){ return false; } })();
+  var ENABLED = !!OS_PH_KEY && OS_PH_KEY.indexOf('YOUR_') === -1 && !DNT && !DESK_FRAME && /(^|\.)oceansafety\.app$/i.test(location.hostname);
 
   // ── Visibility-aware view timer (a "view" = a tab map OR an open POI sheet) ──
   var view = null, startedAt = null, activeMs = 0;
@@ -10062,6 +10064,98 @@ if(DESK){
     if(typeof fn === 'function') fn(String(e.data.id));
   });
 }
+// DESK PREVIEW (2026-10-01). The Dashboard's Stay-Close tab frames the guide (?desk=1) to show an
+// operator one beach card carrying their draft amenity menu, under the live ocean or a sample day
+// they pick. A sample day runs the guide's own model, getCond() then score(), on a copy of the live
+// feed with a few readings changed (DESK_SAMPLE), so the verdict, notices and offers are the ones the
+// guide would show on such a day. The model is never edited. Nothing here can reach a guest: DESK is
+// only true framed inside the Dashboard, messages are same-origin, and the copy lives in this frame.
+// Text and call buttons do not dial from the operator's computer; a note says what a guest's phone does.
+var _deskPv = null, _deskTry = 0;   // var: read by _tripStage(), which can run before this line
+const DESK_SAMPLE = {
+  calm:        { surf:1,  sw_h:1,  wind:6,  cloud:20,  rain:0,   rain72:0,  wet_hours_today:0 },
+  red_flag:    { surf:10, sw_h:10, wind:24, cloud:45,  rain:0,   rain72:2,  wet_hours_today:0, toward:true },
+  brown_water: { surf:2,  sw_h:2,  wind:9,  cloud:85,  rain:600, rain72:60, wet_hours_today:5 },
+  rain:        { surf:2,  sw_h:2,  wind:12, cloud:100, rain:10,  rain72:5,  wet_hours_today:9 }
+};
+async function _deskShow(){
+  const pv = _deskPv; if(!pv) return;
+  const b = B.find(x => x.id === pv.beach);
+  // The island's beaches and the first live read land after boot; wait for them, up to 15 seconds.
+  // Past that the card shows whatever the guide has, which on a dead feed is "Surf data unavailable".
+  if(!b || !scored[pv.beach] || (!LIVE && _deskTry < 60)){ if(++_deskTry < 80) setTimeout(_deskShow, 250); return; }
+  _deskTry = 0;
+  // The app's update bar is for guests; in the preview it only covers the card.
+  if(!document.getElementById('deskPvCss')){ const st = document.createElement('style'); st.id = 'deskPvCss'; st.textContent = '#swUpdateToast{display:none!important}'; document.head.appendChild(st); }
+  if(pv.menu){
+    window._partnerCfg = Object.assign({}, window._partnerCfg || {}, {
+      name: String(pv.menu.name || ''), plan: pv.menu.plan === 'free' ? 'free' : 'paid',
+      amenities: Array.isArray(pv.menu.amenities) ? pv.menu.amenities : [], preview: false
+    });
+  }
+  const keep = LIVE, keepQ = window._streamQ, s = DESK_SAMPLE[pv.state];
+  const sample = s ? Object.assign({}, keep || SNAP, s, s.toward ? { swell_dir: b.facing, sw_d: b.facing } : {}) : null;
+  // The live stream gauges (USGS discharge) are the other brown-water input; a sample day sets
+  // its own rain, so the gauges sit out for it.
+  if(sample){ LIVE = sample; window._streamQ = null; }
+  try {
+    const c = await getCond(b);
+    const r = score(b, c, ints); r._c = c; scored[b.id] = r;
+    const sc = document.getElementById('sc'), y = sc ? sc.scrollTop : 0;
+    openSheet(b.id);
+    const sh = document.getElementById('sheet'); if(sh) sh.classList.add('expanded');
+    _deskMark(pv, sc, y);
+  } catch(e){}
+  finally { if(sample){ if(LIVE === sample) LIVE = keep; if(window._streamQ === null) window._streamQ = keepQ; } }
+}
+// Ring the amenity the operator picked (or is typing), open it, and bring it into view.
+function _deskMark(pv, sc, y){
+  if(!sc) return;
+  const f = (pv.focus == null) ? -1 : +pv.focus, d = (pv.draft == null) ? -1 : +pv.draft;
+  [f, d].forEach((i, k) => {
+    if(i < 0) return;
+    const body = document.getElementById('amenityBody' + i); if(!body) return;
+    const btn = body.closest('button');
+    if(i !== 0){ const b0 = document.getElementById('amenityBody0'); if(b0 && k === 0 && f !== 0){ b0.style.display = 'none'; const t0 = b0.closest('button'); if(t0) t0.setAttribute('aria-expanded','false'); } }
+    body.style.display = ''; if(btn) btn.setAttribute('aria-expanded', 'true');
+    if(btn){
+      btn.style.boxShadow = i === d ? 'none' : '0 0 0 2px var(--ocean,#0f4c5c)';
+      if(i === d){
+        btn.style.border = '1.5px dashed var(--ocean,#0f4c5c)';
+        const nm = btn.querySelector('span > span'); if(nm && !nm.querySelector('[data-desk-tag]')) nm.insertAdjacentHTML('beforeend', '<span data-desk-tag style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#0f4c5c;background:#ebf6fa;border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:2px">Not added yet</span>');
+      }
+    }
+  });
+  const pick = (d >= 0 ? document.getElementById('amenityBody' + d) : f >= 0 ? document.getElementById('amenityBody' + f) : null);
+  const row = pick && pick.closest('button');
+  if(row){ const top = row.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop; sc.scrollTop = Math.max(0, top - 70); }
+  else sc.scrollTop = y;
+}
+function _deskNote(html){
+  let n = document.getElementById('deskNote');
+  if(!n){ n = document.createElement('div'); n.id = 'deskNote'; n.setAttribute('role','status');
+    n.style.cssText = 'position:fixed;left:12px;right:12px;bottom:16px;z-index:5000;background:#0a2731;color:#fff;font:500 13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;border-radius:12px;padding:11px 13px;box-shadow:0 10px 24px rgba(0,0,0,.3)';
+    document.body.appendChild(n); }
+  n.innerHTML = html; n.hidden = false; clearTimeout(n._h); n._h = setTimeout(() => { n.hidden = true; }, 4500);
+}
+if(DESK){
+  window.addEventListener('message', (e) => {
+    if(e.origin !== location.origin || !e.data || e.data.type !== 'os:preview') return;
+    _deskPv = e.data; _deskTry = 0; _deskShow();
+  });
+  // Capture phase, so the link's own handler (and its request event) never runs in the preview.
+  document.addEventListener('click', (e) => {
+    if(!_deskPv) return;
+    const a = e.target.closest && e.target.closest('a[href^="sms:"],a[href^="tel:"]'); if(!a) return;
+    e.preventDefault(); e.stopPropagation();
+    const href = a.getAttribute('href'), raw = decodeURIComponent(href.replace(/^(sms|tel):/,'').split('?')[0]);
+    const dg = raw.replace(/\D/g,'').replace(/^1(?=\d{10}$)/,''), num = dg.length === 10 ? '(' + dg.slice(0,3) + ') ' + dg.slice(3,6) + '-' + dg.slice(6) : raw;
+    const body = (href.split('body=')[1] || ''); const msg = body ? decodeURIComponent(body) : '';
+    _deskNote(/^sms:/.test(href)
+      ? 'On a guest&rsquo;s phone this opens a text to <b>' + _pesc(num) + '</b>' + (msg ? ' that reads: &ldquo;' + _pesc(msg) + '&rdquo;' : '') + '.'
+      : 'On a guest&rsquo;s phone this calls <b>' + _pesc(num) + '</b>.');
+  }, true);
+}
 function pushItemRoute(kind, id, name){
   try {
     const params = new URLSearchParams(location.search);
@@ -10296,6 +10390,7 @@ function _onHawaiiTime(){
   } catch(e){ return false; }
 }
 function _tripStage(){
+  try { if(DESK && _deskPv) return 'on-island'; } catch(e){}   // desk preview: an on-island guest (DESK may not exist yet at boot)
   try {
     if(_onHawaiiTime()){
       try { if(!localStorage.getItem('os_arrived')) localStorage.setItem('os_arrived', new Date().toISOString()); } catch(e){}
