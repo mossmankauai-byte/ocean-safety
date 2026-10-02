@@ -1423,6 +1423,16 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .gp-toast{position:absolute;left:10px;right:10px;bottom:12px;z-index:3;background:#0f2a33;color:#fff;font-size:11.5px;line-height:1.45;border-radius:10px;padding:9px 11px;box-shadow:0 8px 20px rgba(0,0,0,.3)}
   .gp-toast[hidden]{display:none}
   .gp-it:focus-visible,[data-gpask]:focus-visible{outline:2px solid var(--ocean);outline-offset:2px}
+  /* Stay-Close phone, on the site itself: the real guide in desk mode, on an example beach */
+  .gp-isl{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;padding:3px;background:var(--bg-2);border:1px solid var(--line);border-radius:999px;width:max-content;max-width:100%}
+  .gp-isl[hidden],.gp-bline[hidden],.gp-chip[hidden]{display:none}
+  .gp-isl button{appearance:none;font:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink-2);background:none;border:0;border-radius:999px;padding:5px 11px}
+  .gp-isl button[aria-pressed="true"]{background:var(--card);color:var(--sea);box-shadow:0 1px 3px rgba(15,59,73,.18)}
+  .gp-bline{font-size:12px;color:var(--muted);line-height:1.45;margin:8px 2px 0}
+  .gp-bline b{color:var(--ink);font-weight:700}
+  .gp-phone.has-frame .gp-screen{padding:30px 0 0}
+  .gp-phone.has-frame #gpAmenity{display:none}
+  .gp-frame{display:block;width:375px;height:640px;border:0;background:#fefbf3}
   /* Stay-Close (Nick, 2026-10-01): the guest's phone sits LEFT of the amenity editor and stays beside
      it down to a 721px window. The amenity list scrolls inside the phone, like a real one, so the
      pinned rail never runs off the bottom of the window. Under 721px it is the Preview sheet. */
@@ -1437,6 +1447,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .ph-split.ph-left > .ph-rail{order:-1}
   @media (min-width:721px){
     .ph-left #gpAmenity{max-height:max(240px,calc((100vh - 330px) / var(--gpz) - 76px));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;margin:0 -4px;padding:0 4px}
+    .ph-left .gp-frame{height:min(780px,max(440px,calc((100vh - 400px) / var(--gpz) - 30px)))}
   }
   @media (max-width:1000px){
     .ph-split{grid-template-columns:minmax(0,1fr)}
@@ -2196,7 +2207,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       <div class="card" id="gpAmCard">
         <div class="gp-top">
           <div class="gp-chips" role="group" aria-label="Preview ocean condition" id="gpAmChips">
-            <button type="button" class="gp-chip" data-cond="calm" aria-pressed="true">Calm</button>
+            <button type="button" class="gp-chip" data-cond="live" aria-pressed="true" hidden>Live now</button>
+            <button type="button" class="gp-chip" data-cond="calm" aria-pressed="false">Calm</button>
             <button type="button" class="gp-chip" data-cond="red_flag" aria-pressed="false">High surf</button>
             <button type="button" class="gp-chip" data-cond="brown_water" aria-pressed="false">Brown water</button>
             <button type="button" class="gp-chip" data-cond="rain" aria-pressed="false">Rainy day</button>
@@ -2206,8 +2218,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
             Replay
           </button>
         </div>
+        <div class="gp-isl" role="group" aria-label="Example beach" id="gpIsl" hidden>
+          <button type="button" data-isl="kauai" aria-pressed="true">Kauaʻi</button><button type="button" data-isl="maui" aria-pressed="false">Maui</button><button type="button" data-isl="oahu" aria-pressed="false">Oʻahu</button><button type="button" data-isl="hawaii" aria-pressed="false">Hawaiʻi</button>
+        </div>
+        <div class="gp-bline" id="gpBeachLine" hidden></div>
         <div class="gp-phone" id="gpAmPhone"><div class="gp-screen"><div id="gpAmenity"></div></div></div>
-        <div class="gp-note">The beach card guests open, with your offers built live from your menu as you type. Tap an offer in the phone to open it, and tap its buttons to see what a guest gets. Not measured data.</div>
+        <div class="gp-note" id="gpAmNote">The beach card guests open, with your offers built live from your menu as you type. Tap an offer in the phone to open it, and tap its buttons to see what a guest gets. Not measured data.</div>
       </div>
     </section>
     <!-- BAD OCEAN DAY SAVES -->
@@ -4164,7 +4180,76 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     '</div>';
   }
   function gpEl(){ return document.getElementById('gpAmenity'); }
+  /* ---- On the site itself the phone is the real guide in desk mode (?desk=1), opened on an example
+     beach for the chosen island. The chips set the ocean: Live now, or a sample day the guide runs
+     through its own model (index.html, DESK PREVIEW). Off the site (the desktop copy) the drawn
+     card above stands in. ---- */
+  var GP_SAME_SITE = /(^|\.)oceansafety\.app$|\.netlify\.app$/.test(location.hostname) || /[?&]deskframe=1/.test(location.search);
+  var GP_BEACH = {
+    kauai:  { id:'hanalei',     name:'Hanalei Bay',             isl:'Kauaʻi',  stream:true },
+    maui:   { id:'kamaole_iii', name:'Kamaʻole Beach Park III', isl:'Maui',    stream:false },
+    oahu:   { id:'waikiki',     name:'Waikīkī Beach',           isl:'Oʻahu',   stream:true },
+    hawaii: { id:'hapuna',      name:'Hāpuna Beach',            isl:'Hawaiʻi', stream:false }
+  };
+  var gpIsle = 'kauai', gpFrame = null, gpPostT = null;
+  function gpGuestMenu(){
+    var d = gpDraft(), list = gpItems.amenities.concat(d ? [d] : []);
+    return { draft: d ? list.length - 1 : null, items: list.map(function(it){
+      var img = ''; try{ img = it.photo ? (/^data:/.test(it.photo) ? it.photo : new URL(it.photo, location.href).href) : ''; }catch(e){}
+      return { name:it.a, detail:it.b || '', price:'', phone:it.phone || '', hours:it.hours || '', image:img, showWhen:'always' };
+    }) };
+  }
+  function gpPost(){
+    if(!gpFrame || !gpFrame.contentWindow) return;
+    var m = gpGuestMenu();
+    try{ gpFrame.contentWindow.postMessage({ type:'os:preview', beach:GP_BEACH[gpIsle].id, state:gpCond,
+      menu:{ name:gpName(), plan:FREE ? 'free' : 'paid', amenities:m.items },
+      focus: gpSel >= 0 ? gpSel : null, draft: m.draft }, location.origin); }catch(e){}
+  }
+  function gpPostSoon(){ clearTimeout(gpPostT); gpPostT = setTimeout(gpPost, 140); }
+  function gpBeachLine(){
+    var el = document.getElementById('gpBeachLine'), B = GP_BEACH[gpIsle]; if(!el) return;
+    var cond = { live:'the ocean as it is right now', calm:'a sample calm day', red_flag:'a sample high-surf day', brown_water:'a sample brown-water day', rain:'a sample rainy day' }[gpCond];
+    el.innerHTML = '<b>'+esc(B.name)+'</b>, '+esc(B.isl)+', on '+cond+'.' +
+      (gpCond === 'live' ? '' : ' The guide runs its own safety model on these readings.') +
+      (gpCond === 'brown_water' && !B.stream ? ' This beach has no stream mouth, so the guide never flags brown water here.' : '');
+  }
+  function gpMountFrame(){
+    if(gpFrame || !GP_SAME_SITE) return;
+    var ph = document.getElementById('gpAmPhone'), scr = ph && ph.querySelector('.gp-screen'); if(!scr) return;
+    gpFrame = document.createElement('iframe');
+    gpFrame.className = 'gp-frame'; gpFrame.title = 'Your guest guide on an example beach';
+    gpFrame.addEventListener('load', gpPost);
+    gpFrame.src = '/?desk=1&island=' + encodeURIComponent(gpIsle);
+    scr.appendChild(gpFrame); ph.classList.add('has-frame');
+    var re = document.getElementById('gpAmReplay'); if(re) re.hidden = true;
+    ['gpIsl','gpBeachLine'].forEach(function(id){ var x = document.getElementById(id); if(x) x.hidden = false; });
+    var lv = document.querySelector('#gpAmChips [data-cond="live"]'); if(lv) lv.hidden = false;
+    var note = document.getElementById('gpAmNote');
+    if(note) note.textContent = 'Your guest guide, live, on an example beach. Pick an island and an ocean, scroll the whole beach card, and tap your offers to see what a guest gets. Not measured data.';
+    gpBeachLine();
+  }
+  function gpSetIsle(i){
+    if(!GP_BEACH[i]) return; gpIsle = i;
+    document.querySelectorAll('#gpIsl [data-isl]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.isl === i)); });
+    gpBeachLine();
+    if(gpFrame) gpFrame.src = '/?desk=1&island=' + encodeURIComponent(i);
+  }
+  var gpIslEl = document.getElementById('gpIsl');
+  if(gpIslEl) gpIslEl.addEventListener('click', function(e){ var b = e.target.closest('[data-isl]'); if(b) gpSetIsle(b.dataset.isl); });
+  if(GP_SAME_SITE){
+    gpCond = 'live';
+    // The property's own island when the Dashboard is signed in; Kauaʻi for the sample.
+    var gpSlug = String(window.OS_SLUG || '').trim().toLowerCase();
+    if(gpSlug && gpSlug !== 'demo' && !window.OS_GROUP){
+      fetch('partner-config/' + encodeURIComponent(gpSlug) + '.json', { cache:'no-store' })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(cfg){ var i = cfg && typeof cfg.island === 'string' ? cfg.island.trim().toLowerCase() : ''; if(GP_BEACH[i] && i !== gpIsle) gpSetIsle(i); })
+        .catch(function(){});
+    }
+  }
   function gpRender(){
+    if(gpFrame){ gpPostSoon(); return; }
     var el = gpEl(); if(!el) return;
     el.innerHTML = gpAmenityHTML(gpList());
     // Bring the picked or half-typed amenity into view when the card scrolls inside the phone.
@@ -4231,10 +4316,12 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     });
   }
   var gpChips = document.getElementById('gpAmChips');
+  if(gpChips && GP_SAME_SITE) gpChips.querySelectorAll('.gp-chip').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.cond === 'live')); });
   if(gpChips) gpChips.addEventListener('click', function(e){
     var c = e.target.closest('.gp-chip'); if(!c) return;
     gpCond = c.dataset.cond;
     gpChips.querySelectorAll('.gp-chip').forEach(function(b){ b.setAttribute('aria-pressed', String(b===c)); });
+    gpBeachLine();
     gpRender();
   });
   var gpAmRe = document.getElementById('gpAmReplay');
@@ -4251,7 +4338,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 
   /* The live panel is always shown now — replay its pop-in each time Stay-Close opens. */
   var scTab = document.querySelector('.viewtabs button[data-view="stayclose"]');
-  if(scTab) scTab.addEventListener('click', function(){ setTimeout(gpPop, 40); });
+  if(scTab) scTab.addEventListener('click', function(){ gpMountFrame(); setTimeout(gpPop, 40); });
+  if(scTab && scTab.getAttribute('aria-selected') === 'true') gpMountFrame();
 
   manager({ key:'amenities', exportKey:'amenities',
     ids:{list:'amList', a:'amA', b:'amB', phone:'amPhone', hours:'amHours', site:'amSite', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
@@ -7371,6 +7459,7 @@ window.osParseAff = function(v){
   });
   window.addEventListener('message', function(e){
     if(e.origin !== location.origin || !e.data || typeof e.data !== 'object') return;
+    var own = document.getElementById('tdFrame'); if(!own || e.source !== own.contentWindow) return;   // Stay-Close frames the guide too
     if(e.data.type === 'os:poi' && e.data.kind && e.data.id){
       if(echo && echo.kind === String(e.data.kind) && echo.id === String(e.data.id) && Date.now() < echo.until){ echo = null; return; }
       showDesk(String(e.data.kind), String(e.data.id), String(e.data.name||''), true);
