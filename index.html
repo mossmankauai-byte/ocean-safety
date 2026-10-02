@@ -10093,9 +10093,11 @@ async function _deskShow(){
       amenities: Array.isArray(pv.menu.amenities) ? pv.menu.amenities : [], preview: false
     });
   }
-  const keep = LIVE, s = DESK_SAMPLE[pv.state];
+  const keep = LIVE, keepQ = window._streamQ, s = DESK_SAMPLE[pv.state];
   const sample = s ? Object.assign({}, keep || SNAP, s, s.toward ? { swell_dir: b.facing, sw_d: b.facing } : {}) : null;
-  if(sample) LIVE = sample;
+  // The live stream gauges (USGS discharge) are the other brown-water input; a sample day sets
+  // its own rain, so the gauges sit out for it.
+  if(sample){ LIVE = sample; window._streamQ = null; }
   try {
     const c = await getCond(b);
     const r = score(b, c, ints); r._c = c; scored[b.id] = r;
@@ -10104,7 +10106,7 @@ async function _deskShow(){
     const sh = document.getElementById('sheet'); if(sh) sh.classList.add('expanded');
     _deskMark(pv, sc, y);
   } catch(e){}
-  finally { if(sample && LIVE === sample) LIVE = keep; }
+  finally { if(sample){ if(LIVE === sample) LIVE = keep; if(window._streamQ === null) window._streamQ = keepQ; } }
 }
 // Ring the amenity the operator picked (or is typing), open it, and bring it into view.
 function _deskMark(pv, sc, y){
