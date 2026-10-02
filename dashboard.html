@@ -2404,13 +2404,13 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       <section style="margin-top:18px" aria-label="QR codes">
         <div class="sec-h">
           <h2>QR codes</h2>
-          <p>One named code for each spot you post one. Every scan opens your guide, and the chart shows which spot guests act on.</p>
+          <p>One named code per spot. Every scan opens your guide, and the chart shows which code gets guests to tap.</p>
         </div>
         <div class="qr-grid">
           <div class="qr-main">
             <div class="card">
               <div class="qr-ch"><h3>Make a code</h3></div>
-              <p class="qr-lead">Name the spot. The code opens your guide and keeps its own count, so you can tell a lobby sign from a room card. Print it anywhere.</p>
+              <p class="qr-lead">Name the spot. The code opens your guide and carries its own tag, so the chart can tell a lobby sign from a room card. Print it anywhere.</p>
               <form id="qrForm" class="qr-form" autocomplete="off">
                 <input id="qrName" aria-label="Name for this code" type="text" maxlength="40" placeholder="Pool deck, lobby sign, room card">
                 <button type="submit" class="pl-btn primary" id="qrMake">Make the code</button>
@@ -2420,15 +2420,15 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
             <div class="card" style="margin-top:14px">
               <div class="title"><span class="l">Your codes</span><span><span class="chip sample">Sample</span></span></div>
               <div id="qrList" class="qr-tiles"></div>
-              <div class="cap" style="margin-top:12px">Each PNG is 1200 px, sharp at any size, with its own tag in the link. Email opens your mail app with the link; attach the downloaded PNG if the printer needs the file. Your list of names is kept in this browser. The codes keep working wherever you post them.</div>
+              <div class="cap" style="margin-top:12px">Each PNG is 1200 px square, big enough for a lobby sign, with its own tag in the link. Email opens your mail app with the link; attach the downloaded PNG if the printer needs the file. Your list of names is kept in this browser. The codes keep working wherever you post them.</div>
             </div>
           </div>
           <aside class="qr-side">
             <div class="card">
-              <div class="title"><span class="l">Which code brings guests in</span><span><span class="chip sample">Sample</span></span></div>
+              <div class="title"><span class="l">Which code gets guests to tap</span><span><span class="chip sample">Sample</span></span></div>
               <p class="qr-period" id="qrPeriod"></p>
               <div id="qrChart" class="qr-chart" aria-live="polite"></div>
-              <div class="cap" style="margin-top:12px">Conversion is the share of guide opens from a code where the guest went on to tap a place, an offer, an amenity or a tour. Counts only, never an individual. Fewer than 5 shows as fewer than 5.</div>
+              <div class="cap" style="margin-top:12px">Conversion is the share of guide opens from a code where the guest went on to tap a place, an offer, an amenity or a tour. Counts only, never an individual. Anything under 5 reads as fewer than 5.</div>
             </div>
           </aside>
         </div>
@@ -3737,8 +3737,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       body:'How many guests a day, when they plan, and which beaches and offers they open. It stays <b>Sample</b> until your guide is live. Live mode only ever shows measured counts.' },
     { view:'places', sel:'.pl-safety', title:'Places, with safety built in',
       body:'Choose what your guide recommends. Hazardous spots start as <b>Not recommended</b> and cannot be removed, so their warnings always stay in front of guests.' },
-    { view:'qr', sel:'#qrChart', title:'Which code brings guests in',
-      body:'Name a code for each spot you post one: lobby, pool deck, room card. Every scan opens your guide and counts against its code, so the chart shows which spot guests act on.' },
+    { view:'qr', sel:'#qrChart', title:'Which code gets guests to tap',
+      body:'Name a code for each spot you post one, like a lobby sign or a room card. Every scan opens your guide and counts under its code, so the chart shows which code gets guests to tap a place or an offer.' },
     { view:'segments', sel:'#view-segments .card', seg:['timeshare'], title:'Three guests, three funnels',
       body:'Renters, repeat guests and owners each get their own QR code and their own funnel. Owners never see a sales pitch.' },
     { view:'desk', sel:'#affInput', desk:'affiliate', title:'Your tour link',
@@ -7230,7 +7230,7 @@ window.osParseAff = function(v){
 .qr-ch h3{margin:0;font-size:15px;color:var(--ink)}
 .qr-lead{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5;max-width:68ch}
 .qr-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.qr-form input{flex:1;min-width:220px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.qr-form input{flex:1;min-width:220px;font:inherit;font-size:13.5px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)}
 .qr-form input:focus{outline:2px solid var(--sea);outline-offset:1px}
 .qr-form .pl-btn{border:0;cursor:pointer}
 .qr-note{margin:10px 0 0;font-size:12.5px;color:var(--muted);min-height:18px}
@@ -7242,7 +7242,7 @@ window.osParseAff = function(v){
 .qr-nm{font-weight:700;font-size:14px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .qr-tagl{font-size:11.5px;color:var(--muted);word-break:break-all;line-height:1.4}
 .qr-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.qr-acts .pl-btn{padding:6px 10px;font-size:12px;text-decoration:none;cursor:pointer}
+.qr-acts .pl-btn{text-decoration:none;cursor:pointer}
 .qr-acts .qr-rm{margin-left:auto;color:var(--risk)}
 .qr-empty{padding:16px 8px;color:var(--muted);font-size:13px;line-height:1.5}
 .qr-period{margin:0 0 6px;font-size:11.5px;color:var(--muted)}
@@ -7255,7 +7255,7 @@ window.osParseAff = function(v){
 .qr-row .sub{grid-column:1 / -1;font-size:11.5px;color:var(--muted)}
 .qr-row.top .bar i,.qr-row.top .pc{background:var(--good)}
 .qr-row.top .pc{background:none;color:var(--good)}
-.qr-best{display:inline-flex;align-items:center;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--good);background:#e2efe8;border-radius:6px;padding:1px 6px;flex:none}
+.qr-best{display:inline-flex;align-items:center;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--on-sea);background:var(--good);border-radius:6px;padding:1px 6px;flex:none}
 @media (max-width:1000px){
   .qr-grid{grid-template-columns:1fr}
   .qr-side{position:static;order:-1}
@@ -7433,7 +7433,8 @@ window.osParseAff = function(v){
     var L = isLive();
     var rows = items.map(function(it){
       if(!L){ var s = sampleFor(it.tag); return { it:it, open:s.open, eng:Math.round(s.open * s.conv), conv:s.conv }; }
-      var v = liveFor(it.tag); return { it:it, open:v.open, eng:v.eng, conv: v.open >= 5 ? v.eng / v.open : null };
+      /* a percent or a bar beside "fewer than 5" would hand the count back (OD-18), so both wait for 5 taps */
+      var v = liveFor(it.tag); return { it:it, open:v.open, eng:v.eng, conv: (v.open >= 5 && v.eng >= 5) ? v.eng / v.open : null };
     });
     rows.sort(function(a, b){ return (b.conv || 0) - (a.conv || 0) || b.open - a.open; });
     var period = (L && live && live.period > 0) ? live.period : 30;
@@ -7442,7 +7443,7 @@ window.osParseAff = function(v){
     var best = rows.length > 1 && rows[0].conv != null ? rows[0] : null;
     el.innerHTML = rows.map(function(r){
       var pc = r.conv == null ? '' : Math.round(r.conv * 100) + '%';
-      var sub = r.open === 0 ? (L ? (live ? 'No scans counted yet.' : 'Counting with your guest activity.') : '')
+      var sub = r.open === 0 ? (L ? (live ? 'No opens from this code yet.' : 'Loading with your guest activity.') : '')
         : r.open < 5 ? 'Fewer than 5 opens so far.'
         : ct(r.eng) + ' of ' + ct(r.open) + ' opens went on to a tap.';
       return '<div class="qr-row' + (best === r ? ' top' : '') + '"><span class="nm"><span style="overflow:hidden;text-overflow:ellipsis">' + esc(r.it.name) + '</span>' +
