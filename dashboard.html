@@ -1361,9 +1361,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .td-tl-band{display:flex;height:28px;border-radius:8px;overflow:hidden;background:var(--tint)}
   .td-tl-seg{display:flex;flex-basis:0;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-right:2px solid var(--card);min-width:0;overflow:hidden;white-space:nowrap}
   .td-tl-seg:last-child{border-right:0}
-  .td-tl-seg.good{background:var(--good);color:var(--on-sea)} .td-tl-seg.fair{background:var(--gold);color:var(--on-gold)} .td-tl-seg.skip{background:var(--risk);color:var(--on-sea)} .td-tl-seg.na{background:var(--tint);color:var(--muted)}
-.td-tl-col.na{opacity:.55}
-.td-tl-col .ft.lv-na{color:var(--muted)}
+  .td-tl-seg.good{background:var(--good);color:var(--on-sea)} .td-tl-seg.fair{background:var(--gold);color:var(--on-gold)} .td-tl-seg.skip{background:var(--risk);color:var(--on-sea)} .td-tl-seg.na{background:var(--tint);color:var(--ink-2)}
+  .td-tl-col.na{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+  .td-tl-col.na .sky,.td-tl-col.na .sky svg,.td-tl-col.na .rd,.td-tl-col.na .why{color:var(--muted)}
+  .td-tl-col .ft.lv-na{color:var(--muted)}
+  .td-sh-sec ul.td-tl-why{padding-left:0;margin-top:8px}
   .td-tl-now{position:absolute;top:-7px;bottom:-7px;width:0;border-left:2px dashed var(--sea);pointer-events:none}
   .td-tl-now i{position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-style:normal;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--sea);color:var(--on-sea);border-radius:999px;padding:1px 6px}
   .td-tl-axis{position:relative;height:15px;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px}
@@ -1384,7 +1386,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .td-tl-why{display:none;margin:8px 0 0;padding:0;list-style:none;font-size:12px}
   .td-tl-why li{display:grid;grid-template-columns:86px 1fr;gap:8px;padding:4px 0;border-top:1px dashed var(--line)}
   .td-tl-why li b{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:11px} .td-tl-why li.best b{color:var(--good)} .td-tl-why li.best.fair b{color:var(--gold-ink)}
-  @media (max-width:520px){ .td-tl-seg{font-size:0} .td-tl-seg.best{font-size:9px} .td-tl-col{padding:6px 4px} .td-tl-col .nm{font-size:8px;letter-spacing:0;text-transform:none} .td-tl-col .sky{font-size:9.5px;gap:3px;flex-direction:column;align-items:flex-start} .td-tl-col .sky svg{width:15px;height:15px} .td-tl-col .ft{font-size:12px} .td-tl-col .rd{font-size:9.5px} .td-tl-col .why{display:none} .td-tl-why{display:block} }
+  @media (max-width:520px){ .td-tl-seg{font-size:0} .td-tl-seg.best,.td-tl-seg.na{font-size:9px} .td-tl-col{padding:6px 4px} .td-tl-col .nm{font-size:8px;letter-spacing:0;text-transform:none} .td-tl-col .sky{font-size:9.5px;gap:3px;flex-direction:column;align-items:flex-start} .td-tl-col .sky svg{width:15px;height:15px} .td-tl-col .ft{font-size:12px} .td-tl-col .rd{font-size:9.5px} .td-tl-col .why{display:none} .td-tl-why{display:block} }
   @media (max-width:1000px){ .td{grid-template-columns:minmax(0,1fr)} .td-rail{position:static;order:-1;max-height:none;overflow:visible} }
   @media (max-width:760px){ .td-band{grid-template-columns:minmax(0,1fr);justify-items:center} .td-wx{width:100%;grid-template-columns:repeat(2,minmax(0,1fr))} .td-chips .lab{min-width:0} .td-stage{height:620px} .td-cams{margin-left:0} .td-ov{align-items:flex-end;padding:0} .td-dlg{width:100%;max-height:92vh;border-radius:16px 16px 0 0} }
 
@@ -6782,7 +6784,7 @@ window.osParseAff = function(v){
     else if(type === 'playground' && wet){ o.level = 'fair'; o.why.push('Wet playground.'); }
     else if(type === 'town' && wet) o.why.push('Shops and galleries to duck into.');
     else if(wet){ o.level = 'fair'; o.why.push('Outdoors, bring a rain layer.'); }
-    else o.why.push(type === 'scenic' ? 'Clear views.' : type === 'playground' ? 'Dry and open.' : type === 'town' ? 'Walkable town.' : 'Outdoors, dry.');
+    else o.why.push(type === 'scenic' ? 'Views likely open.' : type === 'playground' ? 'Dry and open.' : type === 'town' ? 'Walkable town.' : 'Outdoors, dry.');
     o.label = LVL[o.level];
     o.sub = (TYPE_WORD[type] ? TYPE_WORD[type]+' · ' : '') + o.why[0].replace(/\.$/, '');
     return o;
@@ -7161,18 +7163,20 @@ window.osParseAff = function(v){
       r.range = spanLabel(Math.max(w.a*60, cfg.span[0]), Math.min(w.b*60, cfg.span[1]));
     }
     var why = [];
-    r.storm = s.sky === 'storm';
-    var heavy = s.mm >= 2 || (s.rainP!=null && s.rainP >= 60 && s.mm >= 0.5);
-    r.wet = r.storm || heavy || (s.rainP!=null && s.rainP >= 40) || s.sky === 'rain' || s.sky === 'drizzle';
+    /* rain cut mirrors the outlook's sights read: a 60% chance or real rain reads Maybe outdoors */
+    var rp = s.rainP == null ? 0 : s.rainP;
+    r.cat = s.sky === 'storm' ? 'storm' : (s.mm >= 2 || (rp >= 60 && s.mm >= 0.5)) ? 'heavy' : rp >= 60 ? 'likely' : (rp >= 40 || s.sky === 'rain' || s.sky === 'drizzle') ? 'possible' : null;
+    r.storm = r.cat === 'storm'; r.wet = !!r.cat;
     if(cfg.indoor) why.push(r.wet ? 'Indoor, a good call in the rain.' : 'Indoor, any weather.');
     else {
       if(r.storm){ r.level = 'skip'; why.push('Storms.'); }
-      else if(heavy){ r.level = 'fair'; why.push('Rain likely, bring a layer.'); }
-      else if(r.wet) why.push('Showers likely.');
+      else if(r.cat === 'heavy'){ r.level = 'fair'; why.push('Rain likely, bring a rain layer.'); }
+      else if(r.cat === 'likely'){ r.level = 'fair'; why.push('Showers likely, bring a rain layer.'); }
+      else if(r.cat === 'possible') why.push('Showers possible.');
       if(cfg.scenic && !r.storm && s.cloud!=null && s.cloud >= 80){ if(r.level === 'good') r.level = 'fair'; why.push('Heavy cloud, views may be hidden.'); }
       if(s.wind!=null && s.wind >= 25){ if(r.level === 'good') r.level = 'fair'; why.push('Windy.'); }
       if(s.uv!=null && s.uv >= 8) why.push('UV peaks at '+Math.round(s.uv)+'.');
-      if(!why.length) why.push(cfg.scenic ? 'Clear views.' : 'Dry.');
+      if(!why.length) why.push(cfg.scenic ? 'Views likely open.' : 'Dry.');
     }
     r.why = why.slice(0,3).join(' ');
     if(s.th!=null) r.big = Math.round(s.th)+'<small>&deg;F</small>';
@@ -7186,9 +7190,11 @@ window.osParseAff = function(v){
     var tl = null, th = null, sky = null;
     on.forEach(function(r){ if(r.s.tl!=null){ tl = tl==null ? r.s.tl : Math.min(tl, r.s.tl); th = th==null ? r.s.th : Math.max(th, r.s.th); } if(r.s.sky && (sky==null || SKY_ORD.indexOf(r.s.sky) > SKY_ORD.indexOf(sky))) sky = r.s.sky; });
     var temp = tl!=null ? ', '+(Math.round(tl)===Math.round(th) ? Math.round(th) : Math.round(tl)+' to '+Math.round(th))+'°F' : '';
-    var st = on.filter(function(r){ return r.storm; }), wet = on.filter(function(r){ return r.wet; });
-    if(st.length) return 'Storms possible '+when(st)+temp+'.';
-    if(wet.length) return 'Showers likely '+when(wet)+temp+'.';
+    function of(c){ return on.filter(function(r){ return r.cat === c; }); }
+    var st = of('storm'), wl = on.filter(function(r){ return r.cat === 'heavy' || r.cat === 'likely'; }), ps = of('possible');
+    if(st.length) return 'Storms forecast '+when(st)+temp+'.';
+    if(wl.length) return (of('heavy').length ? 'Rain likely ' : 'Showers likely ')+when(wl)+temp+'. Bring a rain layer.';
+    if(ps.length) return 'Showers possible '+when(ps)+temp+'.';
     return 'Dry'+(sky ? ', '+SKY[sky].toLowerCase() : '')+temp+'.';
   }
   function landDay(src, date, cfg){
@@ -7224,7 +7230,7 @@ window.osParseAff = function(v){
     if(today) li.push(nowHere(sp.d));
     if(D && D.Rl.sunrise && D.Rl.sunset) li.push('<li>Sunrise '+esc(clock(D.Rl.sunrise))+', sunset '+esc(clock(D.Rl.sunset))+'.</li>');
     if(li.join('')) body += '<ul>'+li.join('')+'</ul>';
-    if(D) body += '<p class="cc-cap">'+(sp.fail ? 'This spot&rsquo;s forecast did not load, so this is the island forecast.' : sp.home ? 'Island forecast. This place has no spot on the map to read.' : 'Forecast for this spot&rsquo;s own location.')+'</p>';
+    if(D) body += '<p class="cc-cap">'+(sp.fail ? 'This spot&rsquo;s forecast did not load. Showing the island forecast.' : sp.home ? 'Island forecast. This place has no map location.' : 'Forecast for this spot.')+'</p>';
     return sec(IC.sun, title, body);
   }
   function poiCfg(kind, p, R){
@@ -7232,7 +7238,7 @@ window.osParseAff = function(v){
     if(kind === 'market' && p && p.day!=null && p.start_min!=null){
       var nowM = now.hour*60 + now.minute, add = (p.day - dowOf(now.date) + 7) % 7, span = [p.start_min, p.end_min!=null ? p.end_min : p.start_min+120];
       if(add === 0 && nowM > span[1]) add = 7;
-      return { date:addDays(now.date, add), span:span, far: add === 7 ? 'Ended for today. The next one is '+DAYS[p.day]+', past the hourly forecast.' : '', title:(add === 0 ? 'Today' : add === 1 ? 'Tomorrow' : DAYS[p.day])+', '+spanLabel(span[0], span[1])+'.', sec: add === 0 ? 'Weather at the market' : 'Weather on market day' };
+      return { date:addDays(now.date, add), span:span, far: add === 7 ? 'Over for today. Next '+DAYS[p.day]+' is too far out for an hourly forecast.' : '', title:(add === 0 ? 'Today' : add === 1 ? 'Tomorrow' : add === 7 ? 'Next '+DAYS[p.day] : DAYS[p.day])+', '+spanLabel(span[0], span[1])+'.', sec: add === 0 ? 'Weather at the market' : 'Weather on market day' };
     }
     if(kind === 'act'){
       if(tags.indexOf('indoor') >= 0 || tags.indexOf('rain_ok') >= 0) return { date:now.date, indoor:true, tone:'good', title:'Indoor, any weather.', sec:'Weather today' };
