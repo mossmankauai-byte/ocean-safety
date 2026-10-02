@@ -2,13 +2,13 @@
 /* GoHawaii Dashboard, the per-tab tour: headless test against a real render.
  *
  * What it proves (DASHBOARD-HELP-PLAN-2026-09-25.md section 1, release captain brief 2026-09-29):
- *   1. Each of the nine views has a tour; every step's target resolves in its view, or the step is skipped.
+ *   1. Each of the ten views has a tour; every step's target resolves in its view, or the step is skipped.
  *   2. A tab's tour runs on its own the first time the tab opens in a browser, once; Done marks it seen; the Tour
  *      button in the rail replays it; Skip all tours stops every automatic run; ?tour=off stops them for a load.
  *   3. Walking every step: the ring sits on the target, the card stays inside the viewport and never covers the ring,
  *      the card never overlaps the phone rail, no page error, no network request made by the tour.
  *   4. Esc closes, arrow keys move, focus sits in the card, Tab stays in the card.
- *   5. After all nine tours: ghd_log_v1 has gained no rows, the advisory store is unchanged, ghd_role is unchanged,
+ *   5. After all ten tours: ghd_log_v1 has gained no rows, the advisory store is unchanged, ghd_role is unchanged,
  *      and ghd_tour_v1 is the only new key.
  *   6. Copy law: no em or en dash, no "visitors" as a count, "All four islands" never "All islands", no money term,
  *      no open-defect trigger, no offer word; every body is under 60 words.
@@ -26,7 +26,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const fails = [];
 function check(cond, msg){ if(cond) console.log('  ok   ' + msg); else { console.log('  FAIL ' + msg); fails.push(msg); } }
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-const VIEWS = ['now', 'adv', 'feat', 'promo', 'place', 'use', 'rep', 'prev', 'log'];
+const VIEWS = ['now', 'adv', 'feat', 'promo', 'place', 'use', 'rep', 'prev', 'qr', 'log'];
 // Copy law + the gate's own trigger lists (release captain brief 2026-09-29).
 const BANNED = /[—–]|All islands|\b(drown\w*|rescue\w*|incident\w*|likely|probably|unlikely)\b|\$|\b(per month|subscription|subscribe|fee|fees|commission|get started|sign ?up|activate your|goes live instantly|set it and forget it|book now|special offer|discount code|promo code|% off|free night|resort credit|guests used|sessions recorded|dashboard_token|oceansafety\.app)\b/i;
 const VISITOR_COUNT = /\b\d[\d,]*\s+visitors\b|\bvisitors (a|per) (day|week|month)\b|\bnumber of visitors\b/i;
@@ -71,7 +71,7 @@ const geom = (pg) => pg.evaluate(() => {
 (async () => {
   const br = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: 'new' });
 
-  // ---- 1. the table itself: nine tours, every selector resolves in its view (1280) ----
+  // ---- 1. the table itself: ten tours, every selector resolves in its view (1280) ----
   {
     const t = await page(br, 1280, 900, { seed: { all: 1 } });
     const tbl = await t.pg.evaluate(() => {
@@ -88,7 +88,7 @@ const geom = (pg) => pg.evaluate(() => {
       document.querySelector('.rail button[data-view="now"]').click();
       return out;
     });
-    check(Object.keys(tbl).sort().join(',') === VIEWS.slice().sort().join(','), 'nine tours, one per view (' + Object.keys(tbl).join(', ') + ')');
+    check(Object.keys(tbl).sort().join(',') === VIEWS.slice().sort().join(','), 'ten tours, one per view (' + Object.keys(tbl).join(', ') + ')');
     for (const v of VIEWS) {
       const miss = tbl[v].filter((s) => !s.ok);
       check(miss.length === 0, v + ': every step target resolves (' + tbl[v].length + ' steps' + (miss.length ? '; missing ' + miss.map((m) => m.sel + (m.up ? ' up ' + m.up : '')).join(', ') : '') + ')');
@@ -218,7 +218,7 @@ const geom = (pg) => pg.evaluate(() => {
     check(newKeys.every((k) => k === 'ghd_tour_v1'), '@' + w + ': no new storage key beyond ghd_tour_v1 (' + (newKeys.join(', ') || 'none') + ')');
     const tourReqs = t.reqs.slice(reqBefore).filter((u) => !/\/data\/poi-gohawaii-|\/gh\/beaches\.json|ref=gohawaii|tile|api\.weather|hta-feed|\/api\/wx|leaflet|unpkg|jsdelivr|arcgis|gohawaii\.com\/sites\/default\/files/i.test(u));
     check(tourReqs.length === 0, '@' + w + ': the tour made no network request of its own (' + tourReqs.slice(0, 3).join(' ') + ')');
-    check(t.errs.length === 0, '@' + w + ': no page error across all nine tours' + (t.errs.length ? ': ' + t.errs[0].slice(0, 200) : ''));
+    check(t.errs.length === 0, '@' + w + ': no page error across all ten tours' + (t.errs.length ? ': ' + t.errs[0].slice(0, 200) : ''));
     await t.ctx.close();
   }
 

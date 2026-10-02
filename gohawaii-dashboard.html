@@ -166,6 +166,29 @@
   .uleg{display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--mute);flex-wrap:wrap}
   .uleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
   .cap{font-size:12.5px;color:var(--ink2);line-height:1.5;margin-top:12px}
+  /* ---- QR codes view (2026-10-01) ---- */
+  .qrtiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:14px}
+  .qrtile{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0;background:var(--card)}
+  .qrtile img,.qrtile .ph{width:100%;max-width:160px;aspect-ratio:1;border-radius:10px;align-self:center}
+  .qrtile img{border:1px solid var(--line);background:#fff}
+  .qrtile .ph{background:var(--tint);display:grid;place-items:center;color:var(--mute);font-size:12px;text-align:center;padding:10px}
+  .qrtile .nm{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .qrtile .isl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--sea)}
+  .qrtile .lk{font-size:11.5px;color:var(--mute);word-break:break-all;line-height:1.4}
+  .qrtile .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .qrtile .acts .rm{margin-left:auto;color:var(--red)}
+  .qrchart{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+  .qrrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;align-items:center;font-size:13px}
+  .qrrow .nm{font-weight:600;display:flex;align-items:center;gap:6px;min-width:0}
+  .qrrow .nm span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .qrrow .nm small{font-weight:600;color:var(--mute);flex:none}
+  .qrrow .pc{font-weight:700;min-width:44px;text-align:right}
+  .qrrow .bar{grid-column:1 / -1;height:9px;border-radius:6px;background:var(--tint);overflow:hidden}
+  .qrrow .bar i{display:block;height:100%;width:0;background:var(--sea);border-radius:6px;transition:width .5s}
+  .qrrow .sub{grid-column:1 / -1;font-size:11.5px;color:var(--mute)}
+  .qrrow.top .bar i{background:var(--good)}.qrrow.top .pc{color:var(--goodink)}
+  .qrbest{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--goodink);background:#e2efe8;border-radius:6px;padding:1px 6px;flex:none}
+  .qrempty{padding:14px 4px;color:var(--mute);font-size:13px;line-height:1.5}
   .meth{margin-top:8px;font-size:12px;color:var(--mute)}
   .meth summary{cursor:pointer;font-weight:600;color:var(--sea);width:max-content}
   .meth .body{margin-top:5px;line-height:1.5}
@@ -512,6 +535,7 @@
     <button type="button" data-view="use"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M6 16V9M11 16V4M16 16v-6M21 16v-3"/></svg><span class="lbl">Visitors</span></button>
     <button type="button" data-view="rep"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="lbl">Report</span></button>
     <button type="button" data-view="prev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg><span class="lbl">Preview</span></button>
+    <button type="button" data-view="qr"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v3M17 20h3M14 20h.01M20 20h.01"/></svg><span class="lbl" data-s="QR">QR codes</span></button>
     <button type="button" data-view="log"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="lbl">Log</span></button>
     <button type="button" class="tourbtn" id="btnTour" title="Tour this tab" aria-label="Tour this tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.2a2.9 2.9 0 0 1 5.6.9c0 1.9-2.8 2.4-2.8 4.1M12 17.3h.01"/></svg><span class="lbl">Tour</span></button>
   </nav>
@@ -955,6 +979,29 @@
       </div>
     </section>
 
+    <!-- QR CODES -->
+    <section class="view" id="v-qr" aria-label="QR codes" hidden>
+      <div class="g2">
+        <div class="card">
+          <h2>Make a code</h2>
+          <p class="sub">One named code per spot, like an airport placard or a tower sign. Each opens the GoHawaii app on the island picked above and carries its own tag, so you can tell the spots apart.</p>
+          <form id="qrForm" autocomplete="off">
+            <p class="note" style="margin:0 0 6px">Name the spot <span id="qrIsl"></span></p>
+            <input id="qrName" type="text" maxlength="40" aria-label="Name for this code" placeholder="Baggage claim placard, Poʻipū tower sign">
+            <div class="formfoot" style="margin-top:12px"><button type="submit" class="btn gold" id="qrMake">Make the code</button></div>
+            <div class="msg" id="qrMsg" role="status"></div>
+          </form>
+          <div id="qrList" class="qrtiles"></div>
+          <p class="note" style="margin-top:12px">Each PNG is 1200 px square, big enough for a sign. Download saves the PNG; Email opens your mail app with the link, and you attach the PNG if the printer needs the file. Nothing is sent from the Dashboard, the names stay in this browser, and making or removing a code goes in the Log. A code made on the review build opens the review build.</p>
+        </div>
+        <div class="card">
+          <div class="uh"><h2>Which code gets visitors to tap</h2><span class="r"><span class="chip sample">Sample</span></span></div>
+          <p class="sub" id="qrPeriod">Sample figures. In the review build nothing is counted, so each code gets a sample line to show the chart working.</p>
+          <div id="qrChart" class="qrchart"></div>
+          <p class="cap">Conversion is the share of app opens from a code where the visitor went on to open a beach, a place or an event. Counts only, never an individual.</p>
+        </div>
+      </div>
+    </section>
     <!-- LOG -->
     <section class="view" id="v-log" aria-label="Activity log" hidden>
       <div class="card">
@@ -988,7 +1035,7 @@
   state.who = state.role; state.live = !!A.API; state.org = 'state';
   try { var q = new URLSearchParams(location.search); if(ISL[q.get('island')]) state.isl = q.get('island'); if(q.get('view')) state.view = q.get('view'); } catch(e){}
   try { state.verd = JSON.parse(sessionStorage.getItem('ghd_verdicts') || '{}') || {}; } catch(e){}
-  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', promo: 'Promotions', place: 'Places', use: 'Visitors and intent', rep: 'Monthly report', prev: 'Visitor preview', log: 'Activity log' };
+  var TITLES = { now: 'Right now', adv: 'Advisories', feat: 'Events and campaigns', promo: 'Promotions', place: 'Places', use: 'Visitors and intent', rep: 'Monthly report', prev: 'Visitor preview', qr: 'QR codes', log: 'Activity log' };
 
   function now(){ return Date.now(); }
   function uid(){ return 's' + now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -1019,7 +1066,7 @@
     if(!ISL[k]) return;
     // County staff work on their own island; the server refuses the rest anyway.
     if(state.live && state.org && state.org !== 'state' && k !== state.org){ msg('syncMsg', 'err', 'Your key is for ' + ISL[state.org] + '. Only State staff switch islands.'); return; }
-    state.isl = k; islPick(); renderNow(); paintMap();
+    state.isl = k; islPick(); renderNow(); paintMap(); if(state.view === 'qr') renderQr();
     if(state.view === 'now') loadNowFrame();
     if(state.view === 'prev') loadPreview();
     if(state.view === 'use') renderUse();
@@ -1052,11 +1099,12 @@
     if(!TITLES[v]) v = 'now';
     state.view = v;
     Array.prototype.forEach.call(document.querySelectorAll('.rail button[data-view]'), function(b){ if(b.dataset.view === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
-    ['now','adv','feat','promo','place','use','rep','prev','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
+    ['now','adv','feat','promo','place','use','rep','prev','qr','log'].forEach(function(k){ $('v-' + k).hidden = k !== v; });
     $('viewTitle').textContent = TITLES[v];
     $('islPick').hidden = v === 'now' || v === 'log';
     if(v === 'now'){ setTimeout(function(){ if(map) map.invalidateSize(); }, 50); loadNowFrame(); }
     if(v === 'prev') loadPreview();
+    if(v === 'qr') renderQr();
     if(v === 'use') renderUse();
     if(v === 'rep') renderReport();
     if(v === 'promo') renderPromos();
@@ -2689,6 +2737,124 @@
     renderNow(); paintMap(); renderAdvLists(); renderEvents(); renderPromos(); renderLog(); renderPlaces();
   }
 
+  // ---- QR codes (2026-10-01): one named code per posted spot. A code opens the GoHawaii app on the island
+  // picked above and carries its own tag (?u=<tag>, the telemetry Worker's batch-level tag). Drawn here with
+  // /assets/vendor/qrcode.min.js (the operator Dashboard's engine), the app mark at 16%, error correction H,
+  // smoothing off on every draw. The chart is a sample in the review build: nothing is counted here
+  // (index.html PUBLIC_REFS switches telemetry off for gohawaii). Names stay in this browser (ghd_qr_v1). ----
+  var QR_KEY = 'ghd_qr_v1', qrPngs = {}, qrLibP = null, qrMarkP = null, qrFailed = false;
+  var QR_SEEDS = ['Airport baggage claim', 'Lifeguard tower sign', 'Rental car counter'];
+  function qrRead(){ try { var d = JSON.parse(localStorage.getItem(QR_KEY)); return d && Array.isArray(d.items) ? d.items : null; } catch(e){ return null; } }
+  function qrSave(items){ try { localStorage.setItem(QR_KEY, JSON.stringify({ v: 1, items: items })); } catch(e){} }
+  function qrItems(){ var it = qrRead(); if(!it){ it = QR_SEEDS.map(function(n){ return { name: n, tag: qrTag(n), isl: state.isl, made: '' }; }); qrSave(it); } return it; }
+  function qrTag(name){ var t = String(name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯʻ‘’']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 16).replace(/-+$/, ''); return t || 'code'; }
+  function qrUnique(base, items){ var t = base, n = 2; while(items.some(function(i){ return i.tag === t; })){ var suf = '-' + (n++); t = base.slice(0, 16 - suf.length).replace(/-+$/, '') + suf; } return t; }
+  function qrOrigin(){ return /^https?:$/.test(location.protocol) ? location.origin : 'https://htagohawaii.netlify.app'; }
+  function qrLink(it){ return qrOrigin() + '/?ref=gohawaii&island=' + encodeURIComponent(it.isl) + '&u=' + encodeURIComponent(it.tag); }
+  function qrFile(it){ return 'gohawaii-' + it.isl + '-' + it.tag + '-qr.png'; }
+  function qrLib(){
+    if(qrLibP) return qrLibP;
+    qrLibP = new Promise(function(res, rej){
+      if(window.QRCode && window.QRCode.toDataURL) return res(window.QRCode);
+      var tried = 0, srcs = ['/assets/vendor/qrcode.min.js', 'https://ocean-safety.netlify.app/assets/vendor/qrcode.min.js'];
+      (function next(){
+        if(tried >= srcs.length) return rej(new Error('qrcode.min.js'));
+        var s = document.createElement('script'); s.src = srcs[tried++];
+        s.onload = function(){ if(window.QRCode && window.QRCode.toDataURL) res(window.QRCode); else next(); };
+        s.onerror = next; document.head.appendChild(s);
+      })();
+    });
+    return qrLibP;
+  }
+  function qrMark(){ if(qrMarkP) return qrMarkP; qrMarkP = new Promise(function(res){ var m = new Image(); m.onload = function(){ res(m); }; m.onerror = function(){ res(null); }; m.src = '/icons/apple-touch-icon.png'; }); return qrMarkP; }
+  // 1200 px square, white quiet zone 8% a side, the code drawn with smoothing off (interpolation softens module
+  // edges and, with the centre mark, has made long codes undecodable), the mark on a white rounded backing.
+  function qrDraw(url){
+    return Promise.all([qrLib(), qrMark()]).then(function(r){
+      var QR = r[0], mk = r[1], SIZE = 1200, pad = Math.round(SIZE * 0.08), q = SIZE - pad * 2;
+      return new Promise(function(res, rej){
+        QR.toDataURL(url, { margin: 1, width: q, errorCorrectionLevel: 'H' }, function(e, data){
+          if(e) return rej(e);
+          var im = new Image();
+          im.onload = function(){
+            var c = document.createElement('canvas'); c.width = c.height = SIZE; var x = c.getContext('2d');
+            x.fillStyle = '#fff'; x.fillRect(0, 0, SIZE, SIZE); x.imageSmoothingEnabled = false; x.drawImage(im, pad, pad, q, q); x.imageSmoothingEnabled = true;
+            if(mk){
+              var s = Math.round(q * 0.16), o = Math.round((SIZE - s) / 2), p = Math.round(s * 0.14), br = Math.round(s * 0.26);
+              x.fillStyle = '#fff'; x.beginPath(); if(x.roundRect) x.roundRect(o - p, o - p, s + p * 2, s + p * 2, br); else x.rect(o - p, o - p, s + p * 2, s + p * 2); x.fill();
+              try { x.drawImage(mk, o, o, s, s); } catch(err){}
+            }
+            res(c.toDataURL('image/png'));
+          };
+          im.onerror = function(){ rej(new Error('qr image')); };
+          im.src = data;
+        });
+      });
+    });
+  }
+  function qrHash(s){ var h = 2166136261; for(var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h; }
+  function qrSample(tag){ var h = qrHash(tag); return { open: 40 + (h % 600), conv: 0.14 + ((h >>> 8) % 48) / 100 }; }
+  function qrMailto(it){ return 'mailto:?subject=' + encodeURIComponent(it.name + ' QR code, GoHawaii') + '&body=' + encodeURIComponent('Scan to open the GoHawaii app on ' + ISL[it.isl] + ' (' + it.name + '):\n' + qrLink(it)); }
+  function renderQr(){
+    var items = qrItems(), list = $('qrList'), ch = $('qrChart'), hint = $('qrIsl');
+    if(hint) hint.textContent = '(a new code opens the app on ' + ISL[state.isl] + ')';
+    if(!list || !ch) return;
+    list.innerHTML = items.length ? items.map(function(it){
+      var png = qrPngs[it.tag], L = qrLink(it);
+      return '<div class="qrtile" data-tag="' + esc(it.tag) + '">' +
+        (png ? '<img alt="QR code, ' + esc(it.name) + '" src="' + png + '">' : '<div class="ph">' + (qrFailed ? 'The code could not be drawn here. Reload the page to try again.' : 'Drawing the code') + '</div>') +
+        '<div class="nm" title="' + esc(it.name) + '">' + esc(it.name) + '</div><div class="isl">' + esc(ISL[it.isl] || it.isl) + '</div>' +
+        '<div class="lk">' + esc(L.replace(/^https?:\/\//, '')) + '</div>' +
+        '<div class="acts">' + (png ? '<a class="btn" download="' + esc(qrFile(it)) + '" href="' + png + '">Download PNG</a>' : '') +
+        '<a class="btn" href="' + esc(qrMailto(it)) + '">Email</a>' +
+        (png && navigator.share ? '<button type="button" class="btn" data-share="' + esc(it.tag) + '">Share</button>' : '') +
+        '<button type="button" class="btn" data-copy="' + esc(L) + '">Copy link</button>' +
+        '<button type="button" class="btn ghost rm" data-rm="' + esc(it.tag) + '" aria-label="Remove ' + esc(it.name) + '">Remove</button></div></div>';
+    }).join('') : '<div class="qrempty">No codes yet. Name the first spot above and its code appears here, with its own line in the chart.</div>';
+    var rows = items.map(function(it){ var s = qrSample(it.tag); return { it: it, open: s.open, eng: Math.round(s.open * s.conv), conv: s.conv }; });
+    rows.sort(function(a, b){ return b.conv - a.conv || b.open - a.open; });
+    var best = rows.length > 1 ? rows[0] : null;
+    ch.innerHTML = rows.length ? rows.map(function(r){
+      return '<div class="qrrow' + (best === r ? ' top' : '') + '"><span class="nm"><span>' + esc(r.it.name) + '</span><small>' + esc(ISL[r.it.isl] || '') + '</small>' + (best === r ? '<span class="qrbest">Best</span>' : '') + '</span>' +
+        '<span class="pc">' + Math.round(r.conv * 100) + '%</span><span class="bar"><i style="width:' + Math.round(r.conv * 100) + '%"></i></span>' +
+        '<span class="sub">' + r.eng + ' of ' + r.open + ' sample opens went on to a beach, a place or an event.</span></div>';
+    }).join('') : '<div class="qrempty">Make a code and its line appears here.</div>';
+    items.forEach(function(it){
+      if(qrPngs[it.tag] !== undefined) return;
+      qrPngs[it.tag] = '';
+      qrDraw(qrLink(it)).then(function(d){ qrPngs[it.tag] = d; if(state.view === 'qr') renderQr(); }).catch(function(){ qrFailed = true; delete qrPngs[it.tag]; if(state.view === 'qr') renderQr(); });
+    });
+  }
+  $('qrForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = String($('qrName').value || '').trim().replace(/\s+/g, ' '), items = qrItems();
+    if(!name){ msg('qrMsg', 'err', 'Give the spot a name, like Baggage claim placard.'); $('qrName').focus(); return; }
+    if(items.some(function(i){ return i.name.toLowerCase() === name.toLowerCase() && i.isl === state.isl; })){ msg('qrMsg', 'err', 'There is already a code called ' + name + ' for ' + ISL[state.isl] + '.'); return; }
+    var it = { name: name, tag: qrUnique(qrTag(name), items), isl: state.isl, made: iso(now()) };
+    items.unshift(it); qrSave(items);
+    var st = A.load(); log(st, 'Made QR code', { id: it.tag, title: it.name + ' (' + ISL[it.isl] + ')' }); A.save(st); renderLog();
+    $('qrName').value = ''; msg('qrMsg', 'ok', 'Made. ' + name + ' is in the chart and in your codes below.'); renderQr();
+  });
+  $('qrList').addEventListener('click', function(e){
+    var b = e.target.closest('[data-copy],[data-rm],[data-share]'); if(!b) return;
+    if(b.dataset.copy){ var L = b.dataset.copy; (navigator.clipboard ? navigator.clipboard.writeText(L) : Promise.reject()).then(function(){ msg('qrMsg', 'ok', 'Link copied.'); }, function(){ window.prompt('Copy this link', L); }); return; }
+    if(b.dataset.rm){
+      var items = qrItems(), gone = items.filter(function(i){ return i.tag === b.dataset.rm; })[0];
+      qrSave(items.filter(function(i){ return i.tag !== b.dataset.rm; }));
+      if(gone){ var st = A.load(); log(st, 'Removed QR code', { id: gone.tag, title: gone.name + ' (' + (ISL[gone.isl] || '') + ')' }); A.save(st); renderLog(); msg('qrMsg', 'ok', 'Removed ' + gone.name + '. A code already printed still opens the app.'); }
+      renderQr(); return;
+    }
+    if(b.dataset.share){
+      var sh = qrItems().filter(function(i){ return i.tag === b.dataset.share; })[0], png = sh && qrPngs[sh.tag]; if(!png) return;
+      fetch(png).then(function(r){ return r.blob(); }).then(function(bl){
+        var f = new File([bl], qrFile(sh), { type: 'image/png' }), L2 = qrLink(sh);
+        if(navigator.canShare && navigator.canShare({ files: [f] })) return navigator.share({ files: [f], title: sh.name + ' QR code', text: L2 });
+        return navigator.share({ title: sh.name + ' QR code', text: L2, url: L2 });
+      }).catch(function(){});
+    }
+  });
+  window.GH_QR = { items: qrItems, link: qrLink, tag: qrTag };
+
   window.addEventListener('storage', function(e){ if(e.key === A.KEY) renderAll(); });
   islPick(); rolePaint(); islChecks('fIsl', [state.isl]); islChecks('cIsl', [state.isl]); islChecks('pIsl', [state.isl]); dayChecks([0,1,2,3,4,5,6]); lvPaint();
   initMap();
@@ -2709,7 +2875,7 @@
 (function(){
   'use strict';
   var KEY = 'ghd_tour_v1';
-  var VIEWS = ['now', 'adv', 'feat', 'promo', 'place', 'use', 'rep', 'prev', 'log'];
+  var VIEWS = ['now', 'adv', 'feat', 'promo', 'place', 'use', 'rep', 'prev', 'qr', 'log'];
   var TOURS = {
     now: [
       { center: true, title: 'Welcome to the GoHawaii Dashboard', body: 'Nine tabs, each with a short tour like this one. It runs once per tab in this browser, and the <b>Tour</b> button in the rail replays it. This is a review build: posts save in this browser only, so a colleague on another computer will not see them.' },
@@ -2774,6 +2940,11 @@
       { sel: '#prevFrame', up: '.phwrap', title: 'The real app', body: 'The GoHawaii app on the island picked above, with this browser\'s posts in it. Whatever you post from any tab shows here within a second.' },
       { sel: '#btnReset', title: 'Show dismissed pop-ups again', body: 'A visitor sees a red advisory full screen until they tap I understand, and a yellow one once per visit. This resets that, so you can watch it again.' },
       { sel: '#btnOpen', title: 'Open in a new tab', body: 'The same app in a full tab of this browser. Post from here and it picks the post up on its own.' }
+    ],
+    qr: [
+      { sel: '#qrForm', up: '.card', title: 'One code per spot', body: 'Name the spot where a code goes up, like an airport placard or a tower sign. The code opens the GoHawaii app on the island picked above and carries its own tag, so you can tell the spots apart.' },
+      { sel: '#qrChart', up: '.card', title: 'Which code gets visitors to tap', body: 'Every code you make gets its own line here. In the review build the figures are a sample. The live build would rank codes by the share of opens that went on to a beach, a place or an event.' },
+      { sel: '#qrList', title: 'Download, email, copy', body: 'Download saves the 1200 px PNG. Email opens your mail app with the link, and Copy link puts it on the clipboard. Nothing is sent from the Dashboard, and the names stay in this browser.' }
     ],
     log: [
       { sel: '#logPer', title: 'Period', body: 'The last 7 days, the month to date, the year to date, or a range you set, in Hawaiʻi calendar days.' },
