@@ -27,5 +27,5 @@ must_be_true_after: >
   tag, qr_eng the sessions from that tag that tapped a place, offer, amenity or tour), summed
   over the Home period; a code with no counts says so, counts under 5 read fewer than 5 (OD-18),
   no figure is an outcome claim; the Worker must be deployed before the Dashboard, or every
-  live code reads No scans counted yet; the free frame (?plan=free) shows the same tab
+  live code reads No opens from this code yet; the free frame (?plan=free) shows the same tab
   unlocked; checks/dashboard-ops.js walks the tab and passes in full.
