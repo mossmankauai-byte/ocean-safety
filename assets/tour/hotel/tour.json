@@ -487,15 +487,15 @@
    "how": "The amenity menu takes a name, one line, hours, contact, a type (restaurant, tours, rentals, spa, room upgrades), a photo, and a box to add it as a promotion too. Edits save as a draft and export as a file that we apply to the property's guide, so nothing goes live by accident.",
    "where": "Dashboard, Stay-Close tab",
    "feeds": "The property's amenity menu",
-   "caption": "Operator Dashboard, sample preview: the menu on the left, the guest view updating live on the right; phone numbers are placeholders",
+   "caption": "Operator Dashboard, sample preview: the guest guide on the left, open on an example beach on a sample rainy day, beside the amenity menu; phone numbers are placeholders",
    "view": "stayclose",
    "sel": "#view-stayclose .ph-split",
    "img": [
     {
      "src": "13a.jpg",
-     "v": "081453cc",
+     "v": "ade308b4",
      "w": 2304,
-     "h": 1380
+     "h": 1555
     }
    ],
    "desk": true
