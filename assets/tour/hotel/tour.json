@@ -18,35 +18,35 @@
   },
   {
    "n": 2,
-   "title": "Paid hotel features",
-   "sub": "What the paid plan adds on top of everything above. Nothing on the free plan is taken away.",
+   "title": "At the front desk",
+   "sub": "Dashboard tools for the concierge and the front desk. The Today tab, the first three rows, is served for Kauaʻi properties and uses the guest guide's own live feeds and calls. All of it is on both plans except the Tours tab, whose plan is to be confirmed.",
    "rows": [
     8,
     9,
     10,
     11,
-    12,
-    13
+    12
    ]
   },
   {
    "n": 3,
-   "title": "Pre-arrival",
-   "sub": "Offers a guest sees at home before the trip. The swap happens on the phone's own clock: no location prompt and no booking data.",
+   "title": "Paid hotel features",
+   "sub": "What the paid plan adds on top of everything above. Nothing on the free plan is taken away.",
    "rows": [
+    13,
     14,
     15,
     16,
     17,
-    18,
-    19
+    18
    ]
   },
   {
    "n": 4,
-   "title": "Timed promotions",
-   "sub": "How an offer turns on and off. Every rule runs on the guest's phone, and nothing pops over a safety screen.",
+   "title": "Pre-arrival",
+   "sub": "Offers a guest sees at home before the trip. The swap happens on the phone's own clock: no location prompt and no booking data.",
    "rows": [
+    19,
     20,
     21,
     22,
@@ -56,19 +56,32 @@
   },
   {
    "n": 5,
-   "title": "Visitor data",
-   "sub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "title": "Timed promotions",
+   "sub": "How an offer turns on and off. Every rule runs on the guest's phone, and nothing pops over a safety screen.",
    "rows": [
     25,
     26,
     27,
     28,
-    29,
+    29
+   ]
+  },
+  {
+   "n": 6,
+   "title": "Visitor data",
+   "sub": "What the operator Dashboard shows. Analytics are on in full for the free plan. Every figure in these screens is sample.",
+   "rows": [
     30,
     31,
     32,
     33,
-    34
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40
    ]
   }
  ],
@@ -126,10 +139,10 @@
    ],
    "side": "lobby",
    "stage": "In your lobby",
-   "line": "One code for the room card, the lobby and the welcome email. Every scan counts toward your property.",
-   "does": "One code for the room card, the lobby and the welcome email. Each scan opens the guide tagged to the property.",
+   "line": "A code for the room card, the lobby and the welcome email. Scans are credited to your property.",
+   "does": "A code for the room card, the lobby and the welcome email. Each scan opens the guide tagged to the property.",
    "item": "Scan for the full live guide on your phone",
-   "how": "The first scan stores the property tag on the phone, so every later visit counts toward the property with no login and no app to install. The Dashboard keeps a code for each placement, ready to print. There is one code per property and placement, not one per room.",
+   "how": "The first scan stores the property tag on the phone, so later visits from that phone are credited to the property with no login and no app to install. The Dashboard's QR codes tab makes a named code for each spot, such as the lobby sign or the room card, ready to print. Codes are made per spot, not per room.",
    "where": "Room cards, lobby, welcome email",
    "feeds": "A link tagged to the property",
    "caption": "Lobby board QR, demo property; the code is blurred in this print",
@@ -314,6 +327,151 @@
   {
    "n": 8,
    "part": 2,
+   "name": "Today at the desk",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Front desk or staff"
+   ],
+   "side": "dash",
+   "stage": "On your Dashboard",
+   "line": "The guest guide runs on the desk screen, with live-cam buttons and quick picks for what the guest wants to do and when.",
+   "does": "The property's own guest guide, live on the desk screen, with the day's readings under it.",
+   "item": "Guests want to: Swim, Snorkel, Surf, Beach walk, Sunset, Hike, On the water or Rainy day. When: now, this afternoon or this evening",
+   "how": "The Today tab opens the same guide guests carry, so the desk and the guest look at the same call. Live-cam buttons open public beach cams on their owners' pages. Under the guide sit eight readings (waves, swell, wind, rain, rain chance, UV, sunset and tide) and a wheel that colors the four shores by the biggest surf among the property's beaches. Served today for Kauaʻi properties.",
+   "where": "Dashboard, Today tab",
+   "feeds": "The guest guide; live surf, wind, tide and rain feeds",
+   "caption": "Operator Dashboard, sample preview; conditions are live at capture (Oct 1, 6:22 pm). Two cam buttons that name other businesses are blurred",
+   "view": "today",
+   "sel": "#tdLive",
+   "img": [
+    {
+     "src": "08a.jpg",
+     "v": "3273ada2",
+     "w": 1580,
+     "h": 1830
+    }
+   ],
+   "desk": true
+  },
+  {
+   "n": 9,
+   "part": 2,
+   "name": "Desk notes with the day band",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Front desk or staff"
+   ],
+   "side": "dash",
+   "stage": "On your Dashboard",
+   "line": "Tap a place in the guide or the outlook and its desk notes pop up: today's best time, then what to tell the guest.",
+   "does": "A tap on a place in the guide or the outlook opens its desk notes over the page.",
+   "item": "ʻAnini Beach: Best time 6 to 9 am, calm, 0.9 ft, high tide 8 am",
+   "how": "A band runs from 6 am to sunset in five stretches, each colored by the guide's own call for its worst hour, with the tides and a Now marker. Green \"Best time\" appears only on a calm stretch; on a rough day the band says \"Best of a rough day\" or \"Not a swim day here.\" Below it: what to tell the guest (good for, entry, family, lifeguard hours, water temperature), a local tip, the guide's Watch for warning word for word, and parking with directions. The lifeguard line takes the stricter of the guide's record and the Places tab.",
+   "where": "Dashboard, Today tab",
+   "feeds": "Hourly surf, wind, sky and tide; the guide's place records",
+   "caption": "Operator Dashboard, sample preview; desk notes for one beach, live conditions at capture",
+   "img": [
+    {
+     "src": "09a.jpg",
+     "v": "217467e4",
+     "w": 1200,
+     "h": 1960
+    }
+   ],
+   "desk": true
+  },
+  {
+   "n": 10,
+   "part": 2,
+   "name": "Today's outlook",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Front desk or staff"
+   ],
+   "side": "dash",
+   "stage": "On your Dashboard",
+   "line": "A ranked list for the day: beaches, trails, tour kinds, farmers' markets, and parks, sights and culture.",
+   "does": "A side list of what fits today, ranked from the places the property features or lists.",
+   "item": "Calm: ʻAnini Beach. Good: Māhāʻulepū Heritage Trail and a garden tour. Friday: Līhuʻe Sunshine Market, 3 pm",
+   "how": "Beaches rank by the guide's call, then the property's Featured picks, lifeguards and a calmer shore. A beach the guide treats as hazardous never ranks, and neither does a place the property hid. Trails are read against today's and recent rain. Tours are kinds (boat, helicopter, canyon, lūʻau, kayak, sunset sail, zipline, garden), not vendors. Markets read Open now, Today or the next market day, and indoor sights move up on a wet day. Print desk card puts the list on one page.",
+   "where": "Dashboard, Today tab",
+   "feeds": "The Places tab, live conditions, market hours",
+   "caption": "Operator Dashboard, sample preview; live at capture. The list continues with parks, sights and culture",
+   "img": [
+    {
+     "src": "10a.jpg",
+     "v": "cdff9c1f",
+     "w": 732,
+     "h": 1250
+    }
+   ],
+   "desk": true
+  },
+  {
+   "n": 11,
+   "part": 2,
+   "name": "QR codes for each spot",
+   "plan": "Free and paid plans",
+   "status": "Live",
+   "who": [
+    "Manager",
+    "Front desk or staff"
+   ],
+   "side": "dash",
+   "stage": "On your Dashboard",
+   "line": "Name a spot and the Dashboard makes its code: lobby sign, pool deck, room card, welcome email.",
+   "does": "A named code for each spot, made in the Dashboard.",
+   "item": "Lobby sign, Pool deck and In-room card, each with Download PNG, Email, Share and Copy link",
+   "how": "Each code opens the property's guide and carries its own tag, so a lobby sign and a room card are counted apart. The PNG is 1200 px square, big enough for a lobby sign. Email opens the manager's mail app with the link. The list of names is kept in the browser that made them; a code already printed keeps working if that list is cleared.",
+   "where": "Dashboard, QR codes tab",
+   "feeds": "The property link plus the spot's tag",
+   "caption": "Operator Dashboard, sample preview; the codes and their links are blurred in this print",
+   "view": "qr",
+   "sel": "#view-qr .qr-grid",
+   "img": [
+    {
+     "src": "11a.jpg",
+     "v": "b4f40484",
+     "w": 1504,
+     "h": 1292
+    }
+   ],
+   "desk": true
+  },
+  {
+   "n": 12,
+   "part": 2,
+   "name": "Your tour partner ID",
+   "plan": "Plan to be confirmed",
+   "status": "Live",
+   "who": [
+    "Manager"
+   ],
+   "side": "dash",
+   "stage": "On your Dashboard",
+   "line": "Paste your Viator or GetYourGuide partner link once. The Dashboard picks out your partner ID and saves it.",
+   "does": "The property's own Viator or GetYourGuide partner ID, saved from the Dashboard.",
+   "item": "Paste a Viator or GetYourGuide partner link, then Save link",
+   "how": "The Dashboard finds the partner ID inside a Viator or GetYourGuide partner link, or takes a bare Viator ID, and Save link sends it to the property's settings. The box says it saved only after our server confirms it, and saving the box empty clears it. The Home screen has a card for the tours guests tapped, shown with sample figures in the preview.",
+   "where": "Dashboard, Tours tab",
+   "feeds": "The property's partner link",
+   "caption": "Operator Dashboard, sample preview, Tours tab",
+   "img": [
+    {
+     "src": "12a.jpg",
+     "v": "9f8c9265",
+     "w": 1520,
+     "h": 142
+    }
+   ],
+   "desk": true
+  },
+  {
+   "n": 13,
+   "part": 3,
    "name": "Unlimited amenities",
    "plan": "Paid plan",
    "status": "Live",
@@ -334,8 +492,8 @@
    "sel": "#view-stayclose .ph-split",
    "img": [
     {
-     "src": "08a.jpg",
-     "v": "ca28b649",
+     "src": "13a.jpg",
+     "v": "ade308b4",
      "w": 2304,
      "h": 1555
     }
@@ -343,8 +501,8 @@
    "desk": true
   },
   {
-   "n": 9,
-   "part": 2,
+   "n": 14,
+   "part": 3,
    "name": "Your logo on the guide",
    "plan": "Paid plan",
    "status": "Built, not live",
@@ -362,7 +520,7 @@
    "caption": "Guest app, build with the hotel logo; placeholder logo on a demo property",
    "img": [
     {
-     "src": "09a.jpg",
+     "src": "14a.jpg",
      "v": "4335e146",
      "w": 390,
      "h": 844,
@@ -377,8 +535,8 @@
    "desk": false
   },
   {
-   "n": 10,
-   "part": 2,
+   "n": 15,
+   "part": 3,
    "name": "Promotions",
    "plan": "Paid plan",
    "status": "Live",
@@ -397,14 +555,14 @@
    "caption": "Guest app, demo property, paid plan, Town tab",
    "img": [
     {
-     "src": "10a.jpg",
+     "src": "15a.jpg",
      "v": "96470ae5",
      "w": 390,
      "h": 844,
      "focus": null
     },
     {
-     "src": "10b.jpg",
+     "src": "15b.jpg",
      "v": "7659652a",
      "w": 390,
      "h": 844,
@@ -414,8 +572,8 @@
    "desk": false
   },
   {
-   "n": 11,
-   "part": 2,
+   "n": 16,
+   "part": 3,
    "name": "Pictures on offers",
    "plan": "Paid plan",
    "status": "Built, not live",
@@ -434,7 +592,7 @@
    "caption": "Guest app, build with offer pictures, demo property; photos from the sample flyers",
    "img": [
     {
-     "src": "11a.jpg",
+     "src": "16a.jpg",
      "v": "6c1bb830",
      "w": 390,
      "h": 844,
@@ -444,8 +602,8 @@
    "desk": false
   },
   {
-   "n": 12,
-   "part": 2,
+   "n": 17,
+   "part": 3,
    "name": "House picks",
    "plan": "Paid plan",
    "status": "Live",
@@ -464,7 +622,7 @@
    "caption": "Guest app, demo property, paid plan",
    "img": [
     {
-     "src": "12a.jpg",
+     "src": "17a.jpg",
      "v": "6d6e12f5",
      "w": 390,
      "h": 844,
@@ -479,8 +637,8 @@
    "desk": false
   },
   {
-   "n": 13,
-   "part": 2,
+   "n": 18,
+   "part": 3,
    "name": "Portfolio view",
    "plan": "Paid plan",
    "status": "Sample",
@@ -498,7 +656,7 @@
    "caption": "Operator Dashboard, sample preview, a fictional sample group; its placeholder names are generic",
    "img": [
     {
-     "src": "13a.jpg",
+     "src": "18a.jpg",
      "v": "8712aa91",
      "w": 1800,
      "h": 1260
@@ -507,8 +665,8 @@
    "desk": true
   },
   {
-   "n": 14,
-   "part": 3,
+   "n": 19,
+   "part": 4,
    "name": "A link tagged to your property",
    "plan": "Free and paid plans",
    "status": "Live",
@@ -521,13 +679,13 @@
    "line": "One link in the pre-arrival email you already send. Nothing to change in your PMS, nothing for the guest to install or sign in to.",
    "does": "One link in the pre-arrival email the property already sends.",
    "item": "Opened from the property link: the guide knows the property from the first tap",
-   "how": "No PMS change: the link goes into a confirmation or pre-arrival email as it is. The first open stores the property tag on the phone, so the guest is counted to the property on every later visit, with no login and no app install. We never see booking data; we count only visits that came through the link.",
+   "how": "No PMS change: the link goes into a confirmation or pre-arrival email as it is. The first open stores the property tag on the phone, so the guest's later visits are credited to the property, with no login and no app install. We never see booking data; we count only visits that came through the link.",
    "where": "The property's pre-arrival email",
    "feeds": "The property tag",
    "caption": "Guest app, demo property, opened from its tagged link (paid plan shown; on the free plan the visit still counts, without the greeting)",
    "img": [
     {
-     "src": "14a.jpg",
+     "src": "19a.jpg",
      "v": "ea0c01fb",
      "w": 390,
      "h": 844,
@@ -537,8 +695,8 @@
    "desk": false
   },
   {
-   "n": 15,
-   "part": 3,
+   "n": 20,
+   "part": 4,
    "name": "Pre-arrival offer card",
    "plan": "Paid plan",
    "status": "Live",
@@ -553,10 +711,10 @@
    "how": "A pre-arrival offer has a title, one line of detail, and show-from and until dates. It shows only before arrival and stops when the phone switches to Hawaiʻi time. Weather and time of day are ignored before landing, because the forecast for the trip does not exist yet.",
    "where": "Guest app, offers sheet",
    "feeds": "The property's pre-arrival offers",
-   "caption": "Guest app, build with offer pictures, demo property, phone on a mainland time zone; the pre-arrival card itself is live",
+   "caption": "Guest app, build with offer pictures, demo property, phone off Hawaiʻi time; the pre-arrival card itself is live",
    "img": [
     {
-     "src": "15a.jpg",
+     "src": "20a.jpg",
      "v": "53be8bbb",
      "w": 390,
      "h": 844,
@@ -566,8 +724,8 @@
    "desk": false
   },
   {
-   "n": 16,
-   "part": 3,
+   "n": 21,
+   "part": 4,
    "name": "\"Book ahead of time\"",
    "plan": "Paid plan",
    "status": "Live",
@@ -585,7 +743,7 @@
    "caption": "Guest app, demo property, demo pre-arrival offer",
    "img": [
     {
-     "src": "16a.jpg",
+     "src": "21a.jpg",
      "v": "782d27a7",
      "w": 390,
      "h": 844,
@@ -600,8 +758,8 @@
    "desk": false
   },
   {
-   "n": 17,
-   "part": 3,
+   "n": 22,
+   "part": 4,
    "name": "\"Email the front desk\"",
    "plan": "Paid plan",
    "status": "Live",
@@ -620,7 +778,7 @@
    "caption": "Guest app, demo property, demo pre-arrival offer",
    "img": [
     {
-     "src": "17a.jpg",
+     "src": "22a.jpg",
      "v": "eb67ce27",
      "w": 390,
      "h": 844,
@@ -635,8 +793,8 @@
    "desk": false
   },
   {
-   "n": 18,
-   "part": 3,
+   "n": 23,
+   "part": 4,
    "name": "Before-you-fly amenity list",
    "plan": "Free and paid plans",
    "status": "Live",
@@ -651,10 +809,10 @@
    "how": "Red-flag and rainy-day amenities wait until the guest is on the island, because they describe a day the guest is not having yet. Amenities set to show always appear under this line.",
    "where": "Guest app, beach card",
    "feeds": "The property's amenity list",
-   "caption": "Guest app, demo property, phone set to a mainland time zone",
+   "caption": "Guest app, demo property, phone off Hawaiʻi time",
    "img": [
     {
-     "src": "18a.jpg",
+     "src": "23a.jpg",
      "v": "0b3104cb",
      "w": 390,
      "h": 844,
@@ -669,8 +827,8 @@
    "desk": false
   },
   {
-   "n": 19,
-   "part": 3,
+   "n": 24,
+   "part": 4,
    "name": "Pre-arrival setting in the editor",
    "plan": "Paid plan",
    "status": "Live",
@@ -688,7 +846,7 @@
    "caption": "Operator Dashboard, sample preview; a draft typed for this capture, nothing saved",
    "img": [
     {
-     "src": "19a.jpg",
+     "src": "24a.jpg",
      "v": "ef009070",
      "w": 2236,
      "h": 940
@@ -697,8 +855,8 @@
    "desk": true
   },
   {
-   "n": 20,
-   "part": 4,
+   "n": 25,
+   "part": 5,
    "name": "Pop-up window",
    "plan": "Paid plan",
    "status": "Live",
@@ -717,7 +875,7 @@
    "caption": "Guest app, demo property, paid plan",
    "img": [
     {
-     "src": "20a.jpg",
+     "src": "25a.jpg",
      "v": "b28f2e7b",
      "w": 390,
      "h": 844,
@@ -732,8 +890,8 @@
    "desk": false
   },
   {
-   "n": 21,
-   "part": 4,
+   "n": 26,
+   "part": 5,
    "name": "Start and end dates",
    "plan": "Paid plan",
    "status": "Live",
@@ -751,7 +909,7 @@
    "caption": "Operator Dashboard, sample preview",
    "img": [
     {
-     "src": "21a.jpg",
+     "src": "26a.jpg",
      "v": "1a804185",
      "w": 1800,
      "h": 380
@@ -760,8 +918,8 @@
    "desk": true
   },
   {
-   "n": 22,
-   "part": 4,
+   "n": 27,
+   "part": 5,
    "name": "Weather and time-of-day fit",
    "plan": "Paid plan",
    "status": "Live",
@@ -780,7 +938,7 @@
    "caption": "Operator Dashboard, sample preview",
    "img": [
     {
-     "src": "22a.jpg",
+     "src": "27a.jpg",
      "v": "b6e90342",
      "w": 1100,
      "h": 300
@@ -789,8 +947,8 @@
    "desk": true
   },
   {
-   "n": 23,
-   "part": 4,
+   "n": 28,
+   "part": 5,
    "name": "Trip-stage swap",
    "plan": "Free and paid plans",
    "status": "Live",
@@ -808,7 +966,7 @@
    "caption": "Guest app, demo property, paid plan",
    "img": [
     {
-     "src": "23a.jpg",
+     "src": "28a.jpg",
      "v": "725caf17",
      "w": 390,
      "h": 844,
@@ -820,7 +978,7 @@
      ]
     },
     {
-     "src": "23b.jpg",
+     "src": "28b.jpg",
      "v": "1f0ae8d3",
      "w": 390,
      "h": 844,
@@ -835,8 +993,8 @@
    "desk": false
   },
   {
-   "n": 24,
-   "part": 4,
+   "n": 29,
+   "part": 5,
    "name": "Departed guests drop out",
    "plan": "Free and paid plans",
    "status": "Live",
@@ -856,7 +1014,7 @@
    "sel": "sec:Offers that land",
    "img": [
     {
-     "src": "24a.jpg",
+     "src": "29a.jpg",
      "v": "95a7fec9",
      "w": 2304,
      "h": 900
@@ -865,8 +1023,8 @@
    "desk": true
   },
   {
-   "n": 25,
-   "part": 5,
+   "n": 30,
+   "part": 6,
    "name": "Dashboard home",
    "plan": "Free and paid plans",
    "status": "Live",
@@ -878,25 +1036,25 @@
    "line": "The first screen a manager sees: your numbers, what needs doing, and the island's conditions right now.",
    "does": "The first screen a manager sees: the property's numbers, what needs doing, and the island's conditions right now.",
    "item": "Sample: guide opens, place taps, the most-opened place and offer taps, each against the prior period",
-   "how": "Four counted numbers switch between 7, 30 and 90 days. A short list names what needs the manager, such as an offer about to end or a pick with no photo, with a button straight to the fix. Conditions are the island's raw readings from the same feed the guide uses; beach-by-beach calls stay in the guide. Activity is counts only, never an individual guest. On the free plan the offer count gives way to Stay-Close views.",
+   "how": "Four counted numbers switch between 7, 30 and 90 days. A short list names what needs the manager, such as an offer about to end, no house picks yet, or guide opens down 20% or more on the prior period, each with a button straight to the fix. A card ranks the tours guests tapped (plan to be confirmed). Conditions are the island's raw readings from the same feed the guide uses; beach-by-beach calls stay in the guide. Activity is counts only, never an individual guest. On the free plan the offer count gives way to Stay-Close views.",
    "where": "Dashboard, Home",
    "feeds": "Guide opens, taps, the property's drafts and the live conditions feed",
-   "caption": "Operator Dashboard, sample preview; conditions are live, every other figure is sample",
+   "caption": "Operator Dashboard, sample preview, paid plan; conditions are live, every other figure is sample; one note is blurred in this print",
    "view": "home",
    "sel": "#ccHome",
    "img": [
     {
-     "src": "25a.jpg",
-     "v": "a1874157",
+     "src": "30a.jpg",
+     "v": "b24dd2f1",
      "w": 2304,
-     "h": 1536
+     "h": 1697
     }
    ],
    "desk": true
   },
   {
-   "n": 26,
-   "part": 5,
+   "n": 31,
+   "part": 6,
    "name": "Guest sessions per day",
    "plan": "Free and paid plans",
    "status": "Live",
@@ -916,7 +1074,7 @@
    "sel": "sec:Guest sessions per day",
    "img": [
     {
-     "src": "26a.jpg",
+     "src": "31a.jpg",
      "v": "c9b4bc00",
      "w": 2304,
      "h": 910
@@ -925,8 +1083,8 @@
    "desk": true
   },
   {
-   "n": 27,
-   "part": 5,
+   "n": 32,
+   "part": 6,
    "name": "Top beaches your guests check",
    "plan": "Free and paid plans",
    "status": "Live",
@@ -946,7 +1104,7 @@
    "sel": "sec:The beaches your guests check",
    "img": [
     {
-     "src": "27a.jpg",
+     "src": "32a.jpg",
      "v": "9300bb33",
      "w": 2304,
      "h": 824
@@ -955,8 +1113,8 @@
    "desk": true
   },
   {
-   "n": 28,
-   "part": 5,
+   "n": 33,
+   "part": 6,
    "name": "Bad-ocean-day swaps",
    "plan": "Free and paid plans",
    "status": "Live",
@@ -976,7 +1134,7 @@
    "sel": "sec:Bad-ocean-day saves",
    "img": [
     {
-     "src": "28a.jpg",
+     "src": "33a.jpg",
      "v": "6ebc759b",
      "w": 1544,
      "h": 792
@@ -985,8 +1143,8 @@
    "desk": true
   },
   {
-   "n": 29,
-   "part": 5,
+   "n": 34,
+   "part": 6,
    "name": "Tour desk and self-serve taps",
    "plan": "Free and paid plans",
    "status": "Live",
@@ -1004,7 +1162,7 @@
    "caption": "Guest app, demo property; the number shown is the demo placeholder",
    "img": [
     {
-     "src": "29a.jpg",
+     "src": "34a.jpg",
      "v": "e8707947",
      "w": 390,
      "h": 844,
@@ -1019,8 +1177,8 @@
    "desk": false
   },
   {
-   "n": 30,
-   "part": 5,
+   "n": 35,
+   "part": 6,
    "name": "When guests plan",
    "plan": "Free and paid plans",
    "status": "Sample",
@@ -1040,7 +1198,7 @@
    "sel": "sec:When guests plan",
    "img": [
     {
-     "src": "30a.jpg",
+     "src": "35a.jpg",
      "v": "73b60c13",
      "w": 2304,
      "h": 742
@@ -1049,8 +1207,8 @@
    "desk": true
   },
   {
-   "n": 31,
-   "part": 5,
+   "n": 36,
+   "part": 6,
    "name": "Offers that land",
    "plan": "Free and paid plans",
    "status": "Sample",
@@ -1070,7 +1228,7 @@
    "sel": "sec:Offers that land",
    "img": [
     {
-     "src": "31a.jpg",
+     "src": "36a.jpg",
      "v": "1c54c53d",
      "w": 2304,
      "h": 1250
@@ -1079,8 +1237,8 @@
    "desk": true
   },
   {
-   "n": 32,
-   "part": 5,
+   "n": 37,
+   "part": 6,
    "name": "Staying close",
    "plan": "Free and paid plans",
    "status": "Sample",
@@ -1100,7 +1258,7 @@
    "sel": "sec:Staying close",
    "img": [
     {
-     "src": "32a.jpg",
+     "src": "37a.jpg",
      "v": "3399ba3c",
      "w": 2304,
      "h": 430
@@ -1109,8 +1267,8 @@
    "desk": true
   },
   {
-   "n": 33,
-   "part": 5,
+   "n": 38,
+   "part": 6,
    "name": "Who is scanning your QR",
    "plan": "Free and paid plans",
    "status": "Sample",
@@ -1130,17 +1288,47 @@
    "sel": "sec:scanning your QR",
    "img": [
     {
-     "src": "33a.jpg",
-     "v": "54005b03",
+     "src": "38a.jpg",
+     "v": "18379810",
      "w": 2304,
-     "h": 660
+     "h": 650
     }
    ],
    "desk": true
   },
   {
-   "n": 34,
-   "part": 5,
+   "n": 39,
+   "part": 6,
+   "name": "Which code gets guests to tap",
+   "plan": "Free and paid plans",
+   "status": "Sample",
+   "who": [
+    "Manager"
+   ],
+   "side": "dash",
+   "stage": "On your Dashboard",
+   "line": "For each code made in the QR tab: the share of guide opens that went on to a tap on a place, an offer, an amenity or a tour.",
+   "does": "For codes made in the QR tab, the share of guide opens that went on to a tap.",
+   "item": "Sample: the pool deck code ranks first, at 61%",
+   "how": "Counts only, never an individual guest. A code shows its share once it has at least 5 opens and 5 taps; until then it reads as fewer than 5. Only codes made in the QR tab are counted by spot. Shown with sample figures in the preview.",
+   "where": "Dashboard, QR codes tab",
+   "feeds": "Guide opens and taps, by code tag",
+   "caption": "Operator Dashboard, sample preview",
+   "view": "qr",
+   "sel": "#qrChart",
+   "img": [
+    {
+     "src": "39a.jpg",
+     "v": "39a6acef",
+     "w": 784,
+     "h": 856
+    }
+   ],
+   "desk": true
+  },
+  {
+   "n": 40,
+   "part": 6,
    "name": "Tomorrow's heads-up",
    "plan": "Free and paid plans",
    "status": "Sample",
@@ -1161,10 +1349,10 @@
    "sel": "#tswHeadsup",
    "img": [
     {
-     "src": "34a.jpg",
-     "v": "158cd456",
+     "src": "40a.jpg",
+     "v": "99d1ebeb",
      "w": 1544,
-     "h": 672
+     "h": 395
     }
    ],
    "desk": true

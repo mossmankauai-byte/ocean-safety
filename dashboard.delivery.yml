@@ -2,6 +2,7 @@
 # Required by oscheck.py --type console. The Dashboard is not sent to one recipient:
 # it is served at five segment routes and the segment is resolved from the pathname.
 # Updated 2026-10-01 for the QR codes tab (release captain Phase 1); prior text is in git at f86759a.
+# Updated again 2026-10-01 late for the tours rework.
 
 recipient: any signed-in operator, at their own segment route
 segment: hotel, timeshare, pm, rental, concierge, cars   # /rental serves the pm segment
@@ -41,3 +42,8 @@ must_be_true_after: >
   rain, lookouts read Maybe under heavy cloud; an event past the forecast says so and draws no
   band; live cams carry the watched beach's own surf band; ?plan=free shows the same band;
   checks/dashboard-ops.js passes in full.
+  Tours, reworked 2026-10-01 on work/tours-rework: Take the tour shows only stops whose tab
+  this segment and plan can see (three Today stops on hotel only,
+  two QR stops on all five, the Tours link stop on affiliate-desk segments), never opens by itself, and saves nothing;
+  the presenter tour (/hotel?tour=present) still refuses a real property and carries no price;
+  its slides come only from rows_li.py through export-tour.py.
