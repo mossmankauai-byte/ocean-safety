@@ -1306,6 +1306,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .td-lv.skip{background:rgba(180,69,47,.12);color:var(--risk)}
   .td-lv.na{background:var(--tint);color:var(--muted)}
   .td-lv.house{background:var(--tint);color:var(--ink)}
+  .td-rail .td-lv.house{min-width:96px}
   .td-rail .house-why{font-size:12px;color:var(--muted);margin:2px 0 4px}
   .td-row .nm small.sub{display:block;flex-basis:100%;font-size:11px;color:var(--muted);font-weight:500;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .td-empty{font-size:13px;color:var(--muted);padding:8px 0 12px;line-height:1.5}
@@ -7171,7 +7172,7 @@ window.osParseAff = function(v){
       (why ? sec(IC.sun, 'Why now', '<p>'+esc(why)+'</p>') : '') +
       sec(IC.talk, 'Tell the guest', tell.length ? '<ul>'+tell.join('')+'</ul>' : '<p>Add a line and hours on the Stay-Close tab and they show here.</p>') +
       sec(IC.ext, 'Reach it', linkRow([tel ? '<a href="tel:'+esc(tel)+'">'+IC.phone+'Call '+esc(x.phone)+'</a>' : '', site ? '<a class="alt" href="'+esc(site)+'" target="_blank" rel="noopener">'+IC.ext+'Website</a>' : '', '<button type="button" class="alt" data-td-stay>Edit on Stay-Close</button>'])) +
-      '<p class="cc-cap">From your Stay-Close menu as saved in this browser. Suggest it to the guest; what their guide shows follows your exported menu.</p></div>';
+      '<p class="cc-cap">From your Stay-Close menu as saved in this browser. Suggest it to the guest. Their guide shows what&rsquo;s in your exported menu.</p></div>';
   }
 
   function renderRail(P, R){
