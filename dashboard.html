@@ -1409,18 +1409,18 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .ph-list .gp-via{font-size:11px;color:var(--mute);margin:8px 2px 0;word-break:break-all}
   /* Stay-Close phone: the beach card a guest opens. The hero and safety report are a neutral slot
      (never a mocked safety call); the offer panel below is the guest app's own. */
-  .gp-beach-hero{position:relative;height:128px;border-radius:14px;overflow:hidden;background:linear-gradient(165deg,#7cc3cf 0%,#2f8296 52%,#0f4c5c 100%)}
+  .gp-beach-hero{position:relative;height:128px;border-radius:14px;overflow:hidden;background:linear-gradient(165deg,#7fd0e0 0%,#0a6e8c 52%,#0f4c5c 100%)}
   .gp-beach-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.04) 0%,rgba(0,0,0,0) 35%,rgba(0,0,0,.55) 100%)}
   .gp-beach-badge{position:absolute;top:10px;left:10px;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 8px;border-radius:999px;
-    font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:11.5px;font-weight:600;background:rgba(253,242,214,.94);color:#4b5563;border:1.5px solid rgba(15,76,92,.2)}
+    font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:11.5px;font-weight:600;background:rgba(253,242,214,.94);color:var(--ocean);border:1.5px solid rgba(15,76,92,.2)}
   .gp-beach-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:#9ca3af}
   .gp-beach-txt{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:8px 12px 10px;color:#fff}
   .gp-beach-txt b{display:block;font-size:17px;line-height:1.15;text-shadow:0 1px 6px rgba(0,0,0,.5)}
   .gp-beach-txt span{font-size:10.5px;opacity:.85}
   .gp-beach-safe{margin-top:10px;padding:10px 12px 4px;background:#eef3f5;border:1px solid #d9e3e6;border-radius:10px}
-  .gp-beach-safe i{display:block;height:7px;border-radius:4px;background:#d3dee2;margin-bottom:6px}
+  .gp-beach-safe i{display:block;height:7px;border-radius:4px;background:#d9e3e6;margin-bottom:6px}
   .gp-beach-cap{font-size:10.5px;color:var(--mute);line-height:1.4;margin:5px 2px 0}
-  .gp-toast{position:absolute;left:10px;right:10px;bottom:12px;z-index:3;background:#0f2a33;color:#fff;font-size:11.5px;line-height:1.45;border-radius:10px;padding:9px 11px;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+  .gp-toast{position:absolute;left:10px;right:10px;bottom:12px;z-index:3;background:#0a2731;color:#fff;font-size:11.5px;line-height:1.45;border-radius:10px;padding:9px 11px;box-shadow:0 8px 20px rgba(0,0,0,.3)}
   .gp-toast[hidden]{display:none}
   .gp-it:focus-visible,[data-gpask]:focus-visible{outline:2px solid var(--ocean);outline-offset:2px}
   /* Stay-Close phone, on the site itself: the real guide in desk mode, on an example beach */
@@ -2173,7 +2173,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     <div id="view-stayclose" hidden>
     <!-- AMENITY MANAGER -->
     <section>
-      <div class="sec-h"><h2>Your amenity menu</h2><p>What Stay-Close steers guests to when the ocean is the wrong call. Tap an amenity to see it on the beach card guests open. Edits save as a draft in this browser; Export sends the menu into your app build.</p></div>
+      <div class="sec-h"><h2>Your amenity menu</h2><p>What Stay-Close steers guests to when the ocean is the wrong call. Tap an amenity to see it on the beach card guests open. Edits save as a draft in this browser. <b>Export config</b> downloads the file that goes into your guide.</p></div>
       <div class="card" id="mgAmenities">
         <div class="mg-list" id="amList"></div>
         <div class="mg-add">
@@ -2228,7 +2228,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     </section>
     <!-- BAD OCEAN DAY SAVES -->
     <section>
-      <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the beach isn’t safe, what the app surfaced, and the on-property interest it captured.</p></div>
+      <div class="sec-h"><h2>Bad-ocean-day saves · Stay-Close</h2><p>When the ocean is the wrong call, what the guide put first, and the on-property interest it drew.</p></div>
       <div class="grid g3">
         <div class="card" style="grid-column:span 2">
           <div class="title"><span class="l"><span class="pv measured"></span> Stay-Close renders by trigger</span><span class="chip sample">Sample</span></div>
@@ -4146,7 +4146,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     tel:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ocean)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
   };
   function gpAmenityHTML(items){
-    var top = '<div class="gp-beach-hero"><span class="gp-beach-badge">Live safety call</span>'+
+    var top = '<div class="gp-beach-hero"><span class="gp-beach-badge">Safety report</span>'+
         '<div class="gp-beach-txt"><b>Your nearest beach</b><span>Near '+esc(gpName())+'</span></div></div>'+
       '<div class="gp-beach-safe" aria-hidden="true"><i></i><i></i><i style="width:58%"></i></div>'+
       '<div class="gp-beach-cap">The live surf, rip and hazard report for the beach sits here. Your offers never change it.</div>';
@@ -4209,10 +4209,10 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   function gpPostSoon(){ clearTimeout(gpPostT); gpPostT = setTimeout(gpPost, 140); }
   function gpBeachLine(){
     var el = document.getElementById('gpBeachLine'), B = GP_BEACH[gpIsle]; if(!el) return;
-    var cond = { live:'the ocean as it is right now', calm:'a sample calm day', red_flag:'a sample high-surf day', brown_water:'a sample brown-water day', rain:'a sample rainy day' }[gpCond];
-    el.innerHTML = '<b>'+esc(B.name)+'</b>, '+esc(B.isl)+', on '+cond+'.' +
-      (gpCond === 'live' ? '' : ' The guide runs its own safety model on these readings.') +
-      (gpCond === 'brown_water' && !B.stream ? ' This beach has no stream mouth, so the guide never flags brown water here.' : '');
+    var cond = { calm:'a sample calm day', red_flag:'a sample high-surf day', brown_water:'a sample brown-water day', rain:'a sample rainy day' }[gpCond];
+    el.innerHTML = '<b>'+esc(B.name)+'</b>, '+esc(B.isl)+(gpCond === 'live' ? ', live right now.' : ', on '+cond+'.') +
+      (gpCond === 'live' ? '' : ' The guide makes its own safety call from these sample readings.') +
+      (gpCond === 'brown_water' && !B.stream ? ' This beach has no stream mouth, so the guide&rsquo;s brown-water flag does not apply here.' : '');
   }
   function gpMountFrame(){
     if(gpFrame || !GP_SAME_SITE) return;
@@ -4226,7 +4226,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     ['gpIsl','gpBeachLine'].forEach(function(id){ var x = document.getElementById(id); if(x) x.hidden = false; });
     var lv = document.querySelector('#gpAmChips [data-cond="live"]'); if(lv) lv.hidden = false;
     var note = document.getElementById('gpAmNote');
-    if(note) note.textContent = 'Your guest guide, live, on an example beach. Pick an island and an ocean, scroll the whole beach card, and tap your offers to see what a guest gets. Not measured data.';
+    if(note) note.textContent = 'Your guest guide on an example beach. Pick an island and an ocean condition, then tap your offers to see what a guest gets.';
     gpBeachLine();
   }
   function gpSetIsle(i){
@@ -4266,7 +4266,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     if(!t){ t = document.createElement('div'); t.className = 'gp-toast'; t.setAttribute('role','status'); scr.appendChild(t); }
     t.innerHTML = kind === 'call'
       ? 'On a guest&rsquo;s phone this calls <b>'+esc(it.phone)+'</b>.'
-      : 'On a guest&rsquo;s phone this opens a text to <b>'+esc(it.phone)+'</b> that reads: &ldquo;Aloha, I would like to ask about: '+esc(it.a)+'&rdquo;';
+      : 'On a guest&rsquo;s phone this opens a text to <b>'+esc(it.phone)+'</b> that reads: &ldquo;Aloha, I would like to ask about: '+esc(it.a)+'&rdquo;.';
     t.hidden = false;
     clearTimeout(t._h); t._h = setTimeout(function(){ t.hidden = true; }, 4200);
   }
@@ -4344,10 +4344,10 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   manager({ key:'amenities', exportKey:'amenities',
     ids:{list:'amList', a:'amA', b:'amB', phone:'amPhone', hours:'amHours', site:'amSite', add:'amAdd', reset:'amReset', export:'amExport', count:'amCount', badge:'vbStay'},
     seeds:[
-      ['Spa treatments','Lobby level · massage, facials, day passes','(808) 555-0142','9a–7p daily','assets/amenity/spa.jpg','spa'],
-      ['On-site dining','Oceanview restaurant + poolside grill','(808) 555-0155','7a–9p','assets/amenity/dining.jpg','dining'],
+      ['Spa treatments','Lobby level · massage, facials, day passes','(808) 555-0142','9a to 7p daily','assets/amenity/spa.jpg','spa'],
+      ['On-site dining','Oceanview restaurant + poolside grill','(808) 555-0155','7a to 9p','assets/amenity/dining.jpg','dining'],
       ['Pool bar','Cocktails, shave ice & light bites','','','assets/amenity/poolbar.jpg','dining'],
-      ['Cabana rental','Full-day shade with towel service','(808) 555-0170','8a–5p','assets/amenity/cabana.jpg','rentals'],
+      ['Cabana rental','Full-day shade with towel service','(808) 555-0170','8a to 5p','assets/amenity/cabana.jpg','rentals'],
       ['Gift shop','Sundries, beach wear & local goods','','','assets/amenity/shop.jpg','rentals']
     ],
     // Export in the shared amenity contract {name,detail,price,phone,hours,showWhen} the guest app reads.
