@@ -6425,7 +6425,7 @@ window.osParseAff = function(v){
     cam_hanalei_colony:{beach:'tunnels',op:'Hanalei Colony Resort',host:'Ozolio',view:'The Hāʻena shoreline west of Hanalei: sand, surf and the north shore reef.',url:'https://www.ozolio.com/explore/LKOU000004E4'},
     cam_royal_sonesta:{beach:'kalapaki',op:'Royal Sonesta Kauaʻi',host:'Ozolio',view:'Kalapakī Bay from the resort: the pool deck, the beach and the bay.',url:'https://www.ozolio.com/explore/IDWX000000A6'},
     cam_sheraton_poipu:{beach:'poipu',op:'Sheraton Kauaʻi Resort',host:'Ozolio',view:'Poʻipū Beach from the resort: the shoreline, the surf and the sunset.',url:'https://www.ozolio.com/explore/LOUK00000052'},
-    cam_brenneckes:{beach:'poipu',op:"Brennecke's Beach Broiler",host:'Restaurant webcam',view:'The lawn and the east end of Poʻipū Beach Park from the restaurant.',url:'https://www.brenneckes.com/beach-webcam'}
+    cam_brenneckes:{beach:'poipu',op:"Brennecke's Beach Broiler",host:'brenneckes.com',view:'The lawn and the east end of Poʻipū Beach Park from the restaurant.',url:'https://www.brenneckes.com/beach-webcam'}
   };
   Object.keys(CAMS).forEach(function(k){ CAMS[k].id = k; });
   function camsFor(beachId){ return Object.keys(CAMS).filter(function(k){ return CAMS[k].beach === beachId; }).map(function(k){ return CAMS[k]; }); }
