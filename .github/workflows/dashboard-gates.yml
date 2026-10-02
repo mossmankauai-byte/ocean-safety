@@ -38,7 +38,12 @@ jobs:
           node-version: "20"
 
       - name: Install Playwright
+        # The vendored checks load Playwright from .github/tools/node/node_modules, the
+        # same layout as the standards tree, so install it there, not at the repo root.
+        # .github/tools/ stays untracked; on a Mac it is a symlink into the standards tree.
         run: |
+          mkdir -p .github/tools/node
+          cd .github/tools/node
           npm init -y >/dev/null
           npm i -D playwright@1.62.0 >/dev/null
           npx playwright install --with-deps chromium
@@ -47,7 +52,10 @@ jobs:
         run: python3 .github/checks/clean-route-freshness.py .
 
       - name: Gate 4 · partner-config contract
-        run: node .github/checks/config-contract.js .
+        # Absolute path, like Gate 1. The check serves the checkout over HTTP and refuses
+        # any request whose path does not start with the repo dir; a relative "." never
+        # matches, so every file 404s and the fault injection reads a blank page.
+        run: node .github/checks/config-contract.js "$PWD"
 
       - name: Gate 1 · Dashboard functional walk (this commit's files)
         run: node .github/checks/dashboard-ops.js "$PWD/dashboard.html"
