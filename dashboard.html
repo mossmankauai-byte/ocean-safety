@@ -3717,10 +3717,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   // target must not sit in a hidden block of its own, and seg/desk narrow it further.
   // v2 showed the timeshare funnels to hotels because the hidden view still matched.
   // v4 (2026-10-01 late): three Today stops for the remade tab (guide, readings, outlook) and
-  // two QR stops (the maker, then the chart).
+  // two QR stops (the maker, then the chart). The finish has a version per desk kind, so a
+  // timeshare sales desk is never told about a tour link it does not have.
   var ALL = [
     { center:true, title:'Welcome to your Dashboard',
-      body:'This is where you shape the guide your guests carry to the beach: your amenities, your offers, your picks. This tour takes a minute or two. Replay it any time with <b>Take the tour</b>.' },
+      body:'This is where you shape the guide your guests carry to the beach: what you offer and the places you pick. This tour takes a minute or two. Replay it any time with <b>Take the tour</b>.' },
     { view:'home', sel:'#ccKpis', title:'Your numbers at a glance',
       body:'Guide opens, place taps, your most-opened place and offer taps, compared with the period before. Switch between 7, 30 and 90 days up top. A new property shows <b>Sample data</b> until guests start using its guide.' },
     { view:'home', sel:'#ccTodo', title:'What needs you today',
@@ -3730,9 +3731,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     { view:'today', sel:'#tdLive', title:'Your guest guide, at the desk',
       body:'The guide your guests carry, running live on this tab. Tap any pin, card or tour in it and the desk notes pop up: what to tell the guest, how the day runs from 6 am to sunset, what to watch for and how to get there. <b>Guests want to</b> and <b>When</b> re-rank the picks for the guest in front of you.' },
     { view:'today', sel:'#tdTop', title:'The island right now',
-      body:'Waves, swell, wind, rain, UV, sunset and tide, read from the same live feed as the guide. The wheel colors the four shores by their biggest surf; tap one to see only its picks. These are raw readings. The call on a beach stays in the guide.' },
+      body:'Waves, swell, wind, rain, UV, sunset and tide: raw readings from the same live feed as the guide. The wheel colors North, East, South and West by the biggest surf expected at their beaches; tap an arc to narrow the picks to that shore. The call on a beach stays in the guide.' },
     { view:'today', sel:'#tdRail', title:'Today&rsquo;s outlook',
-      body:'The beaches, trails and tour kinds that fit right now, then farmers&rsquo; markets and parks, sights and culture. Picks come only from what you <b>Feature</b> or <b>List</b> on Places, and a hazard-locked spot never ranks. <b>Print desk card</b> puts the day on one sheet for the desk.' },
+      body:'The beaches, trails and tour kinds that fit right now, then farmers&rsquo; markets, then parks, sights and culture. Beaches, trails, markets and sights come only from what you <b>Feature</b> or <b>List</b> on Places, and a hazard-locked spot never ranks. <b>Print desk card</b> puts the day on one sheet for the desk.' },
     { view:'stayclose', sel:'#mgAmenities', title:'Your amenity menu',
       body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. Edits save as a draft in this browser. <b>Export config</b> downloads the file that goes into your guide.',
       free:{ body:'When the ocean is the wrong call, the guide steers guests to what you offer instead: spa, dining, cabanas. The free plan shows one amenity; the paid plan shows your whole menu. <b>Export config</b> downloads the file that goes into your guide.' } },
@@ -3745,24 +3746,26 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       body:'How many guests a day, when they plan, and which beaches and offers they open. It stays <b>Sample</b> until your guide is live. Live mode only ever shows measured counts.' },
     { view:'places', sel:'.pl-safety', title:'Places, with safety built in',
       body:'Choose what your guide recommends. Hazardous spots start as <b>Not recommended</b> and cannot be removed, so their warnings always stay in front of guests.' },
-    { view:'qr', sel:'#view-qr .qr-main .card', title:'A QR code for every spot',
+    { view:'qr', sel:'#view-qr .qr-main .card', title:'Make your QR codes',
       body:'Name a code for each spot you post one: the lobby sign, a room card, the pool deck. Each one opens your guide with its own tag. Download the PNG, email the link or share it. The names are kept in this browser; the codes work wherever you post them.' },
     { view:'qr', sel:'#view-qr .qr-side .card', title:'Which code gets guests to tap',
       body:'Scans of the codes you make here count under their names. The chart ranks them by the share of opens that went on to tap a place, an offer, an amenity or a tour. Counts only, never an individual, and anything under 5 reads as fewer than 5.' },
     { view:'segments', sel:'#view-segments .card', seg:['timeshare'], title:'Three guests, three funnels',
       body:'Renters, repeat guests and owners each get their own QR code and their own funnel. Owners never see a sales pitch.' },
     { view:'desk', sel:'#affInput', desk:'affiliate', title:'Your tour link',
-      body:'Paste any link from your Viator or GetYourGuide partner account. It saves to your guide right away, and tours guests book through it are credited to your partner account.' },
+      body:'Paste any link from your Viator or GetYourGuide partner account. It saves to your guide right away, and bookings made through it carry your partner ID.' },
     { view:'shop', sel:'#shopFrameWrap', title:'Your store',
       body:'Gear guests can buy or rent straight from your guide. Money lands in your own Square account; OceanSafe never holds it.',
       free:{ sel:'#shopLock', title:'Your store, on the paid plan', body:'Selling and renting gear from your guide is part of the paid plan. Money would land in your own Square account; OceanSafe never holds it.' } },
-    { center:true, title:'That&rsquo;s the tour', last:true,
-      body:'Amenities, promotions and places save as drafts in this browser until you export them, and your QR code names stay in this browser too. A tour link saves to your guide the moment you hit Save. Questions? Your OceanSafe contact is one text away.' }
+    { center:true, title:'That&rsquo;s the tour', last:true, desk:'affiliate',
+      body:'Amenities, promotions and places save as drafts in this browser until you export them, and your QR code names stay in this browser too. A tour link saves to your guide the moment you hit Save. Questions? Your OceanSafe contact is one text away.' },
+    { center:true, title:'That&rsquo;s the tour', last:true, desk:'salesdesk',
+      body:'Amenities, promotions and places save as drafts in this browser until you export them, and your QR code names stay in this browser too. Questions? Your OceanSafe contact is one text away.' }
   ];
   function applies(s){
-    if(s.center) return true;
     if(s.seg && s.seg.indexOf(window.OS_SEG) < 0) return false;
     if(s.desk && (window.OS_SEGCFG||{}).deskKind !== s.desk) return false;
+    if(s.center) return true;
     var tab = document.querySelector('.viewtabs button[data-view="'+s.view+'"]');
     if(!tab || tab.hidden) return false;
     var el = document.querySelector(s.sel); if(!el) return false;
