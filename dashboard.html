@@ -1305,6 +1305,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .td-lv.fair{background:var(--gold-tint);color:var(--gold-ink)}
   .td-lv.skip{background:rgba(180,69,47,.12);color:var(--risk)}
   .td-lv.na{background:var(--tint);color:var(--muted)}
+  .td-lv.house{background:var(--tint);color:var(--ink)}
+  .td-rail .house-why{font-size:12px;color:var(--muted);margin:2px 0 4px}
   .td-row .nm small.sub{display:block;flex-basis:100%;font-size:11px;color:var(--muted);font-weight:500;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .td-empty{font-size:13px;color:var(--muted);padding:8px 0 12px;line-height:1.5}
   .td-rail .cc-card{border-top:3px solid var(--sea)}
@@ -4379,7 +4381,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     // under that name too, made absolute so a bundled asset path still passes the app's check.
     toExport:function(it){ var img = ''; try{ img = it.photo ? (/^data:/.test(it.photo) ? it.photo : new URL(it.photo, location.href).href) : ''; }catch(e){}
       return {name:it.a, detail:it.b, price:'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'', photo:it.photo||'', image:img, pdf:it.pdf||'', showWhen:'always'}; },
-    onChange:function(items){ if(items.length !== gpItems.amenities.length){ gpOpen = {}; gpSel = -1; } gpItems.amenities = items; gpRender(); },
+    onChange:function(items){ if(items.length !== gpItems.amenities.length){ gpOpen = {}; gpSel = -1; } gpItems.amenities = items; gpRender(); window.OS_HOUSE = items; window.dispatchEvent(new CustomEvent('os:house-changed')); },
     onEdit:function(i){ if(gpSel !== i){ gpSel = i; gpOpen = {}; } gpRender(); } });
 })();
 </script>
@@ -7122,6 +7124,56 @@ window.osParseAff = function(v){
   }
 
   /* ---- render: the outlook rail, every row opens the desk notes and the place in the guide ---- */
+  /* ---- your property (2026-10-01): the hotel's own amenity menu (Stay-Close tab) leads the rail on
+     a rough or wet day, and a Restaurant amenity is offered before sunset. OS_HOUSE is the menu as the
+     guest app shows it, so the free plan carries its one amenity only. The menu is this browser's
+     draft, so the desk is told to suggest it, never that the guest's app shows it. Offers sit in
+     their own section, never beside a beach, trail or event. ---- */
+  var HOUSE_CAT = { spa:'Spa', dining:'Restaurant', rentals:'Rentals', tours:'Tours', upgrades:'Room upgrade' };
+  function houseList(){ return (window.OS_HOUSE || []).map(function(it, i){ return { i:i, a:it.a||'', b:it.b||'', phone:it.phone||'', hours:it.hours||'', site:it.site||'', cat:it.cat||'' }; }).filter(function(x){ return x.a; }); }
+  function houseWet(R){ return ui.intent === 'rain' || (!!R && ((R.rainChance!=null && R.rainChance >= 60) || R.rainToday >= 2)); }
+  function houseDay(P, R){
+    if(houseWet(R)) return 'Rain likely today. Steer guests to what you offer under a roof.';
+    if(R && P.all.beach.length && !P.all.beach.some(function(o){ return o.level === 'good'; })) return 'No beach you list reads Calm today. Steer guests to what you offer.';
+    return '';
+  }
+  function houseRank(R){
+    var wet = houseWet(R), ord = { spa:0, dining:1, upgrades:2, tours:3, rentals:4 };
+    return houseList().filter(function(x){ return !(wet && x.cat === 'rentals'); }).sort(function(a, b){ return (ord[a.cat]==null ? 5 : ord[a.cat]) - (ord[b.cat]==null ? 5 : ord[b.cat]) || a.i - b.i; });
+  }
+  function sunsetMin(R){ var m = /T(\d{2}):(\d{2})/.exec(String(R && R.sunset || '')); return m ? (+m[1])*60 + (+m[2]) : null; }
+  function sunsetPick(R){
+    var ss = sunsetMin(R); if(ss == null || !R.now) return null;
+    var nowM = R.now.hour*60 + R.now.minute; if(nowM >= ss) return null;
+    var d = houseList().filter(function(x){ return x.cat === 'dining'; })[0]; if(!d) return null;
+    var from = Math.floor((ss - 30)/5)*5;
+    return { it:d, from:from, ss:ss };
+  }
+  function houseRow(x, sub){ return '<div class="td-row" role="button" tabindex="0" data-open="house:'+x.i+'"><span class="td-lv house">'+esc(HOUSE_CAT[x.cat] || 'Yours')+'</span><div class="nm"><span>'+esc(x.a)+'</span>'+(sub ? '<small class="sub">'+esc(sub)+'</small>' : '')+'</div>'+IC.chev+'</div>'; }
+  function houseSec(P, R, lead){
+    var why = houseDay(P, R); if(!!why !== lead) return '';
+    var sp = R ? sunsetPick(R) : null, ssub = sp ? 'Sunset '+minClock(sp.ss)+'. Suggest it from '+minClock(sp.from)+'.' : '';
+    var picks = why ? houseRank(R).slice(0, 3) : [];
+    if(sp && !picks.some(function(x){ return x.i === sp.it.i; })) picks.push(sp.it);
+    var h = '<div class="rs">Your property</div>' + (why ? '<p class="house-why">'+esc(why)+'</p>' : '');
+    if(!picks.length) return why ? h + '<div class="td-empty">Nothing on your amenity menu fits today. <button type="button" class="td-btn" data-td-stay>Open Stay-Close</button></div>' : '';
+    return h + picks.map(function(x){ return houseRow(x, sp && x.i === sp.it.i ? ssub : x.b); }).join('');
+  }
+  function noteHouse(id, R){
+    var x = houseList().filter(function(y){ return String(y.i) === String(id); })[0];
+    if(!x) return '<div class="td-sh-body"><h3>Your amenity</h3><p>This amenity is no longer on your menu.</p></div>';
+    var why = last.reads ? houseDay(last.reads, R) : '', sp = R ? sunsetPick(R) : null, tell = [];
+    if(x.b) tell.push('<li>'+esc(x.b)+'</li>');
+    if(x.hours) tell.push('<li><b>Hours:</b> '+esc(x.hours)+'</li>');
+    if(sp && sp.it.i === x.i) tell.push('<li><b>Sunset:</b> '+esc(minClock(sp.ss))+'. Suggest a table from '+esc(minClock(sp.from))+'.</li>');
+    var tel = x.phone.replace(/[^\d+]/g, ''), site = /^https?:\/\//i.test(x.site) ? x.site : '';
+    return '<div class="td-sh-body">' + head(x.a, null, 'Your property &middot; '+esc(HOUSE_CAT[x.cat] || 'Amenity')) +
+      (why ? sec(IC.sun, 'Why now', '<p>'+esc(why)+'</p>') : '') +
+      sec(IC.talk, 'Tell the guest', tell.length ? '<ul>'+tell.join('')+'</ul>' : '<p>Add a line and hours on the Stay-Close tab and they show here.</p>') +
+      sec(IC.ext, 'Reach it', linkRow([tel ? '<a href="tel:'+esc(tel)+'">'+IC.phone+'Call '+esc(x.phone)+'</a>' : '', site ? '<a class="alt" href="'+esc(site)+'" target="_blank" rel="noopener">'+IC.ext+'Website</a>' : '', '<button type="button" class="alt" data-td-stay>Edit on Stay-Close</button>'])) +
+      '<p class="cc-cap">From your Stay-Close menu as saved in this browser. Suggest it to the guest; what their guide shows follows your exported menu.</p></div>';
+  }
+
   function renderRail(P, R){
     var el = document.getElementById('tdRail');
     function top(list, n){ return list.filter(function(o){ return o.level === 'good' || o.level === 'fair'; }).slice(0, n); }
@@ -7130,10 +7182,12 @@ window.osParseAff = function(v){
     var filt = []; if(ui.intent !== 'all') filt.push(INTENTS.filter(function(i){ return i[0]===ui.intent; })[0][1]); if(ui.when !== 'now') filt.push(ui.when === 'afternoon' ? 'this afternoon' : 'this evening'); if(ui.shore) filt.push(ui.shore+' shore');
     var h = '<div class="cc-h">'+IC.sun+'Today&rsquo;s outlook'+(R ? '<span class="note">'+esc(R.now.date.slice(5).replace('-','/'))+'</span>' : '')+'</div>';
     if(filt.length) h += '<p class="filt">For: '+esc(filt.join(', '))+'</p>';
+    h += houseSec(P, R, true);
     var nb = P.all.beach.length, nt = P.all.hike.length;
     h += '<div class="rs">Beaches</div>' + (b.length ? b.map(mini).join('') : '<div class="td-empty">'+(!nb ? 'No beaches are Featured or Listed yet. <button type="button" class="td-btn" data-td-places>Open Places</button>' : R ? 'No beach rates well for this.' : 'Loading&hellip;')+'</div>');
     h += '<div class="rs">Trails</div>' + (t.length ? t.map(mini).join('') : '<div class="td-empty">'+(!nt ? 'No trails are Featured or Listed yet.' : R ? 'No trail pick for this.' : 'Loading&hellip;')+'</div>');
     h += '<div class="rs">Tours</div>' + (k.length ? k.map(mini).join('') : '<div class="td-empty">'+(R ? 'No tour kind rates well for this.' : 'Loading&hellip;')+'</div>');
+    h += houseSec(P, R, false);
     var mk = P.markets.slice(0, 3), ac = top(P.acts, 4), ev = P.events.slice(0, 5), nm = P.all.market.length, na = P.all.act.length;
     h += '<div class="rs">Farmers&rsquo; markets</div>' + (mk.length ? mk.map(mini).join('') : '<div class="td-empty">'+(!nm ? 'No markets are Featured or Listed yet.' : 'No market for this.')+'</div>');
     h += '<div class="rs">Parks, sights and culture</div>' + (ac.length ? ac.map(mini).join('') : '<div class="td-empty">'+(!na ? 'No sights are Featured or Listed yet.' : R ? 'No sight pick for this.' : 'Loading&hellip;')+'</div>');
@@ -7496,16 +7550,34 @@ window.osParseAff = function(v){
       sec(IC.pin, 'Getting there', (info.parking ? '<p>'+esc(info.parking)+'</p>' : '') + linkRow([info.lat ? '<a href="'+esc(dirUrl(info.lat, info.lon))+'" target="_blank" rel="noopener">'+IC.pin+'Directions to trailhead</a>' : '', '<button type="button" class="alt" data-phone-open="hike:'+esc(id)+'">'+IC.phone+'Show in guide</button>'])) +
       '</div>';
   }
+  function gygPid(){
+    var v = '', ta = window.OS_TOUR_AFF;
+    if(window.OS_AUTH) v = (ta && ta.gyg_partner_id) || '';
+    else { try{ var raw = localStorage.getItem('os_pm_affiliate_link') || ''; v = raw && window.osParseAff ? (window.osParseAff(raw).gyg_partner_id || '') : ''; }catch(e){} }
+    return /^[A-Za-z0-9_-]{1,32}$/.test(v) ? v : '';
+  }
+  function tourBooking(t, D, R){
+    var showT = toursTabShown(), pid = gygPid(), guide = '<button type="button" class="alt" data-phone-open="tour:'+esc(t.gid)+'">'+IC.phone+'Show in guide</button>';
+    if(D && D.best < 0) return '<p>Not a day to book this one. '+esc(D.sub || '')+'</p>' + linkRow([guide]);
+    if(!D) return '<p>Today&rsquo;s read is still loading. Book once the band above shows a good window.</p>' + linkRow([guide]);
+    var win = D.rows[D.best], when = win.range || rangeLabel(win.w, R);
+    var gone = R.now && (R.now.hour + R.now.minute/60) >= win.w.b;
+    if(pid) return '<p>'+(gone ? 'Today&rsquo;s best window, '+esc(when)+', has passed. Book for another day.' : 'Book for the '+esc(when)+' window.')+' The link carries your GetYourGuide partner ID. Vendors, times and prices are on their page.</p>' +
+      linkRow(['<a href="https://www.getyourguide.com/-t'+encodeURIComponent(t.gid)+'/?partner_id='+encodeURIComponent(pid)+'" target="_blank" rel="noopener">'+IC.ext+'Book</a>', guide]);
+    return '<p>'+(showT ? 'Add your GetYourGuide partner link on the Tours tab and a Book button shows here, under your own partner ID.' : 'Guests book from the Tours cards in your guide.')+'</p>' +
+      linkRow([showT ? '<button type="button" data-td-tours>Open Tours</button>' : '', guide]);
+  }
   function toursTabShown(){ var t = document.querySelector('.viewtabs button[data-view="desk"]'); return !!t && !t.hidden; }
   function noteTour(id, o, R){
     var t = tourByGuideId(id);
     if(!t) return '<div class="td-sh-body"><h3>A tour from your guide</h3><div class="kick">Tour</div>' + sec(IC.talk, 'Tell the guest', '<p>Vendor, times and prices live on the tour card in the guide. The desk reads here cover tour kinds, not vendors.</p>') + '</div>';
     if(!o) o = tourRead(t, R ? islandCond(R) : null);
+    var D = R ? tourDay(t, R) : null;
     return '<div class="td-sh-body">' +
       head(t.n, o, 'Tour kind &middot; '+esc(t.dur)) +
-      sec(IC.sun, 'Today', (R ? (function(){ var D = tourDay(t, R); return D ? bandHTML(D, R) : ''; })() : '')+'<p>'+esc(o.why.filter(Boolean).join(' ') || o.label)+'</p>') +
+      sec(IC.sun, 'Today', (D ? bandHTML(D, R) : '')+'<p>'+esc(o.why.filter(Boolean).join(' ') || o.label)+'</p>') +
       sec(IC.talk, 'Tell the guest', '<ul><li><b>Where:</b> '+esc(t.place)+'</li><li><b>Best when:</b> '+esc(t.when)+'</li><li><b>How long:</b> '+esc(t.dur)+'.</li></ul>') +
-      sec(IC.ext, 'Booking', '<p>Guests book from the Tours cards in your guide'+(toursTabShown() ? ', through the partner link saved on your Tours tab' : '')+'. Vendors, times and prices live there, not here.</p>' + linkRow([toursTabShown() ? '<button type="button" class="alt" data-td-tours>Open Tours</button>' : '', '<button type="button" class="alt" data-phone-open="tour:'+esc(t.gid)+'">'+IC.phone+'Show in guide</button>'])) +
+      sec(IC.ext, 'Booking', tourBooking(t, D, R)) +
       '</div>';
   }
   function noteCam(id, R){
@@ -7564,7 +7636,7 @@ window.osParseAff = function(v){
     if(!d) return;
     var h = '<div class="cc-h">'+IC.talk+'Desk notes<span class="note">from your tap</span></div>';
     var reads = last.reads, found = reads && reads.all[d.kind] ? reads.all[d.kind].filter(function(x){ return x.id === d.id; })[0] : null;
-    var body = d.kind === 'beach' ? noteBeach(d.id, found, R) : d.kind === 'hike' ? noteTrail(d.id, found, R) : d.kind === 'tour' ? noteTour(d.id, found && found.kind==='tour' ? found : null, R) : d.kind === 'cam' ? noteCam(d.id, R) : d.kind === 'event' ? noteEvent(d.id, R) : notePoi(d.kind, d.id, d.name, R);
+    var body = d.kind === 'beach' ? noteBeach(d.id, found, R) : d.kind === 'hike' ? noteTrail(d.id, found, R) : d.kind === 'tour' ? noteTour(d.id, found && found.kind==='tour' ? found : null, R) : d.kind === 'cam' ? noteCam(d.id, R) : d.kind === 'event' ? noteEvent(d.id, R) : d.kind === 'house' ? noteHouse(d.id, R) : notePoi(d.kind, d.id, d.name, R);
     el.innerHTML = h + body;
     var dlg = el.closest('.td-dlg'); if(dlg) dlg.scrollTop = 0;
   }
@@ -7573,7 +7645,7 @@ window.osParseAff = function(v){
     last.desk = { kind:kind, id:String(id), name:name||'' };
     renderDesk();
     openDesk();
-    if(!fromPhone && kind !== 'event'){ var gk = kind === 'tour' && tourByGuideId(id) ? tourByGuideId(id).gid : id; frameOpen(kind, gk); }
+    if(!fromPhone && kind !== 'event' && kind !== 'house'){ var gk = kind === 'tour' && tourByGuideId(id) ? tourByGuideId(id).gid : id; frameOpen(kind, gk); }
   }
 
   /* ---- print: a one-page desk card in a clean window ---- */
@@ -7607,6 +7679,7 @@ window.osParseAff = function(v){
     var t = e.target;
     if(t.closest('[data-td-places]')){ var p = document.querySelector('.viewtabs button[data-view="places"]'); if(p) p.click(); return; }
     if(t.closest('[data-td-tours]')){ closeDesk(); var d = document.querySelector('.viewtabs button[data-view="desk"]'); if(d) d.click(); return; }
+    if(t.closest('[data-td-stay]')){ closeDesk(); var sc = document.querySelector('.viewtabs button[data-view="stayclose"]'); if(sc) sc.click(); return; }
     if(t.closest('#tdClose') || t.id === 'tdOv'){ closeDesk(); return; }
     if(t.closest('#tdRefresh')){ loadWx(true); return; }
     if(t.closest('#tdPrint')){ printCard(); return; }
@@ -7663,6 +7736,7 @@ window.osParseAff = function(v){
   if(tab) tab.addEventListener('click', function(){ setTimeout(start, 0); });
   if(tab && !tab.hidden && !view.hidden) start();
   window.addEventListener('os:places-changed', function(){ setTimeout(render, 0); });
+  window.addEventListener('os:house-changed', function(){ setTimeout(render, 0); });
   window.addEventListener('storage', function(){ setTimeout(render, 0); });
   setInterval(function(){ if(!view.hidden && island) loadWx(true); }, 10*60*1000);
 })();
