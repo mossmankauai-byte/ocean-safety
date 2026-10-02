@@ -14,6 +14,7 @@
 
 # Conditions proxy + cache (collapses per-visitor open-meteo/NOAA calls into one cached server fetch)
 /api/wx         /.netlify/functions/wx  200
+/api/events     /.netlify/functions/events  200
 /api/creator-provision   /.netlify/functions/creator-provision   200
 
 # Store checkout return (create-square-checkout appends ?order=&pickup= to this URL)
