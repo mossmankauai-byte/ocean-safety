@@ -6716,7 +6716,7 @@ window.osParseAff = function(v){
     if(p.day==null){ o.sub = p.hours || ''; return o; }
     if(p.day === dow){
       if(o.em!=null && nowM > o.em){ o.level = 'skip'; o.label = 'Ended'; o.why.push('Ended '+minClock(o.em)+' today.'); }
-      else if(o.sm!=null && nowM < o.sm){ o.level = 'good'; o.label = 'Today'; o.why.push('Opens '+span+'.'); }
+      else if(o.sm!=null && nowM < o.sm){ o.level = 'good'; o.label = 'Today'; o.why.push('Opens '+minClock(o.sm)+(o.em!=null ? ', until '+minClock(o.em) : '')+'.'); }
       else { o.level = 'good'; o.label = 'Open now'; o.why.push(o.em!=null ? 'Until '+minClock(o.em)+'.' : 'Today.'); }
       o.sub = span + (it.r ? ' · '+it.r : '');
     } else { o.level = 'fair'; o.label = DAYS3[p.day]; o.why.push(DAYS[p.day]+(span ? ', '+span : '')+'.'); o.sub = DAYS3[p.day]+(span ? ' '+span : '') + (it.r ? ' · '+it.r : ''); }
@@ -6739,7 +6739,7 @@ window.osParseAff = function(v){
     else if(type === 'scenic' && (wet || cloudy)){ o.level = 'fair'; o.why.push(wet ? 'Rain, views may be hidden.' : 'Heavy cloud, views may be hidden.'); }
     else if(type === 'playground' && wet){ o.level = 'fair'; o.why.push('Wet playground.'); }
     else if(type === 'town' && wet) o.why.push('Shops and galleries to duck into.');
-    else if(wet){ o.level = 'fair'; o.why.push('Outdoors, rain layers.'); }
+    else if(wet){ o.level = 'fair'; o.why.push('Outdoors, bring a rain layer.'); }
     else o.why.push(type === 'scenic' ? 'Clear views.' : type === 'playground' ? 'Dry and open.' : type === 'town' ? 'Walkable town.' : 'Outdoors, dry.');
     o.label = LVL[o.level];
     o.sub = (TYPE_WORD[type] ? TYPE_WORD[type]+' · ' : '') + o.why[0].replace(/\.$/, '');
@@ -7177,7 +7177,7 @@ window.osParseAff = function(v){
       head(ev.title, o.level === 'na' ? null : o, 'Event'+(ev.venue && ev.venue.city ? ' &middot; '+esc(ev.venue.city) : '')) +
       sec(IC.event, 'When', '<p>'+esc(evWhen(ev))+'</p>') +
       (tell.length ? sec(IC.talk, 'Tell the guest', '<ul>'+tell.join('')+'</ul>') : '') +
-      sec(IC.pin, 'Getting there', linkRow([ev.venue && ev.venue.lat!=null ? '<a href="'+esc(dirUrl(ev.venue.lat, ev.venue.lon))+'" target="_blank" rel="noopener">'+IC.pin+'Directions</a>' : '', ev.url ? '<a class="alt" href="'+esc(ev.url)+'" target="_blank" rel="noopener">'+IC.ext+'Event page</a>' : '', ev.website && !/kauaifestivals\.com/.test(ev.website) ? '<a class="alt" href="'+esc(ev.website)+'" target="_blank" rel="noopener">'+IC.ext+'Organizer site</a>' : '']) + '<p class="cc-cap">From kauaifestivals.com, the island calendar run by the Kauaʻi Visitors Bureau, the County of Kauaʻi and the Hawaiʻi Tourism Authority. Details and prices live on the event page.</p>') +
+      sec(IC.pin, 'Getting there', linkRow([ev.venue && ev.venue.lat!=null ? '<a href="'+esc(dirUrl(ev.venue.lat, ev.venue.lon))+'" target="_blank" rel="noopener">'+IC.pin+'Directions</a>' : '', ev.url ? '<a class="alt" href="'+esc(ev.url)+'" target="_blank" rel="noopener">'+IC.ext+'Event page</a>' : '', ev.website && !/kauaifestivals\.com/.test(ev.website) ? '<a class="alt" href="'+esc(ev.website)+'" target="_blank" rel="noopener">'+IC.ext+'Organizer site</a>' : '']) + '<p class="cc-cap">From kauaifestivals.com, the island calendar, a partnership of the Kauaʻi Visitors Bureau, the County of Kauaʻi and the Hawaiʻi Tourism Authority. Details and prices are on the event page.</p>') +
       '</div>';
   }
   function openDesk(){ var ov = document.getElementById('tdOv'); if(!ov || !ov.hidden) return; ov.hidden = false; document.body.style.overflow = 'hidden'; var x = document.getElementById('tdClose'); if(x) x.focus(); }

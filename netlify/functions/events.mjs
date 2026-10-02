@@ -1,6 +1,6 @@
 // OceanSafe events proxy for the Dashboard's Today tab.
-// Kauaʻi's public events calendar is kauaifestivals.com, run by the Kauaʻi Visitors Bureau, the
-// County of Kauaʻi and the Hawaiʻi Tourism Authority (gohawaii.com links to it). It runs The Events
+// Kauaʻi's public events calendar is kauaifestivals.com, a partnership of the Kauaʻi Visitors Bureau,
+// the County of Kauaʻi and the Hawaiʻi Tourism Authority (gohawaii.com links to it). It runs The Events
 // Calendar, whose REST feed is public. This function reads it once an hour for every desk, keeps
 // only what the Today tab shows (no prices: the Dashboard carries no dollar figures), and caches
 // at the edge. Link-out only: the desk sends people to the event's own page. Islands without a
@@ -30,6 +30,15 @@ function text(s) {
     .replace(/\s+/g, ' ').trim();
 }
 const num = (v) => (Number.isFinite(+v) && v !== '' && v != null) ? +v : null;
+// The desk shows no dollar figures: an excerpt that names money is dropped whole. Literal dashes
+// become commas, and the cut lands on a sentence or word boundary.
+function blurb(s) {
+  if (!s || /\$\s?\d|\d\s?(dollars|usd)\b/i.test(s)) return '';
+  s = s.replace(/\s*[\u2014\u2013]\s*/g, ', ');
+  if (s.length <= 300) return s;
+  const cut = s.slice(0, 300), p = cut.lastIndexOf('. '), sp = cut.lastIndexOf(' ');
+  return p > 120 ? cut.slice(0, p + 1) : cut.slice(0, sp > 0 ? sp : 300).replace(/[,;:]$/, '') + '…';
+}
 
 function hstDate(offsetDays = 0) {
   const d = new Date(Date.now() + offsetDays * 86400000);
@@ -66,7 +75,7 @@ export default async (req) => {
     url: String(e.url || ''),
     website: String(e.website || ''),
     venue: e.venue && e.venue.venue ? { name: text(e.venue.venue), address: text(e.venue.address), city: text(e.venue.city), lat: num(e.venue.geo_lat), lon: num(e.venue.geo_lng) } : null,
-    excerpt: text(e.excerpt).slice(0, 300),
+    excerpt: blurb(text(e.excerpt)),
     cats: (e.categories || []).map((c) => text(c.name)),
   }));
   return json({ island: isl, source: src.name, fetched: new Date().toISOString(), events });
