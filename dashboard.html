@@ -8087,6 +8087,8 @@ window.osParseAff = function(v){
    one divider per part, one slide per sheet row (same numbers as the PDF), and a close.
    Keys: arrows, PageUp/PageDown, Space, Esc, N notes, O overview, F full screen. */
   body.pz-on .ph-fab,body.pz-on #tourBtn{display:none}
+  /* the Today rail ends in island Events (kauaifestivals.com, no commercial use): never on a presenter slide */
+  body.pz-on .td-rail{visibility:hidden}
   body.pz-live{padding-bottom:var(--pz-cap,132px)}
   .pz{font-family:Inter,system-ui,sans-serif;color:var(--ink);--pz-cap:148px;--pz-dark:#0f3b49;--pz-sand:#f6f1e7;--pz-sand-2:#cfd9dd}
   .pz *{box-sizing:border-box}
