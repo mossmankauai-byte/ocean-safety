@@ -1349,6 +1349,38 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   .td-links a,.td-links button{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:12.5px;font-weight:700;color:var(--on-sea);background:var(--sea);border:0;border-radius:999px;padding:7px 13px;text-decoration:none;cursor:pointer}
   .td-links a.alt,.td-links button.alt{color:var(--sea);background:transparent;border:1px solid rgba(14,110,140,.35)}
   .td-links a svg,.td-links button svg{width:13px;height:13px}
+  /* the day band inside desk notes: time left to right, the best stretch in green */
+  .td-tl{display:grid;gap:0;margin:2px 0 10px}
+  .td-tl-best{margin:0 0 14px;font-size:13.5px;color:var(--ink-2);line-height:1.45}
+  .td-tl-best b{font-size:15px;color:var(--good)} .td-tl-best.fair b{color:var(--gold-ink)} .td-tl-best.skip b{color:var(--risk)}
+  .td-tl-marks{position:relative;height:16px;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .td-tl-marks span{position:absolute;transform:translateX(-50%);white-space:nowrap} .td-tl-marks span b{color:var(--sea)}
+  .td-tl-wrap{position:relative}
+  .td-tl-band{display:flex;height:28px;border-radius:8px;overflow:hidden;background:var(--tint)}
+  .td-tl-seg{display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-right:2px solid var(--card);min-width:0;overflow:hidden;white-space:nowrap}
+  .td-tl-seg:last-child{border-right:0}
+  .td-tl-seg.good{background:var(--good);color:var(--on-sea)} .td-tl-seg.fair{background:var(--gold);color:var(--on-gold)} .td-tl-seg.skip{background:var(--risk);color:var(--on-sea)} .td-tl-seg.na{background:var(--tint)}
+  .td-tl-now{position:absolute;top:-7px;bottom:-7px;width:0;border-left:2px dashed var(--sea);pointer-events:none}
+  .td-tl-now i{position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-style:normal;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--sea);color:var(--on-sea);border-radius:999px;padding:1px 6px}
+  .td-tl-axis{position:relative;height:15px;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px}
+  .td-tl-axis span{position:absolute;transform:translateX(-50%);white-space:nowrap} .td-tl-axis span.l{transform:none} .td-tl-axis span.r{transform:translateX(-100%)}
+  .td-tl-cols{display:flex;gap:4px;margin-top:8px}
+  .td-tl-col{flex:1 1 0;min-width:0;border-radius:8px;padding:8px 7px;background:var(--tint);display:flex;flex-direction:column;gap:3px}
+  .td-tl-col.best{background:rgba(23,128,90,.10);box-shadow:inset 0 0 0 1.5px var(--good)}
+  .td-tl-col.best.fair{background:var(--gold-tint);box-shadow:inset 0 0 0 1.5px var(--gold)}
+  .td-tl-col .nm{font-size:10.5px;font-weight:800;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
+  .td-tl-col.best .nm,.td-tl-col.best .ft,.td-tl-col.best .sky{color:var(--good)} .td-tl-col.best.fair .nm,.td-tl-col.best.fair .ft,.td-tl-col.best.fair .sky{color:var(--gold-ink)}
+  .td-tl-col .sky{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.2}
+  .td-tl-col .sky svg{width:17px;height:17px;flex:0 0 17px;color:var(--warn)} .td-tl-col .sky svg.cl{color:var(--muted)} .td-tl-col .sky svg.rn{color:var(--sea)}
+  .td-tl-col .ft{font-size:13.5px;font-weight:700;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .td-tl-col .ft small{font-size:10px;font-weight:600;color:var(--muted)}
+  .td-tl-col .ft.lv-fair{color:var(--gold-ink)} .td-tl-col .ft.lv-skip{color:var(--risk)}
+  .td-tl-col .rd{font-size:10.5px;color:var(--ink-2);line-height:1.4;font-variant-numeric:tabular-nums}
+  .td-tl-col .why{font-size:11.5px;line-height:1.35;color:var(--ink);margin-top:2px}
+  .td-tl-why{display:none;margin:8px 0 0;padding:0;list-style:none;font-size:12px}
+  .td-tl-why li{display:grid;grid-template-columns:86px 1fr;gap:8px;padding:4px 0;border-top:1px dashed var(--line)}
+  .td-tl-why li b{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:11px} .td-tl-why li.best b{color:var(--good)} .td-tl-why li.best.fair b{color:var(--gold-ink)}
+  @media (max-width:520px){ .td-tl-seg{font-size:0} .td-tl-seg.best{font-size:9px} .td-tl-col{padding:6px 4px} .td-tl-col .nm{font-size:8.5px;letter-spacing:0} .td-tl-col .sky{font-size:9.5px;gap:3px;flex-direction:column;align-items:flex-start} .td-tl-col .sky svg{width:15px;height:15px} .td-tl-col .ft{font-size:12px} .td-tl-col .rd{font-size:9.5px} .td-tl-col .why{display:none} .td-tl-why{display:block} }
   @media (max-width:1000px){ .td{grid-template-columns:minmax(0,1fr)} .td-rail{position:static;order:-1;max-height:none;overflow:visible} }
   @media (max-width:760px){ .td-band{grid-template-columns:minmax(0,1fr);justify-items:center} .td-wx{width:100%;grid-template-columns:repeat(2,minmax(0,1fr))} .td-chips .lab{min-width:0} .td-stage{height:620px} .td-cams{margin-left:0} .td-ov{align-items:flex-end;padding:0} .td-dlg{width:100%;max-height:92vh;border-radius:16px 16px 0 0} }
 
@@ -6496,6 +6528,7 @@ window.osParseAff = function(v){
     var preds = (wx.td && wx.td.predictions) || [], hi = null, lo = null;
     preds.forEach(function(p){ var v = parseFloat(p.v); if(!isFinite(v)) return; if(!hi || v > hi.v) hi = {v:v,t:p.t}; if(!lo || v < lo.v) lo = {v:v,t:p.t}; });
     if(hi) R.tideHi = clock(hi.t.replace(' ','T')); if(lo) R.tideLo = clock(lo.t.replace(' ','T'));
+    R.hours = hoursToday(now);
     return R;
   }
 
@@ -6789,15 +6822,176 @@ window.osParseAff = function(v){
   function statusTag(kind, id){ var s = placesStatus(kind, id); return '<span class="tg '+s.cls+'">'+esc(s.label)+'</span>'; }
   function linkRow(items){ return '<div class="td-links">'+items.filter(Boolean).join('')+'</div>'; }
   function head(title, o, kick){ return '<h3>'+(o && o.feat ? IC.star : '')+esc(title)+(o && o.level ? ' '+lv(o) : '')+'</h3><div class="kick">'+kick+'</div>'; }
+  /* ---- the day band: today's hours from the feed, each scored by the same math as the
+     readings above, then cut into five stretches. A stretch is only ever as good as its worst
+     hour. Green needs every hour Calm; a day with no calm stretch gets gold, never green. ---- */
+  var LVORD = {na:-1, good:0, fair:1, skip:2};
+  var SKY = { sun:'Sunny', msun:'Mostly sunny', part:'Partly cloudy', cloud:'Cloudy', fog:'Fog', drizzle:'Drizzle', rain:'Showers', storm:'Thunderstorms' };
+  var SKY_ORD = ['sun','msun','part','cloud','fog','drizzle','rain','storm'];
+  var SKYI = {
+    sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    part:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4v1M3.8 6.3l.7.7M3 11h1M12.2 6.3l-.7.7"/><path d="M6 11a3 3 0 0 1 5.5-1.6"/><path d="M8 20h9a4 4 0 0 0 .5-8 5 5 0 0 0-9.6 1.3A3.4 3.4 0 0 0 8 20z"/></svg>',
+    cloud:'<svg class="cl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 19z"/></svg>',
+    rain:'<svg class="rn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 15z"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/></svg>',
+    storm:'<svg class="rn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 14z"/><path d="M13 14l-2 4h3l-2 4"/></svg>'
+  };
+  function skyIcon(k){ return SKYI[k==='msun' ? 'sun' : k==='fog' ? 'cloud' : k==='drizzle' ? 'rain' : k] || ''; }
+  function skyOf(x){
+    var c = x.code;
+    if(c!=null){ if(c>=95) return 'storm'; if(c>=80 || (c>=61 && c<=67)) return 'rain'; if(c>=51 && c<=57) return 'drizzle'; if(c===45||c===48) return 'fog'; if(c===3) return 'cloud'; if(c===2) return 'part'; if(c===1) return 'msun'; if(c===0) return 'sun'; }
+    if(x.mm!=null && x.mm >= 0.2) return 'rain';
+    if(x.cloud!=null) return x.cloud >= 75 ? 'cloud' : x.cloud >= 35 ? 'part' : 'sun';
+    return null;
+  }
+  function hoursToday(now){
+    if(!wx || !wx.w || !wx.w.hourly || !wx.w.hourly.time || !wx.w.hourly.temperature_2m) return null;
+    var hr = wx.w.hourly, sh = (wx.s && wx.s.hourly && wx.s.hourly.time) ? wx.s.hourly : null, out = [];
+    function g(a, k){ return a && typeof a[k]==='number' && isFinite(a[k]) ? a[k] : null; }
+    for(var h=0; h<24; h++){
+      var key = now.date+'T'+pad(h)+':00', i = hr.time.indexOf(key); if(i < 0) continue;
+      var j = sh ? sh.time.indexOf(key) : -1;
+      out.push({ h:h, temp:g(hr.temperature_2m,i), cloud:g(hr.cloud_cover,i), windRaw:g(hr.wind_speed_10m,i), wd:g(hr.wind_direction_10m,i), uv:g(hr.uv_index,i), code:g(hr.weather_code,i), mm:g(hr.precipitation,i), rainP:g(hr.precipitation_probability,i),
+        wave: j>=0 ? g(sh.wave_height,j) : null, sd: j>=0 ? g(sh.wave_direction,j) : null, sw_h: j>=0 ? g(sh.swell_wave_height,j) : null, sw_d: j>=0 ? g(sh.swell_wave_direction,j) : null, sw_t: j>=0 ? g(sh.swell_wave_period,j) : null, ww_h: j>=0 ? g(sh.wind_wave_height,j) : null, ww_d: j>=0 ? g(sh.wind_wave_direction,j) : null });
+    }
+    return out.length >= 12 ? out : null;
+  }
+  function hourR(R, x){ return { surf: x.wave!=null ? hCal(x.wave) : null, sd: x.sd==null ? 0 : x.sd, sw_h:x.sw_h, sw_d:x.sw_d, sw_t:x.sw_t, ww_h:x.ww_h, ww_d:x.ww_d, wind: x.windRaw!=null ? x.windRaw + WIND_ADD : null, wd:x.wd, rainToday:R.rainToday, rain72:R.rain72, q:R.q }; }
+  function isoHour(iso){ var m = /T(\d{2}):(\d{2})/.exec(String(iso||'')); return m ? (+m[1]) + (+m[2])/60 : null; }
+  function clockH(h){ return ((h%12)||12)+(h<12 ? ' am' : ' pm'); }
+  function dayWindows(R){
+    var H = R.hours; if(!H) return null;
+    var sunset = isoHour(R.sunset), end = sunset!=null ? Math.max(17, Math.min(20, Math.ceil(sunset))) : 19;
+    var cuts = [[6,9,'Early'],[9,11,'Morning'],[11,14,'Midday'],[14,16,'Afternoon'],[16,end,'Evening']];
+    return cuts.map(function(c){ return { a:c[0], b:c[1], n:c[2], last:c[1]===end, hours:H.filter(function(x){ return x.h>=c[0] && x.h<c[1]; }) }; }).filter(function(w){ return w.hours.length; });
+  }
+  function rangeLabel(w, R){
+    if(w.last && R && R.sunset) return clockH(w.a)+' to sunset';
+    var ha = (w.a%12)||12, hb = (w.b%12)||12, aa = w.a<12 ? 'am' : 'pm', ab = w.b<12 ? 'am' : 'pm';
+    return aa===ab ? ha+' to '+hb+' '+aa : ha+' '+aa+' to '+hb+' '+ab;
+  }
+  function winStats(w){
+    var s = { tl:null, th:null, wind:null, rainP:null, uv:null, cloud:null, sky:null, mm:0 };
+    w.hours.forEach(function(x){
+      if(x.temp!=null){ s.tl = s.tl==null ? x.temp : Math.min(s.tl, x.temp); s.th = s.th==null ? x.temp : Math.max(s.th, x.temp); }
+      if(x.windRaw!=null) s.wind = Math.max(s.wind==null ? 0 : s.wind, x.windRaw);
+      if(x.rainP!=null) s.rainP = Math.max(s.rainP==null ? 0 : s.rainP, x.rainP);
+      if(x.uv!=null) s.uv = Math.max(s.uv==null ? 0 : s.uv, x.uv);
+      if(x.cloud!=null) s.cloud = Math.max(s.cloud==null ? 0 : s.cloud, x.cloud);
+      if(x.mm!=null) s.mm += x.mm;
+      var k = skyOf(x); if(k && (s.sky==null || SKY_ORD.indexOf(k) > SKY_ORD.indexOf(s.sky))) s.sky = k;
+    });
+    return s;
+  }
+  function tideEvents(){
+    var preds = (wx && wx.td && wx.td.predictions) || [], ev = [];
+    for(var i=1; i<preds.length-1; i++){
+      var a = parseFloat(preds[i-1].v), v = parseFloat(preds[i].v), c = parseFloat(preds[i+1].v);
+      if(!isFinite(a) || !isFinite(v) || !isFinite(c)) continue;
+      var m = /(\d{2}):(\d{2})$/.exec(preds[i].t||''), h = m ? (+m[1]) + (+m[2])/60 : null; if(h==null) continue;
+      if(v > a && v >= c) ev.push({ kind:'High', t:clock(preds[i].t.replace(' ','T')), h:h });
+      else if(v < a && v <= c) ev.push({ kind:'Low', t:clock(preds[i].t.replace(' ','T')), h:h });
+    }
+    return ev;
+  }
+  function tideIn(w){ return tideEvents().filter(function(e){ return e.h >= w.a && e.h < w.b; }); }
+  function ftRange(lo, hi){ return Math.round(lo*10)===Math.round(hi*10) ? hi.toFixed(1) : lo.toFixed(1)+' to '+hi.toFixed(1); }
+  function finishDay(rows, R, o){
+    var best = -1, tone = 'good', i;
+    for(i=0; i<rows.length; i++){ if(rows[i].level==='good'){ best = i; break; } }
+    if(best < 0){ var m = null; rows.forEach(function(r, k){ if(r.level!=='fair') return; var v = r.hi!=null ? r.hi : k; if(m==null || v < m){ m = v; best = k; } }); tone = best>=0 ? 'fair' : 'skip'; }
+    var D = { rows:rows, best:best, tone:tone, headline:'', sub:'' };
+    if(best >= 0){
+      var r = rows[best], lab = rangeLabel(r.w, R);
+      D.headline = (tone==='good' ? 'Best time: ' : o.ft ? 'Best of a rough day: ' : 'Best of the day: ')+lab+'.';
+      if(o.ft){ var te = tideIn(r.w); D.sub = (tone==='good' ? 'Calm, ' : 'Rough, ')+ftRange(r.lo, r.hi)+' ft'+(te.length ? ', '+te[0].kind.toLowerCase()+' tide '+te[0].t : '')+'.'; }
+      else D.sub = r.why;
+    } else {
+      D.headline = o.ft ? 'Not a swim day here.' : 'Not today.';
+      D.sub = o.ft ? (o.runoff ? 'Stream runoff after rain, murky water.' : 'Big surf through the day.') : (rows[0] ? rows[0].why : '');
+    }
+    return D;
+  }
+  function beachDay(it, R){
+    var b = EXP[it.id], W = R ? dayWindows(R) : null; if(!b || !W || !R.surfValid) return null;
+    var ro = runoff(R, b, it.r), rows = [], any = false;
+    W.forEach(function(w){
+      var s = winStats(w), lo = null, hi = null, worst = 'good', onMax = null, onMin = null;
+      w.hours.forEach(function(x){
+        if(x.wave==null) return; any = true;
+        var Rh = hourR(R, x), es = eff(Rh, b);
+        lo = lo==null ? es : Math.min(lo, es); hi = hi==null ? es : Math.max(hi, es);
+        var l = ro ? 'skip' : lvOf(es); if(LVORD[l] > LVORD[worst]) worst = l;
+        var oc = onshore(Rh, b); if(oc!=null){ onMax = onMax==null ? oc : Math.max(onMax, oc); onMin = onMin==null ? oc : Math.min(onMin, oc); }
+      });
+      if(lo==null) worst = 'na';
+      var why = [];
+      if(ro) why.push('Stream runoff, murky water.'); else if(worst==='skip') why.push('Big surf.');
+      if(onMax!=null && onMax > 15) why.push('Onshore wind, choppy.'); else if(onMin!=null && onMin < -4) why.push('Sheltered from the wind.');
+      tideIn(w).forEach(function(e){ why.push(e.kind+' tide '+e.t+'.'); });
+      if(s.uv!=null && s.uv >= 8) why.push('UV peaks at '+Math.round(s.uv)+', shade and sunscreen.');
+      if(s.rainP!=null && s.rainP >= 40) why.push('Showers likely.');
+      if(b.west && w.last && R.sunset) why.push('Sunset shore, sunset '+clock(R.sunset)+'.');
+      if(!why.length) why.push(worst==='good' ? 'Calm all '+w.hours.length+' hours.' : worst==='fair' ? 'Rough all '+w.hours.length+' hours.' : 'No wave reading.');
+      rows.push({ w:w, s:s, lo:lo, hi:hi, level:worst, why:why.slice(0,3).join(' ') });
+    });
+    return any ? finishDay(rows, R, { ft:true, runoff:ro }) : null;
+  }
+  function trailDay(id, R){
+    var f = TRAIL[id], W = R ? dayWindows(R) : null; if(!f || !W) return null;
+    var rows = W.map(function(w){
+      var s = winStats(w);
+      var Rw = { rainToday:R.rainToday, rain72:R.rain72, rainChance: s.rainP!=null ? s.rainP : R.rainChance, cloud: s.cloud!=null ? s.cloud : R.cloud, wind: s.wind!=null ? s.wind + WIND_ADD : R.wind, uvMax: s.uv!=null ? s.uv : R.uvMax };
+      var t = f(Rw), first = String(t[2]||'').split('. ')[0];
+      return { w:w, s:s, level:t[0], why:t[1]+'. '+(first ? first.replace(/\.?$/, '.') : '') };
+    });
+    return finishDay(rows, R, { ft:false });
+  }
+  function tourDay(t, R){
+    var W = R ? dayWindows(R) : null; if(!t || !W) return null;
+    var P = window.OS_PLACES, haz = {}, region = {}, brown = false;
+    if(P) (P.DATA.beaches||[]).forEach(function(it){ if(it.h) haz[it.id] = 1; region[it.id] = it.r; });
+    Object.keys(EXP).forEach(function(id){ if(!haz[id] && runoff(R, EXP[id], region[id])) brown = true; });
+    var rows = W.map(function(w){
+      var s = winStats(w), esMax = null;
+      if(R.surfValid) w.hours.forEach(function(x){ if(x.wave==null) return; var Rh = hourR(R, x), sum = 0, n = 0; Object.keys(EXP).forEach(function(id){ if(haz[id]) return; sum += eff(Rh, EXP[id]); n++; }); var m = n ? sum/n : 99; esMax = esMax==null ? m : Math.max(esMax, m); });
+      var c = { es: esMax==null ? 99 : esMax, wind: s.wind==null ? 0 : s.wind + WIND_ADD, precip: s.mm, precip_chance: s.rainP==null ? 0 : s.rainP, cloud: s.cloud==null ? 0 : s.cloud, brown: brown, h: w.a };
+      var hit = null; for(var i=0; i<t.rules.length; i++){ if(t.rules[i][0](c)){ hit = t.rules[i]; break; } }
+      return { w:w, s:s, level: hit ? hit[1] : t.def[0], why: hit ? hit[2] : t.def[1] };
+    });
+    return finishDay(rows, R, { ft:false });
+  }
+  function bandHTML(D, R){
+    var T0 = D.rows[0].w.a, T1 = D.rows[D.rows.length-1].w.b, span = T1 - T0;
+    function pc(h){ return (Math.max(0, Math.min(1, (h-T0)/span))*100).toFixed(2)+'%'; }
+    function grow(r){ return 'flex-grow:'+Math.round((r.w.b-r.w.a)*100); }
+    var ev = tideEvents().filter(function(e){ return e.h >= T0 && e.h <= T1; });
+    var h = '<div class="td-tl"><p class="td-tl-best '+D.tone+'"><b>'+esc(D.headline)+'</b>'+(D.sub ? ' '+esc(D.sub) : '')+'</p>';
+    h += '<div class="td-tl-marks">'+ev.map(function(e){ return '<span style="left:'+pc(e.h)+'"><b>'+e.kind+'</b> '+esc(e.t)+'</span>'; }).join('')+'</div>';
+    h += '<div class="td-tl-wrap"><div class="td-tl-band">'+D.rows.map(function(r, i){ return '<div class="td-tl-seg '+r.level+(i===D.best ? ' best' : '')+'" style="'+grow(r)+'">'+(i===D.best ? (D.tone==='good' ? 'Best time' : 'Best of the day') : '')+'</div>'; }).join('')+'</div>';
+    var nowH = R.now.hour + R.now.minute/60; if(nowH >= T0 && nowH <= T1) h += '<div class="td-tl-now" style="left:'+pc(nowH)+'"><i>Now</i></div>';
+    h += '</div><div class="td-tl-axis">'; for(var t=T0; t<=T1; t+=2){ h += '<span class="'+(t===T0 ? 'l' : t+2>T1 ? 'r' : '')+'" style="left:'+pc(t)+'">'+clockH(t)+'</span>'; } h += '</div>';
+    h += '<div class="td-tl-cols">'+D.rows.map(function(r, i){
+      var s = r.s, best = i===D.best;
+      return '<div class="td-tl-col'+(best ? ' best '+D.tone : '')+'" style="'+grow(r)+'"><div class="nm">'+esc(r.w.n)+'</div>' +
+        (s.sky ? '<div class="sky">'+skyIcon(s.sky)+'<span>'+esc(SKY[s.sky])+'</span></div>' : '') +
+        (r.lo!=null ? '<div class="ft">'+ftRange(r.lo, r.hi)+'<small> ft</small></div>' : '<div class="ft lv-'+r.level+'">'+esc(LVL[r.level]||'')+'</div>') +
+        '<div class="rd">'+(s.tl!=null ? (Math.round(s.tl)===Math.round(s.th) ? Math.round(s.th) : Math.round(s.tl)+' to '+Math.round(s.th))+'&deg;F<br>' : '')+(s.wind!=null ? 'wind to '+Math.round(s.wind)+' mph<br>' : '')+(s.rainP!=null ? 'rain '+Math.round(s.rainP)+'%' : '')+'</div>' +
+        '<div class="why">'+esc(r.why)+'</div></div>';
+    }).join('')+'</div>';
+    h += '<ul class="td-tl-why">'+D.rows.map(function(r, i){ return '<li'+(i===D.best ? ' class="best '+D.tone+'"' : '')+'><b>'+esc(rangeLabel(r.w, R))+'</b><span>'+esc(r.why)+'</span></li>'; }).join('')+'</ul>';
+    return h + '</div>';
+  }
+  function sunLine(R){ return R && R.sunrise && R.sunset ? '<li>Sunrise '+esc(clock(R.sunrise))+', sunset '+esc(clock(R.sunset))+'.</li>' : ''; }
+
   function noteBeach(id, o, R){
     var rec = placeRec('beach', id), it = rec ? rec.it : { id:id, n:(INFO.B[id]||{}).name||id, r:'', lg:'none' };
     if(!o) o = beachRead(it, rec ? rec.state : 'show', R);
     var b = EXP[id] || {}, info = INFO.B[id] || {}, tags = (b.i||'').split(',').filter(Boolean), lg = lgOf(it), cams = camsFor(id);
-    var today = [];
+    var D = beachDay(it, R), today = [];
     if(R && o.es!=null) today.push('<li><b>'+esc(o.label)+'</b>, '+o.es.toFixed(1)+' ft on this shore right now. '+esc(o.why.filter(Boolean).join(' '))+'</li>');
     else today.push('<li>'+esc(o.why.filter(Boolean).join(' ') || o.label)+'</li>');
     if(R && R.tideHi) today.push('<li>Tide: high '+esc(R.tideHi)+(R.tideLo ? ', low '+esc(R.tideLo) : '')+'.</li>');
-    if(R && R.uv!=null) today.push('<li>UV '+fmt0(R.uv)+' now'+(R.uvMax!=null ? ', peak '+Math.round(R.uvMax) : '')+'. Shade and reef-safe sunscreen.</li>');
+    if(D) today.push(sunLine(R)); else if(R && R.uv!=null) today.push('<li>UV '+fmt0(R.uv)+' now'+(R.uvMax!=null ? ', peak '+Math.round(R.uvMax) : '')+'. Shade and reef-safe sunscreen.</li>');
     if(b.west && R && R.sunset) today.push('<li>Sunset shore. Sunset at '+esc(clock(R.sunset))+'.</li>');
     if(cams.length) today.push('<li>Live cam: '+cams.map(function(c){ return '<a href="'+esc(c.url)+'" target="_blank" rel="noopener">'+esc(c.op)+'</a>'; }).join(', ')+'. Opens on the operator&rsquo;s page.</li>');
     var tell = [];
@@ -6809,7 +7003,7 @@ window.osParseAff = function(v){
     if(b.tidal) tell.push('<li><b>Tide matters here.</b> Check the guide’s beach page before sending anyone at low or high tide.</li>');
     return photoHead(info) + '<div class="td-sh-body">' +
       head(it.n, o, esc(it.r||'')+(it.r ? ' &middot; ' : '')+esc(lgWord(it))+' '+statusTag('beach', id)) +
-      sec(IC.sun, 'Today', '<ul>'+today.join('')+'</ul>') +
+      sec(IC.sun, 'Today', (D ? bandHTML(D, R) : '')+'<ul>'+today.join('')+'</ul>') +
       sec(IC.talk, 'Tell the guest', '<ul>'+tell.join('')+'</ul>') +
       (info.tip ? sec(IC.tip, 'Local tip', '<p>'+esc(info.tip)+'</p>') : '') +
       (it.h && it.why ? sec(IC.warn, 'Hazard-locked', '<p>'+esc(it.why)+'</p>', 'warn') : '') +
@@ -6827,7 +7021,7 @@ window.osParseAff = function(v){
     var stats = '<div class="td-stats">' + (info.length_mi ? '<div><span>Distance</span><b>'+esc(info.length_mi)+' mi</b></div>' : '') + (info.elevation_ft ? '<div><span>Elevation</span><b>'+esc(info.elevation_ft)+' ft</b></div>' : '') + (info.duration_hr ? '<div><span>Time</span><b>'+esc(info.duration_hr)+' h</b></div>' : '') + '<div><span>Level</span><b>'+esc(cap(d)||'n/a')+'</b></div><div><span>Family</span><b>'+family+'</b></div><div><span>Best time</span><b>'+best+'</b></div></div>';
     return photoHead(info) + '<div class="td-sh-body">' +
       head(it.n, o, esc(it.r||'')+(it.r ? ' &middot; ' : '')+'Trail '+statusTag('hike', id)) +
-      sec(IC.sun, 'Today', '<p>'+esc(o.why.filter(Boolean).join(' ') || o.label)+(R && R.rainChance!=null ? ' Rain chance today '+Math.round(R.rainChance)+'%.' : '')+'</p>') +
+      sec(IC.sun, 'Today', (R ? (function(){ var D = trailDay(id, R); return D ? bandHTML(D, R) : ''; })() : '')+'<p>'+esc(o.why.filter(Boolean).join(' ') || o.label)+(R && R.rainChance!=null ? ' Rain chance today '+Math.round(R.rainChance)+'%.' : '')+'</p>') +
       sec(IC.talk, 'Tell the guest', stats + '<ul style="margin-top:8px"><li><b>Bring:</b> '+bring+'.</li>'+(info.tip ? '<li>'+esc(info.tip)+'</li>' : '')+'</ul>') +
       (info.warning ? sec(IC.warn, 'Watch for', '<p>'+esc(info.warning)+'</p>', 'warn') : '') +
       sec(IC.pin, 'Getting there', (info.parking ? '<p>'+esc(info.parking)+'</p>' : '') + linkRow([info.lat ? '<a href="'+esc(dirUrl(info.lat, info.lon))+'" target="_blank" rel="noopener">'+IC.pin+'Directions to trailhead</a>' : '', '<button type="button" class="alt" data-phone-open="hike:'+esc(id)+'">'+IC.phone+'Show in guide</button>'])) +
@@ -6840,7 +7034,7 @@ window.osParseAff = function(v){
     if(!o) o = tourRead(t, R ? islandCond(R) : null);
     return '<div class="td-sh-body">' +
       head(t.n, o, 'Tour kind &middot; '+esc(t.dur)) +
-      sec(IC.sun, 'Today', '<p>'+esc(o.why.filter(Boolean).join(' ') || o.label)+'</p>') +
+      sec(IC.sun, 'Today', (R ? (function(){ var D = tourDay(t, R); return D ? bandHTML(D, R) : ''; })() : '')+'<p>'+esc(o.why.filter(Boolean).join(' ') || o.label)+'</p>') +
       sec(IC.talk, 'Tell the guest', '<ul><li><b>Where:</b> '+esc(t.place)+'</li><li><b>Best when:</b> '+esc(t.when)+'</li><li><b>How long:</b> '+esc(t.dur)+'.</li></ul>') +
       sec(IC.ext, 'Booking', '<p>Guests book from the Tours cards in your guide'+(toursTabShown() ? ', through the partner link saved on your Tours tab' : '')+'. Vendors, times and prices live there, not here.</p>' + linkRow([toursTabShown() ? '<button type="button" class="alt" data-td-tours>Open Tours</button>' : '', '<button type="button" class="alt" data-phone-open="tour:'+esc(t.gid)+'">'+IC.phone+'Show in guide</button>'])) +
       '</div>';
