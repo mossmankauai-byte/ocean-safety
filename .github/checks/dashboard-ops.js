@@ -42,7 +42,7 @@ function serve(root) {
 const target = process.argv[2];
 if (!target) { console.error('usage: dashboard-ops.js <https://host | /path/dashboard.html>'); process.exit(2); }
 const isLocal = !/^https?:/.test(target);
-const ALL_VIEWS = ['home', 'today', 'stayclose', 'promos', 'guests', 'places', 'segments', 'desk', 'shop'];
+const ALL_VIEWS = ['home', 'today', 'stayclose', 'promos', 'guests', 'places', 'qr', 'segments', 'desk', 'shop'];
 const MODE = process.argv.includes('--baseline') ? 'baseline' : process.argv.includes('--diff') ? 'diff' : 'walk';
 const BASE_DIR = path.join(__dirname, 'dash-baseline');
 const fails = [];

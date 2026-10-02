@@ -32,7 +32,7 @@ window.OS_SEGMENTS = {
     freePrice:'Free', paidPrice:'Pricing on request',
     pcFoot:'Free shows one amenity. Pricing on request for the paid plan.',
     portfolioNote:'Pricing on request.',
-    tabs:['home','today','stayclose','promos','guests','places','desk','shop'],
+    tabs:['home','today','stayclose','promos','guests','places','qr','desk','shop'],
     deskLabel:'Tours', deskKind:'affiliate'
   },
   timeshare: {
@@ -47,7 +47,7 @@ window.OS_SEGMENTS = {
     freePrice:'', paidPrice:'The paid plan',
     pcFoot:'One tier, everything above. Pricing on request.',
     portfolioNote:'Pricing on request.',
-    tabs:['home','stayclose','promos','guests','places','segments','desk','shop'],
+    tabs:['home','stayclose','promos','guests','places','qr','segments','desk','shop'],
     segmentsLabel:'Segments &amp; funnels', deskLabel:'Operate the desk', deskKind:'salesdesk'
   },
   pm: {
@@ -62,7 +62,7 @@ window.OS_SEGMENTS = {
     freePrice:'', paidPrice:'The paid plan',
     pcFoot:'One tier, everything above. Pricing on request.',
     portfolioNote:'Pricing on request.',
-    tabs:['home','stayclose','promos','guests','places','desk','shop'],
+    tabs:['home','stayclose','promos','guests','places','qr','desk','shop'],
     deskLabel:'Tours', deskKind:'affiliate'
   },
   concierge: {
@@ -77,7 +77,7 @@ window.OS_SEGMENTS = {
     freePrice:'', paidPrice:'The paid plan',
     pcFoot:'One tier, everything above. Pricing on request.',
     portfolioNote:'Pricing on request.',
-    tabs:['home','stayclose','promos','guests','places','desk','shop'],
+    tabs:['home','stayclose','promos','guests','places','qr','desk','shop'],
     deskLabel:'Tours', deskKind:'affiliate'
   },
   cars: {
@@ -92,7 +92,7 @@ window.OS_SEGMENTS = {
     freePrice:'', paidPrice:'The paid plan',
     pcFoot:'One tier, everything above. Pricing on request.',
     portfolioNote:'Pricing on request.',
-    tabs:['home','stayclose','promos','guests','places','desk','shop'],
+    tabs:['home','stayclose','promos','guests','places','qr','desk','shop'],
     deskLabel:'Tours', deskKind:'affiliate'
   }
 };
@@ -1793,6 +1793,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       <button role="tab" aria-selected="false" data-view="promos">Promotions <span class="vb-badge" id="vbPromos">—</span></button>
       <button role="tab" aria-selected="false" data-view="guests">Guest activity</button>
       <button role="tab" aria-selected="false" data-view="places">Places <span class="vb-badge" id="vbPlaces">—</span></button>
+      <button role="tab" aria-selected="false" data-view="qr">QR codes</button>
       <button role="tab" aria-selected="false" data-view="segments" data-os="tab-segments">Units &amp; owners</button>
       <button role="tab" aria-selected="false" data-view="desk" data-os="tab-desk">Tours</button>
       <button role="tab" aria-selected="false" data-view="shop" data-os="tab-shop" hidden>Shop</button>
@@ -2399,6 +2400,40 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       </section>
     </div><!-- /view-places -->
 
+    <div id="view-qr" hidden>
+      <section style="margin-top:18px" aria-label="QR codes">
+        <div class="sec-h">
+          <h2>QR codes</h2>
+          <p>One named code for each spot you post one. Every scan opens your guide, and the chart shows which spot guests act on.</p>
+        </div>
+        <div class="qr-grid">
+          <div class="qr-main">
+            <div class="card">
+              <div class="qr-ch"><h3>Make a code</h3></div>
+              <p class="qr-lead">Name the spot. The code opens your guide and keeps its own count, so you can tell a lobby sign from a room card. Print it anywhere.</p>
+              <form id="qrForm" class="qr-form" autocomplete="off">
+                <input id="qrName" aria-label="Name for this code" type="text" maxlength="40" placeholder="Pool deck, lobby sign, room card">
+                <button type="submit" class="pl-btn primary" id="qrMake">Make the code</button>
+              </form>
+              <p id="qrNote" class="qr-note" aria-live="polite"></p>
+            </div>
+            <div class="card" style="margin-top:14px">
+              <div class="title"><span class="l">Your codes</span><span><span class="chip sample">Sample</span></span></div>
+              <div id="qrList" class="qr-tiles"></div>
+              <div class="cap" style="margin-top:12px">Each PNG is 1200 px, sharp at any size, with its own tag in the link. Email opens your mail app with the link; attach the downloaded PNG if the printer needs the file. Your list of names is kept in this browser. The codes keep working wherever you post them.</div>
+            </div>
+          </div>
+          <aside class="qr-side">
+            <div class="card">
+              <div class="title"><span class="l">Which code brings guests in</span><span><span class="chip sample">Sample</span></span></div>
+              <p class="qr-period" id="qrPeriod"></p>
+              <div id="qrChart" class="qr-chart" aria-live="polite"></div>
+              <div class="cap" style="margin-top:12px">Conversion is the share of guide opens from a code where the guest went on to tap a place, an offer, an amenity or a tour. Counts only, never an individual. Fewer than 5 shows as fewer than 5.</div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </div>
 <div id="view-segments" hidden>
 
 <style>
@@ -3456,6 +3491,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       .then(function(data){
         var cur = sumRolls(data.days);
         if(window.osCCLive) window.osCCLive({ cur: sumRolls(data.days), prior: sumRolls(data.priorDays), days: data.days || [], priorDays: data.priorDays || [], period: (data.period > 0) ? data.period : period, nameFor: nameFor });
+        try{ document.dispatchEvent(new CustomEvent('os:rollups', { detail: { days: data.days || [], priorDays: data.priorDays || [], period: (data.period > 0) ? data.period : period } })); }catch(e){}
         var prior = sumRolls(data.priorDays);
         var effPeriod = (data.period > 0) ? data.period : period;
 
@@ -3701,6 +3737,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       body:'How many guests a day, when they plan, and which beaches and offers they open. It stays <b>Sample</b> until your guide is live. Live mode only ever shows measured counts.' },
     { view:'places', sel:'.pl-safety', title:'Places, with safety built in',
       body:'Choose what your guide recommends. Hazardous spots start as <b>Not recommended</b> and cannot be removed, so their warnings always stay in front of guests.' },
+    { view:'qr', sel:'#qrChart', title:'Which code brings guests in',
+      body:'Name a code for each spot you post one: lobby, pool deck, room card. Every scan opens your guide and counts against its code, so the chart shows which spot guests act on.' },
     { view:'segments', sel:'#view-segments .card', seg:['timeshare'], title:'Three guests, three funnels',
       body:'Renters, repeat guests and owners each get their own QR code and their own funnel. Owners never see a sales pitch.' },
     { view:'desk', sel:'#affInput', desk:'affiliate', title:'Your tour link',
@@ -6246,9 +6284,9 @@ window.osParseAff = function(v){
     }
     if(live && live.cur.any && live.prior.sessions > 0){
       var pct = Math.round((live.cur.sessions - live.prior.sessions)/live.prior.sessions*100);
-      if(pct <= -20) rows.push([IC.down, 'Guide opens down '+Math.abs(pct)+'%. Check your QR codes are still up', 'guests', 'See activity']);
+      if(pct <= -20) rows.push([IC.down, 'Guide opens down '+Math.abs(pct)+'%. Check your QR codes are still up', 'qr', 'See your codes']);
     } else if(!live){
-      rows.push([IC.down, 'Lobby QR scans down 22% this week', 'guests', 'See activity']);
+      rows.push([IC.down, 'Lobby QR scans down 22% this week', 'qr', 'See your codes']);
     }
     var hdr = '<div class="cc-h">'+IC.list+'Needs attention<span class="ct'+(rows.length?'':' zero')+'">'+rows.length+'</span></div>';
     el.innerHTML = hdr + (rows.length ? rows.map(function(r){
@@ -7180,6 +7218,293 @@ window.osParseAff = function(v){
   window.addEventListener('os:places-changed', function(){ setTimeout(render, 0); });
   window.addEventListener('storage', function(){ setTimeout(render, 0); });
   setInterval(function(){ if(!view.hidden && island) loadWx(true); }, 10*60*1000);
+})();
+</script>
+<style>
+/* ============ QR CODES TAB (2026-10-01) ============ */
+.qr-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;align-items:start}
+.qr-main,.qr-side{min-width:0}
+.qr-side{position:sticky;top:12px}
+.qr-side .card{margin:0}
+.qr-ch{margin:0 0 6px}
+.qr-ch h3{margin:0;font-size:15px;color:var(--ink)}
+.qr-lead{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5;max-width:68ch}
+.qr-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.qr-form input{flex:1;min-width:220px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.qr-form input:focus{outline:2px solid var(--sea);outline-offset:1px}
+.qr-form .pl-btn{border:0;cursor:pointer}
+.qr-note{margin:10px 0 0;font-size:12.5px;color:var(--muted);min-height:18px}
+.qr-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:10px}
+.qr-tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.qr-tile img,.qr-tile .qr-ph{width:100%;max-width:168px;aspect-ratio:1;border-radius:10px;align-self:center}
+.qr-tile img{border:1px solid var(--line);background:#fff}
+.qr-tile .qr-ph{background:var(--tint);display:grid;place-items:center;color:var(--muted);font-size:12px;text-align:center;padding:10px}
+.qr-nm{font-weight:700;font-size:14px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qr-tagl{font-size:11.5px;color:var(--muted);word-break:break-all;line-height:1.4}
+.qr-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.qr-acts .pl-btn{padding:6px 10px;font-size:12px;text-decoration:none;cursor:pointer}
+.qr-acts .qr-rm{margin-left:auto;color:var(--risk)}
+.qr-empty{padding:16px 8px;color:var(--muted);font-size:13px;line-height:1.5}
+.qr-period{margin:0 0 6px;font-size:11.5px;color:var(--muted)}
+.qr-chart{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.qr-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;align-items:center;font-size:13px}
+.qr-row .nm{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:6px;min-width:0}
+.qr-row .pc{font-weight:700;font-size:13px;color:var(--ink);text-align:right;min-width:44px}
+.qr-row .bar{grid-column:1 / -1;height:9px;border-radius:6px;background:var(--hair-soft);overflow:hidden}
+.qr-row .bar i{display:block;height:100%;width:0;background:var(--sea);border-radius:6px;transition:width .5s}
+.qr-row .sub{grid-column:1 / -1;font-size:11.5px;color:var(--muted)}
+.qr-row.top .bar i,.qr-row.top .pc{background:var(--good)}
+.qr-row.top .pc{background:none;color:var(--good)}
+.qr-best{display:inline-flex;align-items:center;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--good);background:#e2efe8;border-radius:6px;padding:1px 6px;flex:none}
+@media (max-width:1000px){
+  .qr-grid{grid-template-columns:1fr}
+  .qr-side{position:static;order:-1}
+}
+</style>
+<script>
+/* ============ QR CODES TAB (2026-10-01) ============
+   One named code per spot an operator posts one. A code encodes the live guide with the
+   operator's slug, their island and a short tag (?u=<tag>): the batch-level tag the telemetry
+   Worker already accepts, which now rolls into qr_open (guide opens per tag) and qr_eng (the
+   sessions from that tag that tapped a place, offer, amenity or tour). The chart ranks codes by
+   conversion = qr_eng / qr_open. Counts only, never an individual (OD-18). No slug = the demo:
+   sample codes and sample figures, tagged Sample. Nothing here is sent anywhere: Download is a
+   PNG, Email opens the operator's own mail app with the link, Share hands the PNG to the phone's
+   sheet. The list of names is kept in this browser; the codes work wherever they are printed. */
+(function(){
+  var view = document.getElementById('view-qr');
+  if(!view) return;
+  var SITE = 'https://oceansafety.app';
+  var ONSITE = /(^|\.)oceansafety\.app$|\.netlify\.app$|^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var ASSET = ONSITE ? '' : 'https://ocean-safety.netlify.app';
+  /* off-site copies draw the plain code: the mirror sends no CORS header for images, so a mark
+     from there would taint the canvas and only add a console error */
+  var MARK = ONSITE ? '/assets/oceansafe-favicon.png' : '', MARK_FRAC = 0.16, SIZE = 1200;
+  var ISL = { kauai:1, maui:1, oahu:1, hawaii:1 };
+  function slug(){ return String(window.OS_SLUG || '').trim().toLowerCase(); }
+  function isLive(){ var s = slug(); return !!s && s !== 'demo' && !window.OS_GROUP; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function propName(){ var h = document.querySelector('[data-os="h1"]'); return h ? h.textContent.trim() : 'Your property'; }
+  function ct(n){ return n < 5 ? 'fewer than 5' : Math.round(n).toLocaleString('en-US'); }
+  var seg = window.OS_SEG || 'pm';
+  var demoSlug = ((window.OS_SEGCFG || {}).slug) || 'your-rentals';
+  var KEY = 'os_qr_v1_' + (isLive() ? slug() : 'demo_' + seg);
+
+  /* demo seeds: the spots each segment actually posts a code, and their sample figures */
+  var SEEDS = {
+    hotel:     ['Lobby sign', 'Pool deck', 'In-room card', 'Welcome email'],
+    timeshare: ['Front desk', 'In-unit card', 'Owner newsletter', 'Welcome email'],
+    pm:        ['In-unit card', 'Welcome email', 'Key box'],
+    concierge: ['Desk card', 'Lobby sign', 'Welcome email'],
+    cars:      ['Dash card', 'Key tag', 'Booking email']
+  };
+  var SAMPLE = { 'lobby-sign':[412,.38], 'pool-deck':[188,.61], 'in-room-card':[655,.47], 'welcome-email':[97,.29],
+                 'front-desk':[301,.42], 'in-unit-card':[540,.51], 'owner-newsletter':[64,.22], 'key-box':[83,.33],
+                 'desk-card':[226,.55], 'dash-card':[147,.46], 'key-tag':[58,.31], 'booking-email':[120,.27] };
+
+  /* the tag is what rides the link: a-z 0-9 hyphen, 16 chars, the Worker's own sanitizer */
+  function tagOf(name){
+    var t = String(name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯʻ‘’']/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 16).replace(/-+$/, '');
+    return t || 'code';
+  }
+  function uniqueTag(base, list){
+    var t = base, n = 2;
+    while(list.some(function(i){ return i.tag === t; })){ var suf = '-' + (n++); t = base.slice(0, 16 - suf.length).replace(/-+$/, '') + suf; }
+    return t;
+  }
+  function read(){ try{ var d = JSON.parse(localStorage.getItem(KEY)); return d && Array.isArray(d.items) ? d.items : null; }catch(e){ return null; } }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify({ v:1, items: items })); }catch(e){} }
+  var items = read();
+  if(!items) items = isLive() ? [] : (SEEDS[seg] || SEEDS.pm).map(function(n){ return { name:n, tag:tagOf(n), made:'' }; });
+
+  /* the island rides the link so the guide opens on the right island; omitted when the partner row has none */
+  var island = isLive() ? null : 'kauai', islandKnown = !isLive();
+  function ready(){
+    if(islandKnown) return Promise.resolve();
+    return fetch('partner-config/' + encodeURIComponent(slug()) + '.json', { cache:'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cfg){ var i = cfg && typeof cfg.island === 'string' ? cfg.island.trim().toLowerCase() : ''; island = ISL[i] ? i : null; })
+      .catch(function(){ island = null; })
+      .then(function(){ islandKnown = true; });
+  }
+  function link(it){
+    var u = SITE + '/?ref=' + encodeURIComponent(isLive() ? slug() : demoSlug);
+    if(island && ISL[island]) u += '&island=' + island;
+    return u + '&u=' + encodeURIComponent(it.tag);
+  }
+  function fileName(it){ return (isLive() ? slug() : demoSlug) + '-' + it.tag + '-qr.png'; }
+
+  /* ---- drawing: qrcode.min.js (the d.html engine) loaded on first open, the mark at 16% ---- */
+  var lib = null, markP = null, pngs = {}, libFailed = false;
+  function loadLib(){
+    if(lib) return lib;
+    lib = new Promise(function(res, rej){
+      if(window.QRCode && window.QRCode.toDataURL) return res(window.QRCode);
+      var s = document.createElement('script'); s.src = ASSET + '/assets/vendor/qrcode.min.js';
+      s.onload = function(){ if(window.QRCode && window.QRCode.toDataURL) res(window.QRCode); else rej(new Error('no QRCode')); };
+      s.onerror = function(){ rej(new Error('qrcode.min.js')); };
+      document.head.appendChild(s);
+    });
+    return lib;
+  }
+  function mark(){
+    if(markP) return markP;
+    markP = new Promise(function(res){ if(!MARK) return res(null); var m = new Image(); m.onload = function(){ res(m); }; m.onerror = function(){ res(null); }; m.src = MARK; });
+    return markP;
+  }
+  /* 1200 px square, white quiet zone 8% a side, the code drawn with smoothing OFF (interpolation
+     softens module edges, and with the centre mark that has made long-slug codes undecodable),
+     the OceanSafe mark on a white rounded backing, error correction H. A tainted canvas (the mark
+     came cross-origin on an off-site copy) falls back to the plain code. */
+  function render(url){
+    return Promise.all([loadLib(), mark()]).then(function(r){
+      var QR = r[0], mk = r[1];
+      return new Promise(function(res, rej){
+        var pad = Math.round(SIZE * 0.08), q = SIZE - pad * 2;
+        QR.toDataURL(url, { margin:1, width:q, errorCorrectionLevel:'H' }, function(e, data){
+          if(e) return rej(e);
+          var im = new Image();
+          im.onload = function(){
+            function base(){ var c = document.createElement('canvas'); c.width = c.height = SIZE; var x = c.getContext('2d');
+              x.fillStyle = '#fff'; x.fillRect(0, 0, SIZE, SIZE); x.imageSmoothingEnabled = false; x.drawImage(im, pad, pad, q, q); x.imageSmoothingEnabled = true; return [c, x]; }
+            var cx = base(), c = cx[0], x = cx[1];
+            if(mk){
+              var s = Math.round(q * MARK_FRAC), o = Math.round((SIZE - s) / 2), p = Math.round(s * 0.14), br = Math.round(s * 0.26);
+              x.fillStyle = '#fff'; x.beginPath();
+              if(x.roundRect) x.roundRect(o - p, o - p, s + p * 2, s + p * 2, br); else x.rect(o - p, o - p, s + p * 2, s + p * 2);
+              x.fill();
+              try{ x.drawImage(mk, o, o, s, s); }catch(err){}
+            }
+            try{ res(c.toDataURL('image/png')); }
+            catch(err){ res(base()[0].toDataURL('image/png')); }
+          };
+          im.onerror = function(){ rej(new Error('qr image')); };
+          im.src = data;
+        });
+      });
+    });
+  }
+
+  /* ---- the live figures: the Worker's rollups, handed over by the live loader ---- */
+  var live = null;
+  document.addEventListener('os:rollups', function(e){ live = e.detail || null; chart(); });
+  function hash(s){ var h = 2166136261; for(var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h; }
+  function sampleFor(tag){
+    if(SAMPLE[tag]) return { open: SAMPLE[tag][0], conv: SAMPLE[tag][1] };
+    var h = hash(tag); return { open: 40 + (h % 600), conv: 0.14 + ((h >>> 8) % 48) / 100 };
+  }
+  function liveFor(tag){
+    var open = 0, eng = 0;
+    ((live && live.days) || []).forEach(function(d){ var r = d && d.roll; if(!r) return;
+      if(r.qr_open) open += r.qr_open[tag] || 0; if(r.qr_eng) eng += r.qr_eng[tag] || 0; });
+    return { open: open, eng: Math.min(eng, open) };
+  }
+
+  /* ---- render ---- */
+  function note(t){ var n = document.getElementById('qrNote'); if(n) n.textContent = t || ''; }
+  var canShare = !!navigator.share;
+  function mailto(it, L){
+    var sub = it.name + ' QR code, ' + propName();
+    var body = 'Scan to open our beach guide (' + it.name + '):\n' + L;
+    return 'mailto:?subject=' + encodeURIComponent(sub) + '&body=' + encodeURIComponent(body);
+  }
+  function tiles(){
+    var el = document.getElementById('qrList'); if(!el) return;
+    if(!items.length){ el.innerHTML = '<div class="qr-empty">No codes yet. Name your first spot above and the code appears here, with its own line in the chart.</div>'; return; }
+    el.innerHTML = items.map(function(it){
+      var png = pngs[it.tag], L = link(it);
+      var pic = png ? '<img alt="QR code, ' + esc(it.name) + '" src="' + png + '">'
+        : '<div class="qr-ph">' + (libFailed ? 'The code could not be drawn here. Reload the page to try again.' : 'Drawing the code') + '</div>';
+      return '<div class="qr-tile" data-tag="' + esc(it.tag) + '">' + pic +
+        '<div class="qr-nm" title="' + esc(it.name) + '">' + esc(it.name) + '</div>' +
+        '<div class="qr-tagl">' + esc(L.replace(/^https:\/\//, '')) + '</div>' +
+        '<div class="qr-acts">' +
+          (png ? '<a class="pl-btn" download="' + esc(fileName(it)) + '" href="' + png + '">Download PNG</a>' : '') +
+          '<a class="pl-btn" href="' + esc(mailto(it, L)) + '">Email</a>' +
+          (png && canShare ? '<button type="button" class="pl-btn" data-share="' + esc(it.tag) + '">Share</button>' : '') +
+          '<button type="button" class="pl-btn" data-copy="' + esc(L) + '">Copy link</button>' +
+          '<button type="button" class="pl-btn qr-rm" data-rm="' + esc(it.tag) + '" aria-label="Remove ' + esc(it.name) + '">Remove</button>' +
+        '</div></div>';
+    }).join('');
+  }
+  function chart(){
+    var el = document.getElementById('qrChart'), per = document.getElementById('qrPeriod'); if(!el) return;
+    var L = isLive();
+    var rows = items.map(function(it){
+      if(!L){ var s = sampleFor(it.tag); return { it:it, open:s.open, eng:Math.round(s.open * s.conv), conv:s.conv }; }
+      var v = liveFor(it.tag); return { it:it, open:v.open, eng:v.eng, conv: v.open >= 5 ? v.eng / v.open : null };
+    });
+    rows.sort(function(a, b){ return (b.conv || 0) - (a.conv || 0) || b.open - a.open; });
+    var period = (L && live && live.period > 0) ? live.period : 30;
+    if(per) per.textContent = (L ? 'Last ' + period + ' days.' : 'Sample figures, last 30 days.') + ' Ranked by the share of opens that led to a tap.';
+    if(!rows.length){ el.innerHTML = '<div class="qr-empty">Make a code and its line appears here.</div>'; return; }
+    var best = rows.length > 1 && rows[0].conv != null ? rows[0] : null;
+    el.innerHTML = rows.map(function(r){
+      var pc = r.conv == null ? '' : Math.round(r.conv * 100) + '%';
+      var sub = r.open === 0 ? (L ? (live ? 'No scans counted yet.' : 'Counting with your guest activity.') : '')
+        : r.open < 5 ? 'Fewer than 5 opens so far.'
+        : ct(r.eng) + ' of ' + ct(r.open) + ' opens went on to a tap.';
+      return '<div class="qr-row' + (best === r ? ' top' : '') + '"><span class="nm"><span style="overflow:hidden;text-overflow:ellipsis">' + esc(r.it.name) + '</span>' +
+        (best === r ? '<span class="qr-best">Best</span>' : '') + '</span><span class="pc">' + pc + '</span>' +
+        '<span class="bar"><i style="width:' + Math.round((r.conv || 0) * 100) + '%"></i></span>' +
+        (sub ? '<span class="sub">' + sub + '</span>' : '') + '</div>';
+    }).join('');
+  }
+  function draw(){
+    tiles(); chart();
+    items.forEach(function(it){
+      if(pngs[it.tag] !== undefined) return;
+      pngs[it.tag] = '';
+      render(link(it)).then(function(d){ pngs[it.tag] = d; tiles(); })
+        .catch(function(){ libFailed = true; delete pngs[it.tag]; tiles(); });
+    });
+  }
+
+  /* ---- actions ---- */
+  var form = document.getElementById('qrForm'), inp = document.getElementById('qrName');
+  if(form) form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = String(inp.value || '').trim().replace(/\s+/g, ' ');
+    if(!name){ note('Give the spot a name, like Pool deck.'); inp.focus(); return; }
+    if(items.some(function(i){ return i.name.toLowerCase() === name.toLowerCase(); })){ note('You already have a code called ' + name + '.'); return; }
+    var it = { name:name, tag:uniqueTag(tagOf(name), items), made:new Date().toISOString() };
+    items.unshift(it); save(); inp.value = '';
+    note('Made. ' + name + ' is in your codes and has its own line in the chart.');
+    ready().then(draw);
+  });
+  var list = document.getElementById('qrList');
+  if(list) list.addEventListener('click', function(e){
+    var b = e.target.closest('[data-copy],[data-rm],[data-share]'); if(!b) return;
+    if(b.dataset.copy){
+      var L = b.dataset.copy;
+      (navigator.clipboard ? navigator.clipboard.writeText(L) : Promise.reject())
+        .then(function(){ note('Link copied.'); }, function(){ window.prompt('Copy this link', L); });
+      return;
+    }
+    if(b.dataset.rm){
+      var it = items.filter(function(i){ return i.tag === b.dataset.rm; })[0];
+      items = items.filter(function(i){ return i.tag !== b.dataset.rm; }); save(); draw();
+      note(it ? 'Removed ' + it.name + '. Make it again any time; a code you already printed still opens your guide.' : '');
+      return;
+    }
+    if(b.dataset.share){
+      var sh = items.filter(function(i){ return i.tag === b.dataset.share; })[0], png = sh && pngs[sh.tag]; if(!png) return;
+      fetch(png).then(function(r){ return r.blob(); }).then(function(bl){
+        var f = new File([bl], fileName(sh), { type:'image/png' }), L2 = link(sh);
+        if(navigator.canShare && navigator.canShare({ files:[f] })) return navigator.share({ files:[f], title: sh.name + ' QR code', text: L2 });
+        return navigator.share({ title: sh.name + ' QR code', text: L2, url: L2 });
+      }).catch(function(){});
+    }
+  });
+
+  /* boot only once the tab is opened, so the library is never fetched for operators who never use it */
+  var started = false;
+  function boot(){ if(started) return; started = true; chart(); ready().then(draw); }
+  var tab = document.querySelector('.viewtabs button[data-view="qr"]');
+  if(tab) tab.addEventListener('click', boot);
+  if(!view.hidden) boot();
+  window.OS_QR = { items: function(){ return items.slice(); }, link: link, tagOf: tagOf, boot: boot };
 })();
 </script>
 <script>

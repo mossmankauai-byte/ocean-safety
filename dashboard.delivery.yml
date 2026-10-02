@@ -1,6 +1,7 @@
 # Delivery spec for dashboard.html, the one operator surface.
 # Required by oscheck.py --type console. The Dashboard is not sent to one recipient:
 # it is served at five segment routes and the segment is resolved from the pathname.
+# Updated 2026-10-01 for the QR codes tab (release captain Phase 1); prior text is in git at f86759a.
 
 recipient: any signed-in operator, at their own segment route
 segment: hotel, timeshare, pm, rental, concierge, cars   # /rental serves the pm segment
@@ -13,3 +14,18 @@ must_be_true_after: >
   The operator lands on their own segment's dashboard, sees their own property
   name in the header, and every tab they can see is about their property.
   Verified by checks/dashboard-ops.js, which must pass 60/60 before a deploy.
+  QR codes tab, added 2026-10-01 on work/qr-tab, both tiers, every segment. A named code
+  encodes the live guide at oceansafety.app/?ref=<own slug>&island=<own island>&u=<tag>, the tag
+  being the name as a-z 0-9 hyphen, 16 characters, the Worker's own sanitizer; the island param
+  is omitted when the partner row has none, never empty or null; the downloaded 1200px PNG
+  decodes (zbarimg) to that exact URL with the OceanSafe mark at 16% and errorCorrectionLevel H;
+  the demo (no slug) encodes the demo guide on the SAME /?ref= shape, labelled Sample, and never
+  /stay-close-v2 (OD-13); names live in this browser's localStorage only; Copy link, Download
+  PNG, Email (mailto with the link in the body) and Share (navigator.share with the PNG) send
+  nothing from the Dashboard; the chart ranks codes by conversion = qr_eng / qr_open from the
+  telemetry Worker's rollups (kauai-beach-guide work/qr-tags: qr_open counts guide opens per
+  tag, qr_eng the sessions from that tag that tapped a place, offer, amenity or tour), summed
+  over the Home period; a code with no counts says so, counts under 5 read fewer than 5 (OD-18),
+  no figure is an outcome claim; the Worker must be deployed before the Dashboard, or every
+  live code reads No scans counted yet; the free frame (?plan=free) shows the same tab
+  unlocked; checks/dashboard-ops.js walks the tab and passes in full.
