@@ -3,9 +3,9 @@ recipient: guests of a Kauaʻi hotel's co-branded guide (?ref=<slug>) and the ho
 segment: hotel
 tier: free
 fulfillment: >
-  None. No price, link or signup. Live-cam pins open the camera operator's own public
-  page in a new tab; nothing is embedded.
+  None. No price, link or signup. Nothing in the guide changes for a guest; the desk
+  bridge runs only when the guide is framed with desk=1.
 must_be_true_after: >
-  A cam pin opens a sheet naming the beach and the operator and its link returns 200.
-  Framed with desk=1, a tapped place posts os:poi to the parent page and sends nothing
-  to the telemetry collector.
+  Framed with desk=1, a tapped place posts os:poi to the parent page, an os:open message
+  from the parent opens that place, and nothing is sent to the telemetry collector.
+  Unframed, the guide behaves exactly as before.
