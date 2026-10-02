@@ -29,3 +29,15 @@ must_be_true_after: >
   no figure is an outcome claim; the Worker must be deployed before the Dashboard, or every
   live code reads No opens from this code yet; the free frame (?plan=free) shows the same tab
   unlocked; checks/dashboard-ops.js walks the tab and passes in full.
+  Today tab desk notes, day band for every place, added 2026-10-01 on work/today-poi-band,
+  hotel, both tiers: every desk note carries the 6 am to sunset band in five stretches (sky,
+  air temp, wind, rain chance, one why line). Farmers' markets, parks, sights and culture,
+  food and drink, and event venues read /api/wx?k=live&island=<the place's own island>&lat=&lon=
+  at the place's own coordinates rounded to 2 decimals, fetched when the note opens, never on
+  render; a place or venue with no coordinates, or coordinates off every island, reads the
+  island forecast and the caption says Island forecast, never the place's name; markets show
+  the next market day with stretches outside their hours greyed Closed, and a market that ended
+  today says the next one is past the hourly forecast; indoor or rain_ok places read Good in
+  rain, lookouts read Maybe under heavy cloud; an event past the forecast says so and draws no
+  band; live cams carry the watched beach's own surf band; ?plan=free shows the same band;
+  checks/dashboard-ops.js passes in full.
