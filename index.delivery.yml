@@ -1,0 +1,11 @@
+# Delivery spec for index.html, the guest guide. Required by oscheck.py for a guest-facing file.
+recipient: guests of a Kauaʻi hotel's co-branded guide (?ref=<slug>) and the hotel desk framing it (&desk=1)
+segment: hotel
+tier: free
+fulfillment: >
+  None. No price, link or signup. Nothing in the guide changes for a guest; the desk
+  bridge runs only when the guide is framed with desk=1.
+must_be_true_after: >
+  Framed with desk=1, a tapped place posts os:poi to the parent page, an os:open message
+  from the parent opens that place, and nothing is sent to the telemetry collector.
+  Unframed, the guide behaves exactly as before.
