@@ -4487,19 +4487,23 @@ function outlookChipsHtml(c){
     const lbl = c.es < 1.5 ? 'Calm' : c.es < 4 ? 'Rough' : 'Big surf';
     chips.push(ico(k, `${lbl} · ${c.es.toFixed(1)} ft`));
   }
-  const sky = skyLabel(c);
+  if(c.wx_snap){
+    chips.push(`<div class="outlook-cond-chip warn">Live weather unavailable</div>`);
+  }
+  const sky = c.wx_snap ? null : skyLabel(c);
   if(sky){
     // Drop the " · NN%" when the UV/rain cross-check overrode the raw cloud number, so the
     // chip can't show a contradiction like "Cloudy · 30%"; otherwise keep the cloud reading.
     chips.push(ico(sky.iconKey, sky.overridden ? sky.label : `${sky.label} · ${sky.pct}%`));
   }
-  if(typeof c.tide === 'number'){
+  if(typeof c.tide === 'number' && !c.tide_snap){
     const k   = c.tide < 1.2 ? 'cond-low-tide' : 'cond-high-tide';
     const lbl = c.tide < 1.2 ? 'Low tide' : 'High tide';
     chips.push(ico(k, `${lbl} · ${c.tide.toFixed(1)} ft`));
   }
   // Rain chip: c.precip is daily mm (FORECAST), c.rain is mm*10 (LIVE/SNAP). Show whenever rainfall is non-trivial.
-  const precipMm = (typeof c.precip === 'number') ? c.precip
+  const precipMm = c.wx_snap ? 0
+                 : (typeof c.precip === 'number') ? c.precip
                  : (typeof c.rain === 'number') ? c.rain / 10
                  : 0;
   const actuallyRaining = precipMm >= 0.5;
@@ -4525,7 +4529,7 @@ function outlookChipsHtml(c){
     // Currently dry but rain is coming within 12h — show ETA chip instead of percentage.
     // More actionable than "60% chance" — tells the user when to bring a poncho.
     chips.push(ico('cond-rain-likely', `Rain at ${fmtHour(LV.rain_at)}`));
-  } else if(typeof c.precip_chance === 'number' && c.precip_chance >= 5){
+  } else if(!c.wx_snap && typeof c.precip_chance === 'number' && c.precip_chance >= 5){
     // Fallback to probability chip — only when we don't have hourly forecast (offline
     // or before first fetch), or when no rain is expected within 12h but probability is
     // non-trivial (could mean an "iffy" multi-day forecast situation).
@@ -4541,7 +4545,7 @@ function outlookChipsHtml(c){
     const jLbl = c.jelly.peak ? 'Box jellyfish · peak' : 'Box jellyfish likely';
     chips.push(`<div class="outlook-cond-chip warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="outlook-cond-ic" style="width:14px;height:14px"><path d="M5 10a7 7 0 0 1 14 0v1H5z"/><path d="M8 11v4M11 11v6M13 11v6M16 11v4"/></svg>${jLbl}</div>`);
   }
-  if(typeof c.wind === 'number'){
+  if(typeof c.wind === 'number' && !c.wx_snap){
     const w = c.wind;
     const k   = w < 14 ? 'cond-light-wind' : 'cond-strong-wind';
     const lbl = w < 5 ? 'Calm' : w < 10 ? 'Light' : w < 16 ? 'Breezy' : w < 22 ? 'Brisk' : w < 28 ? 'Windy' : 'Strong';
@@ -4652,7 +4656,7 @@ async function fetchLive(){
       ww_h: surfValid && Number.isFinite(s.current.wind_wave_height) ? s.current.wind_wave_height : null,
       ww_t: surfValid && Number.isFinite(s.current.wind_wave_period) ? s.current.wind_wave_period : null,
       ww_d: surfValid && Number.isFinite(s.current.wind_wave_direction) ? s.current.wind_wave_direction : null,
-      tide: SNAP.tide, tt: SNAP.tt
+      tide: SNAP.tide, tt: SNAP.tt, tide_live: false
     };
     if(typeof c.temperature_2m === 'number') window._airTemp = c.temperature_2m;
     // Capture current-hour precipitation probability for the chance-of-rain chip.
@@ -4750,6 +4754,7 @@ async function fetchLive(){
       const next = preds[Math.min(curIdx+1, preds.length-1)];
       LIVE.tide = +preds[curIdx].v.toFixed(1);
       LIVE.tt = next.v >= preds[curIdx].v ? 'rising' : 'falling';
+      LIVE.tide_live = true;
     }
     // Mark when this data was fetched, for the freshness indicator in the header
     window._liveFetchedAt = new Date();
@@ -4843,6 +4848,11 @@ async function getCond(b){
     golden, dow:new Date().getDay(), mo:new Date().getMonth(), h
   };
   c.surf_unknown = surfUnknown;
+  // SNAP values are placeholders, not readings. wx_snap: the whole live feed failed, so wind,
+  // UV, cloud, rain and tide are SNAP constants. tide_snap: no NOAA tide, so the tide is SNAP's.
+  // Renderers show "unavailable" for these instead of a number that looks live.
+  c.wx_snap = !LIVE;
+  c.tide_snap = !LIVE || LIVE.tide_live === false;
   // SOUTH-SWELL HONEST CAPTION flag. True exactly when reefFactor's relaxation is engaged —
   // i.e. a reef break is taking an on-facing south swell, so the displayed open-water (offshore-Hs)
   // number is conservative and the breaking face can run larger. Drives the informational note in
@@ -7203,6 +7213,7 @@ function weatherBar(c){
   const uvTxt=c.uv>=11?'Extreme UV':c.uv>=8?'Very High UV':c.uv>=6?'High UV':'Moderate UV';
   const uvC=c.uv>=11?'#dc2626':c.uv>=8?'#d97706':'#ca8a04';
   const surf=c.surf_unknown?'Surf data unavailable':c.es<1?'Flat surf':c.es<2?'Small surf':c.es<3.5?'Moderate surf':'Large surf';
+  if(c.wx_snap) return`<div class="wx-bar"><div class="wx-item"><span>Live weather unavailable</span></div><div class="wx-item"><span>${surf}</span></div></div>`;
   return`<div class="wx-bar">
     <div class="wx-item"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="var(--ocean)" stroke-width="1.3" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="2.5"/><line x1="6.5" y1="0.5" x2="6.5" y2="2"/><line x1="6.5" y1="11" x2="6.5" y2="12.5"/><line x1="0.5" y1="6.5" x2="2" y2="6.5"/><line x1="11" y1="6.5" x2="12.5" y2="6.5"/><line x1="2.4" y1="2.4" x2="3.4" y2="3.4"/><line x1="9.6" y1="9.6" x2="10.6" y2="10.6"/><line x1="10.6" y1="2.4" x2="9.6" y2="3.4"/><line x1="3.4" y1="9.6" x2="2.4" y2="10.6"/></svg><span>${cdesc}</span></div>
     <div class="wx-item"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="var(--ocean)" stroke-width="1.3" stroke-linecap="round"><path d="M1 5 Q3 2 6 4 Q8 5.5 9.5 4 Q11 2.5 12 4"/><path d="M1 9 Q3 6 6 8 Q8 9.5 9.5 8 Q11 6.5 12 8"/></svg><span>${wdesc}${wdir?' · '+wdir:''}</span></div>
@@ -7216,7 +7227,7 @@ function condIcons(c,b){
   const wind=c.wind<8?'Light winds':c.wind<15?'Trade winds':c.wind<22?'Strong winds':'Very windy';
   const items=[];
   items.push({icon:`<svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M0.5 7 Q2 4.5 4 6 T7.5 6 T11 6"/></svg>`,txt:surf});
-  items.push({icon:`<svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M0 4.5 Q2.5 2 5.5 4 Q7.5 5.5 9 4 Q10 3 11 4"/></svg>`,txt:wind});
+  if(!c.wx_snap) items.push({icon:`<svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M0 4.5 Q2.5 2 5.5 4 Q7.5 5.5 9 4 Q10 3 11 4"/></svg>`,txt:wind});
   if(b.reef) items.push({icon:`<svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1 9 Q3 5.5 5.5 7 Q8 9 10 6.5"/><circle cx="3.5" cy="9" r=".6" fill="currentColor"/><circle cx="7.5" cy="7.5" r=".6" fill="currentColor"/></svg>`,txt:'Reef protected'});
   if(!b.reef) items.push({icon:`<svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M0.5 7 Q3 4 5.5 6 T11 6"/><line x1="5.5" y1="6" x2="5.5" y2="9"/></svg>`,txt:'Open water'});
   return`<div class="cond-icons">${items.map(i=>`<div class="cond-chip">${i.icon}<span>${i.txt}</span></div>`).join('')}</div>`;
@@ -7328,7 +7339,11 @@ function bestTime(b,r,c){
   const h=new Date().getHours();
   const top=r.top[0];
   let window='';
-  if(top==='snorkel'||top==='swim'){
+  // Fail closed: no fresh surf reading means no water verdict. Sunset, photo and walk advice is
+  // about light and heat, not the ocean, so it stays.
+  if(c && c.surf_unknown && top!=='sunset' && top!=='photography' && top!=='walk'){
+    window='Conditions unavailable. Ask a lifeguard before you go in';
+  } else if(top==='snorkel'||top==='swim'){
     if(h<10) window='Now through 11am — light winds, rising tide';
     else if(h<14) window='Early morning was best — still good now';
     else window='Morning visits are best — try before 10am tomorrow';
@@ -7702,7 +7717,7 @@ function openSheet(id){
   // on color alone. oc>0 onshore (choppy), oc<0 offshore (cleaner). Falling tide flags the
   // honest current-strength note (rip() amplifies x1.2 on the ebb).
   const _windTideChips = (() => {
-    if(!c) return '';
+    if(!c || c.wx_snap) return '';
     const spd = Math.round(c.wind || 0);
     const ocv = c.oc || 0;
     const windWord = ocv > 2 ? 'Onshore' : ocv < -2 ? 'Offshore' : 'Cross-shore';
@@ -7717,7 +7732,7 @@ function openSheet(id){
     const swellCell = haveSwell ? cell(`<svg width="22" height="22" viewBox="0 0 24 24" style="flex-shrink:0;transform:rotate(${swBlow}deg)" fill="none" stroke="#33586a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg><div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">Swell ${Math.round(c.per)}s</div><div style="font-size:10.5px;color:var(--mute)">forecast swell</div></div>`) : '';
     return `<details class="cond-fold"><summary class="cond-fold-sum"><svg class="cf-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>Wind, tide &amp; swell</summary><div style="display:flex;gap:8px;margin:8px 0 4px;flex-wrap:wrap">
       ${cell(`${windArrow}<div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">${windWord} ${spd} mph</div><div style="font-size:10.5px;color:var(--mute)">forecast wind</div></div>`)}
-      ${cell(`${tideArrow}<div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">Tide ${falling ? 'falling' : 'rising'}</div><div style="font-size:10.5px;color:var(--mute)">${falling ? 'predicted · currents can run stronger' : 'predicted'}</div></div>`)}
+      ${c.tide_snap ? '' : cell(`${tideArrow}<div style="line-height:1.25"><div style="font-size:13px;font-weight:600;color:#2c3e46">Tide ${falling ? 'falling' : 'rising'}</div><div style="font-size:10.5px;color:var(--mute)">${falling ? 'predicted · currents can run stronger' : 'predicted'}</div></div>`)}
       ${swellCell}
     </div></details>`;
   })();
@@ -7815,13 +7830,13 @@ function openSheet(id){
     <div class="tapa"></div>
     <div class="vis-section">
       <div class="vis-row"><div class="vis-icon-lbl">Surf</div>${c.surf_unknown ? '<div class="vis-text"><span class="vis-lbl">No data</span><span class="vis-num">—</span></div>' : waveLevel(c.es)}</div>
-      <div class="vis-row"><div class="vis-icon-lbl">Wind</div>${windLevel(c.wind)}</div>
+      <div class="vis-row"><div class="vis-icon-lbl">Wind</div>${c.wx_snap ? '<div class="vis-text"><span class="vis-lbl">No data</span></div>' : windLevel(c.wind)}</div>
       <div class="vis-row"><div class="vis-icon-lbl">Water</div>${tempBar(b.water_temp||78)}</div>
-      <div class="vis-row"><div class="vis-icon-lbl">UV</div>${uvBar(c.uv)}</div>
-      <div class="vis-row" style="border-top:1px dashed var(--border);padding-top:10px"><div class="vis-icon-lbl">Tide</div><div class="vis-text"><span class="vis-lbl">${c.tt==='rising'?'Rising':c.tt==='falling'?'Falling':'Slack'}</span><span class="vis-num">${c.tide.toFixed(1)} ft</span></div></div>
+      <div class="vis-row"><div class="vis-icon-lbl">UV</div>${c.wx_snap ? '<div class="vis-text"><span class="vis-lbl">No data</span></div>' : uvBar(c.uv)}</div>
+      <div class="vis-row" style="border-top:1px dashed var(--border);padding-top:10px"><div class="vis-icon-lbl">Tide</div>${c.tide_snap ? '<div class="vis-text"><span class="vis-lbl">No data</span></div>' : `<div class="vis-text"><span class="vis-lbl">${c.tt==='rising'?'Rising':c.tt==='falling'?'Falling':'Slack'}</span><span class="vis-num">${c.tide.toFixed(1)} ft</span></div>`}</div>
     </div>
     ${caut}${dgr}${tp}${rope}${cs}${(typeof rsSheetHtml==='function')?rsSheetHtml(b):''}${ps}${nas}
-    <details style="margin-top:12px"><summary style="font-size:10px;color:var(--mute);cursor:pointer;text-transform:uppercase;letter-spacing:.06em">Tide today</summary>${tideGraph(c)}</details>
+    ${c.tide_snap ? '' : `<details style="margin-top:12px"><summary style="font-size:10px;color:var(--mute);cursor:pointer;text-transform:uppercase;letter-spacing:.06em">Tide today</summary>${tideGraph(c)}</details>`}
     <a href="${murl}" target="_blank" rel="noopener" class="dirbtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="1,8 15,1 9,8 15,15"/></svg>Get Directions</a>
     ${viatorBlock}`;
   document.getElementById('sheet').classList.add('on', 'sheet-poi');
