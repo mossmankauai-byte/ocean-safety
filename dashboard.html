@@ -32,7 +32,7 @@ window.OS_SEGMENTS = {
     freePrice:'Free', paidPrice:'Pricing on request',
     pcFoot:'Free shows one amenity. Pricing on request for the paid plan.',
     portfolioNote:'Pricing on request.',
-    tabs:['home','today','stayclose','promos','guests','places','qr','desk','shop'],
+    tabs:['home','today','stayclose','promos','guests','places','prearrival','qr','desk','shop'],
     deskLabel:'Tours', deskKind:'affiliate'
   },
   timeshare: {
@@ -1851,6 +1851,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       <button role="tab" aria-selected="false" data-view="promos">Promotions <span class="vb-badge" id="vbPromos">—</span></button>
       <button role="tab" aria-selected="false" data-view="guests">Guest activity</button>
       <button role="tab" aria-selected="false" data-view="places">Places <span class="vb-badge" id="vbPlaces">—</span></button>
+      <button role="tab" aria-selected="false" data-view="prearrival" hidden>Pre-arrival</button>
       <button role="tab" aria-selected="false" data-view="qr">QR codes</button>
       <button role="tab" aria-selected="false" data-view="segments" data-os="tab-segments">Units &amp; owners</button>
       <button role="tab" aria-selected="false" data-view="desk" data-os="tab-desk">Tours</button>
@@ -2492,6 +2493,86 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
               <p class="qr-period" id="qrPeriod"></p>
               <div id="qrChart" class="qr-chart" aria-live="polite"></div>
               <div class="cap" style="margin-top:12px">Conversion is the share of guide opens from a code where the guest went on to tap a place, an offer, an amenity or a tour. Counts only, never an individual. Anything under 5 reads as fewer than 5.</div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </div>
+    <div id="view-prearrival" hidden>
+      <section style="margin-top:18px" aria-label="Pre-arrival">
+        <div class="sec-h">
+          <h2>Pre-arrival</h2>
+          <p>One code for every guest before they land. Send it with the booking, and they open your guide while they are still planning.</p>
+        </div>
+        <div class="qr-grid">
+          <div class="qr-main">
+            <div class="card pa-code">
+              <div class="qr-ch"><h3>Your pre-arrival code</h3></div>
+              <p class="qr-lead">Put it in your confirmation or pre-arrival email, or text it. It opens your guide on your island. Until they land, the guide also shows the offers you mark Pre-arrival in Promotions, and it switches to your on-island offers once their phone is on Hawai&#699;i time.</p>
+              <div class="pa-row">
+                <div class="pa-pic" id="paPic"><div class="qr-ph">Drawing the code</div></div>
+                <div class="pa-side">
+                  <label class="pa-lab" for="paLink">Link</label>
+                  <div class="pa-linkrow">
+                    <input id="paLink" type="text" readonly value="">
+                    <button type="button" class="pl-btn primary" id="paCopyLink">Copy link</button>
+                  </div>
+                  <div class="qr-acts pa-acts">
+                    <button type="button" class="pl-btn" id="paCopyImg">Copy QR image</button>
+                    <a class="pl-btn" id="paDl" download="pre-arrival-qr.png" href="#">Download PNG</a>
+                    <button type="button" class="pl-btn" id="paShare" hidden>Share</button>
+                    <a class="pl-btn" id="paMail" href="#">Email it to me</a>
+                  </div>
+                  <p class="qr-note" id="paNote" aria-live="polite"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:14px">
+              <div class="qr-ch"><h3>Ready to paste</h3></div>
+              <p class="qr-lead">Edit the wording if you like. Your edits are kept in this browser. The link is filled in for you.</p>
+              <div class="pa-snip">
+                <div class="pa-snip-h"><b>Email</b><button type="button" class="pl-btn primary" data-pa-copy="email">Copy email</button></div>
+                <div class="pa-linkrow" style="margin-bottom:6px"><input id="paSubj" class="pa-subj" type="text" maxlength="120" aria-label="Email subject"><button type="button" class="pl-btn" data-pa-copy="subj">Copy subject</button></div>
+                <textarea id="paEmail" rows="12" aria-label="Email text"></textarea>
+              </div>
+              <div class="pa-snip">
+                <div class="pa-snip-h"><b>Text message</b><span class="pa-count" id="paSmsCount"></span><button type="button" class="pl-btn primary" data-pa-copy="sms">Copy text</button></div>
+                <textarea id="paSms" rows="3" aria-label="Text message"></textarea>
+              </div>
+              <button type="button" class="pa-reset" id="paReset">Reset to the original wording</button>
+            </div>
+
+            <div class="card" style="margin-top:14px">
+              <div class="qr-ch"><h3>Send it automatically</h3></div>
+              <p class="qr-lead">Most booking and guest messaging systems already send a templated email or text before check-in. Add the code there once and every booking gets it, with nothing to integrate.</p>
+              <ol class="pa-steps">
+                <li><b>Open the template that goes out before arrival.</b> It is usually called pre-arrival, pre-stay, booking confirmation or check-in reminder.</li>
+                <li><b>Paste the email text,</b> or put the link behind a button such as &ldquo;Plan your beach days&rdquo;.</li>
+                <li><b>Add the QR image</b> if the template takes images. Upload the PNG you downloaded above.</li>
+                <li><b>Send it 3 to 7 days before check-in.</b> The beach forecast is most useful about a week out.</li>
+                <li><b>Send yourself a test</b> and scan the code from your phone.</li>
+              </ol>
+              <div class="pa-sys">
+                <div><b>Hotel systems</b><span>Oracle OPERA, Cloudbeds, Mews, StayNTouch, innRoad and similar PMS tools keep their guest emails under a section like Guest communication or Email templates.</span></div>
+                <div><b>Guest messaging</b><span>Canary, Duve, Akia, Whistle and similar tools have a scheduled pre-arrival message. Paste the text message there.</span></div>
+                <div><b>Booking engine or email tool</b><span>SynXis, SiteMinder, Mailchimp or your own confirmation email: add the link or the email text to the confirmation.</span></div>
+              </div>
+              <div class="cap" style="margin-top:12px">Stuck on your system? Send your OceanSafe contact the name of it and we will walk your team through where the link goes.</div>
+            </div>
+          </div>
+          <aside class="qr-side">
+            <div class="card">
+              <div class="title"><span class="l">Opened before arrival</span><span><span class="chip sample" id="paChip">Sample</span></span></div>
+              <div id="paStat" class="pa-stat" aria-live="polite"></div>
+              <div class="cap" style="margin-top:12px">Guide opens from this code, and how many went on to tap a place, an offer, an amenity or a tour. Counts only, never an individual. Anything under 5 reads as fewer than 5.</div>
+            </div>
+            <div class="card" style="margin-top:14px">
+              <div class="title"><span class="l">What they see before they land</span></div>
+              <p class="qr-lead" style="margin:6px 0 10px">Offers marked Pre-arrival show only until the guest&rsquo;s phone is on Hawai&#699;i time. Use them for things worth booking ahead: a dinner, a cabana, a lesson.</p>
+              <div class="qr-acts">
+                <button type="button" class="pl-btn" data-goto="promos">Set pre-arrival offers</button>
+              </div>
             </div>
           </aside>
         </div>
@@ -3807,6 +3888,8 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       body:'How many guests a day, when they plan, and which beaches and offers they open. It stays <b>Sample</b> until your guide is live. Live mode only ever shows measured counts.' },
     { view:'places', sel:'.pl-safety', title:'Places, with safety built in',
       body:'Choose what your guide recommends. Hazardous spots start as <b>Not recommended</b> and cannot be removed, so their warnings always stay in front of guests.' },
+    { view:'prearrival', sel:'#view-prearrival .pa-code', title:'Send it before they land',
+      body:'One code for every guest before they arrive. Copy the link or the QR image into your confirmation email or a text, or paste the ready-made wording into the pre-arrival template your booking system already sends.' },
     { view:'qr', sel:'#view-qr .qr-main .card', title:'Make your QR codes',
       body:'Name a code for each spot you post one: the lobby sign, a room card, the pool deck. Each one opens your guide with its own tag. Download the PNG, email the link or share it. The names are kept in this browser; the codes work wherever you post them.' },
     { view:'qr', sel:'#view-qr .qr-side .card', title:'Which code gets guests to tap',
@@ -7814,13 +7897,13 @@ window.osParseAff = function(v){
 
   /* demo seeds: the spots each segment actually posts a code, and their sample figures */
   var SEEDS = {
-    hotel:     ['Lobby sign', 'Pool deck', 'In-room card', 'Welcome email'],
+    hotel:     ['Lobby sign', 'Pool deck', 'In-room card'],
     timeshare: ['Front desk', 'In-unit card', 'Owner newsletter', 'Welcome email'],
     pm:        ['In-unit card', 'Welcome email', 'Key box'],
     concierge: ['Desk card', 'Lobby sign', 'Welcome email'],
     cars:      ['Dash card', 'Key tag', 'Booking email']
   };
-  var SAMPLE = { 'lobby-sign':[412,.38], 'pool-deck':[188,.61], 'in-room-card':[655,.47], 'welcome-email':[97,.29],
+  var SAMPLE = { 'lobby-sign':[412,.38], 'pool-deck':[188,.61], 'in-room-card':[655,.47], 'welcome-email':[97,.29], 'pre-arrival':[318,.44],
                  'front-desk':[301,.42], 'in-unit-card':[540,.51], 'owner-newsletter':[64,.22], 'key-box':[83,.33],
                  'desk-card':[226,.55], 'dash-card':[147,.46], 'key-tag':[58,.31], 'booking-email':[120,.27] };
 
@@ -7830,15 +7913,18 @@ window.osParseAff = function(v){
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 16).replace(/-+$/, '');
     return t || 'code';
   }
+  /* pre-arrival belongs to the Pre-arrival tab's one code, so a spot can never share its count */
+  var PRE = 'pre-arrival';
   function uniqueTag(base, list){
     var t = base, n = 2;
-    while(list.some(function(i){ return i.tag === t; })){ var suf = '-' + (n++); t = base.slice(0, 16 - suf.length).replace(/-+$/, '') + suf; }
+    while(t === PRE || list.some(function(i){ return i.tag === t; })){ var suf = '-' + (n++); t = base.slice(0, 16 - suf.length).replace(/-+$/, '') + suf; }
     return t;
   }
   function read(){ try{ var d = JSON.parse(localStorage.getItem(KEY)); return d && Array.isArray(d.items) ? d.items : null; }catch(e){ return null; } }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify({ v:1, items: items })); }catch(e){} }
   var items = read();
   if(!items) items = isLive() ? [] : (SEEDS[seg] || SEEDS.pm).map(function(n){ return { name:n, tag:tagOf(n), made:'' }; });
+  items = items.filter(function(i){ return i && i.tag !== PRE; });
 
   /* the island rides the link so the guide opens on the right island; omitted when the partner row has none */
   var island = isLive() ? null : 'kauai', islandKnown = !isLive();
@@ -8027,7 +8113,178 @@ window.osParseAff = function(v){
   var tab = document.querySelector('.viewtabs button[data-view="qr"]');
   if(tab) tab.addEventListener('click', boot);
   if(!view.hidden) boot();
-  window.OS_QR = { items: function(){ return items.slice(); }, link: link, tagOf: tagOf, boot: boot };
+  /* the Pre-arrival tab draws its own code with the same engine, link shape and figures */
+  function statFor(tag){
+    if(!isLive()){ var s = sampleFor(tag); return { open:s.open, eng:Math.round(s.open * s.conv), sample:true }; }
+    var v = liveFor(tag); v.sample = false; v.loaded = !!live; return v;
+  }
+  window.OS_QR = { items: function(){ return items.slice(); }, link: link, tagOf: tagOf, boot: boot,
+    ready: ready, render: render, fileName: fileName, statFor: statFor, PRE: PRE };
+})();
+</script>
+<style>
+/* ============ PRE-ARRIVAL TAB (2026-10-03) ============ */
+.pa-row{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start}
+.pa-pic img,.pa-pic .qr-ph{width:200px;height:200px;border-radius:10px;display:block}
+.pa-pic img{border:1px solid var(--line);background:#fff}
+.pa-pic .qr-ph{background:var(--tint);display:grid;place-items:center;color:var(--muted);font-size:12px;text-align:center;padding:10px}
+.pa-side{min-width:0}
+.pa-lab{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin:0 0 5px}
+.pa-linkrow{display:flex;gap:8px;flex-wrap:wrap}
+.pa-linkrow input{flex:1;min-width:200px;font:inherit;font-size:13px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--tint);color:var(--ink)}
+.pa-acts{margin-top:10px}
+.pa-snip{margin-top:12px}
+.pa-snip-h{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:13.5px;color:var(--ink)}
+.pa-snip-h b{margin-right:auto}
+.pa-count{font-size:11.5px;color:var(--muted)}
+.pa-subj,.pa-snip textarea{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:13px;line-height:1.5;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)}
+.pa-subj{flex:1;min-width:200px;width:auto;font-weight:600}
+.pa-snip textarea{resize:vertical}
+.pa-subj:focus,.pa-snip textarea:focus,.pa-linkrow input:focus{outline:2px solid var(--sea);outline-offset:1px}
+.pa-reset{appearance:none;background:none;border:0;padding:0;margin-top:10px;font:inherit;font-size:12px;color:var(--muted);text-decoration:underline;cursor:pointer}
+.pa-steps{margin:0;padding-left:20px;font-size:13px;line-height:1.55;color:var(--ink-2)}
+.pa-steps li{margin:0 0 6px}
+.pa-steps b{color:var(--ink)}
+.pa-sys{display:grid;gap:10px;margin-top:12px}
+.pa-sys > div{background:var(--tint);border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.5;color:var(--ink-2)}
+.pa-sys b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
+.pa-stat{margin-top:6px}
+.pa-stat .n{font-family:Fraunces,Georgia,serif;font-size:34px;font-weight:700;color:var(--ink);line-height:1.1}
+.pa-stat .l{font-size:12.5px;color:var(--muted);margin-top:2px}
+.pa-stat .e{font-size:13px;color:var(--ink-2);margin-top:10px}
+/* the code leads on a phone; the QR codes tab lifts its chart above, this tab does not */
+@media (max-width:1000px){ #view-prearrival .qr-side{order:0;margin-top:14px} }
+@media (max-width:640px){
+  .pa-row{grid-template-columns:1fr}
+  .pa-pic{justify-self:center}
+}
+</style>
+<script>
+/* ============ PRE-ARRIVAL TAB (2026-10-03) ============
+   One code every guest gets before they land, kept apart from the on-property spots on the
+   QR codes tab. It is drawn by that tab's engine (window.OS_QR) with the reserved tag
+   pre-arrival, so its opens count under their own name. The guide already knows a guest is
+   pre-arrival from the phone's clock and shows Pre-arrival offers until they are on
+   Hawaiʻi time, so nothing here changes the guide. Nothing is sent anywhere: Copy writes
+   to the clipboard, Download is a PNG, Email opens the operator's own mail app. Wording edits
+   are kept in this browser with the link and the name stored as tokens, so a live link or
+   a renamed property fills back in. */
+(function(){
+  var view = document.getElementById('view-prearrival'), Q = window.OS_QR;
+  if(!view || !Q) return;
+  var it = { name:'Pre-arrival', tag:Q.PRE };
+  var ISLN = { kauai:'Kauaʻi', maui:'Maui', oahu:'Oʻahu', hawaii:'Hawaiʻi Island' };
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function propName(){ var h = document.querySelector('[data-os="h1"]'); return h ? h.textContent.trim() : 'Your property'; }
+  function slug(){ return String(window.OS_SLUG || '').trim().toLowerCase() || 'demo_' + (window.OS_SEG || 'hotel'); }
+  function ct(n){ return n < 5 ? 'fewer than 5' : Math.round(n).toLocaleString('en-US'); }
+  function note(t){ var n = $('paNote'); if(n) n.textContent = t || ''; }
+  var KEY = 'os_prearrival_v1_' + slug();
+  var L = '', png = '';
+
+  function islandName(){ var m = /[?&]island=([a-z]+)/.exec(L); return m && ISLN[m[1]] ? ISLN[m[1]] : 'Hawaiʻi'; }
+  var DEF = {
+    subj: 'Before you arrive: your beach guide from {name}',
+    email: 'Aloha,\n\nWe are looking forward to your stay. Before you fly, open our free beach guide for {island}. It shows live ocean conditions, which beaches suit the day, and lifeguard hours, so you can plan your beach days ahead.\n\nOpen it here: {link}\n\nOr scan the QR code with your phone camera.\n\nSee you soon,\n{name}',
+    sms: 'Aloha from {name}! Plan your beach days with our free guide and live ocean conditions: {link}'
+  };
+  function read(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+  function fill(t){ return String(t).split('{link}').join(L).split('{name}').join(propName()).split('{island}').join(islandName()); }
+  function tokens(t){
+    var s = String(t);
+    if(L) s = s.split(L).join('{link}');
+    var n = propName(); if(n) s = s.split(n).join('{name}');
+    s = s.split(islandName()).join('{island}');
+    return s;
+  }
+  var F = { subj:'paSubj', email:'paEmail', sms:'paSms' };
+  function paint(){
+    var saved = read();
+    Object.keys(F).forEach(function(k){ var el = $(F[k]); if(el) el.value = fill(saved[k] != null ? saved[k] : DEF[k]); });
+    count(); mail();
+  }
+  function store(){
+    var o = {}; Object.keys(F).forEach(function(k){ var el = $(F[k]); if(el) o[k] = tokens(el.value); });
+    try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){}
+  }
+  function count(){ var el = $('paSms'), c = $('paSmsCount'); if(el && c) c.textContent = el.value.length + ' characters'; }
+  function mail(){
+    var a = $('paMail'); if(!a) return;
+    a.href = 'mailto:?subject=' + encodeURIComponent(($('paSubj')||{}).value || '') + '&body=' + encodeURIComponent(($('paEmail')||{}).value || '');
+  }
+  function copy(text, ok){
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+      .then(function(){ note(ok); }, function(){ window.prompt('Copy this', text); });
+  }
+
+  function stat(){
+    var el = $('paStat'), chip = $('paChip'); if(!el) return;
+    var s = Q.statFor(it.tag);
+    if(chip) chip.hidden = !s.sample;
+    if(!s.sample && !s.open){ el.innerHTML = '<div class="l">' + (s.loaded ? 'No opens from this code yet. They show here once guests use it.' : 'Loading with your guest activity.') + '</div>'; return; }
+    var pc = (s.open >= 5 && s.eng >= 5) ? ' (' + Math.round(s.eng / s.open * 100) + '%)' : '';
+    el.innerHTML = '<div class="n">' + esc(ct(s.open)) + '</div><div class="l">guide opens from this code' + (s.sample ? ', sample, last 30 days' : '') + '</div>' +
+      '<div class="e">' + esc(ct(s.eng)) + ' went on to a tap' + pc + '.</div>';
+  }
+  document.addEventListener('os:rollups', function(){ setTimeout(stat, 0); });
+
+  function draw(){
+    L = Q.link(it);
+    var inp = $('paLink'); if(inp) inp.value = L;
+    var dl = $('paDl'); if(dl) dl.setAttribute('download', Q.fileName(it));
+    paint(); stat();
+    Q.render(L).then(function(d){
+      png = d;
+      var pic = $('paPic'); if(pic) pic.innerHTML = '<img alt="Pre-arrival QR code" src="' + d + '">';
+      if(dl) dl.href = d;
+      var sh = $('paShare'); if(sh) sh.hidden = !navigator.share;
+    }).catch(function(){
+      var pic = $('paPic'); if(pic) pic.innerHTML = '<div class="qr-ph">The code could not be drawn here. Reload the page to try again.</div>';
+    });
+  }
+
+  view.addEventListener('click', function(e){
+    var b = e.target.closest('button,a'); if(!b) return;
+    if(b.id === 'paCopyLink'){ if(L) copy(L, 'Link copied.'); return; }
+    if(b.id === 'paDl' && !png){ e.preventDefault(); note('The code is still drawing.'); return; }
+    if(b.id === 'paCopyImg'){
+      if(!png){ note('The code is still drawing.'); return; }
+      if(!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem)){ note('This browser cannot copy images. Use Download PNG and attach the file instead.'); return; }
+      fetch(png).then(function(r){ return r.blob(); })
+        .then(function(bl){ return navigator.clipboard.write([new ClipboardItem({ 'image/png': bl })]); })
+        .then(function(){ note('QR image copied. Paste it into your email or template.'); },
+              function(){ note('This browser would not copy the image. Use Download PNG and attach the file instead.'); });
+      return;
+    }
+    if(b.id === 'paShare'){
+      if(!png) return;
+      fetch(png).then(function(r){ return r.blob(); }).then(function(bl){
+        var f = new File([bl], Q.fileName(it), { type:'image/png' });
+        if(navigator.canShare && navigator.canShare({ files:[f] })) return navigator.share({ files:[f], title:'Pre-arrival QR code', text:L });
+        return navigator.share({ title:'Pre-arrival QR code', text:L, url:L });
+      }).catch(function(){});
+      return;
+    }
+    if(b.id === 'paReset'){ try{ localStorage.removeItem(KEY); }catch(_){} paint(); note(''); return; }
+    var k = b.getAttribute('data-pa-copy');
+    if(k === 'email'){ copy($('paEmail').value, 'Email text copied.'); return; }
+    if(k === 'sms'){ copy($('paSms').value, 'Text message copied.'); return; }
+    if(k === 'subj'){ copy($('paSubj').value, 'Subject copied.'); return; }
+    var g = b.getAttribute('data-goto');
+    if(g){ var t = document.querySelector('.viewtabs button[data-view="' + g + '"]'); if(t) t.click(); }
+  });
+  view.addEventListener('input', function(e){
+    if(!e.target.closest('#paSubj,#paEmail,#paSms')) return;
+    store(); count(); mail();
+  });
+
+  /* boot on first open, same as the QR codes tab: the library is never fetched for an operator who never looks */
+  var started = false;
+  function boot(){ if(started) return; started = true; Q.ready().then(draw); }
+  var tab = document.querySelector('.viewtabs button[data-view="prearrival"]');
+  if(tab) tab.addEventListener('click', boot);
+  if(!view.hidden) boot();
 })();
 </script>
 <script>
