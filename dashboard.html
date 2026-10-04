@@ -2504,8 +2504,15 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           <h2>Pre-arrival</h2>
           <p>Everything for guests who have booked but not landed yet: the offers they see before they fly, how many open your guide early, and the code you send them.</p>
         </div>
+        <div class="pa-styles" id="paStyles" role="group" aria-label="Layout preview">
+          <span>Layout preview</span>
+          <button type="button" data-pa-style="steps">A. Three steps</button>
+          <button type="button" data-pa-style="simple">B. One button</button>
+          <button type="button" data-pa-style="tiles">C. At a glance</button>
+        </div>
+        <div id="paLayout"></div>
 
-        <div class="card pa-offers">
+        <div class="card pa-offers" id="paOffersCard">
           <div class="pa-oh">
             <div><h3>Pre-arrival offers</h3><p class="qr-lead" style="margin:2px 0 0">Guests see these until their phone is on Hawai&#699;i time, then they stop. Good for anything worth booking before the trip: a dinner, a cabana, a lesson, an upgrade.</p></div>
             <span class="pa-ocount" id="paOCount"></span>
@@ -2522,23 +2529,30 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           <div class="cap" style="margin-top:10px">Offers save in this browser with the rest of your promotions. Set the end date and wording in <button type="button" class="pa-inl" data-goto="promos">Promotions</button>, where <b>Export config</b> sends them to your guide.</div>
         </div>
 
-        <div class="card" style="margin-top:14px">
+        <div class="card pa-data" id="paDataCard">
           <div class="title"><span class="l">Before they land</span><span><span class="chip sample" id="paChip">Sample</span></span></div>
           <p class="qr-period" id="paPeriod"></p>
+          <p class="pa-line" id="paLine"></p>
           <div class="pa-kpis" id="paKpis" aria-live="polite"></div>
           <div class="pa-bars" id="paBars" aria-hidden="true"></div>
           <div class="pa-bars-x" id="paBarsX" aria-hidden="true"></div>
-          <div class="cap" style="margin-top:12px">Counted from guide opens through your pre-arrival link or code, so it shows guests who planned ahead with it. Counts only, never an individual. Anything under 5 reads as fewer than 5, and a percent waits for 5 of each.</div>
+          <div class="cap pa-datacap" style="margin-top:12px">Counted from guide opens through your pre-arrival link or code, so it shows guests who planned ahead with it. Counts only, never an individual. Anything under 5 reads as fewer than 5, and a percent waits for 5 of each.</div>
         </div>
 
-        <div class="qr-grid" style="margin-top:14px">
+        <div class="qr-grid" id="paGrid" style="margin-top:14px">
           <div class="qr-main">
-            <div class="card pa-code">
+            <div class="card pa-code" id="paCodeCard">
               <div class="qr-ch"><h3>Your pre-arrival code</h3></div>
               <p class="qr-lead">Put it in your confirmation or pre-arrival email, or text it. It opens your guide on your island.</p>
               <div class="pa-row">
                 <div class="pa-pic" id="paPic"><div class="qr-ph">Drawing the code</div></div>
                 <div class="pa-side">
+                  <p class="pa-hero-t">Send this to every guest before they arrive</p>
+                  <div class="pa-big">
+                    <button type="button" class="pa-bigbtn" data-pa-act="link">Copy link</button>
+                    <button type="button" class="pa-bigbtn" data-pa-act="img">Copy QR image</button>
+                    <button type="button" class="pa-bigbtn" data-pa-act="email">Copy email</button>
+                  </div>
                   <label class="pa-lab" for="paLink">Link</label>
                   <div class="pa-linkrow">
                     <input id="paLink" type="text" readonly value="">
@@ -2555,15 +2569,15 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
               </div>
             </div>
 
-            <div class="card" style="margin-top:14px">
+            <div class="card" id="paPasteCard" style="margin-top:14px">
               <div class="qr-ch"><h3>Ready to paste</h3></div>
               <p class="qr-lead">Edit the wording if you like. Your edits are kept in this browser. The link is filled in for you.</p>
-              <div class="pa-snip">
+              <div class="pa-snip" id="paSnipEmail">
                 <div class="pa-snip-h"><b>Email</b><button type="button" class="pl-btn primary" data-pa-copy="email">Copy email</button></div>
                 <div class="pa-linkrow" style="margin-bottom:6px"><input id="paSubj" class="pa-subj" type="text" maxlength="120" aria-label="Email subject"><button type="button" class="pl-btn" data-pa-copy="subj">Copy subject</button></div>
                 <textarea id="paEmail" rows="12" aria-label="Email text"></textarea>
               </div>
-              <div class="pa-snip">
+              <div class="pa-snip" id="paSnipSms">
                 <div class="pa-snip-h"><b>Text message</b><span class="pa-count" id="paSmsCount"></span><button type="button" class="pl-btn primary" data-pa-copy="sms">Copy text</button></div>
                 <textarea id="paSms" rows="3" aria-label="Text message"></textarea>
               </div>
@@ -2572,7 +2586,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
 
           </div>
           <aside class="qr-side">
-            <div class="card">
+            <div class="card" id="paAutoCard">
               <div class="qr-ch"><h3>Send it automatically</h3></div>
               <p class="qr-lead">Most booking and guest messaging systems already send a templated email or text before check-in. Add the code there once and every booking gets it, with nothing to integrate.</p>
               <ol class="pa-steps">
@@ -8203,6 +8217,49 @@ body.plan-free #paOList{display:none}
 .pa-bars{display:flex;align-items:flex-end;gap:2px;height:74px;margin-top:16px}
 .pa-bars i{flex:1;min-width:2px;background:var(--sea);opacity:.75;border-radius:3px 3px 0 0}
 .pa-bars-x{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
+/* three layouts to choose between (preview) */
+.pa-styles{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 14px;padding:8px 10px;border:1px dashed #d5bd85;border-radius:11px;background:var(--sample-bg,var(--tint))}
+.pa-styles span{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sample,var(--muted));margin-right:4px}
+.pa-styles button{appearance:none;font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:999px;padding:6px 12px;cursor:pointer}
+.pa-styles button[aria-pressed="true"]{background:var(--sea);border-color:var(--sea);color:var(--on-sea)}
+#paLayout > *{margin-top:0}
+#paLayout > * + *{margin-top:14px !important}
+.pa-line,.pa-hero-t,.pa-big{display:none}
+.pa-step-h{display:flex;align-items:center;gap:10px;margin:6px 0 8px}
+.pa-step-h h3{margin:0;font-family:Fraunces,Georgia,serif;font-size:18px;color:var(--ink)}
+.pa-num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--sea);color:var(--on-sea);display:grid;place-items:center;font-weight:800;font-size:14px}
+.pa-send{padding-top:10px}
+.pa-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 12px;overflow-x:auto}
+.pa-tabs button{appearance:none;border:0;background:none;font:inherit;font-size:13.5px;font-weight:700;color:var(--muted);padding:9px 12px;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
+.pa-tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--sea)}
+.pa-send .pa-snip{margin-top:0}
+.pa-send #paAutoCard{border:0;box-shadow:none;padding:0;margin:0;background:none}
+.pa-send[data-tab="auto"] .pa-reset{display:none}
+.pa-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.pa-more{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0}
+.pa-more > summary{cursor:pointer;padding:14px 16px;font-weight:700;font-size:13.5px;color:var(--sea)}
+.pa-more[open] > summary{border-bottom:1px solid var(--line)}
+.pa-more .pa-send{border:0;box-shadow:none;margin:0}
+/* A. three steps: the numbers shrink to a strip */
+[data-pa-style="steps"] .pa-bars,[data-pa-style="steps"] .pa-bars-x,[data-pa-style="steps"] .pa-datacap{display:none}
+[data-pa-style="steps"] .pa-kpi{padding:9px 12px}
+[data-pa-style="steps"] .pa-kpi .v{font-size:22px}
+[data-pa-style="steps"] .pa-oh h3{display:none}
+/* B. one button: the code leads, the numbers are one line, the rest folds away */
+[data-pa-style="simple"] .pa-kpis,[data-pa-style="simple"] .pa-bars,[data-pa-style="simple"] .pa-bars-x,[data-pa-style="simple"] .pa-datacap,[data-pa-style="simple"] #paPeriod{display:none}
+[data-pa-style="simple"] .pa-line{display:block;margin:4px 0 0;font-size:14px;color:var(--ink-2)}
+[data-pa-style="simple"] .pa-code > .qr-ch,[data-pa-style="simple"] .pa-code > .qr-lead,[data-pa-style="simple"] #paCopyLink,[data-pa-style="simple"] #paCopyImg{display:none}
+[data-pa-style="simple"] .pa-hero-t{display:block;margin:0 0 12px;font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:700;line-height:1.2;color:var(--ink)}
+[data-pa-style="simple"] .pa-big{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.pa-bigbtn{appearance:none;font:inherit;font-size:14.5px;font-weight:800;border:0;border-radius:11px;padding:14px 10px;background:var(--sea);color:var(--on-sea);cursor:pointer}
+.pa-bigbtn:hover{filter:brightness(1.08)}
+[data-pa-style="simple"] .pa-row{grid-template-columns:240px minmax(0,1fr)}
+[data-pa-style="simple"] .pa-pic img,[data-pa-style="simple"] .pa-pic .qr-ph{width:240px;height:240px}
+@media (max-width:900px){ .pa-two{grid-template-columns:1fr} }
+@media (max-width:640px){
+  [data-pa-style="simple"] .pa-row{grid-template-columns:1fr}
+  [data-pa-style="simple"] .pa-big{grid-template-columns:1fr}
+}
 /* the code leads on a phone; the QR codes tab lifts its chart above, this tab does not */
 @media (max-width:1000px){ #view-prearrival .qr-side{order:0;margin-top:14px} }
 @media (max-width:640px){
@@ -8304,6 +8361,8 @@ body.plan-free #paOList{display:none}
     if(isL && !live){ el.innerHTML = '<p class="pa-empty">Loading with your guest activity.</p>'; if(bars) bars.innerHTML = ''; if(bx) bx.innerHTML = ''; return; }
     var O = sum(opens), E = Math.min(sum(engs), O), S = sum(sess);
     if(isL && !O){ el.innerHTML = '<p class="pa-empty">No opens from your pre-arrival link yet. Send it with your next confirmations and they show here.</p>'; if(bars) bars.innerHTML = ''; if(bx) bx.innerHTML = ''; return; }
+    var line = $('paLine');
+    if(line) line.innerHTML = '<b>' + esc(ct(O)) + '</b> guide opens before arrival, <b>' + esc(ct(E)) + '</b> went on to a tap' + (isL ? ', last ' + period + ' days.' : '. Sample figures, last 30 days.');
     var conv = (O >= 5 && E >= 5) ? Math.round(E / O * 100) + '%' : '';
     var share = (O >= 5 && S >= 5) ? Math.round(O / S * 100) + '%' : '';
     el.innerHTML =
@@ -8378,6 +8437,14 @@ body.plan-free #paOList{display:none}
 
   view.addEventListener('click', function(e){
     var b = e.target.closest('button,a'); if(!b) return;
+    var act = b.getAttribute('data-pa-act');
+    if(act === 'link'){ b = $('paCopyLink'); }
+    else if(act === 'img'){ b = $('paCopyImg'); }
+    else if(act === 'email'){ copy($('paEmail').value, 'Email text copied. Paste it into your confirmation or pre-arrival email.'); return; }
+    var st = b.getAttribute('data-pa-style');
+    if(st){ layout(st); return; }
+    var tb = b.getAttribute('data-pa-tab');
+    if(tb){ sendTab(tb); return; }
     if(b.id === 'paCopyLink'){ if(L) copy(L, 'Link copied.'); return; }
     if(b.id === 'paDl' && !png){ e.preventDefault(); note('The code is still drawing.'); return; }
     if(b.id === 'paCopyImg'){
@@ -8412,6 +8479,69 @@ body.plan-free #paOList{display:none}
     if(!e.target.closest('#paSubj,#paEmail,#paSms')) return;
     store(); count(); mail();
   });
+
+  /* ---- three layouts to choose between (preview only: the chosen one stays, the switcher goes) ----
+     The same five pieces, the offers, the numbers, the code, the wording and the setup steps, are
+     moved into each layout, so every button keeps working whichever layout is showing. */
+  var OFF = $('paOffersCard'), DAT = $('paDataCard'), CODE = $('paCodeCard');
+  var send = document.createElement('div');
+  send.className = 'card pa-send';
+  send.innerHTML = '<div class="pa-tabs" role="tablist" aria-label="How to send it">' +
+    '<button type="button" role="tab" data-pa-tab="email">Email</button>' +
+    '<button type="button" role="tab" data-pa-tab="sms">Text message</button>' +
+    '<button type="button" role="tab" data-pa-tab="auto">Send automatically</button></div>' +
+    '<div class="pa-pane" data-pane="email"></div><div class="pa-pane" data-pane="sms"></div><div class="pa-pane" data-pane="auto"></div>';
+  (function(){
+    var pe = send.querySelector('[data-pane="email"]'), ps = send.querySelector('[data-pane="sms"]'), pa = send.querySelector('[data-pane="auto"]');
+    if($('paSnipEmail')) pe.appendChild($('paSnipEmail'));
+    if($('paSnipSms')) ps.appendChild($('paSnipSms'));
+    if($('paReset')){ $('paReset').textContent = 'Reset the email and text to the original wording'; send.appendChild($('paReset')); }
+    if($('paAutoCard')) pa.appendChild($('paAutoCard'));
+    var grid = $('paGrid'); if(grid) grid.parentNode.removeChild(grid);
+  })();
+  function sendTab(t){
+    send.querySelectorAll('[data-pa-tab]').forEach(function(x){ x.setAttribute('aria-selected', String(x.getAttribute('data-pa-tab') === t)); });
+    send.querySelectorAll('.pa-pane').forEach(function(x){ x.hidden = x.getAttribute('data-pane') !== t; });
+    send.setAttribute('data-tab', t);
+  }
+  sendTab('email');
+  function step(n, title, node){
+    var w = document.createElement('div'); w.className = 'pa-step';
+    w.innerHTML = '<div class="pa-step-h"><span class="pa-num">' + n + '</span><h3>' + title + '</h3></div>';
+    w.appendChild(node); return w;
+  }
+  var STYLES = { steps:1, simple:1, tiles:1 };
+  function layout(st){
+    if(!STYLES[st]) st = 'steps';
+    try{ localStorage.setItem('os_pa_style', st); }catch(e){}
+    var box = $('paLayout'), off = OFF, dat = DAT, code = CODE;
+    if(!box || !off || !dat || !code) return;
+    view.setAttribute('data-pa-style', st);
+    $('paStyles').querySelectorAll('[data-pa-style]').forEach(function(x){ x.setAttribute('aria-pressed', String(x.getAttribute('data-pa-style') === st)); });
+    var frag = document.createDocumentFragment();
+    if(st === 'steps'){
+      frag.appendChild(dat);
+      frag.appendChild(step(1, 'Add an offer guests can book before they fly', off));
+      frag.appendChild(step(2, 'Copy your link or QR code', code));
+      frag.appendChild(step(3, 'Send it by email, text, or automatically', send));
+    } else if(st === 'simple'){
+      frag.appendChild(code);
+      frag.appendChild(dat);
+      frag.appendChild(off);
+      var more = document.createElement('details'); more.className = 'pa-more';
+      more.innerHTML = '<summary>More ways to send: text message, edit the email, send automatically</summary>';
+      more.appendChild(send); frag.appendChild(more);
+    } else {
+      frag.appendChild(dat);
+      var g = document.createElement('div'); g.className = 'pa-two';
+      g.appendChild(off); g.appendChild(code); frag.appendChild(g);
+      frag.appendChild(send);
+    }
+    box.innerHTML = ''; box.appendChild(frag);
+  }
+  var startStyle = new URLSearchParams(location.search).get('pa');
+  if(!STYLES[startStyle]){ try{ startStyle = localStorage.getItem('os_pa_style'); }catch(e){ startStyle = null; } }
+  layout(startStyle || 'steps');
 
   /* boot on first open, same as the QR codes tab: the library is never fetched for an operator who never looks */
   var started = false;
