@@ -2517,6 +2517,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
             <div><h3>Pre-arrival offers</h3><p class="qr-lead" style="margin:2px 0 0">Guests see these until their phone is on Hawai&#699;i time, then they stop. Good for anything worth booking before the trip: a dinner, a cabana, a lesson, an upgrade.</p></div>
             <span class="pa-ocount" id="paOCount"></span>
           </div>
+          <div class="pa-obody"><div class="pa-oleft">
           <div class="dz pa-dz" id="paDrop" role="button" tabindex="0" aria-label="Drag a PDF flyer here, or press Enter to choose a file, to add a pre-arrival offer">
             <svg class="dz-ic" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
             <b>Add a pre-arrival offer: drag a PDF flyer here or tap to choose</b>
@@ -2526,6 +2527,13 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           <p class="pa-err" id="paErr" hidden></p>
           <div class="pa-olist" id="paOList"></div>
           <div class="pa-lock" id="paLock">Pre-arrival offers are part of the paid plan, like the rest of Promotions. Your pre-arrival code and messages below work on every plan.</div>
+          </div>
+          <div class="pa-ophone">
+            <div class="ph-lab"><i></i>What guests see before they land</div>
+            <div class="gp-phone pa-gphone"><div class="gp-screen" id="paPhone"></div></div>
+            <p class="gp-note" id="paPhoneNote"></p>
+          </div>
+          </div>
           <div class="cap" style="margin-top:10px">Offers save in this browser with the rest of your promotions. Set the end date and wording in <button type="button" class="pa-inl" data-goto="promos">Promotions</button>, where <b>Export config</b> sends them to your guide.</div>
         </div>
 
@@ -4752,7 +4760,17 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   window._osRenderPromoThumbs = renderThumbs;   // pdf.js onload re-runs this once the lib arrives
   /* The Pre-arrival tab lists and adds pre-arrival offers through this, so both tabs edit one draft. */
   window.OS_PROMOS = {
-    items: function(){ return items.map(function(p, i){ return { i:i, title:p.title, expires:p.expires||'', trip_stage:p.trip_stage||'on-island', sample:!!p.sample }; }); },
+    items: function(){ return items.map(function(p, i){ return { i:i, title:p.title, expires:p.expires||'', trip_stage:p.trip_stage||'on-island', sample:!!p.sample, detail:p.detail||'', flyer:!!(p.dataUrl||p.src) }; }); },
+    open: function(i){
+      var p = items[i]; if(!p) return;
+      if(p.src && !p.dataUrl){ window.open(p.src, '_blank', 'noopener'); return; }
+      if(!/^data:application\/pdf[;,]/i.test(p.dataUrl||'')) return;
+      try{
+        var b64 = p.dataUrl.split(',')[1], bin = atob(b64), u8 = new Uint8Array(bin.length);
+        for(var j=0;j<bin.length;j++) u8[j] = bin.charCodeAt(j);
+        window.open(URL.createObjectURL(new Blob([u8], {type:'application/pdf'})), '_blank', 'noopener');
+      }catch(e){}
+    },
     add: function(file, stage){ addFile(file, stage); },
     setStage: function(i, stage){ if(items[i]){ items[i].trip_stage = stage; save(); render(); } },
     endsLabel: endsLabel, MAX: MAX
@@ -8217,6 +8235,31 @@ body.plan-free #paOList{display:none}
 .pa-bars{display:flex;align-items:flex-end;gap:2px;height:74px;margin-top:16px}
 .pa-bars i{flex:1;min-width:2px;background:var(--sea);opacity:.75;border-radius:3px 3px 0 0}
 .pa-bars-x{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
+/* the guest's pre-arrival offer sheet, beside the list */
+.pa-obody{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+.pa-oleft{min-width:0}
+.pa-ophone .ph-lab{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.pa-ophone .ph-lab i{width:7px;height:7px;border-radius:50%;background:var(--good)}
+.pa-gphone{width:300px;margin-top:8px}
+#paPhone{min-height:430px;padding:36px 0 0;background:linear-gradient(180deg,#d9ecef 0,#e8f1e6 46%,#fefbf3 46%)}
+.pa-gchip{position:absolute;left:12px;top:150px;display:flex;align-items:center;gap:6px;background:rgba(253,242,214,.96);border:1px solid rgba(15,76,92,.15);border-radius:13px;padding:7px 10px;font-size:12px;font-weight:700;color:#0f4c5c;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.pa-gchip i{font-style:normal;min-width:16px;height:16px;border-radius:999px;background:#0f4c5c;color:#fff;font-size:10px;display:grid;place-items:center;padding:0 4px}
+.pa-gsheet{position:relative;margin-top:180px;background:#fefbf3;border-radius:18px 18px 0 0;box-shadow:0 -6px 18px rgba(0,0,0,.1);padding:8px 12px 16px}
+.pa-ggrab{width:38px;height:4px;border-radius:4px;background:#d6d0bf;margin:0 auto 10px}
+.pa-gh{font-family:Fraunces,Georgia,serif;font-size:17px;font-weight:600;color:var(--ink)}
+.pa-gsub{font-size:11px;color:var(--mute);line-height:1.4;margin-top:3px}
+.pa-glist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.pa-grow{display:flex;align-items:flex-start;gap:10px;width:100%;padding:11px;background:#fff;border:1px solid var(--border);border-radius:12px;font:inherit;text-align:left;color:inherit}
+button.pa-grow{cursor:pointer}
+.pa-grow svg{flex:none;margin-top:1px}
+.pa-grow .tx{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.pa-grow b{font-size:13px;line-height:1.3;color:var(--ink)}
+.pa-gdet{font-size:11.5px;color:var(--mute);line-height:1.4;margin-top:3px}
+.pa-gbadge{font-size:10px;font-weight:700;color:#0f4c5c;background:rgba(15,76,92,.08);border-radius:999px;padding:2px 8px;margin-top:5px}
+.pa-gends{font-size:10.5px;color:var(--mute);margin-top:3px}
+[data-pa-style="tiles"] .pa-obody{grid-template-columns:1fr}
+[data-pa-style="tiles"] .pa-ophone{justify-self:center}
+@media (max-width:900px){ .pa-obody{grid-template-columns:1fr} .pa-ophone{justify-self:center} }
 /* three layouts to choose between (preview) */
 .pa-styles{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 14px;padding:8px 10px;border:1px dashed #d5bd85;border-radius:11px;background:var(--sample-bg,var(--tint))}
 .pa-styles span{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sample,var(--muted));margin-right:4px}
@@ -8386,6 +8429,7 @@ body.plan-free #paOList{display:none}
     if(!P){ el.innerHTML = ''; return; }
     var list = P.items().filter(function(p){ return p.trip_stage === 'pre-arrival' || p.trip_stage === 'always'; });
     if(cnt) cnt.textContent = list.length ? list.length + (list.length === 1 ? ' offer' : ' offers') + ' before arrival' : '';
+    phone(list);
     if(!list.length){
       el.innerHTML = '<div class="pa-oempty">No pre-arrival offers yet. Drop a flyer above, or mark an existing offer Pre-arrival or Both in Promotions.</div>';
       return;
@@ -8400,6 +8444,36 @@ body.plan-free #paOList{display:none}
     }).join('');
   }
   window.addEventListener('os:promos-changed', offers);
+  /* The guest's offer sheet before they land, drawn from the same draft: mirrors index.html
+     _promoSheetOpen (title, detail, Book ahead badge, end date, chevron when there is a flyer),
+     with pre-arrival offers first and expired ones gone, exactly the order the guide uses. */
+  var TAGI = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f4c5c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 12.6 21.4a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.5V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l7.1 7.1a2 2 0 0 1 0 2.7z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>';
+  var CHEV = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>';
+  function today(){ var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  function phone(list){
+    var el = $('paPhone'), nt = $('paPhoneNote'); if(!el) return;
+    var t = today(), example = false;
+    var live = list.filter(function(p){ return p.title && !(p.expires && String(p.expires).slice(0,10) < t); })
+      .sort(function(a, b){ var x = a.trip_stage === 'pre-arrival' ? 0 : 1, y = b.trip_stage === 'pre-arrival' ? 0 : 1; return x - y || a.i - b.i; });
+    var expired = list.length - live.length;
+    if(!live.length){ example = true; live = [{ i:-1, title:'Sunset dinner on the lawn', detail:'Reserve a table for your first night.', trip_stage:'pre-arrival', flyer:false }]; }
+    var rows = live.map(function(p){
+      var badge = p.trip_stage === 'pre-arrival' ? '<span class="pa-gbadge">Book ahead of time</span>' : '';
+      var ends = p.expires ? '<span class="pa-gends">Ends ' + esc(P.endsLabel(p.expires)) + '</span>' : '';
+      var det = p.detail ? '<span class="pa-gdet">' + esc(p.detail) + '</span>' : '';
+      var tag = p.flyer ? 'button type="button" data-pa-open="' + p.i + '" title="Opens the flyer, exactly what a tap does for a guest"' : 'div';
+      return '<' + tag + ' class="pa-grow">' + TAGI + '<span class="tx"><b>' + esc(p.title) + '</b>' + det + badge + ends + '</span>' + (p.flyer ? CHEV : '') + '</' + (p.flyer ? 'button' : 'div') + '>';
+    }).join('');
+    el.innerHTML =
+      '<div class="pa-gchip">' + TAGI + '<span>Offers</span><i>' + live.length + '</i></div>' +
+      '<div class="pa-gsheet"><div class="pa-ggrab"></div>' +
+        '<div class="pa-gh">Offers from ' + esc(propName()) + '</div>' +
+        '<div class="pa-gsub">Property offers, separate from the safety report. The ocean call never changes for an offer.</div>' +
+        (example ? '<span class="chip sample" style="margin-top:8px">Example</span>' : '') +
+        '<div class="pa-glist">' + rows + '</div></div>';
+    if(nt) nt.textContent = example ? 'Add a pre-arrival offer and it replaces this example.'
+      : 'Updates as you edit. Guests see this until their phone is on Hawaiʻi time.' + (expired ? ' ' + expired + ' expired ' + (expired === 1 ? 'offer is' : 'offers are') + ' hidden.' : '');
+  }
   function oerr(t){ var e = $('paErr'); if(!e) return; e.textContent = t; e.hidden = !t; clearTimeout(oerr._t); if(t) oerr._t = setTimeout(function(){ e.hidden = true; }, 7000); }
   function take(files){
     if(!P || !files) return;
@@ -8465,6 +8539,8 @@ body.plan-free #paOList{display:none}
       }).catch(function(){});
       return;
     }
+    var po = b.getAttribute('data-pa-open');
+    if(po != null && P && P.open){ P.open(+po); return; }
     var sg = b.getAttribute('data-pa-stg');
     if(sg && P){ P.setStage(+b.getAttribute('data-i'), sg); return; }
     if(b.id === 'paReset'){ try{ localStorage.removeItem(KEY); }catch(_){} paint(); note(''); return; }
