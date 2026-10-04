@@ -2504,12 +2504,6 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
           <h2>Pre-arrival</h2>
           <p>Everything for guests who have booked but not landed yet: the offers they see before they fly, how many open your guide early, and the code you send them.</p>
         </div>
-        <div class="pa-styles" id="paStyles" role="group" aria-label="Layout preview">
-          <span>Layout preview</span>
-          <button type="button" data-pa-style="steps">A. Three steps</button>
-          <button type="button" data-pa-style="simple">B. One button</button>
-          <button type="button" data-pa-style="tiles">C. At a glance</button>
-        </div>
         <div id="paLayout"></div>
 
         <div class="card pa-offers" id="paOffersCard">
@@ -4585,6 +4579,17 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
      app's own offer sheet — title, the flyer or photo, the one-line detail, then the
      action. The action is a request to the front desk, never a checkout: no offer may
      promise self-serve completion. */
+  /* Where a request goes, read the same way the guest app reads request_to: an https link is
+     their own booking page, an email or a phone number opens a conversation with the desk.
+     Anything else is no button rather than a dead one. */
+  function reqAction(v){
+    var s = String(v || '').trim(); if(!s) return null;
+    if(/^https:\/\//i.test(s)) return { href:s, label:'Request this', kind:'url' };
+    if(s.indexOf('@') > 0) return { href:'mailto:' + s, label:'Email the front desk', kind:'email' };
+    var d = s.replace(/[^+0-9]/g, '');
+    if(d.length >= 7) return { href:'tel:' + d, label:'Call the front desk', kind:'call' };
+    return null;
+  }
   function guestOpenHTML(p, i){
     p._i = i;
     // The flyer's first page renders in here via the same pdf.js pass that draws
@@ -4593,8 +4598,9 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
     var detail = p.detail ? '<div class="pm-gopen-d">' + esc(p.detail) + '</div>' : '';
     var stageNote = p.trip_stage === 'pre-arrival'
       ? '<div class="pm-gopen-badge">Book ahead of time</div>' : '';
-    var action = p.url
-      ? '<a class="pm-gopen-cta" href="' + esc(p.url) + '" target="_blank" rel="noopener">Open the offer</a>'
+    var rq = reqAction(p.url);
+    var action = rq
+      ? '<a class="pm-gopen-cta" href="' + esc(rq.href) + '" target="_blank" rel="noopener">' + rq.label + '</a>'
       : '<span class="pm-gopen-cta">Ask the front desk</span>';
     return '<div class="pm-gopen">' +
       '<div class="pm-gopen-t">' + esc(p.title || 'Untitled offer') + '</div>' +
@@ -4630,7 +4636,7 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
                 (p.cat===c[0] ? ' aria-pressed="true"' : '')+'>'+c[1]+'</button>'; }).join('') +
             '</div></div>' +
             '<label class="pm-f"><span>One line guests read when they tap it</span><input class="pm-detail" data-i="'+i+'" maxlength="110" value="'+esc(p.detail||'')+'"></label>' +
-            '<label class="pm-f"><span>Link (optional) — where the offer button sends them</span><input class="pm-url" data-i="'+i+'" type="url" inputmode="url" placeholder="https://" value="'+esc(p.url||'')+'"></label>' +
+            '<label class="pm-f"><span>Where requests go (optional): your booking page link, front desk email or phone</span><input class="pm-url" data-i="'+i+'" type="text" placeholder="https://, an email or a phone number" value="'+esc(p.url||'')+'"></label>' +
             (p.url ? '<div class="pm-taps">' + TAP_SVG + '<b>' + (p.taps||0) + '</b> tap' + ((p.taps||0)===1?'':'s') +
                      '<span>' + (HAS_SLUG ? 'measured, last 30 days' : 'sample — your own taps appear once telemetry is on') + '</span></div>' : '') +
             '<div class="pm-f pm-stagef"><span>When guests see it</span><span class="pm-stage">' +
@@ -4760,7 +4766,16 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
   window._osRenderPromoThumbs = renderThumbs;   // pdf.js onload re-runs this once the lib arrives
   /* The Pre-arrival tab lists and adds pre-arrival offers through this, so both tabs edit one draft. */
   window.OS_PROMOS = {
-    items: function(){ return items.map(function(p, i){ return { i:i, title:p.title, expires:p.expires||'', trip_stage:p.trip_stage||'on-island', sample:!!p.sample, detail:p.detail||'', flyer:!!(p.dataUrl||p.src) }; }); },
+    items: function(){ return items.map(function(p, i){ return { i:i, title:p.title, expires:p.expires||'', trip_stage:p.trip_stage||'on-island', sample:!!p.sample, detail:p.detail||'', url:p.url||'', flyer:!!(p.dataUrl||p.src) }; }); },
+    /* typing in the Pre-arrival tab: save and mirror into this tab's inputs without a redraw, so focus stays put */
+    set: function(i, field, v){
+      var p = items[i]; if(!p || ['title','detail','url'].indexOf(field) < 0) return;
+      p[field] = field === 'url' ? String(v).trim() : v; save();
+      var cls = field === 'title' ? '.pm-title' : field === 'detail' ? '.pm-detail' : '.pm-url';
+      var inp = listEl.querySelector(cls + '[data-i="' + i + '"]'); if(inp) inp.value = v;
+      if(field === 'title'){ var mk = inp && inp.closest('.pm-card'); mk = mk && mk.querySelector('.pm-gcard .tx b'); if(mk) mk.textContent = v || 'Untitled offer'; }
+    },
+    req: reqAction,
     open: function(i){
       var p = items[i]; if(!p) return;
       if(p.src && !p.dataUrl){ window.open(p.src, '_blank', 'noopener'); return; }
@@ -4897,6 +4912,11 @@ details.meth .body{font-size:var(--t-sm);line-height:1.55;color:var(--ink-2)}
       promotions: items.map(function(p){
         var o = { title:p.title, pdf:p.dataUrl || p.src };
         if(p.expires) o.expires = p.expires;
+        if(p.detail) o.detail = p.detail;
+        // the guide's stage contract: no stage means the whole trip, so Both travels as none
+        if(p.trip_stage === 'pre-arrival' || p.trip_stage === 'on-island') o.stage = p.trip_stage;
+        if(p.trip_stage === 'pre-arrival') o.book_ahead = true;
+        if(reqAction(p.url)) o.request_to = String(p.url).trim();
         // timed pop-up window — only a complete window travels (blank = chip-only offer)
         if(p.window && p.window.start && p.window.end) o.window = { start:p.window.start, end:p.window.end };
         return o;
@@ -8212,10 +8232,20 @@ window.osParseAff = function(v){
 .pa-dz{padding:18px 14px}
 .pa-err{margin:8px 0 0;font-size:12.5px;color:var(--warn)}
 .pa-olist{display:grid;gap:8px;margin-top:12px}
-.pa-orow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:var(--card);color:var(--sea)}
-.pa-orow .t{flex:1;min-width:180px;display:flex;flex-direction:column;gap:1px}
-.pa-orow .t b{font-size:13.5px;color:var(--ink)}
-.pa-orow .t span{font-size:11.5px;color:var(--muted)}
+.pa-orow{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:var(--card)}
+.pa-otop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--sea)}
+.pa-orow .t{flex:1;min-width:180px;display:flex;flex-direction:column;gap:2px}
+.pa-orow .t > span{font-size:11.5px;color:var(--muted)}
+.pa-oin{font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:100%;box-sizing:border-box}
+.pa-oin:focus{outline:2px solid var(--sea);outline-offset:1px}
+.pa-otitle{font-weight:700;font-size:13.5px}
+.pa-ofields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px}
+.pa-ofields label span{display:block;font-size:11px;font-weight:700;color:var(--muted);margin:0 0 3px}
+.pa-ohint{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+.pa-ohint b{color:var(--ink-2)}
+.pa-gcard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:11px}
+.pa-gcard .pa-grow{border:0;padding:0;background:none}
+.pa-greq{display:flex;align-items:center;justify-content:center;min-height:38px;margin-top:10px;background:#0f4c5c;color:#fff;border-radius:10px;font-size:12.5px;font-weight:700}
 .pa-stg{display:inline-flex;gap:2px;background:var(--hair-soft);border-radius:9px;padding:2px}
 .pa-stg button{appearance:none;border:0;background:none;font:inherit;font-size:12px;font-weight:600;color:var(--ink-2);padding:5px 9px;border-radius:7px;cursor:pointer}
 .pa-stg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
@@ -8257,20 +8287,10 @@ button.pa-grow{cursor:pointer}
 .pa-gdet{font-size:11.5px;color:var(--mute);line-height:1.4;margin-top:3px}
 .pa-gbadge{font-size:10px;font-weight:700;color:#0f4c5c;background:rgba(15,76,92,.08);border-radius:999px;padding:2px 8px;margin-top:5px}
 .pa-gends{font-size:10.5px;color:var(--mute);margin-top:3px}
-[data-pa-style="tiles"] .pa-obody{grid-template-columns:1fr}
-[data-pa-style="tiles"] .pa-ophone{justify-self:center}
 @media (max-width:900px){ .pa-obody{grid-template-columns:1fr} .pa-ophone{justify-self:center} }
-/* three layouts to choose between (preview) */
-.pa-styles{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 14px;padding:8px 10px;border:1px dashed #d5bd85;border-radius:11px;background:var(--sample-bg,var(--tint))}
-.pa-styles span{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sample,var(--muted));margin-right:4px}
-.pa-styles button{appearance:none;font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:999px;padding:6px 12px;cursor:pointer}
-.pa-styles button[aria-pressed="true"]{background:var(--sea);border-color:var(--sea);color:var(--on-sea)}
 #paLayout > *{margin-top:0}
 #paLayout > * + *{margin-top:14px !important}
 .pa-line,.pa-hero-t,.pa-big{display:none}
-.pa-step-h{display:flex;align-items:center;gap:10px;margin:6px 0 8px}
-.pa-step-h h3{margin:0;font-family:Fraunces,Georgia,serif;font-size:18px;color:var(--ink)}
-.pa-num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--sea);color:var(--on-sea);display:grid;place-items:center;font-weight:800;font-size:14px}
 .pa-send{padding-top:10px}
 .pa-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 12px;overflow-x:auto}
 .pa-tabs button{appearance:none;border:0;background:none;font:inherit;font-size:13.5px;font-weight:700;color:var(--muted);padding:9px 12px;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
@@ -8278,17 +8298,11 @@ button.pa-grow{cursor:pointer}
 .pa-send .pa-snip{margin-top:0}
 .pa-send #paAutoCard{border:0;box-shadow:none;padding:0;margin:0;background:none}
 .pa-send[data-tab="auto"] .pa-reset{display:none}
-.pa-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
 .pa-more{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0}
 .pa-more > summary{cursor:pointer;padding:14px 16px;font-weight:700;font-size:13.5px;color:var(--sea)}
 .pa-more[open] > summary{border-bottom:1px solid var(--line)}
 .pa-more .pa-send{border:0;box-shadow:none;margin:0}
-/* A. three steps: the numbers shrink to a strip */
-[data-pa-style="steps"] .pa-bars,[data-pa-style="steps"] .pa-bars-x,[data-pa-style="steps"] .pa-datacap{display:none}
-[data-pa-style="steps"] .pa-kpi{padding:9px 12px}
-[data-pa-style="steps"] .pa-kpi .v{font-size:22px}
-[data-pa-style="steps"] .pa-oh h3{display:none}
-/* B. one button: the code leads, the numbers are one line, the rest folds away */
+/* the code leads, the numbers are one line, the rest folds away */
 [data-pa-style="simple"] .pa-kpis,[data-pa-style="simple"] .pa-bars,[data-pa-style="simple"] .pa-bars-x,[data-pa-style="simple"] .pa-datacap,[data-pa-style="simple"] #paPeriod{display:none}
 [data-pa-style="simple"] .pa-line{display:block;margin:4px 0 0;font-size:14px;color:var(--ink-2)}
 [data-pa-style="simple"] .pa-code > .qr-ch,[data-pa-style="simple"] .pa-code > .qr-lead,[data-pa-style="simple"] #paCopyLink,[data-pa-style="simple"] #paCopyImg{display:none}
@@ -8298,7 +8312,6 @@ button.pa-grow{cursor:pointer}
 .pa-bigbtn:hover{filter:brightness(1.08)}
 [data-pa-style="simple"] .pa-row{grid-template-columns:240px minmax(0,1fr)}
 [data-pa-style="simple"] .pa-pic img,[data-pa-style="simple"] .pa-pic .qr-ph{width:240px;height:240px}
-@media (max-width:900px){ .pa-two{grid-template-columns:1fr} }
 @media (max-width:640px){
   [data-pa-style="simple"] .pa-row{grid-template-columns:1fr}
   [data-pa-style="simple"] .pa-big{grid-template-columns:1fr}
@@ -8306,6 +8319,7 @@ button.pa-grow{cursor:pointer}
 /* the code leads on a phone; the QR codes tab lifts its chart above, this tab does not */
 @media (max-width:1000px){ #view-prearrival .qr-side{order:0;margin-top:14px} }
 @media (max-width:640px){
+  .pa-ofields{grid-template-columns:1fr}
   .pa-kpis{grid-template-columns:1fr}
   .pa-row{grid-template-columns:1fr}
   .pa-pic{justify-self:center}
@@ -8436,14 +8450,30 @@ button.pa-grow{cursor:pointer}
     }
     el.innerHTML = list.map(function(p){
       var ends = p.expires ? 'Ends ' + esc(P.endsLabel(p.expires)) : 'No end date';
-      return '<div class="pa-orow">' + ICON +
-        '<span class="t"><b>' + esc(p.title || 'Untitled offer') + '</b><span>' + ends + (p.trip_stage === 'always' ? ' &middot; also shows on island' : '') + (p.sample ? ' &middot; sample' : '') + '</span></span>' +
-        '<span class="pa-stg" role="group" aria-label="When guests see ' + esc(p.title || 'this offer') + '">' +
-          STG.map(function(x){ return '<button type="button" data-pa-stg="' + x[0] + '" data-i="' + p.i + '" aria-pressed="' + (p.trip_stage === x[0]) + '">' + x[1] + '</button>'; }).join('') +
-        '</span></div>';
+      return '<div class="pa-orow">' +
+        '<div class="pa-otop">' + ICON +
+          '<span class="t"><input class="pa-oin pa-otitle" data-pa-f="title" data-i="' + p.i + '" maxlength="80" value="' + esc(p.title || '') + '" placeholder="Room upgrade on arrival" aria-label="Title guests see">' +
+          '<span>' + ends + (p.trip_stage === 'always' ? ' &middot; also shows on island' : '') + (p.sample ? ' &middot; sample' : '') + '</span></span>' +
+          '<span class="pa-stg" role="group" aria-label="When guests see this offer">' +
+            STG.map(function(x){ return '<button type="button" data-pa-stg="' + x[0] + '" data-i="' + p.i + '" aria-pressed="' + (p.trip_stage === x[0]) + '">' + x[1] + '</button>'; }).join('') +
+          '</span></div>' +
+        '<div class="pa-ofields">' +
+          '<label><span>One line guests read</span><input class="pa-oin" data-pa-f="detail" data-i="' + p.i + '" maxlength="110" value="' + esc(p.detail || '') + '" placeholder="Ocean view, ready when you land"></label>' +
+          '<label><span>Where requests go</span><input class="pa-oin" data-pa-f="url" data-i="' + p.i + '" value="' + esc(p.url || '') + '" placeholder="Booking page link, desk email or phone"></label>' +
+        '</div>' +
+        '<div class="pa-ohint" data-pa-hint="' + p.i + '">' + hint(p.url) + '</div>' +
+      '</div>';
     }).join('');
   }
   window.addEventListener('os:promos-changed', offers);
+  function hint(v){
+    var r = P && P.req ? P.req(v) : null;
+    if(!String(v || '').trim()) return 'No request button yet. Add your booking page link, the desk email or a phone number and guests get one.';
+    if(!r) return 'Use a link starting with https://, an email, or a phone number.';
+    return r.kind === 'url' ? 'Guests get a <b>Request this</b> button that opens your page.'
+      : r.kind === 'email' ? 'Guests get an <b>Email the front desk</b> button with the offer in the subject.'
+      : 'Guests get a <b>Call the front desk</b> button.';
+  }
   /* The guest's offer sheet before they land, drawn from the same draft: mirrors index.html
      _promoSheetOpen (title, detail, Book ahead badge, end date, chevron when there is a flyer),
      with pre-arrival offers first and expired ones gone, exactly the order the guide uses. */
@@ -8456,13 +8486,15 @@ button.pa-grow{cursor:pointer}
     var live = list.filter(function(p){ return p.title && !(p.expires && String(p.expires).slice(0,10) < t); })
       .sort(function(a, b){ var x = a.trip_stage === 'pre-arrival' ? 0 : 1, y = b.trip_stage === 'pre-arrival' ? 0 : 1; return x - y || a.i - b.i; });
     var expired = list.length - live.length;
-    if(!live.length){ example = true; live = [{ i:-1, title:'Sunset dinner on the lawn', detail:'Reserve a table for your first night.', trip_stage:'pre-arrival', flyer:false }]; }
+    if(!live.length){ example = true; live = [{ i:-1, title:'Room upgrade on arrival', detail:'Ocean view, ready when you land.', trip_stage:'pre-arrival', flyer:false, url:'https://yourhotel.com/upgrade' }]; }
     var rows = live.map(function(p){
       var badge = p.trip_stage === 'pre-arrival' ? '<span class="pa-gbadge">Book ahead of time</span>' : '';
       var ends = p.expires ? '<span class="pa-gends">Ends ' + esc(P.endsLabel(p.expires)) + '</span>' : '';
       var det = p.detail ? '<span class="pa-gdet">' + esc(p.detail) + '</span>' : '';
       var tag = p.flyer ? 'button type="button" data-pa-open="' + p.i + '" title="Opens the flyer, exactly what a tap does for a guest"' : 'div';
-      return '<' + tag + ' class="pa-grow">' + TAGI + '<span class="tx"><b>' + esc(p.title) + '</b>' + det + badge + ends + '</span>' + (p.flyer ? CHEV : '') + '</' + (p.flyer ? 'button' : 'div') + '>';
+      var rq = P.req ? P.req(p.url) : null;
+      return '<div class="pa-gcard"><' + tag + ' class="pa-grow">' + TAGI + '<span class="tx"><b>' + esc(p.title) + '</b>' + det + badge + ends + '</span>' + (p.flyer ? CHEV : '') + '</' + (p.flyer ? 'button' : 'div') + '>' +
+        (rq ? '<span class="pa-greq">' + rq.label + '</span>' : '') + '</div>';
     }).join('');
     el.innerHTML =
       '<div class="pa-gchip">' + TAGI + '<span>Offers</span><i>' + live.length + '</i></div>' +
@@ -8515,8 +8547,6 @@ button.pa-grow{cursor:pointer}
     if(act === 'link'){ b = $('paCopyLink'); }
     else if(act === 'img'){ b = $('paCopyImg'); }
     else if(act === 'email'){ copy($('paEmail').value, 'Email text copied. Paste it into your confirmation or pre-arrival email.'); return; }
-    var st = b.getAttribute('data-pa-style');
-    if(st){ layout(st); return; }
     var tb = b.getAttribute('data-pa-tab');
     if(tb){ sendTab(tb); return; }
     if(b.id === 'paCopyLink'){ if(L) copy(L, 'Link copied.'); return; }
@@ -8552,13 +8582,20 @@ button.pa-grow{cursor:pointer}
     if(g){ var t = document.querySelector('.viewtabs button[data-view="' + g + '"]'); if(t) t.click(); }
   });
   view.addEventListener('input', function(e){
+    var f = e.target.getAttribute && e.target.getAttribute('data-pa-f');
+    if(f && P && P.set){
+      var i = +e.target.getAttribute('data-i');
+      P.set(i, f, e.target.value);
+      if(f === 'url'){ var h = view.querySelector('[data-pa-hint="' + i + '"]'); if(h) h.innerHTML = hint(e.target.value); }
+      phone(P.items().filter(function(p){ return p.trip_stage === 'pre-arrival' || p.trip_stage === 'always'; }));
+      return;
+    }
     if(!e.target.closest('#paSubj,#paEmail,#paSms')) return;
     store(); count(); mail();
   });
 
-  /* ---- three layouts to choose between (preview only: the chosen one stays, the switcher goes) ----
-     The same five pieces, the offers, the numbers, the code, the wording and the setup steps, are
-     moved into each layout, so every button keeps working whichever layout is showing. */
+  /* ---- the layout: the code and its three big copy buttons lead, the numbers sit on one line,
+     then the offers with their phone, and every other way to send folds away underneath ---- */
   var OFF = $('paOffersCard'), DAT = $('paDataCard'), CODE = $('paCodeCard');
   var send = document.createElement('div');
   send.className = 'card pa-send';
@@ -8581,43 +8618,15 @@ button.pa-grow{cursor:pointer}
     send.setAttribute('data-tab', t);
   }
   sendTab('email');
-  function step(n, title, node){
-    var w = document.createElement('div'); w.className = 'pa-step';
-    w.innerHTML = '<div class="pa-step-h"><span class="pa-num">' + n + '</span><h3>' + title + '</h3></div>';
-    w.appendChild(node); return w;
+  function layout(){
+    var box = $('paLayout'); if(!box || !OFF || !DAT || !CODE) return;
+    view.setAttribute('data-pa-style', 'simple');
+    var more = document.createElement('details'); more.className = 'pa-more';
+    more.innerHTML = '<summary>More ways to send: text message, edit the email, send automatically</summary>';
+    more.appendChild(send);
+    [CODE, DAT, OFF, more].forEach(function(n){ box.appendChild(n); });
   }
-  var STYLES = { steps:1, simple:1, tiles:1 };
-  function layout(st){
-    if(!STYLES[st]) st = 'steps';
-    try{ localStorage.setItem('os_pa_style', st); }catch(e){}
-    var box = $('paLayout'), off = OFF, dat = DAT, code = CODE;
-    if(!box || !off || !dat || !code) return;
-    view.setAttribute('data-pa-style', st);
-    $('paStyles').querySelectorAll('[data-pa-style]').forEach(function(x){ x.setAttribute('aria-pressed', String(x.getAttribute('data-pa-style') === st)); });
-    var frag = document.createDocumentFragment();
-    if(st === 'steps'){
-      frag.appendChild(dat);
-      frag.appendChild(step(1, 'Add an offer guests can book before they fly', off));
-      frag.appendChild(step(2, 'Copy your link or QR code', code));
-      frag.appendChild(step(3, 'Send it by email, text, or automatically', send));
-    } else if(st === 'simple'){
-      frag.appendChild(code);
-      frag.appendChild(dat);
-      frag.appendChild(off);
-      var more = document.createElement('details'); more.className = 'pa-more';
-      more.innerHTML = '<summary>More ways to send: text message, edit the email, send automatically</summary>';
-      more.appendChild(send); frag.appendChild(more);
-    } else {
-      frag.appendChild(dat);
-      var g = document.createElement('div'); g.className = 'pa-two';
-      g.appendChild(off); g.appendChild(code); frag.appendChild(g);
-      frag.appendChild(send);
-    }
-    box.innerHTML = ''; box.appendChild(frag);
-  }
-  var startStyle = new URLSearchParams(location.search).get('pa');
-  if(!STYLES[startStyle]){ try{ startStyle = localStorage.getItem('os_pa_style'); }catch(e){ startStyle = null; } }
-  layout(startStyle || 'steps');
+  layout();
 
   /* boot on first open, same as the QR codes tab: the library is never fetched for an operator who never looks */
   var started = false;
