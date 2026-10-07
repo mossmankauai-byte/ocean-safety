@@ -1761,6 +1761,9 @@ body[data-tab="acts"] .saved-chip{top:calc(243px + var(--os-map-dy,0px))}
 #cultureCard .cc-kv i,#cultureCard .cc-pl i{color:#4a3720}
 #cultureCard .cc-pl{padding:7px 10px;background:rgba(255,255,255,.55);border:1px solid rgba(47,36,22,.1);border-radius:9px;font-size:13.5px;line-height:1.35}
 #cultureCard .cc-pl small{display:block;margin-top:2px;color:#6b5a3e;font-size:11.5px}
+#cultureCard .cc-drawn{display:flex;flex-wrap:wrap;gap:4px 14px}
+#cultureCard .cc-sp{display:inline-flex;align-items:center;gap:6px;min-height:40px}
+#cultureCard .cc-sp img{width:40px;height:40px;flex:none}
 #cultureCard .cc-more{font-size:12.5px;margin-top:8px}
 #cultureCard .cc-more a,#cultureCard .cc-srcs a{color:#0f4c5c;text-decoration:underline;text-decoration-color:rgba(15,76,92,.35);text-underline-offset:2px}
 #cultureCard .cc-det{border-top:1px solid rgba(47,36,22,.14)}
@@ -5497,6 +5500,9 @@ function initMap(){
   // each clause cited. Then the species found only in Hawaiʻi that people have seen inside the boundary.
   window.CULTURE_LIFE_GROUP = {P:'Plants', B:'Birds', F:'Fish', S:'Snails and shells', I:'Insects and spiders', O:'Other life'};
   window._cultureLifeName = function(x){ return x[0] || x[1] || x[2]; };
+  // Field guide drawings, one per species, named by scientific name. Only species listed here have one so far.
+  window.CULTURE_LIFE_ART = 'acacia-koa argemone-glauca carex-wahuensis cheirodendron-trigynum chenopodium-oahuense cibotium-chamissoi cibotium-glaucum coprosma-montana dubautia-menziesii dubautia-scabra euphorbia-celastroides gahnia-beecheyi hydrangea-arguta jacquemontia-sandwicensis metrosideros-polymorpha myoporum-sandwicense myrsine-lessertiana peperomia-leptostachya pipturus-albidus psychotria-mariniana rubus-hawaiensis rumex-skottsbergii sadleria-cyatheoides smilax-melastomifolia trisetum-glomeratum vaccinium-calycinum vaccinium-dentatum vaccinium-reticulatum wikstroemia-oahuensis wikstroemia-uva-ursi'.split(' ');
+  window._cultureLifeArt = function(x){ var k = String(x[2]).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); return window.CULTURE_LIFE_ART.indexOf(k) > -1 ? 'culture/life/art/' + k + '.webp' : ''; };
   window._cultureAboutHTML = function(ctx, e){
     var S = window._cultureSrc, row = S && S.ahupuaa[e.id], esc = window._cultureEsc, C = function(k){ return window._cultureCite(ctx, k); }, ok = function(k){ return window._cultureOk(e.id, k); };
     var L = window._cultureLife, lr = L && L.ahupuaa[e.id], out = [], nm = esc(e.name), r10 = function(x){ return window._cultureNum(Math.round(x / 10) * 10); };
@@ -5526,10 +5532,12 @@ function initMap(){
     return window._cultureH3('Found only in Hawaiʻi, seen here', 'kalo')
       + '<p>iNaturalist users have logged ' + n(lr.o) + ' checked sighting' + (lr.o === 1 ? '' : 's') + ' of ' + lr.k + ' species found nowhere else on Earth inside ' + esc(e.name) + '. The most seen:' + window._cultureCite(ctx, 'inat') + '</p>'
       + '<div class="cc-list">' + 'PBFSIO'.split('').filter(function(g){ return by[g]; }).map(function(g){
-          return '<div class="cc-pl"><div><b>' + window.CULTURE_LIFE_GROUP[g] + '</b></div><small>' + by[g].map(function(tx){
+          var drawn = by[g].some(window._cultureLifeArt);
+          return '<div class="cc-pl"><div><b>' + window.CULTURE_LIFE_GROUP[g] + '</b></div><small' + (drawn ? ' class="cc-drawn"' : '') + '>' + by[g].map(function(tx){
             var main = window._cultureLifeName(tx), sub = tx[0] ? tx[1] : (tx[1] ? tx[2] : '');
-            return esc(main) + (sub && sub !== main ? ' (' + esc(sub) + ')' : '');
-          }).join(' · ') + '</small></div>';
+            var art = window._cultureLifeArt(tx), name = esc(main) + (sub && sub !== main ? ' (' + esc(sub) + ')' : '');
+            return drawn ? '<span class="cc-sp">' + (art ? '<img src="' + art + '" alt="" width="40" height="40" loading="lazy">' : '') + name + '</span>' : name;
+          }).join(drawn ? '' : ' · ') + '</small></div>';
         }).join('') + '</div>'
       + '<p class="cc-cite">Rare species whose locations iNaturalist hides are never listed. Sightings follow where people walk, so trails and shorelines count more than remote ridges.</p>';
   };
