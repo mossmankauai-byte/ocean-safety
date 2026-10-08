@@ -1758,6 +1758,19 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .ch-name{font-size:20px;color:var(--ocean);font-weight:700;line-height:1.1}
 .ch-sub{font-size:11px;color:var(--mute);margin-top:2px;letter-spacing:.03em}
 .ch-desc{font-size:13px;line-height:1.55;margin-top:10px;padding:12px;background:var(--warm);border-radius:10px;border-left:3px solid var(--coral)}
+.ripesc{margin:10px 0 4px;border:1px solid #d6e3e7;border-radius:12px;background:#f7fafb;overflow:hidden}
+.ripesc>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px 12px;font-size:13px;font-weight:700;color:#0b485b}
+.ripesc>summary::-webkit-details-marker{display:none}
+.ripesc>summary:focus-visible{outline:2px solid #e2a332;outline-offset:-2px}
+.ripesc>summary .re-chev{margin-left:auto;transition:transform .2s}
+.ripesc[open]>summary .re-chev{transform:rotate(180deg)}
+.ripesc svg.re-scene{display:block;width:100%;height:auto;background:#1b5d70}
+.ripesc ol{margin:0;padding:10px 12px 4px 12px;list-style:none;display:grid;gap:6px;counter-reset:re}
+.ripesc li{counter-increment:re;display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.4;color:#33414a;padding:6px 8px;border-radius:8px;transition:background .3s,color .3s}
+.ripesc li::before{content:counter(re);flex-shrink:0;width:18px;height:18px;border-radius:50%;background:#d6e3e7;color:#0b485b;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.ripesc li.on{background:#0b485b;color:#fdf2d6}
+.ripesc li.on::before{background:#e2a332;color:#0b485b}
+.ripesc .re-src{font-size:11px;color:var(--mute);padding:4px 12px 10px;line-height:1.4}
 .ch-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .ch-stat{background:var(--warm);border-radius:10px;padding:10px 12px;border:1px solid var(--border)}
 .ch-stat-l{font-size:9px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
@@ -4079,6 +4092,61 @@ function eff(surf,sd,b,pt){
 }
 function oc(wind,wd,b){const a=(wd-b.facing+360)%360,n=a>180?a-360:a;return wind*Math.cos(n*Math.PI/180)}
 function rip(b,c){return cl((C.rip[b.morph]||.7)*Math.min(1.5,(c.per||10)/12)*(c.tt==='falling'?1.2:1)*.6)}
+// RIP ESCAPE: expandable top-down animation for channel sheets and rip-risk beach sheets.
+// Steps follow USLA ("relax, don't swim against it, swim along the shore, float, yell and wave")
+// and NOAA ("swim parallel to the shore, then back to land at an angle"). Animation runs only while open.
+const RIP_ESC_STEPS=[
+  {t:'Relax. A rip pulls you out, not under.',path:[[180,232],[180,165],[178,100]]},
+  {t:'Do not swim against it. Float or tread water, and yell and wave for help.',path:[[178,100],[178,94],[178,100]],arm:1},
+  {t:'Swim sideways, along the shoreline, out of the pull.',path:[[178,100],[230,100],[280,100]],hint:1},
+  {t:'Then swim back to shore at an angle.',path:[[280,100],[290,160],[300,222]],hint:1}
+];
+function ripEscapeHTML(reef){
+  const steps=RIP_ESC_STEPS.map(s=>`<li>${s.t}</li>`).join('');
+  return `<details class="ripesc"><summary><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor"/></svg>How to escape a rip current<svg class="re-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></summary>
+    <svg class="re-scene" viewBox="0 0 360 280" role="img" aria-label="Top-down beach. A rip current flows out through a gap in the breaking waves. A swimmer floats, then swims sideways out of it and back to shore at an angle.">
+      <defs><linearGradient id="reSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b5d70"/><stop offset="1" stop-color="#3a95a8"/></linearGradient>
+      <linearGradient id="reRip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#123f4d" stop-opacity=".15"/><stop offset=".55" stop-color="#123f4d" stop-opacity=".85"/><stop offset="1" stop-color="#123f4d" stop-opacity=".9"/></linearGradient>
+      <marker id="reAh" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="#fdf2d6"/></marker></defs>
+      <rect width="360" height="280" fill="url(#reSea)"/>
+      <path d="M150 238 C150 170 146 115 132 30 L228 30 C214 115 210 170 210 238 Z" fill="url(#reRip)"/>
+      <g stroke="#fff" stroke-linecap="round" fill="none" opacity=".85">
+        <path d="M0 140 Q35 133 70 140 T140 140" stroke-width="5"/><path d="M220 140 Q255 133 290 140 T360 140" stroke-width="5"/>
+        <path d="M0 180 Q35 174 70 180 T145 180" stroke-width="3"/><path d="M215 180 Q250 174 285 180 T360 180" stroke-width="3"/></g>
+      <g class="re-flow" stroke="#fdf2d6" stroke-width="2.5" fill="none" marker-end="url(#reAh)" opacity=".9" stroke-dasharray="14 8">
+        <path d="M180 228 L180 195"/><path d="M180 172 L180 132"/><path d="M178 108 L174 72"/>
+        <path d="M110 214 Q150 214 165 199"/><path d="M250 214 Q210 214 195 199"/></g>
+      <path d="M0 238 Q90 226 180 234 T360 232 L360 280 L0 280 Z" fill="#ecd9a8"/>
+      <path d="M0 238 Q90 226 180 234 T360 232" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/>
+      <path class="re-hint" d="M178 100 L280 100 L300 222" stroke="#e2a332" stroke-width="2" stroke-dasharray="5 6" fill="none" opacity="0"/>
+      <g class="re-sw" transform="translate(180 232)"><circle r="12" fill="#e2a332" opacity=".3"/><circle r="6.5" fill="#fdf2d6" stroke="#0b485b" stroke-width="2"/></g>
+      <text x="14" y="266" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#0b485b" letter-spacing=".06em">SHORE</text>
+      <text x="236" y="50" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#fdf2d6" letter-spacing=".06em">RIP CURRENT</text>
+    </svg>
+    <ol>${steps}</ol>
+    <div class="re-src">${reef?'Near reef, watch for shallow coral as you come in. ':''}If you cannot reach shore, keep floating and signaling. Steps from the US Lifesaving Association and NOAA.</div>
+  </details>`;
+}
+function ripEscRun(d){
+  const sw=d.querySelector('.re-sw'),hint=d.querySelector('.re-hint'),flow=d.querySelector('.re-flow'),lis=d.querySelectorAll('li');
+  if(!sw)return;
+  const still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(still){lis.forEach(l=>l.classList.add('on'));hint.setAttribute('opacity',.9);sw.setAttribute('transform','translate(178 100)');return;}
+  const STEP=3200,t0=performance.now();
+  (function tick(now){
+    if(!d.open||!d.isConnected)return;
+    const el=(now-t0)%(STEP*RIP_ESC_STEPS.length),i=Math.floor(el/STEP),s=RIP_ESC_STEPS[i];
+    let t=Math.min((el-i*STEP)/(STEP*.8),1);t=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    const p=s.path,f=Math.min(t*(p.length-1),p.length-1-1e-6),k=Math.floor(f),r=f-k;
+    const x=p[k][0]+(p[k+1][0]-p[k][0])*r,y=p[k][1]+(p[k+1][1]-p[k][1])*r+(s.arm?Math.sin(now/300)*2:0);
+    sw.setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+    hint.setAttribute('opacity',s.hint?.9:0);
+    flow.setAttribute('stroke-dashoffset',(-(now/40)%22).toFixed(1));
+    lis.forEach((l,j)=>l.classList.toggle('on',j===i));
+    requestAnimationFrame(tick);
+  })(t0);
+}
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('ripesc')&&d.open)ripEscRun(d);},true);
 // T4 BROWN: per-beach. Airport leg (c.rain mm×10 vs b.rain_mm — existing units convention, UNCHANGED)
 // OR'd with the region's USGS upland-discharge leg (c.streamQ, set in getCond for TODAY only). UNION
 // can only ADD a fire ⇒ no beach's brown-water sensitivity is ever lowered. The USGS feed is LIVE
@@ -7189,6 +7257,7 @@ function openChannelSheet(id){
       <span style="font-size:14px;flex-shrink:0">⚠</span>
       <span><strong>What to do:</strong> ${ch.rule}</span>
     </div>
+    ${ripEscapeHTML(/reef/.test(ch.type))}
     <a href="https://maps.google.com/?q=${ch.lat},${ch.lon}" target="_blank" rel="noopener" class="dirbtn" style="margin-top:16px">▶ View on Map</a>`;
   document.getElementById('sheet').classList.add('on');
   document.getElementById('overlay').classList.add('on');
@@ -7807,6 +7876,7 @@ function openSheet(id){
     ${_bacteriaNotice}
     ${_windTideChips}
     ${_ripRow}
+    ${(c&&!b.warning_only&&(c.surf_unknown||rip(b,c)>=0.30||(b.channels&&b.channels.length)))?ripEscapeHTML(!!b.reef||/reef/.test(b.morph||'')):''}
     ${_amenityPanel(_amenityCondStates(b, r, c))}
     ${(typeof outlookChipsHtml === 'function') ? outlookChipsHtml(c) : ''}
     ${condIcons(c,b)}
