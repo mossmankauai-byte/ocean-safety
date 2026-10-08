@@ -3020,7 +3020,7 @@ let CHANNELS=[
    desc:"The Hanalei River mouth creates a consistent rip current running north along the west side of the bay. Strengthens significantly after rain when river flow increases. This is a primary factor in Hanalei Bay swim closures.",
    rule:"Stay away from the river mouth. If caught in the current, swim parallel to shore east toward the pier — do not fight it.",
    tidal_amplify:true},
-  {id:'tunnels_channel',name:'Tunnels Channel',beach_id:'kee',
+  {id:'tunnels_channel',name:'Tunnels Channel',beach_id:'tunnels',
    lat:22.2200,lon:-159.5593,dir_deg:330,severity:.75,
    type:'reef_channel',
    desc:"A deep channel cuts through the reef at Tunnels (Makua Beach). Strong rip current runs offshore through this passage, especially during north swell. One of the most powerful channels on the north shore.",
@@ -3882,7 +3882,8 @@ function venueCategoryArrays(){
 }
 
 // Add channel_ids to beaches
-B.find(b=>b.id==='kee').channels=['kee_exit','tunnels_channel'];
+B.find(b=>b.id==='kee').channels=['kee_exit'];
+B.find(b=>b.id==='tunnels').channels=['tunnels_channel'];
 B.find(b=>b.id==='anini').channels=['anini_gap'];
 B.find(b=>b.id==='hanalei').channels=['hanalei_rip'];
 B.find(b=>b.id==='poipu').channels=['poipu_channel'];
