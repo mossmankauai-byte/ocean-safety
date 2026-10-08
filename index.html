@@ -4119,7 +4119,7 @@ function ripEscapeHTML(reef){
       <path d="M0 238 Q90 226 180 234 T360 232 L360 280 L0 280 Z" fill="#ecd9a8"/>
       <path d="M0 238 Q90 226 180 234 T360 232" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/>
       <path class="re-hint" d="M178 100 L280 100 L300 222" stroke="#e2a332" stroke-width="2" stroke-dasharray="5 6" fill="none" opacity="0"/>
-      <g class="re-sw" transform="translate(180 232)"><circle r="12" fill="#e2a332" opacity=".3"/><circle r="6.5" fill="#fdf2d6" stroke="#0b485b" stroke-width="2"/><path class="re-arm" d="M0 -6 L6 -16" stroke="#fdf2d6" stroke-width="3" stroke-linecap="round" opacity="0"/></g>
+      <g class="re-sw" transform="translate(180 232)"><circle r="12" fill="#e2a332" opacity=".3"/><circle r="6.5" fill="#fdf2d6" stroke="#0b485b" stroke-width="2"/></g>
       <text x="14" y="266" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#0b485b" letter-spacing=".06em">SHORE</text>
       <text x="236" y="50" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#fdf2d6" letter-spacing=".06em">RIP CURRENT</text>
     </svg>
@@ -4128,7 +4128,7 @@ function ripEscapeHTML(reef){
   </details>`;
 }
 function ripEscRun(d){
-  const sw=d.querySelector('.re-sw'),arm=d.querySelector('.re-arm'),hint=d.querySelector('.re-hint'),flow=d.querySelector('.re-flow'),lis=d.querySelectorAll('li');
+  const sw=d.querySelector('.re-sw'),hint=d.querySelector('.re-hint'),flow=d.querySelector('.re-flow'),lis=d.querySelectorAll('li');
   if(!sw)return;
   const still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(still){lis.forEach(l=>l.classList.add('on'));hint.setAttribute('opacity',.9);sw.setAttribute('transform','translate(178 100)');return;}
@@ -4140,7 +4140,7 @@ function ripEscRun(d){
     const p=s.path,f=Math.min(t*(p.length-1),p.length-1-1e-6),k=Math.floor(f),r=f-k;
     const x=p[k][0]+(p[k+1][0]-p[k][0])*r,y=p[k][1]+(p[k+1][1]-p[k][1])*r+(s.arm?Math.sin(now/300)*2:0);
     sw.setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)})`);
-    arm.setAttribute('opacity',s.arm?1:0);hint.setAttribute('opacity',s.hint?.9:0);
+    hint.setAttribute('opacity',s.hint?.9:0);
     flow.setAttribute('stroke-dashoffset',(-(now/40)%22).toFixed(1));
     lis.forEach((l,j)=>l.classList.toggle('on',j===i));
     requestAnimationFrame(tick);
