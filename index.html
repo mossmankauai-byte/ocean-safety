@@ -1765,11 +1765,15 @@ details.cond-fold:not([open]) .cf-chev{transform:rotate(-90deg)}
 .ripesc>summary .re-chev{margin-left:auto;transition:transform .2s}
 .ripesc[open]>summary .re-chev{transform:rotate(180deg)}
 .ripesc svg.re-scene{display:block;width:100%;height:auto;background:#1b5d70}
-.ripesc ol{margin:0;padding:10px 12px 4px 12px;list-style:none;display:grid;gap:6px;counter-reset:re}
-.ripesc li{counter-increment:re;display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.4;color:#33414a;padding:6px 8px;border-radius:8px;transition:background .3s,color .3s}
-.ripesc li::before{content:counter(re);flex-shrink:0;width:18px;height:18px;border-radius:50%;background:#d6e3e7;color:#0b485b;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.ripesc li.on{background:#0b485b;color:#fdf2d6}
-.ripesc li.on::before{background:#e2a332;color:#0b485b}
+.ripesc .re-cap{padding:12px 12px 10px;display:grid;gap:4px}
+.ripesc .re-num{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#b07a1a;font-weight:700}
+.ripesc .re-ttl{font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:700;line-height:1.2;color:#0b485b}
+.ripesc .re-txt{font-size:12.5px;line-height:1.45;color:#33414a}
+.ripesc .re-dots{display:flex;gap:6px;padding:0 12px 10px}
+.ripesc .re-dots button{flex:1;min-width:0;font:inherit;font-size:13px;font-weight:600;padding:8px 4px;border-radius:9px;border:1px solid #d6e3e7;background:transparent;color:#0b485b;cursor:pointer}
+.ripesc .re-dots button.on{background:#0b485b;border-color:#0b485b;color:#fdf2d6}
+.ripesc .re-play{display:block;width:calc(100% - 24px);margin:0 12px 6px;font:inherit;font-size:13px;font-weight:700;background:#0b485b;color:#fdf2d6;border:0;border-radius:10px;padding:10px;cursor:pointer}
+.ripesc .re-dots button:focus-visible,.ripesc .re-play:focus-visible{outline:2px solid #e2a332;outline-offset:2px}
 .ripesc .re-src{font-size:11px;color:var(--mute);padding:4px 12px 10px;line-height:1.4}
 .ch-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .ch-stat{background:var(--warm);border-radius:10px;padding:10px 12px;border:1px solid var(--border)}
@@ -4096,13 +4100,13 @@ function rip(b,c){return cl((C.rip[b.morph]||.7)*Math.min(1.5,(c.per||10)/12)*(c
 // Steps follow USLA ("relax, don't swim against it, swim along the shore, float, yell and wave")
 // and NOAA ("swim parallel to the shore, then back to land at an angle"). Animation runs only while open.
 const RIP_ESC_STEPS=[
-  {t:'Relax. A rip pulls you out, not under.',path:[[180,232],[180,165],[178,100]]},
-  {t:'Do not swim against it. Float or tread water, and yell and wave for help.',path:[[178,100],[178,94],[178,100]],arm:1},
-  {t:'Swim sideways, along the shoreline, out of the pull.',path:[[178,100],[230,100],[280,100]],hint:1},
-  {t:'Then swim back to shore at an angle.',path:[[280,100],[290,160],[300,222]],hint:1}
+  {h:'You feel the pull',t:'Relax. A rip current pulls you out through the gap in the waves, not under.',path:[[180,232],[180,165],[178,100]]},
+  {h:'Relax and float',t:'Do not swim against the current. Float or tread water, and yell and wave for help.',path:[[178,100],[178,94],[178,100]],arm:1},
+  {h:'Swim sideways',t:'Swim out of the current in a direction following the shoreline.',path:[[178,100],[230,100],[280,100]],hint:1},
+  {h:'Come back in at an angle',t:'Once you are out of the pull, swim back to shore at an angle.',path:[[280,100],[290,160],[300,222]],hint:1}
 ];
 function ripEscapeHTML(reef){
-  const steps=RIP_ESC_STEPS.map(s=>`<li>${s.t}</li>`).join('');
+  const dots=RIP_ESC_STEPS.map((s,i)=>`<button type="button" data-re="${i}" aria-label="Step ${i+1}: ${s.h}">${i+1}</button>`).join('');
   return `<details class="ripesc"><summary><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor"/></svg>How to escape a rip current<svg class="re-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></summary>
     <svg class="re-scene" viewBox="0 0 360 280" role="img" aria-label="Top-down beach. A rip current flows out through a gap in the breaking waves. A swimmer floats, then swims sideways out of it and back to shore at an angle.">
       <defs><linearGradient id="reSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b5d70"/><stop offset="1" stop-color="#3a95a8"/></linearGradient>
@@ -4123,28 +4127,41 @@ function ripEscapeHTML(reef){
       <text x="14" y="266" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#0b485b" letter-spacing=".06em">SHORE</text>
       <text x="236" y="50" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#fdf2d6" letter-spacing=".06em">RIP CURRENT</text>
     </svg>
-    <ol>${steps}</ol>
+    <div class="re-cap" aria-live="polite"><div class="re-num">Step 1 of ${RIP_ESC_STEPS.length}</div><div class="re-ttl">${RIP_ESC_STEPS[0].h}</div><div class="re-txt">${RIP_ESC_STEPS[0].t}</div></div>
+    <div class="re-dots">${dots}</div>
+    <button type="button" class="re-play">Play all steps</button>
     <div class="re-src">${reef?'Near reef, watch for shallow coral as you come in. ':''}If you cannot reach shore, keep floating and signaling. Steps from the US Lifesaving Association and NOAA.</div>
   </details>`;
 }
-function ripEscRun(d){
-  const sw=d.querySelector('.re-sw'),arm=d.querySelector('.re-arm'),hint=d.querySelector('.re-hint'),flow=d.querySelector('.re-flow'),lis=d.querySelectorAll('li');
+function ripEscGo(d,i,all){
+  const sw=d.querySelector('.re-sw'),arm=d.querySelector('.re-arm'),hint=d.querySelector('.re-hint'),s=RIP_ESC_STEPS[i];
   if(!sw)return;
+  const run=(d._reRun||0)+1;d._reRun=run;
+  d.querySelector('.re-num').textContent=`Step ${i+1} of ${RIP_ESC_STEPS.length}`;
+  d.querySelector('.re-ttl').textContent=s.h;d.querySelector('.re-txt').textContent=s.t;
+  d.querySelectorAll('.re-dots button').forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-current',j===i)});
+  arm.setAttribute('opacity',s.arm?1:0);hint.setAttribute('opacity',s.hint?.9:0);
   const still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(still){lis.forEach(l=>l.classList.add('on'));hint.setAttribute('opacity',.9);sw.setAttribute('transform','translate(178 100)');return;}
-  const STEP=3200,t0=performance.now();
+  const p=s.path,dur=still?1:2600,t0=performance.now();
   (function tick(now){
-    if(!d.open||!d.isConnected)return;
-    const el=(now-t0)%(STEP*RIP_ESC_STEPS.length),i=Math.floor(el/STEP),s=RIP_ESC_STEPS[i];
-    let t=Math.min((el-i*STEP)/(STEP*.8),1);t=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
-    const p=s.path,f=Math.min(t*(p.length-1),p.length-1-1e-6),k=Math.floor(f),r=f-k;
-    const x=p[k][0]+(p[k+1][0]-p[k][0])*r,y=p[k][1]+(p[k+1][1]-p[k][1])*r+(s.arm?Math.sin(now/300)*2:0);
+    if(d._reRun!==run||!d.open||!d.isConnected)return;
+    let t=Math.min((now-t0)/dur,1);const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    const f=Math.min(e*(p.length-1),p.length-1-1e-6),k=Math.floor(f),r=f-k;
+    const x=p[k][0]+(p[k+1][0]-p[k][0])*r,y=p[k][1]+(p[k+1][1]-p[k][1])*r+(s.arm&&!still?Math.sin(now/300)*2:0);
     sw.setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)})`);
-    arm.setAttribute('opacity',s.arm?1:0);hint.setAttribute('opacity',s.hint?.9:0);
-    flow.setAttribute('stroke-dashoffset',(-(now/40)%22).toFixed(1));
-    lis.forEach((l,j)=>l.classList.toggle('on',j===i));
-    requestAnimationFrame(tick);
+    if(t<1||(s.arm&&!still&&now-t0<dur+900))requestAnimationFrame(tick);
+    else if(all&&i<RIP_ESC_STEPS.length-1)setTimeout(()=>{if(d._reRun===run)ripEscGo(d,i+1,true)},700);
   })(t0);
+}
+function ripEscRun(d){
+  if(!d._reWired){
+    d._reWired=1;
+    d.querySelectorAll('.re-dots button').forEach(b=>b.addEventListener('click',()=>ripEscGo(d,+b.dataset.re,false)));
+    d.querySelector('.re-play').addEventListener('click',()=>ripEscGo(d,0,true));
+    const flow=d.querySelector('.re-flow'),still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(flow&&!still)(function ft(now){if(!d.isConnected)return;if(d.open)flow.setAttribute('stroke-dashoffset',(-(now/40)%22).toFixed(1));requestAnimationFrame(ft)})(performance.now());
+  }
+  ripEscGo(d,0,true);
 }
 document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('ripesc')&&d.open)ripEscRun(d);},true);
 // T4 BROWN: per-beach. Airport leg (c.rain mm×10 vs b.rain_mm — existing units convention, UNCHANGED)
