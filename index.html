@@ -4135,7 +4135,7 @@ function ripEscRun(d){
   const STEP=3200,t0=performance.now();
   (function tick(now){
     if(!d.open||!d.isConnected)return;
-    const el=(now-t0)%(STEP*RIP_ESC_STEPS.length),i=Math.floor(el/STEP),s=RIP_ESC_STEPS[i];
+    const el=Math.max(0,now-t0)%(STEP*RIP_ESC_STEPS.length),i=Math.floor(el/STEP),s=RIP_ESC_STEPS[i];
     let t=Math.min((el-i*STEP)/(STEP*.8),1);t=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
     const p=s.path,f=Math.min(t*(p.length-1),p.length-1-1e-6),k=Math.floor(f),r=f-k;
     const x=p[k][0]+(p[k+1][0]-p[k][0])*r,y=p[k][1]+(p[k+1][1]-p[k][1])*r+(s.arm?Math.sin(now/300)*2:0);

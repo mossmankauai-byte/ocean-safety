@@ -18,7 +18,7 @@
 // Both the price scrub and the dashboard merge claimed v285 on the same day.
 // Resolved forward, never backward: a backward bump is the stale-build trap.
 // v289 was claimed twice on the same day. Forward, never backward.
-const CACHE_VERSION = 'v405-2026-10-08-rip-escape';
+const CACHE_VERSION = 'v411-2026-10-09-rip-escape-fix';   // Rip escape animation no longer stops on its first frame. v406 to v410 are claimed on other branches.
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
