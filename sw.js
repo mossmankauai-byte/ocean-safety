@@ -20,7 +20,7 @@
 // v289 was claimed twice on the same day. Forward, never backward.
 // v319 is claimed on work/reserve-links; this branch skips to v320.
 // v345 was claimed twice on 2026-09-19 (gh-promotions and the tsunami map): tsunami resolves forward to v346.
-const CACHE_VERSION = 'v410-2026-10-09-rip-escape';   // Rip current escape guide from main (#43) on channel and rip-risk beach sheets. v405 on main is a different build.
+const CACHE_VERSION = 'v412-2026-10-12-gh-ask';   // GoHawaii Ask button (review build). v411 is main's rip escape fix.
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 

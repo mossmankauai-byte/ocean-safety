@@ -17,6 +17,8 @@
 # GoHawaii advisories: the Hawaiʻi Tourism Authority feed sends no CORS header, so the app reads it
 # through this proxy. Only the /alerts/ items are used; see gh/advisories.js.
 /api/hta-feed   https://hta.hawaii.gov/feed/  200
+# GoHawaii Ask: a visitor's ocean question, answered by Claude from the page's own Ocean Safe data (POST only).
+/api/ask        /.netlify/functions/ask  200
 # GoHawaii Dashboard (review build)
 /gohawaii-dashboard   /gohawaii-dashboard.html   200
 /api/creator-provision   /.netlify/functions/creator-provision   200
