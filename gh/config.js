@@ -4,4 +4,5 @@
  * visit totals. One line; nothing else changes. */
 // Review mode for now (Nick, 2026-09-23): no sign-in, posts stay in each browser, nothing counted. The backend stays
 // deployed; put its address back here (https://gohawaii-api.oceansafe-hi.workers.dev) to turn live data on again.
-window.GH_CONFIG = { api: '' };
+// ask: the Ask button's endpoint (netlify/functions/ask.mjs, needs ANTHROPIC_API_KEY on the site). '' hides the button.
+window.GH_CONFIG = { api: '', ask: '/api/ask' };

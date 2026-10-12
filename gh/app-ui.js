@@ -33,7 +33,10 @@
     pin:  '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
     loc:  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
     shake:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h3l3-7 4 14 3-7h5"/></svg>',
-    x:    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'
+    x:    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    ask:  '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M9.6 9.6a2.4 2.4 0 1 1 3.4 2.2c-.6.3-1 .8-1 1.5"/><path d="M12 16.3h.01"/></svg>',
+    send: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    tel:  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>'
   };
   var VERDICT = { green:'Calmer today', yellow:'Use caution', red:'Not recommended', nodata:'No live data' };
   var VCOL = { green:'#16a34a', yellow:'#d97706', red:'#b91c1c', nodata:'#5f92a8' };
@@ -126,6 +129,30 @@
       '@media (prefers-reduced-motion:reduce){.gha-ring::before{animation:none}}',
       '#ghaHubBtn{appearance:none;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:3px 10px 3px 9px;font:700 11.5px "DM Sans",system-ui,sans-serif;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}',
       '#ghaHubBtn .gha-dot{width:8px;height:8px;border-radius:50%;background:#5f92a8;box-shadow:0 0 0 2px rgba(255,255,255,.5)}',
+      '#ghaAskBtn{appearance:none;border:0;background:#e2a332;color:#0b485b;border-radius:999px;padding:4px 11px 4px 9px;font:800 11.5px "DM Sans",system-ui,sans-serif;display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;flex-shrink:0}',
+      '.gha-askcta{appearance:none;width:100%;display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px 14px;border:0;border-radius:12px;background:#0b485b;color:#fdf2d6;font:700 14px "DM Sans",system-ui,sans-serif;text-align:left;cursor:pointer}',
+      '.gha-askcta .gha-x{flex:1}',
+      '.gha-ask h2{font-family:"Fraunces",Georgia,serif;font-size:24px;margin:0;color:#0b485b;font-weight:700;letter-spacing:-.01em}',
+      '.gha-ask .gha-date{font-size:12.5px;color:var(--mute,#64748b);margin-top:4px;line-height:1.45}',
+      '.gha-ask .gha-911{display:flex;align-items:center;gap:8px;margin-top:12px;padding:9px 12px;border-radius:10px;background:#fdecea;color:#7f1d1d;font-size:13px;font-weight:700;text-decoration:none}',
+      '.gha-ask .gha-911 svg{color:#b91c1c;flex-shrink:0}',
+      '.gha-ask .gha-log{margin-top:14px;display:flex;flex-direction:column;gap:10px}',
+      '.gha-ask .gha-q{align-self:flex-end;max-width:85%;background:#0b485b;color:#fff;border-radius:14px 14px 4px 14px;padding:9px 12px;font-size:14px;line-height:1.4;white-space:pre-wrap;word-break:break-word}',
+      '.gha-ask .gha-a{align-self:flex-start;max-width:92%;background:#fdf2d6;border:1px solid #f0dfb4;color:#1f2937;border-radius:14px 14px 14px 4px;padding:10px 13px;font-size:14px;line-height:1.5}',
+      '.gha-ask .gha-a p{margin:0 0 6px}.gha-ask .gha-a p:last-child{margin:0}',
+      '.gha-ask .gha-a ul{margin:4px 0 6px;padding-left:18px}.gha-ask .gha-a li{margin:2px 0}',
+      '.gha-ask .gha-a.gha-err{background:#fef3c7;color:#78350f}',
+      '.gha-ask .gha-wait{display:inline-flex;gap:4px;padding:4px 2px}.gha-ask .gha-wait i{width:7px;height:7px;border-radius:50%;background:#0b485b;opacity:.3;animation:ghaDot 1s infinite}',
+      '.gha-ask .gha-wait i:nth-child(2){animation-delay:.15s}.gha-ask .gha-wait i:nth-child(3){animation-delay:.3s}',
+      '@keyframes ghaDot{50%{opacity:1}}',
+      '.gha-ask .gha-sugg{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}',
+      '.gha-ask .gha-sugg button{appearance:none;border:1px solid #cbd5e1;background:#fff;color:#0b485b;border-radius:999px;padding:7px 11px;font:600 12.5px "DM Sans",system-ui,sans-serif;cursor:pointer;text-align:left}',
+      '.gha-ask form{display:flex;gap:8px;align-items:flex-end;margin-top:14px}',
+      '.gha-ask textarea{flex:1;min-height:44px;max-height:120px;resize:none;border:1.5px solid #cbd5e1;border-radius:12px;padding:11px 12px;font:15px/1.35 "DM Sans",system-ui,sans-serif;color:#0f172a;background:#fff}',
+      '.gha-ask textarea:focus{outline:none;border-color:#0b485b}',
+      '.gha-ask form button{appearance:none;border:0;width:44px;height:44px;border-radius:12px;background:#0b485b;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}',
+      '.gha-ask form button:disabled{opacity:.45;cursor:default}',
+      '.gha-ask .gha-left{font-size:11.5px;color:var(--mute,#64748b);margin-top:6px;text-align:right}',
       '#ghaRed .gha-ok2{background:#fff;color:#b91c1c;border:2px solid #b91c1c}',
       '.gha-waybtn{appearance:none;display:inline-flex;align-items:center;gap:6px;margin-top:8px;border:0;border-radius:10px;background:#b91c1c;color:#fff;font:800 13.5px "DM Sans",system-ui,sans-serif;padding:9px 12px;cursor:pointer}',
       '#ghTsu{position:fixed;inset:0;z-index:5900;display:flex;flex-direction:column;background:#dfe7ea;font-family:"DM Sans",system-ui,sans-serif;color:#0f172a}',
@@ -210,6 +237,15 @@
       s.appendChild(btn);
       s.style.cursor = 'pointer';
       s.addEventListener('click', function(){ openHub(); });
+    }
+    if(askOn() && !document.getElementById('ghaAskBtn')){
+      var ab = document.createElement('button'); ab.type = 'button'; ab.id = 'ghaAskBtn';
+      ab.setAttribute('aria-label', 'Ask a question about the ocean today');
+      ab.innerHTML = ICON.ask + 'Ask';
+      ab.addEventListener('click', function(e){ e.stopPropagation(); askOpen(); });
+      s.insertBefore(ab, btn);
+      // The strip's own label gives way so Ask and Today both fit at phone width.
+      var lb = s.children[0]; if(lb && lb !== ab){ lb.style.cssText += ';flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'; }
     }
     var L = list().filter(function(a){ return a.level !== 'info'; });
     var col = L.length ? (L[0].level === 'red' ? '#f87171' : '#fbbf24') : '#5f92a8';
@@ -414,6 +450,7 @@
     try { d = new Date().toLocaleDateString('en-US', { timeZone:'Pacific/Honolulu', weekday:'long', month:'long', day:'numeric' }); } catch(e){}
     return '<div class="gha-hub"><div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0f4c5c">GoHawaii</div>'
       + '<h2>Today on ' + esc(islName()) + '</h2><div class="gha-date">' + esc(d) + ' · Hawaiʻi time</div>'
+      + (askOn() ? '<button type="button" class="gha-askcta" onclick="ghAskOpen()">' + ICON.ask + '<span class="gha-x">Ask about the ocean today</span>' + ICON.chev + '</button>' : '')
       + advSection() + beachSection() + featSection() + promoSection() + eventSection()
       + '<div class="gha-fine">Weather advisories come from the National Weather Service and travel updates from the Hawaiʻi Tourism Authority, credited on each card. GoHawaii posts its own notices here. Beach verdicts by Ocean Safe. Always follow lifeguards and posted signs.</div></div>';
   }
@@ -784,11 +821,134 @@
       A.count(I(), 'link', h === 'gohawaii.com' ? 'gohawaii' : a.classList.contains('dirbtn') ? 'directions' : 'website');
     }, true);
   }
+  // ---- Ask: a visitor's question about the ocean, answered from this page's own Ocean Safe data ----
+  // gh/config.js names the endpoint (ask: '' turns it off). The server (netlify/functions/ask.mjs) holds the
+  // API key, caps each visitor and checks every answer; this side only gathers what the app already shows:
+  // today's verdict for each beach on the island, rip channel rules, live surf and wind, the advisories on
+  // screen, and the record of the last beach opened. Nothing about the visitor goes with it.
+  var ASK_URL = (window.GH_CONFIG && typeof GH_CONFIG.ask === 'string') ? GH_CONFIG.ask : '';
+  var askLog = [], askBusy = false, askBeach = '', askLeft = null;
+  function askOn(){ return /^\/[a-z0-9\/_-]+$/i.test(ASK_URL); }
+  function askHook(){
+    try {
+      if(typeof window.openSheet === 'function' && !window.openSheet._ask){
+        var o = window.openSheet;
+        window.openSheet = function(id){ askBeach = String(id || ''); return o.apply(this, arguments); };
+        window.openSheet._ask = true;
+      }
+    } catch(e){}
+  }
+  function askB(id){ try { return (typeof B !== 'undefined' ? B : []).filter(function(b){ return b.id === id; })[0] || null; } catch(e){ return null; } }
+  function askCtx(){
+    var ctx = { beaches: [], channels: [], adv: [], live: {} };
+    try {
+      if(typeof B !== 'undefined' && typeof scored !== 'undefined') B.forEach(function(b){
+        var r = scored[b.id]; if(!r) return;
+        var v = b.warning_only ? 'warning' : r.status === 'hidden' ? (r.reason === 'Conditions Unavailable' ? 'nodata' : 'red') : r.status;
+        var c = r._c || {};
+        // No live surf means no surf number either: the 99 placeholder must never read as a reading.
+        var live = v !== 'nodata' && !c.surf_unknown;
+        ctx.beaches.push({ id: b.id, v: v, why: r.status === 'hidden' ? String(r.reason || '') : '', es: live ? c.es : null, wind: live ? c.wind : null,
+          good: (r.top || []).map(String), lg: String(b.lg || ''), kid: !!r.kid });
+      });
+    } catch(e){}
+    try { if(typeof CHANNELS !== 'undefined') CHANNELS.forEach(function(ch){ ctx.channels.push({ name: String(ch.name || ''), beach: String(ch.beach_id || ''), rule: String(ch.rule || '') }); }); } catch(e){}
+    try { list().forEach(function(a){ ctx.adv.push({ lv: a.level, t: (a.sample ? 'Sample, not a real alert: ' : '') + String(a.title || ''), w: String(a.where || ''), src: String(a.src === 'staff' ? 'GoHawaii' : (a.srcName || '')) }); }); } catch(e){}
+    try {
+      if(typeof LIVE !== 'undefined' && LIVE) ctx.live = { surf: LIVE.surf, period: LIVE.period, wind: LIVE.wind, rain: typeof LIVE.rain === 'number' ? LIVE.rain / 10 : null,
+        uv: LIVE.uv, air: window._airTemp, unknown: !!LIVE.surf_unknown };
+    } catch(e){}
+    var ob = askBeach && askB(askBeach);
+    if(ob) ctx.open = { id: ob.id, caution: String(ob.caution || ''), tip: String(ob.tip || ''), lg_hours: String(ob.lg_hours || ''), drown: !!ob.drown };
+    return ctx;
+  }
+  function askFmt(t){
+    var out = '', ul = false;
+    String(t || '').split(/\n+/).forEach(function(line){
+      line = line.trim(); if(!line) return;
+      var li = /^[-•*]\s+/.test(line);
+      if(li && !ul){ out += '<ul>'; ul = true; }
+      if(!li && ul){ out += '</ul>'; ul = false; }
+      out += li ? '<li>' + esc(line.replace(/^[-•*]\s+/, '')) + '</li>' : '<p>' + esc(line) + '</p>';
+    });
+    return out + (ul ? '</ul>' : '');
+  }
+  function askSugg(){
+    var b = askBeach && askB(askBeach), out = ['Where is calmest to swim today?'];
+    if(b) out.push('How is ' + (b.n || b.name) + ' for snorkeling today?');
+    else out.push('Which beach is best for kids today?');
+    out.push('What do I do if a rip current pulls me out?');
+    return out;
+  }
+  function askHtml(){
+    var log = askLog.map(function(m){
+      return '<div class="gha-q">' + esc(m.q) + '</div>'
+        + (m.a === null ? '<div class="gha-a" aria-live="polite"><span class="gha-wait" aria-label="Checking today\'s data"><i></i><i></i><i></i></span></div>'
+          : '<div class="gha-a' + (m.err ? ' gha-err' : '') + '">' + askFmt(m.a) + '</div>');
+    }).join('');
+    return '<div class="gha-ask"><div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0f4c5c">GoHawaii</div>'
+      + '<h2>Ask about the ocean</h2>'
+      + '<div class="gha-date">Answers come from today\'s Ocean Safe verdicts for ' + esc(islName()) + '. Lifeguards and posted signs always come first.</div>'
+      + '<a class="gha-911" href="tel:911">' + ICON.tel + '<span>Someone in trouble in the water? Call 911 now.</span></a>'
+      + (log ? '<div class="gha-log">' + log + '</div>' : '')
+      + (askLog.length ? '' : '<div class="gha-sugg">' + askSugg().map(function(q){ return '<button type="button" data-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') + '</div>')
+      + '<form id="ghaAskForm" autocomplete="off"><textarea id="ghaAskQ" rows="1" maxlength="400" placeholder="Ask about beaches, surf or currents" aria-label="Your question"></textarea>'
+      + '<button type="submit" aria-label="Send"' + (askBusy ? ' disabled' : '') + '>' + ICON.send + '</button></form>'
+      + (askLeft !== null && askLeft <= 5 ? '<div class="gha-left">' + askLeft + ' question' + (askLeft === 1 ? '' : 's') + ' left today</div>' : '')
+      + '<div class="gha-fine">Answers are written by AI (Anthropic\'s Claude) from Ocean Safe\'s data and can be wrong. Your question goes to Anthropic to write the answer; Ocean Safe does not keep it. Please leave out names, phone numbers and other personal details.</div></div>';
+  }
+  function askPaint(focus, first){
+    // An answer that lands after the visitor moved on to another sheet never paints over it.
+    var sc = document.getElementById('sc'); if(!sc || sc.dataset.gha !== 'ask' || !sheetOpen() || (!first && !sc.querySelector('.gha-ask'))) return;
+    var ta = document.getElementById('ghaAskQ'), draft = ta ? ta.value : '';
+    sc.innerHTML = askHtml();
+    ta = document.getElementById('ghaAskQ'); if(ta){ ta.value = draft; }
+    var f = document.getElementById('ghaAskForm');
+    if(f) f.addEventListener('submit', function(e){ e.preventDefault(); askSend(document.getElementById('ghaAskQ').value); });
+    if(ta) ta.addEventListener('keydown', function(e){ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); askSend(ta.value); } });
+    Array.prototype.forEach.call(sc.querySelectorAll('.gha-sugg button'), function(b){ b.addEventListener('click', function(){ askSend(b.getAttribute('data-q')); }); });
+    var last = sc.querySelector('.gha-log > :last-child'); if(last && askLog.length) last.scrollIntoView({ block: 'nearest' });
+    if(focus && ta) try { ta.focus({ preventScroll: true }); } catch(e){}
+  }
+  var ASK_MSG = {
+    unconfigured: 'Ask is not switched on yet. Each beach card still shows today\'s verdict.',
+    day: 'That is the most questions for one day. Each beach card still shows today\'s verdict, and the lifeguards can help.',
+    site: 'Ask is resting for the rest of today. Each beach card still shows today\'s verdict.',
+    fast: 'One moment, then ask again.'
+  };
+  function askSend(q){
+    q = String(q || '').replace(/\s+/g, ' ').trim().slice(0, 400);
+    if(q.length < 2 || askBusy) return;
+    var m = { q: q, a: null }; askLog.push(m); if(askLog.length > 8) askLog.shift();
+    askBusy = true;
+    var ta = document.getElementById('ghaAskQ'); if(ta) ta.value = '';
+    askPaint();
+    var done = function(a, err){ m.a = a; m.err = !!err; askBusy = false; askPaint(); };
+    fetch(ASK_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q: q, island: isl(), ctx: askCtx() }) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(j){
+        if(j && j.ok && j.answer){ if(typeof j.left === 'number') askLeft = j.left; done(j.answer); return; }
+        done(ASK_MSG[j && j.reason] || 'Could not get an answer just now. Try again in a minute, and check the beach card meanwhile.', true);
+      })
+      .catch(function(){ done('Could not reach Ask just now. Check your connection, and the beach card meanwhile.', true); });
+  }
+  function askOpen(){
+    var sc = document.getElementById('sc'), sh = document.getElementById('sheet'), ov = document.getElementById('overlay');
+    if(!sc || !sh || !askOn()) return;
+    css();
+    var p = document.getElementById('ghaPop'); if(p) p.remove();
+    sc.style.display = ''; sc.dataset.gha = 'ask'; sc.scrollTop = 0;
+    sh.classList.add('on', 'sheet-poi'); if(ov) ov.classList.add('on');
+    hubOn = false;
+    askPaint(true, true);
+  }
+  window.ghAskOpen = askOpen;
   function start(){
     placesHook();
     postVerdicts();
     if(PROBE) return;
     liveBoot();
+    askHook();
     css(); strip(); promoBoot();
     // Staff posts need no feed: show them now, then again as each feed lands.
     afterFeeds();
