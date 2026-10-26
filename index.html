@@ -3033,7 +3033,7 @@ let CHANNELS=[
    desc:"The Hanalei River mouth creates a consistent rip current running north along the west side of the bay. Strengthens significantly after rain when river flow increases. This is a primary factor in Hanalei Bay swim closures.",
    rule:"Stay away from the river mouth. If caught in the current, swim parallel to shore east toward the pier — do not fight it.",
    tidal_amplify:true},
-  {id:'tunnels_channel',name:'Tunnels Channel',beach_id:'kee',
+  {id:'tunnels_channel',name:'Tunnels Channel',beach_id:'tunnels',
    lat:22.2200,lon:-159.5593,dir_deg:330,severity:.75,
    type:'reef_channel',
    desc:"A deep channel cuts through the reef at Tunnels (Makua Beach). Strong rip current runs offshore through this passage, especially during north swell. One of the most powerful channels on the north shore.",
@@ -3895,7 +3895,8 @@ function venueCategoryArrays(){
 }
 
 // Add channel_ids to beaches
-B.find(b=>b.id==='kee').channels=['kee_exit','tunnels_channel'];
+B.find(b=>b.id==='kee').channels=['kee_exit'];
+B.find(b=>b.id==='tunnels').channels=['tunnels_channel'];
 B.find(b=>b.id==='anini').channels=['anini_gap'];
 B.find(b=>b.id==='hanalei').channels=['hanalei_rip'];
 B.find(b=>b.id==='poipu').channels=['poipu_channel'];
@@ -7214,15 +7215,20 @@ function renderChannels(){
     // arrowhead; direction + relative strength read at a glance. No green-family color at a
     // channel — slate is the deliberate "not a go-signal" low, matching the card/dot. Color
     // is derived from sev so the dash color and the "<sev> current" label can never disagree.
-    const streak=`<svg aria-hidden="true" width="40" height="46" viewBox="0 0 40 46" style="transform:rotate(${ch.dir_deg}deg);overflow:visible">`
+    // Pivot on the channel point (20,50), 14px behind the tail, so the whole glyph sits seaward
+    // of the point instead of straddling it. Centered, the tail and label landed on the beach,
+    // because most channel points sit right at the shoreline or river mouth.
+    const streak=`<svg aria-hidden="true" width="40" height="46" viewBox="0 0 40 46" style="position:absolute;left:0;top:0;transform:rotate(${ch.dir_deg}deg);transform-origin:20px 50px;overflow:visible">`
       +`<g stroke="${col}" stroke-width="4" stroke-linecap="round" fill="none">`
       +`<line class="os-rs" x1="20" y1="34" x2="20" y2="22"/>`
       +`<line class="os-rs d2" x1="13" y1="36" x2="13" y2="25"/>`
       +`<line class="os-rs d3" x1="27" y1="36" x2="27" y2="25"/>`
       +`<path d="M12 14 L20 5 L28 14"/></g></svg>`;
+    // Label sits just past the arrowhead along the outflow direction, so it stays over water too.
+    const _rad=ch.dir_deg*Math.PI/180, _lx=Math.round(20+Math.sin(_rad)*58), _ly=Math.round(50-Math.cos(_rad)*58);
     const icon=L.divIcon({
-      html:`<div class="chw">${streak}<div class="chlbl">${sev} current</div></div>`,
-      className:'',iconSize:[40,60],iconAnchor:[20,23]
+      html:`<div class="chw" style="position:relative;display:block;width:40px;height:46px">${streak}<div class="chlbl" style="position:absolute;left:${_lx}px;top:${_ly}px;transform:translate(-50%,-50%);margin:0">${sev} current</div></div>`,
+      className:'',iconSize:[40,46],iconAnchor:[20,50]
     });
     const mk=L.marker([ch.lat,ch.lon],{icon,zIndexOffset:-100}).addTo(map);
     mk.on('click',()=>openChannelSheet(ch.id));
