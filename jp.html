@@ -2811,54 +2811,9 @@ let ACTS=[
    tip:'Preserved 1864 sugar plantation home — original furnishings, kitchens, outbuildings. 2-hour guided tour, reservations required. Good rainy day option.',
    tags:['cultural','indoor','rain_ok','reservations','school_age','teen']},{"id":"poipu_beach_park","name":"Poʻipū Beach Park","n":"Poʻipū Beach Park","r":"South Shore","lat":21.8735,"lon":-159.4557,"type":"playground","price":"Free","hours":"Sunrise to sunset","duration_min":120,"tip":"The top family beach park on the south shore: a lifeguarded, reef-protected keiki (kids) swim pool beside a small playground, big lawn, restrooms and easy parking. Green sea turtles and Hawaiian monk seals often rest on the sand, so stay well back. Strong midday sun with little natural shade, so bring your own. [verify coords]","tags":["playground","beach","free","lifeguard","calm","restrooms","parking_easy","toddler","little_kid","school_age"]},{"id":"kapaa_old_town","name":"Kapaʻa Old Town","n":"Kapaʻa Old Town","r":"East Side","lat":22.0806,"lon":-159.339,"type":"town","price":"Free","hours":"Most shops 10am–6pm","duration_min":60,"tip":"Walkable plantation-era main street with shave ice, local shops, casual eats and easy parking; the flat coastal multi-use path runs alongside for a stroller-friendly stroll. A few street crossings on the highway side, so hold little ones hands. [verify coords]","tags":["town","free","restrooms","stroller","little_kid","school_age","teen","parking_easy","rain_ok"]},{"id":"waimea_canyon_lookout","name":"Waimea Canyon Lookout","n":"Waimea Canyon Lookout","r":"West Side","lat":22.0687,"lon":-159.662,"type":"scenic","price":"Non-resident fee $5/person + $10/vehicle; Hawaii residents free","hours":"Sunrise to sunset (day-use)","duration_min":30,"tip":"The main overlook into the 'Grand Canyon of the Pacific' is a paved, railed platform just steps from the parking lot, so even little kids get the huge view with minimal walking. Restrooms nearby. There is a sheer drop beyond the railing, so keep kids close, and it often clouds over by midday, so go in the morning. [verify coords]","tags":["scenic","restrooms","parking_easy","ada","stroller","toddler","little_kid","school_age","teen"]},{"id":"hanalei_blackpot_turtles","name":"Hanalei Bay (Black Pot Beach) Turtle Viewing","n":"Hanalei Turtle Viewing","r":"North Shore","lat":22.2043,"lon":-159.501,"type":"wildlife","price":"Free","hours":"Sunrise to sunset","duration_min":45,"tip":"Green sea turtles feed just off Hanalei Pier and Black Pot Beach Park, giving easy, gentle viewing from the pier or shore, with restrooms, parking and summer lifeguards. Water is calmest in summer; winter brings big, dangerous surf, so stay well back from the shorebreak then. Never touch or crowd turtles or seals. [verify coords]","tags":["wildlife","beach","free","calm","lifeguard","restrooms","parking_easy","toddler","little_kid","school_age"]}];
 
-// ────────────────────────────────────────────────────────────────────────
-// AFFILIATE TODO LIST (as of 2026-05-18)
-// 1. VRBO: Sign up at https://vrbo.com/partner-programs — replace the 7
-//    sequential demo IDs (12345…78901) AND the `MISSING_YOUR_AFF_ID_VRBO`
-//    query string with real listing IDs + your affiliate ID. Grep for
-//    'MISSING_YOUR_AFF_ID_VRBO' to find every callsite.
-// 2. Booking.com: Sign up at https://partners.booking.com — replace
-//    'MISSING_YOUR_AFF_ID_BOOKING' with your real `aid` partner code.
-//    Grep for 'MISSING_YOUR_AFF_ID_BOOKING'.
-// Once all three are populated, delete this comment block.
-// ────────────────────────────────────────────────────────────────────────
-// STAYS — themed VRBO vacation rentals curated for the app's audience.
-// Each booking_url should carry your VRBO affiliate parameter (?adid=YOUR_AFFILIATE_ID).
-// Replace these placeholder VRBO IDs with real listings researched on vrbo.com.
-let STAYS = [
-
-  // HOTELS — Booking.com affiliate (sign up at partner.booking.com, append ?aid=MISSING_YOUR_AFF_ID_BOOKING).
-  {id:'grand_hyatt_kauai',website:'https://www.hyatt.com/grand-hyatt/en-US/kauai-grand-hyatt-kauai-resort-and-spa', name:'Grand Hyatt Kauaʻi Resort & Spa', n:'Grand Hyatt', r:'South Shore',
-   lat:21.8775, lon:-159.4495, theme:'hotel', sleeps:4, beds:1, baths:1,
-   price_low:475, price_high:950, photo:'',
-   tip:'Saltwater lagoon pool, lazy river, kid-friendly without being theme-park. Walking distance to Shipwrecks Beach.',
-   near_beach_id:'shipwrecks',
-   booking_url:'https://www.booking.com/hotel/us/grand-hyatt-kauai-resort-and-spa.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'},
-  {id:'1_hotel_hanalei',website:'https://www.1hotels.com/hanalei-bay', name:'1 Hotel Hanalei Bay', n:'1 Hotel Hanalei', r:'North Shore',
-   lat:22.2030, lon:-159.4870, theme:'hotel', sleeps:4, beds:1, baths:1,
-   price_low:895, price_high:1850, photo:'',
-   tip:'Eco-luxury rebrand of the old St. Regis Princeville. The view of Hanalei Bay is the whole show.',
-   near_beach_id:'hanalei',
-   booking_url:'https://www.booking.com/hotel/us/1-hotel-hanalei-bay.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'},
-  {id:'koa_kea_poipu',website:'https://www.koakea.com/', name:'Koa Kea Hotel & Resort', n:'Koa Kea', r:'South Shore',
-   lat:21.8725, lon:-159.4540, theme:'hotel', sleeps:4, beds:1, baths:1,
-   price_low:525, price_high:1100, photo:'',
-   tip:'Smaller boutique on Poʻipū Beach. Adults-leaning, oceanfront rooms get direct beach access.',
-   near_beach_id:'poipu',
-   booking_url:'https://www.booking.com/hotel/us/koa-kea-resort.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'},
-  {id:'kauai_shores_kapaa',website:'https://www.kauaishoreshotel.com/', name:'Kauaʻi Shores Hotel', n:'Kauaʻi Shores', r:'East Side',
-   lat:22.0772, lon:-159.3320, theme:'hotel', sleeps:3, beds:1, baths:1,
-   price_low:215, price_high:410, photo:'',
-   tip:'Mid-budget oceanfront in Kapaʻa. Walkable to coastal path, food trucks, and the Kapaʻa town strip.',
-   near_beach_id:'kealia',
-   booking_url:'https://www.booking.com/hotel/us/kauai-shores.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'},
-  {id:'sheraton_kauai',website:'https://www.marriott.com/en-us/hotels/lihsk-sheraton-kauai-coconut-beach-resort/overview/', name:'Sheraton Kauaʻi Coconut Beach', n:'Sheraton Kauaʻi', r:'East Side',
-   lat:22.0980, lon:-159.3315, theme:'hotel', sleeps:5, beds:2, baths:1,
-   price_low:325, price_high:625, photo:'',
-   tip:'Family-friendly Marriott Bonvoy spot. Two pools, oceanfront fire pit, easy Wailua Bay access.',
-   near_beach_id:'wailua',
-   booking_url:'https://www.booking.com/hotel/us/sheraton-kauai-coconut-beach.html?aid=MISSING_YOUR_AFF_ID_BOOKING', platform:'booking'}
-];
+// STAYS: retired 2026-07-15 (Nick: "dont use stays i have no plans to ever use that").
+// Booking.com and VRBO dropped 2026-10-04. Emptied so renderStays/openStaySheet stay intact.
+let STAYS = [];
 
 let stayMkrs = {};
 
