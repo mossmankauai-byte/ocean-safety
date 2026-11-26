@@ -176,6 +176,7 @@ def alert_line(alerts, island, words):
     seen, bits = set(), []
     for a in alerts:
         zones = [z for z in a["areas"] if any(re.search(r"\b" + w + r"\b", z.lower().replace("ʻ", "").replace("'", "")) for w in words)]
+        zones = [z for z in zones if "summit" not in z.lower()]      # mountain summit zones say nothing about a beach
         if not zones or (a["event"], tuple(zones)) in seen:
             continue
         seen.add((a["event"], tuple(zones)))
